@@ -68,7 +68,7 @@
               <p>
                 Historia, identidad institucional, autoridades e instalaciones.
               </p>
-              <a href="#">Ver más</a>
+              <a href="#escuela">Ver más</a>
             </article>
             <article class="card">
               <i class="bi bi-mortarboard"></i>
@@ -504,7 +504,74 @@
           </section>
         </div>
       </section>
+
+      <!-- =====================================================
+     GALERÍA INSTITUCIONAL
+===================================================== -->
+
+      <section class="galeria" id="galeria">
+        <div class="contenedor">
+          <div class="encabezado-seccion">
+            <span>Nuestra escuela</span>
+
+            <h2>Galería Institucional</h2>
+
+            <p>
+              Algunos espacios, actividades y momentos que reflejan la vida
+              institucional de la Escuela de Educación Técnico Profesional N.º
+              495 "Malvinas Argentinas".
+            </p>
+          </div>
+
+          <div class="galeria-grid">
+            <figure class="foto">
+              <img src="assets/img/escuela.jpg" alt="Frente de la escuela" />
+
+              <figcaption>Frente de la Escuela</figcaption>
+            </figure>
+
+            <figure class="foto">
+              <img src="assets/img/talleres.jpg" alt="Talleres" />
+
+              <figcaption>Talleres</figcaption>
+            </figure>
+
+            <figure class="foto">
+              <img src="assets/img/laboratorio.jpg" alt="Laboratorio" />
+
+              <figcaption>Laboratorio</figcaption>
+            </figure>
+
+            <figure class="foto">
+              <img src="assets/img/aula.jpg" alt="Aulas" />
+
+              <figcaption>Aulas</figcaption>
+            </figure>
+
+            <figure class="foto">
+              <img src="assets/img/actos.jpg" alt="Actos escolares" />
+
+              <figcaption>Actos Institucionales</figcaption>
+            </figure>
+
+            <figure class="foto">
+              <img src="assets/img/patio.jpg" alt="Patio" />
+
+              <figcaption>Patio y espacios comunes</figcaption>
+            </figure>
+          </div>
+        </div>
+      </section>
     </main>
+    <!-- =====================================================
+     LIGHTBOX GALERÍA
+===================================================== -->
+    <div class="lightbox" id="lightbox">
+      <span class="cerrar">&times;</span>
+
+      <img id="imagenLightbox" src="" alt="Imagen ampliada" />
+    </div>
+
     <footer>
       <div class="footer-contenedor">
         <!-- Columna 1 -->
@@ -588,11 +655,43 @@
     </a>
     <script>
       const btnArriba = document.getElementById("btnArriba");
+
       window.addEventListener("scroll", () => {
         if (window.scrollY > 300) {
           btnArriba.classList.add("mostrar");
         } else {
           btnArriba.classList.remove("mostrar");
+        }
+      });
+
+      const lightbox = document.getElementById("lightbox");
+      const imagenLightbox = document.getElementById("imagenLightbox");
+      const cerrar = document.querySelector(".cerrar");
+
+      document.querySelectorAll(".foto").forEach((foto) => {
+        foto.addEventListener("click", () => {
+          const imagen = foto.querySelector("img");
+
+          imagenLightbox.src = imagen.src;
+          imagenLightbox.alt = imagen.alt;
+
+          lightbox.classList.add("activo");
+        });
+      });
+
+      cerrar.addEventListener("click", () => {
+        lightbox.classList.remove("activo");
+      });
+
+      lightbox.addEventListener("click", (e) => {
+        if (e.target === lightbox) {
+          lightbox.classList.remove("activo");
+        }
+      });
+
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") {
+          lightbox.classList.remove("activo");
         }
       });
     </script>
