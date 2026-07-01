@@ -1,0 +1,523 @@
+/* =====================================================
+   RESET
+===================================================== */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* =====================================================
+   VARIABLES
+===================================================== */
+
+:root {
+    --azul: #0B4F9C;
+    --azul-hover: #08376D;
+    --naranja: #F39C12;
+    --gris-fondo: #F8FAFC;
+    --texto: #1F2937;
+    --gris: #666666;
+    --blanco: #FFFFFF;
+}
+
+/* =====================================================
+   CONFIGURACIÓN GENERAL
+===================================================== */
+
+body {
+    font-family: "Nunito Sans", sans-serif;
+    background: var(--gris-fondo);
+    color: var(--texto);
+    line-height: 1.6;
+}
+
+.contenedor {
+    width: 90%;
+    max-width: 1200px;
+    margin: auto;
+}
+
+html{
+    scroll-behavior:smooth;
+}
+
+/* =====================================================
+   HEADER
+===================================================== */
+
+header {
+    background: linear-gradient(135deg, #ffffff 0%, #eef5ff 100%);
+    padding: 35px 50px;
+    border-bottom: 4px solid var(--azul);
+}
+
+.header-contenido {
+    max-width: 1200px;
+    margin: auto;
+
+    display: flex;
+    align-items: center;
+    gap: 35px;
+}
+
+.logo img {
+    width: 160px;
+    transition: .3s;
+}
+
+.logo img:hover {
+    transform: scale(1.05);
+}
+
+.titulo h1 {
+    font-size: 2rem;
+    font-weight: 500;
+}
+
+.titulo h2 {
+    font-size: 3rem;
+    font-weight: 800;
+    color: var(--azul);
+}
+
+.ubicacion {
+    color: var(--gris);
+    font-size: 1rem;
+}
+
+/* =====================================================
+   NAVEGACIÓN
+===================================================== */
+
+nav {
+    background: var(--azul);
+    box-shadow: 0 3px 10px rgba(0,0,0,.08);
+}
+
+nav ul {
+    max-width: 1200px;
+    margin: auto;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 16px;
+
+    list-style: none;
+
+    padding: 16px 20px;
+}
+
+nav li {
+    display: flex;
+}
+
+nav a {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    height: 46px;
+    padding: 0 18px;
+
+    color: white;
+    text-decoration: none;
+    font-weight: 700;
+
+    border-radius: 8px;
+
+    transition: all .25s ease;
+}
+
+nav a:hover {
+    background: rgba(255,255,255,.15);
+    color: white;
+}
+
+nav a.activo {
+    background: white;
+    color: var(--azul);
+}
+
+.portal {
+    background: var(--naranja);
+    color: white !important;
+}
+
+.portal:hover {
+    background: #d98208;
+}
+
+/* =====================================================
+   HERO
+===================================================== */
+
+.hero {
+
+    background:
+        linear-gradient(rgba(11,79,156,.82), rgba(11,79,156,.82)),
+        url("../img/escuela.jpg");
+
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+
+    min-height: 430px;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+}
+
+.hero-contenido {
+
+    text-align: center;
+    color: white;
+
+}
+
+.hero h2 {
+
+    font-size: 2.6rem;
+    margin-bottom: 20px;
+
+}
+
+.hero p {
+
+    font-size: 1.2rem;
+    margin-bottom: 35px;
+
+}
+
+.btn-principal {
+
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+
+    width: 230px;
+    height: 55px;
+
+    background: var(--naranja);
+
+    color: white;
+    text-decoration: none;
+
+    border-radius: 8px;
+
+    font-weight: 700;
+
+    transition: .25s;
+
+}
+
+.btn-principal:hover {
+
+    background: #d98208;
+
+}
+
+/* =====================================================
+   PRESENTACIÓN
+===================================================== */
+
+.presentacion {
+    background: #ffffff;
+    padding: 90px 20px;
+}
+
+.presentacion h2 {
+    text-align: center;
+    color: var(--azul);
+    font-size: 2.4rem;
+    margin-bottom: 60px;
+}
+
+.destacados {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 30px;
+}
+
+.destacado {
+    text-align: center;
+}
+
+.destacado i {
+    font-size: 3.5rem;
+    color: var(--azul);
+    margin-bottom: 18px;
+}
+
+.destacado h3 {
+    font-size: 1.4rem;
+    color: var(--azul);
+    margin-bottom: 15px;
+}
+
+.destacado p {
+    font-size: 1rem;
+    line-height: 1.8;
+    color: var(--texto);
+}
+
+/* =====================================================
+   ACCESOS
+===================================================== */
+
+.accesos {
+
+    background: #eef5ff;
+
+    padding: 90px 20px;
+
+}
+
+.accesos h2 {
+
+    text-align: center;
+
+    color: var(--azul);
+
+    font-size: 2.4rem;
+
+    margin-bottom: 55px;
+
+}
+
+.cards {
+
+    display: grid;
+
+    grid-template-columns: repeat(4,1fr);
+
+    gap: 30px;
+
+}
+
+.card {
+
+    background: white;
+
+    border-radius: 18px;
+
+    padding: 40px 30px;
+
+    min-height: 420px;
+
+    display: flex;
+
+    flex-direction: column;
+
+    align-items: center;
+
+    text-align: center;
+
+    box-shadow: 0 12px 35px rgba(0,0,0,.08);
+
+    transition: .30s;
+
+}
+
+.card:hover{
+
+    transform: translateY(-8px);
+
+    box-shadow: 0 20px 45px rgba(0,0,0,.14);
+
+}
+
+.card i {
+    font-size: 4rem;
+    color: var(--azul);
+    margin-bottom: 12px;
+    line-height: 1;
+}
+
+.card h3 {
+    font-size: 1.45rem;
+    color: var(--azul);
+    margin-bottom: 18px;
+    min-height: 60px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.card p {
+    flex: 1;
+
+    font-size: 1rem;
+    line-height: 1.8;
+
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+
+    margin-bottom: 28px;
+}
+
+.card a{
+
+    width:190px;
+
+    height:50px;
+
+    display:flex;
+
+    justify-content:center;
+
+    align-items:center;
+
+    background:var(--azul);
+
+    color:white;
+
+    text-decoration:none;
+
+    border-radius:8px;
+
+    font-weight:700;
+
+    transition:.25s;
+
+}
+
+.card a:hover{
+
+    background:var(--naranja);
+
+}
+
+/* =====================================================
+   FOOTER
+===================================================== */
+
+footer{
+
+    height:120px;
+
+    background:var(--azul);
+
+}
+
+/* =====================================================
+   HISTORIA
+===================================================== */
+
+.historia{
+    background:#fff;
+    padding:90px 40px 70px;
+}
+
+.historia-contenido{
+    max-width:1400px;
+    margin:auto;
+
+    display:grid;
+    grid-template-columns:600px 1fr;
+    gap:60px;
+    align-items:center;
+}
+
+.historia-imagen img{
+    width:100%;
+    display:block;
+
+    border-radius:16px;
+
+    box-shadow:0 16px 35px rgba(0,0,0,.18);
+
+    object-fit:cover;
+}
+
+.historia-etiqueta{
+    display:inline-block;
+    margin-bottom:12px;
+
+    color:var(--naranja);
+    font-weight:800;
+    letter-spacing:2px;
+    text-transform:uppercase;
+    font-size:.9rem;
+}
+
+.historia-texto h2{
+    color:var(--azul);
+    font-size:2.2rem;
+    line-height:1.25;
+    margin-bottom:28px;
+}
+
+.historia-texto p{
+    margin-bottom:18px;
+    line-height:1.9;
+    color:#444;
+    text-align:left;
+}
+
+/* =====================================================
+   BOTÓN VOLVER ARRIBA
+===================================================== */
+
+html{
+    scroll-behavior:smooth;
+}
+
+.btn-arriba{
+
+    position:fixed;
+
+    right:30px;
+    bottom:30px;
+
+    width:58px;
+    height:58px;
+
+    border-radius:50%;
+
+    background:var(--azul);
+    color:#fff;
+
+    text-decoration:none;
+
+    display:flex;
+    justify-content:center;
+    align-items:center;
+
+    font-size:1.6rem;
+    font-weight:700;
+
+    box-shadow:0 10px 25px rgba(0,0,0,.25);
+
+    opacity:0;
+    visibility:hidden;
+
+    transform:translateY(20px);
+
+    transition:.3s;
+
+    z-index:999;
+}
+
+.btn-arriba:hover{
+
+    background:var(--naranja);
+
+    transform:translateY(-4px);
+
+}
+
+.btn-arriba.mostrar{
+
+    opacity:1;
+    visibility:visible;
+
+    transform:translateY(0);
+
+}
