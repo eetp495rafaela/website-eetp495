@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>Portal Institucional | E.E.T.P. Nº 495</title>
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="assets/css/portal.css" />
+
+    <!-- Logo en la pestaña -->
+    <link rel="icon" href="assets/img/logo.png" />
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+
+    <link
+      href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Font Awesome -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
+    />
+  </head>
+
+  <body>
+    <main class="portal">
+      <div class="circulo">
+        <div class="reloj"></div>
+        <div class="login">
+          <div class="logo-contenedor">
+            <img
+              src="assets/img/logo.png"
+              alt="Logo E.E.T.P. Nº495"
+              class="logo"
+            />
+          </div>
+
+          <h1>E.E.T.P. Nº 495</h1>
+
+          <h2>Portal Institucional</h2>
+
+          <form>
+            <div class="campo">
+              <i class="fa-regular fa-user"></i>
+
+              <input
+                type="text"
+                id="usuario"
+                placeholder="Usuario"
+                autocomplete="username"
+              />
+            </div>
+
+            <div class="campo">
+              <i class="fa-solid fa-lock"></i>
+
+              <input
+                type="password"
+                id="password"
+                placeholder="Contraseña"
+                autocomplete="current-password"
+              />
+            </div>
+
+            <button type="submit" class="btn-ingresar">Ingresar</button>
+            <p class="mensaje-login"></p>
+          </form>
+        </div>
+      </div>
+    </main>
+
+    <script src="assets/js/portal.js"></script>
+  </body>
+</html>
