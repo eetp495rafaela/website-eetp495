@@ -82,6 +82,10 @@ boton.addEventListener("click", (e) => {
 
       mensaje.textContent = "✅ Acceso concedido";
 
+      setTimeout(() => {
+        window.location.href = "admin/index.html";
+      }, 800);
+
       // Más adelante acá iremos al portal
     } else {
       detenerAnimacion();
