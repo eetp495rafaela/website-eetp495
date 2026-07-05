@@ -1085,3 +1085,400 @@ html {
 .contacto-banner:hover .contacto-track {
   animation-play-state: paused;
 }
+/* =====================================================
+   RESPONSIVE GENERAL - CELULARES
+===================================================== */
+
+@media (max-width: 768px) {
+  /* ---------- CONTENEDOR GENERAL ---------- */
+
+  .contenedor {
+    width: 92%;
+  }
+
+  /* ---------- HEADER ---------- */
+
+  header {
+    padding: 24px 20px;
+  }
+
+  .header-contenido {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .logo img {
+    width: 120px;
+    margin-bottom: 16px;
+  }
+
+  .titulo {
+    margin-left: 0;
+  }
+
+  .titulo h1 {
+    font-size: 1.15rem;
+    line-height: 1.35;
+  }
+
+  .titulo h2 {
+    font-size: 2rem;
+    line-height: 1.15;
+    margin-top: 5px;
+  }
+
+  .ubicacion {
+    font-size: 0.95rem;
+    margin-top: 8px;
+  }
+
+  .acceso-portal {
+    margin: 22px 0 0;
+  }
+
+  .btn-portal {
+    justify-content: center;
+    min-width: 230px;
+  }
+
+  /* ---------- HERO ---------- */
+
+  .hero {
+    min-height: 440px;
+    padding: 55px 20px;
+  }
+
+  .hero h2 {
+    font-size: 2rem;
+    line-height: 1.2;
+  }
+
+  .hero p {
+    font-size: 1.05rem;
+    line-height: 1.65;
+    margin-bottom: 30px;
+  }
+
+  .btn-principal {
+    width: 100%;
+    max-width: 280px;
+  }
+
+  /* ---------- ENCABEZADOS DE SECCIÓN ---------- */
+
+  .encabezado-seccion {
+    margin-bottom: 45px;
+  }
+
+  .encabezado-seccion span {
+    font-size: 0.75rem;
+    letter-spacing: 1.4px;
+  }
+
+  .encabezado-seccion h2 {
+    font-size: 1.85rem;
+  }
+
+  .encabezado-seccion p {
+    font-size: 1rem;
+    line-height: 1.7;
+  }
+
+  /* ---------- ACCESOS PRINCIPALES ---------- */
+
+  .accesos {
+    padding: 80px 0;
+  }
+
+  .accesos h2 {
+    font-size: 2rem;
+    margin-bottom: 35px;
+  }
+
+  .cards {
+    grid-template-columns: 1fr;
+    gap: 18px;
+  }
+
+  .card {
+    min-height: auto;
+    padding: 30px 22px;
+  }
+
+  .card i {
+    font-size: 3.3rem;
+  }
+
+  .card h3 {
+    min-height: auto;
+    font-size: 1.35rem;
+    margin-bottom: 12px;
+  }
+
+  .card p {
+    margin-bottom: 24px;
+  }
+
+  .card a {
+    width: 100%;
+    max-width: 250px;
+  }
+
+  /* ---------- HISTORIA ---------- */
+
+  .historia {
+    padding: 65px 0;
+  }
+
+  .historia-contenido {
+    grid-template-columns: 1fr;
+    gap: 35px;
+  }
+
+  .historia-imagen img {
+    border-radius: 14px;
+  }
+
+  .historia-texto > p {
+    font-size: 1rem;
+    line-height: 1.8;
+    text-align: left;
+  }
+
+  .destacados {
+    grid-template-columns: 1fr;
+    gap: 35px;
+    margin-top: 55px;
+  }
+
+  .destacado i {
+    font-size: 3rem;
+  }
+
+  /* ---------- OFERTA ACADÉMICA ---------- */
+
+  .oferta {
+    padding: 70px 0;
+  }
+
+  .oferta h2 {
+    font-size: 1.9rem;
+  }
+
+  .oferta-intro {
+    gap: 35px;
+    margin-bottom: 60px;
+  }
+
+  .oferta-texto h3 {
+    font-size: 1.55rem;
+  }
+
+  .oferta-texto p {
+    font-size: 1rem;
+    line-height: 1.8;
+  }
+
+  .oferta-destacados li {
+    align-items: flex-start;
+    font-size: 0.98rem;
+    line-height: 1.55;
+  }
+
+  .oferta-destacados i {
+    margin-top: 5px;
+  }
+
+  .titulo-bloque {
+    font-size: 1.65rem;
+    line-height: 1.3;
+    margin-bottom: 30px;
+  }
+
+  .perfil-grid {
+    gap: 20px;
+    margin-bottom: 65px;
+  }
+
+  .perfil-item {
+    padding: 30px 22px;
+  }
+
+  .campo-laboral {
+    gap: 16px;
+    margin-bottom: 65px;
+  }
+
+  .campo-item {
+    padding: 20px;
+  }
+
+  /* ---------- PLAN DE ESTUDIOS ---------- */
+
+  #plan-estudios {
+    padding-top: 10px;
+  }
+
+  .plan-grid {
+    gap: 20px;
+    margin-top: 35px;
+  }
+
+  .anio ul {
+    padding: 22px;
+  }
+
+  .anio li {
+    font-size: 0.95rem;
+  }
+
+  .plan-final {
+    margin-top: 45px;
+    gap: 22px;
+  }
+
+  .plan-final-icono {
+    width: 78px;
+    height: 78px;
+  }
+
+  .plan-final-icono i {
+    font-size: 2rem;
+  }
+
+  .plan-final-texto h3 {
+    font-size: 1.45rem;
+    line-height: 1.3;
+  }
+
+  .plan-final-texto p {
+    font-size: 0.98rem;
+    line-height: 1.75;
+  }
+
+  /* ---------- GALERÍA ---------- */
+
+  .galeria {
+    padding: 70px 0;
+  }
+
+  .galeria-grid {
+    gap: 18px;
+  }
+
+  .foto img {
+    height: 250px;
+  }
+
+  .foto figcaption {
+    left: 18px;
+    bottom: 16px;
+    font-size: 1rem;
+  }
+
+  /* ---------- CONTACTO ---------- */
+
+  .contacto {
+    padding: 70px 0;
+  }
+
+  .contacto-banner {
+    margin: 35px 0 45px;
+    padding: 15px 0;
+  }
+
+  .dato-contacto {
+    padding: 0 24px;
+    font-size: 0.92rem;
+  }
+
+  .dato-contacto::after {
+    margin-left: 24px;
+  }
+
+  .mapa {
+    margin-top: 45px;
+  }
+
+  .mapa h3 {
+    font-size: 1.55rem;
+  }
+
+  .mapa iframe {
+    height: 320px;
+    border-radius: 14px;
+  }
+
+  /* ---------- FOOTER ---------- */
+
+  .footer-contenedor {
+    padding: 45px 24px;
+    gap: 32px;
+  }
+
+  .footer-col h3 {
+    font-size: 1.3rem;
+  }
+
+  .footer-col h4 {
+    font-size: 1rem;
+  }
+
+  .footer-bottom {
+    padding: 18px 20px;
+    font-size: 0.8rem;
+    line-height: 1.5;
+  }
+
+  /* ---------- BOTÓN SUBIR ---------- */
+
+  .btn-arriba {
+    right: 18px;
+    bottom: 18px;
+    width: 50px;
+    height: 50px;
+    font-size: 1.25rem;
+  }
+
+  /* ---------- LIGHTBOX ---------- */
+
+  .cerrar {
+    top: 15px;
+    right: 20px;
+    font-size: 2.5rem;
+  }
+}
+
+/* =====================================================
+   CELULARES PEQUEÑOS
+===================================================== */
+
+@media (max-width: 420px) {
+  .titulo h1 {
+    font-size: 1.05rem;
+  }
+
+  .titulo h2 {
+    font-size: 1.75rem;
+  }
+
+  .hero h2 {
+    font-size: 1.75rem;
+  }
+
+  .encabezado-seccion h2 {
+    font-size: 1.65rem;
+  }
+
+  .oferta h2 {
+    font-size: 1.7rem;
+  }
+
+  .plan-final {
+    padding: 28px 20px;
+  }
+
+  .mapa iframe {
+    height: 280px;
+  }
+}
