@@ -25,8 +25,14 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-function volverAlLogin() {
-  window.location.replace("../login.html");
+function volverAlLogin(mensaje = "") {
+  const url = new URL("../login.html", window.location.href);
+
+  if (mensaje) {
+    url.searchParams.set("mensaje", mensaje);
+  }
+
+  window.location.replace(url.toString());
 }
 
 function normalizarCorreo(correo) {
@@ -39,6 +45,33 @@ function obtenerRolEsperado() {
   return String(document.body.dataset.rolPermitido || "")
     .trim()
     .toUpperCase();
+}
+
+function accesoVencido(fechaFinAcceso) {
+  if (!fechaFinAcceso) {
+    return false;
+  }
+
+  const fechaTexto = String(fechaFinAcceso).trim();
+
+  if (!fechaTexto) {
+    return false;
+  }
+
+  // Se interpreta como válido hasta las 23:59:59 del día indicado.
+  const fechaVencimiento = new Date(`${fechaTexto}T23:59:59`);
+  const ahora = new Date();
+
+  if (Number.isNaN(fechaVencimiento.getTime())) {
+    console.warn(
+      "Fecha de finalización inválida en el perfil:",
+      fechaFinAcceso,
+    );
+
+    return false;
+  }
+
+  return ahora > fechaVencimiento;
 }
 
 onAuthStateChanged(auth, async (user) => {
@@ -54,7 +87,7 @@ onAuthStateChanged(auth, async (user) => {
 
     if (!correo) {
       await signOut(auth);
-      volverAlLogin();
+      volverAlLogin("No se pudo validar el correo de la cuenta.");
       return;
     }
 
@@ -63,7 +96,7 @@ onAuthStateChanged(auth, async (user) => {
 
     if (!documento.exists()) {
       await signOut(auth);
-      volverAlLogin();
+      volverAlLogin("Tu cuenta no está autorizada.");
       return;
     }
 
@@ -77,9 +110,21 @@ onAuthStateChanged(auth, async (user) => {
       .trim()
       .toUpperCase();
 
-    if (estado !== "ACTIVO" || rolUsuario !== rolEsperado) {
+    if (estado !== "ACTIVO") {
       await signOut(auth);
-      volverAlLogin();
+      volverAlLogin("Tu cuenta no se encuentra activa.");
+      return;
+    }
+
+    if (accesoVencido(perfil.fechaFinAcceso)) {
+      await signOut(auth);
+      volverAlLogin("Tu acceso institucional ha finalizado.");
+      return;
+    }
+
+    if (rolUsuario !== rolEsperado) {
+      await signOut(auth);
+      volverAlLogin("Tu cuenta no tiene permiso para este portal.");
       return;
     }
 
@@ -87,11 +132,12 @@ onAuthStateChanged(auth, async (user) => {
       correo,
       nombreCompleto: perfil.nombreCompleto || "",
       rol: rolUsuario,
+      fechaFinAcceso: perfil.fechaFinAcceso || null,
     });
   } catch (error) {
     console.error("Error al verificar acceso:", error);
 
     await signOut(auth);
-    volverAlLogin();
+    volverAlLogin("No fue posible validar el acceso.");
   }
 });
