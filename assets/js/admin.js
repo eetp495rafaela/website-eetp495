@@ -7,6 +7,7 @@ import {
 import {
   getAuth,
   onAuthStateChanged,
+  signOut,
 } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-auth.js";
 
 import {
@@ -39,6 +40,7 @@ const btnRegistrar = document.getElementById("btnRegistrarUsuario");
 const btnVerUsuarios = document.getElementById("btnVerUsuarios");
 const cuerpoTabla = document.getElementById("cuerpoTablaUsuarios");
 const mensajeUsuarios = document.getElementById("mensajeUsuarios");
+const btnCerrarSesion = document.getElementById("btnCerrarSesion");
 const modalEditar = document.getElementById("modalEditarUsuario");
 const formEditar = document.getElementById("formEditarUsuario");
 const editarCorreo = document.getElementById("editarCorreo");
@@ -470,6 +472,24 @@ if (modalEditar) {
   modalEditar.addEventListener("click", (event) => {
     if (event.target === modalEditar) {
       cerrarModalEdicion();
+    }
+  });
+}
+
+if (btnCerrarSesion) {
+  btnCerrarSesion.addEventListener("click", async () => {
+    const confirmar = window.confirm(
+      "¿Querés cerrar la sesión del Portal Institucional?",
+    );
+
+    if (!confirmar) return;
+
+    try {
+      await signOut(auth);
+      window.location.replace("../login.html");
+    } catch (error) {
+      console.error("Error al cerrar sesión:", error);
+      alert("No se pudo cerrar la sesión. Intentá nuevamente.");
     }
   });
 }
