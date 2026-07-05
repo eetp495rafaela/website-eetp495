@@ -39,8 +39,21 @@ const btnRegistrar = document.getElementById("btnRegistrarUsuario");
 const btnVerUsuarios = document.getElementById("btnVerUsuarios");
 const cuerpoTabla = document.getElementById("cuerpoTablaUsuarios");
 const mensajeUsuarios = document.getElementById("mensajeUsuarios");
+const modalEditar = document.getElementById("modalEditarUsuario");
+const formEditar = document.getElementById("formEditarUsuario");
+const editarCorreo = document.getElementById("editarCorreo");
+const editarCorreoVisible = document.getElementById("editarCorreoVisible");
+const editarNombreCompleto = document.getElementById("editarNombreCompleto");
+const editarRol = document.getElementById("editarRol");
+const editarTipoVinculo = document.getElementById("editarTipoVinculo");
+const editarFechaFinAcceso = document.getElementById("editarFechaFinAcceso");
+const mensajeEditarUsuario = document.getElementById("mensajeEditarUsuario");
+const btnCerrarEdicion = document.getElementById("btnCerrarEdicion");
+const btnCancelarEdicion = document.getElementById("btnCancelarEdicion");
+const btnGuardarEdicion = document.getElementById("btnGuardarEdicion");
 
 let usuarioSoporte = null;
+let usuarioEnEdicion = null;
 
 function normalizarCorreo(correo) {
   return String(correo || "")
@@ -322,66 +335,104 @@ async function cambiarEstadoUsuario(usuario) {
   }
 }
 
-async function editarUsuario(usuario) {
+function mostrarMensajeEdicion(texto, tipo = "") {
+  if (!mensajeEditarUsuario) return;
+
+  mensajeEditarUsuario.textContent = texto;
+  mensajeEditarUsuario.className = `mensaje-formulario ${tipo}`.trim();
+}
+
+function abrirModalEdicion(usuario) {
   const correo = normalizarCorreo(usuario.correo);
   const correoActual = normalizarCorreo(usuarioSoporte?.email);
   const esMiCuenta = correo === correoActual;
 
-  const nuevoNombre = window.prompt(
-    "Nombre completo:",
-    usuario.nombreCompleto || "",
+  usuarioEnEdicion = usuario;
+
+  editarCorreo.value = correo;
+  editarCorreoVisible.value = correo;
+  editarNombreCompleto.value = usuario.nombreCompleto || "";
+  editarRol.value = String(usuario.rol || "").toUpperCase();
+  editarTipoVinculo.value = usuario.tipoVinculo || "";
+  editarFechaFinAcceso.value = usuario.fechaFinAcceso || "";
+
+  editarRol.disabled = esMiCuenta;
+
+  mostrarMensajeEdicion(
+    esMiCuenta ? "Por seguridad, no podés cambiar tu propio rol." : "",
   );
 
-  if (nuevoNombre === null) return;
+  modalEditar.classList.add("abierta");
+  modalEditar.setAttribute("aria-hidden", "false");
+  document.body.classList.add("modal-abierto");
 
-  const nuevoRol = window.prompt(
-    "Rol: ALUMNO, DOCENTE o SOPORTE",
-    String(usuario.rol || "").toUpperCase(),
-  );
+  setTimeout(() => editarNombreCompleto.focus(), 100);
+}
 
-  if (nuevoRol === null) return;
+function cerrarModalEdicion() {
+  modalEditar.classList.remove("abierta");
+  modalEditar.setAttribute("aria-hidden", "true");
+  document.body.classList.remove("modal-abierto");
 
-  const rolNormalizado = nuevoRol.trim().toUpperCase();
+  usuarioEnEdicion = null;
+  formEditar.reset();
+  mostrarMensajeEdicion("");
+}
 
-  if (!["ALUMNO", "DOCENTE", "SOPORTE"].includes(rolNormalizado)) {
-    mostrarMensajeUsuarios(
-      "El rol debe ser ALUMNO, DOCENTE o SOPORTE.",
-      "error",
-    );
+function editarUsuario(usuario) {
+  abrirModalEdicion(usuario);
+}
+
+async function guardarEdicionUsuario(event) {
+  event.preventDefault();
+
+  if (!usuarioEnEdicion || !usuarioSoporte) {
     return;
   }
 
-  if (esMiCuenta && rolNormalizado !== "SOPORTE") {
-    mostrarMensajeUsuarios(
+  const correo = normalizarCorreo(editarCorreo.value);
+  const correoActual = normalizarCorreo(usuarioSoporte.email);
+  const esMiCuenta = correo === correoActual;
+
+  const nombreCompleto = editarNombreCompleto.value.trim();
+  const rol = String(editarRol.value || "")
+    .trim()
+    .toUpperCase();
+  const tipoVinculo = editarTipoVinculo.value.trim();
+  const fechaFinAcceso = editarFechaFinAcceso.value.trim();
+
+  if (!nombreCompleto || !rol) {
+    mostrarMensajeEdicion("Completá nombre y rol antes de guardar.", "error");
+    return;
+  }
+
+  if (!["ALUMNO", "DOCENTE", "SOPORTE"].includes(rol)) {
+    mostrarMensajeEdicion("El rol seleccionado no es válido.", "error");
+    return;
+  }
+
+  if (esMiCuenta && rol !== "SOPORTE") {
+    mostrarMensajeEdicion(
       "No podés cambiar tu propio rol desde este panel.",
       "error",
     );
     return;
   }
 
-  const nuevoVinculo = window.prompt(
-    "Tipo de vínculo:",
-    usuario.tipoVinculo || "",
-  );
-
-  if (nuevoVinculo === null) return;
-
-  const nuevaFechaFin = window.prompt(
-    "Fecha de finalización (AAAA-MM-DD) o dejar vacío:",
-    usuario.fechaFinAcceso || "",
-  );
-
-  if (nuevaFechaFin === null) return;
+  btnGuardarEdicion.disabled = true;
+  mostrarMensajeEdicion("Guardando cambios...");
 
   try {
     await updateDoc(doc(db, "usuarios", correo), {
-      nombreCompleto: nuevoNombre.trim(),
-      rol: rolNormalizado,
-      tipoVinculo: nuevoVinculo.trim() || rolNormalizado,
-      fechaFinAcceso: nuevaFechaFin.trim() || null,
+      nombreCompleto,
+      rol,
+      tipoVinculo: tipoVinculo || rol,
+      fechaFinAcceso: fechaFinAcceso || null,
       actualizadoEn: serverTimestamp(),
       actualizadoPor: correoActual,
     });
+
+    cerrarModalEdicion();
 
     mostrarMensajeUsuarios("Usuario actualizado correctamente.", "ok");
 
@@ -389,7 +440,9 @@ async function editarUsuario(usuario) {
   } catch (error) {
     console.error("Error al editar usuario:", error);
 
-    mostrarMensajeUsuarios("No se pudo actualizar el usuario.", "error");
+    mostrarMensajeEdicion("No se pudieron guardar los cambios.", "error");
+  } finally {
+    btnGuardarEdicion.disabled = false;
   }
 }
 
@@ -399,6 +452,26 @@ if (formulario) {
 
 if (btnVerUsuarios) {
   btnVerUsuarios.addEventListener("click", cargarUsuarios);
+}
+
+if (formEditar) {
+  formEditar.addEventListener("submit", guardarEdicionUsuario);
+}
+
+if (btnCerrarEdicion) {
+  btnCerrarEdicion.addEventListener("click", cerrarModalEdicion);
+}
+
+if (btnCancelarEdicion) {
+  btnCancelarEdicion.addEventListener("click", cerrarModalEdicion);
+}
+
+if (modalEditar) {
+  modalEditar.addEventListener("click", (event) => {
+    if (event.target === modalEditar) {
+      cerrarModalEdicion();
+    }
+  });
 }
 
 onAuthStateChanged(auth, (user) => {

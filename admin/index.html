@@ -368,7 +368,89 @@
         </a>
       </section>
     </main>
+    <div class="modal-edicion" id="modalEditarUsuario" aria-hidden="true">
+      <div
+        class="modal-edicion-contenido"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="tituloEditarUsuario"
+      >
+        <div class="modal-edicion-cabecera">
+          <div>
+            <h3 id="tituloEditarUsuario">Editar usuario</h3>
+            <p>Modificá los datos autorizados para esta cuenta.</p>
+          </div>
 
+          <button
+            class="btn-cerrar-modal"
+            id="btnCerrarEdicion"
+            type="button"
+            aria-label="Cerrar"
+          >
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+
+        <form id="formEditarUsuario" class="formulario-edicion">
+          <input id="editarCorreo" type="hidden" />
+
+          <div class="form-grid">
+            <div class="campo-formulario campo-doble">
+              <label for="editarNombreCompleto">Nombre completo *</label>
+              <input id="editarNombreCompleto" type="text" required />
+            </div>
+
+            <div class="campo-formulario campo-doble">
+              <label>Correo de acceso</label>
+              <input id="editarCorreoVisible" type="email" disabled />
+            </div>
+
+            <div class="campo-formulario">
+              <label for="editarRol">Rol *</label>
+              <select id="editarRol" required>
+                <option value="ALUMNO">ALUMNO</option>
+                <option value="DOCENTE">DOCENTE</option>
+                <option value="SOPORTE">SOPORTE</option>
+              </select>
+            </div>
+
+            <div class="campo-formulario">
+              <label for="editarTipoVinculo">Tipo de vínculo</label>
+              <select id="editarTipoVinculo">
+                <option value="">Seleccionar</option>
+                <option value="ALUMNO">Alumno/a</option>
+                <option value="DOCENTE">Docente</option>
+                <option value="SUPLENTE">Docente suplente</option>
+                <option value="REEMPLAZANTE">Docente reemplazante</option>
+                <option value="SOPORTE">Soporte</option>
+              </select>
+            </div>
+
+            <div class="campo-formulario">
+              <label for="editarFechaFinAcceso"> Fecha de finalización </label>
+              <input id="editarFechaFinAcceso" type="date" />
+            </div>
+          </div>
+
+          <p class="mensaje-formulario" id="mensajeEditarUsuario"></p>
+
+          <div class="acciones-modal">
+            <button
+              class="btn-secundario"
+              id="btnCancelarEdicion"
+              type="button"
+            >
+              Cancelar
+            </button>
+
+            <button class="btn-accion" id="btnGuardarEdicion" type="submit">
+              <i class="fa-solid fa-floppy-disk"></i>
+              Guardar cambios
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
     <button
       class="btn-arriba"
       id="btnArriba"
