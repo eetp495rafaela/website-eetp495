@@ -128,7 +128,7 @@ onAuthStateChanged(auth, async (user) => {
       return;
     }
 
-    console.log("Acceso autorizado:", {
+    console.log("Acceso Autorizado:", {
       correo,
       nombreCompleto: perfil.nombreCompleto || "",
       rol: rolUsuario,
