@@ -139,7 +139,7 @@ onAuthStateChanged(auth, async (user) => {
 
     if (accesoVencido(perfil.fechaFinAcceso)) {
       await signOut(auth);
-      volverAlLogin("Tu acceso institucional ha finalizado.");
+      volverAlLogin("Tu acceso al portal ha finalizado.");
       return;
     }
 
