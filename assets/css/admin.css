@@ -961,3 +961,27 @@ body.modal-abierto {
     grid-column: span 1;
   }
 }
+/* =========================
+   PERFIL DEL USUARIO
+========================= */
+
+.usuario-perfil {
+  text-align: left;
+}
+
+.usuario-datos {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.usuario-datos span {
+  font-weight: 800;
+  line-height: 1.1;
+}
+
+.usuario-datos small {
+  font-size: 0.76rem;
+  font-weight: 600;
+  opacity: 0.82;
+}
