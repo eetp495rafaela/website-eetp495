@@ -73,6 +73,14 @@
             <p>Vinculación de docentes, materias, talleres y cursos.</p>
           </a>
 
+          <a class="tarjeta tarjeta-enlace" href="#espacios-curriculares">
+            <i class="fa-solid fa-book-bookmark"></i>
+            <h3>Espacios Curriculares</h3>
+            <p>
+              Importación y administración del Plan de Estudios institucional.
+            </p>
+          </a>
+
           <a class="tarjeta tarjeta-enlace" href="#estudiantes">
             <i class="fa-solid fa-user-graduate"></i>
             <h3>Estudiantes</h3>
@@ -247,6 +255,73 @@
           </div>
 
           <p id="mensajeUsuarios" class="mensaje-formulario"></p>
+        </div>
+
+        <a class="btn-volver" href="#inicio">
+          <i class="fa-solid fa-arrow-up"></i>
+          Volver al inicio
+        </a>
+      </section>
+
+      <section class="grupo seccion-destino" id="espacios-curriculares">
+        <h2>Espacios Curriculares</h2>
+
+        <div class="panel-info">
+          <p>
+            Desde esta sección se importará y administrará el Plan de Estudios
+            institucional, organizado por año y tipo de espacio.
+          </p>
+
+          <div class="acciones">
+            <button
+              class="btn-accion"
+              id="btnImportarPlanEstudios"
+              type="button"
+            >
+              <i class="fa-solid fa-file-import"></i>
+              Importar Plan de Estudios
+            </button>
+          </div>
+
+          <p id="mensajeImportacionPlan" class="mensaje-formulario"></p>
+
+          <div class="separador-usuarios"></div>
+
+          <div class="encabezado-listado">
+            <div>
+              <h3>Espacios registrados</h3>
+              <p>
+                Materias, talleres y espacios institucionales disponibles para
+                asignaciones docentes.
+              </p>
+            </div>
+
+            <button
+              class="btn-accion"
+              id="btnVerEspaciosCurriculares"
+              type="button"
+            >
+              <i class="fa-solid fa-list"></i>
+              Ver espacios
+            </button>
+          </div>
+
+          <div class="tabla-contenedor">
+            <table class="tabla-usuarios">
+              <thead>
+                <tr>
+                  <th>Año</th>
+                  <th>Espacio curricular</th>
+                  <th>Tipo</th>
+                  <th>Estado</th>
+                </tr>
+              </thead>
+
+              <tbody id="cuerpoTablaEspaciosCurriculares"></tbody>
+            </table>
+          </div>
+
+          <p id="mensajeEspaciosCurriculares" class="mensaje-formulario"></p>
         </div>
 
         <a class="btn-volver" href="#inicio">

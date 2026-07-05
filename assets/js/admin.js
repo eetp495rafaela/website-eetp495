@@ -19,6 +19,7 @@ import {
   setDoc,
   updateDoc,
   addDoc,
+  writeBatch,
   serverTimestamp,
 } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
 
@@ -54,6 +55,21 @@ const btnVerCursos = document.getElementById("btnVerCursos");
 const cuerpoTablaCursos = document.getElementById("cuerpoTablaCursos");
 const mensajeRegistroCurso = document.getElementById("mensajeRegistroCurso");
 const mensajeCursos = document.getElementById("mensajeCursos");
+const btnImportarPlanEstudios = document.getElementById(
+  "btnImportarPlanEstudios",
+);
+const btnVerEspaciosCurriculares = document.getElementById(
+  "btnVerEspaciosCurriculares",
+);
+const cuerpoTablaEspaciosCurriculares = document.getElementById(
+  "cuerpoTablaEspaciosCurriculares",
+);
+const mensajeImportacionPlan = document.getElementById(
+  "mensajeImportacionPlan",
+);
+const mensajeEspaciosCurriculares = document.getElementById(
+  "mensajeEspaciosCurriculares",
+);
 const btnCerrarSesion = document.getElementById("btnCerrarSesion");
 const modalEditar = document.getElementById("modalEditarUsuario");
 const formEditar = document.getElementById("formEditarUsuario");
@@ -423,6 +439,277 @@ async function registrarCurso(event) {
   }
 }
 
+const PLAN_ESTUDIOS_INICIAL = [
+  // PRIMER AÑO
+  { anio: 1, nombre: "Biología", tipo: "AULA" },
+  { anio: 1, nombre: "Educación Artística: Música", tipo: "AULA" },
+  { anio: 1, nombre: "Educación Física", tipo: "EDUCACION_FISICA" },
+  { anio: 1, nombre: "Educación Tecnológica", tipo: "AULA" },
+  { anio: 1, nombre: "Formación Ética y Ciudadana", tipo: "AULA" },
+  { anio: 1, nombre: "Geografía", tipo: "AULA" },
+  { anio: 1, nombre: "Lengua Extranjera: Inglés", tipo: "AULA" },
+  { anio: 1, nombre: "Lengua y Literatura", tipo: "AULA" },
+  { anio: 1, nombre: "Matemática", tipo: "AULA" },
+  { anio: 1, nombre: "Ruedas de Convivencia", tipo: "AULA" },
+  { anio: 1, nombre: "Taller Electricidad", tipo: "TALLER" },
+  { anio: 1, nombre: "Taller Informática", tipo: "TALLER" },
+  {
+    anio: 1,
+    nombre: "Taller Organización de la Empresa",
+    tipo: "TALLER",
+  },
+
+  // SEGUNDO AÑO
+  {
+    anio: 2,
+    nombre: "Educación Artística: Artes Visuales",
+    tipo: "AULA",
+  },
+  { anio: 2, nombre: "Educación Física", tipo: "EDUCACION_FISICA" },
+  { anio: 2, nombre: "Educación Tecnológica", tipo: "AULA" },
+  { anio: 2, nombre: "Físico-Química", tipo: "AULA" },
+  { anio: 2, nombre: "Formación Ética y Ciudadana", tipo: "AULA" },
+  { anio: 2, nombre: "Historia", tipo: "AULA" },
+  { anio: 2, nombre: "Lengua Extranjera: Inglés", tipo: "AULA" },
+  { anio: 2, nombre: "Lengua y Literatura", tipo: "AULA" },
+  { anio: 2, nombre: "Matemática", tipo: "AULA" },
+  { anio: 2, nombre: "Ruedas de Convivencia", tipo: "AULA" },
+  { anio: 2, nombre: "Taller Electrónica", tipo: "TALLER" },
+  { anio: 2, nombre: "Taller Informática", tipo: "TALLER" },
+  {
+    anio: 2,
+    nombre: "Taller Documentos Comerciales",
+    tipo: "TALLER",
+  },
+
+  // TERCER AÑO
+  { anio: 3, nombre: "Educación Física", tipo: "EDUCACION_FISICA" },
+  { anio: 3, nombre: "Física", tipo: "AULA" },
+  { anio: 3, nombre: "Formación Ética y Ciudadana", tipo: "AULA" },
+  { anio: 3, nombre: "Hardware I", tipo: "AULA" },
+  { anio: 3, nombre: "Historia", tipo: "AULA" },
+  { anio: 3, nombre: "Lengua Extranjera: Inglés", tipo: "AULA" },
+  { anio: 3, nombre: "Lengua y Literatura", tipo: "AULA" },
+  { anio: 3, nombre: "Matemática", tipo: "AULA" },
+  { anio: 3, nombre: "Materiales y Procesos", tipo: "AULA" },
+  { anio: 3, nombre: "Software I", tipo: "AULA" },
+  { anio: 3, nombre: "T.I.C.", tipo: "AULA" },
+  { anio: 3, nombre: "Taller", tipo: "TALLER" },
+
+  // CUARTO AÑO
+  { anio: 4, nombre: "Automatización y Control", tipo: "AULA" },
+  { anio: 4, nombre: "Economía", tipo: "AULA" },
+  { anio: 4, nombre: "Formación Ética y Ciudadana", tipo: "AULA" },
+  { anio: 4, nombre: "Fundamentos de Gestión", tipo: "AULA" },
+  { anio: 4, nombre: "Geografía", tipo: "AULA" },
+  { anio: 4, nombre: "Hardware II", tipo: "AULA" },
+  { anio: 4, nombre: "Lengua Extranjera: Inglés", tipo: "AULA" },
+  { anio: 4, nombre: "Lengua y Literatura", tipo: "AULA" },
+  { anio: 4, nombre: "Matemática", tipo: "AULA" },
+  { anio: 4, nombre: "Software II", tipo: "AULA" },
+  { anio: 4, nombre: "Taller", tipo: "TALLER" },
+
+  // QUINTO AÑO
+  { anio: 5, nombre: "Formación Ética y Ciudadana", tipo: "AULA" },
+  { anio: 5, nombre: "Hardware III", tipo: "AULA" },
+  { anio: 5, nombre: "Lengua Extranjera: Inglés", tipo: "AULA" },
+  { anio: 5, nombre: "Lengua y Literatura", tipo: "AULA" },
+  { anio: 5, nombre: "Marco Jurídico", tipo: "AULA" },
+  { anio: 5, nombre: "Matemática", tipo: "AULA" },
+  { anio: 5, nombre: "Organización y Gestión", tipo: "AULA" },
+  { anio: 5, nombre: "Procesos Productivos", tipo: "AULA" },
+  { anio: 5, nombre: "Programación I", tipo: "AULA" },
+  { anio: 5, nombre: "Software III", tipo: "AULA" },
+  { anio: 5, nombre: "Taller", tipo: "TALLER" },
+
+  // SEXTO AÑO
+  { anio: 6, nombre: "Formación Ética Profesional", tipo: "AULA" },
+  { anio: 6, nombre: "Hardware IV", tipo: "AULA" },
+  { anio: 6, nombre: "Inglés Técnico", tipo: "AULA" },
+  { anio: 6, nombre: "Lengua y Literatura", tipo: "AULA" },
+  { anio: 6, nombre: "Matemática Aplicada", tipo: "AULA" },
+  { anio: 6, nombre: "Organización y Gestión Comercial", tipo: "AULA" },
+  { anio: 6, nombre: "Prácticas Profesionalizantes", tipo: "AULA" },
+  { anio: 6, nombre: "Programación II", tipo: "AULA" },
+  { anio: 6, nombre: "Proyecto Tecnológico", tipo: "AULA" },
+  { anio: 6, nombre: "Redes", tipo: "AULA" },
+  { anio: 6, nombre: "Software IV", tipo: "AULA" },
+];
+
+function mostrarMensajeImportacionPlan(texto, tipo = "") {
+  if (!mensajeImportacionPlan) return;
+
+  mensajeImportacionPlan.textContent = texto;
+  mensajeImportacionPlan.className = `mensaje-formulario ${tipo}`.trim();
+}
+
+function mostrarMensajeEspaciosCurriculares(texto, tipo = "") {
+  if (!mensajeEspaciosCurriculares) return;
+
+  mensajeEspaciosCurriculares.textContent = texto;
+  mensajeEspaciosCurriculares.className = `mensaje-formulario ${tipo}`.trim();
+}
+
+function crearIdEspacioCurricular(anio, nombre) {
+  const textoLimpio = String(nombre)
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+
+  return `${anio}-${textoLimpio}`;
+}
+
+function textoTipoEspacio(tipo) {
+  const tipos = {
+    AULA: "Aula",
+    TALLER: "Taller",
+    EDUCACION_FISICA: "Educación Física",
+  };
+
+  return tipos[tipo] || tipo || "-";
+}
+
+async function importarPlanEstudios() {
+  if (!usuarioSoporte) {
+    mostrarMensajeImportacionPlan("Esperando validación de sesión.", "error");
+    return;
+  }
+
+  const resultado = await Swal.fire({
+    icon: "question",
+    title: "¿Importar Plan de Estudios?",
+    text: "Se cargarán los espacios curriculares de 1º a 6º año.",
+    showCancelButton: true,
+    confirmButtonText: "Sí, importar",
+    cancelButtonText: "Cancelar",
+    reverseButtons: true,
+    focusCancel: true,
+  });
+
+  if (!resultado.isConfirmed) return;
+
+  btnImportarPlanEstudios.disabled = true;
+  mostrarMensajeImportacionPlan("Importando Plan de Estudios...");
+
+  try {
+    const lote = writeBatch(db);
+    const correoSoporte = normalizarCorreo(usuarioSoporte.email);
+
+    PLAN_ESTUDIOS_INICIAL.forEach((espacio) => {
+      const espacioId = crearIdEspacioCurricular(espacio.anio, espacio.nombre);
+
+      const referencia = doc(db, "espacios_curriculares", espacioId);
+
+      lote.set(
+        referencia,
+        {
+          anio: espacio.anio,
+          nombre: espacio.nombre,
+          tipo: espacio.tipo,
+          estado: "ACTIVO",
+          actualizadoEn: serverTimestamp(),
+          actualizadoPor: correoSoporte,
+        },
+        { merge: true },
+      );
+    });
+
+    await lote.commit();
+
+    mostrarMensajeImportacionPlan(
+      `Plan importado correctamente: ${PLAN_ESTUDIOS_INICIAL.length} espacios curriculares.`,
+      "ok",
+    );
+
+    await Swal.fire({
+      icon: "success",
+      title: "Plan importado",
+      text: `Se registraron ${PLAN_ESTUDIOS_INICIAL.length} espacios curriculares.`,
+      confirmButtonText: "Entendido",
+    });
+
+    await cargarEspaciosCurriculares();
+  } catch (error) {
+    console.error("Error al importar el Plan de Estudios:", error);
+
+    mostrarMensajeImportacionPlan(
+      "No se pudo importar el Plan de Estudios.",
+      "error",
+    );
+  } finally {
+    btnImportarPlanEstudios.disabled = false;
+  }
+}
+
+async function cargarEspaciosCurriculares() {
+  if (!usuarioSoporte) {
+    mostrarMensajeEspaciosCurriculares(
+      "Esperando validación de sesión...",
+      "error",
+    );
+    return;
+  }
+
+  if (!cuerpoTablaEspaciosCurriculares) return;
+
+  mostrarMensajeEspaciosCurriculares("Cargando espacios...");
+  cuerpoTablaEspaciosCurriculares.innerHTML = "";
+
+  try {
+    const consulta = await getDocs(collection(db, "espacios_curriculares"));
+
+    const espacios = consulta.docs
+      .map((documento) => ({
+        id: documento.id,
+        ...documento.data(),
+      }))
+      .sort((a, b) => {
+        const diferenciaAnio = Number(a.anio) - Number(b.anio);
+
+        if (diferenciaAnio !== 0) {
+          return diferenciaAnio;
+        }
+
+        return String(a.nombre || "").localeCompare(
+          String(b.nombre || ""),
+          "es",
+        );
+      });
+
+    if (!espacios.length) {
+      mostrarMensajeEspaciosCurriculares(
+        "Todavía no hay espacios curriculares registrados.",
+      );
+      return;
+    }
+
+    espacios.forEach((espacio) => {
+      const fila = document.createElement("tr");
+
+      fila.appendChild(crearCelda(espacio.anio));
+      fila.appendChild(crearCelda(espacio.nombre));
+      fila.appendChild(crearCelda(textoTipoEspacio(espacio.tipo)));
+      fila.appendChild(crearCeldaEstado(espacio.estado));
+
+      cuerpoTablaEspaciosCurriculares.appendChild(fila);
+    });
+
+    mostrarMensajeEspaciosCurriculares(
+      `${espacios.length} espacio(s) cargado(s).`,
+      "ok",
+    );
+  } catch (error) {
+    console.error("Error al cargar espacios curriculares:", error);
+
+    mostrarMensajeEspaciosCurriculares(
+      "No se pudieron cargar los espacios curriculares.",
+      "error",
+    );
+  }
+}
+
 async function cargarUsuarios() {
   if (!usuarioSoporte) {
     mostrarMensajeUsuarios("Esperando validación de sesión...", "error");
@@ -716,6 +1003,16 @@ async function guardarEdicionUsuario(event) {
 
 if (formulario) {
   formulario.addEventListener("submit", registrarUsuario);
+}
+if (btnImportarPlanEstudios) {
+  btnImportarPlanEstudios.addEventListener("click", importarPlanEstudios);
+}
+
+if (btnVerEspaciosCurriculares) {
+  btnVerEspaciosCurriculares.addEventListener(
+    "click",
+    cargarEspaciosCurriculares,
+  );
 }
 if (cursoAnio) {
   cursoAnio.addEventListener("input", actualizarNombreCurso);
