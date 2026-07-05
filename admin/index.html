@@ -97,21 +97,107 @@
 
         <div class="panel-info">
           <p>
-            Desde esta sección se administrarán las cuentas autorizadas para
-            ingresar al Portal Institucional.
+            Registrá aquí las cuentas autorizadas para ingresar al Portal
+            Institucional mediante Google.
           </p>
 
-          <div class="acciones">
-            <button class="btn-accion" type="button">
-              <i class="fa-solid fa-user-plus"></i>
-              Registrar usuario
-            </button>
+          <form
+            id="formRegistroUsuario"
+            class="formulario-usuario"
+            autocomplete="off"
+          >
+            <div class="form-grid">
+              <div class="campo-formulario campo-ancho">
+                <label for="nombreCompleto">Nombre completo *</label>
+                <input
+                  id="nombreCompleto"
+                  name="nombreCompleto"
+                  type="text"
+                  placeholder="Apellido y nombre"
+                  required
+                />
+              </div>
 
-            <button class="btn-accion" type="button">
+              <div class="campo-formulario campo-ancho">
+                <label for="correo">Correo de acceso *</label>
+                <input
+                  id="correo"
+                  name="correo"
+                  type="email"
+                  placeholder="persona@gmail.com"
+                  required
+                />
+              </div>
+
+              <div class="campo-formulario">
+                <label for="rol">Rol *</label>
+                <select id="rol" name="rol" required>
+                  <option value="">Seleccionar rol</option>
+                  <option value="ALUMNO">ALUMNO</option>
+                  <option value="DOCENTE">DOCENTE</option>
+                  <option value="SOPORTE">SOPORTE</option>
+                </select>
+              </div>
+
+              <div class="campo-formulario">
+                <label for="tipoVinculo">Tipo de vínculo</label>
+                <select id="tipoVinculo" name="tipoVinculo">
+                  <option value="">Seleccionar</option>
+                  <option value="ALUMNO">Alumno/a</option>
+                  <option value="DOCENTE">Docente</option>
+                  <option value="SUPLENTE">Docente suplente</option>
+                  <option value="REEMPLAZANTE">Docente reemplazante</option>
+                  <option value="SOPORTE">Soporte</option>
+                </select>
+              </div>
+
+              <div class="campo-formulario">
+                <label for="fechaFinAcceso">Fecha de finalización</label>
+                <input id="fechaFinAcceso" name="fechaFinAcceso" type="date" />
+              </div>
+            </div>
+
+            <div class="acciones">
+              <button class="btn-accion" id="btnRegistrarUsuario" type="submit">
+                <i class="fa-solid fa-user-plus"></i>
+                Registrar usuario
+              </button>
+            </div>
+
+            <p id="mensajeRegistroUsuario" class="mensaje-formulario"></p>
+          </form>
+
+          <div class="separador-usuarios"></div>
+
+          <div class="encabezado-listado">
+            <div>
+              <h3>Usuarios registrados</h3>
+              <p>Consultá las cuentas autorizadas actualmente.</p>
+            </div>
+
+            <button class="btn-accion" id="btnVerUsuarios" type="button">
               <i class="fa-solid fa-users"></i>
               Ver usuarios
             </button>
           </div>
+
+          <div class="tabla-contenedor">
+            <table class="tabla-usuarios">
+              <thead>
+                <tr>
+                  <th>Nombre completo</th>
+                  <th>Correo</th>
+                  <th>Rol</th>
+                  <th>Estado</th>
+                  <th>Vínculo</th>
+                </tr>
+              </thead>
+
+              <tbody id="cuerpoTablaUsuarios"></tbody>
+            </table>
+          </div>
+
+          <p id="mensajeUsuarios" class="mensaje-formulario"></p>
         </div>
 
         <a class="btn-volver" href="#inicio">
@@ -292,6 +378,7 @@
     </button>
 
     <script type="module" src="../assets/js/proteger-portal.js"></script>
+    <script type="module" src="../assets/js/admin.js"></script>
 
     <script>
       const btnArriba = document.getElementById("btnArriba");
