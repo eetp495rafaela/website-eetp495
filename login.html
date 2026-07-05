@@ -46,36 +46,22 @@
 
           <h2>Portal Institucional</h2>
 
-          <form>
-            <div class="campo">
-              <i class="fa-regular fa-user"></i>
+          <div class="login-acceso">
+            <p class="texto-acceso">
+              Ingresá con tu cuenta institucional o cuenta autorizada.
+            </p>
 
-              <input
-                type="text"
-                id="usuario"
-                placeholder="Usuario"
-                autocomplete="username"
-              />
-            </div>
+            <button type="button" class="btn-ingresar" id="btnGoogle">
+              <i class="fa-brands fa-google"></i>
+              Ingresar con Google
+            </button>
 
-            <div class="campo">
-              <i class="fa-solid fa-lock"></i>
-
-              <input
-                type="password"
-                id="password"
-                placeholder="Contraseña"
-                autocomplete="current-password"
-              />
-            </div>
-
-            <button type="submit" class="btn-ingresar">Ingresar</button>
             <p class="mensaje-login"></p>
-          </form>
+          </div>
         </div>
       </div>
     </main>
 
-    <script src="assets/js/portal.js"></script>
+    <script type="module" src="assets/js/firebase-auth.js"></script>
   </body>
 </html>

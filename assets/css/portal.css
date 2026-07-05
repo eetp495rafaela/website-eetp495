@@ -278,3 +278,150 @@ MENSAJES LOGIN
 
   font-weight: 600;
 }
+/* =====================================================
+   RESPONSIVE - PORTAL INSTITUCIONAL
+===================================================== */
+
+@media (max-width: 768px) {
+  body {
+    overflow-x: hidden;
+  }
+
+  .portal {
+    min-height: 100svh;
+    padding: 24px 16px;
+  }
+
+  .circulo {
+    width: 100%;
+    max-width: 460px;
+    height: auto;
+    min-height: 0;
+
+    border-radius: 28px;
+
+    padding: 42px 24px;
+
+    box-shadow:
+      0 0 45px rgba(0, 0, 0, 0.3),
+      inset 0 0 30px rgba(255, 255, 255, 0.04);
+  }
+
+  /* En celular ocultamos el reloj para priorizar
+     comodidad, legibilidad y espacio del formulario */
+  .reloj {
+    display: none;
+  }
+
+  .login {
+    width: 100%;
+    max-width: 340px;
+  }
+
+  .logo-contenedor {
+    width: 140px;
+    height: 140px;
+    margin-bottom: 18px;
+  }
+
+  .logo {
+    width: 82px;
+  }
+
+  .login h1 {
+    font-size: 1.75rem;
+    line-height: 1.2;
+  }
+
+  .login h2 {
+    font-size: 0.98rem;
+    margin-top: 8px;
+    margin-bottom: 28px;
+  }
+
+  .campo {
+    padding: 14px 16px;
+    margin-bottom: 15px;
+  }
+
+  .campo input {
+    font-size: 1rem;
+  }
+
+  .btn-ingresar {
+    height: 52px;
+    margin-top: 8px;
+  }
+
+  .mensaje-login {
+    margin-top: 16px;
+    font-size: 0.9rem;
+  }
+}
+
+/* =====================================================
+   CELULARES PEQUEÑOS
+===================================================== */
+
+@media (max-width: 420px) {
+  .portal {
+    padding: 16px 12px;
+  }
+
+  .circulo {
+    border-radius: 24px;
+    padding: 34px 20px;
+  }
+
+  .logo-contenedor {
+    width: 120px;
+    height: 120px;
+    margin-bottom: 16px;
+  }
+
+  .logo {
+    width: 72px;
+  }
+
+  .login h1 {
+    font-size: 1.55rem;
+  }
+
+  .login h2 {
+    font-size: 0.92rem;
+    margin-bottom: 24px;
+  }
+
+  .campo {
+    padding: 13px 14px;
+  }
+
+  .btn-ingresar {
+    height: 50px;
+  }
+}
+/* =====================================================
+   VOLVER AL SITIO PÚBLICO
+===================================================== */
+
+.btn-volver-sitio {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+
+  margin-top: 18px;
+
+  color: #e8f1ff;
+  text-decoration: none;
+
+  font-size: 0.92rem;
+  font-weight: 700;
+
+  transition: 0.25s;
+}
+
+.btn-volver-sitio:hover {
+  color: #ffd54a;
+  transform: translateX(-4px);
+}
