@@ -143,8 +143,9 @@ function crearCeldaEstado(estado) {
     .trim()
     .toUpperCase();
 
-  etiqueta.className =
-    valor === "ACTIVO" ? "estado estado-activo" : "estado estado-inactivo";
+  etiqueta.className = ["ACTIVO", "ACTIVA"].includes(valor)
+    ? "estado estado-activo"
+    : "estado estado-inactivo";
 
   etiqueta.textContent = valor || "SIN ESTADO";
 
@@ -926,6 +927,244 @@ async function prepararFormularioAsignaciones() {
   limpiarSelect(asignacionEspacio, "Seleccioná primero un curso");
 }
 
+function crearIdAsignacion(docenteCorreo, cursoId, espacioId, cicloLectivo) {
+  return [
+    encodeURIComponent(docenteCorreo),
+    cursoId,
+    espacioId,
+    cicloLectivo,
+  ].join("__");
+}
+
+function mostrarMensajeAsignaciones(texto, tipo = "") {
+  if (!mensajeAsignaciones) return;
+
+  mensajeAsignaciones.textContent = texto;
+  mensajeAsignaciones.className = `mensaje-formulario ${tipo}`.trim();
+}
+
+async function registrarAsignacion(event) {
+  event.preventDefault();
+
+  if (!usuarioSoporte) {
+    mostrarMensajeRegistroAsignacion(
+      "Esperando validación de sesión.",
+      "error",
+    );
+    return;
+  }
+
+  const docenteCorreo = normalizarCorreo(asignacionDocente.value);
+  const cursoId = String(asignacionCurso.value || "").trim();
+  const espacioId = String(asignacionEspacio.value || "").trim();
+  const cicloLectivo = Number(asignacionCicloLectivo.value || 0);
+  const estado = String(asignacionEstado.value || "ACTIVA")
+    .trim()
+    .toUpperCase();
+
+  if (!docenteCorreo || !cursoId || !espacioId || !cicloLectivo) {
+    mostrarMensajeRegistroAsignacion(
+      "Completá docente, curso, espacio curricular y ciclo lectivo.",
+      "error",
+    );
+    return;
+  }
+
+  if (cicloLectivo < 2020 || cicloLectivo > 2100) {
+    mostrarMensajeRegistroAsignacion(
+      "Ingresá un ciclo lectivo válido.",
+      "error",
+    );
+    return;
+  }
+
+  btnRegistrarAsignacion.disabled = true;
+  mostrarMensajeRegistroAsignacion("Verificando asignación...");
+
+  try {
+    const [docenteDocumento, cursoDocumento, espacioDocumento] =
+      await Promise.all([
+        getDoc(doc(db, "usuarios", docenteCorreo)),
+        getDoc(doc(db, "cursos", cursoId)),
+        getDoc(doc(db, "espacios_curriculares", espacioId)),
+      ]);
+
+    if (!docenteDocumento.exists()) {
+      throw new Error("El docente seleccionado no existe.");
+    }
+
+    if (!cursoDocumento.exists()) {
+      throw new Error("El curso seleccionado no existe.");
+    }
+
+    if (!espacioDocumento.exists()) {
+      throw new Error("El espacio curricular seleccionado no existe.");
+    }
+
+    const docente = docenteDocumento.data();
+    const curso = cursoDocumento.data();
+    const espacio = espacioDocumento.data();
+
+    const rolDocente = String(docente.rol || "")
+      .trim()
+      .toUpperCase();
+
+    const estadoDocente = String(docente.estado || "")
+      .trim()
+      .toUpperCase();
+
+    if (rolDocente !== "DOCENTE" || estadoDocente !== "ACTIVO") {
+      throw new Error("El usuario seleccionado no es un docente activo.");
+    }
+
+    const estadoCurso = String(curso.estado || "")
+      .trim()
+      .toUpperCase();
+
+    if (estadoCurso !== "ACTIVO") {
+      throw new Error("El curso seleccionado no está activo.");
+    }
+
+    const estadoEspacio = String(espacio.estado || "")
+      .trim()
+      .toUpperCase();
+
+    if (estadoEspacio !== "ACTIVO") {
+      throw new Error("El espacio curricular seleccionado no está activo.");
+    }
+
+    if (Number(espacio.anio) !== Number(curso.anio)) {
+      throw new Error("El espacio curricular no corresponde al año del curso.");
+    }
+
+    const asignacionId = crearIdAsignacion(
+      docenteCorreo,
+      cursoId,
+      espacioId,
+      cicloLectivo,
+    );
+
+    const referenciaAsignacion = doc(db, "asignaciones_docentes", asignacionId);
+
+    const asignacionExistente = await getDoc(referenciaAsignacion);
+
+    if (asignacionExistente.exists()) {
+      mostrarMensajeRegistroAsignacion(
+        "Esta asignación ya está registrada para ese ciclo lectivo.",
+        "error",
+      );
+      return;
+    }
+
+    await setDoc(referenciaAsignacion, {
+      docenteCorreo,
+      docenteNombre: docente.nombreCompleto || docenteCorreo,
+
+      cursoId,
+      cursoNombre: curso.nombre || `${curso.anio}º ${curso.division}`,
+      cursoAnio: Number(curso.anio),
+      cursoDivision: curso.division || "",
+
+      espacioId,
+      espacioNombre: espacio.nombre || "",
+      espacioTipo: espacio.tipo || "",
+
+      cicloLectivo,
+      estado,
+
+      fechaAlta: serverTimestamp(),
+      actualizadoEn: serverTimestamp(),
+      creadoPor: normalizarCorreo(usuarioSoporte.email),
+    });
+
+    formRegistroAsignacion.reset();
+    limpiarSelect(asignacionEspacio, "Seleccioná primero un curso");
+
+    mostrarMensajeRegistroAsignacion(
+      "Asignación docente registrada correctamente.",
+      "ok",
+    );
+
+    await cargarAsignaciones();
+  } catch (error) {
+    console.error("Error al registrar asignación:", error);
+
+    mostrarMensajeRegistroAsignacion(
+      error.message || "No se pudo registrar la asignación.",
+      "error",
+    );
+  } finally {
+    btnRegistrarAsignacion.disabled = false;
+  }
+}
+
+async function cargarAsignaciones() {
+  if (!usuarioSoporte || !cuerpoTablaAsignaciones) {
+    return;
+  }
+
+  mostrarMensajeAsignaciones("Cargando asignaciones...");
+  cuerpoTablaAsignaciones.innerHTML = "";
+
+  try {
+    const consulta = await getDocs(collection(db, "asignaciones_docentes"));
+
+    const asignaciones = consulta.docs
+      .map((documento) => ({
+        id: documento.id,
+        ...documento.data(),
+      }))
+      .sort((a, b) => {
+        const cicloA = Number(a.cicloLectivo || 0);
+        const cicloB = Number(b.cicloLectivo || 0);
+
+        if (cicloA !== cicloB) {
+          return cicloB - cicloA;
+        }
+
+        return String(a.docenteNombre || "").localeCompare(
+          String(b.docenteNombre || ""),
+          "es",
+        );
+      });
+
+    if (!asignaciones.length) {
+      mostrarMensajeAsignaciones("Todavía no hay asignaciones registradas.");
+      return;
+    }
+
+    asignaciones.forEach((asignacion) => {
+      const fila = document.createElement("tr");
+
+      fila.appendChild(crearCelda(asignacion.docenteNombre));
+
+      fila.appendChild(crearCelda(asignacion.cursoNombre));
+
+      fila.appendChild(crearCelda(asignacion.espacioNombre));
+
+      fila.appendChild(crearCelda(textoTipoEspacio(asignacion.espacioTipo)));
+
+      fila.appendChild(crearCelda(asignacion.cicloLectivo));
+
+      fila.appendChild(crearCeldaEstado(asignacion.estado));
+
+      cuerpoTablaAsignaciones.appendChild(fila);
+    });
+
+    mostrarMensajeAsignaciones(
+      `${asignaciones.length} asignación(es) cargada(s).`,
+      "ok",
+    );
+  } catch (error) {
+    console.error("Error al cargar asignaciones:", error);
+
+    mostrarMensajeAsignaciones(
+      "No se pudieron cargar las asignaciones.",
+      "error",
+    );
+  }
+}
+
 async function cargarUsuarios() {
   if (!usuarioSoporte) {
     mostrarMensajeUsuarios("Esperando validación de sesión...", "error");
@@ -1232,6 +1471,14 @@ if (btnVerEspaciosCurriculares) {
 }
 if (asignacionCurso) {
   asignacionCurso.addEventListener("change", cargarEspaciosAsignacion);
+}
+
+if (formRegistroAsignacion) {
+  formRegistroAsignacion.addEventListener("submit", registrarAsignacion);
+}
+
+if (btnVerAsignaciones) {
+  btnVerAsignaciones.addEventListener("click", cargarAsignaciones);
 }
 
 if (btnRegistrarAsignacion) {
