@@ -67,7 +67,38 @@ function mostrarDatosUsuario(perfil, user, correo, rolUsuario) {
     elementoRol.textContent = rolesLegibles[rolUsuario] || rolUsuario;
   }
 }
+const btnCerrarSesionPortal = document.getElementById("btnCerrarSesionPortal");
 
+if (btnCerrarSesionPortal) {
+  btnCerrarSesionPortal.addEventListener("click", async () => {
+    const resultado = await Swal.fire({
+      icon: "question",
+      title: "¿Cerrar sesión?",
+      text: "Vas a salir del Portal Institucional.",
+      showCancelButton: true,
+      confirmButtonText: "Sí, cerrar sesión",
+      cancelButtonText: "Cancelar",
+      reverseButtons: true,
+      focusCancel: true,
+    });
+
+    if (!resultado.isConfirmed) return;
+
+    try {
+      await signOut(auth);
+      window.location.replace("../login.html");
+    } catch (error) {
+      console.error("Error al cerrar sesión:", error);
+
+      Swal.fire({
+        icon: "error",
+        title: "No se pudo cerrar sesión",
+        text: "Intentá nuevamente.",
+        confirmButtonText: "Entendido",
+      });
+    }
+  });
+}
 function accesoVencido(fechaFinAcceso) {
   if (!fechaFinAcceso) {
     return false;
