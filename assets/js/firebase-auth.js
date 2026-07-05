@@ -103,10 +103,28 @@ async function procesarUsuarioAutenticado(user) {
     console.log("Perfil autorizado:", perfil);
 
     mostrarMensaje(
-      `Bienvenido/a, ${perfil.nombreCompleto}. Rol: ${perfil.rol}`,
+      `Bienvenido/a, ${perfil.nombreCompleto}. Ingresando al portal...`,
     );
 
-    boton.disabled = false;
+    setTimeout(() => {
+      if (perfil.rol === "SOPORTE") {
+        window.location.href = "admin/index.html";
+        return;
+      }
+
+      if (perfil.rol === "DOCENTE") {
+        window.location.href = "docentes/index.html";
+        return;
+      }
+
+      if (perfil.rol === "ALUMNO") {
+        window.location.href = "alumnos/index.html";
+        return;
+      }
+
+      mostrarMensaje("Tu cuenta no tiene un portal asignado.");
+      boton.disabled = false;
+    }, 900);
   } catch (error) {
     console.error("Error de autorización:", error);
 
