@@ -730,6 +730,7 @@ async function cargarEspaciosCurriculares() {
     );
   }
 }
+
 function mostrarMensajeRegistroAsignacion(texto, tipo = "") {
   if (!mensajeRegistroAsignacion) return;
 
@@ -862,9 +863,7 @@ async function cargarEspaciosAsignacion() {
 
   const cursoId = String(asignacionCurso?.value || "").trim();
 
-  if (!cursoId) {
-    return;
-  }
+  if (!cursoId) return;
 
   try {
     const cursoDocumento = await getDoc(doc(db, "cursos", cursoId));
@@ -926,6 +925,7 @@ async function prepararFormularioAsignaciones() {
 
   limpiarSelect(asignacionEspacio, "Seleccioná primero un curso");
 }
+
 async function cargarUsuarios() {
   if (!usuarioSoporte) {
     mostrarMensajeUsuarios("Esperando validación de sesión...", "error");
@@ -1324,4 +1324,6 @@ onAuthStateChanged(auth, (user) => {
   if (!user) return;
 
   usuarioSoporte = user;
+
+  prepararFormularioAsignaciones();
 });
