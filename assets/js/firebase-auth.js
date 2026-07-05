@@ -120,7 +120,7 @@ await setPersistence(auth, browserLocalPersistence);
 
 if (boton) {
   boton.addEventListener("click", async () => {
-    mostrarMensaje("Abriendo acceso con Google...");
+    mostrarMensaje("Abriendo el acceso con Google...");
     boton.disabled = true;
 
     try {
@@ -128,7 +128,7 @@ if (boton) {
     } catch (error) {
       console.error("Error Firebase:", error);
 
-      mostrarMensaje(`Error de acceso: ${error.code || "desconocido"}`);
+      mostrarMensaje(`Error de acceso: ${error.code || "Desconocido"}`);
 
       boton.disabled = false;
     }
