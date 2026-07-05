@@ -15,6 +15,10 @@
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
     />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css"
+    />
 
     <link
       href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;600;700;800&display=swap"
@@ -32,9 +36,29 @@
         </div>
       </div>
 
-      <div class="usuario">
-        <i class="fa-solid fa-user"></i>
-        <span>Profesor</span>
+      <div class="acciones-topbar">
+        <div class="usuario usuario-perfil">
+          <i class="fa-solid fa-chalkboard-user"></i>
+
+          <div class="usuario-datos">
+            <span data-nombre-usuario>Cargando usuario...</span>
+            <small data-rol-usuario>Docente</small>
+          </div>
+        </div>
+
+        <a class="btn-sitio-publico" href="../index.html">
+          <i class="fa-solid fa-house"></i>
+          Sitio público
+        </a>
+
+        <button
+          class="btn-cerrar-sesion"
+          id="btnCerrarSesionPortal"
+          type="button"
+        >
+          <i class="fa-solid fa-right-from-bracket"></i>
+          Cerrar sesión
+        </button>
       </div>
     </header>
 
@@ -150,6 +174,7 @@
     <a href="#" class="btn-arriba" id="btnArriba" aria-label="Volver al inicio">
       <i class="fa-solid fa-arrow-up"></i>
     </a>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script type="module" src="../assets/js/proteger-portal.js"></script>
     <script src="../assets/js/volver-arriba.js"></script>
   </body>
