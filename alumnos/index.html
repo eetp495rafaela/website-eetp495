@@ -1,0 +1,232 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>Portal Alumnos | E.E.T.P. Nº 495</title>
+
+    <link rel="stylesheet" href="../assets/css/docentes.css" />
+    <link rel="icon" href="../assets/img/logo.png" />
+
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
+    />
+
+    <link
+      href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+
+    <style>
+      .tarjeta-enlace {
+        text-decoration: none;
+        color: inherit;
+        cursor: pointer;
+      }
+
+      .tarjeta-enlace:hover {
+        text-decoration: none;
+      }
+
+      .seccion-destino {
+        scroll-margin-top: 100px;
+      }
+
+      .acciones {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+      }
+
+      .btn-accion {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        min-width: 220px;
+        padding: 12px 18px;
+        border-radius: 10px;
+        text-decoration: none;
+        font-weight: 700;
+        transition:
+          transform 0.2s ease,
+          opacity 0.2s ease;
+      }
+
+      .btn-accion:hover {
+        transform: translateY(-2px);
+        opacity: 0.92;
+      }
+
+      .btn-volver {
+        margin-top: 22px;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        text-decoration: none;
+        font-weight: 700;
+      }
+
+      @media (max-width: 600px) {
+        .btn-accion {
+          width: 100%;
+        }
+      }
+    </style>
+  </head>
+
+  <body data-rol-permitido="ALUMNO">
+    <header class="topbar">
+      <div class="logo">
+        <img src="../assets/img/logo.png" alt="Logo E.E.T.P. Nº 495" />
+
+        <div>
+          <h1>E.E.T.P. Nº 495</h1>
+          <span>Portal Institucional Alumnos</span>
+        </div>
+      </div>
+
+      <div class="usuario">
+        <i class="fa-solid fa-user-graduate"></i>
+        <span>Estudiante</span>
+      </div>
+    </header>
+
+    <main class="contenedor" id="inicio">
+      <section class="grupo">
+        <h2>Servicios para Estudiantes</h2>
+
+        <div class="grid">
+          <a class="tarjeta tarjeta-enlace" href="#horarios">
+            <i class="fa-solid fa-calendar-days"></i>
+            <h3>Horarios</h3>
+            <p>Consulta los horarios de Aula, Taller y Educación Física.</p>
+          </a>
+
+          <a class="tarjeta tarjeta-enlace" href="#examenes">
+            <i class="fa-solid fa-file-signature"></i>
+            <h3>Inscripción a Exámenes</h3>
+            <p>Accedé al S.I.M.E. para inscribirte a las mesas de exámenes.</p>
+          </a>
+
+          <a class="tarjeta tarjeta-enlace" href="#programas">
+            <i class="fa-solid fa-book-open"></i>
+            <h3>Programas de Examen</h3>
+            <p>Visualizá y descargá los programas de examen vigentes.</p>
+          </a>
+
+          <a class="tarjeta tarjeta-enlace" href="#material">
+            <i class="fa-solid fa-file-pdf"></i>
+            <h3>Material de Estudio</h3>
+            <p>Consultá y descargá material publicado por tus docentes.</p>
+          </a>
+
+          <a class="tarjeta tarjeta-enlace" href="#netbooks">
+            <i class="fa-solid fa-laptop"></i>
+            <h3>Desbloqueo de Netbooks</h3>
+            <p>Accedé al sitio oficial para solicitar códigos de desbloqueo.</p>
+          </a>
+        </div>
+      </section>
+
+      <section class="grupo seccion-destino" id="horarios">
+        <h2>Horarios</h2>
+
+        <div class="acciones">
+          <a class="btn-accion" href="#">
+            <i class="fa-solid fa-school"></i>
+            Horarios de Aula
+          </a>
+
+          <a class="btn-accion" href="#">
+            <i class="fa-solid fa-industry"></i>
+            Horarios de Taller
+          </a>
+
+          <a class="btn-accion" href="#">
+            <i class="fa-solid fa-person-running"></i>
+            Horarios de Educación Física
+          </a>
+        </div>
+
+        <a class="btn-volver" href="#inicio">
+          <i class="fa-solid fa-arrow-up"></i>
+          Volver al inicio
+        </a>
+      </section>
+
+      <section class="grupo seccion-destino" id="examenes">
+        <h2>Inscripción a Exámenes</h2>
+
+        <div class="acciones">
+          <a class="btn-accion" href="#">
+            <i class="fa-solid fa-file-signature"></i>
+            Ingresar a S.I.M.E.
+          </a>
+        </div>
+
+        <a class="btn-volver" href="#inicio">
+          <i class="fa-solid fa-arrow-up"></i>
+          Volver al inicio
+        </a>
+      </section>
+
+      <section class="grupo seccion-destino" id="programas">
+        <h2>Programas de Examen</h2>
+
+        <div class="acciones">
+          <a class="btn-accion" href="#">
+            <i class="fa-solid fa-book-open"></i>
+            Consultar Programas Vigentes
+          </a>
+        </div>
+
+        <a class="btn-volver" href="#inicio">
+          <i class="fa-solid fa-arrow-up"></i>
+          Volver al inicio
+        </a>
+      </section>
+
+      <section class="grupo seccion-destino" id="material">
+        <h2>Material de Estudio</h2>
+
+        <div class="acciones">
+          <a class="btn-accion" href="#">
+            <i class="fa-solid fa-folder-open"></i>
+            Ver Material Disponible
+          </a>
+        </div>
+
+        <a class="btn-volver" href="#inicio">
+          <i class="fa-solid fa-arrow-up"></i>
+          Volver al inicio
+        </a>
+      </section>
+
+      <section class="grupo seccion-destino" id="netbooks">
+        <h2>Desbloqueo de Netbooks</h2>
+
+        <div class="acciones">
+          <a
+            class="btn-accion"
+            href="#"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <i class="fa-solid fa-unlock-keyhole"></i>
+            Solicitar Código de Desbloqueo
+          </a>
+        </div>
+
+        <a class="btn-volver" href="#inicio">
+          <i class="fa-solid fa-arrow-up"></i>
+          Volver al inicio
+        </a>
+      </section>
+    </main>
+
+    <script type="module" src="../assets/js/proteger-portal.js"></script>
+  </body>
+</html>
