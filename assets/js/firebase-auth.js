@@ -50,10 +50,15 @@ if (boton) {
 }
 
 try {
-  await getRedirectResult(auth);
+  const resultado = await getRedirectResult(auth);
+
+  if (resultado?.user) {
+    mostrarMensaje(`Acceso completado: ${resultado.user.email}`);
+  }
 } catch (error) {
-  console.error(error);
-  mostrarMensaje("No fue posible completar el acceso con Google.");
+  console.error("Error Firebase:", error);
+
+  mostrarMensaje(`Error de acceso: ${error.code || "desconocido"}`);
 }
 
 onAuthStateChanged(auth, (user) => {
