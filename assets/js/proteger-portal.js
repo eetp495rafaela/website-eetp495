@@ -47,6 +47,27 @@ function obtenerRolEsperado() {
     .toUpperCase();
 }
 
+function mostrarDatosUsuario(perfil, user, correo, rolUsuario) {
+  const elementoNombre = document.querySelector("[data-nombre-usuario]");
+  const elementoRol = document.querySelector("[data-rol-usuario]");
+
+  const nombreVisible = perfil.nombreCompleto || user.displayName || correo;
+
+  const rolesLegibles = {
+    ALUMNO: "Estudiante",
+    DOCENTE: "Docente",
+    SOPORTE: "Soporte Institucional",
+  };
+
+  if (elementoNombre) {
+    elementoNombre.textContent = nombreVisible;
+  }
+
+  if (elementoRol) {
+    elementoRol.textContent = rolesLegibles[rolUsuario] || rolUsuario;
+  }
+}
+
 function accesoVencido(fechaFinAcceso) {
   if (!fechaFinAcceso) {
     return false;
@@ -127,7 +148,7 @@ onAuthStateChanged(auth, async (user) => {
       volverAlLogin("Tu cuenta no tiene permiso para este portal.");
       return;
     }
-
+    mostrarDatosUsuario(perfil, user, correo, rolUsuario);
     console.log("Acceso Autorizado:", {
       correo,
       nombreCompleto: perfil.nombreCompleto || "",

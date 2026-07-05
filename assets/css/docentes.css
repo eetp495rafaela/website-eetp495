@@ -203,3 +203,27 @@ RESPONSIVE
     padding: 30px 20px 60px;
   }
 }
+/* =========================
+   USUARIO AUTENTICADO
+========================= */
+
+.usuario-perfil {
+  text-align: left;
+}
+
+.usuario-datos {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.usuario-datos span {
+  font-weight: 800;
+  line-height: 1.1;
+}
+
+.usuario-datos small {
+  font-size: 0.76rem;
+  font-weight: 600;
+  opacity: 0.82;
+}
