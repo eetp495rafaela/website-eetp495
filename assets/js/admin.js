@@ -40,6 +40,9 @@ const btnRegistrar = document.getElementById("btnRegistrarUsuario");
 const btnVerUsuarios = document.getElementById("btnVerUsuarios");
 const cuerpoTabla = document.getElementById("cuerpoTablaUsuarios");
 const mensajeUsuarios = document.getElementById("mensajeUsuarios");
+const buscarUsuario = document.getElementById("buscarUsuario");
+const filtroRol = document.getElementById("filtroRol");
+const filtroEstado = document.getElementById("filtroEstado");
 const btnCerrarSesion = document.getElementById("btnCerrarSesion");
 const modalEditar = document.getElementById("modalEditarUsuario");
 const formEditar = document.getElementById("formEditarUsuario");
@@ -55,6 +58,7 @@ const btnCancelarEdicion = document.getElementById("btnCancelarEdicion");
 const btnGuardarEdicion = document.getElementById("btnGuardarEdicion");
 
 let usuarioSoporte = null;
+let usuariosCargados = [];
 let usuarioEnEdicion = null;
 
 function normalizarCorreo(correo) {
@@ -157,6 +161,69 @@ function crearCeldaAcciones(usuario) {
   return celda;
 }
 
+function renderizarUsuarios(usuarios) {
+  cuerpoTabla.innerHTML = "";
+
+  if (!usuarios.length) {
+    mostrarMensajeUsuarios("No se encontraron usuarios con esos filtros.");
+    return;
+  }
+
+  usuarios.forEach((usuario) => {
+    const fila = document.createElement("tr");
+
+    fila.appendChild(crearCelda(usuario.nombreCompleto));
+    fila.appendChild(crearCelda(usuario.correo));
+    fila.appendChild(crearCelda(usuario.rol));
+    fila.appendChild(crearCeldaEstado(usuario.estado));
+    fila.appendChild(crearCelda(usuario.tipoVinculo));
+    fila.appendChild(crearCeldaAcciones(usuario));
+
+    cuerpoTabla.appendChild(fila);
+  });
+
+  mostrarMensajeUsuarios(`${usuarios.length} usuario(s) mostrado(s).`, "ok");
+}
+
+function aplicarFiltrosUsuarios() {
+  const textoBusqueda = String(buscarUsuario?.value || "")
+    .trim()
+    .toLowerCase();
+
+  const rolSeleccionado = String(filtroRol?.value || "")
+    .trim()
+    .toUpperCase();
+
+  const estadoSeleccionado = String(filtroEstado?.value || "")
+    .trim()
+    .toUpperCase();
+
+  const usuariosFiltrados = usuariosCargados.filter((usuario) => {
+    const nombre = String(usuario.nombreCompleto || "").toLowerCase();
+    const correo = String(usuario.correo || "").toLowerCase();
+
+    const rol = String(usuario.rol || "")
+      .trim()
+      .toUpperCase();
+    const estado = String(usuario.estado || "")
+      .trim()
+      .toUpperCase();
+
+    const coincideBusqueda =
+      !textoBusqueda ||
+      nombre.includes(textoBusqueda) ||
+      correo.includes(textoBusqueda);
+
+    const coincideRol = !rolSeleccionado || rol === rolSeleccionado;
+
+    const coincideEstado = !estadoSeleccionado || estado === estadoSeleccionado;
+
+    return coincideBusqueda && coincideRol && coincideEstado;
+  });
+
+  renderizarUsuarios(usuariosFiltrados);
+}
+
 async function cargarUsuarios() {
   if (!usuarioSoporte) {
     mostrarMensajeUsuarios("Esperando validación de sesión...", "error");
@@ -169,7 +236,7 @@ async function cargarUsuarios() {
   try {
     const consulta = await getDocs(collection(db, "usuarios"));
 
-    const usuarios = consulta.docs
+    usuariosCargados = consulta.docs
       .map((documento) => ({
         id: documento.id,
         ...documento.data(),
@@ -181,25 +248,12 @@ async function cargarUsuarios() {
         ),
       );
 
-    if (!usuarios.length) {
+    if (!usuariosCargados.length) {
       mostrarMensajeUsuarios("Todavía no hay usuarios registrados.");
       return;
     }
 
-    usuarios.forEach((usuario) => {
-      const fila = document.createElement("tr");
-
-      fila.appendChild(crearCelda(usuario.nombreCompleto));
-      fila.appendChild(crearCelda(usuario.correo));
-      fila.appendChild(crearCelda(usuario.rol));
-      fila.appendChild(crearCeldaEstado(usuario.estado));
-      fila.appendChild(crearCelda(usuario.tipoVinculo));
-      fila.appendChild(crearCeldaAcciones(usuario));
-
-      cuerpoTabla.appendChild(fila);
-    });
-
-    mostrarMensajeUsuarios(`${usuarios.length} usuario(s) cargado(s).`, "ok");
+    aplicarFiltrosUsuarios();
   } catch (error) {
     console.error("Error al cargar usuarios:", error);
 
@@ -308,11 +362,24 @@ async function cambiarEstadoUsuario(usuario) {
 
   const accion = nuevoEstado === "ACTIVO" ? "activar" : "desactivar";
 
-  const confirmar = window.confirm(
-    `¿Confirmás ${accion} la cuenta de ${usuario.nombreCompleto}?`,
-  );
+  const resultado = await Swal.fire({
+    icon: nuevoEstado === "ACTIVO" ? "question" : "warning",
+    title:
+      nuevoEstado === "ACTIVO" ? "¿Activar cuenta?" : "¿Desactivar cuenta?",
+    html: `
+    <p>Vas a ${accion} la cuenta de:</p>
+    <strong>${usuario.nombreCompleto || correo}</strong>
+    <p style="margin-top: 8px;">${correo}</p>
+  `,
+    showCancelButton: true,
+    confirmButtonText:
+      nuevoEstado === "ACTIVO" ? "Sí, activar" : "Sí, desactivar",
+    cancelButtonText: "Cancelar",
+    reverseButtons: true,
+    focusCancel: true,
+  });
 
-  if (!confirmar) return;
+  if (!resultado.isConfirmed) return;
 
   try {
     await updateDoc(doc(db, "usuarios", correo), {
@@ -451,7 +518,17 @@ async function guardarEdicionUsuario(event) {
 if (formulario) {
   formulario.addEventListener("submit", registrarUsuario);
 }
+if (buscarUsuario) {
+  buscarUsuario.addEventListener("input", aplicarFiltrosUsuarios);
+}
 
+if (filtroRol) {
+  filtroRol.addEventListener("change", aplicarFiltrosUsuarios);
+}
+
+if (filtroEstado) {
+  filtroEstado.addEventListener("change", aplicarFiltrosUsuarios);
+}
 if (btnVerUsuarios) {
   btnVerUsuarios.addEventListener("click", cargarUsuarios);
 }

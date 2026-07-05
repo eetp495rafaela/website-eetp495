@@ -196,7 +196,42 @@
               Ver usuarios
             </button>
           </div>
+          <div class="filtros-usuarios">
+            <div class="campo-filtro campo-busqueda">
+              <label for="buscarUsuario">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                Buscar usuario
+              </label>
 
+              <input
+                id="buscarUsuario"
+                type="search"
+                placeholder="Nombre o correo..."
+                autocomplete="off"
+              />
+            </div>
+
+            <div class="campo-filtro">
+              <label for="filtroRol">Rol</label>
+
+              <select id="filtroRol">
+                <option value="">Todos los roles</option>
+                <option value="ALUMNO">ALUMNO</option>
+                <option value="DOCENTE">DOCENTE</option>
+                <option value="SOPORTE">SOPORTE</option>
+              </select>
+            </div>
+
+            <div class="campo-filtro">
+              <label for="filtroEstado">Estado</label>
+
+              <select id="filtroEstado">
+                <option value="">Todos los estados</option>
+                <option value="ACTIVO">ACTIVO</option>
+                <option value="INACTIVO">INACTIVO</option>
+              </select>
+            </div>
+          </div>
           <div class="tabla-contenedor">
             <table class="tabla-usuarios">
               <thead>
