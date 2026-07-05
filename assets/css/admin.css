@@ -559,3 +559,47 @@ body {
     width: 100%;
   }
 }
+/* =========================
+   ACCIONES DE USUARIOS
+========================= */
+
+.acciones-tabla {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.btn-tabla {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+
+  min-height: 34px;
+  padding: 7px 10px;
+  border: 0;
+  border-radius: 8px;
+
+  color: #fff;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.78rem;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.btn-editar {
+  background: #0b4f9c;
+}
+
+.btn-activar {
+  background: #14804a;
+}
+
+.btn-desactivar {
+  background: #b42318;
+}
+
+.btn-tabla:hover {
+  filter: brightness(0.92);
+}
