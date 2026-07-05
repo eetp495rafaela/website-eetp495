@@ -985,3 +985,12 @@ body.modal-abierto {
   font-weight: 600;
   opacity: 0.82;
 }
+.panel-asignaciones {
+  margin-top: 28px;
+}
+
+.panel-asignaciones h3 {
+  color: var(--azul-oscuro);
+  font-size: 1.18rem;
+  font-weight: 800;
+}

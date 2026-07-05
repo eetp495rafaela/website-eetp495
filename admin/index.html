@@ -432,7 +432,115 @@
 
           <p id="mensajeCursos" class="mensaje-formulario"></p>
         </div>
+        <div class="panel-info panel-asignaciones">
+          <h3>Asignaciones Docentes</h3>
 
+          <p>
+            Vinculá cada docente con el curso, espacio curricular y ciclo
+            lectivo correspondiente.
+          </p>
+
+          <form
+            id="formRegistroAsignacion"
+            class="formulario-usuario"
+            autocomplete="off"
+          >
+            <div class="form-grid">
+              <div class="campo-formulario campo-doble">
+                <label for="asignacionDocente">Docente *</label>
+
+                <select id="asignacionDocente" name="docente" required>
+                  <option value="">Cargando docentes...</option>
+                </select>
+              </div>
+
+              <div class="campo-formulario">
+                <label for="asignacionCurso">Curso *</label>
+
+                <select id="asignacionCurso" name="curso" required>
+                  <option value="">Cargando cursos...</option>
+                </select>
+              </div>
+
+              <div class="campo-formulario">
+                <label for="asignacionEspacio">Espacio curricular *</label>
+
+                <select id="asignacionEspacio" name="espacio" required>
+                  <option value="">Seleccioná primero un curso</option>
+                </select>
+              </div>
+
+              <div class="campo-formulario">
+                <label for="asignacionCicloLectivo">Ciclo lectivo *</label>
+
+                <input
+                  id="asignacionCicloLectivo"
+                  name="cicloLectivo"
+                  type="number"
+                  min="2020"
+                  max="2100"
+                  value="2026"
+                  required
+                />
+              </div>
+
+              <div class="campo-formulario">
+                <label for="asignacionEstado">Estado</label>
+
+                <select id="asignacionEstado" name="estado">
+                  <option value="ACTIVA" selected>ACTIVA</option>
+                  <option value="INACTIVA">INACTIVA</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="acciones">
+              <button
+                class="btn-accion"
+                id="btnRegistrarAsignacion"
+                type="submit"
+              >
+                <i class="fa-solid fa-link"></i>
+                Registrar asignación
+              </button>
+            </div>
+
+            <p id="mensajeRegistroAsignacion" class="mensaje-formulario"></p>
+          </form>
+
+          <div class="separador-usuarios"></div>
+
+          <div class="encabezado-listado">
+            <div>
+              <h3>Asignaciones registradas</h3>
+              <p>Relación entre docentes, cursos y espacios curriculares.</p>
+            </div>
+
+            <button class="btn-accion" id="btnVerAsignaciones" type="button">
+              <i class="fa-solid fa-list"></i>
+              Ver asignaciones
+            </button>
+          </div>
+
+          <div class="tabla-contenedor">
+            <table class="tabla-usuarios">
+              <thead>
+                <tr>
+                  <th>Docente</th>
+                  <th>Curso</th>
+                  <th>Espacio curricular</th>
+                  <th>Tipo</th>
+                  <th>Ciclo lectivo</th>
+                  <th>Estado</th>
+                </tr>
+              </thead>
+
+              <tbody id="cuerpoTablaAsignaciones"></tbody>
+            </table>
+          </div>
+
+          <p id="mensajeAsignaciones" class="mensaje-formulario"></p>
+        </div>
         <a class="btn-volver" href="#inicio">
           <i class="fa-solid fa-arrow-up"></i>
           Volver al inicio

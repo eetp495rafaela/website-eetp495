@@ -70,6 +70,37 @@ const mensajeImportacionPlan = document.getElementById(
 const mensajeEspaciosCurriculares = document.getElementById(
   "mensajeEspaciosCurriculares",
 );
+const formRegistroAsignacion = document.getElementById(
+  "formRegistroAsignacion",
+);
+
+const asignacionDocente = document.getElementById("asignacionDocente");
+
+const asignacionCurso = document.getElementById("asignacionCurso");
+
+const asignacionEspacio = document.getElementById("asignacionEspacio");
+
+const asignacionCicloLectivo = document.getElementById(
+  "asignacionCicloLectivo",
+);
+
+const asignacionEstado = document.getElementById("asignacionEstado");
+
+const btnRegistrarAsignacion = document.getElementById(
+  "btnRegistrarAsignacion",
+);
+
+const btnVerAsignaciones = document.getElementById("btnVerAsignaciones");
+
+const cuerpoTablaAsignaciones = document.getElementById(
+  "cuerpoTablaAsignaciones",
+);
+
+const mensajeRegistroAsignacion = document.getElementById(
+  "mensajeRegistroAsignacion",
+);
+
+const mensajeAsignaciones = document.getElementById("mensajeAsignaciones");
 const btnCerrarSesion = document.getElementById("btnCerrarSesion");
 const modalEditar = document.getElementById("modalEditarUsuario");
 const formEditar = document.getElementById("formEditarUsuario");
@@ -709,7 +740,202 @@ async function cargarEspaciosCurriculares() {
     );
   }
 }
+function mostrarMensajeRegistroAsignacion(texto, tipo = "") {
+  if (!mensajeRegistroAsignacion) return;
 
+  mensajeRegistroAsignacion.textContent = texto;
+  mensajeRegistroAsignacion.className = `mensaje-formulario ${tipo}`.trim();
+}
+
+function limpiarSelect(select, textoInicial) {
+  if (!select) return;
+
+  select.innerHTML = "";
+
+  const opcionInicial = document.createElement("option");
+  opcionInicial.value = "";
+  opcionInicial.textContent = textoInicial;
+
+  select.appendChild(opcionInicial);
+}
+
+function agregarOpcion(select, valor, texto) {
+  const opcion = document.createElement("option");
+
+  opcion.value = valor;
+  opcion.textContent = texto;
+
+  select.appendChild(opcion);
+}
+
+async function cargarDocentesAsignacion() {
+  if (!asignacionDocente || !usuarioSoporte) return;
+
+  limpiarSelect(asignacionDocente, "Seleccionar docente");
+
+  try {
+    const consulta = await getDocs(collection(db, "usuarios"));
+
+    const docentes = consulta.docs
+      .map((documento) => documento.data())
+      .filter((usuario) => {
+        const rol = String(usuario.rol || "")
+          .trim()
+          .toUpperCase();
+        const estado = String(usuario.estado || "")
+          .trim()
+          .toUpperCase();
+
+        return rol === "DOCENTE" && estado === "ACTIVO";
+      })
+      .sort((a, b) =>
+        String(a.nombreCompleto || "").localeCompare(
+          String(b.nombreCompleto || ""),
+          "es",
+        ),
+      );
+
+    if (!docentes.length) {
+      limpiarSelect(asignacionDocente, "No hay docentes activos registrados");
+      return;
+    }
+
+    docentes.forEach((docente) => {
+      agregarOpcion(
+        asignacionDocente,
+        normalizarCorreo(docente.correo),
+        `${docente.nombreCompleto} — ${docente.correo}`,
+      );
+    });
+  } catch (error) {
+    console.error("Error al cargar docentes:", error);
+
+    limpiarSelect(asignacionDocente, "No se pudieron cargar docentes");
+  }
+}
+
+async function cargarCursosAsignacion() {
+  if (!asignacionCurso || !usuarioSoporte) return;
+
+  limpiarSelect(asignacionCurso, "Seleccionar curso");
+
+  try {
+    const consulta = await getDocs(collection(db, "cursos"));
+
+    const cursos = consulta.docs
+      .map((documento) => ({
+        id: documento.id,
+        ...documento.data(),
+      }))
+      .filter(
+        (curso) =>
+          String(curso.estado || "")
+            .trim()
+            .toUpperCase() === "ACTIVO",
+      )
+      .sort((a, b) => {
+        const diferenciaAnio = Number(a.anio || 0) - Number(b.anio || 0);
+
+        if (diferenciaAnio !== 0) {
+          return diferenciaAnio;
+        }
+
+        return String(a.division || "").localeCompare(
+          String(b.division || ""),
+          "es",
+        );
+      });
+
+    if (!cursos.length) {
+      limpiarSelect(asignacionCurso, "No hay cursos activos registrados");
+      return;
+    }
+
+    cursos.forEach((curso) => {
+      agregarOpcion(
+        asignacionCurso,
+        curso.id,
+        curso.nombre || `${curso.anio}º ${curso.division}`,
+      );
+    });
+  } catch (error) {
+    console.error("Error al cargar cursos para asignación:", error);
+
+    limpiarSelect(asignacionCurso, "No se pudieron cargar cursos");
+  }
+}
+
+async function cargarEspaciosAsignacion() {
+  if (!asignacionEspacio) return;
+
+  limpiarSelect(asignacionEspacio, "Seleccioná primero un curso");
+
+  const cursoId = String(asignacionCurso?.value || "").trim();
+
+  if (!cursoId) {
+    return;
+  }
+
+  try {
+    const cursoDocumento = await getDoc(doc(db, "cursos", cursoId));
+
+    if (!cursoDocumento.exists()) {
+      limpiarSelect(asignacionEspacio, "Curso no encontrado");
+      return;
+    }
+
+    const curso = cursoDocumento.data();
+    const anioCurso = Number(curso.anio || 0);
+
+    if (!anioCurso) {
+      limpiarSelect(asignacionEspacio, "Curso sin año válido");
+      return;
+    }
+
+    const consulta = await getDocs(collection(db, "espacios_curriculares"));
+
+    const espacios = consulta.docs
+      .map((documento) => ({
+        id: documento.id,
+        ...documento.data(),
+      }))
+      .filter((espacio) => {
+        const estado = String(espacio.estado || "")
+          .trim()
+          .toUpperCase();
+
+        return Number(espacio.anio) === anioCurso && estado === "ACTIVO";
+      })
+      .sort((a, b) =>
+        String(a.nombre || "").localeCompare(String(b.nombre || ""), "es"),
+      );
+
+    if (!espacios.length) {
+      limpiarSelect(asignacionEspacio, "No hay espacios activos para este año");
+      return;
+    }
+
+    limpiarSelect(asignacionEspacio, "Seleccionar espacio curricular");
+
+    espacios.forEach((espacio) => {
+      agregarOpcion(
+        asignacionEspacio,
+        espacio.id,
+        `${espacio.nombre} (${textoTipoEspacio(espacio.tipo)})`,
+      );
+    });
+  } catch (error) {
+    console.error("Error al cargar espacios para asignación:", error);
+
+    limpiarSelect(asignacionEspacio, "No se pudieron cargar los espacios");
+  }
+}
+
+async function prepararFormularioAsignaciones() {
+  await Promise.all([cargarDocentesAsignacion(), cargarCursosAsignacion()]);
+
+  limpiarSelect(asignacionEspacio, "Seleccioná primero un curso");
+}
 async function cargarUsuarios() {
   if (!usuarioSoporte) {
     mostrarMensajeUsuarios("Esperando validación de sesión...", "error");
@@ -1013,6 +1239,13 @@ if (btnVerEspaciosCurriculares) {
     "click",
     cargarEspaciosCurriculares,
   );
+}
+if (asignacionCurso) {
+  asignacionCurso.addEventListener("change", cargarEspaciosAsignacion);
+}
+
+if (btnRegistrarAsignacion) {
+  prepararFormularioAsignaciones();
 }
 if (cursoAnio) {
   cursoAnio.addEventListener("input", actualizarNombreCurso);
