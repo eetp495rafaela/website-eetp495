@@ -2,53 +2,310 @@
 <html lang="es">
   <head>
     <meta charset="UTF-8" />
-
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-    <title>Portal Institucional</title>
+    <title>Panel de Soporte | E.E.T.P. Nº 495</title>
 
-    <style>
-      * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-        font-family: "Nunito Sans", sans-serif;
-      }
+    <link rel="stylesheet" href="../assets/css/admin.css" />
+    <link rel="icon" href="../assets/img/logo.png" />
 
-      body {
-        background: #0b2f5b;
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
+    />
 
-        color: white;
-
-        display: flex;
-
-        justify-content: center;
-
-        align-items: center;
-
-        height: 100vh;
-      }
-
-      h1 {
-        font-size: 3rem;
-      }
-
-      p {
-        margin-top: 20px;
-
-        font-size: 1.2rem;
-
-        text-align: center;
-      }
-    </style>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;600;700;800&display=swap"
+      rel="stylesheet"
+    />
   </head>
 
   <body data-rol-permitido="SOPORTE">
-    <div>
-      <h1>Portal Institucional</h1>
+    <header class="topbar">
+      <div class="logo">
+        <img src="../assets/img/logo.png" alt="Logo E.E.T.P. Nº 495" />
 
-      <p>Bienvenido/a</p>
-    </div>
+        <div>
+          <h1>E.E.T.P. Nº 495</h1>
+          <span>Panel Institucional de Soporte</span>
+        </div>
+      </div>
+
+      <div class="usuario">
+        <i class="fa-solid fa-shield-halved"></i>
+        <span>Soporte Institucional</span>
+      </div>
+    </header>
+
+    <main class="contenedor" id="inicio">
+      <section class="grupo">
+        <h2>Administración del Portal</h2>
+
+        <div class="grid">
+          <a class="tarjeta tarjeta-enlace" href="#usuarios">
+            <i class="fa-solid fa-users-gear"></i>
+            <h3>Usuarios</h3>
+            <p>Alta, edición, activación y desactivación de cuentas.</p>
+          </a>
+
+          <a class="tarjeta tarjeta-enlace" href="#roles">
+            <i class="fa-solid fa-user-shield"></i>
+            <h3>Roles y Accesos</h3>
+            <p>Asignación de permisos para alumnos, docentes y soporte.</p>
+          </a>
+
+          <a class="tarjeta tarjeta-enlace" href="#docentes-cursos">
+            <i class="fa-solid fa-chalkboard-user"></i>
+            <h3>Docentes y Cursos</h3>
+            <p>Vinculación de docentes, materias, talleres y cursos.</p>
+          </a>
+
+          <a class="tarjeta tarjeta-enlace" href="#estudiantes">
+            <i class="fa-solid fa-user-graduate"></i>
+            <h3>Estudiantes</h3>
+            <p>Consulta y administración de información estudiantil.</p>
+          </a>
+
+          <a class="tarjeta tarjeta-enlace" href="#material">
+            <i class="fa-solid fa-file-pdf"></i>
+            <h3>Material de Estudio</h3>
+            <p>Revisión de archivos publicados para estudiantes.</p>
+          </a>
+
+          <a class="tarjeta tarjeta-enlace" href="#programas">
+            <i class="fa-solid fa-book-open"></i>
+            <h3>Programas de Examen</h3>
+            <p>Administración de programas vigentes por materia.</p>
+          </a>
+
+          <a class="tarjeta tarjeta-enlace" href="#configuracion">
+            <i class="fa-solid fa-gears"></i>
+            <h3>Configuración</h3>
+            <p>Enlaces generales, avisos y parámetros del portal.</p>
+          </a>
+
+          <a class="tarjeta tarjeta-enlace" href="#accesos">
+            <i class="fa-solid fa-clock-rotate-left"></i>
+            <h3>Accesos Recientes</h3>
+            <p>Consulta de ingresos y actividad general del sistema.</p>
+          </a>
+        </div>
+      </section>
+
+      <section class="grupo seccion-destino" id="usuarios">
+        <h2>Usuarios</h2>
+
+        <div class="panel-info">
+          <p>
+            Desde esta sección se administrarán las cuentas autorizadas para
+            ingresar al Portal Institucional.
+          </p>
+
+          <div class="acciones">
+            <button class="btn-accion" type="button">
+              <i class="fa-solid fa-user-plus"></i>
+              Registrar usuario
+            </button>
+
+            <button class="btn-accion" type="button">
+              <i class="fa-solid fa-users"></i>
+              Ver usuarios
+            </button>
+          </div>
+        </div>
+
+        <a class="btn-volver" href="#inicio">
+          <i class="fa-solid fa-arrow-up"></i>
+          Volver al inicio
+        </a>
+      </section>
+
+      <section class="grupo seccion-destino" id="roles">
+        <h2>Roles y Accesos</h2>
+
+        <div class="panel-info">
+          <p>
+            Aquí se definirán los permisos de cada persona: ALUMNO, DOCENTE o
+            SOPORTE.
+          </p>
+
+          <div class="acciones">
+            <button class="btn-accion" type="button">
+              <i class="fa-solid fa-user-tag"></i>
+              Gestionar roles
+            </button>
+          </div>
+        </div>
+
+        <a class="btn-volver" href="#inicio">
+          <i class="fa-solid fa-arrow-up"></i>
+          Volver al inicio
+        </a>
+      </section>
+
+      <section class="grupo seccion-destino" id="docentes-cursos">
+        <h2>Docentes y Cursos</h2>
+
+        <div class="panel-info">
+          <p>
+            Permitirá relacionar docentes con materias, cursos, talleres y
+            espacios institucionales.
+          </p>
+
+          <div class="acciones">
+            <button class="btn-accion" type="button">
+              <i class="fa-solid fa-link"></i>
+              Gestionar asignaciones
+            </button>
+          </div>
+        </div>
+
+        <a class="btn-volver" href="#inicio">
+          <i class="fa-solid fa-arrow-up"></i>
+          Volver al inicio
+        </a>
+      </section>
+
+      <section class="grupo seccion-destino" id="estudiantes">
+        <h2>Estudiantes</h2>
+
+        <div class="panel-info">
+          <p>
+            Más adelante permitirá consultar y organizar estudiantes por curso,
+            división y ciclo lectivo.
+          </p>
+
+          <div class="acciones">
+            <button class="btn-accion" type="button">
+              <i class="fa-solid fa-users-viewfinder"></i>
+              Consultar estudiantes
+            </button>
+          </div>
+        </div>
+
+        <a class="btn-volver" href="#inicio">
+          <i class="fa-solid fa-arrow-up"></i>
+          Volver al inicio
+        </a>
+      </section>
+
+      <section class="grupo seccion-destino" id="material">
+        <h2>Material de Estudio</h2>
+
+        <div class="panel-info">
+          <p>
+            Espacio para revisar, ordenar y administrar los archivos PDF
+            publicados por docentes.
+          </p>
+
+          <div class="acciones">
+            <button class="btn-accion" type="button">
+              <i class="fa-solid fa-folder-open"></i>
+              Ver materiales
+            </button>
+          </div>
+        </div>
+
+        <a class="btn-volver" href="#inicio">
+          <i class="fa-solid fa-arrow-up"></i>
+          Volver al inicio
+        </a>
+      </section>
+
+      <section class="grupo seccion-destino" id="programas">
+        <h2>Programas de Examen</h2>
+
+        <div class="panel-info">
+          <p>
+            Permitirá controlar los programas disponibles y su vigencia para
+            cada materia.
+          </p>
+
+          <div class="acciones">
+            <button class="btn-accion" type="button">
+              <i class="fa-solid fa-book"></i>
+              Administrar programas
+            </button>
+          </div>
+        </div>
+
+        <a class="btn-volver" href="#inicio">
+          <i class="fa-solid fa-arrow-up"></i>
+          Volver al inicio
+        </a>
+      </section>
+
+      <section class="grupo seccion-destino" id="configuracion">
+        <h2>Configuración del Portal</h2>
+
+        <div class="panel-info">
+          <p>
+            En esta sección se cargarán enlaces institucionales, accesos
+            externos y avisos generales del portal.
+          </p>
+
+          <div class="acciones">
+            <button class="btn-accion" type="button">
+              <i class="fa-solid fa-sliders"></i>
+              Configurar portal
+            </button>
+          </div>
+        </div>
+
+        <a class="btn-volver" href="#inicio">
+          <i class="fa-solid fa-arrow-up"></i>
+          Volver al inicio
+        </a>
+      </section>
+
+      <section class="grupo seccion-destino" id="accesos">
+        <h2>Accesos Recientes</h2>
+
+        <div class="panel-info">
+          <p>
+            Más adelante se podrá consultar la actividad de ingreso de usuarios
+            autorizados.
+          </p>
+
+          <div class="acciones">
+            <button class="btn-accion" type="button">
+              <i class="fa-solid fa-list-check"></i>
+              Ver actividad
+            </button>
+          </div>
+        </div>
+
+        <a class="btn-volver" href="#inicio">
+          <i class="fa-solid fa-arrow-up"></i>
+          Volver al inicio
+        </a>
+      </section>
+    </main>
+
+    <button
+      class="btn-arriba"
+      id="btnArriba"
+      type="button"
+      aria-label="Volver al inicio"
+    >
+      <i class="fa-solid fa-arrow-up"></i>
+    </button>
+
     <script type="module" src="../assets/js/proteger-portal.js"></script>
+
+    <script>
+      const btnArriba = document.getElementById("btnArriba");
+
+      window.addEventListener("scroll", () => {
+        btnArriba.classList.toggle("mostrar", window.scrollY > 300);
+      });
+
+      btnArriba.addEventListener("click", () => {
+        window.scrollTo({
+          top: 0,
+          behavior: "smooth",
+        });
+      });
+    </script>
   </body>
 </html>
