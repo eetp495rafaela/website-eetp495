@@ -820,3 +820,73 @@ body.modal-abierto {
     justify-content: center;
   }
 }
+/* =========================
+   ALERTAS DEL PORTAL
+========================= */
+
+.swal2-popup {
+  border-radius: 18px !important;
+  font-family: "Nunito Sans", sans-serif !important;
+}
+
+.swal2-title {
+  color: var(--azul-oscuro) !important;
+  font-weight: 800 !important;
+}
+
+.swal2-html-container {
+  color: var(--texto-suave) !important;
+  font-size: 0.98rem !important;
+}
+
+.swal2-confirm {
+  border-radius: 10px !important;
+  background: var(--azul-principal) !important;
+  font-family: inherit !important;
+  font-weight: 800 !important;
+}
+
+.swal2-cancel {
+  border-radius: 10px !important;
+  background: #e8eef7 !important;
+  color: var(--azul-oscuro) !important;
+  font-family: inherit !important;
+  font-weight: 800 !important;
+}
+
+.swal2-confirm:focus,
+.swal2-cancel:focus {
+  box-shadow: 0 0 0 3px rgba(11, 79, 156, 0.2) !important;
+}
+.btn-sitio-publico {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+
+  min-height: 42px;
+  padding: 10px 15px;
+  border: 1px solid rgba(255, 255, 255, 0.38);
+  border-radius: 999px;
+
+  color: #fff;
+  background: rgba(255, 255, 255, 0.12);
+  font-size: 0.88rem;
+  font-weight: 800;
+  text-decoration: none;
+
+  transition:
+    background 0.2s ease,
+    transform 0.2s ease;
+}
+
+.btn-sitio-publico:hover {
+  background: rgba(255, 255, 255, 0.24);
+  transform: translateY(-2px);
+}
+
+@media (max-width: 700px) {
+  .btn-sitio-publico {
+    width: 100%;
+  }
+}

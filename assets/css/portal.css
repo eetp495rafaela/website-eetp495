@@ -428,3 +428,27 @@ MENSAJES LOGIN
 .texto-acceso {
   color: #ffffff;
 }
+.volver-sitio-publico {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+
+  margin-top: 18px;
+
+  color: #ffffff;
+  font-size: 0.9rem;
+  font-weight: 700;
+  text-decoration: none;
+
+  opacity: 0.9;
+  transition:
+    opacity 0.2s ease,
+    transform 0.2s ease;
+}
+
+.volver-sitio-publico:hover {
+  color: #ffffff;
+  opacity: 1;
+  transform: translateY(-2px);
+}

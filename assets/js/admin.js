@@ -478,18 +478,32 @@ if (modalEditar) {
 
 if (btnCerrarSesion) {
   btnCerrarSesion.addEventListener("click", async () => {
-    const confirmar = window.confirm(
-      "¿Querés cerrar la sesión del Portal Institucional?",
-    );
+    const resultado = await Swal.fire({
+      icon: "question",
+      title: "¿Cerrar sesión?",
+      text: "Vas a salir del Portal Institucional.",
+      showCancelButton: true,
+      confirmButtonText: "Sí, cerrar sesión",
+      cancelButtonText: "Cancelar",
+      reverseButtons: true,
+      focusCancel: true,
+    });
 
-    if (!confirmar) return;
+    if (!resultado.isConfirmed) return;
 
     try {
       await signOut(auth);
+
       window.location.replace("../login.html");
     } catch (error) {
       console.error("Error al cerrar sesión:", error);
-      alert("No se pudo cerrar la sesión. Intentá nuevamente.");
+
+      Swal.fire({
+        icon: "error",
+        title: "No se pudo cerrar sesión",
+        text: "Intentá nuevamente.",
+        confirmButtonText: "Entendido",
+      });
     }
   });
 }
