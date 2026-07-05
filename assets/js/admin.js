@@ -18,6 +18,7 @@ import {
   getDocs,
   setDoc,
   updateDoc,
+  addDoc,
   serverTimestamp,
 } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
 
@@ -43,6 +44,16 @@ const mensajeUsuarios = document.getElementById("mensajeUsuarios");
 const buscarUsuario = document.getElementById("buscarUsuario");
 const filtroRol = document.getElementById("filtroRol");
 const filtroEstado = document.getElementById("filtroEstado");
+const formRegistroCurso = document.getElementById("formRegistroCurso");
+const cursoAnio = document.getElementById("cursoAnio");
+const cursoDivision = document.getElementById("cursoDivision");
+const cursoNombre = document.getElementById("cursoNombre");
+const cursoEstado = document.getElementById("cursoEstado");
+const btnRegistrarCurso = document.getElementById("btnRegistrarCurso");
+const btnVerCursos = document.getElementById("btnVerCursos");
+const cuerpoTablaCursos = document.getElementById("cuerpoTablaCursos");
+const mensajeRegistroCurso = document.getElementById("mensajeRegistroCurso");
+const mensajeCursos = document.getElementById("mensajeCursos");
 const btnCerrarSesion = document.getElementById("btnCerrarSesion");
 const modalEditar = document.getElementById("modalEditarUsuario");
 const formEditar = document.getElementById("formEditarUsuario");
@@ -222,6 +233,194 @@ function aplicarFiltrosUsuarios() {
   });
 
   renderizarUsuarios(usuariosFiltrados);
+}
+
+function mostrarMensajeCurso(texto, tipo = "") {
+  if (!mensajeRegistroCurso) return;
+
+  mensajeRegistroCurso.textContent = texto;
+  mensajeRegistroCurso.className = `mensaje-formulario ${tipo}`.trim();
+}
+
+function mostrarMensajeListadoCursos(texto, tipo = "") {
+  if (!mensajeCursos) return;
+
+  mensajeCursos.textContent = texto;
+  mensajeCursos.className = `mensaje-formulario ${tipo}`.trim();
+}
+
+function actualizarNombreCurso() {
+  if (!cursoAnio || !cursoDivision || !cursoNombre) return;
+
+  const anio = String(cursoAnio.value || "").trim();
+  const division = String(cursoDivision.value || "")
+    .trim()
+    .toUpperCase();
+
+  cursoDivision.value = division;
+
+  cursoNombre.value = anio && division ? `${anio}º ${division}` : "";
+}
+
+function crearCeldaCurso(texto) {
+  const celda = document.createElement("td");
+  celda.textContent = texto || "-";
+  return celda;
+}
+
+function crearCeldaEstadoCurso(estado) {
+  const celda = document.createElement("td");
+  const etiqueta = document.createElement("span");
+
+  const valor = String(estado || "")
+    .trim()
+    .toUpperCase();
+
+  etiqueta.className =
+    valor === "ACTIVO" ? "estado estado-activo" : "estado estado-inactivo";
+
+  etiqueta.textContent = valor || "SIN ESTADO";
+
+  celda.appendChild(etiqueta);
+
+  return celda;
+}
+
+async function cargarCursos() {
+  if (!usuarioSoporte) {
+    mostrarMensajeListadoCursos("Esperando validación de sesión...", "error");
+    return;
+  }
+
+  if (!cuerpoTablaCursos) return;
+
+  mostrarMensajeListadoCursos("Cargando cursos...");
+  cuerpoTablaCursos.innerHTML = "";
+
+  try {
+    const consulta = await getDocs(collection(db, "cursos"));
+
+    const cursos = consulta.docs
+      .map((documento) => ({
+        id: documento.id,
+        ...documento.data(),
+      }))
+      .sort((a, b) => {
+        const anioA = Number(a.anio || 0);
+        const anioB = Number(b.anio || 0);
+
+        if (anioA !== anioB) {
+          return anioA - anioB;
+        }
+
+        return String(a.division || "").localeCompare(
+          String(b.division || ""),
+          "es",
+        );
+      });
+
+    if (!cursos.length) {
+      mostrarMensajeListadoCursos("Todavía no hay cursos registrados.");
+      return;
+    }
+
+    cursos.forEach((curso) => {
+      const fila = document.createElement("tr");
+
+      fila.appendChild(crearCeldaCurso(curso.nombre));
+      fila.appendChild(crearCeldaCurso(curso.anio));
+      fila.appendChild(crearCeldaCurso(curso.division));
+      fila.appendChild(crearCeldaEstadoCurso(curso.estado));
+
+      cuerpoTablaCursos.appendChild(fila);
+    });
+
+    mostrarMensajeListadoCursos(`${cursos.length} curso(s) cargado(s).`, "ok");
+  } catch (error) {
+    console.error("Error al cargar cursos:", error);
+
+    mostrarMensajeListadoCursos(
+      "No se pudieron cargar los cursos. Revisá permisos o conexión.",
+      "error",
+    );
+  }
+}
+
+async function registrarCurso(event) {
+  event.preventDefault();
+
+  if (!usuarioSoporte) {
+    mostrarMensajeCurso("Esperando validación de sesión.", "error");
+    return;
+  }
+
+  const anio = Number(cursoAnio?.value || 0);
+  const division = String(cursoDivision?.value || "")
+    .trim()
+    .toUpperCase();
+  const nombre = `${anio}º ${division}`;
+  const estado = String(cursoEstado?.value || "ACTIVO")
+    .trim()
+    .toUpperCase();
+
+  if (!anio || !division) {
+    mostrarMensajeCurso("Completá año y división antes de registrar.", "error");
+    return;
+  }
+
+  if (anio < 1 || anio > 7) {
+    mostrarMensajeCurso("El año debe estar entre 1 y 7.", "error");
+    return;
+  }
+
+  btnRegistrarCurso.disabled = true;
+  mostrarMensajeCurso("Verificando curso...");
+
+  try {
+    const consulta = await getDocs(collection(db, "cursos"));
+
+    const existe = consulta.docs.some((documento) => {
+      const datos = documento.data();
+
+      return (
+        Number(datos.anio) === anio &&
+        String(datos.division || "")
+          .trim()
+          .toUpperCase() === division
+      );
+    });
+
+    if (existe) {
+      mostrarMensajeCurso(`El curso ${nombre} ya está registrado.`, "error");
+      return;
+    }
+
+    await addDoc(collection(db, "cursos"), {
+      anio,
+      division,
+      nombre,
+      estado,
+      fechaAlta: serverTimestamp(),
+      actualizadoEn: serverTimestamp(),
+      creadoPor: normalizarCorreo(usuarioSoporte.email),
+    });
+
+    formRegistroCurso.reset();
+    actualizarNombreCurso();
+
+    mostrarMensajeCurso(`Curso ${nombre} registrado correctamente.`, "ok");
+
+    await cargarCursos();
+  } catch (error) {
+    console.error("Error al registrar curso:", error);
+
+    mostrarMensajeCurso(
+      "No se pudo registrar el curso. Revisá permisos o conexión.",
+      "error",
+    );
+  } finally {
+    btnRegistrarCurso.disabled = false;
+  }
 }
 
 async function cargarUsuarios() {
@@ -517,6 +716,22 @@ async function guardarEdicionUsuario(event) {
 
 if (formulario) {
   formulario.addEventListener("submit", registrarUsuario);
+}
+if (cursoAnio) {
+  cursoAnio.addEventListener("input", actualizarNombreCurso);
+}
+
+if (cursoDivision) {
+  cursoDivision.addEventListener("input", actualizarNombreCurso);
+  cursoDivision.addEventListener("blur", actualizarNombreCurso);
+}
+
+if (formRegistroCurso) {
+  formRegistroCurso.addEventListener("submit", registrarCurso);
+}
+
+if (btnVerCursos) {
+  btnVerCursos.addEventListener("click", cargarCursos);
 }
 if (buscarUsuario) {
   buscarUsuario.addEventListener("input", aplicarFiltrosUsuarios);

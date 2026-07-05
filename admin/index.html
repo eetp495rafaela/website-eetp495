@@ -67,12 +67,6 @@
             <p>Alta, edición, activación y desactivación de cuentas.</p>
           </a>
 
-          <a class="tarjeta tarjeta-enlace" href="#roles">
-            <i class="fa-solid fa-user-shield"></i>
-            <h3>Roles y Accesos</h3>
-            <p>Asignación de permisos para alumnos, docentes y soporte.</p>
-          </a>
-
           <a class="tarjeta tarjeta-enlace" href="#docentes-cursos">
             <i class="fa-solid fa-chalkboard-user"></i>
             <h3>Docentes y Cursos</h3>
@@ -261,44 +255,107 @@
         </a>
       </section>
 
-      <section class="grupo seccion-destino" id="roles">
-        <h2>Roles y Accesos</h2>
-
-        <div class="panel-info">
-          <p>
-            Aquí se definirán los permisos de cada persona: ALUMNO, DOCENTE o
-            SOPORTE.
-          </p>
-
-          <div class="acciones">
-            <button class="btn-accion" type="button">
-              <i class="fa-solid fa-user-tag"></i>
-              Gestionar roles
-            </button>
-          </div>
-        </div>
-
-        <a class="btn-volver" href="#inicio">
-          <i class="fa-solid fa-arrow-up"></i>
-          Volver al inicio
-        </a>
-      </section>
-
       <section class="grupo seccion-destino" id="docentes-cursos">
         <h2>Docentes y Cursos</h2>
 
         <div class="panel-info">
           <p>
-            Permitirá relacionar docentes con materias, cursos, talleres y
-            espacios institucionales.
+            Primero cargamos los cursos institucionales. Después los
+            utilizaremos para vincular docentes, materias, talleres y
+            estudiantes.
           </p>
 
-          <div class="acciones">
-            <button class="btn-accion" type="button">
-              <i class="fa-solid fa-link"></i>
-              Gestionar asignaciones
+          <form
+            id="formRegistroCurso"
+            class="formulario-usuario"
+            autocomplete="off"
+          >
+            <div class="form-grid">
+              <div class="campo-formulario">
+                <label for="cursoAnio">Año *</label>
+                <input
+                  id="cursoAnio"
+                  name="anio"
+                  type="number"
+                  min="1"
+                  max="7"
+                  placeholder="Ej.: 3"
+                  required
+                />
+              </div>
+
+              <div class="campo-formulario">
+                <label for="cursoDivision">División *</label>
+                <input
+                  id="cursoDivision"
+                  name="division"
+                  type="text"
+                  maxlength="3"
+                  placeholder="Ej.: A"
+                  required
+                />
+              </div>
+
+              <div class="campo-formulario">
+                <label for="cursoNombre">Nombre del curso</label>
+                <input
+                  id="cursoNombre"
+                  name="nombre"
+                  type="text"
+                  placeholder="Se completará automáticamente"
+                  readonly
+                />
+              </div>
+
+              <div class="campo-formulario">
+                <label for="cursoEstado">Estado</label>
+                <select id="cursoEstado" name="estado">
+                  <option value="ACTIVO" selected>ACTIVO</option>
+                  <option value="INACTIVO">INACTIVO</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="acciones">
+              <button class="btn-accion" id="btnRegistrarCurso" type="submit">
+                <i class="fa-solid fa-school"></i>
+                Registrar curso
+              </button>
+            </div>
+
+            <p id="mensajeRegistroCurso" class="mensaje-formulario"></p>
+          </form>
+
+          <div class="separador-usuarios"></div>
+
+          <div class="encabezado-listado">
+            <div>
+              <h3>Cursos registrados</h3>
+              <p>Listado de cursos disponibles para asignaciones docentes.</p>
+            </div>
+
+            <button class="btn-accion" id="btnVerCursos" type="button">
+              <i class="fa-solid fa-list"></i>
+              Ver cursos
             </button>
           </div>
+
+          <div class="tabla-contenedor">
+            <table class="tabla-usuarios">
+              <thead>
+                <tr>
+                  <th>Curso</th>
+                  <th>Año</th>
+                  <th>División</th>
+                  <th>Estado</th>
+                </tr>
+              </thead>
+
+              <tbody id="cuerpoTablaCursos"></tbody>
+            </table>
+          </div>
+
+          <p id="mensajeCursos" class="mensaje-formulario"></p>
         </div>
 
         <a class="btn-volver" href="#inicio">
