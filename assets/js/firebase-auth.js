@@ -3,8 +3,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/12.15.0/fireba
 import {
   getAuth,
   GoogleAuthProvider,
-  signInWithRedirect,
-  getRedirectResult,
+  signInWithPopup,
   onAuthStateChanged,
   setPersistence,
   browserLocalPersistence,
@@ -36,39 +35,33 @@ await setPersistence(auth, browserLocalPersistence);
 
 if (boton) {
   boton.addEventListener("click", async () => {
-    mostrarMensaje("Redirigiendo a Google...");
+    mostrarMensaje("Abriendo acceso con Google...");
     boton.disabled = true;
 
     try {
-      await signInWithRedirect(auth, provider);
+      const resultado = await signInWithPopup(auth, provider);
+
+      mostrarMensaje(`Acceso completado: ${resultado.user.email}`);
     } catch (error) {
-      console.error(error);
-      mostrarMensaje("No fue posible iniciar sesión con Google.");
+      console.error("Error Firebase:", error);
+
+      mostrarMensaje(`Error de acceso: ${error.code || "desconocido"}`);
+
       boton.disabled = false;
     }
   });
 }
 
-try {
-  const resultado = await getRedirectResult(auth);
-
-  if (resultado?.user) {
-    mostrarMensaje(`Acceso completado: ${resultado.user.email}`);
-  }
-} catch (error) {
-  console.error("Error Firebase:", error);
-
-  mostrarMensaje(`Error de acceso: ${error.code || "desconocido"}`);
-}
-
 onAuthStateChanged(auth, (user) => {
-  if (!user) return;
-
-  mostrarMensaje(`Cuenta detectada: ${user.email}`);
+  if (!user) {
+    return;
+  }
 
   console.log("Usuario Firebase:", {
     uid: user.uid,
     email: user.email,
     displayName: user.displayName,
   });
+
+  mostrarMensaje(`Cuenta detectada: ${user.email}`);
 });
