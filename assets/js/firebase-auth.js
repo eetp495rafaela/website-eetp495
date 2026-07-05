@@ -7,7 +7,14 @@ import {
   onAuthStateChanged,
   setPersistence,
   browserLocalPersistence,
+  signOut,
 } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-auth.js";
+
+import {
+  getFirestore,
+  doc,
+  getDoc,
+} from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyAARktrOpu-Rz683q4RxTK2h1nmkUaUbuA",
@@ -20,6 +27,7 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
+const db = getFirestore(app);
 const provider = new GoogleAuthProvider();
 
 const boton = document.getElementById("btnGoogle");
@@ -31,6 +39,83 @@ function mostrarMensaje(texto) {
   }
 }
 
+function normalizarCorreo(correo) {
+  return String(correo || "")
+    .trim()
+    .toLowerCase();
+}
+
+async function validarPerfilUsuario(user) {
+  const correo = normalizarCorreo(user.email);
+
+  if (!correo) {
+    throw new Error("La cuenta Google no tiene un correo disponible.");
+  }
+
+  const referenciaUsuario = doc(db, "usuarios", correo);
+  const documentoUsuario = await getDoc(referenciaUsuario);
+
+  if (!documentoUsuario.exists()) {
+    await signOut(auth);
+
+    throw new Error(
+      "Tu cuenta Google no está autorizada para usar el Portal Institucional.",
+    );
+  }
+
+  const perfil = documentoUsuario.data();
+  const estado = String(perfil.estado || "")
+    .trim()
+    .toUpperCase();
+  const rol = String(perfil.rol || "")
+    .trim()
+    .toUpperCase();
+
+  if (estado !== "ACTIVO") {
+    await signOut(auth);
+
+    throw new Error(
+      `Tu cuenta no está habilitada. Estado actual: ${estado || "SIN ESTADO"}.`,
+    );
+  }
+
+  if (!["DOCENTE", "ALUMNO", "SOPORTE"].includes(rol)) {
+    await signOut(auth);
+
+    throw new Error("Tu cuenta no tiene un rol válido configurado.");
+  }
+
+  return {
+    correo,
+    nombreCompleto: perfil.nombreCompleto || user.displayName || correo,
+    rol,
+    estado,
+    tipoVinculo: perfil.tipoVinculo || "",
+  };
+}
+
+async function procesarUsuarioAutenticado(user) {
+  mostrarMensaje("Verificando autorización...");
+
+  try {
+    const perfil = await validarPerfilUsuario(user);
+
+    console.log("Perfil autorizado:", perfil);
+
+    mostrarMensaje(
+      `Bienvenido/a, ${perfil.nombreCompleto}. Rol: ${perfil.rol}`,
+    );
+
+    boton.disabled = false;
+  } catch (error) {
+    console.error("Error de autorización:", error);
+
+    mostrarMensaje(`Acceso denegado: ${error.message}`);
+
+    boton.disabled = false;
+  }
+}
+
 await setPersistence(auth, browserLocalPersistence);
 
 if (boton) {
@@ -39,9 +124,7 @@ if (boton) {
     boton.disabled = true;
 
     try {
-      const resultado = await signInWithPopup(auth, provider);
-
-      mostrarMensaje(`Acceso completado: ${resultado.user.email}`);
+      await signInWithPopup(auth, provider);
     } catch (error) {
       console.error("Error Firebase:", error);
 
@@ -52,16 +135,10 @@ if (boton) {
   });
 }
 
-onAuthStateChanged(auth, (user) => {
+onAuthStateChanged(auth, async (user) => {
   if (!user) {
     return;
   }
 
-  console.log("Usuario Firebase:", {
-    uid: user.uid,
-    email: user.email,
-    displayName: user.displayName,
-  });
-
-  mostrarMensaje(`Cuenta detectada: ${user.email}`);
+  await procesarUsuarioAutenticado(user);
 });
