@@ -73,33 +73,23 @@ const mensajeEspaciosCurriculares = document.getElementById(
 const formRegistroAsignacion = document.getElementById(
   "formRegistroAsignacion",
 );
-
 const asignacionDocente = document.getElementById("asignacionDocente");
-
 const asignacionCurso = document.getElementById("asignacionCurso");
-
 const asignacionEspacio = document.getElementById("asignacionEspacio");
-
 const asignacionCicloLectivo = document.getElementById(
   "asignacionCicloLectivo",
 );
-
 const asignacionEstado = document.getElementById("asignacionEstado");
-
 const btnRegistrarAsignacion = document.getElementById(
   "btnRegistrarAsignacion",
 );
-
 const btnVerAsignaciones = document.getElementById("btnVerAsignaciones");
-
 const cuerpoTablaAsignaciones = document.getElementById(
   "cuerpoTablaAsignaciones",
 );
-
 const mensajeRegistroAsignacion = document.getElementById(
   "mensajeRegistroAsignacion",
 );
-
 const mensajeAsignaciones = document.getElementById("mensajeAsignaciones");
 const btnCerrarSesion = document.getElementById("btnCerrarSesion");
 const modalEditar = document.getElementById("modalEditarUsuario");
