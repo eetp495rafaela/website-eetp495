@@ -120,7 +120,7 @@ await setPersistence(auth, browserLocalPersistence);
 
 if (boton) {
   boton.addEventListener("click", async () => {
-    mostrarMensaje("Abriendo el acceso con Google...");
+    mostrarMensaje("Abriendo acceso con Google...");
     boton.disabled = true;
 
     try {
