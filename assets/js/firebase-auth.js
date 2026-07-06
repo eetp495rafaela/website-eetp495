@@ -79,7 +79,16 @@ async function validarPerfilUsuario(user) {
     );
   }
 
-  if (!["DOCENTE", "ALUMNO", "SOPORTE"].includes(rol)) {
+  if (
+    ![
+      "ALUMNO",
+      "DOCENTE",
+      "SOPORTE",
+      "PRECEPTORIA",
+      "SECRETARIA",
+      "DIRECCION",
+    ].includes(rol)
+  ) {
     await signOut(auth);
 
     throw new Error("Tu cuenta no tiene un rol válido configurado.");
