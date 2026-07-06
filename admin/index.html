@@ -157,18 +157,22 @@
                   <option value="ALUMNO">ALUMNO</option>
                   <option value="DOCENTE">DOCENTE</option>
                   <option value="SOPORTE">SOPORTE</option>
+                  <option value="PRECEPTORIA">PRECEPTORÍA</option>
+                  <option value="SECRETARIA">SECRETARÍA</option>
+                  <option value="DIRECCION">DIRECCIÓN</option>
                 </select>
               </div>
 
               <div class="campo-formulario">
-                <label for="tipoVinculo">Tipo de vínculo</label>
-                <select id="tipoVinculo" name="tipoVinculo">
-                  <option value="">Seleccionar</option>
-                  <option value="ALUMNO">Alumno/a</option>
-                  <option value="DOCENTE">Docente</option>
-                  <option value="SUPLENTE">Docente suplente</option>
-                  <option value="REEMPLAZANTE">Docente reemplazante</option>
-                  <option value="SOPORTE">Soporte</option>
+                <label for="tipoVinculo">Situación de Revista *</label>
+
+                <select id="tipoVinculo" name="tipoVinculo" required>
+                  <option value="">Seleccionar situación</option>
+                  <option value="TITULAR">Titular</option>
+                  <option value="INTERINO">Interino/a</option>
+                  <option value="REEMPLAZANTE">Reemplazante</option>
+                  <option value="CURSANDO">Cursando</option>
+                  <option value="CURSADA_COMPLETA">Cursada Completa</option>
                 </select>
               </div>
 
@@ -245,7 +249,7 @@
                   <th>Correo</th>
                   <th>Rol</th>
                   <th>Estado</th>
-                  <th>Vínculo</th>
+                  <th>Situación de Revista</th>
                   <th>Acciones</th>
                 </tr>
               </thead>
@@ -807,18 +811,22 @@
                 <option value="ALUMNO">ALUMNO</option>
                 <option value="DOCENTE">DOCENTE</option>
                 <option value="SOPORTE">SOPORTE</option>
+                <option value="PRECEPTORIA">PRECEPTORÍA</option>
+                <option value="SECRETARIA">SECRETARÍA</option>
+                <option value="DIRECCION">DIRECCIÓN</option>
               </select>
             </div>
 
             <div class="campo-formulario">
-              <label for="editarTipoVinculo">Tipo de vínculo</label>
-              <select id="editarTipoVinculo">
-                <option value="">Seleccionar</option>
-                <option value="ALUMNO">Alumno/a</option>
-                <option value="DOCENTE">Docente</option>
-                <option value="SUPLENTE">Docente suplente</option>
-                <option value="REEMPLAZANTE">Docente reemplazante</option>
-                <option value="SOPORTE">Soporte</option>
+              <label for="editarTipoVinculo">Situación de Revista *</label>
+
+              <select id="editarTipoVinculo" required>
+                <option value="">Seleccionar situación</option>
+                <option value="TITULAR">Titular</option>
+                <option value="INTERINO">Interino/a</option>
+                <option value="REEMPLAZANTE">Reemplazante</option>
+                <option value="CURSANDO">Cursando</option>
+                <option value="CURSADA_COMPLETA">Cursada Completa</option>
               </select>
             </div>
 

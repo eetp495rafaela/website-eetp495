@@ -1664,8 +1664,31 @@ async function registrarUsuario(event) {
     );
     return;
   }
+  const situacionesRevistaValidas = [
+    "TITULAR",
+    "INTERINO",
+    "REEMPLAZANTE",
+    "CURSANDO",
+    "CURSADA_COMPLETA",
+  ];
 
-  if (!["ALUMNO", "DOCENTE", "SOPORTE"].includes(rol)) {
+  if (!situacionesRevistaValidas.includes(tipoVinculo)) {
+    mostrarMensajeRegistro(
+      "Seleccioná una Situación de Revista válida.",
+      "error",
+    );
+    return;
+  }
+  if (
+    ![
+      "ALUMNO",
+      "DOCENTE",
+      "SOPORTE",
+      "PRECEPTORIA",
+      "SECRETARIA",
+      "DIRECCION",
+    ].includes(rol)
+  ) {
     mostrarMensajeRegistro("El rol seleccionado no es válido.", "error");
     return;
   }
@@ -1690,7 +1713,7 @@ async function registrarUsuario(event) {
       nombreCompleto,
       rol,
       estado: "ACTIVO",
-      tipoVinculo: tipoVinculo || rol,
+      tipoVinculo,
       fechaFinAcceso: fechaFinAcceso || null,
       fechaAlta: serverTimestamp(),
       actualizadoEn: serverTimestamp(),
@@ -1843,6 +1866,21 @@ async function guardarEdicionUsuario(event) {
     .trim()
     .toUpperCase();
   const tipoVinculo = editarTipoVinculo.value.trim();
+  const situacionesRevistaValidas = [
+    "TITULAR",
+    "INTERINO",
+    "REEMPLAZANTE",
+    "CURSANDO",
+    "CURSADA_COMPLETA",
+  ];
+
+  if (!situacionesRevistaValidas.includes(tipoVinculo)) {
+    mostrarMensajeEdicion(
+      "Seleccioná una Situación de Revista válida.",
+      "error",
+    );
+    return;
+  }
   const fechaFinAcceso = editarFechaFinAcceso.value.trim();
 
   if (!nombreCompleto || !rol) {
@@ -1850,7 +1888,16 @@ async function guardarEdicionUsuario(event) {
     return;
   }
 
-  if (!["ALUMNO", "DOCENTE", "SOPORTE"].includes(rol)) {
+  if (
+    ![
+      "ALUMNO",
+      "DOCENTE",
+      "SOPORTE",
+      "PRECEPTORIA",
+      "SECRETARIA",
+      "DIRECCION",
+    ].includes(rol)
+  ) {
     mostrarMensajeEdicion("El rol seleccionado no es válido.", "error");
     return;
   }
@@ -1870,7 +1917,7 @@ async function guardarEdicionUsuario(event) {
     await updateDoc(doc(db, "usuarios", correo), {
       nombreCompleto,
       rol,
-      tipoVinculo: tipoVinculo || rol,
+      tipoVinculo,
       fechaFinAcceso: fechaFinAcceso || null,
       actualizadoEn: serverTimestamp(),
       actualizadoPor: correoActual,
