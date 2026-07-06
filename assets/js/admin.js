@@ -2556,6 +2556,76 @@ if (btnImportarCursosAlumnos) {
   });
 }
 
+if (archivoImportacionCursosAlumnos) {
+  archivoImportacionCursosAlumnos.addEventListener("change", async () => {
+    const archivo = archivoImportacionCursosAlumnos.files[0];
+
+    if (!archivo) return;
+
+    if (!window.XLSX) {
+      await Swal.fire({
+        title: "Lector de Excel no disponible",
+        text: "Recargá la página e intentá nuevamente.",
+        icon: "error",
+        confirmButtonText: "Aceptar",
+      });
+
+      archivoImportacionCursosAlumnos.value = "";
+      return;
+    }
+
+    try {
+      const datosArchivo = await archivo.arrayBuffer();
+
+      const libro = XLSX.read(datosArchivo, {
+        type: "array",
+      });
+
+      const nombrePrimeraHoja = libro.SheetNames[0];
+      const hoja = libro.Sheets[nombrePrimeraHoja];
+
+      const filas = XLSX.utils.sheet_to_json(hoja, {
+        defval: "",
+      });
+
+      if (!filas.length) {
+        await Swal.fire({
+          title: "Archivo sin datos",
+          text: "No se encontraron filas con estudiantes en la primera hoja.",
+          icon: "warning",
+          confirmButtonText: "Aceptar",
+        });
+
+        return;
+      }
+
+      console.log("Filas de cursos de alumnos:", filas);
+
+      await Swal.fire({
+        title: "Archivo leído correctamente",
+        html: `
+            <p><strong>Archivo:</strong> ${archivo.name}</p>
+            <p><strong>Filas encontradas:</strong> ${filas.length}</p>
+            <p>En el próximo paso validaremos correo, año, división y grupo.</p>
+          `,
+        icon: "success",
+        confirmButtonText: "Continuar",
+      });
+    } catch (error) {
+      console.error("Error al leer archivo de cursos de alumnos:", error);
+
+      await Swal.fire({
+        title: "No se pudo leer el archivo",
+        text: "Verificá que sea un Excel o CSV válido e intentá nuevamente.",
+        icon: "error",
+        confirmButtonText: "Aceptar",
+      });
+    } finally {
+      archivoImportacionCursosAlumnos.value = "";
+    }
+  });
+}
+
 btnImportarUsuarios.addEventListener("click", () => {
   archivoImportacionUsuarios.click();
 });
