@@ -1482,3 +1482,50 @@ html {
     height: 280px;
   }
 }
+/* =====================================================
+   AJUSTE TABLET - ENCABEZADO SITIO PÚBLICO
+===================================================== */
+
+@media (min-width: 769px) and (max-width: 1100px) {
+  header {
+    padding: 26px 34px;
+  }
+
+  .header-contenido {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 18px 24px;
+    align-items: center;
+  }
+
+  .logo img {
+    width: 115px;
+  }
+
+  .titulo {
+    margin-left: 0;
+  }
+
+  .titulo h1 {
+    font-size: 1.45rem;
+  }
+
+  .titulo h2 {
+    font-size: 2.25rem;
+  }
+
+  .ubicacion {
+    font-size: 0.95rem;
+  }
+
+  .acceso-portal {
+    grid-column: 1 / -1;
+    margin-left: 0;
+    width: 100%;
+  }
+
+  .btn-portal {
+    width: 100%;
+    justify-content: center;
+  }
+}
