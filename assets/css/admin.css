@@ -994,3 +994,115 @@ body.modal-abierto {
   font-size: 1.18rem;
   font-weight: 800;
 }
+/* =====================================================
+   MODAL EDITAR CURSO
+===================================================== */
+
+.modal-edicion {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(3, 8, 18, 0.72);
+  backdrop-filter: blur(5px);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: 0.25s ease;
+  z-index: 9999;
+}
+
+.modal-edicion.mostrar {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+}
+
+.modal-edicion-contenido {
+  width: min(100%, 680px);
+  max-height: calc(100vh - 48px);
+  overflow-y: auto;
+  background: #ffffff;
+  border-radius: 20px;
+  padding: 28px;
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.35);
+  transform: translateY(18px);
+  transition: transform 0.25s ease;
+}
+
+.modal-edicion.mostrar .modal-edicion-contenido {
+  transform: translateY(0);
+}
+
+.modal-edicion-cabecera {
+  display: flex;
+  justify-content: space-between;
+  gap: 18px;
+  align-items: flex-start;
+  margin-bottom: 24px;
+}
+
+.modal-edicion-cabecera h3 {
+  margin: 0 0 6px;
+}
+
+.modal-edicion-cabecera p {
+  margin: 0;
+}
+
+.btn-cerrar-modal {
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  font-size: 1.35rem;
+  line-height: 1;
+}
+
+.formulario-edicion .form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 18px;
+}
+
+.formulario-edicion .campo-formulario {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.formulario-edicion input,
+.formulario-edicion select {
+  width: 100%;
+}
+
+.acciones-modal {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+@media (max-width: 640px) {
+  .modal-edicion {
+    padding: 14px;
+  }
+
+  .modal-edicion-contenido {
+    padding: 22px 18px;
+    max-height: calc(100vh - 28px);
+  }
+
+  .formulario-edicion .form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .acciones-modal {
+    flex-direction: column-reverse;
+  }
+
+  .acciones-modal button {
+    width: 100%;
+  }
+}
