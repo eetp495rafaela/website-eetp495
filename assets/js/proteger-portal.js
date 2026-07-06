@@ -68,6 +68,9 @@ function mostrarDatosUsuario(perfil, user, correo, rolUsuario) {
     ALUMNO: "Estudiante",
     DOCENTE: "Docente",
     SOPORTE: "Soporte Institucional",
+    PRECEPTORIA: "Preceptoría",
+    SECRETARIA: "Secretaría",
+    DIRECCION: "Dirección",
   };
 
   if (elementoNombre) {
