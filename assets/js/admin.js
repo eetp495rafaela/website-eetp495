@@ -2556,6 +2556,94 @@ if (btnImportarCursosAlumnos) {
   });
 }
 
+function validarFilasImportacionCursosAlumnos(filas) {
+  const encabezadosObligatorios = [
+    "CORREO_DE_ACCESO",
+    "ANIO",
+    "DIVISION",
+    "GRUPO",
+  ];
+
+  const encabezadosArchivo = Object.keys(filas[0] || {});
+
+  const encabezadosFaltantes = encabezadosObligatorios.filter(
+    (encabezado) => !encabezadosArchivo.includes(encabezado),
+  );
+
+  if (encabezadosFaltantes.length) {
+    return {
+      correcto: false,
+      tipo: "ENCABEZADOS",
+      errores: encabezadosFaltantes,
+      asignacionesValidas: [],
+    };
+  }
+
+  const errores = [];
+  const asignacionesValidas = [];
+
+  filas.forEach((fila, indice) => {
+    const numeroFilaExcel = indice + 2;
+
+    const correo = String(fila.CORREO_DE_ACCESO || "")
+      .trim()
+      .toLowerCase();
+
+    const anio = Number(fila.ANIO || 0);
+
+    const division = String(fila.DIVISION || "")
+      .trim()
+      .toUpperCase();
+
+    const grupoTaller = String(fila.GRUPO || "")
+      .trim()
+      .toUpperCase();
+
+    const erroresFila = [];
+
+    if (!correo) {
+      erroresFila.push("falta el correo de acceso");
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(correo)) {
+      erroresFila.push("el correo no tiene un formato válido");
+    }
+
+    if (!Number.isInteger(anio) || anio < 1 || anio > 6) {
+      erroresFila.push("el año debe ser un número entre 1 y 6");
+    }
+
+    if (!division) {
+      erroresFila.push("falta la división");
+    }
+
+    if (grupoTaller && !["G1", "G2"].includes(grupoTaller)) {
+      erroresFila.push("el grupo debe ser G1, G2 o quedar vacío");
+    }
+
+    if (erroresFila.length) {
+      errores.push({
+        fila: numeroFilaExcel,
+        detalle: erroresFila.join(", "),
+      });
+
+      return;
+    }
+
+    asignacionesValidas.push({
+      correo,
+      anio,
+      division,
+      grupoTaller: grupoTaller || null,
+    });
+  });
+
+  return {
+    correcto: errores.length === 0,
+    tipo: "DATOS",
+    errores,
+    asignacionesValidas,
+  };
+}
+
 if (archivoImportacionCursosAlumnos) {
   archivoImportacionCursosAlumnos.addEventListener("change", async () => {
     const archivo = archivoImportacionCursosAlumnos.files[0];
@@ -2601,11 +2689,64 @@ if (archivoImportacionCursosAlumnos) {
 
       console.log("Filas de cursos de alumnos:", filas);
 
+      const validacionCursos = validarFilasImportacionCursosAlumnos(filas);
+
+      if (!validacionCursos.correcto) {
+        if (validacionCursos.tipo === "ENCABEZADOS") {
+          await Swal.fire({
+            title: "Columnas faltantes",
+            html: `
+        <p>El archivo no tiene todas las columnas necesarias.</p>
+        <p><strong>Faltan:</strong></p>
+        <p>${validacionCursos.errores.join("<br>")}</p>
+      `,
+            icon: "error",
+            confirmButtonText: "Aceptar",
+          });
+
+          return;
+        }
+
+        const detalleErrores = validacionCursos.errores
+          .slice(0, 8)
+          .map(
+            (errorFila) =>
+              `<li><strong>Fila ${errorFila.fila}:</strong> ${errorFila.detalle}</li>`,
+          )
+          .join("");
+
+        const textoExtra =
+          validacionCursos.errores.length > 8
+            ? `<p>Y ${validacionCursos.errores.length - 8} error(es) más.</p>`
+            : "";
+
+        await Swal.fire({
+          title: "Hay datos para corregir",
+          html: `
+      <p>No se modificó ningún estudiante.</p>
+      <ul style="text-align:left; margin-top:12px;">
+        ${detalleErrores}
+      </ul>
+      ${textoExtra}
+    `,
+          icon: "warning",
+          confirmButtonText: "Aceptar",
+        });
+
+        return;
+      }
+
+      console.log(
+        "Asignaciones de cursos validadas:",
+        validacionCursos.asignacionesValidas,
+      );
+
       await Swal.fire({
         title: "Archivo leído correctamente",
         html: `
             <p><strong>Archivo:</strong> ${archivo.name}</p>
             <p><strong>Filas encontradas:</strong> ${filas.length}</p>
+<p><strong>Asignaciones válidas:</strong> ${validacionCursos.asignacionesValidas.length}</p>
             <p>En el próximo paso validaremos correo, año, división y grupo.</p>
           `,
         icon: "success",
