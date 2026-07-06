@@ -613,9 +613,15 @@ formAsignarCursoEstudiante.addEventListener("submit", async (event) => {
     .trim()
     .toUpperCase();
 
-  if (!anio || !division || !["G1", "G2"].includes(grupoTaller)) {
+  if (!anio || !division) {
+    mensajeAsignarCursoEstudiante.textContent = "Completá año y división.";
+    mensajeAsignarCursoEstudiante.className = "mensaje-formulario error";
+    return;
+  }
+
+  if (grupoTaller && !["G1", "G2"].includes(grupoTaller)) {
     mensajeAsignarCursoEstudiante.textContent =
-      "Completá año, división y grupo de taller.";
+      "El grupo de Taller debe ser G1 o G2.";
     mensajeAsignarCursoEstudiante.className = "mensaje-formulario error";
     return;
   }
@@ -653,7 +659,7 @@ formAsignarCursoEstudiante.addEventListener("submit", async (event) => {
       cursoAnio: anio,
       cursoDivision: division,
       cursoNombre: curso.nombre || `${anio}º ${division}`,
-      grupoTaller,
+      grupoTaller: grupoTaller || null,
       actualizadoEn: serverTimestamp(),
     });
 
@@ -2542,6 +2548,12 @@ if (btnVerUsuarios) {
 
 if (btnVerEstudiantes) {
   btnVerEstudiantes.addEventListener("click", cargarEstudiantes);
+}
+
+if (btnImportarCursosAlumnos) {
+  btnImportarCursosAlumnos.addEventListener("click", () => {
+    archivoImportacionCursosAlumnos.click();
+  });
 }
 
 btnImportarUsuarios.addEventListener("click", () => {
