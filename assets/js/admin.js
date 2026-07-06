@@ -40,6 +40,11 @@ const formulario = document.getElementById("formRegistroUsuario");
 const mensajeRegistro = document.getElementById("mensajeRegistroUsuario");
 const btnRegistrar = document.getElementById("btnRegistrarUsuario");
 const btnVerUsuarios = document.getElementById("btnVerUsuarios");
+const btnImportarUsuarios = document.getElementById("btnImportarUsuarios");
+
+const archivoImportacionUsuarios = document.getElementById(
+  "archivoImportacionUsuarios",
+);
 const cuerpoTabla = document.getElementById("cuerpoTablaUsuarios");
 const mensajeUsuarios = document.getElementById("mensajeUsuarios");
 const buscarUsuario = document.getElementById("buscarUsuario");
@@ -2174,6 +2179,10 @@ if (filtroEstado) {
 if (btnVerUsuarios) {
   btnVerUsuarios.addEventListener("click", cargarUsuarios);
 }
+
+btnImportarUsuarios.addEventListener("click", () => {
+  archivoImportacionUsuarios.click();
+});
 
 if (formEditar) {
   formEditar.addEventListener("submit", guardarEdicionUsuario);
