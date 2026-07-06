@@ -2244,7 +2244,21 @@ function validarFilasImportacionUsuarios(filas) {
       .trim()
       .toUpperCase();
 
-    const fechaFinalizacion = String(fila.FECHA_FINALIZACION || "").trim();
+    let fechaFinalizacion = fila.FECHA_FINALIZACION || "";
+
+    if (fechaFinalizacion instanceof Date) {
+      fechaFinalizacion = fechaFinalizacion.toISOString().slice(0, 10);
+    } else if (typeof fechaFinalizacion === "number") {
+      const fechaExcel = XLSX.SSF.parse_date_code(fechaFinalizacion);
+
+      fechaFinalizacion = fechaExcel
+        ? `${fechaExcel.y}-${String(fechaExcel.m).padStart(2, "0")}-${String(
+            fechaExcel.d,
+          ).padStart(2, "0")}`
+        : "";
+    } else {
+      fechaFinalizacion = String(fechaFinalizacion).trim();
+    }
 
     const erroresFila = [];
 
