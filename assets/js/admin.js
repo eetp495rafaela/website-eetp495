@@ -2644,6 +2644,108 @@ function validarFilasImportacionCursosAlumnos(filas) {
   };
 }
 
+async function revisarAsignacionesCursosAlumnos(asignaciones) {
+  const correosRepetidos = [];
+  const correosVistos = new Set();
+
+  asignaciones.forEach((asignacion) => {
+    if (correosVistos.has(asignacion.correo)) {
+      correosRepetidos.push(asignacion.correo);
+    }
+
+    correosVistos.add(asignacion.correo);
+  });
+
+  const asignacionesSinDuplicados = asignaciones.filter(
+    (asignacion, indice) =>
+      asignaciones.findIndex((item) => item.correo === asignacion.correo) ===
+      indice,
+  );
+
+  const consultaCursos = await getDocs(collection(db, "cursos"));
+
+  const cursosActivos = consultaCursos.docs
+    .map((documento) => ({
+      id: documento.id,
+      ...documento.data(),
+    }))
+    .filter(
+      (curso) =>
+        String(curso.estado || "ACTIVO")
+          .trim()
+          .toUpperCase() === "ACTIVO",
+    );
+
+  const resultados = await Promise.all(
+    asignacionesSinDuplicados.map(async (asignacion) => {
+      const referenciaUsuario = doc(db, "usuarios", asignacion.correo);
+
+      const documentoUsuario = await getDoc(referenciaUsuario);
+
+      if (!documentoUsuario.exists()) {
+        return {
+          ...asignacion,
+          estadoRevision: "NO_EXISTE",
+        };
+      }
+
+      const usuario = documentoUsuario.data();
+
+      if (
+        String(usuario.rol || "")
+          .trim()
+          .toUpperCase() !== "ALUMNO"
+      ) {
+        return {
+          ...asignacion,
+          nombreCompleto: usuario.nombreCompleto || "",
+          estadoRevision: "NO_ES_ALUMNO",
+        };
+      }
+
+      const curso = cursosActivos.find(
+        (item) =>
+          Number(item.anio) === asignacion.anio &&
+          String(item.division || "")
+            .trim()
+            .toUpperCase() === asignacion.division,
+      );
+
+      if (!curso) {
+        return {
+          ...asignacion,
+          nombreCompleto: usuario.nombreCompleto || "",
+          estadoRevision: "CURSO_INEXISTENTE",
+        };
+      }
+
+      return {
+        ...asignacion,
+        nombreCompleto: usuario.nombreCompleto || "",
+        cursoId: curso.id,
+        cursoNombre:
+          curso.nombre || `${asignacion.anio}º ${asignacion.division}`,
+        yaTeniaCurso: Boolean(usuario.cursoId),
+        estadoRevision: "CORRECTO",
+      };
+    }),
+  );
+
+  return {
+    correctas: resultados.filter((item) => item.estadoRevision === "CORRECTO"),
+    correosInexistentes: resultados.filter(
+      (item) => item.estadoRevision === "NO_EXISTE",
+    ),
+    noSonAlumnos: resultados.filter(
+      (item) => item.estadoRevision === "NO_ES_ALUMNO",
+    ),
+    cursosInexistentes: resultados.filter(
+      (item) => item.estadoRevision === "CURSO_INEXISTENTE",
+    ),
+    correosRepetidos: [...new Set(correosRepetidos)],
+  };
+}
+
 if (archivoImportacionCursosAlumnos) {
   archivoImportacionCursosAlumnos.addEventListener("change", async () => {
     const archivo = archivoImportacionCursosAlumnos.files[0];
@@ -2736,9 +2838,40 @@ if (archivoImportacionCursosAlumnos) {
         return;
       }
 
-      console.log(
-        "Asignaciones de cursos validadas:",
+      const revisionCursos = await revisarAsignacionesCursosAlumnos(
         validacionCursos.asignacionesValidas,
+      );
+
+      const asignacionesNuevas = revisionCursos.correctas.filter(
+        (item) => !item.yaTeniaCurso,
+      );
+
+      const asignacionesActualizar = revisionCursos.correctas.filter(
+        (item) => item.yaTeniaCurso,
+      );
+
+      await Swal.fire({
+        title: "Revisión de asignaciones completada",
+        html: `
+    <p><strong>Asignaciones correctas:</strong> ${revisionCursos.correctas.length}</p>
+    <p><strong>Alumnos sin curso previo:</strong> ${asignacionesNuevas.length}</p>
+    <p><strong>Alumnos con curso a actualizar:</strong> ${asignacionesActualizar.length}</p>
+    <p><strong>Correos inexistentes:</strong> ${revisionCursos.correosInexistentes.length}</p>
+    <p><strong>Usuarios que no son alumnos:</strong> ${revisionCursos.noSonAlumnos.length}</p>
+    <p><strong>Cursos inexistentes o inactivos:</strong> ${revisionCursos.cursosInexistentes.length}</p>
+    <p><strong>Correos repetidos en el Excel:</strong> ${revisionCursos.correosRepetidos.length}</p>
+
+    <p style="margin-top:16px;">
+      Todavía no se modificó ningún estudiante.
+    </p>
+  `,
+        icon: "info",
+        confirmButtonText: "Aceptar",
+      });
+
+      console.log(
+        "Asignaciones correctas para importar:",
+        revisionCursos.correctas,
       );
 
       await Swal.fire({
