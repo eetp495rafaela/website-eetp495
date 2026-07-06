@@ -2405,17 +2405,32 @@ archivoImportacionUsuarios.addEventListener("change", async () => {
       validacion.usuariosValidos,
     );
 
-    await Swal.fire({
-      title: "Archivo leído correctamente",
+    const confirmacionImportacion = await Swal.fire({
+      title: "Usuarios listos para importar",
       html: `
-        <p><strong>Archivo:</strong> ${archivo.name}</p>
-        <p><strong>Usuarios encontrados:</strong> ${filas.length}</p>
-<p><strong>Usuarios válidos:</strong> ${validacion.usuariosValidos.length}</p>
-        <p>En el próximo paso validaremos las columnas y los datos.</p>
-      `,
-      icon: "success",
-      confirmButtonText: "Continuar",
+    <p><strong>Archivo:</strong> ${archivo.name}</p>
+    <p><strong>Usuarios encontrados:</strong> ${filas.length}</p>
+    <p><strong>Usuarios válidos:</strong> ${validacion.usuariosValidos.length}</p>
+    <p style="margin-top:14px;">
+      En el próximo paso el sistema comprobará cuáles ya existen
+      antes de crear registros nuevos.
+    </p>
+  `,
+      icon: "question",
+      showCancelButton: true,
+      confirmButtonText: "Continuar con la importación",
+      cancelButtonText: "Cancelar",
+      confirmButtonColor: "#0d6efd",
     });
+
+    if (!confirmacionImportacion.isConfirmed) {
+      return;
+    }
+
+    console.log(
+      "Importación confirmada. Usuarios pendientes:",
+      validacion.usuariosValidos,
+    );
   } catch (error) {
     console.error("Error al leer archivo de importación:", error);
 
