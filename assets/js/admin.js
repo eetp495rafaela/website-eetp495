@@ -2133,6 +2133,7 @@ async function cargarEstudiantes() {
       return;
     }
 
+    cargarOpcionesFiltroCursosEstudiantes();
     aplicarFiltrosEstudiantes();
   } catch (error) {
     console.error("Error al cargar estudiantes:", error);
@@ -2141,6 +2142,40 @@ async function cargarEstudiantes() {
       "No se pudieron cargar los estudiantes. Revisá permisos o conexión.",
       "error",
     );
+  }
+}
+
+function cargarOpcionesFiltroCursosEstudiantes() {
+  if (!filtroCursoEstudiante) return;
+
+  const cursoSeleccionadoActual = filtroCursoEstudiante.value;
+
+  const cursosDisponibles = [
+    ...new Set(
+      estudiantesCargados
+        .map((estudiante) => String(estudiante.cursoNombre || "").trim())
+        .filter(Boolean),
+    ),
+  ].sort((a, b) =>
+    a.localeCompare(b, "es", {
+      numeric: true,
+    }),
+  );
+
+  filtroCursoEstudiante.innerHTML =
+    '<option value="">Todos los cursos</option>';
+
+  cursosDisponibles.forEach((cursoNombre) => {
+    const opcion = document.createElement("option");
+
+    opcion.value = cursoNombre;
+    opcion.textContent = cursoNombre;
+
+    filtroCursoEstudiante.appendChild(opcion);
+  });
+
+  if (cursosDisponibles.includes(cursoSeleccionadoActual)) {
+    filtroCursoEstudiante.value = cursoSeleccionadoActual;
   }
 }
 
