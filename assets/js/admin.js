@@ -55,6 +55,31 @@ const btnVerCursos = document.getElementById("btnVerCursos");
 const cuerpoTablaCursos = document.getElementById("cuerpoTablaCursos");
 const mensajeRegistroCurso = document.getElementById("mensajeRegistroCurso");
 const mensajeCursos = document.getElementById("mensajeCursos");
+const modalEditarCurso = document.getElementById("modalEditarCurso");
+
+const formEditarCurso = document.getElementById("formEditarCurso");
+
+const editarCursoId = document.getElementById("editarCursoId");
+
+const editarCursoAnio = document.getElementById("editarCursoAnio");
+
+const editarCursoDivision = document.getElementById("editarCursoDivision");
+
+const editarCursoNombre = document.getElementById("editarCursoNombre");
+
+const editarCursoEstado = document.getElementById("editarCursoEstado");
+
+const mensajeEditarCurso = document.getElementById("mensajeEditarCurso");
+
+const btnCerrarEdicionCurso = document.getElementById("btnCerrarEdicionCurso");
+
+const btnCancelarEdicionCurso = document.getElementById(
+  "btnCancelarEdicionCurso",
+);
+
+const btnGuardarEdicionCurso = document.getElementById(
+  "btnGuardarEdicionCurso",
+);
 const btnImportarPlanEstudios = document.getElementById(
   "btnImportarPlanEstudios",
 );
@@ -148,6 +173,7 @@ const btnGuardarEdicion = document.getElementById("btnGuardarEdicion");
 
 let usuarioSoporte = null;
 let usuariosCargados = [];
+let cursoEnEdicion = null;
 let asignacionEnEdicion = null;
 let usuarioEnEdicion = null;
 
@@ -322,6 +348,43 @@ function mostrarMensajeCurso(texto, tipo = "") {
   mensajeRegistroCurso.className = `mensaje-formulario ${tipo}`.trim();
 }
 
+function abrirModalEditarCurso(curso) {
+  cursoEnEdicion = curso;
+
+  editarCursoId.value = curso.id;
+  editarCursoAnio.value = curso.anio || "";
+  editarCursoDivision.value = curso.division || "";
+  editarCursoNombre.value = curso.nombre || `${curso.anio}º ${curso.division}`;
+
+  editarCursoEstado.value = curso.estado || "ACTIVO";
+  mensajeEditarCurso.textContent = "";
+
+  modalEditarCurso.classList.add("mostrar");
+  modalEditarCurso.setAttribute("aria-hidden", "false");
+  document.body.style.overflow = "hidden";
+}
+
+function cerrarModalEditarCurso() {
+  cursoEnEdicion = null;
+
+  formEditarCurso.reset();
+  mensajeEditarCurso.textContent = "";
+
+  modalEditarCurso.classList.remove("mostrar");
+  modalEditarCurso.setAttribute("aria-hidden", "true");
+  document.body.style.overflow = "";
+}
+
+btnCerrarEdicionCurso.addEventListener("click", cerrarModalEditarCurso);
+
+btnCancelarEdicionCurso.addEventListener("click", cerrarModalEditarCurso);
+
+modalEditarCurso.addEventListener("click", function (event) {
+  if (event.target === modalEditarCurso) {
+    cerrarModalEditarCurso();
+  }
+});
+
 function mostrarMensajeListadoCursos(texto, tipo = "") {
   if (!mensajeCursos) return;
 
@@ -411,6 +474,43 @@ async function cargarCursos() {
       fila.appendChild(crearCeldaCurso(curso.anio));
       fila.appendChild(crearCeldaCurso(curso.division));
       fila.appendChild(crearCeldaEstadoCurso(curso.estado));
+
+      const celdaAcciones = document.createElement("td");
+      celdaAcciones.className = "celda-acciones";
+
+      const contenedorAcciones = document.createElement("div");
+      contenedorAcciones.className = "acciones-tabla";
+
+      const btnEditar = document.createElement("button");
+      btnEditar.type = "button";
+      btnEditar.className = "btn-tabla btn-editar";
+      btnEditar.innerHTML = '<i class="fa-solid fa-pen-to-square"></i> Editar';
+
+      btnEditar.addEventListener("click", () => {
+        abrirModalEditarCurso(curso);
+      });
+
+      const estaActivo = curso.estado !== "INACTIVO";
+
+      const btnEstado = document.createElement("button");
+      btnEstado.type = "button";
+      btnEstado.className = estaActivo
+        ? "btn-tabla btn-desactivar"
+        : "btn-tabla btn-activar";
+
+      btnEstado.innerHTML = estaActivo
+        ? '<i class="fa-solid fa-ban"></i> Desactivar'
+        : '<i class="fa-solid fa-circle-check"></i> Activar';
+
+      btnEstado.addEventListener("click", () => {
+        cambiarEstadoCurso(curso);
+      });
+
+      contenedorAcciones.appendChild(btnEditar);
+      contenedorAcciones.appendChild(btnEstado);
+      celdaAcciones.appendChild(contenedorAcciones);
+
+      fila.appendChild(celdaAcciones);
 
       cuerpoTablaCursos.appendChild(fila);
     });

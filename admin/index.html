@@ -430,6 +430,7 @@
                   <th>Año</th>
                   <th>División</th>
                   <th>Estado</th>
+                  <th>Acciones</th>
                 </tr>
               </thead>
 
@@ -851,6 +852,91 @@
             </button>
 
             <button class="btn-accion" id="btnGuardarEdicion" type="submit">
+              <i class="fa-solid fa-floppy-disk"></i>
+              Guardar cambios
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+    <div class="modal-edicion" id="modalEditarCurso" aria-hidden="true">
+      <div
+        class="modal-edicion-contenido"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="tituloEditarCurso"
+      >
+        <div class="modal-edicion-cabecera">
+          <div>
+            <h3 id="tituloEditarCurso">Editar curso</h3>
+            <p>Actualizá los datos institucionales del curso.</p>
+          </div>
+
+          <button
+            class="btn-cerrar-modal"
+            id="btnCerrarEdicionCurso"
+            type="button"
+            aria-label="Cerrar"
+          >
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+
+        <form id="formEditarCurso" class="formulario-edicion">
+          <input id="editarCursoId" type="hidden" />
+
+          <div class="form-grid">
+            <div class="campo-formulario">
+              <label for="editarCursoAnio">Año *</label>
+              <input
+                id="editarCursoAnio"
+                type="number"
+                min="1"
+                max="7"
+                required
+              />
+            </div>
+
+            <div class="campo-formulario">
+              <label for="editarCursoDivision">División *</label>
+              <input
+                id="editarCursoDivision"
+                type="text"
+                maxlength="3"
+                required
+              />
+            </div>
+
+            <div class="campo-formulario">
+              <label for="editarCursoNombre">Nombre del curso</label>
+              <input id="editarCursoNombre" type="text" readonly />
+            </div>
+
+            <div class="campo-formulario">
+              <label for="editarCursoEstado">Estado</label>
+              <select id="editarCursoEstado">
+                <option value="ACTIVO">ACTIVO</option>
+                <option value="INACTIVO">INACTIVO</option>
+              </select>
+            </div>
+          </div>
+
+          <p id="mensajeEditarCurso" class="mensaje-formulario"></p>
+
+          <div class="acciones-modal">
+            <button
+              class="btn-secundario"
+              id="btnCancelarEdicionCurso"
+              type="button"
+            >
+              Cancelar
+            </button>
+
+            <button
+              class="btn-accion"
+              id="btnGuardarEdicionCurso"
+              type="submit"
+            >
               <i class="fa-solid fa-floppy-disk"></i>
               Guardar cambios
             </button>
