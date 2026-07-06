@@ -2183,6 +2183,118 @@ if (btnVerUsuarios) {
 btnImportarUsuarios.addEventListener("click", () => {
   archivoImportacionUsuarios.click();
 });
+function validarFilasImportacionUsuarios(filas) {
+  const encabezadosObligatorios = [
+    "NOMBRE_COMPLETO",
+    "CORREO_DE_ACCESO",
+    "ROL",
+    "SITUACION_DE_REVISTA",
+    "FECHA_FINALIZACION",
+  ];
+
+  const rolesValidos = [
+    "ALUMNO",
+    "DOCENTE",
+    "SOPORTE",
+    "PRECEPTORIA",
+    "SECRETARIA",
+    "DIRECCION",
+  ];
+
+  const situacionesValidas = [
+    "TITULAR",
+    "INTERINO",
+    "REEMPLAZANTE",
+    "CURSANDO",
+    "CURSADA_COMPLETA",
+  ];
+
+  const encabezadosArchivo = Object.keys(filas[0] || {});
+
+  const encabezadosFaltantes = encabezadosObligatorios.filter(
+    (encabezado) => !encabezadosArchivo.includes(encabezado),
+  );
+
+  if (encabezadosFaltantes.length) {
+    return {
+      correcto: false,
+      tipo: "ENCABEZADOS",
+      errores: encabezadosFaltantes,
+      usuariosValidos: [],
+    };
+  }
+
+  const errores = [];
+  const usuariosValidos = [];
+
+  filas.forEach((fila, indice) => {
+    const numeroFilaExcel = indice + 2;
+
+    const nombreCompleto = String(fila.NOMBRE_COMPLETO || "").trim();
+
+    const correo = String(fila.CORREO_DE_ACCESO || "")
+      .trim()
+      .toLowerCase();
+
+    const rol = String(fila.ROL || "")
+      .trim()
+      .toUpperCase();
+
+    const situacionRevista = String(fila.SITUACION_DE_REVISTA || "")
+      .trim()
+      .toUpperCase();
+
+    const fechaFinalizacion = String(fila.FECHA_FINALIZACION || "").trim();
+
+    const erroresFila = [];
+
+    if (!nombreCompleto) {
+      erroresFila.push("falta el nombre completo");
+    }
+
+    if (!correo) {
+      erroresFila.push("falta el correo de acceso");
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(correo)) {
+      erroresFila.push("el correo no tiene un formato válido");
+    }
+
+    if (!rolesValidos.includes(rol)) {
+      erroresFila.push("el rol no es válido");
+    }
+
+    if (!situacionesValidas.includes(situacionRevista)) {
+      erroresFila.push("la situación de revista no es válida");
+    }
+
+    if (fechaFinalizacion && !/^\d{4}-\d{2}-\d{2}$/.test(fechaFinalizacion)) {
+      erroresFila.push("la fecha debe tener formato AAAA-MM-DD");
+    }
+
+    if (erroresFila.length) {
+      errores.push({
+        fila: numeroFilaExcel,
+        detalle: erroresFila.join(", "),
+      });
+
+      return;
+    }
+
+    usuariosValidos.push({
+      nombreCompleto,
+      correo,
+      rol,
+      tipoVinculo: situacionRevista,
+      fechaFinAcceso: fechaFinalizacion || null,
+    });
+  });
+
+  return {
+    correcto: errores.length === 0,
+    tipo: "DATOS",
+    errores,
+    usuariosValidos,
+  };
+}
 archivoImportacionUsuarios.addEventListener("change", async () => {
   const archivo = archivoImportacionUsuarios.files[0];
 
@@ -2227,12 +2339,64 @@ archivoImportacionUsuarios.addEventListener("change", async () => {
     }
 
     console.log("Filas importadas desde Excel:", filas);
+    const validacion = validarFilasImportacionUsuarios(filas);
+
+    if (!validacion.correcto) {
+      if (validacion.tipo === "ENCABEZADOS") {
+        await Swal.fire({
+          title: "Columnas faltantes",
+          html: `
+        <p>El archivo no tiene todas las columnas necesarias.</p>
+        <p><strong>Faltan:</strong></p>
+        <p>${validacion.errores.join("<br>")}</p>
+      `,
+          icon: "error",
+          confirmButtonText: "Aceptar",
+        });
+
+        return;
+      }
+
+      const detalleErrores = validacion.errores
+        .slice(0, 8)
+        .map(
+          (errorFila) =>
+            `<li><strong>Fila ${errorFila.fila}:</strong> ${errorFila.detalle}</li>`,
+        )
+        .join("");
+
+      const textoExtra =
+        validacion.errores.length > 8
+          ? `<p>Y ${validacion.errores.length - 8} error(es) más.</p>`
+          : "";
+
+      await Swal.fire({
+        title: "Hay datos para corregir",
+        html: `
+      <p>No se creó ningún usuario.</p>
+      <ul style="text-align:left; margin-top:12px;">
+        ${detalleErrores}
+      </ul>
+      ${textoExtra}
+    `,
+        icon: "warning",
+        confirmButtonText: "Aceptar",
+      });
+
+      return;
+    }
+
+    console.log(
+      "Usuarios validados correctamente:",
+      validacion.usuariosValidos,
+    );
 
     await Swal.fire({
       title: "Archivo leído correctamente",
       html: `
         <p><strong>Archivo:</strong> ${archivo.name}</p>
         <p><strong>Usuarios encontrados:</strong> ${filas.length}</p>
+<p><strong>Usuarios válidos:</strong> ${validacion.usuariosValidos.length}</p>
         <p>En el próximo paso validaremos las columnas y los datos.</p>
       `,
       icon: "success",
