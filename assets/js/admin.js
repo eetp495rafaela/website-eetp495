@@ -40,6 +40,29 @@ const formulario = document.getElementById("formRegistroUsuario");
 const mensajeRegistro = document.getElementById("mensajeRegistroUsuario");
 const btnRegistrar = document.getElementById("btnRegistrarUsuario");
 const btnVerUsuarios = document.getElementById("btnVerUsuarios");
+const btnVerEstudiantes = document.getElementById("btnVerEstudiantes");
+
+const btnImportarCursosAlumnos = document.getElementById(
+  "btnImportarCursosAlumnos",
+);
+
+const archivoImportacionCursosAlumnos = document.getElementById(
+  "archivoImportacionCursosAlumnos",
+);
+
+const buscarEstudiante = document.getElementById("buscarEstudiante");
+
+const filtroCursoEstudiante = document.getElementById("filtroCursoEstudiante");
+
+const filtroEstadoEstudiante = document.getElementById(
+  "filtroEstadoEstudiante",
+);
+
+const cuerpoTablaEstudiantes = document.getElementById(
+  "cuerpoTablaEstudiantes",
+);
+
+const mensajeEstudiantes = document.getElementById("mensajeEstudiantes");
 const btnImportarUsuarios = document.getElementById("btnImportarUsuarios");
 
 const archivoImportacionUsuarios = document.getElementById(
@@ -178,6 +201,7 @@ const btnGuardarEdicion = document.getElementById("btnGuardarEdicion");
 
 let usuarioSoporte = null;
 let usuariosCargados = [];
+let estudiantesCargados = [];
 let cursoEnEdicion = null;
 let asignacionEnEdicion = null;
 let usuarioEnEdicion = null;
@@ -200,6 +224,13 @@ function mostrarMensajeUsuarios(texto, tipo = "") {
 
   mensajeUsuarios.textContent = texto;
   mensajeUsuarios.className = `mensaje-formulario ${tipo}`.trim();
+}
+
+function mostrarMensajeEstudiantes(texto, tipo = "") {
+  if (!mensajeEstudiantes) return;
+
+  mensajeEstudiantes.textContent = texto;
+  mensajeEstudiantes.className = `mensaje-formulario ${tipo}`.trim();
 }
 
 function crearCelda(texto) {
@@ -307,6 +338,65 @@ function renderizarUsuarios(usuarios) {
   mostrarMensajeUsuarios(`${usuarios.length} usuario(s) mostrado(s).`, "ok");
 }
 
+function renderizarEstudiantes(estudiantes) {
+  cuerpoTablaEstudiantes.innerHTML = "";
+
+  if (!estudiantes.length) {
+    mostrarMensajeEstudiantes(
+      "No se encontraron estudiantes con esos filtros.",
+    );
+    return;
+  }
+
+  estudiantes.forEach((estudiante) => {
+    const fila = document.createElement("tr");
+
+    const cursoActual = estudiante.cursoNombre || "Sin curso asignado";
+
+    const grupoTaller = estudiante.grupoTaller || "Sin grupo";
+
+    fila.appendChild(crearCelda(estudiante.nombreCompleto));
+
+    fila.appendChild(crearCelda(estudiante.correo));
+
+    fila.appendChild(crearCelda(cursoActual));
+
+    fila.appendChild(crearCelda(grupoTaller));
+
+    fila.appendChild(crearCeldaEstado(estudiante.estado));
+
+    const celdaAcciones = document.createElement("td");
+    celdaAcciones.className = "celda-acciones";
+
+    const contenedorAcciones = document.createElement("div");
+    contenedorAcciones.className = "acciones-tabla";
+
+    const btnAsignarCurso = document.createElement("button");
+    btnAsignarCurso.type = "button";
+    btnAsignarCurso.className = "btn-tabla btn-editar";
+
+    btnAsignarCurso.innerHTML = estudiante.cursoNombre
+      ? '<i class="fa-solid fa-pen-to-square"></i> Cambiar curso'
+      : '<i class="fa-solid fa-school"></i> Asignar curso';
+
+    btnAsignarCurso.addEventListener("click", () => {
+      console.log("Estudiante seleccionado para asignación:", estudiante);
+    });
+
+    contenedorAcciones.appendChild(btnAsignarCurso);
+    celdaAcciones.appendChild(contenedorAcciones);
+
+    fila.appendChild(celdaAcciones);
+
+    cuerpoTablaEstudiantes.appendChild(fila);
+  });
+
+  mostrarMensajeEstudiantes(
+    `${estudiantes.length} estudiante(s) mostrado(s).`,
+    "ok",
+  );
+}
+
 function aplicarFiltrosUsuarios() {
   const textoBusqueda = String(buscarUsuario?.value || "")
     .trim()
@@ -344,6 +434,44 @@ function aplicarFiltrosUsuarios() {
   });
 
   renderizarUsuarios(usuariosFiltrados);
+}
+
+function aplicarFiltrosEstudiantes() {
+  const textoBusqueda = String(buscarEstudiante?.value || "")
+    .trim()
+    .toLowerCase();
+
+  const cursoSeleccionado = String(filtroCursoEstudiante?.value || "").trim();
+
+  const estadoSeleccionado = String(filtroEstadoEstudiante?.value || "")
+    .trim()
+    .toUpperCase();
+
+  const estudiantesFiltrados = estudiantesCargados.filter((estudiante) => {
+    const nombre = String(estudiante.nombreCompleto || "").toLowerCase();
+
+    const correo = String(estudiante.correo || "").toLowerCase();
+
+    const cursoNombre = String(estudiante.cursoNombre || "").trim();
+
+    const estado = String(estudiante.estado || "")
+      .trim()
+      .toUpperCase();
+
+    const coincideBusqueda =
+      !textoBusqueda ||
+      nombre.includes(textoBusqueda) ||
+      correo.includes(textoBusqueda);
+
+    const coincideCurso =
+      !cursoSeleccionado || cursoNombre === cursoSeleccionado;
+
+    const coincideEstado = !estadoSeleccionado || estado === estadoSeleccionado;
+
+    return coincideBusqueda && coincideCurso && coincideEstado;
+  });
+
+  renderizarEstudiantes(estudiantesFiltrados);
 }
 
 function mostrarMensajeCurso(texto, tipo = "") {
@@ -1790,6 +1918,52 @@ async function cargarUsuarios() {
   }
 }
 
+async function cargarEstudiantes() {
+  if (!usuarioSoporte) {
+    mostrarMensajeEstudiantes("Esperando validación de sesión...", "error");
+    return;
+  }
+
+  mostrarMensajeEstudiantes("Cargando estudiantes...");
+  cuerpoTablaEstudiantes.innerHTML = "";
+
+  try {
+    const consulta = await getDocs(collection(db, "usuarios"));
+
+    estudiantesCargados = consulta.docs
+      .map((documento) => ({
+        id: documento.id,
+        ...documento.data(),
+      }))
+      .filter(
+        (usuario) =>
+          String(usuario.rol || "")
+            .trim()
+            .toUpperCase() === "ALUMNO",
+      )
+      .sort((a, b) =>
+        String(a.nombreCompleto || "").localeCompare(
+          String(b.nombreCompleto || ""),
+          "es",
+        ),
+      );
+
+    if (!estudiantesCargados.length) {
+      mostrarMensajeEstudiantes("Todavía no hay estudiantes registrados.");
+      return;
+    }
+
+    aplicarFiltrosEstudiantes();
+  } catch (error) {
+    console.error("Error al cargar estudiantes:", error);
+
+    mostrarMensajeEstudiantes(
+      "No se pudieron cargar los estudiantes. Revisá permisos o conexión.",
+      "error",
+    );
+  }
+}
+
 async function registrarUsuario(event) {
   event.preventDefault();
 
@@ -2178,6 +2352,10 @@ if (filtroEstado) {
 }
 if (btnVerUsuarios) {
   btnVerUsuarios.addEventListener("click", cargarUsuarios);
+}
+
+if (btnVerEstudiantes) {
+  btnVerEstudiantes.addEventListener("click", cargarEstudiantes);
 }
 
 btnImportarUsuarios.addEventListener("click", () => {

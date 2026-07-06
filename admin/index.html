@@ -575,17 +575,91 @@
         <h2>Estudiantes</h2>
 
         <div class="panel-info">
-          <p>
-            Más adelante permitirá consultar y organizar estudiantes por curso,
-            división y ciclo lectivo.
-          </p>
+          <div class="encabezado-listado">
+            <div>
+              <h3>Estudiantes registrados</h3>
+              <p>
+                Consultá los usuarios con rol ALUMNO y asignales su curso
+                actual.
+              </p>
+            </div>
 
-          <div class="acciones">
-            <button class="btn-accion" type="button">
-              <i class="fa-solid fa-users-viewfinder"></i>
-              Consultar estudiantes
-            </button>
+            <div class="acciones-estudiantes">
+              <button
+                class="btn-accion"
+                id="btnImportarCursosAlumnos"
+                type="button"
+              >
+                <i class="fa-solid fa-file-import"></i>
+                Importar cursos
+              </button>
+
+              <button class="btn-accion" id="btnVerEstudiantes" type="button">
+                <i class="fa-solid fa-user-graduate"></i>
+                Ver estudiantes
+              </button>
+            </div>
           </div>
+
+          <input
+            id="archivoImportacionCursosAlumnos"
+            type="file"
+            accept=".xlsx,.xls,.csv"
+            hidden
+          />
+
+          <div class="filtros-usuarios filtros-estudiantes">
+            <div class="campo-filtro campo-busqueda">
+              <label for="buscarEstudiante">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                Buscar estudiante
+              </label>
+
+              <input
+                id="buscarEstudiante"
+                type="search"
+                placeholder="Nombre o correo..."
+                autocomplete="off"
+              />
+            </div>
+
+            <div class="campo-filtro">
+              <label for="filtroCursoEstudiante">Curso</label>
+
+              <select id="filtroCursoEstudiante">
+                <option value="">Todos los cursos</option>
+              </select>
+            </div>
+
+            <div class="campo-filtro">
+              <label for="filtroEstadoEstudiante">Estado</label>
+
+              <select id="filtroEstadoEstudiante">
+                <option value="">Todos los estados</option>
+                <option value="ACTIVO">ACTIVO</option>
+                <option value="INACTIVO">INACTIVO</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="tabla-contenedor">
+            <table class="tabla-usuarios tabla-estudiantes">
+              <thead>
+                <tr>
+                  <th>Nombre completo</th>
+                  <th>Correo</th>
+                  <th>Curso actual</th>
+                  <th>Grupo de Taller</th>
+                  <th>Estado</th>
+                  <th>Acciones</th>
+                </tr>
+              </thead>
+
+              <tbody id="cuerpoTablaEstudiantes"></tbody>
+            </table>
+          </div>
+
+          <p id="mensajeEstudiantes" class="mensaje-formulario"></p>
         </div>
 
         <a class="btn-volver" href="#inicio">
