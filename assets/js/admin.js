@@ -2183,6 +2183,30 @@ if (btnVerUsuarios) {
 btnImportarUsuarios.addEventListener("click", () => {
   archivoImportacionUsuarios.click();
 });
+archivoImportacionUsuarios.addEventListener("change", () => {
+  const archivo = archivoImportacionUsuarios.files[0];
+
+  if (!archivo) return;
+
+  if (!window.XLSX) {
+    Swal.fire({
+      title: "Lector de Excel no disponible",
+      text: "No se pudo cargar la herramienta para leer archivos. Recargá la página e intentá nuevamente.",
+      icon: "error",
+      confirmButtonText: "Aceptar",
+    });
+
+    archivoImportacionUsuarios.value = "";
+    return;
+  }
+
+  Swal.fire({
+    title: "Archivo seleccionado",
+    text: `Se preparó el archivo: ${archivo.name}`,
+    icon: "success",
+    confirmButtonText: "Continuar",
+  });
+});
 
 if (formEditar) {
   formEditar.addEventListener("submit", guardarEdicionUsuario);
