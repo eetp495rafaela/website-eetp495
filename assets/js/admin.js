@@ -2347,6 +2347,18 @@ if (filtroRol) {
   filtroRol.addEventListener("change", aplicarFiltrosUsuarios);
 }
 
+if (buscarEstudiante) {
+  buscarEstudiante.addEventListener("input", aplicarFiltrosEstudiantes);
+}
+
+if (filtroCursoEstudiante) {
+  filtroCursoEstudiante.addEventListener("change", aplicarFiltrosEstudiantes);
+}
+
+if (filtroEstadoEstudiante) {
+  filtroEstadoEstudiante.addEventListener("change", aplicarFiltrosEstudiantes);
+}
+
 if (filtroEstado) {
   filtroEstado.addEventListener("change", aplicarFiltrosUsuarios);
 }
