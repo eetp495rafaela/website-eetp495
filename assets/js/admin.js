@@ -2347,6 +2347,34 @@ async function revisarUsuariosExistentes(usuarios) {
   };
 }
 
+async function importarUsuariosNuevos(usuarios) {
+  if (!usuarios.length) {
+    return 0;
+  }
+
+  const lote = writeBatch(db);
+
+  usuarios.forEach((usuario) => {
+    const referencia = doc(db, "usuarios", usuario.correo);
+
+    lote.set(referencia, {
+      correo: usuario.correo,
+      nombreCompleto: usuario.nombreCompleto,
+      rol: usuario.rol,
+      estado: "ACTIVO",
+      tipoVinculo: usuario.tipoVinculo,
+      fechaFinAcceso: usuario.fechaFinAcceso || null,
+      fechaAlta: serverTimestamp(),
+      actualizadoEn: serverTimestamp(),
+      creadoPor: normalizarCorreo(usuarioSoporte.email),
+    });
+  });
+
+  await lote.commit();
+
+  return usuarios.length;
+}
+
 archivoImportacionUsuarios.addEventListener("change", async () => {
   const archivo = archivoImportacionUsuarios.files[0];
 
@@ -2491,48 +2519,79 @@ archivoImportacionUsuarios.addEventListener("change", async () => {
         ? `<p>Y ${revision.correosRepetidos.length - 8} correo(s) repetido(s) más.</p>`
         : "";
 
-    await Swal.fire({
-      title: "Revisión de usuarios completada",
+    if (!revision.nuevos.length) {
+      await Swal.fire({
+        title: "No hay usuarios nuevos para importar",
+        text: "Todos los correos del archivo ya están registrados o hay correos repetidos que revisar.",
+        icon: "info",
+        confirmButtonText: "Aceptar",
+      });
+
+      return;
+    }
+
+    const confirmacionFinal = await Swal.fire({
+      title: "¿Importar usuarios?",
       html: `
-    <p><strong>Usuarios nuevos:</strong> ${revision.nuevos.length}</p>
-    <p><strong>Ya registrados:</strong> ${revision.existentes.length}</p>
-    <p><strong>Correos repetidos en el archivo:</strong> ${revision.correosRepetidos.length}</p>
-
+    <p>Se crearán <strong>${revision.nuevos.length}</strong> usuario(s) nuevo(s).</p>
+    <p>Los usuarios ya existentes no se modificarán.</p>
     ${
-      listaExistentes
+      revision.correosRepetidos.length
         ? `
-          <hr style="margin:16px 0;">
-          <p><strong>Usuarios ya registrados:</strong></p>
-          <ul style="text-align:left; margin:8px 0 0;">
-            ${listaExistentes}
-          </ul>
-          ${masExistentes}
+          <p style="margin-top:14px;">
+            <strong>Atención:</strong> se detectaron
+            ${revision.correosRepetidos.length} correo(s) repetido(s) en el archivo.
+            Solo se tomará una vez cada correo.
+          </p>
         `
         : ""
     }
-
-    ${
-      listaRepetidos
-        ? `
-          <hr style="margin:16px 0;">
-          <p><strong>Correos repetidos en el Excel:</strong></p>
-          <ul style="text-align:left; margin:8px 0 0;">
-            ${listaRepetidos}
-          </ul>
-          ${masRepetidos}
-        `
-        : ""
-    }
-
-    <p style="margin-top:16px;">
-      Todavía no se creó ningún usuario.
-    </p>
   `,
-      icon: "info",
-      confirmButtonText: "Aceptar",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: `Sí, importar ${revision.nuevos.length}`,
+      cancelButtonText: "Cancelar",
+      confirmButtonColor: "#198754",
     });
 
-    console.log("Usuarios nuevos para importar:", revision.nuevos);
+    if (!confirmacionFinal.isConfirmed) {
+      return;
+    }
+
+    try {
+      Swal.fire({
+        title: "Importando usuarios...",
+        text: "Por favor, esperá un momento.",
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        didOpen: () => {
+          Swal.showLoading();
+        },
+      });
+
+      const cantidadImportada = await importarUsuariosNuevos(revision.nuevos);
+
+      await Swal.fire({
+        title: "Importación completada",
+        html: `
+      <p>Se registraron correctamente <strong>${cantidadImportada}</strong> usuario(s).</p>
+      <p>Los usuarios ya pueden iniciar sesión con su cuenta de Google autorizada.</p>
+    `,
+        icon: "success",
+        confirmButtonText: "Aceptar",
+      });
+
+      await cargarUsuarios();
+    } catch (error) {
+      console.error("Error al importar usuarios:", error);
+
+      await Swal.fire({
+        title: "No se pudo completar la importación",
+        text: "No se registraron los usuarios. Revisá la conexión, los permisos y volvé a intentarlo.",
+        icon: "error",
+        confirmButtonText: "Aceptar",
+      });
+    }
   } catch (error) {
     console.error("Error al leer archivo de importación:", error);
 
