@@ -657,17 +657,20 @@ formAsignarCursoEstudiante.addEventListener("submit", async (event) => {
       actualizadoEn: serverTimestamp(),
     });
 
+    const nombreEstudiante = estudianteEnAsignacion.nombreCompleto;
+
+    cerrarModalAsignarCursoEstudiante();
+
     await Swal.fire({
       title: "Curso asignado",
       html: `
-          <p><strong>${estudianteEnAsignacion.nombreCompleto}</strong></p>
-          <p>${curso.nombre || `${anio}º ${division}`} · ${grupoTaller}</p>
-        `,
+    <p><strong>${nombreEstudiante}</strong></p>
+    <p>${curso.nombre || `${anio}º ${division}`} · ${grupoTaller}</p>
+  `,
       icon: "success",
       confirmButtonText: "Aceptar",
     });
 
-    cerrarModalAsignarCursoEstudiante();
     await cargarEstudiantes();
   } catch (error) {
     console.error("Error al asignar curso al estudiante:", error);
