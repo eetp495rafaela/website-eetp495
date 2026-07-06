@@ -2183,13 +2183,13 @@ if (btnVerUsuarios) {
 btnImportarUsuarios.addEventListener("click", () => {
   archivoImportacionUsuarios.click();
 });
-archivoImportacionUsuarios.addEventListener("change", () => {
+archivoImportacionUsuarios.addEventListener("change", async () => {
   const archivo = archivoImportacionUsuarios.files[0];
 
   if (!archivo) return;
 
   if (!window.XLSX) {
-    Swal.fire({
+    await Swal.fire({
       title: "Lector de Excel no disponible",
       text: "No se pudo cargar la herramienta para leer archivos. Recargá la página e intentá nuevamente.",
       icon: "error",
@@ -2200,12 +2200,56 @@ archivoImportacionUsuarios.addEventListener("change", () => {
     return;
   }
 
-  Swal.fire({
-    title: "Archivo seleccionado",
-    text: `Se preparó el archivo: ${archivo.name}`,
-    icon: "success",
-    confirmButtonText: "Continuar",
-  });
+  try {
+    const datosArchivo = await archivo.arrayBuffer();
+
+    const libro = XLSX.read(datosArchivo, {
+      type: "array",
+    });
+
+    const nombrePrimeraHoja = libro.SheetNames[0];
+    const hoja = libro.Sheets[nombrePrimeraHoja];
+
+    const filas = XLSX.utils.sheet_to_json(hoja, {
+      defval: "",
+    });
+
+    if (!filas.length) {
+      await Swal.fire({
+        title: "Archivo sin usuarios",
+        text: "No se encontraron filas con datos en la primera hoja.",
+        icon: "warning",
+        confirmButtonText: "Aceptar",
+      });
+
+      archivoImportacionUsuarios.value = "";
+      return;
+    }
+
+    console.log("Filas importadas desde Excel:", filas);
+
+    await Swal.fire({
+      title: "Archivo leído correctamente",
+      html: `
+        <p><strong>Archivo:</strong> ${archivo.name}</p>
+        <p><strong>Usuarios encontrados:</strong> ${filas.length}</p>
+        <p>En el próximo paso validaremos las columnas y los datos.</p>
+      `,
+      icon: "success",
+      confirmButtonText: "Continuar",
+    });
+  } catch (error) {
+    console.error("Error al leer archivo de importación:", error);
+
+    await Swal.fire({
+      title: "No se pudo leer el archivo",
+      text: "Verificá que sea un Excel o CSV válido e intentá nuevamente.",
+      icon: "error",
+      confirmButtonText: "Aceptar",
+    });
+  } finally {
+    archivoImportacionUsuarios.value = "";
+  }
 });
 
 if (formEditar) {
