@@ -63,6 +63,45 @@ const cuerpoTablaEstudiantes = document.getElementById(
 );
 
 const mensajeEstudiantes = document.getElementById("mensajeEstudiantes");
+const modalAsignarCursoEstudiante = document.getElementById(
+  "modalAsignarCursoEstudiante",
+);
+
+const formAsignarCursoEstudiante = document.getElementById(
+  "formAsignarCursoEstudiante",
+);
+
+const asignarCursoEstudianteCorreo = document.getElementById(
+  "asignarCursoEstudianteCorreo",
+);
+
+const asignarCursoEstudianteAnio = document.getElementById(
+  "asignarCursoEstudianteAnio",
+);
+
+const asignarCursoEstudianteDivision = document.getElementById(
+  "asignarCursoEstudianteDivision",
+);
+
+const asignarCursoEstudianteGrupo = document.getElementById(
+  "asignarCursoEstudianteGrupo",
+);
+
+const subtituloAsignarCursoEstudiante = document.getElementById(
+  "subtituloAsignarCursoEstudiante",
+);
+
+const mensajeAsignarCursoEstudiante = document.getElementById(
+  "mensajeAsignarCursoEstudiante",
+);
+
+const btnCerrarAsignacionCursoEstudiante = document.getElementById(
+  "btnCerrarAsignacionCursoEstudiante",
+);
+
+const btnCancelarAsignacionCursoEstudiante = document.getElementById(
+  "btnCancelarAsignacionCursoEstudiante",
+);
 const btnImportarUsuarios = document.getElementById("btnImportarUsuarios");
 
 const archivoImportacionUsuarios = document.getElementById(
@@ -202,6 +241,7 @@ const btnGuardarEdicion = document.getElementById("btnGuardarEdicion");
 let usuarioSoporte = null;
 let usuariosCargados = [];
 let estudiantesCargados = [];
+let estudianteEnAsignacion = null;
 let cursoEnEdicion = null;
 let asignacionEnEdicion = null;
 let usuarioEnEdicion = null;
@@ -380,7 +420,7 @@ function renderizarEstudiantes(estudiantes) {
       : '<i class="fa-solid fa-school"></i> Asignar curso';
 
     btnAsignarCurso.addEventListener("click", () => {
-      console.log("Estudiante seleccionado para asignación:", estudiante);
+      abrirModalAsignarCursoEstudiante(estudiante);
     });
 
     contenedorAcciones.appendChild(btnAsignarCurso);
@@ -507,6 +547,56 @@ function cerrarModalEditarCurso() {
   modalEditarCurso.setAttribute("aria-hidden", "true");
   document.body.style.overflow = "";
 }
+
+function abrirModalAsignarCursoEstudiante(estudiante) {
+  estudianteEnAsignacion = estudiante;
+
+  asignarCursoEstudianteCorreo.value = estudiante.correo || "";
+
+  subtituloAsignarCursoEstudiante.textContent = `${estudiante.nombreCompleto || "Estudiante"} — ${estudiante.correo || ""}`;
+
+  asignarCursoEstudianteAnio.value = estudiante.cursoAnio || "";
+
+  asignarCursoEstudianteDivision.value = estudiante.cursoDivision || "";
+
+  asignarCursoEstudianteGrupo.value = estudiante.grupoTaller || "";
+
+  mensajeAsignarCursoEstudiante.textContent = "";
+
+  modalAsignarCursoEstudiante.classList.add("mostrar");
+  modalAsignarCursoEstudiante.setAttribute("aria-hidden", "false");
+
+  document.body.style.overflow = "hidden";
+}
+
+function cerrarModalAsignarCursoEstudiante() {
+  estudianteEnAsignacion = null;
+
+  formAsignarCursoEstudiante.reset();
+  mensajeAsignarCursoEstudiante.textContent = "";
+
+  modalAsignarCursoEstudiante.classList.remove("mostrar");
+  modalAsignarCursoEstudiante.setAttribute("aria-hidden", "true");
+
+  document.body.style.overflow = "";
+}
+
+btnCerrarAsignacionCursoEstudiante.addEventListener(
+  "click",
+  cerrarModalAsignarCursoEstudiante,
+);
+
+btnCancelarAsignacionCursoEstudiante.addEventListener(
+  "click",
+  cerrarModalAsignarCursoEstudiante,
+);
+
+modalAsignarCursoEstudiante.addEventListener("click", (event) => {
+  if (event.target === modalAsignarCursoEstudiante) {
+    cerrarModalAsignarCursoEstudiante();
+  }
+});
+
 async function cambiarEstadoCurso(curso) {
   const estaActivo = curso.estado !== "INACTIVO";
 

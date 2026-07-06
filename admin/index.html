@@ -1033,6 +1033,98 @@
         </form>
       </div>
     </div>
+
+    <div
+      class="modal-edicion"
+      id="modalAsignarCursoEstudiante"
+      aria-hidden="true"
+    >
+      <div
+        class="modal-edicion-contenido"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="tituloAsignarCursoEstudiante"
+      >
+        <div class="modal-edicion-cabecera">
+          <div>
+            <h3 id="tituloAsignarCursoEstudiante">
+              Asignar curso al estudiante
+            </h3>
+            <p id="subtituloAsignarCursoEstudiante"></p>
+          </div>
+
+          <button
+            class="btn-cerrar-modal"
+            id="btnCerrarAsignacionCursoEstudiante"
+            type="button"
+            aria-label="Cerrar"
+          >
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+
+        <form id="formAsignarCursoEstudiante" class="formulario-edicion">
+          <input id="asignarCursoEstudianteCorreo" type="hidden" />
+
+          <div class="form-grid">
+            <div class="campo-formulario">
+              <label for="asignarCursoEstudianteAnio">Año *</label>
+
+              <select id="asignarCursoEstudianteAnio" required>
+                <option value="">Seleccionar año</option>
+                <option value="1">1º</option>
+                <option value="2">2º</option>
+                <option value="3">3º</option>
+                <option value="4">4º</option>
+                <option value="5">5º</option>
+                <option value="6">6º</option>
+              </select>
+            </div>
+
+            <div class="campo-formulario">
+              <label for="asignarCursoEstudianteDivision"> División * </label>
+
+              <select id="asignarCursoEstudianteDivision" required>
+                <option value="">Seleccionar división</option>
+                <option value="A">A</option>
+                <option value="B">B</option>
+                <option value="C">C</option>
+              </select>
+            </div>
+
+            <div class="campo-formulario">
+              <label for="asignarCursoEstudianteGrupo">
+                Grupo de Taller *
+              </label>
+
+              <select id="asignarCursoEstudianteGrupo" required>
+                <option value="">Seleccionar grupo</option>
+                <option value="G1">G1</option>
+                <option value="G2">G2</option>
+              </select>
+            </div>
+          </div>
+
+          <p id="mensajeAsignarCursoEstudiante" class="mensaje-formulario"></p>
+
+          <div class="acciones-modal">
+            <button
+              class="btn-secundario"
+              id="btnCancelarAsignacionCursoEstudiante"
+              type="button"
+            >
+              Cancelar
+            </button>
+
+            <button class="btn-accion" type="submit">
+              <i class="fa-solid fa-floppy-disk"></i>
+              Guardar asignación
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
     <button
       class="btn-arriba"
       id="btnArriba"
