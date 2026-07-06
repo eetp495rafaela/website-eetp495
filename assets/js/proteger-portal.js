@@ -41,10 +41,21 @@ function normalizarCorreo(correo) {
     .toLowerCase();
 }
 
-function obtenerRolEsperado() {
-  return String(document.body.dataset.rolPermitido || "")
+function obtenerRolesPermitidos() {
+  const rolUnico = String(document.body.dataset.rolPermitido || "")
     .trim()
     .toUpperCase();
+
+  const rolesMultiples = String(document.body.dataset.rolesPermitidos || "")
+    .split(",")
+    .map((rol) => rol.trim().toUpperCase())
+    .filter(Boolean);
+
+  if (rolesMultiples.length) {
+    return rolesMultiples;
+  }
+
+  return rolUnico ? [rolUnico] : [];
 }
 
 function mostrarDatosUsuario(perfil, user, correo, rolUsuario) {
@@ -127,9 +138,9 @@ function accesoVencido(fechaFinAcceso) {
 }
 
 onAuthStateChanged(auth, async (user) => {
-  const rolEsperado = obtenerRolEsperado();
+  const rolesPermitidos = obtenerRolesPermitidos();
 
-  if (!user || !rolEsperado) {
+  if (!user || !rolesPermitidos.length) {
     volverAlLogin();
     return;
   }
@@ -174,7 +185,7 @@ onAuthStateChanged(auth, async (user) => {
       return;
     }
 
-    if (rolUsuario !== rolEsperado) {
+    if (!rolesPermitidos.includes(rolUsuario)) {
       await signOut(auth);
       volverAlLogin("Tu cuenta no tiene permiso para este portal.");
       return;

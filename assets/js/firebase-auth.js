@@ -122,6 +122,11 @@ async function procesarUsuarioAutenticado(user) {
         return;
       }
 
+      if (["PRECEPTORIA", "SECRETARIA", "DIRECCION"].includes(perfil.rol)) {
+        window.location.href = "gestion/index.html";
+        return;
+      }
+
       mostrarMensaje("Tu cuenta no tiene un portal asignado.");
       boton.disabled = false;
     }, 900);
