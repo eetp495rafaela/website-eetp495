@@ -374,6 +374,52 @@ function cerrarModalEditarCurso() {
   modalEditarCurso.setAttribute("aria-hidden", "true");
   document.body.style.overflow = "";
 }
+async function cambiarEstadoCurso(curso) {
+  const estaActivo = curso.estado !== "INACTIVO";
+
+  const nuevoEstado = estaActivo ? "INACTIVO" : "ACTIVO";
+
+  const accion = estaActivo ? "desactivar" : "activar";
+
+  const confirmacion = await Swal.fire({
+    title: `¿${estaActivo ? "Desactivar" : "Activar"} curso?`,
+    text: estaActivo
+      ? `El curso ${curso.nombre} dejará de estar disponible para nuevas asignaciones.`
+      : `El curso ${curso.nombre} volverá a estar disponible.`,
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonText: `Sí, ${accion}`,
+    cancelButtonText: "Cancelar",
+    confirmButtonColor: estaActivo ? "#dc3545" : "#198754",
+  });
+
+  if (!confirmacion.isConfirmed) return;
+
+  try {
+    await updateDoc(doc(db, "cursos", curso.id), {
+      estado: nuevoEstado,
+      actualizadoEn: serverTimestamp(),
+    });
+
+    await Swal.fire({
+      title: "Cambio realizado",
+      text: `El curso fue ${estaActivo ? "desactivado" : "activado"} correctamente.`,
+      icon: "success",
+      confirmButtonText: "Aceptar",
+    });
+
+    await cargarCursos();
+  } catch (error) {
+    console.error("Error al cambiar el estado del curso:", error);
+
+    await Swal.fire({
+      title: "No se pudo realizar el cambio",
+      text: "Revisá la conexión o los permisos de Firebase.",
+      icon: "error",
+      confirmButtonText: "Aceptar",
+    });
+  }
+}
 
 btnCerrarEdicionCurso.addEventListener("click", cerrarModalEditarCurso);
 
