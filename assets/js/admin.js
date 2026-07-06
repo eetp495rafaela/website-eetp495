@@ -2309,6 +2309,44 @@ function validarFilasImportacionUsuarios(filas) {
     usuariosValidos,
   };
 }
+
+async function revisarUsuariosExistentes(usuarios) {
+  const correosRepetidos = [];
+  const correosVistos = new Set();
+
+  usuarios.forEach((usuario) => {
+    if (correosVistos.has(usuario.correo)) {
+      correosRepetidos.push(usuario.correo);
+    }
+
+    correosVistos.add(usuario.correo);
+  });
+
+  const usuariosSinDuplicados = usuarios.filter(
+    (usuario, indice) =>
+      usuarios.findIndex((item) => item.correo === usuario.correo) === indice,
+  );
+
+  const resultados = await Promise.all(
+    usuariosSinDuplicados.map(async (usuario) => {
+      const referenciaUsuario = doc(db, "usuarios", usuario.correo);
+
+      const documentoUsuario = await getDoc(referenciaUsuario);
+
+      return {
+        ...usuario,
+        existe: documentoUsuario.exists(),
+      };
+    }),
+  );
+
+  return {
+    nuevos: resultados.filter((usuario) => !usuario.existe),
+    existentes: resultados.filter((usuario) => usuario.existe),
+    correosRepetidos: [...new Set(correosRepetidos)],
+  };
+}
+
 archivoImportacionUsuarios.addEventListener("change", async () => {
   const archivo = archivoImportacionUsuarios.files[0];
 
@@ -2427,10 +2465,74 @@ archivoImportacionUsuarios.addEventListener("change", async () => {
       return;
     }
 
-    console.log(
-      "Importación confirmada. Usuarios pendientes:",
+    const revision = await revisarUsuariosExistentes(
       validacion.usuariosValidos,
     );
+
+    const listaExistentes = revision.existentes
+      .slice(0, 8)
+      .map(
+        (usuario) => `<li>${usuario.nombreCompleto} — ${usuario.correo}</li>`,
+      )
+      .join("");
+
+    const listaRepetidos = revision.correosRepetidos
+      .slice(0, 8)
+      .map((correo) => `<li>${correo}</li>`)
+      .join("");
+
+    const masExistentes =
+      revision.existentes.length > 8
+        ? `<p>Y ${revision.existentes.length - 8} usuario(s) existente(s) más.</p>`
+        : "";
+
+    const masRepetidos =
+      revision.correosRepetidos.length > 8
+        ? `<p>Y ${revision.correosRepetidos.length - 8} correo(s) repetido(s) más.</p>`
+        : "";
+
+    await Swal.fire({
+      title: "Revisión de usuarios completada",
+      html: `
+    <p><strong>Usuarios nuevos:</strong> ${revision.nuevos.length}</p>
+    <p><strong>Ya registrados:</strong> ${revision.existentes.length}</p>
+    <p><strong>Correos repetidos en el archivo:</strong> ${revision.correosRepetidos.length}</p>
+
+    ${
+      listaExistentes
+        ? `
+          <hr style="margin:16px 0;">
+          <p><strong>Usuarios ya registrados:</strong></p>
+          <ul style="text-align:left; margin:8px 0 0;">
+            ${listaExistentes}
+          </ul>
+          ${masExistentes}
+        `
+        : ""
+    }
+
+    ${
+      listaRepetidos
+        ? `
+          <hr style="margin:16px 0;">
+          <p><strong>Correos repetidos en el Excel:</strong></p>
+          <ul style="text-align:left; margin:8px 0 0;">
+            ${listaRepetidos}
+          </ul>
+          ${masRepetidos}
+        `
+        : ""
+    }
+
+    <p style="margin-top:16px;">
+      Todavía no se creó ningún usuario.
+    </p>
+  `,
+      icon: "info",
+      confirmButtonText: "Aceptar",
+    });
+
+    console.log("Usuarios nuevos para importar:", revision.nuevos);
   } catch (error) {
     console.error("Error al leer archivo de importación:", error);
 
