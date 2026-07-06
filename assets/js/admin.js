@@ -416,7 +416,7 @@ function renderizarEstudiantes(estudiantes) {
     btnAsignarCurso.className = "btn-tabla btn-editar";
 
     btnAsignarCurso.innerHTML = estudiante.cursoNombre
-      ? '<i class="fa-solid fa-pen-to-square"></i> Cambiar curso'
+      ? '<i class="fa-solid fa-pen-to-square"></i> Editar'
       : '<i class="fa-solid fa-school"></i> Asignar curso';
 
     btnAsignarCurso.addEventListener("click", () => {
@@ -2970,18 +2970,6 @@ if (archivoImportacionCursosAlumnos) {
           confirmButtonText: "Aceptar",
         });
       }
-
-      await Swal.fire({
-        title: "Archivo leído correctamente",
-        html: `
-            <p><strong>Archivo:</strong> ${archivo.name}</p>
-            <p><strong>Filas encontradas:</strong> ${filas.length}</p>
-<p><strong>Asignaciones válidas:</strong> ${validacionCursos.asignacionesValidas.length}</p>
-            <p>En el próximo paso validaremos correo, año, división y grupo.</p>
-          `,
-        icon: "success",
-        confirmButtonText: "Continuar",
-      });
     } catch (error) {
       console.error("Error al leer archivo de cursos de alumnos:", error);
 
