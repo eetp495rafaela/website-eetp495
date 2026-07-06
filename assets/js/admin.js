@@ -597,6 +597,87 @@ modalAsignarCursoEstudiante.addEventListener("click", (event) => {
   }
 });
 
+formAsignarCursoEstudiante.addEventListener("submit", async (event) => {
+  event.preventDefault();
+
+  if (!estudianteEnAsignacion) {
+    return;
+  }
+
+  const anio = Number(asignarCursoEstudianteAnio.value);
+  const division = String(asignarCursoEstudianteDivision.value || "")
+    .trim()
+    .toUpperCase();
+
+  const grupoTaller = String(asignarCursoEstudianteGrupo.value || "")
+    .trim()
+    .toUpperCase();
+
+  if (!anio || !division || !["G1", "G2"].includes(grupoTaller)) {
+    mensajeAsignarCursoEstudiante.textContent =
+      "Completá año, división y grupo de taller.";
+    mensajeAsignarCursoEstudiante.className = "mensaje-formulario error";
+    return;
+  }
+
+  try {
+    mensajeAsignarCursoEstudiante.textContent = "Verificando curso...";
+    mensajeAsignarCursoEstudiante.className = "mensaje-formulario";
+
+    const consultaCursos = await getDocs(collection(db, "cursos"));
+
+    const curso = consultaCursos.docs
+      .map((documento) => ({
+        id: documento.id,
+        ...documento.data(),
+      }))
+      .find(
+        (item) =>
+          Number(item.anio) === anio &&
+          String(item.division || "")
+            .trim()
+            .toUpperCase() === division &&
+          String(item.estado || "ACTIVO")
+            .trim()
+            .toUpperCase() === "ACTIVO",
+      );
+
+    if (!curso) {
+      mensajeAsignarCursoEstudiante.textContent = `No existe un curso activo para ${anio}º ${division}.`;
+      mensajeAsignarCursoEstudiante.className = "mensaje-formulario error";
+      return;
+    }
+
+    await updateDoc(doc(db, "usuarios", estudianteEnAsignacion.correo), {
+      cursoId: curso.id,
+      cursoAnio: anio,
+      cursoDivision: division,
+      cursoNombre: curso.nombre || `${anio}º ${division}`,
+      grupoTaller,
+      actualizadoEn: serverTimestamp(),
+    });
+
+    await Swal.fire({
+      title: "Curso asignado",
+      html: `
+          <p><strong>${estudianteEnAsignacion.nombreCompleto}</strong></p>
+          <p>${curso.nombre || `${anio}º ${division}`} · ${grupoTaller}</p>
+        `,
+      icon: "success",
+      confirmButtonText: "Aceptar",
+    });
+
+    cerrarModalAsignarCursoEstudiante();
+    await cargarEstudiantes();
+  } catch (error) {
+    console.error("Error al asignar curso al estudiante:", error);
+
+    mensajeAsignarCursoEstudiante.textContent =
+      "No se pudo guardar la asignación. Revisá conexión o permisos.";
+    mensajeAsignarCursoEstudiante.className = "mensaje-formulario error";
+  }
+});
+
 async function cambiarEstadoCurso(curso) {
   const estaActivo = curso.estado !== "INACTIVO";
 
