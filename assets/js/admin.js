@@ -2746,6 +2746,40 @@ async function revisarAsignacionesCursosAlumnos(asignaciones) {
   };
 }
 
+async function importarAsignacionesCursosAlumnos(asignaciones) {
+  if (!asignaciones.length) {
+    return 0;
+  }
+
+  const TAMANIO_LOTE = 450;
+  let cantidadActualizada = 0;
+
+  for (let inicio = 0; inicio < asignaciones.length; inicio += TAMANIO_LOTE) {
+    const grupoAsignaciones = asignaciones.slice(inicio, inicio + TAMANIO_LOTE);
+
+    const lote = writeBatch(db);
+
+    grupoAsignaciones.forEach((asignacion) => {
+      const referenciaUsuario = doc(db, "usuarios", asignacion.correo);
+
+      lote.update(referenciaUsuario, {
+        cursoId: asignacion.cursoId,
+        cursoAnio: asignacion.anio,
+        cursoDivision: asignacion.division,
+        cursoNombre: asignacion.cursoNombre,
+        grupoTaller: asignacion.grupoTaller || null,
+        actualizadoEn: serverTimestamp(),
+      });
+    });
+
+    await lote.commit();
+
+    cantidadActualizada += grupoAsignaciones.length;
+  }
+
+  return cantidadActualizada;
+}
+
 if (archivoImportacionCursosAlumnos) {
   archivoImportacionCursosAlumnos.addEventListener("change", async () => {
     const archivo = archivoImportacionCursosAlumnos.files[0];
@@ -2850,29 +2884,100 @@ if (archivoImportacionCursosAlumnos) {
         (item) => item.yaTeniaCurso,
       );
 
-      await Swal.fire({
-        title: "Revisión de asignaciones completada",
+      if (!revisionCursos.correctas.length) {
+        await Swal.fire({
+          title: "No hay asignaciones válidas para importar",
+          text: "Revisá los errores informados antes de continuar.",
+          icon: "info",
+          confirmButtonText: "Aceptar",
+        });
+
+        return;
+      }
+
+      const asignacionesNuevas = revisionCursos.correctas.filter(
+        (item) => !item.yaTeniaCurso,
+      );
+
+      const asignacionesActualizar = revisionCursos.correctas.filter(
+        (item) => item.yaTeniaCurso,
+      );
+
+      const confirmacionAsignaciones = await Swal.fire({
+        title: "¿Asignar cursos a estudiantes?",
         html: `
-    <p><strong>Asignaciones correctas:</strong> ${revisionCursos.correctas.length}</p>
-    <p><strong>Alumnos sin curso previo:</strong> ${asignacionesNuevas.length}</p>
-    <p><strong>Alumnos con curso a actualizar:</strong> ${asignacionesActualizar.length}</p>
-    <p><strong>Correos inexistentes:</strong> ${revisionCursos.correosInexistentes.length}</p>
-    <p><strong>Usuarios que no son alumnos:</strong> ${revisionCursos.noSonAlumnos.length}</p>
-    <p><strong>Cursos inexistentes o inactivos:</strong> ${revisionCursos.cursosInexistentes.length}</p>
-    <p><strong>Correos repetidos en el Excel:</strong> ${revisionCursos.correosRepetidos.length}</p>
+    <p>Se actualizarán <strong>${revisionCursos.correctas.length}</strong> estudiante(s).</p>
+
+    <p><strong>Sin curso previo:</strong> ${asignacionesNuevas.length}</p>
+    <p><strong>Con curso a actualizar:</strong> ${asignacionesActualizar.length}</p>
+
+    ${
+      revisionCursos.correosInexistentes.length ||
+      revisionCursos.noSonAlumnos.length ||
+      revisionCursos.cursosInexistentes.length ||
+      revisionCursos.correosRepetidos.length
+        ? `
+          <hr style="margin:16px 0;">
+          <p><strong>Se omitirán los registros con problemas:</strong></p>
+          <p>Correos inexistentes: ${revisionCursos.correosInexistentes.length}</p>
+          <p>No son alumnos: ${revisionCursos.noSonAlumnos.length}</p>
+          <p>Cursos inexistentes o inactivos: ${revisionCursos.cursosInexistentes.length}</p>
+          <p>Correos repetidos: ${revisionCursos.correosRepetidos.length}</p>
+        `
+        : ""
+    }
 
     <p style="margin-top:16px;">
-      Todavía no se modificó ningún estudiante.
+      Los datos del Excel reemplazarán cualquier curso o grupo cargado previamente.
     </p>
   `,
-        icon: "info",
-        confirmButtonText: "Aceptar",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonText: `Sí, asignar ${revisionCursos.correctas.length}`,
+        cancelButtonText: "Cancelar",
+        confirmButtonColor: "#198754",
       });
 
-      console.log(
-        "Asignaciones correctas para importar:",
-        revisionCursos.correctas,
-      );
+      if (!confirmacionAsignaciones.isConfirmed) {
+        return;
+      }
+
+      try {
+        Swal.fire({
+          title: "Asignando cursos...",
+          text: "Por favor, esperá un momento.",
+          allowOutsideClick: false,
+          allowEscapeKey: false,
+          didOpen: () => {
+            Swal.showLoading();
+          },
+        });
+
+        const cantidadActualizada = await importarAsignacionesCursosAlumnos(
+          revisionCursos.correctas,
+        );
+
+        await Swal.fire({
+          title: "Asignación completada",
+          html: `
+      <p>Se actualizaron correctamente <strong>${cantidadActualizada}</strong> estudiante(s).</p>
+      <p>El curso y el grupo de Taller ya quedaron registrados.</p>
+    `,
+          icon: "success",
+          confirmButtonText: "Aceptar",
+        });
+
+        await cargarEstudiantes();
+      } catch (error) {
+        console.error("Error al importar asignaciones de cursos:", error);
+
+        await Swal.fire({
+          title: "No se pudo completar la asignación",
+          text: "No se pudieron actualizar los estudiantes. Revisá conexión, permisos y volvé a intentarlo.",
+          icon: "error",
+          confirmButtonText: "Aceptar",
+        });
+      }
 
       await Swal.fire({
         title: "Archivo leído correctamente",
