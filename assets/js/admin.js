@@ -2876,14 +2876,6 @@ if (archivoImportacionCursosAlumnos) {
         validacionCursos.asignacionesValidas,
       );
 
-      const asignacionesNuevas = revisionCursos.correctas.filter(
-        (item) => !item.yaTeniaCurso,
-      );
-
-      const asignacionesActualizar = revisionCursos.correctas.filter(
-        (item) => item.yaTeniaCurso,
-      );
-
       if (!revisionCursos.correctas.length) {
         await Swal.fire({
           title: "No hay asignaciones válidas para importar",
