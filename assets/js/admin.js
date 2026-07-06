@@ -2352,27 +2352,36 @@ async function importarUsuariosNuevos(usuarios) {
     return 0;
   }
 
-  const lote = writeBatch(db);
+  const TAMANIO_LOTE = 450;
+  let cantidadImportada = 0;
 
-  usuarios.forEach((usuario) => {
-    const referencia = doc(db, "usuarios", usuario.correo);
+  for (let inicio = 0; inicio < usuarios.length; inicio += TAMANIO_LOTE) {
+    const grupoUsuarios = usuarios.slice(inicio, inicio + TAMANIO_LOTE);
 
-    lote.set(referencia, {
-      correo: usuario.correo,
-      nombreCompleto: usuario.nombreCompleto,
-      rol: usuario.rol,
-      estado: "ACTIVO",
-      tipoVinculo: usuario.tipoVinculo,
-      fechaFinAcceso: usuario.fechaFinAcceso || null,
-      fechaAlta: serverTimestamp(),
-      actualizadoEn: serverTimestamp(),
-      creadoPor: normalizarCorreo(usuarioSoporte.email),
+    const lote = writeBatch(db);
+
+    grupoUsuarios.forEach((usuario) => {
+      const referencia = doc(db, "usuarios", usuario.correo);
+
+      lote.set(referencia, {
+        correo: usuario.correo,
+        nombreCompleto: usuario.nombreCompleto,
+        rol: usuario.rol,
+        estado: "ACTIVO",
+        tipoVinculo: usuario.tipoVinculo,
+        fechaFinAcceso: usuario.fechaFinAcceso || null,
+        fechaAlta: serverTimestamp(),
+        actualizadoEn: serverTimestamp(),
+        creadoPor: normalizarCorreo(usuarioSoporte.email),
+      });
     });
-  });
 
-  await lote.commit();
+    await lote.commit();
 
-  return usuarios.length;
+    cantidadImportada += grupoUsuarios.length;
+  }
+
+  return cantidadImportada;
 }
 
 archivoImportacionUsuarios.addEventListener("change", async () => {
