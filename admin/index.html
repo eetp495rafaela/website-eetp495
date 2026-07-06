@@ -532,6 +532,7 @@
                   <th>Tipo</th>
                   <th>Ciclo lectivo</th>
                   <th>Estado</th>
+                  <th>Acciones</th>
                 </tr>
               </thead>
 
@@ -661,6 +662,106 @@
           Volver al inicio
         </a>
       </section>
+      <div class="modal-edicion" id="modalEditarAsignacion" aria-hidden="true">
+        <div
+          class="modal-edicion-contenido"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="tituloEditarAsignacion"
+        >
+          <div class="modal-edicion-cabecera">
+            <div>
+              <h3 id="tituloEditarAsignacion">Editar asignación</h3>
+              <p>Actualizá los datos de la asignación docente.</p>
+            </div>
+
+            <button
+              class="btn-cerrar-modal"
+              id="btnCerrarEdicionAsignacion"
+              type="button"
+              aria-label="Cerrar"
+            >
+              <i class="fa-solid fa-xmark"></i>
+            </button>
+          </div>
+
+          <form id="formEditarAsignacion" class="formulario-edicion">
+            <input id="editarAsignacionIdOriginal" type="hidden" />
+
+            <div class="form-grid">
+              <div class="campo-formulario campo-doble">
+                <label for="editarAsignacionDocente">Docente *</label>
+
+                <select id="editarAsignacionDocente" required>
+                  <option value="">Cargando docentes...</option>
+                </select>
+              </div>
+
+              <div class="campo-formulario">
+                <label for="editarAsignacionCurso">Curso *</label>
+
+                <select id="editarAsignacionCurso" required>
+                  <option value="">Cargando cursos...</option>
+                </select>
+              </div>
+
+              <div class="campo-formulario">
+                <label for="editarAsignacionEspacio">
+                  Espacio curricular *
+                </label>
+
+                <select id="editarAsignacionEspacio" required>
+                  <option value="">Seleccioná primero un curso</option>
+                </select>
+              </div>
+
+              <div class="campo-formulario">
+                <label for="editarAsignacionCicloLectivo">
+                  Ciclo lectivo *
+                </label>
+
+                <input
+                  id="editarAsignacionCicloLectivo"
+                  type="number"
+                  min="2020"
+                  max="2100"
+                  required
+                />
+              </div>
+
+              <div class="campo-formulario">
+                <label for="editarAsignacionEstado">Estado</label>
+
+                <select id="editarAsignacionEstado">
+                  <option value="ACTIVA">ACTIVA</option>
+                  <option value="INACTIVA">INACTIVA</option>
+                </select>
+              </div>
+            </div>
+
+            <p id="mensajeEditarAsignacion" class="mensaje-formulario"></p>
+
+            <div class="acciones-modal">
+              <button
+                class="btn-secundario"
+                id="btnCancelarEdicionAsignacion"
+                type="button"
+              >
+                Cancelar
+              </button>
+
+              <button
+                class="btn-accion"
+                id="btnGuardarEdicionAsignacion"
+                type="submit"
+              >
+                <i class="fa-solid fa-floppy-disk"></i>
+                Guardar cambios
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
     </main>
 
     <div class="modal-edicion" id="modalEditarUsuario" aria-hidden="true">

@@ -91,6 +91,47 @@ const mensajeRegistroAsignacion = document.getElementById(
   "mensajeRegistroAsignacion",
 );
 const mensajeAsignaciones = document.getElementById("mensajeAsignaciones");
+const modalEditarAsignacion = document.getElementById("modalEditarAsignacion");
+
+const formEditarAsignacion = document.getElementById("formEditarAsignacion");
+
+const editarAsignacionIdOriginal = document.getElementById(
+  "editarAsignacionIdOriginal",
+);
+
+const editarAsignacionDocente = document.getElementById(
+  "editarAsignacionDocente",
+);
+
+const editarAsignacionCurso = document.getElementById("editarAsignacionCurso");
+
+const editarAsignacionEspacio = document.getElementById(
+  "editarAsignacionEspacio",
+);
+
+const editarAsignacionCicloLectivo = document.getElementById(
+  "editarAsignacionCicloLectivo",
+);
+
+const editarAsignacionEstado = document.getElementById(
+  "editarAsignacionEstado",
+);
+
+const mensajeEditarAsignacion = document.getElementById(
+  "mensajeEditarAsignacion",
+);
+
+const btnCerrarEdicionAsignacion = document.getElementById(
+  "btnCerrarEdicionAsignacion",
+);
+
+const btnCancelarEdicionAsignacion = document.getElementById(
+  "btnCancelarEdicionAsignacion",
+);
+
+const btnGuardarEdicionAsignacion = document.getElementById(
+  "btnGuardarEdicionAsignacion",
+);
 const btnCerrarSesion = document.getElementById("btnCerrarSesion");
 const modalEditar = document.getElementById("modalEditarUsuario");
 const formEditar = document.getElementById("formEditarUsuario");
@@ -107,6 +148,7 @@ const btnGuardarEdicion = document.getElementById("btnGuardarEdicion");
 
 let usuarioSoporte = null;
 let usuariosCargados = [];
+let asignacionEnEdicion = null;
 let usuarioEnEdicion = null;
 
 function normalizarCorreo(correo) {
@@ -1097,7 +1139,405 @@ async function registrarAsignacion(event) {
     btnRegistrarAsignacion.disabled = false;
   }
 }
+function mostrarMensajeEdicionAsignacion(texto, tipo = "") {
+  if (!mensajeEditarAsignacion) return;
 
+  mensajeEditarAsignacion.textContent = texto;
+  mensajeEditarAsignacion.className = `mensaje-formulario ${tipo}`.trim();
+}
+
+function cerrarModalEditarAsignacion() {
+  if (!modalEditarAsignacion) return;
+
+  modalEditarAsignacion.classList.remove("abierta");
+  modalEditarAsignacion.setAttribute("aria-hidden", "true");
+
+  document.body.classList.remove("modal-abierto");
+
+  asignacionEnEdicion = null;
+
+  if (formEditarAsignacion) {
+    formEditarAsignacion.reset();
+  }
+
+  mostrarMensajeEdicionAsignacion("");
+}
+
+async function cargarDocentesEnSelect(select, correoSeleccionado = "") {
+  limpiarSelect(select, "Seleccionar docente");
+
+  const consulta = await getDocs(collection(db, "usuarios"));
+
+  const docentes = consulta.docs
+    .map((documento) => documento.data())
+    .filter((usuario) => {
+      const rol = String(usuario.rol || "")
+        .trim()
+        .toUpperCase();
+      const estado = String(usuario.estado || "")
+        .trim()
+        .toUpperCase();
+
+      return rol === "DOCENTE" && estado === "ACTIVO";
+    })
+    .sort((a, b) =>
+      String(a.nombreCompleto || "").localeCompare(
+        String(b.nombreCompleto || ""),
+        "es",
+      ),
+    );
+
+  docentes.forEach((docente) => {
+    const correo = normalizarCorreo(docente.correo);
+
+    agregarOpcion(select, correo, `${docente.nombreCompleto} — ${correo}`);
+  });
+
+  select.value = correoSeleccionado;
+}
+
+async function cargarCursosEnSelect(select, cursoSeleccionado = "") {
+  limpiarSelect(select, "Seleccionar curso");
+
+  const consulta = await getDocs(collection(db, "cursos"));
+
+  const cursos = consulta.docs
+    .map((documento) => ({
+      id: documento.id,
+      ...documento.data(),
+    }))
+    .filter(
+      (curso) =>
+        String(curso.estado || "")
+          .trim()
+          .toUpperCase() === "ACTIVO",
+    )
+    .sort((a, b) => {
+      const diferenciaAnio = Number(a.anio || 0) - Number(b.anio || 0);
+
+      if (diferenciaAnio !== 0) {
+        return diferenciaAnio;
+      }
+
+      return String(a.division || "").localeCompare(
+        String(b.division || ""),
+        "es",
+      );
+    });
+
+  cursos.forEach((curso) => {
+    agregarOpcion(
+      select,
+      curso.id,
+      curso.nombre || `${curso.anio}º ${curso.division}`,
+    );
+  });
+
+  select.value = cursoSeleccionado;
+}
+
+async function cargarEspaciosEnSelect(
+  select,
+  cursoId,
+  espacioSeleccionado = "",
+) {
+  limpiarSelect(select, "Seleccionar espacio curricular");
+
+  if (!cursoId) {
+    limpiarSelect(select, "Seleccioná primero un curso");
+    return;
+  }
+
+  const cursoDocumento = await getDoc(doc(db, "cursos", cursoId));
+
+  if (!cursoDocumento.exists()) {
+    limpiarSelect(select, "Curso no encontrado");
+    return;
+  }
+
+  const curso = cursoDocumento.data();
+  const anioCurso = Number(curso.anio || 0);
+
+  const consulta = await getDocs(collection(db, "espacios_curriculares"));
+
+  const espacios = consulta.docs
+    .map((documento) => ({
+      id: documento.id,
+      ...documento.data(),
+    }))
+    .filter((espacio) => {
+      const estado = String(espacio.estado || "")
+        .trim()
+        .toUpperCase();
+
+      return Number(espacio.anio) === anioCurso && estado === "ACTIVO";
+    })
+    .sort((a, b) =>
+      String(a.nombre || "").localeCompare(String(b.nombre || ""), "es"),
+    );
+
+  espacios.forEach((espacio) => {
+    agregarOpcion(
+      select,
+      espacio.id,
+      `${espacio.nombre} (${textoTipoEspacio(espacio.tipo)})`,
+    );
+  });
+
+  select.value = espacioSeleccionado;
+}
+
+async function abrirModalEditarAsignacion(asignacion) {
+  if (!modalEditarAsignacion) return;
+
+  asignacionEnEdicion = asignacion;
+
+  editarAsignacionIdOriginal.value = asignacion.id;
+  editarAsignacionCicloLectivo.value = asignacion.cicloLectivo || "";
+  editarAsignacionEstado.value = String(
+    asignacion.estado || "ACTIVA",
+  ).toUpperCase();
+
+  mostrarMensajeEdicionAsignacion("Cargando datos...");
+
+  modalEditarAsignacion.classList.add("abierta");
+  modalEditarAsignacion.setAttribute("aria-hidden", "false");
+
+  document.body.classList.add("modal-abierto");
+
+  try {
+    await Promise.all([
+      cargarDocentesEnSelect(editarAsignacionDocente, asignacion.docenteCorreo),
+      cargarCursosEnSelect(editarAsignacionCurso, asignacion.cursoId),
+    ]);
+
+    await cargarEspaciosEnSelect(
+      editarAsignacionEspacio,
+      asignacion.cursoId,
+      asignacion.espacioId,
+    );
+
+    mostrarMensajeEdicionAsignacion("");
+  } catch (error) {
+    console.error("Error al cargar edición de asignación:", error);
+
+    mostrarMensajeEdicionAsignacion(
+      "No se pudieron cargar los datos de la asignación.",
+      "error",
+    );
+  }
+}
+
+function crearCeldaAccionesAsignacion(asignacion) {
+  const celda = document.createElement("td");
+  const contenedor = document.createElement("div");
+
+  contenedor.className = "acciones-tabla";
+
+  const btnEditar = crearBoton(
+    "fa-solid fa-pen-to-square",
+    "Editar",
+    "btn-editar",
+  );
+
+  btnEditar.addEventListener("click", () => {
+    abrirModalEditarAsignacion(asignacion);
+  });
+
+  const estado = String(asignacion.estado || "")
+    .trim()
+    .toUpperCase();
+
+  const activa = estado === "ACTIVA";
+
+  const btnEstado = crearBoton(
+    activa ? "fa-solid fa-ban" : "fa-solid fa-circle-check",
+    activa ? "Desactivar" : "Activar",
+    activa ? "btn-desactivar" : "btn-activar",
+  );
+
+  btnEstado.addEventListener("click", () => {
+    cambiarEstadoAsignacion(asignacion);
+  });
+
+  contenedor.appendChild(btnEditar);
+  contenedor.appendChild(btnEstado);
+
+  celda.appendChild(contenedor);
+
+  return celda;
+}
+
+async function cambiarEstadoAsignacion(asignacion) {
+  const estadoActual = String(asignacion.estado || "")
+    .trim()
+    .toUpperCase();
+
+  const nuevoEstado = estadoActual === "ACTIVA" ? "INACTIVA" : "ACTIVA";
+
+  const accion = nuevoEstado === "ACTIVA" ? "activar" : "desactivar";
+
+  const resultado = await Swal.fire({
+    icon: nuevoEstado === "ACTIVA" ? "question" : "warning",
+    title:
+      nuevoEstado === "ACTIVA"
+        ? "¿Activar asignación?"
+        : "¿Desactivar asignación?",
+    html: `
+      <p>Vas a ${accion} la siguiente asignación:</p>
+      <strong>${asignacion.docenteNombre}</strong>
+      <p style="margin-top: 8px;">
+        ${asignacion.cursoNombre} — ${asignacion.espacioNombre}
+      </p>
+    `,
+    showCancelButton: true,
+    confirmButtonText:
+      nuevoEstado === "ACTIVA" ? "Sí, activar" : "Sí, desactivar",
+    cancelButtonText: "Cancelar",
+    reverseButtons: true,
+    focusCancel: true,
+  });
+
+  if (!resultado.isConfirmed) return;
+
+  try {
+    await updateDoc(doc(db, "asignaciones_docentes", asignacion.id), {
+      estado: nuevoEstado,
+      actualizadoEn: serverTimestamp(),
+      actualizadoPor: normalizarCorreo(usuarioSoporte.email),
+    });
+
+    mostrarMensajeAsignaciones(
+      `Asignación ${accion === "activar" ? "activada" : "desactivada"} correctamente.`,
+      "ok",
+    );
+
+    await cargarAsignaciones();
+  } catch (error) {
+    console.error("Error al cambiar estado de asignación:", error);
+
+    mostrarMensajeAsignaciones("No se pudo actualizar la asignación.", "error");
+  }
+}
+
+async function guardarEdicionAsignacion(event) {
+  event.preventDefault();
+
+  if (!asignacionEnEdicion || !usuarioSoporte) return;
+
+  const docenteCorreo = normalizarCorreo(editarAsignacionDocente.value);
+
+  const cursoId = String(editarAsignacionCurso.value || "").trim();
+  const espacioId = String(editarAsignacionEspacio.value || "").trim();
+
+  const cicloLectivo = Number(editarAsignacionCicloLectivo.value || 0);
+
+  const estado = String(editarAsignacionEstado.value || "ACTIVA")
+    .trim()
+    .toUpperCase();
+
+  if (!docenteCorreo || !cursoId || !espacioId || !cicloLectivo) {
+    mostrarMensajeEdicionAsignacion(
+      "Completá todos los campos obligatorios.",
+      "error",
+    );
+    return;
+  }
+
+  btnGuardarEdicionAsignacion.disabled = true;
+  mostrarMensajeEdicionAsignacion("Guardando cambios...");
+
+  try {
+    const [docenteDocumento, cursoDocumento, espacioDocumento] =
+      await Promise.all([
+        getDoc(doc(db, "usuarios", docenteCorreo)),
+        getDoc(doc(db, "cursos", cursoId)),
+        getDoc(doc(db, "espacios_curriculares", espacioId)),
+      ]);
+
+    if (
+      !docenteDocumento.exists() ||
+      !cursoDocumento.exists() ||
+      !espacioDocumento.exists()
+    ) {
+      throw new Error("No se pudieron validar los datos seleccionados.");
+    }
+
+    const docente = docenteDocumento.data();
+    const curso = cursoDocumento.data();
+    const espacio = espacioDocumento.data();
+
+    if (Number(espacio.anio) !== Number(curso.anio)) {
+      throw new Error("El espacio curricular no corresponde al año del curso.");
+    }
+
+    const nuevoId = crearIdAsignacion(
+      docenteCorreo,
+      cursoId,
+      espacioId,
+      cicloLectivo,
+    );
+
+    const idOriginal = asignacionEnEdicion.id;
+
+    if (nuevoId !== idOriginal) {
+      const duplicada = await getDoc(doc(db, "asignaciones_docentes", nuevoId));
+
+      if (duplicada.exists()) {
+        throw new Error(
+          "Ya existe una asignación igual para ese ciclo lectivo.",
+        );
+      }
+    }
+
+    const datosActualizados = {
+      docenteCorreo,
+      docenteNombre: docente.nombreCompleto || docenteCorreo,
+
+      cursoId,
+      cursoNombre: curso.nombre || `${curso.anio}º ${curso.division}`,
+      cursoAnio: Number(curso.anio),
+      cursoDivision: curso.division || "",
+
+      espacioId,
+      espacioNombre: espacio.nombre || "",
+      espacioTipo: espacio.tipo || "",
+
+      cicloLectivo,
+      estado,
+
+      actualizadoEn: serverTimestamp(),
+      actualizadoPor: normalizarCorreo(usuarioSoporte.email),
+    };
+
+    const lote = writeBatch(db);
+
+    lote.set(doc(db, "asignaciones_docentes", nuevoId), datosActualizados, {
+      merge: true,
+    });
+
+    if (nuevoId !== idOriginal) {
+      lote.delete(doc(db, "asignaciones_docentes", idOriginal));
+    }
+
+    await lote.commit();
+
+    cerrarModalEditarAsignacion();
+
+    mostrarMensajeAsignaciones("Asignación actualizada correctamente.", "ok");
+
+    await cargarAsignaciones();
+  } catch (error) {
+    console.error("Error al guardar edición de asignación:", error);
+
+    mostrarMensajeEdicionAsignacion(
+      error.message || "No se pudo actualizar la asignación.",
+      "error",
+    );
+  } finally {
+    btnGuardarEdicionAsignacion.disabled = false;
+  }
+}
 async function cargarAsignaciones() {
   if (!usuarioSoporte || !cuerpoTablaAsignaciones) {
     return;
@@ -1135,19 +1575,13 @@ async function cargarAsignaciones() {
 
     asignaciones.forEach((asignacion) => {
       const fila = document.createElement("tr");
-
       fila.appendChild(crearCelda(asignacion.docenteNombre));
-
       fila.appendChild(crearCelda(asignacion.cursoNombre));
-
       fila.appendChild(crearCelda(asignacion.espacioNombre));
-
       fila.appendChild(crearCelda(textoTipoEspacio(asignacion.espacioTipo)));
-
       fila.appendChild(crearCelda(asignacion.cicloLectivo));
-
       fila.appendChild(crearCeldaEstado(asignacion.estado));
-
+      fila.appendChild(crearCeldaAccionesAsignacion(asignacion));
       cuerpoTablaAsignaciones.appendChild(fila);
     });
 
@@ -1472,7 +1906,40 @@ if (btnVerEspaciosCurriculares) {
 if (asignacionCurso) {
   asignacionCurso.addEventListener("change", cargarEspaciosAsignacion);
 }
+if (editarAsignacionCurso) {
+  editarAsignacionCurso.addEventListener("change", async () => {
+    await cargarEspaciosEnSelect(
+      editarAsignacionEspacio,
+      editarAsignacionCurso.value,
+    );
+  });
+}
 
+if (formEditarAsignacion) {
+  formEditarAsignacion.addEventListener("submit", guardarEdicionAsignacion);
+}
+
+if (btnCerrarEdicionAsignacion) {
+  btnCerrarEdicionAsignacion.addEventListener(
+    "click",
+    cerrarModalEditarAsignacion,
+  );
+}
+
+if (btnCancelarEdicionAsignacion) {
+  btnCancelarEdicionAsignacion.addEventListener(
+    "click",
+    cerrarModalEditarAsignacion,
+  );
+}
+
+if (modalEditarAsignacion) {
+  modalEditarAsignacion.addEventListener("click", (event) => {
+    if (event.target === modalEditarAsignacion) {
+      cerrarModalEditarAsignacion();
+    }
+  });
+}
 if (formRegistroAsignacion) {
   formRegistroAsignacion.addEventListener("submit", registrarAsignacion);
 }
