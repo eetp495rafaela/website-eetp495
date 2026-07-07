@@ -87,7 +87,40 @@ function formatearFechaCarga(fechaTexto) {
 
 function mostrarDocumentosEnTabla(documentos) {
   if (!cuerpoTablaDocumentacionAdmin) return;
+  const documentosOrdenados = [...documentos].sort((a, b) => {
+    const obtenerAnio = (documento) => {
+      const anioGuardado = Number(documento.cursoAnio || 0);
 
+      if (anioGuardado > 0) {
+        return anioGuardado;
+      }
+
+      const coincidencia = String(documento.curso || "").match(/\d+/);
+
+      return coincidencia ? Number(coincidencia[0]) : 999;
+    };
+
+    const anioA = obtenerAnio(a);
+    const anioB = obtenerAnio(b);
+
+    if (anioA !== anioB) {
+      return anioA - anioB;
+    }
+
+    const tipoA = obtenerEtiquetaTipoDocumento(a.tipoDocumento);
+    const tipoB = obtenerEtiquetaTipoDocumento(b.tipoDocumento);
+
+    const comparacionTipo = tipoA.localeCompare(tipoB, "es");
+
+    if (comparacionTipo !== 0) {
+      return comparacionTipo;
+    }
+
+    return String(a.espacioCurricular || "").localeCompare(
+      String(b.espacioCurricular || ""),
+      "es",
+    );
+  });
   if (!Array.isArray(documentos) || !documentos.length) {
     cuerpoTablaDocumentacionAdmin.innerHTML = `
       <tr>
@@ -100,7 +133,7 @@ function mostrarDocumentosEnTabla(documentos) {
     return;
   }
 
-  cuerpoTablaDocumentacionAdmin.innerHTML = documentos
+  cuerpoTablaDocumentacionAdmin.innerHTML = documentosOrdenados
     .map((documento) => {
       const idDocumento = escaparHtml(documento.id);
       const driveUrl = escaparHtml(documento.driveUrl);
