@@ -55,6 +55,13 @@ const espacioDocumentoAcademico = document.getElementById(
 const mensajeDocumentacionAcademica = document.getElementById(
   "mensajeDocumentacionAcademica",
 );
+const archivoDocumentoAcademico = document.getElementById(
+  "archivoDocumentoAcademico",
+);
+
+const btnSubirDocumentoAcademico = document.getElementById(
+  "btnSubirDocumentoAcademico",
+);
 
 let opcionesDocumentacion = [];
 
@@ -79,6 +86,29 @@ async function enviarAlBackend(datos) {
   }
 
   return respuesta.json();
+}
+function convertirArchivoABase64(archivo) {
+  return new Promise((resolve, reject) => {
+    const lector = new FileReader();
+
+    lector.onload = () => {
+      const resultado = String(lector.result || "");
+      const base64 = resultado.includes(",") ? resultado.split(",")[1] : "";
+
+      if (!base64) {
+        reject(new Error("No se pudo preparar el archivo para enviarlo."));
+        return;
+      }
+
+      resolve(base64);
+    };
+
+    lector.onerror = () => {
+      reject(new Error("No se pudo leer el archivo seleccionado."));
+    };
+
+    lector.readAsDataURL(archivo);
+  });
 }
 
 function cargarCursosDisponibles() {
@@ -257,26 +287,126 @@ if (cursoDocumentoAcademico) {
 }
 
 if (formDocumentacionAcademica) {
-  formDocumentacionAcademica.addEventListener("submit", (event) => {
+  formDocumentacionAcademica.addEventListener("submit", async (event) => {
     event.preventDefault();
 
-    const tipo = String(tipoDocumentoAcademico.value || "").trim();
+    const usuario = auth.currentUser;
 
-    const curso = String(cursoDocumentoAcademico.value || "").trim();
+    const tipoDocumento = String(tipoDocumentoAcademico.value || "")
+      .trim()
+      .toUpperCase();
 
-    const espacio = String(espacioDocumentoAcademico.value || "").trim();
+    const cursoAnio = String(cursoDocumentoAcademico.value || "").trim();
 
-    if (!tipo || !curso || !espacio) {
+    const espacioId = String(espacioDocumentoAcademico.value || "").trim();
+
+    const opcionEspacio =
+      espacioDocumentoAcademico.options[
+        espacioDocumentoAcademico.selectedIndex
+      ];
+
+    const archivo = archivoDocumentoAcademico.files[0];
+
+    if (!usuario) {
+      mostrarMensajeDocumentacion(
+        "No se detectó una sesión activa. Volvé a iniciar sesión.",
+        "error",
+      );
+      return;
+    }
+
+    if (!tipoDocumento || !cursoAnio || !espacioId) {
       mostrarMensajeDocumentacion(
         "Seleccioná tipo de documento, curso y espacio curricular.",
         "error",
       );
-
       return;
     }
 
-    mostrarMensajeDocumentacion(
-      "La subida de PDF se agregará en el próximo paso.",
-    );
+    if (!archivo) {
+      mostrarMensajeDocumentacion(
+        "Seleccioná un archivo PDF antes de continuar.",
+        "error",
+      );
+      return;
+    }
+
+    const tipoMime = String(archivo.type || "")
+      .trim()
+      .toLowerCase();
+
+    if (
+      tipoMime !== "application/pdf" &&
+      !archivo.name.toLowerCase().endsWith(".pdf")
+    ) {
+      mostrarMensajeDocumentacion("Solo se permiten archivos PDF.", "error");
+      return;
+    }
+
+    const LIMITE_ARCHIVO_MB = 10;
+
+    if (archivo.size > LIMITE_ARCHIVO_MB * 1024 * 1024) {
+      mostrarMensajeDocumentacion(
+        `El archivo supera el tamaño máximo permitido de ${LIMITE_ARCHIVO_MB} MB.`,
+        "error",
+      );
+      return;
+    }
+
+    btnSubirDocumentoAcademico.disabled = true;
+
+    mostrarMensajeDocumentacion("Preparando archivo y verificando permisos...");
+
+    try {
+      const idToken = await usuario.getIdToken(true);
+
+      const archivoBase64 = await convertirArchivoABase64(archivo);
+
+      const resultado = await enviarAlBackend({
+        accion: "subir_documento",
+        idToken,
+        tipoDocumento,
+        cicloLectivo: cicloLectivoDocumento.value,
+        cursoAnio,
+        espacioId,
+        espacioNombre: opcionEspacio?.dataset.nombre || "",
+        nombreOriginal: archivo.name,
+        tipoMime: "application/pdf",
+        archivoBase64,
+      });
+
+      if (!resultado.ok) {
+        throw new Error(resultado.mensaje || "No se pudo cargar el documento.");
+      }
+
+      await Swal.fire({
+        title: "Documento cargado",
+        html: `
+            <p><strong>${resultado.documento.nombre}</strong></p>
+            <p>
+              ${
+                resultado.documento.reemplazo
+                  ? "Se reemplazó la versión anterior del documento."
+                  : "El documento fue guardado correctamente."
+              }
+            </p>
+          `,
+        icon: "success",
+        confirmButtonText: "Aceptar",
+      });
+
+      archivoDocumentoAcademico.value = "";
+
+      mostrarMensajeDocumentacion("Documento cargado correctamente.", "ok");
+    } catch (error) {
+      console.error("Error al subir documentación académica:", error);
+
+      mostrarMensajeDocumentacion(
+        error.message || "No se pudo cargar el documento.",
+        "error",
+      );
+    } finally {
+      btnSubirDocumentoAcademico.disabled = false;
+    }
   });
 }
