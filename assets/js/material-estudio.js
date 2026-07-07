@@ -62,6 +62,9 @@ const archivoDocumentoAcademico = document.getElementById(
 const btnSubirDocumentoAcademico = document.getElementById(
   "btnSubirDocumentoAcademico",
 );
+const cuerpoTablaDocumentosDocente = document.getElementById(
+  "cuerpoTablaDocumentosDocente",
+);
 
 let opcionesDocumentacion = [];
 
@@ -213,6 +216,112 @@ async function cargarOpcionesDocumentacion() {
   return resultado;
 }
 
+function obtenerEtiquetaTipoDocumento(tipoDocumento) {
+  const etiquetas = {
+    PLAN_ANUAL: "Plan Anual",
+    PROGRAMA_EXAMEN: "Programa de Examen",
+    MATERIAL_ESTUDIO: "Material de Estudio",
+  };
+
+  return etiquetas[tipoDocumento] || "Sin tipo";
+}
+
+function formatearFechaCarga(fechaTexto) {
+  const fecha = String(fechaTexto || "").trim();
+
+  if (!fecha) {
+    return "Sin fecha";
+  }
+
+  return fecha;
+}
+
+function escaparHtml(texto) {
+  return String(texto || "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
+function mostrarDocumentosEnTabla(documentos) {
+  if (!cuerpoTablaDocumentosDocente) return;
+
+  if (!Array.isArray(documentos) || !documentos.length) {
+    cuerpoTablaDocumentosDocente.innerHTML = `
+      <tr>
+        <td colspan="5" class="tabla-documentos-vacia">
+          No hay documentación cargada para tus cursos y espacios curriculares asignados.
+        </td>
+      </tr>
+    `;
+
+    return;
+  }
+
+  cuerpoTablaDocumentosDocente.innerHTML = documentos
+    .map((documento) => {
+      const url = escaparHtml(documento.driveUrl);
+
+      return `
+        <tr>
+          <td>${escaparHtml(documento.curso)}</td>
+          <td>${escaparHtml(
+            obtenerEtiquetaTipoDocumento(documento.tipoDocumento),
+          )}</td>
+          <td>${escaparHtml(documento.espacioCurricular)}</td>
+          <td>${escaparHtml(formatearFechaCarga(documento.fechaCarga))}</td>
+          <td>
+            <a
+              class="btn-ver-documento"
+              href="${url}"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <i class="fa-solid fa-eye"></i>
+              Ver
+            </a>
+          </td>
+        </tr>
+      `;
+    })
+    .join("");
+}
+
+async function cargarDocumentosDisponibles() {
+  if (!cuerpoTablaDocumentosDocente) return;
+
+  const usuario = auth.currentUser;
+
+  if (!usuario) {
+    throw new Error("No se detectó una sesión activa. Volvé a iniciar sesión.");
+  }
+
+  cuerpoTablaDocumentosDocente.innerHTML = `
+    <tr>
+      <td colspan="5" class="tabla-documentos-vacia">
+        Cargando documentación disponible...
+      </td>
+    </tr>
+  `;
+
+  const idToken = await usuario.getIdToken(true);
+
+  const resultado = await enviarAlBackend({
+    accion: "obtener_documentos_docente",
+    idToken,
+  });
+
+  if (!resultado.ok) {
+    throw new Error(
+      resultado.mensaje || "No se pudo cargar la documentación disponible.",
+    );
+  }
+
+  mostrarDocumentosEnTabla(resultado.documentos || []);
+}
+
 if (btnAbrirDocumentacionAcademica) {
   btnAbrirDocumentacionAcademica.addEventListener("click", async () => {
     panelDocumentacionAcademica.hidden = false;
@@ -234,8 +343,10 @@ if (btnAbrirDocumentacionAcademica) {
     try {
       const resultado = await cargarOpcionesDocumentacion();
 
+      await cargarDocumentosDisponibles();
+
       mostrarMensajeDocumentacion(
-        `Asignaciones cargadas correctamente para ${resultado.docente.nombreCompleto}.`,
+        `Asignaciones y documentos cargados correctamente para ${resultado.docente.nombreCompleto}.`,
         "ok",
       );
     } catch (error) {
@@ -397,7 +508,12 @@ if (formDocumentacionAcademica) {
 
       archivoDocumentoAcademico.value = "";
 
-      mostrarMensajeDocumentacion("Documento cargado correctamente.", "ok");
+      await cargarDocumentosDisponibles();
+
+      mostrarMensajeDocumentacion(
+        "Documento cargado correctamente. La tabla fue actualizada.",
+        "ok",
+      );
     } catch (error) {
       console.error("Error al subir documentación académica:", error);
 

@@ -189,3 +189,115 @@
   opacity: 0.65;
   transform: none;
 }
+/* =====================================================
+   DOCUMENTOS DISPONIBLES DEL DOCENTE
+===================================================== */
+
+.documentos-cargados-docente {
+  margin-top: 38px;
+  padding-top: 30px;
+  border-top: 1px solid rgba(255, 255, 255, 0.16);
+}
+
+.encabezado-documentos-cargados {
+  margin-bottom: 20px;
+}
+
+.encabezado-documentos-cargados h3 {
+  margin: 0 0 6px;
+  color: #ffffff;
+  font-size: 1.22rem;
+  font-weight: 900;
+}
+
+.encabezado-documentos-cargados p {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.8);
+  line-height: 1.55;
+}
+
+.tabla-documentos-contenedor {
+  overflow-x: auto;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.tabla-documentos {
+  width: 100%;
+  min-width: 760px;
+  border-collapse: collapse;
+}
+
+.tabla-documentos th,
+.tabla-documentos td {
+  padding: 14px 16px;
+  text-align: left;
+  vertical-align: middle;
+}
+
+.tabla-documentos th {
+  background: rgba(2, 25, 72, 0.56);
+  color: #ffd92f;
+  font-size: 0.86rem;
+  font-weight: 900;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.tabla-documentos td {
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.94);
+  font-weight: 600;
+}
+
+.tabla-documentos tbody tr {
+  transition: background 0.2s ease;
+}
+
+.tabla-documentos tbody tr:hover {
+  background: rgba(255, 255, 255, 0.07);
+}
+
+.tabla-documentos-vacia {
+  padding: 28px !important;
+  text-align: center !important;
+  color: rgba(255, 255, 255, 0.78) !important;
+}
+
+.btn-ver-documento {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 36px;
+  padding: 0 14px;
+  border: 1px solid rgba(255, 217, 47, 0.42);
+  border-radius: 9px;
+  background: rgba(255, 217, 47, 0.12);
+  color: #ffffff;
+  font: inherit;
+  font-size: 0.86rem;
+  font-weight: 800;
+  text-decoration: none;
+  transition: 0.2s ease;
+}
+
+.btn-ver-documento:hover {
+  border-color: #ffd92f;
+  background: rgba(255, 217, 47, 0.24);
+  color: #ffffff;
+  transform: translateY(-1px);
+}
+
+@media (max-width: 760px) {
+  .documentos-cargados-docente {
+    margin-top: 30px;
+    padding-top: 24px;
+  }
+
+  .tabla-documentos th,
+  .tabla-documentos td {
+    padding: 12px 14px;
+  }
+}
