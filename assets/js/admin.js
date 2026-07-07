@@ -230,6 +230,7 @@ const formEditar = document.getElementById("formEditarUsuario");
 const editarCorreo = document.getElementById("editarCorreo");
 const editarCorreoVisible = document.getElementById("editarCorreoVisible");
 const editarNombreCompleto = document.getElementById("editarNombreCompleto");
+const editarDni = document.getElementById("editarDni");
 const editarRol = document.getElementById("editarRol");
 const editarTipoVinculo = document.getElementById("editarTipoVinculo");
 const editarFechaFinAcceso = document.getElementById("editarFechaFinAcceso");
@@ -2196,10 +2197,19 @@ async function registrarUsuario(event) {
     .toUpperCase();
   const tipoVinculo = String(datos.get("tipoVinculo") || "").trim();
   const fechaFinAcceso = String(datos.get("fechaFinAcceso") || "").trim();
-
+  const dni = String(datos.get("dni") || "")
+    .replace(/\D/g, "")
+    .trim();
   if (!nombreCompleto || !correo || !rol) {
     mostrarMensajeRegistro(
       "Completá nombre, correo y rol antes de registrar.",
+      "error",
+    );
+    return;
+  }
+  if (dni && (dni.length < 7 || dni.length > 8)) {
+    mostrarMensajeRegistro(
+      "El DNI debe tener entre 7 y 8 números, sin puntos.",
       "error",
     );
     return;
@@ -2254,6 +2264,7 @@ async function registrarUsuario(event) {
       rol,
       estado: "ACTIVO",
       tipoVinculo,
+      dni: dni || null,
       fechaFinAcceso: fechaFinAcceso || null,
       fechaAlta: serverTimestamp(),
       actualizadoEn: serverTimestamp(),
@@ -2359,6 +2370,9 @@ function abrirModalEdicion(usuario) {
   editarCorreo.value = correo;
   editarCorreoVisible.value = correo;
   editarNombreCompleto.value = usuario.nombreCompleto || "";
+  editarDni.value = String(usuario.dni || "")
+    .replace(/\D/g, "")
+    .trim();
   editarRol.value = String(usuario.rol || "").toUpperCase();
   editarTipoVinculo.value = usuario.tipoVinculo || "";
   editarFechaFinAcceso.value = usuario.fechaFinAcceso || "";
@@ -2422,9 +2436,19 @@ async function guardarEdicionUsuario(event) {
     return;
   }
   const fechaFinAcceso = editarFechaFinAcceso.value.trim();
+  const dni = String(editarDni.value || "")
+    .replace(/\D/g, "")
+    .trim();
 
   if (!nombreCompleto || !rol) {
     mostrarMensajeEdicion("Completá nombre y rol antes de guardar.", "error");
+    return;
+  }
+  if (dni && (dni.length < 7 || dni.length > 8)) {
+    mostrarMensajeEdicion(
+      "El DNI debe tener entre 7 y 8 números, sin puntos.",
+      "error",
+    );
     return;
   }
 
@@ -2458,6 +2482,7 @@ async function guardarEdicionUsuario(event) {
       nombreCompleto,
       rol,
       tipoVinculo,
+      dni: dni || null,
       fechaFinAcceso: fechaFinAcceso || null,
       actualizadoEn: serverTimestamp(),
       actualizadoPor: correoActual,
