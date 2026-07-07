@@ -32,6 +32,19 @@ const cuerpoTablaDocumentacionAdmin = document.getElementById(
 const mensajeDocumentacionAdmin = document.getElementById(
   "mensajeDocumentacionAdmin",
 );
+const filtroCursoDocumentacion = document.getElementById(
+  "filtroCursoDocumentacion",
+);
+
+const filtroTipoDocumentacion = document.getElementById(
+  "filtroTipoDocumentacion",
+);
+
+const filtroEspacioDocumentacion = document.getElementById(
+  "filtroEspacioDocumentacion",
+);
+
+let documentosAdministracion = [];
 
 function mostrarMensajeDocumentacionAdmin(texto, tipo = "") {
   if (!mensajeDocumentacionAdmin) return;
@@ -83,6 +96,73 @@ function formatearFechaCarga(fechaTexto) {
   }
 
   return fecha.replace(" ", " · ");
+}
+
+function cargarOpcionesFiltroCurso(documentos) {
+  if (!filtroCursoDocumentacion) return;
+
+  const cursoSeleccionado = filtroCursoDocumentacion.value;
+
+  const cursos = [
+    ...new Set(
+      documentos
+        .map((documento) => String(documento.curso || "").trim())
+        .filter(Boolean),
+    ),
+  ].sort((a, b) => {
+    const anioA = Number(a.match(/\d+/)?.[0] || 999);
+    const anioB = Number(b.match(/\d+/)?.[0] || 999);
+
+    return anioA - anioB;
+  });
+
+  filtroCursoDocumentacion.innerHTML =
+    '<option value="">Todos los cursos</option>';
+
+  cursos.forEach((curso) => {
+    const opcion = document.createElement("option");
+
+    opcion.value = curso;
+    opcion.textContent = curso;
+
+    filtroCursoDocumentacion.appendChild(opcion);
+  });
+
+  filtroCursoDocumentacion.value = cursos.includes(cursoSeleccionado)
+    ? cursoSeleccionado
+    : "";
+}
+
+function aplicarFiltrosDocumentacion() {
+  const cursoSeleccionado = String(
+    filtroCursoDocumentacion?.value || "",
+  ).trim();
+
+  const tipoSeleccionado = String(filtroTipoDocumentacion?.value || "").trim();
+
+  const textoEspacio = String(filtroEspacioDocumentacion?.value || "")
+    .trim()
+    .toLowerCase();
+
+  const documentosFiltrados = documentosAdministracion.filter((documento) => {
+    const coincideCurso =
+      !cursoSeleccionado ||
+      String(documento.curso || "").trim() === cursoSeleccionado;
+
+    const coincideTipo =
+      !tipoSeleccionado ||
+      String(documento.tipoDocumento || "").trim() === tipoSeleccionado;
+
+    const coincideEspacio =
+      !textoEspacio ||
+      String(documento.espacioCurricular || "")
+        .toLowerCase()
+        .includes(textoEspacio);
+
+    return coincideCurso && coincideTipo && coincideEspacio;
+  });
+
+  mostrarDocumentosEnTabla(documentosFiltrados);
 }
 
 function mostrarDocumentosEnTabla(documentos) {
@@ -205,7 +285,11 @@ async function cargarDocumentosAdministracion() {
       );
     }
 
-    mostrarDocumentosEnTabla(resultado.documentos || []);
+    documentosAdministracion = resultado.documentos || [];
+
+    cargarOpcionesFiltroCurso(documentosAdministracion);
+
+    aplicarFiltrosDocumentacion();
 
     mostrarMensajeDocumentacionAdmin("");
   } catch (error) {
@@ -271,6 +355,27 @@ async function eliminarDocumentoAcademico(idDocumento) {
   });
 
   await cargarDocumentosAdministracion();
+}
+
+if (filtroCursoDocumentacion) {
+  filtroCursoDocumentacion.addEventListener(
+    "change",
+    aplicarFiltrosDocumentacion,
+  );
+}
+
+if (filtroTipoDocumentacion) {
+  filtroTipoDocumentacion.addEventListener(
+    "change",
+    aplicarFiltrosDocumentacion,
+  );
+}
+
+if (filtroEspacioDocumentacion) {
+  filtroEspacioDocumentacion.addEventListener(
+    "input",
+    aplicarFiltrosDocumentacion,
+  );
 }
 
 if (cuerpoTablaDocumentacionAdmin) {

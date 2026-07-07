@@ -680,7 +680,40 @@
               </p>
             </div>
           </div>
+          <div class="filtros-documentacion-admin">
+            <div class="campo-filtro">
+              <label for="filtroCursoDocumentacion">Curso</label>
 
+              <select id="filtroCursoDocumentacion">
+                <option value="">Todos los cursos</option>
+              </select>
+            </div>
+
+            <div class="campo-filtro">
+              <label for="filtroTipoDocumentacion">Tipo</label>
+
+              <select id="filtroTipoDocumentacion">
+                <option value="">Todos los tipos</option>
+                <option value="PLAN_ANUAL">Plan Anual</option>
+                <option value="PROGRAMA_EXAMEN">Programa de Examen</option>
+                <option value="MATERIAL_ESTUDIO">Material de Estudio</option>
+              </select>
+            </div>
+
+            <div class="campo-filtro campo-busqueda">
+              <label for="filtroEspacioDocumentacion">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                Espacio curricular
+              </label>
+
+              <input
+                id="filtroEspacioDocumentacion"
+                type="search"
+                placeholder="Buscar materia o taller..."
+                autocomplete="off"
+              />
+            </div>
+          </div>
           <div class="tabla-contenedor">
             <table class="tabla-usuarios tabla-documentacion-academica">
               <thead>
