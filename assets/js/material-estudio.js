@@ -184,7 +184,7 @@ async function cargarOpcionesDocumentacion() {
 }
 
 if (btnAbrirDocumentacionAcademica) {
-  btnAbrirDocumentacionAcademica.addEventListener("click", () => {
+  btnAbrirDocumentacionAcademica.addEventListener("click", async () => {
     panelDocumentacionAcademica.hidden = false;
 
     panelDocumentacionAcademica.scrollIntoView({
@@ -192,9 +192,30 @@ if (btnAbrirDocumentacionAcademica) {
       block: "start",
     });
 
+    if (opcionesDocumentacion.length) {
+      mostrarMensajeDocumentacion("Tus asignaciones ya están cargadas.", "ok");
+      return;
+    }
+
     mostrarMensajeDocumentacion(
-      "Usá “Probar conexión” para cargar tus cursos y espacios curriculares.",
+      "Cargando tus cursos y espacios curriculares...",
     );
+
+    try {
+      const resultado = await cargarOpcionesDocumentacion();
+
+      mostrarMensajeDocumentacion(
+        `Asignaciones cargadas correctamente para ${resultado.docente.nombreCompleto}.`,
+        "ok",
+      );
+    } catch (error) {
+      console.error("Error al cargar asignaciones de documentación:", error);
+
+      mostrarMensajeDocumentacion(
+        error.message || "No se pudieron cargar tus asignaciones.",
+        "error",
+      );
+    }
   });
 }
 
