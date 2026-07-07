@@ -20,9 +20,9 @@
   gap: 8px;
   min-height: 36px;
   padding: 0 14px;
-  border: 1px solid #0b5ed7;
+  border: 1px solid #2d6df6;
   border-radius: 9px;
-  background: #0b5ed7;
+  background: #2d6df6;
   color: #ffffff;
   font: inherit;
   font-size: 0.86rem;
@@ -33,10 +33,11 @@
 }
 
 .btn-ver-documento-alumno:hover {
-  border-color: #084298;
-  background: #084298;
+  border-color: #1f56c7;
+  background: #1f56c7;
   color: #ffffff;
   transform: translateY(-1px);
+  text-decoration: none;
 }
 
 @media (max-width: 760px) {
