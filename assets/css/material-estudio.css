@@ -168,3 +168,24 @@
     width: 100%;
   }
 }
+#btnSubirDocumentoAcademico {
+  min-width: 230px;
+  border: 1px solid rgba(255, 217, 47, 0.45);
+  background: linear-gradient(135deg, #ffd92f, #f3bd16);
+  color: #17345f;
+  font-weight: 900;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.18);
+}
+
+#btnSubirDocumentoAcademico:hover {
+  transform: translateY(-2px);
+  border-color: #ffffff;
+  background: linear-gradient(135deg, #ffe66b, #ffd92f);
+  box-shadow: 0 14px 26px rgba(0, 0, 0, 0.25);
+}
+
+#btnSubirDocumentoAcademico:disabled {
+  cursor: wait;
+  opacity: 0.65;
+  transform: none;
+}
