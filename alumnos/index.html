@@ -7,6 +7,7 @@
     <title>Portal Alumnos | E.E.T.P. Nº 495</title>
 
     <link rel="stylesheet" href="../assets/css/docentes.css" />
+    <link rel="stylesheet" href="../assets/css/documentacion-alumno.css" />
     <link rel="stylesheet" href="../assets/css/volver-arriba.css" />
     <link rel="icon" href="../assets/img/logo.png" />
 
@@ -136,19 +137,20 @@
             <p>Accedé al S.I.M.E. para inscribirte a las mesas de exámenes.</p>
           </a>
 
-          <a class="tarjeta tarjeta-enlace" href="#programas">
-            <i class="fa-solid fa-book-open"></i>
-            <h3>Programas de Examen</h3>
-            <p>Visualizá y descargá los programas de examen vigentes.</p>
+          <a class="tarjeta tarjeta-enlace" href="#documentacion-academica">
+            <i class="fa-solid fa-folder-open"></i>
+            <h3>Documentación Académica</h3>
+            <p>
+              Consultá programas de examen y material de estudio de tu curso.
+            </p>
           </a>
 
-          <a class="tarjeta tarjeta-enlace" href="#material">
-            <i class="fa-solid fa-file-pdf"></i>
-            <h3>Material de Estudio</h3>
-            <p>Consultá y descargá material publicado por tus docentes.</p>
-          </a>
-
-          <a class="tarjeta tarjeta-enlace" href="#netbooks">
+          <a
+            class="tarjeta tarjeta-enlace"
+            href="https://desbloqueo.dgp.educ.ar"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
             <i class="fa-solid fa-laptop"></i>
             <h3>Desbloqueo de Netbooks</h3>
             <p>Accedé al sitio oficial para solicitar códigos de desbloqueo.</p>
@@ -198,30 +200,56 @@
         </a>
       </section>
 
-      <section class="grupo seccion-destino" id="programas">
-        <h2>Programas de Examen</h2>
+      <section class="grupo seccion-destino" id="documentacion-academica">
+        <h2>Documentación Académica</h2>
 
-        <div class="acciones">
-          <a class="btn-accion" href="#">
-            <i class="fa-solid fa-book-open"></i>
-            Consultar Programas Vigentes
-          </a>
-        </div>
+        <div class="panel-info">
+          <div class="encabezado-listado">
+            <div>
+              <h3>Documentos disponibles</h3>
+              <p>
+                Consultá los programas de examen y el material de estudio
+                correspondiente a tu curso.
+              </p>
+            </div>
+          </div>
 
-        <a class="btn-volver" href="#inicio">
-          <i class="fa-solid fa-arrow-up"></i>
-          Volver al inicio
-        </a>
-      </section>
+          <div class="filtros-documentacion-alumno">
+            <div class="campo-filtro">
+              <label for="filtroTipoDocumentacionAlumno">
+                Tipo de documento
+              </label>
 
-      <section class="grupo seccion-destino" id="material">
-        <h2>Material de Estudio</h2>
+              <select id="filtroTipoDocumentacionAlumno">
+                <option value="">Todos los documentos</option>
+                <option value="PROGRAMA_EXAMEN">Programas de Examen</option>
+                <option value="MATERIAL_ESTUDIO">Material de Estudio</option>
+              </select>
+            </div>
+          </div>
 
-        <div class="acciones">
-          <a class="btn-accion" href="#">
-            <i class="fa-solid fa-folder-open"></i>
-            Ver Material Disponible
-          </a>
+          <div class="tabla-contenedor">
+            <table class="tabla-usuarios tabla-documentacion-alumno">
+              <thead>
+                <tr>
+                  <th>Tipo</th>
+                  <th>Espacio Curricular</th>
+                  <th>Fecha de carga</th>
+                  <th>Acciones</th>
+                </tr>
+              </thead>
+
+              <tbody id="cuerpoTablaDocumentacionAlumno">
+                <tr>
+                  <td colspan="4" class="tabla-vacia">
+                    Cargando documentación disponible...
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <p id="mensajeDocumentacionAlumno" class="mensaje-formulario"></p>
         </div>
 
         <a class="btn-volver" href="#inicio">
@@ -256,6 +284,7 @@
     </a>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script type="module" src="../assets/js/proteger-portal.js"></script>
+    <script type="module" src="../assets/js/documentacion-alumno.js"></script>
     <script src="../assets/js/volver-arriba.js"></script>
   </body>
 </html>
