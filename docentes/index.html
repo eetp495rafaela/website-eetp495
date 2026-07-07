@@ -15,6 +15,7 @@
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
     />
+
     <link
       rel="stylesheet"
       href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css"
@@ -29,7 +30,8 @@
   <body data-rol-permitido="DOCENTE">
     <header class="topbar">
       <div class="logo">
-        <img src="../assets/img/logo.png" alt="Logo" />
+        <img src="../assets/img/logo.png" alt="Logo E.E.T.P. Nº 495" />
+
         <div>
           <h1>E.E.T.P. Nº 495</h1>
           <span>Portal Institucional Docentes</span>
@@ -70,19 +72,19 @@
           <div class="tarjeta">
             <i class="fa-solid fa-calendar-days"></i>
             <h3>Horario de Aula</h3>
-            <p>Consulta el Horario de Clases Turno Mañana y Tarde.</p>
+            <p>Consulta el horario de clases de turno mañana y tarde.</p>
           </div>
 
           <div class="tarjeta">
             <i class="fa-solid fa-industry"></i>
             <h3>Horario Taller y Educación Física</h3>
-            <p>Consulta el horario de Taller y Educación Física.</p>
+            <p>Consulta los horarios de Taller y Educación Física.</p>
           </div>
 
           <div class="tarjeta">
             <i class="fa-solid fa-users"></i>
             <h3>Listas de Estudiantes</h3>
-            <p>Nómina de estudiantes por curso.</p>
+            <p>Nómina de estudiantes organizada por curso y división.</p>
           </div>
         </div>
       </section>
@@ -94,56 +96,156 @@
           <div class="tarjeta">
             <i class="fa-solid fa-user-check"></i>
             <h3>Si.R.A. Taller</h3>
-            <p>Registro de asistencia a Taller.</p>
+            <p>Registro de asistencia de Taller.</p>
           </div>
 
           <div class="tarjeta">
             <i class="fa-solid fa-person-running"></i>
             <h3>Si.R.A. Educación Física</h3>
-            <p>Registro de asistencia a Educación Física.</p>
+            <p>Registro de asistencia de Educación Física.</p>
           </div>
 
           <div class="tarjeta">
             <i class="fa-solid fa-chart-column"></i>
             <h3>Calificaciones</h3>
-            <p>Calificaciones de Taller Ciclo Básico.</p>
+            <p>Calificaciones de Taller del Ciclo Básico.</p>
           </div>
 
           <div class="tarjeta">
             <i class="fa-solid fa-file-signature"></i>
             <h3>Exámenes</h3>
-            <p>Consulta de Mesas e inscriptos.</p>
+            <p>Consulta de mesas de examen y estudiantes inscriptos.</p>
           </div>
         </div>
       </section>
 
-      <section class="grupo">
-        <h2>Documentación</h2>
+      <section class="grupo" id="documentacion-academica">
+        <h2>Documentación Académica</h2>
 
         <div class="grid">
-          <div class="tarjeta">
-            <i class="fa-solid fa-book"></i>
-            <h3>Planes Anuales</h3>
-            <p>Consulta, carga y descarga.</p>
-          </div>
-
-          <div class="tarjeta">
-            <i class="fa-solid fa-book-open"></i>
-            <h3>Programas de Examen</h3>
-            <p>Consulta, carga y descarga de Programas vigentes.</p>
-          </div>
+          <button
+            class="tarjeta tarjeta-documentacion"
+            id="btnAbrirDocumentacionAcademica"
+            type="button"
+          >
+            <i class="fa-solid fa-file-arrow-up"></i>
+            <h3>Documentación Académica</h3>
+            <p>
+              Cargá Planes Anuales, Programas de Examen y Material de Estudio en
+              formato PDF.
+            </p>
+          </button>
 
           <div class="tarjeta">
             <i class="fa-solid fa-scale-balanced"></i>
             <h3>Normativa Vigente</h3>
-            <p>Leyes y reglamentos.</p>
+            <p>
+              Leyes, resoluciones, reglamentos y documentación institucional.
+            </p>
           </div>
 
           <div class="tarjeta">
             <i class="fa-solid fa-boxes-stacked"></i>
             <h3>Inventario Escolar</h3>
-            <p>Inventario Institucional.</p>
+            <p>
+              Consulta del inventario institucional de recursos y equipamiento.
+            </p>
           </div>
+        </div>
+      </section>
+
+      <section class="grupo" id="panelDocumentacionAcademica" hidden>
+        <h2>Cargar Documentación Académica</h2>
+
+        <div class="panel-info">
+          <p>
+            Seleccioná el tipo de documento, el curso, el espacio curricular y
+            el archivo PDF. Solo se mostrarán los espacios que tengas asignados.
+          </p>
+
+          <form id="formDocumentacionAcademica">
+            <div class="form-grid-documentacion">
+              <div class="campo-documentacion">
+                <label for="tipoDocumentoAcademico">
+                  Tipo de documento *
+                </label>
+
+                <select id="tipoDocumentoAcademico" required>
+                  <option value="">Seleccionar tipo</option>
+                  <option value="PLAN_ANUAL">Plan Anual</option>
+                  <option value="PROGRAMA_EXAMEN">Programa de Examen</option>
+                  <option value="MATERIAL_ESTUDIO">Material de Estudio</option>
+                </select>
+              </div>
+
+              <div class="campo-documentacion">
+                <label for="cicloLectivoDocumento"> Ciclo lectivo </label>
+
+                <input
+                  id="cicloLectivoDocumento"
+                  type="text"
+                  value="2026"
+                  readonly
+                />
+              </div>
+
+              <div class="campo-documentacion">
+                <label for="cursoDocumentoAcademico"> Curso * </label>
+
+                <select id="cursoDocumentoAcademico" required disabled>
+                  <option value="">Primero seleccioná un tipo</option>
+                </select>
+              </div>
+
+              <div class="campo-documentacion">
+                <label for="espacioDocumentoAcademico">
+                  Espacio curricular *
+                </label>
+
+                <select id="espacioDocumentoAcademico" required disabled>
+                  <option value="">Primero seleccioná un curso</option>
+                </select>
+              </div>
+
+              <div class="campo-documentacion campo-archivo-documentacion">
+                <label for="archivoDocumentoAcademico"> Archivo PDF * </label>
+
+                <input
+                  id="archivoDocumentoAcademico"
+                  type="file"
+                  accept="application/pdf,.pdf"
+                  required
+                />
+
+                <small> Solo se permiten archivos PDF. </small>
+              </div>
+            </div>
+
+            <div class="acciones">
+              <button
+                class="btn-accion"
+                id="btnProbarConexionDocumentacion"
+                type="button"
+              >
+                <i class="fa-solid fa-plug-circle-check"></i>
+                Probar conexión
+              </button>
+
+              <button
+                class="btn-accion"
+                id="btnSubirDocumentoAcademico"
+                type="submit"
+              >
+                <i class="fa-solid fa-cloud-arrow-up"></i>
+                Subir documento
+              </button>
+            </div>
+
+            <p
+              id="mensajeDocumentacionAcademica"
+              class="mensaje-formulario"
+            ></p>
+          </form>
         </div>
       </section>
 
@@ -152,30 +254,27 @@
 
         <div class="grid">
           <div class="tarjeta">
-            <i class="fa-solid fa-file-pdf"></i>
-            <h3>Material para Estudiantes</h3>
-            <p>Carga y consulta de PDF y material didáctico.</p>
-          </div>
-
-          <div class="tarjeta">
             <i class="fa-solid fa-clipboard-list"></i>
             <h3>Informes Pedagógicos</h3>
-            <p>Seguimiento de estudiantes.</p>
+            <p>Seguimiento, observaciones e informes de estudiantes.</p>
           </div>
 
           <div class="tarjeta">
             <i class="fa-solid fa-folder-open"></i>
             <h3>Gestiones Docentes</h3>
-            <p>Formularios de Licencias, certificados y más.</p>
+            <p>Licencias, certificados, formularios y otras gestiones.</p>
           </div>
         </div>
       </section>
     </main>
+
     <a href="#" class="btn-arriba" id="btnArriba" aria-label="Volver al inicio">
       <i class="fa-solid fa-arrow-up"></i>
     </a>
+
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script type="module" src="../assets/js/proteger-portal.js"></script>
+    <script type="module" src="../assets/js/material-estudio.js"></script>
     <script src="../assets/js/volver-arriba.js"></script>
   </body>
 </html>
