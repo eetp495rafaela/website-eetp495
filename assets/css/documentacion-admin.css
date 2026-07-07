@@ -1,0 +1,72 @@
+/* =====================================================
+   DOCUMENTACIÓN ACADÉMICA - PANEL DE SOPORTE
+===================================================== */
+
+.tabla-documentacion-academica {
+  min-width: 860px;
+}
+
+.acciones-documentacion-admin {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.btn-documento-admin {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-height: 36px;
+  padding: 0 13px;
+  border: 1px solid transparent;
+  border-radius: 9px;
+  font: inherit;
+  font-size: 0.84rem;
+  font-weight: 800;
+  text-decoration: none;
+  transition: 0.2s ease;
+}
+
+.btn-ver-documento-admin {
+  border-color: rgba(255, 217, 47, 0.44);
+  background: rgba(255, 217, 47, 0.14);
+  color: #ffffff;
+}
+
+.btn-ver-documento-admin:hover {
+  border-color: #ffd92f;
+  background: rgba(255, 217, 47, 0.25);
+  color: #ffffff;
+  transform: translateY(-1px);
+}
+
+.btn-eliminar-documento-admin {
+  border-color: rgba(255, 120, 120, 0.5);
+  background: rgba(200, 45, 45, 0.2);
+  color: #ffffff;
+  cursor: pointer;
+}
+
+.btn-eliminar-documento-admin:hover {
+  border-color: #ff9b9b;
+  background: rgba(200, 45, 45, 0.34);
+  transform: translateY(-1px);
+}
+
+.btn-eliminar-documento-admin:disabled {
+  cursor: wait;
+  opacity: 0.6;
+  transform: none;
+}
+
+@media (max-width: 760px) {
+  .acciones-documentacion-admin {
+    gap: 8px;
+  }
+
+  .btn-documento-admin {
+    min-height: 34px;
+    padding: 0 11px;
+  }
+}

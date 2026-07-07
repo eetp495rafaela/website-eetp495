@@ -7,6 +7,7 @@
     <title>Panel de Soporte | E.E.T.P. Nº 495</title>
 
     <link rel="stylesheet" href="../assets/css/admin.css" />
+    <link rel="stylesheet" href="../assets/css/documentacion-admin.css" />
     <link rel="icon" href="../assets/img/logo.png" />
 
     <link
@@ -87,16 +88,13 @@
             <p>Consulta y administración de información estudiantil.</p>
           </a>
 
-          <a class="tarjeta tarjeta-enlace" href="#material">
-            <i class="fa-solid fa-file-pdf"></i>
-            <h3>Material de Estudio</h3>
-            <p>Revisión de archivos publicados para estudiantes.</p>
-          </a>
-
-          <a class="tarjeta tarjeta-enlace" href="#programas">
-            <i class="fa-solid fa-book-open"></i>
-            <h3>Programas de Examen</h3>
-            <p>Administración de programas vigentes por materia.</p>
+          <a class="tarjeta tarjeta-enlace" href="#documentacion-academica">
+            <i class="fa-solid fa-folder-open"></i>
+            <h3>Documentación Académica</h3>
+            <p>
+              Consulta, revisión y administración de planes, programas y
+              material de estudio.
+            </p>
           </a>
 
           <a class="tarjeta tarjeta-enlace" href="#configuracion">
@@ -668,44 +666,44 @@
         </a>
       </section>
 
-      <section class="grupo seccion-destino" id="material">
-        <h2>Material de Estudio</h2>
+      <section class="grupo seccion-destino" id="documentacion-academica">
+        <h2>Documentación Académica</h2>
 
         <div class="panel-info">
-          <p>
-            Espacio para revisar, ordenar y administrar los archivos PDF
-            publicados por docentes.
-          </p>
-
-          <div class="acciones">
-            <button class="btn-accion" type="button">
-              <i class="fa-solid fa-folder-open"></i>
-              Ver materiales
-            </button>
+          <div class="encabezado-listado">
+            <div>
+              <h3>Documentos cargados</h3>
+              <p>
+                Consultá toda la documentación académica publicada por los
+                docentes. Desde esta sección podrás visualizar o eliminar
+                documentos.
+              </p>
+            </div>
           </div>
-        </div>
 
-        <a class="btn-volver" href="#inicio">
-          <i class="fa-solid fa-arrow-up"></i>
-          Volver al inicio
-        </a>
-      </section>
+          <div class="tabla-contenedor">
+            <table class="tabla-usuarios tabla-documentacion-academica">
+              <thead>
+                <tr>
+                  <th>Curso</th>
+                  <th>Tipo</th>
+                  <th>Espacio Curricular</th>
+                  <th>Fecha de carga</th>
+                  <th>Acciones</th>
+                </tr>
+              </thead>
 
-      <section class="grupo seccion-destino" id="programas">
-        <h2>Programas de Examen</h2>
-
-        <div class="panel-info">
-          <p>
-            Permitirá controlar los programas disponibles y su vigencia para
-            cada materia.
-          </p>
-
-          <div class="acciones">
-            <button class="btn-accion" type="button">
-              <i class="fa-solid fa-book"></i>
-              Administrar programas
-            </button>
+              <tbody id="cuerpoTablaDocumentacionAdmin">
+                <tr>
+                  <td colspan="5" class="tabla-vacia">
+                    Cargando documentación académica...
+                  </td>
+                </tr>
+              </tbody>
+            </table>
           </div>
+
+          <p id="mensajeDocumentacionAdmin" class="mensaje-formulario"></p>
         </div>
 
         <a class="btn-volver" href="#inicio">
@@ -1138,6 +1136,7 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
     <script type="module" src="../assets/js/admin.js"></script>
+    <script type="module" src="../assets/js/documentacion-admin.js"></script>
 
     <script>
       const btnArriba = document.getElementById("btnArriba");
