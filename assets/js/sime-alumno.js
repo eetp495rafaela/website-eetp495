@@ -461,6 +461,131 @@ if (cuerpoTablaInscripcionesSime) {
   });
 }
 
+if (formInscripcionSime) {
+  formInscripcionSime.addEventListener("submit", async (event) => {
+    event.preventDefault();
+
+    const usuario = auth.currentUser;
+
+    if (!usuario) {
+      mostrarMensajeSime(
+        mensajeInscripcionSime,
+        "No se detectó una sesión activa.",
+        "error",
+      );
+      return;
+    }
+
+    const anioCursado = Number(anioCursadoSime?.value || 0);
+    const cursoOrigen = Number(cursoOrigenSime?.value || 0);
+
+    const materiasSeleccionadas = Array.from(
+      document.querySelectorAll('input[name="materiaSime"]:checked'),
+    ).map((checkbox) => checkbox.value);
+
+    if (!anioCursado) {
+      mostrarMensajeSime(
+        mensajeInscripcionSime,
+        "Seleccioná el año en que cursaste la materia.",
+        "error",
+      );
+      return;
+    }
+
+    if (!cursoOrigen) {
+      mostrarMensajeSime(
+        mensajeInscripcionSime,
+        "Seleccioná el curso de origen.",
+        "error",
+      );
+      return;
+    }
+
+    if (!materiasSeleccionadas.length) {
+      mostrarMensajeSime(
+        mensajeInscripcionSime,
+        "Seleccioná al menos una materia para rendir.",
+        "error",
+      );
+      return;
+    }
+
+    if (materiasSeleccionadas.length > 12) {
+      mostrarMensajeSime(
+        mensajeInscripcionSime,
+        "No podés seleccionar más de 12 materias en una inscripción.",
+        "error",
+      );
+      return;
+    }
+
+    btnRegistrarInscripcionSime.disabled = true;
+
+    mostrarMensajeSime(
+      mensajeInscripcionSime,
+      "Registrando inscripción y generando permiso...",
+    );
+
+    try {
+      const idToken = await usuario.getIdToken(true);
+
+      const resultado = await enviarAlBackendSime({
+        accion: "registrar_inscripcion",
+        idToken,
+        anioCursado,
+        cursoOrigen,
+        espaciosIds: materiasSeleccionadas,
+      });
+
+      if (!resultado.ok) {
+        throw new Error(
+          resultado.mensaje || "No se pudo registrar la inscripción.",
+        );
+      }
+
+      await Swal.fire({
+        title: "Inscripción registrada",
+        html: `
+          <p>Tu inscripción fue registrada correctamente.</p>
+          <p>Ya podés ver el permiso desde <strong>Mis inscripciones</strong>.</p>
+        `,
+        icon: "success",
+        confirmButtonText: "Aceptar",
+      });
+
+      formInscripcionSime.reset();
+
+      if (listaMateriasSime) {
+        listaMateriasSime.innerHTML = `
+          <p class="mensaje-lista-sime">
+            Seleccioná primero el curso de origen.
+          </p>
+        `;
+      }
+
+      cargarAniosCursadoSime(configuracionSimeAlumno?.aniosCursado || []);
+
+      await cargarMisInscripcionesSime();
+
+      mostrarMensajeSime(
+        mensajeInscripcionSime,
+        "Inscripción registrada correctamente.",
+        "ok",
+      );
+    } catch (error) {
+      console.error("Error al registrar inscripción S.I.M.E.:", error);
+
+      mostrarMensajeSime(
+        mensajeInscripcionSime,
+        error.message || "No se pudo registrar la inscripción.",
+        "error",
+      );
+    } finally {
+      btnRegistrarInscripcionSime.disabled = false;
+    }
+  });
+}
+
 onAuthStateChanged(auth, async (usuario) => {
   if (!usuario) return;
 
