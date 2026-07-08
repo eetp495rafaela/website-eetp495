@@ -41,12 +41,21 @@ async function enviarAlBackendSime(datos) {
   return respuesta.json();
 }
 
-async function probarConexionSime() {
+async function cargarConfiguracionSimeAlumno(usuario) {
+  const idToken = await usuario.getIdToken(true);
+
   const resultado = await enviarAlBackendSime({
-    accion: "ping",
+    accion: "obtener_configuracion_alumno",
+    idToken,
   });
 
-  console.log("Respuesta S.I.M.E.:", resultado);
+  if (!resultado.ok) {
+    throw new Error(
+      resultado.mensaje || "No se pudo cargar la configuración de S.I.M.E.",
+    );
+  }
+
+  console.log("Configuración S.I.M.E. Alumno:", resultado);
 
   return resultado;
 }
@@ -55,8 +64,8 @@ onAuthStateChanged(auth, async (usuario) => {
   if (!usuario) return;
 
   try {
-    await probarConexionSime();
+    await cargarConfiguracionSimeAlumno(usuario);
   } catch (error) {
-    console.error("Error al conectar con S.I.M.E.:", error);
+    console.error("Error al cargar S.I.M.E.:", error);
   }
 });
