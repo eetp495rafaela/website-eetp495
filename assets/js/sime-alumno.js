@@ -260,7 +260,7 @@ function mostrarInscripcionesSime(inscripciones) {
       return `
         <tr>
           <td>${inscripcion.fechaInscripcion || ""}</td>
-          <td>${inscripcion.turnoExamen || ""}</td>
+          <td>${formatearTurnoSime(inscripcion.turnoExamen)}</td>
           <td>
             <span class="etiqueta-estado-sime">
               ${obtenerEtiquetaEstadoSime(inscripcion.estado)}
