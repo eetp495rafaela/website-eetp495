@@ -224,6 +224,20 @@ function obtenerEtiquetaEstadoSime(estado) {
   return estadoNormalizado || "Sin estado";
 }
 
+function formatearTurnoSime(turno) {
+  const texto = String(turno || "").trim();
+
+  if (!texto) {
+    return "";
+  }
+
+  if (texto.includes("Apr") || texto.includes("Abr")) {
+    return "Abril 2026";
+  }
+
+  return texto;
+}
+
 function mostrarInscripcionesSime(inscripciones) {
   if (!cuerpoTablaInscripcionesSime) return;
 

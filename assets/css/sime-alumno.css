@@ -210,3 +210,13 @@
     min-width: 520px;
   }
 }
+.tabla-sime-alumno th:nth-child(3),
+.tabla-sime-alumno td:nth-child(3),
+.tabla-sime-alumno th:nth-child(4),
+.tabla-sime-alumno td:nth-child(4) {
+  text-align: center;
+}
+
+.tabla-sime-alumno td:nth-child(4) {
+  vertical-align: middle;
+}
