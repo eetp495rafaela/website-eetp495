@@ -8,6 +8,7 @@
 
     <link rel="stylesheet" href="../assets/css/docentes.css" />
     <link rel="stylesheet" href="../assets/css/documentacion-alumno.css" />
+    <link rel="stylesheet" href="../assets/css/sime-alumno.css" />
     <link rel="stylesheet" href="../assets/css/volver-arriba.css" />
     <link rel="icon" href="../assets/img/logo.png" />
 
@@ -299,11 +300,113 @@
       <section class="grupo seccion-destino" id="examenes">
         <h2>Inscripción a Exámenes</h2>
 
-        <div class="acciones">
-          <a class="btn-accion" href="#">
-            <i class="fa-solid fa-file-signature"></i>
-            Ingresar a S.I.M.E.
-          </a>
+        <div class="panel-info panel-sime">
+          <div class="encabezado-listado">
+            <div>
+              <h3>S.I.M.E. - Sistema de Inscripción a Mesas de Exámenes</h3>
+              <p>
+                Desde esta sección podés realizar nuevas inscripciones y
+                consultar los permisos ya generados.
+              </p>
+            </div>
+          </div>
+
+          <div class="estado-sime" id="estadoSimeAlumno">
+            Cargando información de inscripción...
+          </div>
+
+          <div class="sime-grid">
+            <section class="sime-bloque">
+              <h3>Nueva inscripción</h3>
+
+              <p class="texto-ayuda-sime">
+                Completá los datos de la materia que vas a rendir. Si debés
+                materias de distintos cursos o años, realizá una inscripción
+                separada para cada combinación.
+              </p>
+
+              <form id="formInscripcionSime" autocomplete="off">
+                <div class="form-grid-sime">
+                  <div class="campo-filtro">
+                    <label for="anioCursadoSime">Año en que cursaste *</label>
+
+                    <select id="anioCursadoSime" required>
+                      <option value="">Seleccionar año</option>
+                    </select>
+                  </div>
+
+                  <div class="campo-filtro">
+                    <label for="cursoOrigenSime">Curso de origen *</label>
+
+                    <select id="cursoOrigenSime" required>
+                      <option value="">Seleccionar curso</option>
+                      <option value="1">1º</option>
+                      <option value="2">2º</option>
+                      <option value="3">3º</option>
+                      <option value="4">4º</option>
+                      <option value="5">5º</option>
+                      <option value="6">6º</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="campo-materias-sime">
+                  <label>Materias a rendir *</label>
+
+                  <div class="lista-materias-sime" id="listaMateriasSime">
+                    <p class="mensaje-lista-sime">
+                      Seleccioná primero el curso de origen.
+                    </p>
+                  </div>
+                </div>
+
+                <div class="acciones-sime">
+                  <button
+                    class="btn-accion"
+                    id="btnRegistrarInscripcionSime"
+                    type="submit"
+                  >
+                    <i class="fa-solid fa-file-signature"></i>
+                    Registrar inscripción
+                  </button>
+                </div>
+
+                <p id="mensajeInscripcionSime" class="mensaje-formulario"></p>
+              </form>
+            </section>
+
+            <section class="sime-bloque">
+              <h3>Mis inscripciones</h3>
+
+              <p class="texto-ayuda-sime">
+                Consultá tus inscripciones realizadas y abrí el permiso para
+                imprimirlo cuando corresponda.
+              </p>
+
+              <div class="tabla-contenedor">
+                <table class="tabla-usuarios tabla-sime-alumno">
+                  <thead>
+                    <tr>
+                      <th>Fecha</th>
+                      <th>Turno</th>
+                      <th>Estado</th>
+                      <th>Acciones</th>
+                    </tr>
+                  </thead>
+
+                  <tbody id="cuerpoTablaInscripcionesSime">
+                    <tr>
+                      <td colspan="4" class="tabla-vacia">
+                        Cargando tus inscripciones...
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
+              <p id="mensajeListadoSime" class="mensaje-formulario"></p>
+            </section>
+          </div>
         </div>
 
         <a class="btn-volver" href="#inicio">

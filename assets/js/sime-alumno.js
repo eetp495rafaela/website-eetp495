@@ -24,6 +24,32 @@ const BACKEND_SIME_URL =
 const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
 
 const auth = getAuth(app);
+const estadoSimeAlumno = document.getElementById("estadoSimeAlumno");
+
+const formInscripcionSime = document.getElementById("formInscripcionSime");
+
+const anioCursadoSime = document.getElementById("anioCursadoSime");
+
+const cursoOrigenSime = document.getElementById("cursoOrigenSime");
+
+const listaMateriasSime = document.getElementById("listaMateriasSime");
+
+const btnRegistrarInscripcionSime = document.getElementById(
+  "btnRegistrarInscripcionSime",
+);
+
+const mensajeInscripcionSime = document.getElementById(
+  "mensajeInscripcionSime",
+);
+
+const cuerpoTablaInscripcionesSime = document.getElementById(
+  "cuerpoTablaInscripcionesSime",
+);
+
+const mensajeListadoSime = document.getElementById("mensajeListadoSime");
+
+let configuracionSimeAlumno = null;
+let alumnoSime = null;
 
 async function enviarAlBackendSime(datos) {
   const respuesta = await fetch(BACKEND_SIME_URL, {
@@ -39,6 +65,147 @@ async function enviarAlBackendSime(datos) {
   }
 
   return respuesta.json();
+}
+
+function mostrarMensajeSime(elemento, texto, tipo = "") {
+  if (!elemento) return;
+
+  elemento.textContent = texto;
+  elemento.className = `mensaje-formulario ${tipo}`.trim();
+}
+
+function mostrarEstadoSime(configuracion) {
+  if (!estadoSimeAlumno) return;
+
+  const estado = String(configuracion.estadoInscripciones || "CERRADO")
+    .trim()
+    .toUpperCase();
+
+  const turno = String(configuracion.turnoExamen || "").trim();
+
+  estadoSimeAlumno.classList.remove("abierto", "cerrado");
+
+  if (estado === "ABIERTO") {
+    estadoSimeAlumno.classList.add("abierto");
+    estadoSimeAlumno.textContent = `Inscripciones abiertas para el turno ${turno}.`;
+    return;
+  }
+
+  estadoSimeAlumno.classList.add("cerrado");
+  estadoSimeAlumno.textContent = `Las inscripciones para el turno ${turno} no se encuentran abiertas.`;
+}
+
+function cargarAniosCursadoSime(anios) {
+  if (!anioCursadoSime) return;
+
+  anioCursadoSime.innerHTML = '<option value="">Seleccionar año</option>';
+
+  (anios || []).forEach((anio) => {
+    const opcion = document.createElement("option");
+
+    opcion.value = String(anio);
+    opcion.textContent = String(anio);
+
+    anioCursadoSime.appendChild(opcion);
+  });
+}
+
+function bloquearFormularioSime(bloquear) {
+  if (!formInscripcionSime) return;
+
+  const controles = formInscripcionSime.querySelectorAll(
+    "input, select, button",
+  );
+
+  controles.forEach((control) => {
+    control.disabled = bloquear;
+  });
+}
+
+function mostrarMateriasSime(materias) {
+  if (!listaMateriasSime) return;
+
+  if (!Array.isArray(materias) || !materias.length) {
+    listaMateriasSime.innerHTML = `
+      <p class="mensaje-lista-sime">
+        No hay materias disponibles para el curso seleccionado.
+      </p>
+    `;
+    return;
+  }
+
+  listaMateriasSime.innerHTML = materias
+    .map((materia) => {
+      const espacioId = String(materia.espacioId || "").trim();
+      const nombre = String(materia.nombre || "").trim();
+
+      return `
+        <label class="item-materia-sime">
+          <input
+            type="checkbox"
+            name="materiaSime"
+            value="${espacioId}"
+          />
+          <span>${nombre}</span>
+        </label>
+      `;
+    })
+    .join("");
+}
+
+async function cargarMateriasCursoSime() {
+  const usuario = auth.currentUser;
+
+  if (!usuario || !cursoOrigenSime || !listaMateriasSime) return;
+
+  const cursoOrigen = Number(cursoOrigenSime.value || 0);
+
+  if (!cursoOrigen) {
+    listaMateriasSime.innerHTML = `
+      <p class="mensaje-lista-sime">
+        Seleccioná primero el curso de origen.
+      </p>
+    `;
+    return;
+  }
+
+  listaMateriasSime.innerHTML = `
+    <p class="mensaje-lista-sime">
+      Cargando materias...
+    </p>
+  `;
+
+  try {
+    const idToken = await usuario.getIdToken(true);
+
+    const resultado = await enviarAlBackendSime({
+      accion: "obtener_materias_por_curso",
+      idToken,
+      cursoOrigen,
+    });
+
+    if (!resultado.ok) {
+      throw new Error(
+        resultado.mensaje || "No se pudieron cargar las materias.",
+      );
+    }
+
+    mostrarMateriasSime(resultado.materias || []);
+  } catch (error) {
+    console.error("Error al cargar materias S.I.M.E.:", error);
+
+    listaMateriasSime.innerHTML = `
+      <p class="mensaje-lista-sime">
+        No se pudieron cargar las materias.
+      </p>
+    `;
+
+    mostrarMensajeSime(
+      mensajeInscripcionSime,
+      error.message || "No se pudieron cargar las materias.",
+      "error",
+    );
+  }
 }
 
 async function cargarConfiguracionSimeAlumno(usuario) {
@@ -58,6 +225,10 @@ async function cargarConfiguracionSimeAlumno(usuario) {
   console.log("Configuración S.I.M.E. Alumno:", resultado);
 
   return resultado;
+}
+
+if (cursoOrigenSime) {
+  cursoOrigenSime.addEventListener("change", cargarMateriasCursoSime);
 }
 
 onAuthStateChanged(auth, async (usuario) => {
