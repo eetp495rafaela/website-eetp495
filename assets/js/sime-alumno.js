@@ -271,13 +271,14 @@ function mostrarInscripcionesSime(inscripciones) {
               inscripcion.tienePermiso
                 ? `
                   <button
-                    class="btn-ver-permiso-sime"
-                    type="button"
-                    data-id-inscripcion="${idInscripcion}"
-                  >
-                    <i class="fa-solid fa-eye"></i>
-                    Ver
-                  </button>
+  class="btn-ver-permiso-sime"
+  type="button"
+  data-id-inscripcion="${idInscripcion}"
+  title="Ver permiso"
+  aria-label="Ver permiso"
+>
+  <i class="fa-solid fa-eye"></i>
+</button>
                 `
                 : "Sin permiso"
             }
