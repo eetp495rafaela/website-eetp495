@@ -208,6 +208,122 @@ async function cargarMateriasCursoSime() {
   }
 }
 
+function obtenerEtiquetaEstadoSime(estado) {
+  const estadoNormalizado = String(estado || "")
+    .trim()
+    .toUpperCase();
+
+  if (estadoNormalizado === "ACTIVA") {
+    return "Activa";
+  }
+
+  if (estadoNormalizado === "ANULADA") {
+    return "Anulada";
+  }
+
+  return estadoNormalizado || "Sin estado";
+}
+
+function mostrarInscripcionesSime(inscripciones) {
+  if (!cuerpoTablaInscripcionesSime) return;
+
+  if (!Array.isArray(inscripciones) || !inscripciones.length) {
+    cuerpoTablaInscripcionesSime.innerHTML = `
+      <tr>
+        <td colspan="4" class="tabla-vacia">
+          Todavía no tenés inscripciones registradas.
+        </td>
+      </tr>
+    `;
+
+    return;
+  }
+
+  cuerpoTablaInscripcionesSime.innerHTML = inscripciones
+    .map((inscripcion) => {
+      const idInscripcion = String(inscripcion.idInscripcion || "").trim();
+
+      return `
+        <tr>
+          <td>${inscripcion.fechaInscripcion || ""}</td>
+          <td>${inscripcion.turnoExamen || ""}</td>
+          <td>
+            <span class="etiqueta-estado-sime">
+              ${obtenerEtiquetaEstadoSime(inscripcion.estado)}
+            </span>
+          </td>
+          <td>
+            ${
+              inscripcion.tienePermiso
+                ? `
+                  <button
+                    class="btn-ver-permiso-sime"
+                    type="button"
+                    data-id-inscripcion="${idInscripcion}"
+                  >
+                    <i class="fa-solid fa-eye"></i>
+                    Ver
+                  </button>
+                `
+                : "Sin permiso"
+            }
+          </td>
+        </tr>
+      `;
+    })
+    .join("");
+}
+
+async function cargarMisInscripcionesSime() {
+  if (!cuerpoTablaInscripcionesSime) return;
+
+  const usuario = auth.currentUser;
+
+  if (!usuario) return;
+
+  cuerpoTablaInscripcionesSime.innerHTML = `
+    <tr>
+      <td colspan="4" class="tabla-vacia">
+        Cargando tus inscripciones...
+      </td>
+    </tr>
+  `;
+
+  try {
+    const idToken = await usuario.getIdToken(true);
+
+    const resultado = await enviarAlBackendSime({
+      accion: "listar_mis_inscripciones",
+      idToken,
+    });
+
+    if (!resultado.ok) {
+      throw new Error(
+        resultado.mensaje || "No se pudieron cargar tus inscripciones.",
+      );
+    }
+
+    mostrarInscripcionesSime(resultado.inscripciones || []);
+    mostrarMensajeSime(mensajeListadoSime, "");
+  } catch (error) {
+    console.error("Error al cargar inscripciones S.I.M.E.:", error);
+
+    cuerpoTablaInscripcionesSime.innerHTML = `
+      <tr>
+        <td colspan="4" class="tabla-vacia">
+          No se pudieron cargar tus inscripciones.
+        </td>
+      </tr>
+    `;
+
+    mostrarMensajeSime(
+      mensajeListadoSime,
+      error.message || "No se pudieron cargar tus inscripciones.",
+      "error",
+    );
+  }
+}
+
 async function cargarConfiguracionSimeAlumno(usuario) {
   const idToken = await usuario.getIdToken(true);
 
@@ -236,6 +352,7 @@ onAuthStateChanged(auth, async (usuario) => {
 
   try {
     await cargarConfiguracionSimeAlumno(usuario);
+    await cargarMisInscripcionesSime();
   } catch (error) {
     console.error("Error al cargar S.I.M.E.:", error);
   }
