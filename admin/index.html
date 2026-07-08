@@ -97,6 +97,15 @@
             </p>
           </a>
 
+          <a class="tarjeta tarjeta-enlace" href="#sime">
+            <i class="fa-solid fa-file-signature"></i>
+            <h3>S.I.M.E.</h3>
+            <p>
+              Configuración, consulta y administración de inscripciones a mesas
+              de examen.
+            </p>
+          </a>
+
           <a class="tarjeta tarjeta-enlace" href="#configuracion">
             <i class="fa-solid fa-gears"></i>
             <h3>Configuración</h3>
@@ -756,7 +765,184 @@
           Volver al inicio
         </a>
       </section>
+      <section class="grupo seccion-destino" id="sime">
+        <h2>S.I.M.E.</h2>
 
+        <div class="panel-info">
+          <div class="encabezado-listado">
+            <div>
+              <h3>Configuración de inscripciones</h3>
+              <p>
+                Administrá el ciclo lectivo, turno de examen, fechas de apertura
+                y cierre, y el estado general del sistema de inscripciones.
+              </p>
+            </div>
+          </div>
+
+          <form
+            id="formConfiguracionSime"
+            class="formulario-usuario"
+            autocomplete="off"
+          >
+            <div class="form-grid">
+              <div class="campo-formulario">
+                <label for="simeCicloLectivo">Ciclo lectivo *</label>
+                <input
+                  id="simeCicloLectivo"
+                  type="number"
+                  min="2020"
+                  max="2100"
+                  required
+                />
+              </div>
+
+              <div class="campo-formulario">
+                <label for="simeTurnoExamen">Turno de examen *</label>
+                <input
+                  id="simeTurnoExamen"
+                  type="text"
+                  placeholder="Ej.: Abril 2026"
+                  required
+                />
+              </div>
+
+              <div class="campo-formulario">
+                <label for="simeFechaApertura">Fecha de apertura</label>
+                <input id="simeFechaApertura" type="datetime-local" />
+              </div>
+
+              <div class="campo-formulario">
+                <label for="simeFechaCierre">Fecha de cierre</label>
+                <input id="simeFechaCierre" type="datetime-local" />
+              </div>
+
+              <div class="campo-formulario">
+                <label for="simeEstadoInscripciones">Estado *</label>
+                <select id="simeEstadoInscripciones" required>
+                  <option value="CERRADO">CERRADO</option>
+                  <option value="ABIERTO">ABIERTO</option>
+                </select>
+              </div>
+
+              <div class="campo-formulario">
+                <label for="simeEmailContacto">Email de contacto</label>
+                <input
+                  id="simeEmailContacto"
+                  type="email"
+                  placeholder="soportetecnico.tec495@gmail.com"
+                />
+              </div>
+            </div>
+
+            <div class="acciones">
+              <button
+                class="btn-accion"
+                id="btnGuardarConfiguracionSime"
+                type="submit"
+              >
+                <i class="fa-solid fa-floppy-disk"></i>
+                Guardar configuración
+              </button>
+            </div>
+
+            <p id="mensajeConfiguracionSime" class="mensaje-formulario"></p>
+          </form>
+        </div>
+
+        <div class="panel-info panel-sime-admin">
+          <div class="encabezado-listado">
+            <div>
+              <h3>Inscripciones registradas</h3>
+              <p>
+                Consultá las inscripciones realizadas por los estudiantes y
+                accedé a los permisos generados.
+              </p>
+            </div>
+
+            <button
+              class="btn-accion"
+              id="btnActualizarInscripcionesSime"
+              type="button"
+            >
+              <i class="fa-solid fa-rotate"></i>
+              Actualizar listado
+            </button>
+          </div>
+
+          <div class="filtros-documentacion-admin">
+            <div class="campo-filtro">
+              <label for="filtroSimeCurso">Curso</label>
+
+              <select id="filtroSimeCurso">
+                <option value="">Todos los cursos</option>
+                <option value="1">1º</option>
+                <option value="2">2º</option>
+                <option value="3">3º</option>
+                <option value="4">4º</option>
+                <option value="5">5º</option>
+                <option value="6">6º</option>
+              </select>
+            </div>
+
+            <div class="campo-filtro">
+              <label for="filtroSimeEstado">Estado</label>
+
+              <select id="filtroSimeEstado">
+                <option value="">Todos los estados</option>
+                <option value="ACTIVA">ACTIVA</option>
+                <option value="ANULADA">ANULADA</option>
+              </select>
+            </div>
+
+            <div class="campo-filtro campo-busqueda">
+              <label for="buscarSimeAlumno">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                Buscar estudiante
+              </label>
+
+              <input
+                id="buscarSimeAlumno"
+                type="search"
+                placeholder="Nombre, correo o DNI..."
+                autocomplete="off"
+              />
+            </div>
+          </div>
+
+          <div class="tabla-contenedor">
+            <table class="tabla-usuarios tabla-sime-admin">
+              <thead>
+                <tr>
+                  <th>Fecha</th>
+                  <th>Alumno</th>
+                  <th>DNI</th>
+                  <th>Turno</th>
+                  <th>Curso</th>
+                  <th>Año cursado</th>
+                  <th>Materias</th>
+                  <th>Estado</th>
+                  <th>Acciones</th>
+                </tr>
+              </thead>
+
+              <tbody id="cuerpoTablaSimeAdmin">
+                <tr>
+                  <td colspan="9" class="tabla-vacia">
+                    Cargando inscripciones...
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <p id="mensajeSimeAdmin" class="mensaje-formulario"></p>
+        </div>
+
+        <a class="btn-volver" href="#inicio">
+          <i class="fa-solid fa-arrow-up"></i>
+          Volver al inicio
+        </a>
+      </section>
       <section class="grupo seccion-destino" id="configuracion">
         <h2>Configuración del Portal</h2>
 
