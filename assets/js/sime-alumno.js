@@ -50,6 +50,7 @@ const mensajeListadoSime = document.getElementById("mensajeListadoSime");
 
 let configuracionSimeAlumno = null;
 let alumnoSime = null;
+const rolUsuarioEncabezado = document.querySelector("[data-rol-usuario]");
 
 async function enviarAlBackendSime(datos) {
   const respuesta = await fetch(BACKEND_SIME_URL, {
@@ -72,6 +73,41 @@ function mostrarMensajeSime(elemento, texto, tipo = "") {
 
   elemento.textContent = texto;
   elemento.className = `mensaje-formulario ${tipo}`.trim();
+}
+function obtenerEtiquetaSituacionRevistaSime(tipoVinculo) {
+  const valor = String(tipoVinculo || "")
+    .trim()
+    .toUpperCase();
+
+  const etiquetas = {
+    CURSANDO: "Cursando",
+    CURSADA_COMPLETA: "Cursada completa",
+    TITULAR: "Titular",
+    INTERINO: "Interino/a",
+    REEMPLAZANTE: "Reemplazante",
+  };
+
+  return etiquetas[valor] || valor || "";
+}
+
+function actualizarEncabezadoAlumnoSime(alumno) {
+  if (!rolUsuarioEncabezado || !alumno) return;
+
+  const situacion = obtenerEtiquetaSituacionRevistaSime(alumno.tipoVinculo);
+
+  const curso = String(alumno.cursoNombre || "").trim();
+
+  if (curso && situacion) {
+    rolUsuarioEncabezado.textContent = `Estudiante · ${curso} · ${situacion}`;
+    return;
+  }
+
+  if (situacion) {
+    rolUsuarioEncabezado.textContent = `Estudiante · ${situacion}`;
+    return;
+  }
+
+  rolUsuarioEncabezado.textContent = "Estudiante";
 }
 
 function mostrarEstadoSime(configuracion) {
@@ -595,6 +631,8 @@ onAuthStateChanged(auth, async (usuario) => {
 
     alumnoSime = resultadoSime.alumno;
     configuracionSimeAlumno = resultadoSime.configuracion;
+
+    actualizarEncabezadoAlumnoSime(alumnoSime);
 
     cargarAniosCursadoSime(configuracionSimeAlumno.aniosCursado || []);
 
