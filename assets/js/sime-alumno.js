@@ -338,6 +338,75 @@ async function cargarMisInscripcionesSime() {
   }
 }
 
+function convertirBase64ABlobSime(base64, tipoMime = "application/pdf") {
+  const caracteres = atob(base64);
+  const bytes = new Uint8Array(caracteres.length);
+
+  for (let indice = 0; indice < caracteres.length; indice += 1) {
+    bytes[indice] = caracteres.charCodeAt(indice);
+  }
+
+  return new Blob([bytes], {
+    type: tipoMime,
+  });
+}
+
+async function abrirPermisoSime(idInscripcion, boton) {
+  const usuario = auth.currentUser;
+
+  if (!usuario) {
+    throw new Error("No se detectó una sesión activa.");
+  }
+
+  const ventanaPermiso = window.open("", "_blank");
+
+  if (!ventanaPermiso) {
+    throw new Error(
+      "El navegador bloqueó la apertura del permiso. Permití ventanas emergentes para este sitio.",
+    );
+  }
+
+  ventanaPermiso.document.write(`
+    <p style="font-family: Arial, sans-serif; padding: 20px;">
+      Preparando permiso de examen...
+    </p>
+  `);
+
+  boton.disabled = true;
+
+  try {
+    const idToken = await usuario.getIdToken(true);
+
+    const resultado = await enviarAlBackendSime({
+      accion: "obtener_permiso_inscripcion",
+      idToken,
+      idInscripcion,
+    });
+
+    if (!resultado.ok) {
+      throw new Error(resultado.mensaje || "No se pudo abrir el permiso.");
+    }
+
+    const blobPdf = convertirBase64ABlobSime(
+      resultado.permisoBase64,
+      resultado.tipoMime || "application/pdf",
+    );
+
+    const urlPdf = URL.createObjectURL(blobPdf);
+
+    ventanaPermiso.location.href = urlPdf;
+
+    setTimeout(() => {
+      URL.revokeObjectURL(urlPdf);
+    }, 60000);
+  } catch (error) {
+    ventanaPermiso.close();
+    throw error;
+  } finally {
+    boton.disabled = false;
+  }
+}
+
 async function cargarConfiguracionSimeAlumno(usuario) {
   const idToken = await usuario.getIdToken(true);
 
@@ -361,11 +430,48 @@ if (cursoOrigenSime) {
   cursoOrigenSime.addEventListener("change", cargarMateriasCursoSime);
 }
 
+if (cuerpoTablaInscripcionesSime) {
+  cuerpoTablaInscripcionesSime.addEventListener("click", async (event) => {
+    const botonVer = event.target.closest(".btn-ver-permiso-sime");
+
+    if (!botonVer) return;
+
+    const idInscripcion = String(botonVer.dataset.idInscripcion || "").trim();
+
+    if (!idInscripcion) {
+      mostrarMensajeSime(
+        mensajeListadoSime,
+        "No se pudo identificar la inscripción.",
+        "error",
+      );
+      return;
+    }
+
+    try {
+      await abrirPermisoSime(idInscripcion, botonVer);
+    } catch (error) {
+      console.error("Error al abrir permiso S.I.M.E.:", error);
+
+      mostrarMensajeSime(
+        mensajeListadoSime,
+        error.message || "No se pudo abrir el permiso.",
+        "error",
+      );
+    }
+  });
+}
+
 onAuthStateChanged(auth, async (usuario) => {
   if (!usuario) return;
 
   try {
-    await cargarConfiguracionSimeAlumno(usuario);
+    const resultadoSime = await cargarConfiguracionSimeAlumno(usuario);
+
+    alumnoSime = resultadoSime.alumno;
+    configuracionSimeAlumno = resultadoSime.configuracion;
+
+    cargarAniosCursadoSime(configuracionSimeAlumno.aniosCursado || []);
+
     await cargarMisInscripcionesSime();
   } catch (error) {
     console.error("Error al cargar S.I.M.E.:", error);
