@@ -210,13 +210,40 @@
     min-width: 520px;
   }
 }
-.tabla-sime-alumno th:nth-child(3),
-.tabla-sime-alumno td:nth-child(3),
-.tabla-sime-alumno th:nth-child(4),
-.tabla-sime-alumno td:nth-child(4) {
-  text-align: center;
+
+/* Ajuste fino tabla Mis Inscripciones */
+
+.tabla-sime-alumno {
+  table-layout: fixed;
 }
 
-.tabla-sime-alumno td:nth-child(4) {
+.tabla-sime-alumno th,
+.tabla-sime-alumno td {
+  text-align: center;
   vertical-align: middle;
+}
+
+.tabla-sime-alumno th:nth-child(1),
+.tabla-sime-alumno td:nth-child(1) {
+  width: 28%;
+}
+
+.tabla-sime-alumno th:nth-child(2),
+.tabla-sime-alumno td:nth-child(2) {
+  width: 24%;
+}
+
+.tabla-sime-alumno th:nth-child(3),
+.tabla-sime-alumno td:nth-child(3) {
+  width: 22%;
+}
+
+.tabla-sime-alumno th:nth-child(4),
+.tabla-sime-alumno td:nth-child(4) {
+  width: 26%;
+}
+
+.tabla-sime-alumno td:nth-child(1),
+.tabla-sime-alumno td:nth-child(2) {
+  font-weight: 600;
 }
