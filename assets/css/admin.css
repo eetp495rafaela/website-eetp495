@@ -1348,3 +1348,31 @@ body.modal-abierto {
     grid-template-columns: 1fr;
   }
 }
+.encabezado-tarjeta-bloque-horario {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.btn-eliminar-bloque-horario {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  min-width: 28px;
+  height: 28px;
+  border: 1px solid #dc2626;
+  border-radius: 8px;
+  background: #dc2626;
+  color: #ffffff;
+  font-size: 0.78rem;
+  cursor: pointer;
+  box-shadow: 0 4px 10px rgba(220, 38, 38, 0.18);
+  transition: 0.2s ease;
+}
+
+.btn-eliminar-bloque-horario:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.05);
+}

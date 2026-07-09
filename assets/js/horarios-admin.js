@@ -13,6 +13,8 @@ import {
   collection,
   getDocs,
   addDoc,
+  deleteDoc,
+  doc,
   serverTimestamp,
 } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
@@ -543,9 +545,21 @@ function renderizarHorarioAulaCargado(bloques) {
                 .map(
                   (bloque) => `
                     <div class="tarjeta-bloque-horario-admin">
-                      <div class="bloque-horario-hora">
-                        Bloque ${bloque.bloqueNumero} · ${bloque.horaInicio} a ${bloque.horaFin}
-                      </div>
+  <div class="encabezado-tarjeta-bloque-horario">
+    <div class="bloque-horario-hora">
+      Bloque ${bloque.bloqueNumero} · ${bloque.horaInicio} a ${bloque.horaFin}
+    </div>
+
+    <button
+      class="btn-eliminar-bloque-horario"
+      type="button"
+      title="Eliminar bloque"
+      aria-label="Eliminar bloque"
+      data-id-horario="${bloque.id}"
+    >
+      <i class="fa-solid fa-trash"></i>
+    </button>
+  </div>
 
                       <div class="bloque-horario-materia">
                         ${bloque.espacioCurricular || "-"}
@@ -651,6 +665,51 @@ async function cargarHorarioAulaRegistrado() {
         No se pudo cargar el horario registrado.
       </p>
     `;
+  }
+}
+
+async function eliminarBloqueHorarioAula(idHorario) {
+  if (!idHorario) return;
+
+  const confirmacion = await Swal.fire({
+    title: "Eliminar bloque horario",
+    text: "Se eliminará este bloque del horario de aula.",
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonText: "Sí, eliminar",
+    cancelButtonText: "Cancelar",
+    confirmButtonColor: "#dc2626",
+  });
+
+  if (!confirmacion.isConfirmed) return;
+
+  try {
+    await deleteDoc(doc(db, "horarios", idHorario));
+
+    await Swal.fire({
+      title: "Bloque eliminado",
+      text: "El bloque horario fue eliminado correctamente.",
+      icon: "success",
+      confirmButtonText: "Aceptar",
+    });
+
+    await cargarHorarioAulaRegistrado();
+
+    mostrarMensajeHorarioAula("Bloque horario eliminado correctamente.", "ok");
+  } catch (error) {
+    console.error("Error al eliminar bloque horario:", error);
+
+    Swal.fire({
+      title: "No se pudo eliminar",
+      text: "Ocurrió un error al eliminar el bloque horario.",
+      icon: "error",
+      confirmButtonText: "Aceptar",
+    });
+
+    mostrarMensajeHorarioAula(
+      "No se pudo eliminar el bloque horario.",
+      "error",
+    );
   }
 }
 
@@ -837,6 +896,16 @@ if (horarioAulaCicloLectivo) {
     "change",
     cargarHorarioAulaRegistrado,
   );
+}
+
+if (vistaHorarioAula) {
+  vistaHorarioAula.addEventListener("click", async (event) => {
+    const botonEliminar = event.target.closest(".btn-eliminar-bloque-horario");
+
+    if (!botonEliminar) return;
+
+    await eliminarBloqueHorarioAula(botonEliminar.dataset.idHorario);
+  });
 }
 
 onAuthStateChanged(auth, async (usuario) => {
