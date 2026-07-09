@@ -1078,13 +1078,14 @@
                 </div>
 
                 <div class="campo-formulario campo-doble">
-                  <label>Bloques horarios *</label>
+                  <label for="horarioTallerHorario">Horario de taller</label>
 
-                  <div class="bloques-horarios-admin" id="bloquesHorarioAula">
-                    <p class="mensaje-formulario">
-                      Seleccioná primero un turno.
-                    </p>
-                  </div>
+                  <input
+                    id="horarioTallerHorario"
+                    type="text"
+                    placeholder="Se completará automáticamente según el turno"
+                    readonly
+                  />
                 </div>
 
                 <div class="campo-formulario campo-doble">
@@ -1144,6 +1145,151 @@
             <div id="vistaHorarioAula" class="vista-horario-aula">
               <p class="mensaje-formulario">
                 Todavía no hay bloques horarios cargados.
+              </p>
+            </div>
+          </div>
+          <div id="panelHorarioTaller" class="panel-horario-taller">
+            <div class="separador-usuarios"></div>
+
+            <h3>Horario de Taller</h3>
+
+            <p>
+              Cargá los bloques de taller por curso, grupo, espacio, docente,
+              día y franja horaria.
+            </p>
+
+            <form
+              id="formHorarioTaller"
+              class="formulario-usuario"
+              autocomplete="off"
+            >
+              <div class="form-grid">
+                <div class="campo-formulario">
+                  <label for="horarioTallerCicloLectivo">Ciclo lectivo *</label>
+                  <input
+                    id="horarioTallerCicloLectivo"
+                    type="number"
+                    min="2020"
+                    max="2100"
+                    value="2026"
+                    required
+                  />
+                </div>
+
+                <div class="campo-formulario">
+                  <label for="horarioTallerTurno">Turno *</label>
+                  <select id="horarioTallerTurno" required>
+                    <option value="">Seleccionar turno</option>
+                    <option value="MANANA">Mañana</option>
+                    <option value="TARDE">Tarde</option>
+                  </select>
+                </div>
+
+                <div class="campo-formulario">
+                  <label for="horarioTallerCurso">Curso *</label>
+                  <select id="horarioTallerCurso" required>
+                    <option value="">Cargando cursos...</option>
+                  </select>
+                </div>
+
+                <div class="campo-formulario">
+                  <label for="horarioTallerGrupo">Grupo *</label>
+                  <select id="horarioTallerGrupo" required>
+                    <option value="">Seleccionar grupo</option>
+                    <option value="G1">Grupo 1</option>
+                    <option value="G2">Grupo 2</option>
+                  </select>
+                </div>
+
+                <div class="campo-formulario">
+                  <label for="horarioTallerDia">Día *</label>
+                  <select id="horarioTallerDia" required>
+                    <option value="">Seleccionar día</option>
+                    <option value="LUNES">Lunes</option>
+                    <option value="MARTES">Martes</option>
+                    <option value="MIERCOLES">Miércoles</option>
+                    <option value="JUEVES">Jueves</option>
+                    <option value="VIERNES">Viernes</option>
+                  </select>
+                </div>
+
+                <div class="campo-formulario campo-doble">
+                  <label for="horarioTallerEspacio"
+                    >Taller / Espacio curricular *</label
+                  >
+                  <select id="horarioTallerEspacio" required>
+                    <option value="">Seleccioná primero un curso</option>
+                  </select>
+                </div>
+
+                <div class="campo-formulario campo-doble">
+                  <label for="horarioTallerDocente">Docente asignado</label>
+                  <input
+                    id="horarioTallerDocente"
+                    type="text"
+                    placeholder="Se completará automáticamente"
+                    readonly
+                  />
+                </div>
+
+                <div class="campo-formulario campo-doble">
+                  <label>Bloques horarios *</label>
+
+                  <div class="bloques-horarios-admin" id="bloquesHorarioTaller">
+                    <p class="mensaje-formulario">
+                      Seleccioná primero un turno.
+                    </p>
+                  </div>
+                </div>
+
+                <div class="campo-formulario campo-doble">
+                  <label for="horarioTallerUbicacion">Ubicación</label>
+                  <input
+                    id="horarioTallerUbicacion"
+                    type="text"
+                    placeholder="Ej.: Aula Electricidad, Laboratorio Norte, etc."
+                  />
+                </div>
+              </div>
+
+              <div class="acciones">
+                <button
+                  class="btn-accion"
+                  id="btnRegistrarHorarioTaller"
+                  type="submit"
+                >
+                  <i class="fa-solid fa-plus"></i>
+                  Registrar bloque de taller
+                </button>
+              </div>
+
+              <p id="mensajeHorarioTaller" class="mensaje-formulario"></p>
+            </form>
+
+            <div class="separador-usuarios"></div>
+
+            <div class="encabezado-listado">
+              <div>
+                <h3>Horario de taller cargado</h3>
+                <p>
+                  Los bloques registrados se mostrarán ordenados por día, grupo
+                  y horario.
+                </p>
+              </div>
+
+              <button
+                class="btn-accion"
+                id="btnActualizarHorarioTaller"
+                type="button"
+              >
+                <i class="fa-solid fa-rotate"></i>
+                Actualizar horario
+              </button>
+            </div>
+
+            <div id="vistaHorarioTaller" class="vista-horario-aula">
+              <p class="mensaje-formulario">
+                Todavía no hay bloques de taller cargados.
               </p>
             </div>
           </div>

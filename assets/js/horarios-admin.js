@@ -54,6 +54,28 @@ const btnActualizarHorarioAula = document.getElementById(
 );
 const vistaHorarioAula = document.getElementById("vistaHorarioAula");
 const mensajeHorarioAula = document.getElementById("mensajeHorarioAula");
+const formHorarioTaller = document.getElementById("formHorarioTaller");
+const horarioTallerCicloLectivo = document.getElementById(
+  "horarioTallerCicloLectivo",
+);
+const horarioTallerTurno = document.getElementById("horarioTallerTurno");
+const horarioTallerCurso = document.getElementById("horarioTallerCurso");
+const horarioTallerGrupo = document.getElementById("horarioTallerGrupo");
+const horarioTallerDia = document.getElementById("horarioTallerDia");
+const horarioTallerEspacio = document.getElementById("horarioTallerEspacio");
+const horarioTallerDocente = document.getElementById("horarioTallerDocente");
+const horarioTallerHorario = document.getElementById("horarioTallerHorario");
+const horarioTallerUbicacion = document.getElementById(
+  "horarioTallerUbicacion",
+);
+const btnRegistrarHorarioTaller = document.getElementById(
+  "btnRegistrarHorarioTaller",
+);
+const btnActualizarHorarioTaller = document.getElementById(
+  "btnActualizarHorarioTaller",
+);
+const vistaHorarioTaller = document.getElementById("vistaHorarioTaller");
+const mensajeHorarioTaller = document.getElementById("mensajeHorarioTaller");
 
 let cursosHorarios = [];
 let espaciosHorarios = [];
@@ -74,6 +96,55 @@ function mostrarMensajeHorarioAula(texto, tipo = "") {
   if (tipo === "ok") {
     mensajeHorarioAula.classList.add("mensaje-ok");
   }
+}
+
+function mostrarMensajeHorarioTaller(texto, tipo = "") {
+  if (!mensajeHorarioTaller) return;
+
+  mensajeHorarioTaller.textContent = texto || "";
+  mensajeHorarioTaller.classList.remove("mensaje-error", "mensaje-ok");
+
+  if (tipo === "error") {
+    mensajeHorarioTaller.classList.add("mensaje-error");
+  }
+
+  if (tipo === "ok") {
+    mensajeHorarioTaller.classList.add("mensaje-ok");
+  }
+}
+
+function obtenerHorarioFijoTaller(turno) {
+  const valor = String(turno || "").trim();
+
+  if (valor === "MANANA") {
+    return {
+      inicio: "07:15",
+      fin: "10:55",
+      texto: "07:15 a 10:55",
+    };
+  }
+
+  if (valor === "TARDE") {
+    return {
+      inicio: "13:15",
+      fin: "16:55",
+      texto: "13:15 a 16:55",
+    };
+  }
+
+  return {
+    inicio: "",
+    fin: "",
+    texto: "",
+  };
+}
+
+function actualizarHorarioFijoTaller() {
+  if (!horarioTallerTurno || !horarioTallerHorario) return;
+
+  const horario = obtenerHorarioFijoTaller(horarioTallerTurno.value);
+
+  horarioTallerHorario.value = horario.texto;
 }
 
 const BLOQUES_HORARIOS_AULA = {
@@ -357,6 +428,37 @@ async function cargarDocenteAsignadoHorarioAula() {
   }
 }
 
+function cargarCursosHorarioTallerDesdeCache() {
+  if (!horarioTallerCurso) return;
+
+  if (!cursosHorarios.length) {
+    horarioTallerCurso.innerHTML = `
+      <option value="">No hay cursos activos</option>
+    `;
+    return;
+  }
+
+  horarioTallerCurso.innerHTML = `
+    <option value="">Seleccionar curso</option>
+    ${cursosHorarios
+      .map((curso) => {
+        const nombreCurso = obtenerNombreCursoHorario(curso);
+
+        return `
+          <option
+            value="${curso.id}"
+            data-anio="${curso.anio || ""}"
+            data-division="${curso.division || ""}"
+            data-nombre="${nombreCurso}"
+          >
+            ${nombreCurso}
+          </option>
+        `;
+      })
+      .join("")}
+  `;
+}
+
 async function cargarCursosHorarioAula() {
   if (!horarioAulaCurso) return;
 
@@ -421,6 +523,7 @@ async function cargarCursosHorarioAula() {
         })
         .join("")}
     `;
+    cargarCursosHorarioTallerDesdeCache();
 
     mostrarMensajeHorarioAula(
       `Cursos cargados correctamente: ${cursosHorarios.length}.`,
@@ -1109,6 +1212,10 @@ if (btnCancelarEdicionHorarioAula) {
 
     mostrarMensajeHorarioAula("Edición cancelada.");
   });
+}
+
+if (horarioTallerTurno) {
+  horarioTallerTurno.addEventListener("change", actualizarHorarioFijoTaller);
 }
 
 onAuthStateChanged(auth, async (usuario) => {
