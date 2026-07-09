@@ -26,6 +26,9 @@ const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
+const horarioAulaCicloLectivo = document.getElementById(
+  "horarioAulaCicloLectivo",
+);
 const horarioAulaCurso = document.getElementById("horarioAulaCurso");
 const horarioAulaEspacio = document.getElementById("horarioAulaEspacio");
 const horarioAulaDocente = document.getElementById("horarioAulaDocente");
@@ -179,6 +182,78 @@ async function cargarEspaciosHorarioAulaPorCurso() {
   }
 }
 
+async function cargarDocenteAsignadoHorarioAula() {
+  if (!horarioAulaCurso || !horarioAulaEspacio || !horarioAulaDocente) return;
+
+  const cursoId = String(horarioAulaCurso.value || "").trim();
+  const espacioId = String(horarioAulaEspacio.value || "").trim();
+  const cicloLectivo = Number(horarioAulaCicloLectivo?.value || 0);
+
+  horarioAulaDocente.value = "";
+
+  if (!cursoId || !espacioId || !cicloLectivo) {
+    return;
+  }
+
+  horarioAulaDocente.value = "Buscando docente asignado...";
+
+  try {
+    const consulta = await getDocs(collection(db, "asignaciones_docentes"));
+
+    let asignacionEncontrada = null;
+
+    consulta.forEach((documento) => {
+      if (asignacionEncontrada) return;
+
+      const datos = documento.data();
+
+      const estado = String(datos.estado || "")
+        .trim()
+        .toUpperCase();
+
+      const mismoCurso = String(datos.cursoId || "").trim() === cursoId;
+
+      const mismoEspacio = String(datos.espacioId || "").trim() === espacioId;
+
+      const mismoCiclo = Number(datos.cicloLectivo || 0) === cicloLectivo;
+
+      const estaActiva = !estado || estado === "ACTIVA" || estado === "ACTIVO";
+
+      if (mismoCurso && mismoEspacio && mismoCiclo && estaActiva) {
+        asignacionEncontrada = {
+          docenteNombre: datos.docenteNombre || "",
+          docenteCorreo: datos.docenteCorreo || "",
+        };
+      }
+    });
+
+    if (!asignacionEncontrada) {
+      horarioAulaDocente.value = "Sin docente asignado";
+      mostrarMensajeHorarioAula(
+        "No se encontró una asignación docente activa para ese curso y materia.",
+        "error",
+      );
+      return;
+    }
+
+    horarioAulaDocente.value =
+      asignacionEncontrada.docenteNombre ||
+      asignacionEncontrada.docenteCorreo ||
+      "Docente asignado";
+
+    mostrarMensajeHorarioAula("Docente asignado cargado correctamente.", "ok");
+  } catch (error) {
+    console.error("Error al buscar docente asignado:", error);
+
+    horarioAulaDocente.value = "";
+
+    mostrarMensajeHorarioAula(
+      "No se pudo buscar el docente asignado.",
+      "error",
+    );
+  }
+}
+
 async function cargarCursosHorarioAula() {
   if (!horarioAulaCurso) return;
 
@@ -263,9 +338,23 @@ async function cargarCursosHorarioAula() {
 }
 
 if (horarioAulaCurso) {
-  horarioAulaCurso.addEventListener(
+  horarioAulaCurso.addEventListener("change", async () => {
+    await cargarEspaciosHorarioAulaPorCurso();
+    await cargarDocenteAsignadoHorarioAula();
+  });
+}
+
+if (horarioAulaEspacio) {
+  horarioAulaEspacio.addEventListener(
     "change",
-    cargarEspaciosHorarioAulaPorCurso,
+    cargarDocenteAsignadoHorarioAula,
+  );
+}
+
+if (horarioAulaCicloLectivo) {
+  horarioAulaCicloLectivo.addEventListener(
+    "change",
+    cargarDocenteAsignadoHorarioAula,
   );
 }
 
