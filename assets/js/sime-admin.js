@@ -151,12 +151,9 @@ function mostrarInscripcionesSimeAdmin() {
     .map((inscripcion) => {
       return `
         <tr>
-          <td>${inscripcion.fechaInscripcion || "-"}</td>
+          <td>${String(inscripcion.fechaInscripcion || "-").split(" ")[0]}</td>
 
-          <td>
-            <strong>${inscripcion.alumnoNombre || "-"}</strong><br>
-            <small>${inscripcion.alumnoCorreo || ""}</small>
-          </td>
+        <td><strong>${inscripcion.alumnoNombre || "-"}</strong></td>
 
           <td>${inscripcion.anioCursado || "-"}</td>
 
