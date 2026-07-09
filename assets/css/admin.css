@@ -1230,3 +1230,15 @@ body.modal-abierto {
 .btn-google-sheets-sime:hover {
   filter: brightness(1.05);
 }
+.acciones-usuarios-listado {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.mensaje-estudiantes-superior {
+  margin-top: 8px;
+  margin-bottom: 0;
+  font-weight: 700;
+}

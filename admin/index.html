@@ -219,18 +219,21 @@
               <p>Consultá las cuentas autorizadas actualmente.</p>
             </div>
 
-            <button class="btn-accion" id="btnVerUsuarios" type="button">
-              <i class="fa-solid fa-users"></i>
-              Ver usuarios
-            </button>
-            <button
-              class="btn-accion btn-importar-usuarios"
-              id="btnImportarUsuarios"
-              type="button"
-            >
-              <i class="fa-solid fa-file-import"></i>
-              Importar usuarios
-            </button>
+            <div class="acciones-usuarios-listado">
+              <button class="btn-accion" id="btnVerUsuarios" type="button">
+                <i class="fa-solid fa-users"></i>
+                Ver usuarios
+              </button>
+
+              <button
+                class="btn-accion btn-importar-usuarios"
+                id="btnImportarUsuarios"
+                type="button"
+              >
+                <i class="fa-solid fa-file-import"></i>
+                Importar usuarios
+              </button>
+            </div>
 
             <input
               id="archivoImportacionUsuarios"
@@ -591,6 +594,10 @@
                 Consultá los usuarios con rol ALUMNO y asignales su curso
                 actual.
               </p>
+              <p
+                id="mensajeEstudiantesSuperior"
+                class="mensaje-formulario mensaje-estudiantes-superior"
+              ></p>
             </div>
 
             <div class="acciones-estudiantes">
@@ -1399,6 +1406,36 @@
           behavior: "smooth",
         });
       });
+      const mensajeEstudiantesInferior =
+        document.getElementById("mensajeEstudiantes");
+      const mensajeEstudiantesSuperior = document.getElementById(
+        "mensajeEstudiantesSuperior",
+      );
+
+      if (mensajeEstudiantesInferior && mensajeEstudiantesSuperior) {
+        const copiarMensajeEstudiantes = () => {
+          mensajeEstudiantesSuperior.textContent =
+            mensajeEstudiantesInferior.textContent || "";
+
+          mensajeEstudiantesSuperior.className =
+            mensajeEstudiantesInferior.className +
+            " mensaje-estudiantes-superior";
+        };
+
+        const observadorEstudiantes = new MutationObserver(
+          copiarMensajeEstudiantes,
+        );
+
+        observadorEstudiantes.observe(mensajeEstudiantesInferior, {
+          childList: true,
+          characterData: true,
+          subtree: true,
+          attributes: true,
+          attributeFilter: ["class"],
+        });
+
+        copiarMensajeEstudiantes();
+      }
     </script>
   </body>
 </html>
