@@ -966,6 +966,7 @@ async function registrarCurso(event) {
 const PLAN_ESTUDIOS_INICIAL = [
   // PRIMER AÑO
   { anio: 1, nombre: "Biología", tipo: "AULA" },
+  { anio: 1, nombre: "Dibujo Técnico", tipo: "AULA" },
   { anio: 1, nombre: "Educación Artística: Música", tipo: "AULA" },
   { anio: 1, nombre: "Educación Física", tipo: "EDUCACION_FISICA" },
   { anio: 1, nombre: "Educación Tecnológica", tipo: "AULA" },
@@ -989,6 +990,7 @@ const PLAN_ESTUDIOS_INICIAL = [
     nombre: "Educación Artística: Artes Visuales",
     tipo: "AULA",
   },
+  { anio: 2, nombre: "Dibujo Técnico", tipo: "AULA" },
   { anio: 2, nombre: "Educación Física", tipo: "EDUCACION_FISICA" },
   { anio: 2, nombre: "Educación Tecnológica", tipo: "AULA" },
   { anio: 2, nombre: "Físico-Química", tipo: "AULA" },
