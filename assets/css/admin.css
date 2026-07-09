@@ -1276,3 +1276,75 @@ body.modal-abierto {
   font-weight: 800;
   text-align: center;
 }
+.grilla-horario-aula-admin {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(180px, 1fr));
+  gap: 14px;
+  align-items: start;
+}
+
+.dia-horario-admin {
+  border: 1px solid #d5e3f7;
+  border-radius: 16px;
+  background: #f8fbff;
+  padding: 12px;
+}
+
+.dia-horario-admin h4 {
+  margin: 0 0 10px;
+  color: #00327a;
+  font-size: 0.98rem;
+  font-weight: 900;
+  text-align: center;
+}
+
+.tarjeta-bloque-horario-admin {
+  padding: 10px;
+  border-radius: 12px;
+  background: #ffffff;
+  border: 1px solid #dce8fa;
+  box-shadow: 0 5px 14px rgba(8, 43, 102, 0.06);
+}
+
+.tarjeta-bloque-horario-admin + .tarjeta-bloque-horario-admin {
+  margin-top: 8px;
+}
+
+.bloque-horario-hora {
+  font-size: 0.76rem;
+  font-weight: 900;
+  color: #0b4aad;
+  margin-bottom: 5px;
+}
+
+.bloque-horario-materia {
+  font-size: 0.9rem;
+  font-weight: 900;
+  color: #111b3f;
+}
+
+.bloque-horario-docente {
+  margin-top: 4px;
+  font-size: 0.82rem;
+  color: #405579;
+  font-weight: 700;
+}
+
+.bloque-horario-ubicacion {
+  margin-top: 6px;
+  font-size: 0.78rem;
+  color: #31588f;
+  font-weight: 800;
+}
+
+@media (max-width: 1100px) {
+  .grilla-horario-aula-admin {
+    grid-template-columns: repeat(2, minmax(220px, 1fr));
+  }
+}
+
+@media (max-width: 650px) {
+  .grilla-horario-aula-admin {
+    grid-template-columns: 1fr;
+  }
+}
