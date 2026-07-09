@@ -7,10 +7,13 @@ import {
   getAuth,
   onAuthStateChanged,
 } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
+
 import {
   getFirestore,
   collection,
   getDocs,
+  addDoc,
+  serverTimestamp,
 } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -26,18 +29,25 @@ const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
+const formHorarioAula = document.getElementById("formHorarioAula");
 const horarioAulaCicloLectivo = document.getElementById(
   "horarioAulaCicloLectivo",
 );
 const horarioAulaTurno = document.getElementById("horarioAulaTurno");
 const bloquesHorarioAula = document.getElementById("bloquesHorarioAula");
 const horarioAulaCurso = document.getElementById("horarioAulaCurso");
+const horarioAulaDia = document.getElementById("horarioAulaDia");
 const horarioAulaEspacio = document.getElementById("horarioAulaEspacio");
 const horarioAulaDocente = document.getElementById("horarioAulaDocente");
+const horarioAulaUbicacion = document.getElementById("horarioAulaUbicacion");
+const btnRegistrarHorarioAula = document.getElementById(
+  "btnRegistrarHorarioAula",
+);
 const mensajeHorarioAula = document.getElementById("mensajeHorarioAula");
 
 let cursosHorarios = [];
 let espaciosHorarios = [];
+let docenteAsignadoHorarioAula = null;
 
 function mostrarMensajeHorarioAula(texto, tipo = "") {
   if (!mensajeHorarioAula) return;
@@ -264,6 +274,7 @@ async function cargarDocenteAsignadoHorarioAula() {
   const cicloLectivo = Number(horarioAulaCicloLectivo?.value || 0);
 
   horarioAulaDocente.value = "";
+  docenteAsignadoHorarioAula = null;
 
   if (!cursoId || !espacioId || !cicloLectivo) {
     return;
@@ -303,10 +314,13 @@ async function cargarDocenteAsignadoHorarioAula() {
 
     if (!asignacionEncontrada) {
       horarioAulaDocente.value = "Sin docente asignado";
+      docenteAsignadoHorarioAula = null;
+
       mostrarMensajeHorarioAula(
         "No se encontró una asignación docente activa para ese curso y materia.",
         "error",
       );
+
       return;
     }
 
@@ -315,11 +329,14 @@ async function cargarDocenteAsignadoHorarioAula() {
       asignacionEncontrada.docenteCorreo ||
       "Docente asignado";
 
+    docenteAsignadoHorarioAula = asignacionEncontrada;
+
     mostrarMensajeHorarioAula("Docente asignado cargado correctamente.", "ok");
   } catch (error) {
     console.error("Error al buscar docente asignado:", error);
 
     horarioAulaDocente.value = "";
+    docenteAsignadoHorarioAula = null;
 
     mostrarMensajeHorarioAula(
       "No se pudo buscar el docente asignado.",
@@ -434,6 +451,217 @@ if (horarioAulaCicloLectivo) {
 
 if (horarioAulaTurno) {
   horarioAulaTurno.addEventListener("change", renderizarBloquesHorarioAula);
+}
+
+function obtenerBloquesSeleccionadosHorarioAula() {
+  return Array.from(
+    document.querySelectorAll('input[name="bloqueHorarioAula"]:checked'),
+  ).map((checkbox) => ({
+    numero: Number(checkbox.value || 0),
+    inicio: checkbox.dataset.inicio || "",
+    fin: checkbox.dataset.fin || "",
+  }));
+}
+
+async function existeBloqueHorarioAula(datosBloque) {
+  const consulta = await getDocs(collection(db, "horarios"));
+  let existe = false;
+
+  consulta.forEach((documento) => {
+    if (existe) return;
+
+    const datos = documento.data();
+
+    const mismoTipo = String(datos.tipoHorario || "") === "AULA";
+
+    const mismoCiclo =
+      Number(datos.cicloLectivo || 0) === Number(datosBloque.cicloLectivo);
+
+    const mismoCurso =
+      String(datos.cursoId || "") === String(datosBloque.cursoId);
+
+    const mismoDia = String(datos.dia || "") === String(datosBloque.dia);
+
+    const mismoBloque =
+      Number(datos.bloqueNumero || 0) === Number(datosBloque.bloqueNumero);
+
+    const activo = String(datos.estado || "ACTIVO").toUpperCase() === "ACTIVO";
+
+    if (
+      mismoTipo &&
+      mismoCiclo &&
+      mismoCurso &&
+      mismoDia &&
+      mismoBloque &&
+      activo
+    ) {
+      existe = true;
+    }
+  });
+
+  return existe;
+}
+
+async function registrarHorarioAula(event) {
+  event.preventDefault();
+
+  const usuario = auth.currentUser;
+
+  if (!usuario) {
+    mostrarMensajeHorarioAula("No se detectó una sesión activa.", "error");
+    return;
+  }
+
+  const cicloLectivo = Number(horarioAulaCicloLectivo?.value || 0);
+  const turno = String(horarioAulaTurno?.value || "").trim();
+  const dia = String(horarioAulaDia?.value || "").trim();
+  const cursoId = String(horarioAulaCurso?.value || "").trim();
+  const espacioId = String(horarioAulaEspacio?.value || "").trim();
+  const ubicacion = String(horarioAulaUbicacion?.value || "").trim();
+
+  const opcionCurso = horarioAulaCurso.options[horarioAulaCurso.selectedIndex];
+
+  const opcionEspacio =
+    horarioAulaEspacio.options[horarioAulaEspacio.selectedIndex];
+
+  const cursoAnio = Number(opcionCurso?.dataset?.anio || 0);
+  const cursoDivision = String(opcionCurso?.dataset?.division || "")
+    .trim()
+    .toUpperCase();
+  const cursoNombre = String(opcionCurso?.dataset?.nombre || "").trim();
+
+  const espacioCurricular = String(opcionEspacio?.dataset?.nombre || "").trim();
+
+  const bloquesSeleccionados = obtenerBloquesSeleccionadosHorarioAula();
+
+  if (!cicloLectivo) {
+    mostrarMensajeHorarioAula("Ingresá el ciclo lectivo.", "error");
+    return;
+  }
+
+  if (!turno) {
+    mostrarMensajeHorarioAula("Seleccioná el turno.", "error");
+    return;
+  }
+
+  if (!cursoId) {
+    mostrarMensajeHorarioAula("Seleccioná el curso.", "error");
+    return;
+  }
+
+  if (!dia) {
+    mostrarMensajeHorarioAula("Seleccioná el día.", "error");
+    return;
+  }
+
+  if (!espacioId) {
+    mostrarMensajeHorarioAula("Seleccioná la materia.", "error");
+    return;
+  }
+
+  if (!docenteAsignadoHorarioAula) {
+    mostrarMensajeHorarioAula(
+      "No hay docente asignado para ese curso y materia.",
+      "error",
+    );
+    return;
+  }
+
+  if (!bloquesSeleccionados.length) {
+    mostrarMensajeHorarioAula(
+      "Seleccioná al menos un bloque horario.",
+      "error",
+    );
+    return;
+  }
+
+  btnRegistrarHorarioAula.disabled = true;
+
+  mostrarMensajeHorarioAula("Registrando horario de aula...");
+
+  try {
+    let registrados = 0;
+
+    for (const bloque of bloquesSeleccionados) {
+      const datosBloque = {
+        tipoHorario: "AULA",
+        cicloLectivo,
+        turno,
+        cursoId,
+        cursoAnio,
+        cursoDivision,
+        cursoNombre,
+        dia,
+        bloqueNumero: bloque.numero,
+        horaInicio: bloque.inicio,
+        horaFin: bloque.fin,
+        espacioId,
+        espacioCurricular,
+        docenteNombre: docenteAsignadoHorarioAula.docenteNombre || "",
+        docenteCorreo: docenteAsignadoHorarioAula.docenteCorreo || "",
+        ubicacion,
+        estado: "ACTIVO",
+      };
+
+      const yaExiste = await existeBloqueHorarioAula(datosBloque);
+
+      if (yaExiste) {
+        throw new Error(
+          `Ya existe un horario cargado para ${cursoNombre}, ${dia}, bloque ${bloque.numero}.`,
+        );
+      }
+
+      await addDoc(collection(db, "horarios"), {
+        ...datosBloque,
+        creadoEn: serverTimestamp(),
+        creadoPor: usuario.email || "",
+        actualizadoEn: serverTimestamp(),
+        actualizadoPor: usuario.email || "",
+      });
+
+      registrados++;
+    }
+
+    await Swal.fire({
+      title: "Horario registrado",
+      text: `Se registraron ${registrados} bloque/s de horario de aula.`,
+      icon: "success",
+      confirmButtonText: "Aceptar",
+    });
+
+    document
+      .querySelectorAll('input[name="bloqueHorarioAula"]:checked')
+      .forEach((checkbox) => {
+        checkbox.checked = false;
+      });
+
+    horarioAulaUbicacion.value = "";
+
+    mostrarMensajeHorarioAula(
+      `Horario registrado correctamente: ${registrados} bloque/s.`,
+      "ok",
+    );
+  } catch (error) {
+    console.error("Error al registrar horario de aula:", error);
+
+    mostrarMensajeHorarioAula(
+      error.message || "No se pudo registrar el horario de aula.",
+      "error",
+    );
+
+    Swal.fire({
+      title: "No se pudo registrar",
+      text: error.message || "Ocurrió un error al guardar el horario.",
+      icon: "error",
+      confirmButtonText: "Aceptar",
+    });
+  } finally {
+    btnRegistrarHorarioAula.disabled = false;
+  }
+}
+
+if (formHorarioAula) {
+  formHorarioAula.addEventListener("submit", registrarHorarioAula);
 }
 
 onAuthStateChanged(auth, async (usuario) => {
