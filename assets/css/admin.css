@@ -1221,3 +1221,12 @@ body.modal-abierto {
 .btn-peligro-sime:hover {
   filter: brightness(1.05);
 }
+.btn-google-sheets-sime {
+  border-color: #16a34a;
+  background: #16a34a;
+  color: #ffffff;
+}
+
+.btn-google-sheets-sime:hover {
+  filter: brightness(1.05);
+}

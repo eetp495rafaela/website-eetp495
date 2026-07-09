@@ -41,6 +41,10 @@ const btnActualizarInscripcionesSime = document.getElementById(
 const btnLimpiarInscripcionesSime = document.getElementById(
   "btnLimpiarInscripcionesSime",
 );
+const btnAbrirPlanillaSime = document.getElementById("btnAbrirPlanillaSime");
+
+const URL_PLANILLA_SIME =
+  "https://docs.google.com/spreadsheets/d/1cRWNbH6fz66NWrM_rpXxINbFlj0uJ0VUCMBCVw-OYCM/edit";
 const cuerpoTablaSimeAdmin = document.getElementById("cuerpoTablaSimeAdmin");
 const mensajeSimeAdmin = document.getElementById("mensajeSimeAdmin");
 const filtroSimeCurso = document.getElementById("filtroSimeCurso");
@@ -365,7 +369,7 @@ async function limpiarInscripcionesAdminSime() {
     html: `
       <p>Estás por eliminar todas las inscripciones registradas en S.I.M.E.</p>
       <p><strong>Esta acción es posible que no se pueda revertir completamente.</strong></p>
-      <p>Los PDF se enviarán a la papelera de Drive, pero los registros de la hoja serán eliminados.</p>
+      <p>Los PDF se enviarán a la papelera de Drive, y los registros de la hoja serán eliminados.</p>
     `,
     icon: "error",
     showCancelButton: true,
@@ -553,6 +557,27 @@ if (btnLimpiarInscripcionesSime) {
     "click",
     limpiarInscripcionesAdminSime,
   );
+}
+if (btnAbrirPlanillaSime) {
+  btnAbrirPlanillaSime.addEventListener("click", async () => {
+    const confirmacion = await Swal.fire({
+      title: "Abrir Google Sheets",
+      html: `
+        <p>Vas a salir del portal para abrir la planilla origen de S.I.M.E.</p>
+        <p><strong>Tené cuidado de no modificar datos manualmente</strong>, salvo que sea estrictamente necesario.</p>
+        <p>Los cambios incorrectos podrían afectar el funcionamiento del sistema.</p>
+      `,
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Abrir planilla",
+      cancelButtonText: "Cancelar",
+      confirmButtonColor: "#16a34a",
+    });
+
+    if (!confirmacion.isConfirmed) return;
+
+    window.open(URL_PLANILLA_SIME, "_blank", "noopener,noreferrer");
+  });
 }
 
 if (cuerpoTablaSimeAdmin) {
