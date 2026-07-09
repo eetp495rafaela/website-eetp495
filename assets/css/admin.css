@@ -1267,3 +1267,12 @@ body.modal-abierto {
 .vista-horario-aula {
   margin-top: 18px;
 }
+.recreo-horario-admin {
+  padding: 8px 12px;
+  border-radius: 10px;
+  background: #eef4ff;
+  color: #31588f;
+  font-size: 0.82rem;
+  font-weight: 800;
+  text-align: center;
+}

@@ -29,6 +29,8 @@ const db = getFirestore(app);
 const horarioAulaCicloLectivo = document.getElementById(
   "horarioAulaCicloLectivo",
 );
+const horarioAulaTurno = document.getElementById("horarioAulaTurno");
+const bloquesHorarioAula = document.getElementById("bloquesHorarioAula");
 const horarioAulaCurso = document.getElementById("horarioAulaCurso");
 const horarioAulaEspacio = document.getElementById("horarioAulaEspacio");
 const horarioAulaDocente = document.getElementById("horarioAulaDocente");
@@ -50,6 +52,78 @@ function mostrarMensajeHorarioAula(texto, tipo = "") {
   if (tipo === "ok") {
     mensajeHorarioAula.classList.add("mensaje-ok");
   }
+}
+
+const BLOQUES_HORARIOS_AULA = {
+  MANANA: [
+    { tipo: "BLOQUE", numero: 1, inicio: "07:15", fin: "07:55" },
+    { tipo: "BLOQUE", numero: 2, inicio: "07:55", fin: "08:35" },
+    { tipo: "RECREO", inicio: "08:35", fin: "08:45" },
+    { tipo: "BLOQUE", numero: 3, inicio: "08:45", fin: "09:25" },
+    { tipo: "BLOQUE", numero: 4, inicio: "09:25", fin: "10:05" },
+    { tipo: "RECREO", inicio: "10:05", fin: "10:15" },
+    { tipo: "BLOQUE", numero: 5, inicio: "10:15", fin: "10:55" },
+    { tipo: "BLOQUE", numero: 6, inicio: "10:55", fin: "11:35" },
+    { tipo: "RECREO", inicio: "11:35", fin: "11:40" },
+    { tipo: "BLOQUE", numero: 7, inicio: "11:40", fin: "12:20" },
+  ],
+
+  TARDE: [
+    { tipo: "BLOQUE", numero: 1, inicio: "13:15", fin: "13:55" },
+    { tipo: "BLOQUE", numero: 2, inicio: "13:55", fin: "14:35" },
+    { tipo: "RECREO", inicio: "14:35", fin: "14:45" },
+    { tipo: "BLOQUE", numero: 3, inicio: "14:45", fin: "15:25" },
+    { tipo: "BLOQUE", numero: 4, inicio: "15:25", fin: "16:05" },
+    { tipo: "RECREO", inicio: "16:05", fin: "16:15" },
+    { tipo: "BLOQUE", numero: 5, inicio: "16:15", fin: "16:55" },
+    { tipo: "BLOQUE", numero: 6, inicio: "16:55", fin: "17:35" },
+    { tipo: "RECREO", inicio: "17:35", fin: "17:40" },
+    { tipo: "BLOQUE", numero: 7, inicio: "17:40", fin: "18:20" },
+  ],
+};
+
+function renderizarBloquesHorarioAula() {
+  if (!bloquesHorarioAula || !horarioAulaTurno) return;
+
+  const turno = String(horarioAulaTurno.value || "").trim();
+  const bloques = BLOQUES_HORARIOS_AULA[turno] || [];
+
+  if (!turno || !bloques.length) {
+    bloquesHorarioAula.innerHTML = `
+      <p class="mensaje-formulario">
+        Seleccioná primero un turno.
+      </p>
+    `;
+    return;
+  }
+
+  bloquesHorarioAula.innerHTML = bloques
+    .map((bloque) => {
+      if (bloque.tipo === "RECREO") {
+        return `
+          <div class="recreo-horario-admin">
+            Recreo · ${bloque.inicio} a ${bloque.fin}
+          </div>
+        `;
+      }
+
+      return `
+        <label class="bloque-horario-opcion">
+          <input
+            type="checkbox"
+            name="bloqueHorarioAula"
+            value="${bloque.numero}"
+            data-inicio="${bloque.inicio}"
+            data-fin="${bloque.fin}"
+          />
+
+          <span>
+            Bloque ${bloque.numero} · ${bloque.inicio} a ${bloque.fin}
+          </span>
+        </label>
+      `;
+    })
+    .join("");
 }
 
 function obtenerNombreCursoHorario(curso) {
@@ -356,6 +430,10 @@ if (horarioAulaCicloLectivo) {
     "change",
     cargarDocenteAsignadoHorarioAula,
   );
+}
+
+if (horarioAulaTurno) {
+  horarioAulaTurno.addEventListener("change", renderizarBloquesHorarioAula);
 }
 
 onAuthStateChanged(auth, async (usuario) => {
