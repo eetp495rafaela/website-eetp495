@@ -1205,3 +1205,19 @@ body.modal-abierto {
   background: #dc2626;
   box-shadow: 0 4px 10px rgba(220, 38, 38, 0.18);
 }
+.acciones-sime-listado {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.btn-peligro-sime {
+  border-color: #dc2626;
+  background: #dc2626;
+  color: #ffffff;
+}
+
+.btn-peligro-sime:hover {
+  filter: brightness(1.05);
+}

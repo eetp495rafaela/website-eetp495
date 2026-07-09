@@ -38,6 +38,9 @@ const mensajeConfiguracionSime = document.getElementById(
 const btnActualizarInscripcionesSime = document.getElementById(
   "btnActualizarInscripcionesSime",
 );
+const btnLimpiarInscripcionesSime = document.getElementById(
+  "btnLimpiarInscripcionesSime",
+);
 const cuerpoTablaSimeAdmin = document.getElementById("cuerpoTablaSimeAdmin");
 const mensajeSimeAdmin = document.getElementById("mensajeSimeAdmin");
 const filtroSimeCurso = document.getElementById("filtroSimeCurso");
@@ -339,6 +342,103 @@ async function eliminarInscripcionAdminSime(idInscripcion, boton) {
     }
   }
 }
+
+async function limpiarInscripcionesAdminSime() {
+  const usuario = auth.currentUser;
+
+  if (!usuario) return;
+
+  const primeraConfirmacion = await Swal.fire({
+    title: "Eliminar todas las inscripciones",
+    text: "Esta acción eliminará todos los registros de inscripciones y enviará los PDF generados a la papelera de Drive.",
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonText: "Continuar",
+    cancelButtonText: "Cancelar",
+    confirmButtonColor: "#dc2626",
+  });
+
+  if (!primeraConfirmacion.isConfirmed) return;
+
+  const segundaConfirmacion = await Swal.fire({
+    title: "Confirmación final",
+    html: `
+      <p>Estás por eliminar todas las inscripciones registradas en S.I.M.E.</p>
+      <p><strong>Esta acción es posible que no se pueda revertir completamente.</strong></p>
+      <p>Los PDF se enviarán a la papelera de Drive, pero los registros de la hoja serán eliminados.</p>
+    `,
+    icon: "error",
+    showCancelButton: true,
+    confirmButtonText: "Sí, eliminar todo",
+    cancelButtonText: "Cancelar",
+    confirmButtonColor: "#dc2626",
+  });
+
+  if (!segundaConfirmacion.isConfirmed) return;
+
+  btnLimpiarInscripcionesSime.disabled = true;
+
+  mostrarMensajeSimeAdmin(
+    mensajeSimeAdmin,
+    "Eliminando inscripciones y permisos PDF...",
+  );
+
+  try {
+    const idToken = await usuario.getIdToken(true);
+
+    const resultado = await enviarAlBackendSimeAdmin({
+      accion: "limpiar_inscripciones_admin",
+      idToken,
+    });
+
+    if (!resultado.ok) {
+      throw new Error(resultado.mensaje || "No se pudo realizar la limpieza.");
+    }
+
+    await Swal.fire({
+      title: "Limpieza realizada",
+      html: `
+        <p>${resultado.mensaje || "Limpieza finalizada correctamente."}</p>
+        <p><strong>Registros eliminados:</strong> ${resultado.filasEliminadas || 0}</p>
+        <p><strong>PDF enviados a papelera:</strong> ${resultado.pdfEliminados || 0}</p>
+        ${
+          resultado.pdfConError
+            ? `<p><strong>PDF con error:</strong> ${resultado.pdfConError}</p>`
+            : ""
+        }
+      `,
+      icon: "success",
+      confirmButtonText: "Aceptar",
+    });
+
+    inscripcionesSimeAdmin = [];
+    mostrarInscripcionesSimeAdmin();
+
+    mostrarMensajeSimeAdmin(
+      mensajeSimeAdmin,
+      "No hay inscripciones para mostrar.",
+      "ok",
+    );
+  } catch (error) {
+    console.error("Error al limpiar inscripciones S.I.M.E.:", error);
+
+    Swal.fire({
+      title: "No se pudo limpiar S.I.M.E.",
+      text: error.message || "Ocurrió un error durante la limpieza.",
+      icon: "error",
+      confirmButtonText: "Aceptar",
+    });
+
+    mostrarMensajeSimeAdmin(
+      mensajeSimeAdmin,
+      error.message || "No se pudo realizar la limpieza.",
+      "error",
+    );
+  } finally {
+    btnLimpiarInscripcionesSime.disabled = false;
+  }
+}
+
 async function cargarInscripcionesSimeAdmin() {
   const usuario = auth.currentUser;
 
@@ -445,6 +545,13 @@ if (btnActualizarInscripcionesSime) {
   btnActualizarInscripcionesSime.addEventListener(
     "click",
     cargarInscripcionesSimeAdmin,
+  );
+}
+
+if (btnLimpiarInscripcionesSime) {
+  btnLimpiarInscripcionesSime.addEventListener(
+    "click",
+    limpiarInscripcionesAdminSime,
   );
 }
 
