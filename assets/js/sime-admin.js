@@ -41,6 +41,7 @@ const btnActualizarInscripcionesSime = document.getElementById(
 const cuerpoTablaSimeAdmin = document.getElementById("cuerpoTablaSimeAdmin");
 const mensajeSimeAdmin = document.getElementById("mensajeSimeAdmin");
 const filtroSimeCurso = document.getElementById("filtroSimeCurso");
+const filtroSimeAnioCursado = document.getElementById("filtroSimeAnioCursado");
 const buscarSimeAlumno = document.getElementById("buscarSimeAlumno");
 
 let inscripcionesSimeAdmin = [];
@@ -108,14 +109,33 @@ function renderizarMateriasSimeAdmin(materias) {
     </div>
   `;
 }
+function cargarFiltroAniosCursadoSimeAdmin() {
+  if (!filtroSimeAnioCursado) return;
 
+  const anios = [
+    ...new Set(
+      inscripcionesSimeAdmin
+        .map((inscripcion) => Number(inscripcion.anioCursado || 0))
+        .filter(Boolean),
+    ),
+  ].sort((a, b) => b - a);
+
+  filtroSimeAnioCursado.innerHTML = `
+    <option value="">Todos los años</option>
+    ${anios.map((anio) => `<option value="${anio}">${anio}</option>`).join("")}
+  `;
+}
 function obtenerInscripcionesFiltradasSimeAdmin() {
   const curso = String(filtroSimeCurso?.value || "").trim();
+  const anioCursado = String(filtroSimeAnioCursado?.value || "").trim();
   const busqueda = normalizarTextoSimeAdmin(buscarSimeAlumno?.value || "");
 
   return inscripcionesSimeAdmin.filter((inscripcion) => {
     const coincideCurso =
       !curso || String(inscripcion.cursoOrigen || "") === curso;
+
+    const coincideAnioCursado =
+      !anioCursado || String(inscripcion.anioCursado || "") === anioCursado;
 
     const textoAlumno = normalizarTextoSimeAdmin(
       [
@@ -127,7 +147,7 @@ function obtenerInscripcionesFiltradasSimeAdmin() {
 
     const coincideBusqueda = !busqueda || textoAlumno.includes(busqueda);
 
-    return coincideCurso && coincideBusqueda;
+    return coincideCurso && coincideAnioCursado && coincideBusqueda;
   });
 }
 
@@ -216,11 +236,12 @@ async function cargarInscripcionesSimeAdmin() {
 
     inscripcionesSimeAdmin = resultado.inscripciones || [];
 
+    cargarFiltroAniosCursadoSimeAdmin();
     mostrarInscripcionesSimeAdmin();
 
     mostrarMensajeSimeAdmin(
       mensajeSimeAdmin,
-      `Inscripciones cargadas: ${inscripcionesSimeAdmin.length}.`,
+      `Inscripciones cargadas: ${inscripcionesSimeAdmin.length}`,
       "ok",
     );
   } catch (error) {
@@ -297,12 +318,14 @@ if (btnActualizarInscripcionesSime) {
   );
 }
 
-[filtroSimeCurso, buscarSimeAlumno].forEach((control) => {
-  if (!control) return;
+[filtroSimeCurso, filtroSimeAnioCursado, buscarSimeAlumno].forEach(
+  (control) => {
+    if (!control) return;
 
-  control.addEventListener("input", mostrarInscripcionesSimeAdmin);
-  control.addEventListener("change", mostrarInscripcionesSimeAdmin);
-});
+    control.addEventListener("input", mostrarInscripcionesSimeAdmin);
+    control.addEventListener("change", mostrarInscripcionesSimeAdmin);
+  },
+);
 if (formConfiguracionSime) {
   formConfiguracionSime.addEventListener("submit", async (event) => {
     event.preventDefault();
