@@ -32,6 +32,9 @@ const cuerpoTablaDocumentacionAdmin = document.getElementById(
 const mensajeDocumentacionAdmin = document.getElementById(
   "mensajeDocumentacionAdmin",
 );
+const btnCargarDocumentacionAdmin = document.getElementById(
+  "btnCargarDocumentacionAdmin",
+);
 const filtroCursoDocumentacion = document.getElementById(
   "filtroCursoDocumentacion",
 );
@@ -260,6 +263,10 @@ async function cargarDocumentosAdministracion() {
   const usuario = auth.currentUser;
 
   if (!usuario) {
+    mostrarMensajeDocumentacionAdmin(
+      "No se detectó una sesión activa. Volvé a iniciar sesión.",
+      "error",
+    );
     return;
   }
 
@@ -411,8 +418,26 @@ if (cuerpoTablaDocumentacionAdmin) {
   });
 }
 
-onAuthStateChanged(auth, (usuario) => {
-  if (usuario) {
-    cargarDocumentosAdministracion();
-  }
+if (btnCargarDocumentacionAdmin) {
+  btnCargarDocumentacionAdmin.addEventListener("click", async () => {
+    btnCargarDocumentacionAdmin.disabled = true;
+
+    const textoOriginal = btnCargarDocumentacionAdmin.innerHTML;
+
+    btnCargarDocumentacionAdmin.innerHTML = `
+      <i class="fa-solid fa-spinner fa-spin"></i>
+      Cargando...
+    `;
+
+    try {
+      await cargarDocumentosAdministracion();
+    } finally {
+      btnCargarDocumentacionAdmin.disabled = false;
+      btnCargarDocumentacionAdmin.innerHTML = textoOriginal;
+    }
+  });
+}
+
+onAuthStateChanged(auth, () => {
+  mostrarMensajeDocumentacionAdmin("");
 });

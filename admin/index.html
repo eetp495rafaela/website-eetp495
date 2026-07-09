@@ -697,7 +697,7 @@
         <h2>Documentación Académica</h2>
 
         <div class="panel-info">
-          <div class="encabezado-listado">
+          <div class="encabezado-documentos-cargados encabezado-con-acciones">
             <div>
               <h3>Documentos cargados</h3>
               <p>
@@ -706,6 +706,15 @@
                 documentos.
               </p>
             </div>
+
+            <button
+              class="btn-accion"
+              id="btnCargarDocumentacionAdmin"
+              type="button"
+            >
+              <i class="fa-solid fa-rotate"></i>
+              Cargar documentación
+            </button>
           </div>
           <div class="filtros-documentacion-admin">
             <div class="campo-filtro">
@@ -753,10 +762,11 @@
                 </tr>
               </thead>
 
-              <tbody id="cuerpoTablaDocumentacionAdmin">
+              <tbody id="cuerpoTablaDocumentosAdmin">
                 <tr>
-                  <td colspan="5" class="tabla-vacia">
-                    Cargando documentación académica...
+                  <td colspan="5" class="tabla-documentos-vacia">
+                    Todavía no se consultó la documentación académica. Presioná
+                    “Cargar documentación” para verla.
                   </td>
                 </tr>
               </tbody>
