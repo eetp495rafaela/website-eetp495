@@ -152,14 +152,18 @@ function obtenerInscripcionesFiltradasSimeAdmin() {
 }
 
 function mostrarInscripcionesSimeAdmin() {
+  if (!cuerpoTablaSimeAdmin) return;
+
+  const inscripciones = obtenerInscripcionesFiltradasSimeAdmin();
+
   if (!inscripciones.length) {
     cuerpoTablaSimeAdmin.innerHTML = `
-    <tr>
-      <td colspan="6" class="tabla-vacia">
-        No hay inscripciones para mostrar.
-      </td>
-    </tr>
-  `;
+      <tr>
+        <td colspan="6" class="tabla-vacia">
+          No hay inscripciones para mostrar.
+        </td>
+      </tr>
+    `;
     return;
   }
 
@@ -169,12 +173,15 @@ function mostrarInscripcionesSimeAdmin() {
         <tr>
           <td>${String(inscripcion.fechaInscripcion || "-").split(" ")[0]}</td>
 
-        <td>
-  <strong>${inscripcion.alumnoNombre || "-"}</strong>
-</td>
-<td>${inscripcion.anioCursado || "-"}</td>
-<td>${inscripcion.cursoOrigen ? `${inscripcion.cursoOrigen}º` : "-"}</td>
-<td>${renderizarMateriasSimeAdmin(inscripcion.materias)}</td>
+          <td>
+            <strong>${inscripcion.alumnoNombre || "-"}</strong>
+          </td>
+
+          <td>${inscripcion.cursoOrigen ? `${inscripcion.cursoOrigen}º` : "-"}</td>
+
+          <td>${inscripcion.anioCursado || "-"}</td>
+
+          <td>${renderizarMateriasSimeAdmin(inscripcion.materias)}</td>
 
           <td>
             <div class="acciones-sime-admin">
