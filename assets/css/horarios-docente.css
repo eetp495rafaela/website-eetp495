@@ -1,0 +1,108 @@
+.bloque-horario-docente {
+  margin-top: 24px;
+}
+
+.bloque-horario-docente > h3 {
+  margin-bottom: 14px;
+  color: #ffd60a;
+}
+
+.grilla-horario-aula-docente {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(180px, 1fr));
+  gap: 14px;
+  align-items: start;
+}
+
+.dia-horario-docente {
+  min-height: 100%;
+  padding: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.dia-horario-docente h4 {
+  margin: 0 0 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.16);
+  color: #ffd60a;
+  font-size: 1rem;
+  font-weight: 900;
+  text-align: center;
+}
+
+.tarjeta-bloque-horario-docente {
+  padding: 11px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.94);
+  color: #111b3f;
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.18);
+}
+
+.tarjeta-bloque-horario-docente + .tarjeta-bloque-horario-docente {
+  margin-top: 10px;
+}
+
+.bloque-horario-hora-docente {
+  margin-bottom: 6px;
+  color: #0b4aad;
+  font-size: 0.78rem;
+  font-weight: 900;
+}
+
+.bloque-horario-curso-docente {
+  color: #111b3f;
+  font-size: 0.95rem;
+  font-weight: 900;
+  line-height: 1.2;
+}
+
+.bloque-horario-materia-docente {
+  margin-top: 4px;
+  color: #405579;
+  font-size: 0.86rem;
+  font-weight: 800;
+}
+
+.bloque-horario-turno-docente {
+  margin-top: 7px;
+  color: #0b4aad;
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+.bloque-horario-ubicacion-docente {
+  margin-top: 7px;
+  padding-top: 7px;
+  border-top: 1px solid rgba(11, 74, 173, 0.16);
+  color: #0b4aad;
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+.dia-horario-docente .mensaje-formulario {
+  margin: 0;
+  padding: 10px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.82);
+  text-align: center;
+  font-size: 0.86rem;
+}
+
+.bloque-horario-pendiente {
+  opacity: 0.9;
+}
+
+@media (max-width: 1100px) {
+  .grilla-horario-aula-docente {
+    grid-template-columns: repeat(2, minmax(220px, 1fr));
+  }
+}
+
+@media (max-width: 650px) {
+  .grilla-horario-aula-docente {
+    grid-template-columns: 1fr;
+  }
+}

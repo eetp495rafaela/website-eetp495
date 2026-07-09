@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="../assets/css/docentes.css" />
     <link rel="stylesheet" href="../assets/css/material-estudio.css" />
     <link rel="stylesheet" href="../assets/css/volver-arriba.css" />
+    <link rel="stylesheet" href="../assets/css/horarios-docente.css" />
 
     <link rel="icon" href="../assets/img/logo.png" />
 
@@ -70,17 +71,11 @@
         <h2>Organización</h2>
 
         <div class="grid">
-          <div class="tarjeta">
+          <a class="tarjeta tarjeta-enlace" href="#mis-horarios-docente">
             <i class="fa-solid fa-calendar-days"></i>
-            <h3>Horario de Aula</h3>
-            <p>Consulta el horario de clases de turno mañana y tarde.</p>
-          </div>
-
-          <div class="tarjeta">
-            <i class="fa-solid fa-industry"></i>
-            <h3>Horario Taller y Educación Física</h3>
-            <p>Consulta los horarios de Taller y Educación Física.</p>
-          </div>
+            <h3>Mis Horarios</h3>
+            <p>Consultá tus horarios de aula, taller y educación física.</p>
+          </a>
 
           <div class="tarjeta">
             <i class="fa-solid fa-users"></i>
@@ -89,7 +84,49 @@
           </div>
         </div>
       </section>
+      <section class="grupo seccion-destino" id="mis-horarios-docente">
+        <h2>Mis Horarios</h2>
 
+        <div class="panel-info">
+          <div class="encabezado-listado">
+            <div>
+              <h3>Horarios asignados</h3>
+              <p>
+                Estos horarios se muestran automáticamente según los bloques que
+                tenés asignados como docente.
+              </p>
+            </div>
+          </div>
+
+          <div class="bloque-horario-docente">
+            <h3>Horario de Aula</h3>
+
+            <div
+              id="vistaHorarioAulaDocente"
+              class="vista-horario-aula-docente"
+            >
+              <p class="mensaje-formulario">Cargando horario de aula...</p>
+            </div>
+          </div>
+
+          <div class="bloque-horario-docente bloque-horario-pendiente">
+            <h3>Horario de Taller</h3>
+
+            <p class="mensaje-formulario">
+              Próximamente se mostrarán acá los horarios de taller asignados.
+            </p>
+          </div>
+
+          <div class="bloque-horario-docente bloque-horario-pendiente">
+            <h3>Educación Física</h3>
+
+            <p class="mensaje-formulario">
+              Próximamente se mostrarán acá los horarios de Educación Física
+              asignados.
+            </p>
+          </div>
+        </div>
+      </section>
       <section class="grupo">
         <h2>Gestión Docente</h2>
 
@@ -301,5 +338,6 @@
     <script type="module" src="../assets/js/proteger-portal.js"></script>
     <script type="module" src="../assets/js/material-estudio.js"></script>
     <script src="../assets/js/volver-arriba.js"></script>
+    <script type="module" src="../assets/js/horarios-docente.js"></script>
   </body>
 </html>
