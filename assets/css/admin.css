@@ -1118,29 +1118,36 @@ body.modal-abierto {
 
 .tabla-sime-admin th:nth-child(1),
 .tabla-sime-admin td:nth-child(1) {
-  width: 125px;
+  width: 110px;
   white-space: nowrap;
 }
 
 .tabla-sime-admin th:nth-child(2),
 .tabla-sime-admin td:nth-child(2) {
-  width: 260px;
+  width: 245px;
 }
 
 .tabla-sime-admin th:nth-child(3),
 .tabla-sime-admin td:nth-child(3) {
-  width: 105px;
+  width: 85px;
   text-align: center;
   white-space: nowrap;
 }
 
 .tabla-sime-admin th:nth-child(4),
 .tabla-sime-admin td:nth-child(4) {
-  width: auto;
+  width: 115px;
+  text-align: center;
+  white-space: nowrap;
 }
 
 .tabla-sime-admin th:nth-child(5),
 .tabla-sime-admin td:nth-child(5) {
+  width: auto;
+}
+
+.tabla-sime-admin th:nth-child(6),
+.tabla-sime-admin td:nth-child(6) {
   width: 115px;
   text-align: center;
 }

@@ -152,18 +152,14 @@ function obtenerInscripcionesFiltradasSimeAdmin() {
 }
 
 function mostrarInscripcionesSimeAdmin() {
-  if (!cuerpoTablaSimeAdmin) return;
-
-  const inscripciones = obtenerInscripcionesFiltradasSimeAdmin();
-
   if (!inscripciones.length) {
     cuerpoTablaSimeAdmin.innerHTML = `
-      <tr>
-        <td colspan="5" class="tabla-vacia">
-          No hay inscripciones para mostrar.
-        </td>
-      </tr>
-    `;
+    <tr>
+      <td colspan="6" class="tabla-vacia">
+        No hay inscripciones para mostrar.
+      </td>
+    </tr>
+  `;
     return;
   }
 
@@ -173,11 +169,12 @@ function mostrarInscripcionesSimeAdmin() {
         <tr>
           <td>${String(inscripcion.fechaInscripcion || "-").split(" ")[0]}</td>
 
-        <td><strong>${inscripcion.alumnoNombre || "-"}</strong></td>
-
-          <td>${inscripcion.anioCursado || "-"}</td>
-
-          <td>${renderizarMateriasSimeAdmin(inscripcion.materias)}</td>
+        <td>
+  <strong>${inscripcion.alumnoNombre || "-"}</strong>
+</td>
+<td>${inscripcion.anioCursado || "-"}</td>
+<td>${inscripcion.cursoOrigen ? `${inscripcion.cursoOrigen}º` : "-"}</td>
+<td>${renderizarMateriasSimeAdmin(inscripcion.materias)}</td>
 
           <td>
             <div class="acciones-sime-admin">
@@ -208,7 +205,133 @@ function mostrarInscripcionesSimeAdmin() {
     })
     .join("");
 }
+function convertirBase64ABlobSimeAdmin(base64, tipoMime) {
+  const binario = atob(base64);
+  const bytes = new Uint8Array(binario.length);
 
+  for (let i = 0; i < binario.length; i++) {
+    bytes[i] = binario.charCodeAt(i);
+  }
+
+  return new Blob([bytes], {
+    type: tipoMime || "application/pdf",
+  });
+}
+
+async function abrirPermisoAdminSime(idInscripcion, boton) {
+  const usuario = auth.currentUser;
+
+  if (!usuario) return;
+
+  const ventanaPermiso = window.open("", "_blank");
+
+  if (boton) {
+    boton.disabled = true;
+  }
+
+  try {
+    const idToken = await usuario.getIdToken(true);
+
+    const resultado = await enviarAlBackendSimeAdmin({
+      accion: "obtener_permiso_inscripcion_admin",
+      idToken,
+      idInscripcion,
+    });
+
+    if (!resultado.ok) {
+      throw new Error(resultado.mensaje || "No se pudo obtener el permiso.");
+    }
+
+    const blob = convertirBase64ABlobSimeAdmin(
+      resultado.permisoBase64,
+      resultado.tipoMime,
+    );
+
+    const url = URL.createObjectURL(blob);
+
+    if (ventanaPermiso) {
+      ventanaPermiso.location.href = url;
+    } else {
+      window.open(url, "_blank");
+    }
+  } catch (error) {
+    console.error("Error al abrir permiso S.I.M.E.:", error);
+
+    if (ventanaPermiso) {
+      ventanaPermiso.close();
+    }
+
+    Swal.fire({
+      title: "No se pudo abrir el permiso",
+      text: error.message || "Ocurrió un error al obtener el PDF.",
+      icon: "error",
+      confirmButtonText: "Aceptar",
+    });
+  } finally {
+    if (boton) {
+      boton.disabled = false;
+    }
+  }
+}
+
+async function eliminarInscripcionAdminSime(idInscripcion, boton) {
+  const usuario = auth.currentUser;
+
+  if (!usuario) return;
+
+  const confirmacion = await Swal.fire({
+    title: "Eliminar inscripción",
+    text: "Se eliminará la inscripción y también el PDF generado en Drive. Esta acción no se puede deshacer.",
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonText: "Sí, eliminar",
+    cancelButtonText: "Cancelar",
+  });
+
+  if (!confirmacion.isConfirmed) return;
+
+  if (boton) {
+    boton.disabled = true;
+  }
+
+  try {
+    const idToken = await usuario.getIdToken(true);
+
+    const resultado = await enviarAlBackendSimeAdmin({
+      accion: "eliminar_inscripcion_admin",
+      idToken,
+      idInscripcion,
+    });
+
+    if (!resultado.ok) {
+      throw new Error(
+        resultado.mensaje || "No se pudo eliminar la inscripción.",
+      );
+    }
+
+    await Swal.fire({
+      title: "Inscripción eliminada",
+      text: resultado.mensaje || "La inscripción fue eliminada correctamente.",
+      icon: "success",
+      confirmButtonText: "Aceptar",
+    });
+
+    await cargarInscripcionesSimeAdmin();
+  } catch (error) {
+    console.error("Error al eliminar inscripción S.I.M.E.:", error);
+
+    Swal.fire({
+      title: "No se pudo eliminar",
+      text: error.message || "Ocurrió un error al eliminar la inscripción.",
+      icon: "error",
+      confirmButtonText: "Aceptar",
+    });
+  } finally {
+    if (boton) {
+      boton.disabled = false;
+    }
+  }
+}
 async function cargarInscripcionesSimeAdmin() {
   const usuario = auth.currentUser;
 
@@ -316,6 +439,27 @@ if (btnActualizarInscripcionesSime) {
     "click",
     cargarInscripcionesSimeAdmin,
   );
+}
+
+if (cuerpoTablaSimeAdmin) {
+  cuerpoTablaSimeAdmin.addEventListener("click", async (event) => {
+    const botonVer = event.target.closest(".btn-ver-permiso-admin-sime");
+
+    if (botonVer) {
+      const idInscripcion = botonVer.dataset.idInscripcion;
+      await abrirPermisoAdminSime(idInscripcion, botonVer);
+      return;
+    }
+
+    const botonEliminar = event.target.closest(
+      ".btn-eliminar-inscripcion-admin-sime",
+    );
+
+    if (botonEliminar) {
+      const idInscripcion = botonEliminar.dataset.idInscripcion;
+      await eliminarInscripcionAdminSime(idInscripcion, botonEliminar);
+    }
+  });
 }
 
 [filtroSimeCurso, filtroSimeAnioCursado, buscarSimeAlumno].forEach(
