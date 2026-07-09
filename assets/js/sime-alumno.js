@@ -74,6 +74,61 @@ function mostrarMensajeSime(elemento, texto, tipo = "") {
   elemento.textContent = texto;
   elemento.className = `mensaje-formulario ${tipo}`.trim();
 }
+function formatearFechaVisibleSime(fechaTexto) {
+  const texto = String(fechaTexto || "").trim();
+
+  if (!texto) return "";
+
+  const partes = texto.split("-");
+
+  if (partes.length !== 3) {
+    return texto;
+  }
+
+  const [anio, mes, dia] = partes;
+
+  return `${dia}/${mes}/${anio}`;
+}
+
+function limpiarFormularioInscripcionSime() {
+  if (formInscripcionSime) {
+    formInscripcionSime.reset();
+  }
+
+  if (listaMateriasSime) {
+    listaMateriasSime.innerHTML = `
+      <p class="mensaje-lista-sime">
+        Seleccioná primero el curso de origen.
+      </p>
+    `;
+  }
+
+  cargarAniosCursadoSime(configuracionSimeAlumno?.aniosCursado || []);
+
+  mostrarMensajeSime(mensajeInscripcionSime, "");
+}
+
+async function mostrarAvisoInscripcionesCerradasSime() {
+  const fechaApertura = formatearFechaVisibleSime(
+    configuracionSimeAlumno?.fechaApertura,
+  );
+
+  const mensaje = fechaApertura
+    ? `Las inscripciones abren el ${fechaApertura}.`
+    : "Las inscripciones todavía no se encuentran abiertas.";
+
+  await Swal.fire({
+    title: "Inscripciones no disponibles",
+    html: `
+      <p>${mensaje}</p>
+      <p>A partir de la fecha indicada podrás registrar tu inscripción.</p>
+    `,
+    icon: "info",
+    confirmButtonText: "Aceptar",
+  });
+
+  limpiarFormularioInscripcionSime();
+}
 function obtenerEtiquetaSituacionRevistaSime(tipoVinculo) {
   const valor = String(tipoVinculo || "")
     .trim()
@@ -510,6 +565,13 @@ if (formInscripcionSime) {
         "No se detectó una sesión activa.",
         "error",
       );
+      return;
+    }
+    const estadoRealInscripciones =
+      configuracionSimeAlumno?.estadoRealInscripciones;
+
+    if (estadoRealInscripciones && estadoRealInscripciones.abierto === false) {
+      await mostrarAvisoInscripcionesCerradasSime();
       return;
     }
 
