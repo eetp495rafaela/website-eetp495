@@ -82,6 +82,8 @@ let espaciosHorarios = [];
 let docenteAsignadoHorarioAula = null;
 let idHorarioAulaEditando = null;
 let horariosAulaCargados = [];
+let materiasHorarioTaller = [];
+let docenteAsignadoHorarioTaller = null;
 
 function mostrarMensajeHorarioAula(texto, tipo = "") {
   if (!mensajeHorarioAula) return;
@@ -457,6 +459,118 @@ function cargarCursosHorarioTallerDesdeCache() {
       })
       .join("")}
   `;
+}
+
+function limpiarMateriasHorarioTaller() {
+  materiasHorarioTaller = [];
+  docenteAsignadoHorarioTaller = null;
+
+  if (horarioTallerEspacio) {
+    horarioTallerEspacio.innerHTML = `
+      <option value="">Seleccioná primero un curso</option>
+    `;
+  }
+
+  if (horarioTallerDocente) {
+    horarioTallerDocente.value = "";
+  }
+}
+
+async function cargarMateriasHorarioTaller() {
+  if (!horarioTallerCurso || !horarioTallerEspacio) return;
+
+  const cursoId = horarioTallerCurso.value;
+  const opcionCurso =
+    horarioTallerCurso.options[horarioTallerCurso.selectedIndex];
+
+  const cursoAnio = Number(opcionCurso?.dataset?.anio || 0);
+
+  docenteAsignadoHorarioTaller = null;
+
+  if (horarioTallerDocente) {
+    horarioTallerDocente.value = "";
+  }
+
+  if (!cursoId || !cursoAnio) {
+    limpiarMateriasHorarioTaller();
+    return;
+  }
+
+  horarioTallerEspacio.innerHTML = `
+    <option value="">Cargando espacios...</option>
+  `;
+
+  try {
+    const resultado = await getDocs(collection(db, "espacios_curriculares"));
+
+    materiasHorarioTaller = [];
+
+    resultado.forEach((documento) => {
+      const datos = documento.data();
+
+      const estado = String(datos.estado || "ACTIVO")
+        .trim()
+        .toUpperCase();
+
+      const anioEspacio = Number(
+        datos.anio || datos.cursoAnio || datos.CURSO_ANIO || 0,
+      );
+
+      if (estado !== "ACTIVO") return;
+      if (anioEspacio !== cursoAnio) return;
+
+      const nombreEspacio =
+        datos.nombre ||
+        datos.espacioCurricular ||
+        datos.ESPACIO_CURRICULAR ||
+        datos.descripcion ||
+        documento.id;
+
+      materiasHorarioTaller.push({
+        id: documento.id,
+        nombre: nombreEspacio,
+        ...datos,
+      });
+    });
+
+    materiasHorarioTaller.sort((a, b) =>
+      String(a.nombre || "").localeCompare(String(b.nombre || ""), "es"),
+    );
+
+    if (!materiasHorarioTaller.length) {
+      horarioTallerEspacio.innerHTML = `
+        <option value="">No hay espacios cargados para este curso</option>
+      `;
+      return;
+    }
+
+    horarioTallerEspacio.innerHTML = `
+      <option value="">Seleccionar taller / espacio</option>
+      ${materiasHorarioTaller
+        .map(
+          (espacio) => `
+            <option
+              value="${espacio.id}"
+              data-nombre="${espacio.nombre}"
+            >
+              ${espacio.nombre}
+            </option>
+          `,
+        )
+        .join("")}
+    `;
+  } catch (error) {
+    console.error("Error al cargar espacios de taller:", error);
+
+    horarioTallerEspacio.innerHTML = `
+      <option value="">Error al cargar espacios</option>
+    `;
+
+    mostrarMensajeHorarioTaller(
+      "No se pudieron cargar los espacios curriculares.",
+      "error",
+    );
+  }
 }
 
 async function cargarCursosHorarioAula() {
@@ -1216,6 +1330,9 @@ if (btnCancelarEdicionHorarioAula) {
 
 if (horarioTallerTurno) {
   horarioTallerTurno.addEventListener("change", actualizarHorarioFijoTaller);
+}
+if (horarioTallerCurso) {
+  horarioTallerCurso.addEventListener("change", cargarMateriasHorarioTaller);
 }
 
 onAuthStateChanged(auth, async (usuario) => {
