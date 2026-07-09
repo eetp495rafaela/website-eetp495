@@ -281,21 +281,20 @@
       <section class="grupo seccion-destino" id="horarios">
         <h2>Horarios</h2>
 
-        <div class="acciones">
-          <a class="btn-accion" href="#">
-            <i class="fa-solid fa-school"></i>
-            Horarios de Aula
-          </a>
+        <div class="panel-info">
+          <div class="encabezado-listado">
+            <div>
+              <h3>Horario de Aula</h3>
+              <p>
+                Este horario se muestra automáticamente según el curso que tenés
+                asignado en el Portal Institucional.
+              </p>
+            </div>
+          </div>
 
-          <a class="btn-accion" href="#">
-            <i class="fa-solid fa-industry"></i>
-            Horarios de Taller
-          </a>
-
-          <a class="btn-accion" href="#">
-            <i class="fa-solid fa-person-running"></i>
-            Horarios de Educación Física
-          </a>
+          <div id="vistaHorarioAulaAlumno" class="vista-horario-aula-alumno">
+            <p class="mensaje-formulario">Cargando horario...</p>
+          </div>
         </div>
 
         <a class="btn-volver" href="#inicio">
@@ -487,5 +486,6 @@
     <script type="module" src="../assets/js/documentacion-alumno.js"></script>
     <script type="module" src="../assets/js/sime-alumno.js"></script>
     <script src="../assets/js/volver-arriba.js"></script>
+    <script type="module" src="../assets/js/horarios-alumno.js"></script>
   </body>
 </html>
