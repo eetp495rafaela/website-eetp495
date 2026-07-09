@@ -1242,3 +1242,28 @@ body.modal-abierto {
   margin-bottom: 0;
   font-weight: 700;
 }
+.bloques-horarios-admin {
+  display: grid;
+  gap: 8px;
+}
+
+.bloque-horario-opcion {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border: 1px solid #d5e3f7;
+  border-radius: 12px;
+  background: #ffffff;
+  font-weight: 700;
+  color: #082b66;
+}
+
+.bloque-horario-opcion input {
+  width: auto;
+  accent-color: #0b4aad;
+}
+
+.vista-horario-aula {
+  margin-top: 18px;
+}

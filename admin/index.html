@@ -106,6 +106,15 @@
             </p>
           </a>
 
+          <a class="tarjeta tarjeta-enlace" href="#horarios">
+            <i class="fa-solid fa-calendar-days"></i>
+            <h3>Horarios</h3>
+            <p>
+              Carga y administración de horarios de aula, taller y educación
+              física.
+            </p>
+          </a>
+
           <a class="tarjeta tarjeta-enlace" href="#configuracion">
             <i class="fa-solid fa-gears"></i>
             <h3>Configuración</h3>
@@ -955,6 +964,188 @@
           Volver al inicio
         </a>
       </section>
+
+      <section class="grupo seccion-destino" id="horarios">
+        <h2>Horarios</h2>
+
+        <div class="panel-info">
+          <div class="encabezado-listado">
+            <div>
+              <h3>Administración de horarios</h3>
+              <p>
+                Desde esta sección se cargarán los horarios institucionales para
+                que cada estudiante y docente vea únicamente lo que le
+                corresponde.
+              </p>
+            </div>
+          </div>
+
+          <div class="acciones">
+            <button class="btn-accion" id="btnHorarioAula" type="button">
+              <i class="fa-solid fa-school"></i>
+              Horario de Aula
+            </button>
+
+            <button class="btn-accion" id="btnHorarioTaller" type="button">
+              <i class="fa-solid fa-screwdriver-wrench"></i>
+              Horario de Taller
+            </button>
+
+            <button
+              class="btn-accion"
+              id="btnHorarioEducacionFisica"
+              type="button"
+            >
+              <i class="fa-solid fa-person-running"></i>
+              Educación Física
+            </button>
+          </div>
+
+          <div class="separador-usuarios"></div>
+
+          <div id="panelHorarioAula">
+            <h3>Horario de Aula</h3>
+
+            <p>
+              Cargá los bloques de aula por curso, materia, docente, día y
+              franja horaria. Podés seleccionar varios bloques del mismo día si
+              la materia se repite.
+            </p>
+
+            <form
+              id="formHorarioAula"
+              class="formulario-usuario"
+              autocomplete="off"
+            >
+              <div class="form-grid">
+                <div class="campo-formulario">
+                  <label for="horarioAulaCicloLectivo">Ciclo lectivo *</label>
+                  <input
+                    id="horarioAulaCicloLectivo"
+                    type="number"
+                    min="2020"
+                    max="2100"
+                    value="2026"
+                    required
+                  />
+                </div>
+
+                <div class="campo-formulario">
+                  <label for="horarioAulaTurno">Turno *</label>
+                  <select id="horarioAulaTurno" required>
+                    <option value="">Seleccionar turno</option>
+                    <option value="MANANA">Mañana</option>
+                    <option value="TARDE">Tarde</option>
+                  </select>
+                </div>
+
+                <div class="campo-formulario">
+                  <label for="horarioAulaCurso">Curso *</label>
+                  <select id="horarioAulaCurso" required>
+                    <option value="">Cargando cursos...</option>
+                  </select>
+                </div>
+
+                <div class="campo-formulario">
+                  <label for="horarioAulaDia">Día *</label>
+                  <select id="horarioAulaDia" required>
+                    <option value="">Seleccionar día</option>
+                    <option value="LUNES">Lunes</option>
+                    <option value="MARTES">Martes</option>
+                    <option value="MIERCOLES">Miércoles</option>
+                    <option value="JUEVES">Jueves</option>
+                    <option value="VIERNES">Viernes</option>
+                  </select>
+                </div>
+
+                <div class="campo-formulario campo-doble">
+                  <label for="horarioAulaEspacio"
+                    >Materia / Espacio curricular *</label
+                  >
+                  <select id="horarioAulaEspacio" required>
+                    <option value="">Seleccioná primero un curso</option>
+                  </select>
+                </div>
+
+                <div class="campo-formulario campo-doble">
+                  <label for="horarioAulaDocente">Docente asignado</label>
+                  <input
+                    id="horarioAulaDocente"
+                    type="text"
+                    placeholder="Se completará automáticamente"
+                    readonly
+                  />
+                </div>
+
+                <div class="campo-formulario campo-doble">
+                  <label>Bloques horarios *</label>
+
+                  <div class="bloques-horarios-admin" id="bloquesHorarioAula">
+                    <p class="mensaje-formulario">
+                      Seleccioná primero un turno.
+                    </p>
+                  </div>
+                </div>
+
+                <div class="campo-formulario campo-doble">
+                  <label for="horarioAulaUbicacion">Ubicación</label>
+                  <input
+                    id="horarioAulaUbicacion"
+                    type="text"
+                    placeholder="Ej.: Aula 9, Laboratorio Norte, etc."
+                  />
+                </div>
+              </div>
+
+              <div class="acciones">
+                <button
+                  class="btn-accion"
+                  id="btnRegistrarHorarioAula"
+                  type="submit"
+                >
+                  <i class="fa-solid fa-plus"></i>
+                  Registrar bloque horario
+                </button>
+              </div>
+
+              <p id="mensajeHorarioAula" class="mensaje-formulario"></p>
+            </form>
+
+            <div class="separador-usuarios"></div>
+
+            <div class="encabezado-listado">
+              <div>
+                <h3>Horario cargado</h3>
+                <p>
+                  Los bloques registrados se mostrarán ordenados por día y
+                  horario.
+                </p>
+              </div>
+
+              <button
+                class="btn-accion"
+                id="btnActualizarHorarioAula"
+                type="button"
+              >
+                <i class="fa-solid fa-rotate"></i>
+                Actualizar horario
+              </button>
+            </div>
+
+            <div id="vistaHorarioAula" class="vista-horario-aula">
+              <p class="mensaje-formulario">
+                Todavía no hay bloques horarios cargados.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <a class="btn-volver" href="#inicio">
+          <i class="fa-solid fa-arrow-up"></i>
+          Volver al inicio
+        </a>
+      </section>
+
       <section class="grupo seccion-destino" id="configuracion">
         <h2>Configuración del Portal</h2>
 
