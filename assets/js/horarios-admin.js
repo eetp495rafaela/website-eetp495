@@ -27,9 +27,12 @@ const auth = getAuth(app);
 const db = getFirestore(app);
 
 const horarioAulaCurso = document.getElementById("horarioAulaCurso");
+const horarioAulaEspacio = document.getElementById("horarioAulaEspacio");
+const horarioAulaDocente = document.getElementById("horarioAulaDocente");
 const mensajeHorarioAula = document.getElementById("mensajeHorarioAula");
 
 let cursosHorarios = [];
+let espaciosHorarios = [];
 
 function mostrarMensajeHorarioAula(texto, tipo = "") {
   if (!mensajeHorarioAula) return;
@@ -73,6 +76,107 @@ function ordenarCursosHorarios(cursos) {
       "es",
     );
   });
+}
+
+function limpiarEspaciosHorarioAula(mensaje = "Seleccioná primero un curso") {
+  if (!horarioAulaEspacio) return;
+
+  horarioAulaEspacio.innerHTML = `
+    <option value="">${mensaje}</option>
+  `;
+
+  if (horarioAulaDocente) {
+    horarioAulaDocente.value = "";
+  }
+
+  espaciosHorarios = [];
+}
+
+function ordenarEspaciosHorarios(espacios) {
+  return espacios.sort((a, b) =>
+    String(a.nombre || "").localeCompare(String(b.nombre || ""), "es"),
+  );
+}
+
+async function cargarEspaciosHorarioAulaPorCurso() {
+  if (!horarioAulaCurso || !horarioAulaEspacio) return;
+
+  const opcionSeleccionada =
+    horarioAulaCurso.options[horarioAulaCurso.selectedIndex];
+
+  const anioCurso = Number(opcionSeleccionada?.dataset?.anio || 0);
+
+  limpiarEspaciosHorarioAula("Cargando materias...");
+
+  if (!anioCurso) {
+    limpiarEspaciosHorarioAula("Seleccioná primero un curso");
+    return;
+  }
+
+  try {
+    const consulta = await getDocs(collection(db, "espacios_curriculares"));
+
+    espaciosHorarios = [];
+
+    consulta.forEach((documento) => {
+      const datos = documento.data();
+
+      const estado = String(datos.estado || "")
+        .trim()
+        .toUpperCase();
+
+      const anio = Number(datos.anio || 0);
+
+      if (estado && estado !== "ACTIVO") return;
+      if (anio !== anioCurso) return;
+
+      espaciosHorarios.push({
+        id: documento.id,
+        anio,
+        nombre: datos.nombre,
+        tipo: datos.tipo,
+        estado: datos.estado,
+      });
+    });
+
+    ordenarEspaciosHorarios(espaciosHorarios);
+
+    if (!espaciosHorarios.length) {
+      limpiarEspaciosHorarioAula("No hay materias activas para este curso");
+      return;
+    }
+
+    horarioAulaEspacio.innerHTML = `
+      <option value="">Seleccionar materia</option>
+      ${espaciosHorarios
+        .map(
+          (espacio) => `
+            <option
+              value="${espacio.id}"
+              data-nombre="${espacio.nombre || ""}"
+              data-tipo="${espacio.tipo || ""}"
+            >
+              ${espacio.nombre || "Espacio sin nombre"}
+            </option>
+          `,
+        )
+        .join("")}
+    `;
+
+    mostrarMensajeHorarioAula(
+      `Materias cargadas para ${anioCurso}º año: ${espaciosHorarios.length}.`,
+      "ok",
+    );
+  } catch (error) {
+    console.error("Error al cargar materias para horarios:", error);
+
+    limpiarEspaciosHorarioAula("Error al cargar materias");
+
+    mostrarMensajeHorarioAula(
+      "No se pudieron cargar las materias del curso seleccionado.",
+      "error",
+    );
+  }
 }
 
 async function cargarCursosHorarioAula() {
@@ -156,6 +260,13 @@ async function cargarCursosHorarioAula() {
       "error",
     );
   }
+}
+
+if (horarioAulaCurso) {
+  horarioAulaCurso.addEventListener(
+    "change",
+    cargarEspaciosHorarioAulaPorCurso,
+  );
 }
 
 onAuthStateChanged(auth, async (usuario) => {
