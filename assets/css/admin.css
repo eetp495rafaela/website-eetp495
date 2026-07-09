@@ -1106,3 +1106,95 @@ body.modal-abierto {
     width: 100%;
   }
 }
+.tabla-sime-admin {
+  table-layout: fixed;
+  width: 100%;
+}
+
+.tabla-sime-admin th,
+.tabla-sime-admin td {
+  vertical-align: middle;
+}
+
+.tabla-sime-admin th:nth-child(1),
+.tabla-sime-admin td:nth-child(1) {
+  width: 125px;
+  white-space: nowrap;
+}
+
+.tabla-sime-admin th:nth-child(2),
+.tabla-sime-admin td:nth-child(2) {
+  width: 260px;
+}
+
+.tabla-sime-admin th:nth-child(3),
+.tabla-sime-admin td:nth-child(3) {
+  width: 105px;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.tabla-sime-admin th:nth-child(4),
+.tabla-sime-admin td:nth-child(4) {
+  width: auto;
+}
+
+.tabla-sime-admin th:nth-child(5),
+.tabla-sime-admin td:nth-child(5) {
+  width: 115px;
+  text-align: center;
+}
+
+.materias-sime-admin {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  font-size: 0.86rem;
+  line-height: 1.25;
+}
+
+.materias-sime-admin span {
+  display: block;
+}
+
+.acciones-sime-admin {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+}
+
+.btn-sime-icono {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  min-height: 30px;
+  padding: 0;
+  border: 1px solid #2d6df6;
+  border-radius: 9px;
+  background: #2d6df6;
+  color: #ffffff;
+  font: inherit;
+  font-size: 0.82rem;
+  cursor: pointer;
+  box-shadow: 0 4px 10px rgba(11, 94, 215, 0.18);
+  transition: 0.2s ease;
+}
+
+.btn-sime-icono:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.04);
+}
+
+.btn-sime-icono:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.btn-eliminar-inscripcion-admin-sime {
+  border-color: #dc2626;
+  background: #dc2626;
+  box-shadow: 0 4px 10px rgba(220, 38, 38, 0.18);
+}

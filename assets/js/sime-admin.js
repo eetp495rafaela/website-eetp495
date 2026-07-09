@@ -35,6 +35,16 @@ const mensajeConfiguracionSime = document.getElementById(
   "mensajeConfiguracionSime",
 );
 
+const btnActualizarInscripcionesSime = document.getElementById(
+  "btnActualizarInscripcionesSime",
+);
+const cuerpoTablaSimeAdmin = document.getElementById("cuerpoTablaSimeAdmin");
+const mensajeSimeAdmin = document.getElementById("mensajeSimeAdmin");
+const filtroSimeCurso = document.getElementById("filtroSimeCurso");
+const buscarSimeAlumno = document.getElementById("buscarSimeAlumno");
+
+let inscripcionesSimeAdmin = [];
+
 function mostrarMensajeSimeAdmin(elemento, texto, tipo = "") {
   if (!elemento) return;
 
@@ -65,7 +75,171 @@ async function enviarAlBackendSimeAdmin(datos) {
 
   return respuesta.json();
 }
+function normalizarTextoSimeAdmin(texto) {
+  return String(texto || "")
+    .trim()
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "");
+}
 
+function obtenerEtiquetaEstadoInscripcionSimeAdmin(estado) {
+  const valor = String(estado || "")
+    .trim()
+    .toUpperCase();
+
+  if (valor === "ACTIVA") return "ACTIVA";
+  if (valor === "ANULADA") return "ANULADA";
+
+  return valor || "-";
+}
+
+function renderizarMateriasSimeAdmin(materias) {
+  const lista = String(materias || "")
+    .split(",")
+    .map((materia) => materia.trim())
+    .filter(Boolean);
+
+  if (!lista.length) return "-";
+
+  return `
+    <div class="materias-sime-admin">
+      ${lista.map((materia) => `<span>${materia}</span>`).join("")}
+    </div>
+  `;
+}
+
+function obtenerInscripcionesFiltradasSimeAdmin() {
+  const curso = String(filtroSimeCurso?.value || "").trim();
+  const busqueda = normalizarTextoSimeAdmin(buscarSimeAlumno?.value || "");
+
+  return inscripcionesSimeAdmin.filter((inscripcion) => {
+    const coincideCurso =
+      !curso || String(inscripcion.cursoOrigen || "") === curso;
+
+    const textoAlumno = normalizarTextoSimeAdmin(
+      [
+        inscripcion.alumnoNombre,
+        inscripcion.alumnoCorreo,
+        inscripcion.alumnoDni,
+      ].join(" "),
+    );
+
+    const coincideBusqueda = !busqueda || textoAlumno.includes(busqueda);
+
+    return coincideCurso && coincideBusqueda;
+  });
+}
+
+function mostrarInscripcionesSimeAdmin() {
+  if (!cuerpoTablaSimeAdmin) return;
+
+  const inscripciones = obtenerInscripcionesFiltradasSimeAdmin();
+
+  if (!inscripciones.length) {
+    cuerpoTablaSimeAdmin.innerHTML = `
+      <tr>
+        <td colspan="5" class="tabla-vacia">
+          No hay inscripciones para mostrar.
+        </td>
+      </tr>
+    `;
+    return;
+  }
+
+  cuerpoTablaSimeAdmin.innerHTML = inscripciones
+    .map((inscripcion) => {
+      return `
+        <tr>
+          <td>${inscripcion.fechaInscripcion || "-"}</td>
+
+          <td>
+            <strong>${inscripcion.alumnoNombre || "-"}</strong><br>
+            <small>${inscripcion.alumnoCorreo || ""}</small>
+          </td>
+
+          <td>${inscripcion.anioCursado || "-"}</td>
+
+          <td>${renderizarMateriasSimeAdmin(inscripcion.materias)}</td>
+
+          <td>
+            <div class="acciones-sime-admin">
+              <button
+                class="btn-sime-icono btn-ver-permiso-admin-sime"
+                type="button"
+                title="Ver permiso"
+                aria-label="Ver permiso"
+                data-id-inscripcion="${inscripcion.idInscripcion}"
+                ${inscripcion.tienePermiso ? "" : "disabled"}
+              >
+                <i class="fa-solid fa-eye"></i>
+              </button>
+
+              <button
+                class="btn-sime-icono btn-eliminar-inscripcion-admin-sime"
+                type="button"
+                title="Eliminar inscripción"
+                aria-label="Eliminar inscripción"
+                data-id-inscripcion="${inscripcion.idInscripcion}"
+              >
+                <i class="fa-solid fa-trash"></i>
+              </button>
+            </div>
+          </td>
+        </tr>
+      `;
+    })
+    .join("");
+}
+
+async function cargarInscripcionesSimeAdmin() {
+  const usuario = auth.currentUser;
+
+  if (!usuario) return;
+
+  mostrarMensajeSimeAdmin(mensajeSimeAdmin, "Cargando inscripciones...");
+
+  if (btnActualizarInscripcionesSime) {
+    btnActualizarInscripcionesSime.disabled = true;
+  }
+
+  try {
+    const idToken = await usuario.getIdToken(true);
+
+    const resultado = await enviarAlBackendSimeAdmin({
+      accion: "listar_inscripciones_admin",
+      idToken,
+    });
+
+    if (!resultado.ok) {
+      throw new Error(
+        resultado.mensaje || "No se pudieron cargar las inscripciones.",
+      );
+    }
+
+    inscripcionesSimeAdmin = resultado.inscripciones || [];
+
+    mostrarInscripcionesSimeAdmin();
+
+    mostrarMensajeSimeAdmin(
+      mensajeSimeAdmin,
+      `Inscripciones cargadas: ${inscripcionesSimeAdmin.length}.`,
+      "ok",
+    );
+  } catch (error) {
+    console.error("Error al cargar inscripciones S.I.M.E.:", error);
+
+    mostrarMensajeSimeAdmin(
+      mensajeSimeAdmin,
+      error.message || "No se pudieron cargar las inscripciones.",
+      "error",
+    );
+  } finally {
+    if (btnActualizarInscripcionesSime) {
+      btnActualizarInscripcionesSime.disabled = false;
+    }
+  }
+}
 function cargarFormularioConfiguracionSime(configuracion) {
   if (!configuracion) return;
 
@@ -119,7 +293,19 @@ async function cargarConfiguracionSimeAdmin() {
     );
   }
 }
+if (btnActualizarInscripcionesSime) {
+  btnActualizarInscripcionesSime.addEventListener(
+    "click",
+    cargarInscripcionesSimeAdmin,
+  );
+}
 
+[filtroSimeCurso, buscarSimeAlumno].forEach((control) => {
+  if (!control) return;
+
+  control.addEventListener("input", mostrarInscripcionesSimeAdmin);
+  control.addEventListener("change", mostrarInscripcionesSimeAdmin);
+});
 if (formConfiguracionSime) {
   formConfiguracionSime.addEventListener("submit", async (event) => {
     event.preventDefault();
@@ -227,4 +413,5 @@ onAuthStateChanged(auth, async (usuario) => {
   if (!usuario) return;
 
   await cargarConfiguracionSimeAdmin();
+  await cargarInscripcionesSimeAdmin();
 });
