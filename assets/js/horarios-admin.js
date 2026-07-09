@@ -13,6 +13,7 @@ import {
   collection,
   getDocs,
   addDoc,
+  updateDoc,
   deleteDoc,
   doc,
   serverTimestamp,
@@ -45,6 +46,9 @@ const horarioAulaUbicacion = document.getElementById("horarioAulaUbicacion");
 const btnRegistrarHorarioAula = document.getElementById(
   "btnRegistrarHorarioAula",
 );
+const btnCancelarEdicionHorarioAula = document.getElementById(
+  "btnCancelarEdicionHorarioAula",
+);
 const btnActualizarHorarioAula = document.getElementById(
   "btnActualizarHorarioAula",
 );
@@ -54,6 +58,8 @@ const mensajeHorarioAula = document.getElementById("mensajeHorarioAula");
 let cursosHorarios = [];
 let espaciosHorarios = [];
 let docenteAsignadoHorarioAula = null;
+let idHorarioAulaEditando = null;
+let horariosAulaCargados = [];
 
 function mostrarMensajeHorarioAula(texto, tipo = "") {
   if (!mensajeHorarioAula) return;
@@ -469,12 +475,16 @@ function obtenerBloquesSeleccionadosHorarioAula() {
   }));
 }
 
-async function existeBloqueHorarioAula(datosBloque) {
+async function existeBloqueHorarioAula(datosBloque, idIgnorar = "") {
   const consulta = await getDocs(collection(db, "horarios"));
   let existe = false;
 
   consulta.forEach((documento) => {
     if (existe) return;
+
+    if (idIgnorar && documento.id === idIgnorar) {
+      return;
+    }
 
     const datos = documento.data();
 
@@ -550,15 +560,25 @@ function renderizarHorarioAulaCargado(bloques) {
       Bloque ${bloque.bloqueNumero} · ${bloque.horaInicio} a ${bloque.horaFin}
     </div>
 
-    <button
-      class="btn-eliminar-bloque-horario"
-      type="button"
-      title="Eliminar bloque"
-      aria-label="Eliminar bloque"
-      data-id-horario="${bloque.id}"
-    >
-      <i class="fa-solid fa-trash"></i>
-    </button>
+   <button
+  class="btn-editar-bloque-horario"
+  type="button"
+  title="Editar bloque"
+  aria-label="Editar bloque"
+  data-id-horario="${bloque.id}"
+>
+  <i class="fa-solid fa-pen"></i>
+</button>
+
+<button
+  class="btn-eliminar-bloque-horario"
+  type="button"
+  title="Eliminar bloque"
+  aria-label="Eliminar bloque"
+  data-id-horario="${bloque.id}"
+>
+  <i class="fa-solid fa-trash"></i>
+</button>
   </div>
 
                       <div class="bloque-horario-materia">
@@ -656,6 +676,7 @@ async function cargarHorarioAulaRegistrado() {
       return Number(a.bloqueNumero || 0) - Number(b.bloqueNumero || 0);
     });
 
+    horariosAulaCargados = bloques;
     renderizarHorarioAulaCargado(bloques);
   } catch (error) {
     console.error("Error al cargar horario de aula registrado:", error);
@@ -711,6 +732,96 @@ async function eliminarBloqueHorarioAula(idHorario) {
       "error",
     );
   }
+}
+
+function activarModoEdicionHorarioAula(idHorario) {
+  idHorarioAulaEditando = idHorario;
+
+  if (btnRegistrarHorarioAula) {
+    btnRegistrarHorarioAula.innerHTML = `
+      <i class="fa-solid fa-floppy-disk"></i>
+      Guardar cambios
+    `;
+  }
+
+  if (btnCancelarEdicionHorarioAula) {
+    btnCancelarEdicionHorarioAula.hidden = false;
+  }
+}
+
+function limpiarModoEdicionHorarioAula() {
+  idHorarioAulaEditando = null;
+
+  if (btnRegistrarHorarioAula) {
+    btnRegistrarHorarioAula.innerHTML = `
+      <i class="fa-solid fa-plus"></i>
+      Registrar bloque horario
+    `;
+  }
+
+  if (btnCancelarEdicionHorarioAula) {
+    btnCancelarEdicionHorarioAula.hidden = true;
+  }
+}
+
+async function iniciarEdicionHorarioAula(idHorario) {
+  const bloque = horariosAulaCargados.find((item) => item.id === idHorario);
+
+  if (!bloque) {
+    Swal.fire({
+      title: "No se pudo editar",
+      text: "No se encontró el bloque horario seleccionado.",
+      icon: "error",
+      confirmButtonText: "Aceptar",
+    });
+    return;
+  }
+
+  horarioAulaCicloLectivo.value = bloque.cicloLectivo || "";
+  horarioAulaTurno.value = bloque.turno || "";
+
+  renderizarBloquesHorarioAula();
+
+  horarioAulaCurso.value = bloque.cursoId || "";
+
+  await cargarEspaciosHorarioAulaPorCurso();
+
+  horarioAulaDia.value = bloque.dia || "";
+  horarioAulaEspacio.value = bloque.espacioId || "";
+  horarioAulaUbicacion.value = bloque.ubicacion || "";
+
+  await cargarDocenteAsignadoHorarioAula();
+
+  if (!docenteAsignadoHorarioAula) {
+    docenteAsignadoHorarioAula = {
+      docenteNombre: bloque.docenteNombre || "",
+      docenteCorreo: bloque.docenteCorreo || "",
+    };
+
+    horarioAulaDocente.value =
+      docenteAsignadoHorarioAula.docenteNombre ||
+      docenteAsignadoHorarioAula.docenteCorreo ||
+      "Docente asignado";
+  }
+
+  document
+    .querySelectorAll('input[name="bloqueHorarioAula"]')
+    .forEach((checkbox) => {
+      checkbox.checked =
+        Number(checkbox.value || 0) === Number(bloque.bloqueNumero || 0);
+    });
+
+  activarModoEdicionHorarioAula(idHorario);
+
+  mostrarMensajeHorarioAula(
+    "Editando bloque horario. Modificá los datos y guardá los cambios.",
+    "ok",
+  );
+
+  formHorarioAula.scrollIntoView({
+    behavior: "smooth",
+    block: "start",
+  });
 }
 
 async function registrarHorarioAula(event) {
@@ -786,11 +897,81 @@ async function registrarHorarioAula(event) {
     return;
   }
 
+  if (idHorarioAulaEditando && bloquesSeleccionados.length !== 1) {
+    mostrarMensajeHorarioAula(
+      "En modo edición solo podés seleccionar un bloque horario.",
+      "error",
+    );
+    return;
+  }
+
   btnRegistrarHorarioAula.disabled = true;
 
-  mostrarMensajeHorarioAula("Registrando horario de aula...");
+  mostrarMensajeHorarioAula(
+    idHorarioAulaEditando
+      ? "Guardando cambios del bloque horario..."
+      : "Registrando horario de aula...",
+  );
 
   try {
+    if (idHorarioAulaEditando) {
+      const bloque = bloquesSeleccionados[0];
+
+      const datosBloque = {
+        tipoHorario: "AULA",
+        cicloLectivo,
+        turno,
+        cursoId,
+        cursoAnio,
+        cursoDivision,
+        cursoNombre,
+        dia,
+        bloqueNumero: bloque.numero,
+        horaInicio: bloque.inicio,
+        horaFin: bloque.fin,
+        espacioId,
+        espacioCurricular,
+        docenteNombre: docenteAsignadoHorarioAula.docenteNombre || "",
+        docenteCorreo: docenteAsignadoHorarioAula.docenteCorreo || "",
+        ubicacion,
+        estado: "ACTIVO",
+      };
+
+      const yaExiste = await existeBloqueHorarioAula(
+        datosBloque,
+        idHorarioAulaEditando,
+      );
+
+      if (yaExiste) {
+        throw new Error(
+          `Ya existe un horario cargado para ${cursoNombre}, ${dia}, bloque ${bloque.numero}.`,
+        );
+      }
+
+      await updateDoc(doc(db, "horarios", idHorarioAulaEditando), {
+        ...datosBloque,
+        actualizadoEn: serverTimestamp(),
+        actualizadoPor: usuario.email || "",
+      });
+
+      await Swal.fire({
+        title: "Horario actualizado",
+        text: "El bloque horario fue actualizado correctamente.",
+        icon: "success",
+        confirmButtonText: "Aceptar",
+      });
+
+      limpiarModoEdicionHorarioAula();
+
+      mostrarMensajeHorarioAula(
+        "Bloque horario actualizado correctamente.",
+        "ok",
+      );
+
+      await cargarHorarioAulaRegistrado();
+      return;
+    }
+
     let registrados = 0;
 
     for (const bloque of bloquesSeleccionados) {
@@ -852,6 +1033,7 @@ async function registrarHorarioAula(event) {
       `Horario registrado correctamente: ${registrados} bloque/s.`,
       "ok",
     );
+
     await cargarHorarioAulaRegistrado();
   } catch (error) {
     console.error("Error al registrar horario de aula:", error);
@@ -862,7 +1044,7 @@ async function registrarHorarioAula(event) {
     );
 
     Swal.fire({
-      title: "No se pudo registrar",
+      title: "No se pudo guardar",
       text: error.message || "Ocurrió un error al guardar el horario.",
       icon: "error",
       confirmButtonText: "Aceptar",
@@ -900,11 +1082,32 @@ if (horarioAulaCicloLectivo) {
 
 if (vistaHorarioAula) {
   vistaHorarioAula.addEventListener("click", async (event) => {
+    const botonEditar = event.target.closest(".btn-editar-bloque-horario");
+
+    if (botonEditar) {
+      await iniciarEdicionHorarioAula(botonEditar.dataset.idHorario);
+      return;
+    }
+
     const botonEliminar = event.target.closest(".btn-eliminar-bloque-horario");
 
     if (!botonEliminar) return;
 
     await eliminarBloqueHorarioAula(botonEliminar.dataset.idHorario);
+  });
+}
+
+if (btnCancelarEdicionHorarioAula) {
+  btnCancelarEdicionHorarioAula.addEventListener("click", () => {
+    limpiarModoEdicionHorarioAula();
+
+    document
+      .querySelectorAll('input[name="bloqueHorarioAula"]:checked')
+      .forEach((checkbox) => {
+        checkbox.checked = false;
+      });
+
+    mostrarMensajeHorarioAula("Edición cancelada.");
   });
 }
 
