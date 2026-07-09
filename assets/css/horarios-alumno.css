@@ -1,0 +1,116 @@
+.vista-horario-aula-alumno {
+  margin-top: 24px;
+}
+
+.encabezado-horario-alumno {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 18px;
+  padding: 10px 14px;
+  border: 1px solid rgba(255, 214, 10, 0.35);
+  border-radius: 999px;
+  background: rgba(255, 214, 10, 0.12);
+  color: #ffffff;
+  font-size: 0.95rem;
+  font-weight: 800;
+}
+
+.encabezado-horario-alumno strong {
+  color: #ffd60a;
+}
+
+.grilla-horario-aula-alumno {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(180px, 1fr));
+  gap: 14px;
+  align-items: start;
+}
+
+.dia-horario-alumno {
+  min-height: 100%;
+  padding: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.dia-horario-alumno h4 {
+  margin: 0 0 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.16);
+  color: #ffd60a;
+  font-size: 1rem;
+  font-weight: 900;
+  text-align: center;
+}
+
+.tarjeta-bloque-horario-alumno {
+  padding: 11px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.94);
+  color: #111b3f;
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.18);
+}
+
+.tarjeta-bloque-horario-alumno + .tarjeta-bloque-horario-alumno {
+  margin-top: 10px;
+}
+
+.bloque-horario-hora-alumno {
+  margin-bottom: 6px;
+  color: #0b4aad;
+  font-size: 0.78rem;
+  font-weight: 900;
+}
+
+.bloque-horario-materia-alumno {
+  color: #111b3f;
+  font-size: 0.95rem;
+  font-weight: 900;
+  line-height: 1.2;
+}
+
+.bloque-horario-docente-alumno {
+  margin-top: 5px;
+  color: #405579;
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.bloque-horario-ubicacion-alumno {
+  margin-top: 7px;
+  padding-top: 7px;
+  border-top: 1px solid rgba(11, 74, 173, 0.16);
+  color: #0b4aad;
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+.dia-horario-alumno .mensaje-formulario {
+  margin: 0;
+  padding: 10px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.82);
+  text-align: center;
+  font-size: 0.86rem;
+}
+
+@media (max-width: 1100px) {
+  .grilla-horario-aula-alumno {
+    grid-template-columns: repeat(2, minmax(220px, 1fr));
+  }
+}
+
+@media (max-width: 650px) {
+  .grilla-horario-aula-alumno {
+    grid-template-columns: 1fr;
+  }
+
+  .encabezado-horario-alumno {
+    width: 100%;
+    justify-content: center;
+    border-radius: 14px;
+  }
+}

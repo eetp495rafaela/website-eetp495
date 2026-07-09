@@ -88,7 +88,7 @@ function renderizarHorarioAulaAlumno(bloques, perfilAlumno) {
                   (bloque) => `
                     <div class="tarjeta-bloque-horario-alumno">
                       <div class="bloque-horario-hora-alumno">
-                        Bloque ${bloque.bloqueNumero} · ${bloque.horaInicio} a ${bloque.horaFin}
+                        ${bloque.horaInicio} a ${bloque.horaFin}
                       </div>
 
                       <div class="bloque-horario-materia-alumno">
