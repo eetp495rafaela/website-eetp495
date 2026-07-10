@@ -1397,3 +1397,9 @@ body.modal-abierto {
   transform: translateY(-1px);
   filter: brightness(1.05);
 }
+.acciones-bloque-horario {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}

@@ -430,6 +430,90 @@ async function cargarDocenteAsignadoHorarioAula() {
   }
 }
 
+async function cargarDocenteAsignadoHorarioTaller() {
+  if (!horarioTallerCurso || !horarioTallerEspacio || !horarioTallerDocente) {
+    return;
+  }
+
+  const cursoId = String(horarioTallerCurso.value || "").trim();
+  const espacioId = String(horarioTallerEspacio.value || "").trim();
+  const cicloLectivo = Number(horarioTallerCicloLectivo?.value || 0);
+
+  horarioTallerDocente.value = "";
+  docenteAsignadoHorarioTaller = null;
+
+  if (!cursoId || !espacioId || !cicloLectivo) {
+    return;
+  }
+
+  horarioTallerDocente.value = "Buscando docente asignado...";
+
+  try {
+    const consulta = await getDocs(collection(db, "asignaciones_docentes"));
+
+    let asignacionEncontrada = null;
+
+    consulta.forEach((documento) => {
+      if (asignacionEncontrada) return;
+
+      const datos = documento.data();
+
+      const estado = String(datos.estado || "")
+        .trim()
+        .toUpperCase();
+
+      const mismoCurso = String(datos.cursoId || "").trim() === cursoId;
+
+      const mismoEspacio = String(datos.espacioId || "").trim() === espacioId;
+
+      const mismoCiclo = Number(datos.cicloLectivo || 0) === cicloLectivo;
+
+      const estaActiva = !estado || estado === "ACTIVA" || estado === "ACTIVO";
+
+      if (mismoCurso && mismoEspacio && mismoCiclo && estaActiva) {
+        asignacionEncontrada = {
+          docenteNombre: datos.docenteNombre || "",
+          docenteCorreo: datos.docenteCorreo || "",
+        };
+      }
+    });
+
+    if (!asignacionEncontrada) {
+      horarioTallerDocente.value = "Sin docente asignado";
+      docenteAsignadoHorarioTaller = null;
+
+      mostrarMensajeHorarioTaller(
+        "No se encontró una asignación docente activa para ese curso y taller.",
+        "error",
+      );
+
+      return;
+    }
+
+    horarioTallerDocente.value =
+      asignacionEncontrada.docenteNombre ||
+      asignacionEncontrada.docenteCorreo ||
+      "Docente asignado";
+
+    docenteAsignadoHorarioTaller = asignacionEncontrada;
+
+    mostrarMensajeHorarioTaller(
+      "Docente asignado cargado correctamente.",
+      "ok",
+    );
+  } catch (error) {
+    console.error("Error al buscar docente asignado para taller:", error);
+
+    horarioTallerDocente.value = "";
+    docenteAsignadoHorarioTaller = null;
+
+    mostrarMensajeHorarioTaller(
+      "No se pudo buscar el docente asignado para taller.",
+      "error",
+    );
+  }
+}
+
 function cargarCursosHorarioTallerDesdeCache() {
   if (!horarioTallerCurso) return;
 
@@ -735,7 +819,54 @@ async function existeBloqueHorarioAula(datosBloque, idIgnorar = "") {
   return existe;
 }
 
+async function existeBloqueHorarioTaller(datosBloque) {
+  const consulta = await getDocs(collection(db, "horarios"));
+  let existe = false;
+
+  consulta.forEach((documento) => {
+    if (existe) return;
+
+    const datos = documento.data();
+
+    const mismoTipo = String(datos.tipoHorario || "") === "TALLER";
+
+    const mismoCiclo =
+      Number(datos.cicloLectivo || 0) === Number(datosBloque.cicloLectivo);
+
+    const mismoCurso =
+      String(datos.cursoId || "") === String(datosBloque.cursoId);
+
+    const mismoGrupo =
+      String(datos.grupoTaller || "") === String(datosBloque.grupoTaller);
+
+    const mismoDia = String(datos.dia || "") === String(datosBloque.dia);
+
+    const activo = String(datos.estado || "ACTIVO").toUpperCase() === "ACTIVO";
+
+    if (
+      mismoTipo &&
+      mismoCiclo &&
+      mismoCurso &&
+      mismoGrupo &&
+      mismoDia &&
+      activo
+    ) {
+      existe = true;
+    }
+  });
+
+  return existe;
+}
+
 const DIAS_HORARIO_AULA = [
+  { valor: "LUNES", etiqueta: "Lunes" },
+  { valor: "MARTES", etiqueta: "Martes" },
+  { valor: "MIERCOLES", etiqueta: "Miércoles" },
+  { valor: "JUEVES", etiqueta: "Jueves" },
+  { valor: "VIERNES", etiqueta: "Viernes" },
+];
+
+const DIAS_HORARIO_TALLER = [
   { valor: "LUNES", etiqueta: "Lunes" },
   { valor: "MARTES", etiqueta: "Martes" },
   { valor: "MIERCOLES", etiqueta: "Miércoles" },
@@ -830,6 +961,99 @@ function renderizarHorarioAulaCargado(bloques) {
   `;
 }
 
+function renderizarHorarioTallerCargado(bloques) {
+  if (!vistaHorarioTaller) return;
+
+  if (!bloques.length) {
+    vistaHorarioTaller.innerHTML = `
+      <p class="mensaje-formulario">
+        Todavía no hay bloques de taller cargados para este curso y grupo.
+      </p>
+    `;
+    return;
+  }
+
+  const htmlDias = DIAS_HORARIO_TALLER.map((dia) => {
+    const bloquesDia = bloques
+      .filter((bloque) => bloque.dia === dia.valor)
+      .sort((a, b) =>
+        String(a.horaInicio || "").localeCompare(String(b.horaInicio || "")),
+      );
+
+    return `
+      <div class="dia-horario-admin">
+        <h4>${dia.etiqueta}</h4>
+
+        ${
+          bloquesDia.length
+            ? bloquesDia
+                .map(
+                  (bloque) => `
+                    <div class="tarjeta-bloque-horario-admin">
+                      <div class="encabezado-tarjeta-bloque-horario">
+  <div class="bloque-horario-hora">
+    ${bloque.horarioTexto || `${bloque.horaInicio || "-"} a ${bloque.horaFin || "-"}`}
+  </div>
+
+<div class="acciones-bloque-horario">
+  <button
+    class="btn-editar-bloque-horario btn-editar-bloque-horario-taller"
+    type="button"
+    title="Editar bloque de taller"
+    aria-label="Editar bloque de taller"
+    data-id-horario="${bloque.id}"
+  >
+    <i class="fa-solid fa-pen"></i>
+  </button>
+
+  <button
+    class="btn-eliminar-bloque-horario btn-eliminar-bloque-horario-taller"
+    type="button"
+    title="Eliminar bloque de taller"
+    aria-label="Eliminar bloque de taller"
+    data-id-horario="${bloque.id}"
+  >
+    <i class="fa-solid fa-trash"></i>
+  </button>
+</div>
+</div>
+
+                      <div class="bloque-horario-materia">
+                        ${bloque.espacioCurricular || "-"}
+                      </div>
+
+                      <div class="bloque-horario-docente">
+                        ${bloque.docenteNombre || "Docente sin cargar"}
+                      </div>
+
+                      <div class="bloque-horario-ubicacion">
+                        ${bloque.grupoTaller || "Grupo sin cargar"}
+                      </div>
+
+                      ${
+                        bloque.ubicacion
+                          ? `<div class="bloque-horario-ubicacion">
+                              ${bloque.ubicacion}
+                            </div>`
+                          : ""
+                      }
+                    </div>
+                  `,
+                )
+                .join("")
+            : `<p class="mensaje-formulario">Sin bloques cargados.</p>`
+        }
+      </div>
+    `;
+  }).join("");
+
+  vistaHorarioTaller.innerHTML = `
+    <div class="grilla-horario-aula-admin">
+      ${htmlDias}
+    </div>
+  `;
+}
+
 async function cargarHorarioAulaRegistrado() {
   if (!vistaHorarioAula) return;
 
@@ -906,6 +1130,91 @@ async function cargarHorarioAulaRegistrado() {
   }
 }
 
+async function cargarHorarioTallerRegistrado() {
+  if (!vistaHorarioTaller) return;
+
+  const cursoId = String(horarioTallerCurso?.value || "").trim();
+  const grupoTaller = String(horarioTallerGrupo?.value || "").trim();
+  const cicloLectivo = Number(horarioTallerCicloLectivo?.value || 0);
+  const turno = String(horarioTallerTurno?.value || "").trim();
+
+  if (!cursoId) {
+    vistaHorarioTaller.innerHTML = `
+      <p class="mensaje-formulario">
+        Seleccioná un curso para ver el horario de taller cargado.
+      </p>
+    `;
+    return;
+  }
+
+  vistaHorarioTaller.innerHTML = `
+    <p class="mensaje-formulario">
+      Cargando horario de taller registrado...
+    </p>
+  `;
+
+  try {
+    const consulta = await getDocs(collection(db, "horarios"));
+    const bloques = [];
+
+    consulta.forEach((documento) => {
+      const datos = documento.data();
+
+      const tipoHorario = String(datos.tipoHorario || "")
+        .trim()
+        .toUpperCase();
+
+      const estado = String(datos.estado || "ACTIVO")
+        .trim()
+        .toUpperCase();
+
+      if (tipoHorario !== "TALLER") return;
+      if (estado !== "ACTIVO") return;
+      if (String(datos.cursoId || "").trim() !== cursoId) return;
+      if (
+        grupoTaller &&
+        String(datos.grupoTaller || "").trim() !== grupoTaller
+      ) {
+        return;
+      }
+
+      if (cicloLectivo && Number(datos.cicloLectivo || 0) !== cicloLectivo) {
+        return;
+      }
+
+      if (turno && String(datos.turno || "").trim() !== turno) {
+        return;
+      }
+
+      bloques.push({
+        id: documento.id,
+        ...datos,
+      });
+    });
+
+    bloques.sort((a, b) => {
+      const diaA = DIAS_HORARIO_TALLER.findIndex((dia) => dia.valor === a.dia);
+      const diaB = DIAS_HORARIO_TALLER.findIndex((dia) => dia.valor === b.dia);
+
+      if (diaA !== diaB) return diaA - diaB;
+
+      return String(a.horaInicio || "").localeCompare(
+        String(b.horaInicio || ""),
+      );
+    });
+
+    renderizarHorarioTallerCargado(bloques);
+  } catch (error) {
+    console.error("Error al cargar horario de taller registrado:", error);
+
+    vistaHorarioTaller.innerHTML = `
+      <p class="mensaje-formulario mensaje-error">
+        No se pudo cargar el horario de taller registrado.
+      </p>
+    `;
+  }
+}
+
 async function eliminarBloqueHorarioAula(idHorario) {
   if (!idHorario) return;
 
@@ -946,6 +1255,54 @@ async function eliminarBloqueHorarioAula(idHorario) {
 
     mostrarMensajeHorarioAula(
       "No se pudo eliminar el bloque horario.",
+      "error",
+    );
+  }
+}
+
+async function eliminarBloqueHorarioTaller(idHorario) {
+  if (!idHorario) return;
+
+  const confirmacion = await Swal.fire({
+    title: "Eliminar bloque de taller",
+    text: "Se eliminará este bloque del horario de taller.",
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonText: "Sí, eliminar",
+    cancelButtonText: "Cancelar",
+    confirmButtonColor: "#dc2626",
+  });
+
+  if (!confirmacion.isConfirmed) return;
+
+  try {
+    await deleteDoc(doc(db, "horarios", idHorario));
+
+    await Swal.fire({
+      title: "Bloque eliminado",
+      text: "El bloque de taller fue eliminado correctamente.",
+      icon: "success",
+      confirmButtonText: "Aceptar",
+    });
+
+    await cargarHorarioTallerRegistrado();
+
+    mostrarMensajeHorarioTaller(
+      "Bloque de taller eliminado correctamente.",
+      "ok",
+    );
+  } catch (error) {
+    console.error("Error al eliminar bloque de taller:", error);
+
+    Swal.fire({
+      title: "No se pudo eliminar",
+      text: "Ocurrió un error al eliminar el bloque de taller.",
+      icon: "error",
+      confirmButtonText: "Aceptar",
+    });
+
+    mostrarMensajeHorarioTaller(
+      "No se pudo eliminar el bloque de taller.",
       "error",
     );
   }
@@ -1271,8 +1628,171 @@ async function registrarHorarioAula(event) {
   }
 }
 
+async function registrarHorarioTaller(event) {
+  event.preventDefault();
+
+  const usuario = auth.currentUser;
+
+  if (!usuario) {
+    mostrarMensajeHorarioTaller("No se detectó una sesión activa.", "error");
+    return;
+  }
+
+  const cicloLectivo = Number(horarioTallerCicloLectivo?.value || 0);
+  const turno = String(horarioTallerTurno?.value || "").trim();
+  const cursoId = String(horarioTallerCurso?.value || "").trim();
+  const grupoTaller = String(horarioTallerGrupo?.value || "").trim();
+  const dia = String(horarioTallerDia?.value || "").trim();
+  const espacioId = String(horarioTallerEspacio?.value || "").trim();
+  const ubicacion = String(horarioTallerUbicacion?.value || "").trim();
+
+  const horarioFijo = obtenerHorarioFijoTaller(turno);
+
+  const opcionCurso =
+    horarioTallerCurso.options[horarioTallerCurso.selectedIndex];
+
+  const opcionEspacio =
+    horarioTallerEspacio.options[horarioTallerEspacio.selectedIndex];
+
+  const cursoAnio = Number(opcionCurso?.dataset?.anio || 0);
+
+  const cursoDivision = String(opcionCurso?.dataset?.division || "")
+    .trim()
+    .toUpperCase();
+
+  const cursoNombre = String(opcionCurso?.dataset?.nombre || "").trim();
+
+  const espacioCurricular = String(opcionEspacio?.dataset?.nombre || "").trim();
+
+  if (!cicloLectivo) {
+    mostrarMensajeHorarioTaller("Ingresá el ciclo lectivo.", "error");
+    return;
+  }
+
+  if (!turno) {
+    mostrarMensajeHorarioTaller("Seleccioná el turno.", "error");
+    return;
+  }
+
+  if (!cursoId) {
+    mostrarMensajeHorarioTaller("Seleccioná el curso.", "error");
+    return;
+  }
+
+  if (!grupoTaller) {
+    mostrarMensajeHorarioTaller("Seleccioná el grupo de taller.", "error");
+    return;
+  }
+
+  if (!dia) {
+    mostrarMensajeHorarioTaller("Seleccioná el día.", "error");
+    return;
+  }
+
+  if (!espacioId) {
+    mostrarMensajeHorarioTaller(
+      "Seleccioná el taller / espacio curricular.",
+      "error",
+    );
+    return;
+  }
+
+  if (!horarioFijo.inicio || !horarioFijo.fin) {
+    mostrarMensajeHorarioTaller(
+      "No se pudo determinar el horario del turno.",
+      "error",
+    );
+    return;
+  }
+
+  if (!docenteAsignadoHorarioTaller) {
+    mostrarMensajeHorarioTaller(
+      "No hay docente asignado para ese curso y taller.",
+      "error",
+    );
+    return;
+  }
+
+  const datosHorarioTaller = {
+    tipoHorario: "TALLER",
+    cicloLectivo,
+    turno,
+    cursoId,
+    cursoAnio,
+    cursoDivision,
+    cursoNombre,
+    grupoTaller,
+    dia,
+    horaInicio: horarioFijo.inicio,
+    horaFin: horarioFijo.fin,
+    horarioTexto: horarioFijo.texto,
+    espacioId,
+    espacioCurricular,
+    docenteNombre: docenteAsignadoHorarioTaller.docenteNombre || "",
+    docenteCorreo: docenteAsignadoHorarioTaller.docenteCorreo || "",
+    ubicacion,
+    estado: "ACTIVO",
+  };
+
+  btnRegistrarHorarioTaller.disabled = true;
+  mostrarMensajeHorarioTaller("Registrando horario de taller...");
+
+  try {
+    const yaExiste = await existeBloqueHorarioTaller(datosHorarioTaller);
+
+    if (yaExiste) {
+      throw new Error(
+        `Ya existe un horario de taller cargado para ${cursoNombre}, ${grupoTaller}, ${dia}.`,
+      );
+    }
+
+    await addDoc(collection(db, "horarios"), {
+      ...datosHorarioTaller,
+      creadoEn: serverTimestamp(),
+      creadoPor: usuario.email || "",
+      actualizadoEn: serverTimestamp(),
+      actualizadoPor: usuario.email || "",
+    });
+
+    await Swal.fire({
+      title: "Horario de taller registrado",
+      text: "El bloque de taller fue registrado correctamente.",
+      icon: "success",
+      confirmButtonText: "Aceptar",
+    });
+
+    horarioTallerUbicacion.value = "";
+
+    mostrarMensajeHorarioTaller(
+      "Horario de taller registrado correctamente.",
+      "ok",
+    );
+  } catch (error) {
+    console.error("Error al registrar horario de taller:", error);
+
+    mostrarMensajeHorarioTaller(
+      error.message || "No se pudo registrar el horario de taller.",
+      "error",
+    );
+
+    Swal.fire({
+      title: "No se pudo guardar",
+      text:
+        error.message || "Ocurrió un error al guardar el horario de taller.",
+      icon: "error",
+      confirmButtonText: "Aceptar",
+    });
+  } finally {
+    btnRegistrarHorarioTaller.disabled = false;
+  }
+}
+
 if (formHorarioAula) {
   formHorarioAula.addEventListener("submit", registrarHorarioAula);
+}
+
+if (formHorarioTaller) {
+  formHorarioTaller.addEventListener("submit", registrarHorarioTaller);
 }
 
 if (btnActualizarHorarioAula) {
@@ -1283,6 +1803,26 @@ if (btnActualizarHorarioAula) {
     }
 
     await cargarHorarioAulaRegistrado();
+  });
+}
+
+if (btnActualizarHorarioTaller) {
+  btnActualizarHorarioTaller.addEventListener("click", async () => {
+    if (!cursosHorarios.length) {
+      await cargarCursosHorarioAula();
+
+      if (vistaHorarioTaller) {
+        vistaHorarioTaller.innerHTML = `
+          <p class="mensaje-formulario">
+            Cursos cargados. Seleccioná curso, grupo y turno para cargar el horario de taller.
+          </p>
+        `;
+      }
+
+      return;
+    }
+
+    await cargarHorarioTallerRegistrado();
   });
 }
 
@@ -1318,6 +1858,33 @@ if (vistaHorarioAula) {
   });
 }
 
+if (vistaHorarioTaller) {
+  vistaHorarioTaller.addEventListener("click", async (event) => {
+    const botonEditar = event.target.closest(
+      ".btn-editar-bloque-horario-taller",
+    );
+
+    if (botonEditar) {
+      console.log("Editar bloque de taller:", botonEditar.dataset.idHorario);
+
+      mostrarMensajeHorarioTaller(
+        "Edición de taller detectada correctamente. Falta conectar el modo edición.",
+        "ok",
+      );
+
+      return;
+    }
+
+    const botonEliminar = event.target.closest(
+      ".btn-eliminar-bloque-horario-taller",
+    );
+
+    if (!botonEliminar) return;
+
+    await eliminarBloqueHorarioTaller(botonEliminar.dataset.idHorario);
+  });
+}
+
 if (btnCancelarEdicionHorarioAula) {
   btnCancelarEdicionHorarioAula.addEventListener("click", () => {
     limpiarModoEdicionHorarioAula();
@@ -1333,10 +1900,35 @@ if (btnCancelarEdicionHorarioAula) {
 }
 
 if (horarioTallerTurno) {
-  horarioTallerTurno.addEventListener("change", actualizarHorarioFijoTaller);
+  horarioTallerTurno.addEventListener("change", async () => {
+    actualizarHorarioFijoTaller();
+    await cargarHorarioTallerRegistrado();
+  });
 }
+
 if (horarioTallerCurso) {
-  horarioTallerCurso.addEventListener("change", cargarMateriasHorarioTaller);
+  horarioTallerCurso.addEventListener("change", async () => {
+    await cargarMateriasHorarioTaller();
+    await cargarDocenteAsignadoHorarioTaller();
+  });
+}
+
+if (horarioTallerGrupo) {
+  horarioTallerGrupo.addEventListener("change", cargarHorarioTallerRegistrado);
+}
+
+if (horarioTallerEspacio) {
+  horarioTallerEspacio.addEventListener(
+    "change",
+    cargarDocenteAsignadoHorarioTaller,
+  );
+}
+
+if (horarioTallerCicloLectivo) {
+  horarioTallerCicloLectivo.addEventListener("change", async () => {
+    await cargarDocenteAsignadoHorarioTaller();
+    await cargarHorarioTallerRegistrado();
+  });
 }
 
 onAuthStateChanged(auth, (usuario) => {
@@ -1358,6 +1950,14 @@ onAuthStateChanged(auth, (usuario) => {
     vistaHorarioAula.innerHTML = `
       <p class="mensaje-formulario">
         Todavía no se consultó el horario. Presioná “Actualizar horario” para comenzar.
+      </p>
+    `;
+  }
+
+  if (vistaHorarioTaller) {
+    vistaHorarioTaller.innerHTML = `
+      <p class="mensaje-formulario">
+        Todavía no se consultó el horario de taller. Presioná “Actualizar horario” para comenzar.
       </p>
     `;
   }
