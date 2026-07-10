@@ -31,6 +31,9 @@ const simeEmailContacto = document.getElementById("simeEmailContacto");
 const btnGuardarConfiguracionSime = document.getElementById(
   "btnGuardarConfiguracionSime",
 );
+const btnCargarConfiguracionSime = document.getElementById(
+  "btnCargarConfiguracionSime",
+);
 const mensajeConfiguracionSime = document.getElementById(
   "mensajeConfiguracionSime",
 );
@@ -545,6 +548,25 @@ async function cargarConfiguracionSimeAdmin() {
     );
   }
 }
+if (btnCargarConfiguracionSime) {
+  btnCargarConfiguracionSime.addEventListener("click", async () => {
+    btnCargarConfiguracionSime.disabled = true;
+
+    const textoOriginal = btnCargarConfiguracionSime.innerHTML;
+
+    btnCargarConfiguracionSime.innerHTML = `
+      <i class="fa-solid fa-spinner fa-spin"></i>
+      Cargando...
+    `;
+
+    try {
+      await cargarConfiguracionSimeAdmin();
+    } finally {
+      btnCargarConfiguracionSime.disabled = false;
+      btnCargarConfiguracionSime.innerHTML = textoOriginal;
+    }
+  });
+}
 if (btnActualizarInscripcionesSime) {
   btnActualizarInscripcionesSime.addEventListener(
     "click",
@@ -712,9 +734,26 @@ if (formConfiguracionSime) {
   });
 }
 
-onAuthStateChanged(auth, async (usuario) => {
+onAuthStateChanged(auth, (usuario) => {
   if (!usuario) return;
 
-  await cargarConfiguracionSimeAdmin();
-  await cargarInscripcionesSimeAdmin();
+  mostrarMensajeSimeAdmin(
+    mensajeConfiguracionSime,
+    "Configuración pendiente de carga manual.",
+  );
+
+  if (cuerpoTablaSimeAdmin) {
+    cuerpoTablaSimeAdmin.innerHTML = `
+      <tr>
+        <td colspan="6" class="tabla-vacia">
+          Todavía no se consultaron las inscripciones. Presioná “Actualizar listado” para verlas.
+        </td>
+      </tr>
+    `;
+  }
+
+  mostrarMensajeSimeAdmin(
+    mensajeSimeAdmin,
+    "Listado pendiente de carga manual.",
+  );
 });

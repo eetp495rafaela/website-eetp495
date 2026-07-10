@@ -2559,11 +2559,30 @@ if (formRegistroAsignacion) {
 }
 
 if (btnVerAsignaciones) {
-  btnVerAsignaciones.addEventListener("click", cargarAsignaciones);
+  btnVerAsignaciones.addEventListener("click", async () => {
+    await prepararFormularioAsignaciones();
+    await cargarAsignaciones();
+  });
 }
 
 if (btnRegistrarAsignacion) {
-  prepararFormularioAsignaciones();
+  if (asignacionDocente) {
+    limpiarSelect(
+      asignacionDocente,
+      "Presioná “Ver asignaciones” para cargar docentes",
+    );
+  }
+
+  if (asignacionCurso) {
+    limpiarSelect(
+      asignacionCurso,
+      "Presioná “Ver asignaciones” para cargar cursos",
+    );
+  }
+
+  if (asignacionEspacio) {
+    limpiarSelect(asignacionEspacio, "Seleccioná primero un curso");
+  }
 }
 if (cursoAnio) {
   cursoAnio.addEventListener("input", actualizarNombreCurso);
@@ -3538,6 +3557,4 @@ onAuthStateChanged(auth, (user) => {
   if (!user) return;
 
   usuarioSoporte = user;
-
-  prepararFormularioAsignaciones();
 });

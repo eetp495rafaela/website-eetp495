@@ -1276,10 +1276,14 @@ if (formHorarioAula) {
 }
 
 if (btnActualizarHorarioAula) {
-  btnActualizarHorarioAula.addEventListener(
-    "click",
-    cargarHorarioAulaRegistrado,
-  );
+  btnActualizarHorarioAula.addEventListener("click", async () => {
+    if (!cursosHorarios.length) {
+      await cargarCursosHorarioAula();
+      return;
+    }
+
+    await cargarHorarioAulaRegistrado();
+  });
 }
 
 if (horarioAulaCurso) {
@@ -1335,8 +1339,26 @@ if (horarioTallerCurso) {
   horarioTallerCurso.addEventListener("change", cargarMateriasHorarioTaller);
 }
 
-onAuthStateChanged(auth, async (usuario) => {
+onAuthStateChanged(auth, (usuario) => {
   if (!usuario) return;
 
-  await cargarCursosHorarioAula();
+  if (horarioAulaCurso) {
+    horarioAulaCurso.innerHTML = `
+      <option value="">Presioná “Actualizar horario” para cargar cursos</option>
+    `;
+  }
+
+  if (horarioTallerCurso) {
+    horarioTallerCurso.innerHTML = `
+      <option value="">Presioná “Actualizar horario” para cargar cursos</option>
+    `;
+  }
+
+  if (vistaHorarioAula) {
+    vistaHorarioAula.innerHTML = `
+      <p class="mensaje-formulario">
+        Todavía no se consultó el horario. Presioná “Actualizar horario” para comenzar.
+      </p>
+    `;
+  }
 });
