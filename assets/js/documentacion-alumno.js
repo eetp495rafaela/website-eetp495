@@ -37,6 +37,8 @@ const filtroTipoDocumentacionAlumno = document.getElementById(
   "filtroTipoDocumentacionAlumno",
 );
 
+const btnVerMiDocumentacion = document.getElementById("btnVerMiDocumentacion");
+
 let documentosAlumno = [];
 
 function mostrarMensajeDocumentacionAlumno(texto, tipo = "") {
@@ -208,8 +210,39 @@ if (filtroTipoDocumentacionAlumno) {
   );
 }
 
+if (btnVerMiDocumentacion) {
+  btnVerMiDocumentacion.addEventListener("click", async () => {
+    btnVerMiDocumentacion.disabled = true;
+
+    const textoOriginal = btnVerMiDocumentacion.innerHTML;
+
+    btnVerMiDocumentacion.innerHTML = `
+      <i class="fa-solid fa-spinner fa-spin"></i>
+      Cargando...
+    `;
+
+    try {
+      await cargarDocumentosAlumno();
+    } finally {
+      btnVerMiDocumentacion.disabled = false;
+      btnVerMiDocumentacion.innerHTML = textoOriginal;
+    }
+  });
+}
+
 onAuthStateChanged(auth, (usuario) => {
-  if (usuario) {
-    cargarDocumentosAlumno();
+  if (!usuario) return;
+
+  if (cuerpoTablaDocumentacionAlumno) {
+    cuerpoTablaDocumentacionAlumno.innerHTML = `
+      <tr>
+        <td colspan="4" class="tabla-vacia">
+          Todavía no se consultó tu documentación. Presioná “Ver mi documentación”
+          para cargarla.
+        </td>
+      </tr>
+    `;
   }
+
+  mostrarMensajeDocumentacionAlumno("");
 });
