@@ -46,6 +46,14 @@ const DIAS_HORARIO_AULA_ALUMNO = [
   { valor: "VIERNES", etiqueta: "Viernes" },
 ];
 
+const DIAS_HORARIO_TALLER_ALUMNO = [
+  { valor: "LUNES", etiqueta: "Lunes" },
+  { valor: "MARTES", etiqueta: "Martes" },
+  { valor: "MIERCOLES", etiqueta: "Miércoles" },
+  { valor: "JUEVES", etiqueta: "Jueves" },
+  { valor: "VIERNES", etiqueta: "Viernes" },
+];
+
 function normalizarCorreoHorarioAlumno(correo) {
   return String(correo || "")
     .trim()
@@ -62,20 +70,20 @@ function mostrarMensajeHorarioAlumno(texto, tipo = "") {
   `;
 }
 
-function renderizarHorarioAulaAlumno(bloques, perfilAlumno) {
+function renderizarHorarioCompletoAlumno(
+  bloquesAula,
+  bloquesTaller,
+  perfilAlumno,
+) {
   if (!vistaHorarioAulaAlumno) return;
 
-  if (!bloques.length) {
-    mostrarMensajeHorarioAlumno(
-      "Todavía no hay horarios de aula cargados para tu curso.",
-    );
-    return;
-  }
-
   const cursoVisible = String(perfilAlumno.cursoNombre || "").trim();
+  const grupoTaller = String(perfilAlumno.grupoTaller || "")
+    .trim()
+    .toUpperCase();
 
-  const htmlDias = DIAS_HORARIO_AULA_ALUMNO.map((dia) => {
-    const bloquesDia = bloques
+  const htmlAula = DIAS_HORARIO_AULA_ALUMNO.map((dia) => {
+    const bloquesDia = bloquesAula
       .filter((bloque) => bloque.dia === dia.valor)
       .sort(
         (a, b) => Number(a.bloqueNumero || 0) - Number(b.bloqueNumero || 0),
@@ -92,7 +100,7 @@ function renderizarHorarioAulaAlumno(bloques, perfilAlumno) {
                   (bloque) => `
                     <div class="tarjeta-bloque-horario-alumno">
                       <div class="bloque-horario-hora-alumno">
-                        ${bloque.horaInicio} a ${bloque.horaFin}
+                        ${bloque.horaInicio || "-"} a ${bloque.horaFin || "-"}
                       </div>
 
                       <div class="bloque-horario-materia-alumno">
@@ -120,14 +128,107 @@ function renderizarHorarioAulaAlumno(bloques, perfilAlumno) {
     `;
   }).join("");
 
+  const htmlTaller = DIAS_HORARIO_TALLER_ALUMNO.map((dia) => {
+    const bloquesDia = bloquesTaller
+      .filter((bloque) => bloque.dia === dia.valor)
+      .sort((a, b) =>
+        String(a.horaInicio || "").localeCompare(String(b.horaInicio || "")),
+      );
+
+    return `
+      <div class="dia-horario-alumno">
+        <h4>${dia.etiqueta}</h4>
+
+        ${
+          bloquesDia.length
+            ? bloquesDia
+                .map(
+                  (bloque) => `
+                    <div class="tarjeta-bloque-horario-alumno">
+                      <div class="bloque-horario-hora-alumno">
+                        ${
+                          bloque.horarioTexto ||
+                          `${bloque.horaInicio || "-"} a ${bloque.horaFin || "-"}`
+                        }
+                      </div>
+
+                      <div class="bloque-horario-materia-alumno">
+                        ${bloque.espacioCurricular || "-"}
+                      </div>
+
+                      <div class="bloque-horario-docente-alumno">
+                        ${bloque.docenteNombre || "Docente sin cargar"}
+                      </div>
+
+                      <div class="bloque-horario-ubicacion-alumno">
+                        Grupo: ${bloque.grupoTaller || grupoTaller || "-"}
+                      </div>
+
+                      ${
+                        bloque.ubicacion
+                          ? `<div class="bloque-horario-ubicacion-alumno">
+                              ${bloque.ubicacion}
+                            </div>`
+                          : ""
+                      }
+                    </div>
+                  `,
+                )
+                .join("")
+            : `<p class="mensaje-formulario">Sin taller cargado.</p>`
+        }
+      </div>
+    `;
+  }).join("");
+
   vistaHorarioAulaAlumno.innerHTML = `
     <div class="encabezado-horario-alumno">
-      <strong>Curso:</strong> ${cursoVisible || `${perfilAlumno.cursoAnio}º ${perfilAlumno.cursoDivision}`}
+      <strong>Curso:</strong>
+      ${cursoVisible || `${perfilAlumno.cursoAnio}º ${perfilAlumno.cursoDivision}`}
+
+      ${
+        grupoTaller
+          ? `<span class="separador-horario-alumno">|</span>
+             <strong>Grupo de taller:</strong> ${grupoTaller}`
+          : ""
+      }
     </div>
 
-    <div class="grilla-horario-aula-alumno">
-      ${htmlDias}
-    </div>
+    <section class="bloque-horario-seccion-alumno">
+      <div class="titulo-horario-seccion-alumno">
+        <h3>Horario de Aula</h3>
+        <p>Clases semanales correspondientes a tu curso.</p>
+      </div>
+
+      ${
+        bloquesAula.length
+          ? `<div class="grilla-horario-aula-alumno">${htmlAula}</div>`
+          : `<p class="mensaje-formulario">Todavía no hay horarios de aula cargados para tu curso.</p>`
+      }
+    </section>
+
+    <section class="bloque-horario-seccion-alumno">
+      <div class="titulo-horario-seccion-alumno">
+        <h3>Horario de Taller</h3>
+        <p>
+          ${
+            grupoTaller
+              ? `Taller correspondiente a tu grupo asignado: ${grupoTaller}.`
+              : "Tu cuenta todavía no tiene grupo de taller asignado."
+          }
+        </p>
+      </div>
+
+      ${
+        grupoTaller
+          ? bloquesTaller.length
+            ? `<div class="grilla-horario-aula-alumno">${htmlTaller}</div>`
+            : `<p class="mensaje-formulario">Todavía no hay horarios de taller cargados para tu grupo.</p>`
+          : `<p class="mensaje-formulario error">
+              Consultá con Preceptoría o Soporte para que asignen tu grupo de taller.
+            </p>`
+      }
+    </section>
   `;
 }
 
@@ -167,7 +268,12 @@ async function cargarHorarioAulaAlumno(usuario) {
 
     const resultado = await getDocs(consultaHorarios);
 
-    const bloques = [];
+    const grupoTallerAlumno = String(perfilAlumno.grupoTaller || "")
+      .trim()
+      .toUpperCase();
+
+    const bloquesAula = [];
+    const bloquesTaller = [];
 
     resultado.forEach((documento) => {
       const datos = documento.data();
@@ -176,15 +282,31 @@ async function cargarHorarioAulaAlumno(usuario) {
         .trim()
         .toUpperCase();
 
-      if (tipoHorario !== "AULA") return;
+      if (tipoHorario === "AULA") {
+        bloquesAula.push({
+          id: documento.id,
+          ...datos,
+        });
 
-      bloques.push({
-        id: documento.id,
-        ...datos,
-      });
+        return;
+      }
+
+      if (tipoHorario === "TALLER") {
+        const grupoTallerBloque = String(datos.grupoTaller || "")
+          .trim()
+          .toUpperCase();
+
+        if (!grupoTallerAlumno) return;
+        if (grupoTallerBloque !== grupoTallerAlumno) return;
+
+        bloquesTaller.push({
+          id: documento.id,
+          ...datos,
+        });
+      }
     });
 
-    bloques.sort((a, b) => {
+    bloquesAula.sort((a, b) => {
       const diaA = DIAS_HORARIO_AULA_ALUMNO.findIndex(
         (dia) => dia.valor === a.dia,
       );
@@ -197,7 +319,22 @@ async function cargarHorarioAulaAlumno(usuario) {
       return Number(a.bloqueNumero || 0) - Number(b.bloqueNumero || 0);
     });
 
-    renderizarHorarioAulaAlumno(bloques, perfilAlumno);
+    bloquesTaller.sort((a, b) => {
+      const diaA = DIAS_HORARIO_TALLER_ALUMNO.findIndex(
+        (dia) => dia.valor === a.dia,
+      );
+      const diaB = DIAS_HORARIO_TALLER_ALUMNO.findIndex(
+        (dia) => dia.valor === b.dia,
+      );
+
+      if (diaA !== diaB) return diaA - diaB;
+
+      return String(a.horaInicio || "").localeCompare(
+        String(b.horaInicio || ""),
+      );
+    });
+
+    renderizarHorarioCompletoAlumno(bloquesAula, bloquesTaller, perfilAlumno);
   } catch (error) {
     console.error("Error al cargar horario de aula del alumno:", error);
 
