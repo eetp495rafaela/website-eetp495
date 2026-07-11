@@ -114,3 +114,253 @@
     border-radius: 14px;
   }
 }
+/* =========================
+   MIS DOCENTES - AGENDA
+========================= */
+
+.vista-docentes-alumno {
+  margin-top: 18px;
+}
+
+.encabezado-agenda-docentes-alumno {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+
+  margin-bottom: 18px;
+  padding: 10px 14px;
+
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.08);
+
+  color: #ffffff;
+  font-weight: 800;
+}
+
+.tabla-docentes-alumno {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+.tabla-docentes-alumno thead th {
+  padding: 14px 18px;
+  text-align: left;
+
+  color: #ffd54a;
+  font-size: 0.95rem;
+  font-weight: 900;
+
+  border-bottom: 2px solid rgba(255, 255, 255, 0.16);
+}
+
+.tabla-docentes-alumno tbody td {
+  padding: 14px 18px;
+  vertical-align: middle;
+
+  color: #ffffff;
+  font-size: 0.95rem;
+  line-height: 1.45;
+
+  border-bottom: 1px solid rgba(255, 255, 255, 0.09);
+}
+
+.tabla-docentes-alumno tbody tr {
+  transition:
+    background 0.2s ease,
+    transform 0.2s ease;
+}
+
+.tabla-docentes-alumno tbody tr:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.tabla-docentes-alumno thead th:nth-child(1),
+.tabla-docentes-alumno tbody td:nth-child(1) {
+  width: 34%;
+}
+
+.tabla-docentes-alumno thead th:nth-child(2),
+.tabla-docentes-alumno tbody td:nth-child(2) {
+  width: 26%;
+}
+
+.tabla-docentes-alumno thead th:nth-child(3),
+.tabla-docentes-alumno tbody td:nth-child(3) {
+  width: 40%;
+}
+
+.enlace-correo-docente-alumno {
+  display: inline-flex;
+  align-items: center;
+
+  color: #8fc8ff;
+  font-weight: 800;
+  text-decoration: none;
+  word-break: break-word;
+
+  transition:
+    color 0.2s ease,
+    opacity 0.2s ease;
+}
+
+.enlace-correo-docente-alumno:hover {
+  color: #ffd54a;
+  text-decoration: underline;
+}
+
+@media (max-width: 900px) {
+  .tabla-docentes-alumno thead th,
+  .tabla-docentes-alumno tbody td {
+    padding: 12px;
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 650px) {
+  .encabezado-agenda-docentes-alumno {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .tabla-docentes-alumno thead {
+    display: none;
+  }
+
+  .tabla-docentes-alumno,
+  .tabla-docentes-alumno tbody,
+  .tabla-docentes-alumno tr,
+  .tabla-docentes-alumno td {
+    display: block;
+    width: 100%;
+  }
+
+  .tabla-docentes-alumno tbody tr {
+    margin-bottom: 14px;
+    padding: 14px;
+
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.07);
+  }
+
+  .tabla-docentes-alumno tbody td {
+    padding: 7px 0;
+    border-bottom: none;
+  }
+
+  .tabla-docentes-alumno tbody td::before {
+    display: block;
+    margin-bottom: 3px;
+
+    color: #ffd54a;
+    font-size: 0.78rem;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  .tabla-docentes-alumno tbody td:nth-child(1)::before {
+    content: "Espacio Curricular";
+  }
+
+  .tabla-docentes-alumno tbody td:nth-child(2)::before {
+    content: "Docente";
+  }
+
+  .tabla-docentes-alumno tbody td:nth-child(3)::before {
+    content: "Correo electrónico";
+  }
+}
+/* =========================
+   MIS DOCENTES - AJUSTE FINO
+========================= */
+
+.tabla-docentes-alumno thead th:nth-child(1),
+.tabla-docentes-alumno tbody td:nth-child(1) {
+  width: 32%;
+  text-align: right;
+  padding-right: 28px;
+}
+
+.tabla-docentes-alumno thead th:nth-child(2),
+.tabla-docentes-alumno tbody td:nth-child(2) {
+  width: 25%;
+  text-align: left;
+  padding-left: 8px;
+}
+
+.tabla-docentes-alumno thead th:nth-child(3),
+.tabla-docentes-alumno tbody td:nth-child(3) {
+  width: 43%;
+  text-align: left;
+  padding-left: 24px;
+}
+
+.tabla-docentes-alumno tbody td:first-child {
+  color: rgba(255, 255, 255, 0.96);
+  font-weight: 850;
+}
+
+.tabla-docentes-alumno tbody td:nth-child(2) {
+  color: #ffffff;
+  font-weight: 850;
+}
+
+.enlace-correo-docente-alumno {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+
+  width: auto;
+  max-width: 100%;
+  padding: 0;
+
+  border: none;
+  border-radius: 0;
+
+  background: transparent;
+  color: #9ed0ff;
+
+  font-size: 0.94rem;
+  font-weight: 850;
+  text-decoration: none;
+
+  word-break: break-word;
+}
+
+.enlace-correo-docente-alumno::before {
+  content: "\f0e0";
+
+  font-family: "Font Awesome 6 Free";
+  font-weight: 900;
+
+  color: #ffd54a;
+  font-size: 0.82rem;
+}
+
+.enlace-correo-docente-alumno:hover {
+  background: transparent;
+  border-color: transparent;
+  color: #ffd54a;
+  text-decoration: underline;
+  transform: none;
+}
+
+@media (max-width: 650px) {
+  .tabla-docentes-alumno thead th:nth-child(1),
+  .tabla-docentes-alumno tbody td:nth-child(1),
+  .tabla-docentes-alumno thead th:nth-child(2),
+  .tabla-docentes-alumno tbody td:nth-child(2),
+  .tabla-docentes-alumno thead th:nth-child(3),
+  .tabla-docentes-alumno tbody td:nth-child(3) {
+    width: 100%;
+    text-align: left;
+    padding-left: 0;
+    padding-right: 0;
+  }
+
+  .enlace-correo-docente-alumno {
+    width: auto;
+    justify-content: flex-start;
+  }
+}

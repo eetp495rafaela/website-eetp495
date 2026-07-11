@@ -95,7 +95,7 @@
 
           <a
             class="tarjeta tarjeta-enlace"
-            href="#"
+            href="https://drive.google.com/drive/folders/12uzImxU1baMY8YFNFPLPRPbyljqSlJtI?usp=sharing"
             target="_blank"
             rel="noopener noreferrer"
           >
@@ -109,7 +109,7 @@
 
           <a
             class="tarjeta tarjeta-enlace"
-            href="#"
+            href="https://drive.google.com/drive/folders/1NoVpghNJCUUHBSTrvQVYmSbqrCXgT4Dy"
             target="_blank"
             rel="noopener noreferrer"
           >
@@ -151,7 +151,7 @@
 
           <a
             class="tarjeta tarjeta-enlace"
-            href="#"
+            href="https://docs.google.com/spreadsheets/d/1DOCCY-1cXT2BWGwQdeYaRG3r4FasH5ICI-MXOsqyGuQ/edit?gid=1149931630#gid=1149931630"
             target="_blank"
             rel="noopener noreferrer"
           >
@@ -171,7 +171,7 @@
         <div class="grid">
           <a
             class="tarjeta tarjeta-enlace"
-            href="#"
+            href="https://drive.google.com/drive/folders/15JEGf-_w10akOoMmmdtlFycUd-t0Akqe"
             target="_blank"
             rel="noopener noreferrer"
           >
@@ -183,15 +183,13 @@
             </p>
           </a>
 
-          <a
-            class="tarjeta tarjeta-enlace"
-            href="#"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
+          <a class="tarjeta tarjeta-enlace" href="#listas-estudiantes-docente">
             <i class="fa-solid fa-users"></i>
             <h3>Listas de Estudiantes</h3>
-            <p>Nómina de estudiantes organizada por curso, división y grupo.</p>
+            <p>
+              Consultá los estudiantes cursando en los cursos que tenés
+              asignados.
+            </p>
           </a>
         </div>
       </section>
@@ -268,7 +266,47 @@
           Volver al inicio
         </a>
       </section>
+      <section class="grupo seccion-destino" id="listas-estudiantes-docente">
+        <h2>Listas de Estudiantes</h2>
 
+        <div class="panel-info">
+          <div class="encabezado-listado">
+            <div>
+              <h3>Estudiantes por curso asignado</h3>
+              <p>
+                Consultá los estudiantes con situación de revista Cursando en
+                los cursos que tenés asignados como docente.
+              </p>
+            </div>
+          </div>
+
+          <div class="acciones">
+            <button
+              class="btn-accion"
+              id="btnVerListasEstudiantesDocente"
+              type="button"
+            >
+              <i class="fa-solid fa-users"></i>
+              Ver listas de estudiantes
+            </button>
+          </div>
+
+          <div
+            id="vistaListasEstudiantesDocente"
+            class="vista-listas-estudiantes-docente"
+          >
+            <p class="mensaje-formulario">
+              Todavía no se consultaron las listas de estudiantes. Presioná “Ver
+              listas de estudiantes” para cargarlas.
+            </p>
+          </div>
+        </div>
+
+        <a class="btn-volver" href="#inicio">
+          <i class="fa-solid fa-arrow-up"></i>
+          Volver al inicio
+        </a>
+      </section>
       <section
         class="grupo seccion-destino"
         id="panelDocumentacionAcademica"
@@ -426,5 +464,9 @@
     <script type="module" src="../assets/js/material-estudio.js"></script>
     <script src="../assets/js/volver-arriba.js"></script>
     <script type="module" src="../assets/js/horarios-docente.js"></script>
+    <script
+      type="module"
+      src="../assets/js/listas-estudiantes-docente.js"
+    ></script>
   </body>
 </html>

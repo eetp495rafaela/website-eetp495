@@ -252,6 +252,20 @@
             <p>Consulta los horarios de Aula, Taller y Educación Física.</p>
           </a>
 
+          <a
+            class="tarjeta tarjeta-enlace"
+            href="#mis-docentes-alumno"
+            id="tarjetaMisDocentesAlumno"
+          >
+            <i class="fa-solid fa-address-book"></i>
+            <h3>Mis docentes</h3>
+            <p>
+              Hacé clic aquí para ver el listado de tus docentes y sus
+              direcciones de correo para contactarlos en caso de que lo
+              necesites.
+            </p>
+          </a>
+
           <a class="tarjeta tarjeta-enlace" href="#examenes">
             <i class="fa-solid fa-file-signature"></i>
             <h3>Inscripción a Exámenes</h3>
@@ -313,7 +327,34 @@
           Volver al inicio
         </a>
       </section>
+      <section class="grupo seccion-destino" id="mis-docentes-alumno">
+        <h2>Mis docentes</h2>
 
+        <div class="panel-info">
+          <div class="encabezado-listado">
+            <div>
+              <h3>Agenda de contactos docentes</h3>
+              <p>
+                Consultá los docentes asignados a tu curso y sus correos
+                electrónicos institucionales para contactarlos cuando sea
+                necesario.
+              </p>
+            </div>
+          </div>
+
+          <div id="vistaDocentesAlumno" class="vista-docentes-alumno">
+            <p class="mensaje-formulario">
+              Seleccioná la tarjeta “Mis docentes” para consultar la agenda de
+              contactos docentes.
+            </p>
+          </div>
+        </div>
+
+        <a class="btn-volver" href="#inicio">
+          <i class="fa-solid fa-arrow-up"></i>
+          Volver al inicio
+        </a>
+      </section>
       <section class="grupo seccion-destino" id="examenes">
         <h2>Inscripción a Exámenes</h2>
 
@@ -518,5 +559,6 @@
     <script type="module" src="../assets/js/sime-alumno.js"></script>
     <script src="../assets/js/volver-arriba.js"></script>
     <script type="module" src="../assets/js/horarios-alumno.js"></script>
+    <script type="module" src="../assets/js/docentes-alumno.js"></script>
   </body>
 </html>

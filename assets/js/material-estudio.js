@@ -66,6 +66,10 @@ const cuerpoTablaDocumentosDocente = document.getElementById(
   "cuerpoTablaDocumentosDocente",
 );
 
+const btnVerDocumentosDocente = document.getElementById(
+  "btnVerDocumentosDocente",
+);
+
 let opcionesDocumentacion = [];
 
 function mostrarMensajeDocumentacion(texto, tipo = "") {
@@ -343,10 +347,19 @@ if (btnAbrirDocumentacionAcademica) {
     try {
       const resultado = await cargarOpcionesDocumentacion();
 
-      await cargarDocumentosDisponibles();
+      if (cuerpoTablaDocumentosDocente) {
+        cuerpoTablaDocumentosDocente.innerHTML = `
+          <tr>
+            <td colspan="5" class="tabla-documentos-vacia">
+              Todavía no se consultó la documentación cargada. Presioná
+              “Ver documentación cargada” para mostrarla.
+            </td>
+          </tr>
+        `;
+      }
 
       mostrarMensajeDocumentacion(
-        `Asignaciones y documentos cargados correctamente para ${resultado.docente.nombreCompleto}.`,
+        `Asignaciones cargadas correctamente para ${resultado.docente.nombreCompleto}.`,
         "ok",
       );
     } catch (error) {
@@ -356,6 +369,45 @@ if (btnAbrirDocumentacionAcademica) {
         error.message || "No se pudieron cargar tus asignaciones.",
         "error",
       );
+    }
+  });
+}
+
+if (btnVerDocumentosDocente) {
+  btnVerDocumentosDocente.addEventListener("click", async () => {
+    btnVerDocumentosDocente.disabled = true;
+
+    const textoOriginal = btnVerDocumentosDocente.innerHTML;
+
+    btnVerDocumentosDocente.innerHTML = `
+      <i class="fa-solid fa-spinner fa-spin"></i>
+      Cargando...
+    `;
+
+    try {
+      await cargarDocumentosDisponibles();
+
+      mostrarMensajeDocumentacion("Documentación cargada correctamente.", "ok");
+    } catch (error) {
+      console.error("Error al cargar documentación docente:", error);
+
+      if (cuerpoTablaDocumentosDocente) {
+        cuerpoTablaDocumentosDocente.innerHTML = `
+          <tr>
+            <td colspan="5" class="tabla-documentos-vacia">
+              No se pudo cargar la documentación disponible.
+            </td>
+          </tr>
+        `;
+      }
+
+      mostrarMensajeDocumentacion(
+        error.message || "No se pudo cargar la documentación disponible.",
+        "error",
+      );
+    } finally {
+      btnVerDocumentosDocente.disabled = false;
+      btnVerDocumentosDocente.innerHTML = textoOriginal;
     }
   });
 }
