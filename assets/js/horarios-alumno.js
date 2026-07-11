@@ -34,6 +34,10 @@ const vistaHorarioAulaAlumno = document.getElementById(
   "vistaHorarioAulaAlumno",
 );
 
+const btnVerMiHorario = document.getElementById("btnVerMiHorario");
+
+let usuarioHorarioAlumnoActual = null;
+
 const DIAS_HORARIO_AULA_ALUMNO = [
   { valor: "LUNES", etiqueta: "Lunes" },
   { valor: "MARTES", etiqueta: "Martes" },
@@ -204,8 +208,40 @@ async function cargarHorarioAulaAlumno(usuario) {
   }
 }
 
-onAuthStateChanged(auth, async (usuario) => {
+if (btnVerMiHorario) {
+  btnVerMiHorario.addEventListener("click", async () => {
+    if (!usuarioHorarioAlumnoActual) {
+      mostrarMensajeHorarioAlumno(
+        "No se detectó una sesión activa. Volvé a iniciar sesión.",
+        "error",
+      );
+      return;
+    }
+
+    btnVerMiHorario.disabled = true;
+
+    const textoOriginal = btnVerMiHorario.innerHTML;
+
+    btnVerMiHorario.innerHTML = `
+      <i class="fa-solid fa-spinner fa-spin"></i>
+      Cargando...
+    `;
+
+    try {
+      await cargarHorarioAulaAlumno(usuarioHorarioAlumnoActual);
+    } finally {
+      btnVerMiHorario.disabled = false;
+      btnVerMiHorario.innerHTML = textoOriginal;
+    }
+  });
+}
+
+onAuthStateChanged(auth, (usuario) => {
   if (!usuario) return;
 
-  await cargarHorarioAulaAlumno(usuario);
+  usuarioHorarioAlumnoActual = usuario;
+
+  mostrarMensajeHorarioAlumno(
+    "Todavía no se consultó tu horario. Presioná “Ver mi horario” para cargarlo.",
+  );
 });
