@@ -84,6 +84,8 @@ let idHorarioAulaEditando = null;
 let horariosAulaCargados = [];
 let materiasHorarioTaller = [];
 let docenteAsignadoHorarioTaller = null;
+let idHorarioTallerEditando = null;
+let horariosTallerCargados = [];
 
 function mostrarMensajeHorarioAula(texto, tipo = "") {
   if (!mensajeHorarioAula) return;
@@ -819,12 +821,16 @@ async function existeBloqueHorarioAula(datosBloque, idIgnorar = "") {
   return existe;
 }
 
-async function existeBloqueHorarioTaller(datosBloque) {
+async function existeBloqueHorarioTaller(datosBloque, idIgnorar = "") {
   const consulta = await getDocs(collection(db, "horarios"));
   let existe = false;
 
   consulta.forEach((documento) => {
     if (existe) return;
+
+    if (idIgnorar && documento.id === idIgnorar) {
+      return;
+    }
 
     const datos = documento.data();
 
@@ -1203,6 +1209,7 @@ async function cargarHorarioTallerRegistrado() {
       );
     });
 
+    horariosTallerCargados = bloques;
     renderizarHorarioTallerCargado(bloques);
   } catch (error) {
     console.error("Error al cargar horario de taller registrado:", error);
@@ -1338,6 +1345,28 @@ function limpiarModoEdicionHorarioAula() {
   }
 }
 
+function activarModoEdicionHorarioTaller(idHorario) {
+  idHorarioTallerEditando = idHorario;
+
+  if (btnRegistrarHorarioTaller) {
+    btnRegistrarHorarioTaller.innerHTML = `
+      <i class="fa-solid fa-floppy-disk"></i>
+      Guardar cambios
+    `;
+  }
+}
+
+function limpiarModoEdicionHorarioTaller() {
+  idHorarioTallerEditando = null;
+
+  if (btnRegistrarHorarioTaller) {
+    btnRegistrarHorarioTaller.innerHTML = `
+      <i class="fa-solid fa-plus"></i>
+      Registrar bloque de taller
+    `;
+  }
+}
+
 async function iniciarEdicionHorarioAula(idHorario) {
   const bloque = horariosAulaCargados.find((item) => item.id === idHorario);
 
@@ -1393,6 +1422,59 @@ async function iniciarEdicionHorarioAula(idHorario) {
   );
 
   formHorarioAula.scrollIntoView({
+    behavior: "smooth",
+    block: "start",
+  });
+}
+
+async function iniciarEdicionHorarioTaller(idHorario) {
+  const bloque = horariosTallerCargados.find((item) => item.id === idHorario);
+
+  if (!bloque) {
+    Swal.fire({
+      title: "No se pudo editar",
+      text: "No se encontró el bloque de taller seleccionado.",
+      icon: "error",
+      confirmButtonText: "Aceptar",
+    });
+    return;
+  }
+
+  horarioTallerCicloLectivo.value = bloque.cicloLectivo || "";
+  horarioTallerTurno.value = bloque.turno || "";
+  horarioTallerCurso.value = bloque.cursoId || "";
+  horarioTallerGrupo.value = bloque.grupoTaller || "";
+  horarioTallerDia.value = bloque.dia || "";
+  horarioTallerUbicacion.value = bloque.ubicacion || "";
+
+  actualizarHorarioFijoTaller();
+
+  await cargarMateriasHorarioTaller();
+
+  horarioTallerEspacio.value = bloque.espacioId || "";
+
+  await cargarDocenteAsignadoHorarioTaller();
+
+  if (!docenteAsignadoHorarioTaller) {
+    docenteAsignadoHorarioTaller = {
+      docenteNombre: bloque.docenteNombre || "",
+      docenteCorreo: bloque.docenteCorreo || "",
+    };
+
+    horarioTallerDocente.value =
+      docenteAsignadoHorarioTaller.docenteNombre ||
+      docenteAsignadoHorarioTaller.docenteCorreo ||
+      "Docente asignado";
+  }
+
+  activarModoEdicionHorarioTaller(idHorario);
+
+  mostrarMensajeHorarioTaller(
+    "Editando bloque de taller. Modificá los datos y guardá los cambios.",
+    "ok",
+  );
+
+  formHorarioTaller.scrollIntoView({
     behavior: "smooth",
     block: "start",
   });
@@ -1735,15 +1817,49 @@ async function registrarHorarioTaller(event) {
   };
 
   btnRegistrarHorarioTaller.disabled = true;
-  mostrarMensajeHorarioTaller("Registrando horario de taller...");
+
+  mostrarMensajeHorarioTaller(
+    idHorarioTallerEditando
+      ? "Guardando cambios del horario de taller..."
+      : "Registrando horario de taller...",
+  );
 
   try {
-    const yaExiste = await existeBloqueHorarioTaller(datosHorarioTaller);
+    const yaExiste = await existeBloqueHorarioTaller(
+      datosHorarioTaller,
+      idHorarioTallerEditando,
+    );
 
     if (yaExiste) {
       throw new Error(
         `Ya existe un horario de taller cargado para ${cursoNombre}, ${grupoTaller}, ${dia}.`,
       );
+    }
+
+    if (idHorarioTallerEditando) {
+      await updateDoc(doc(db, "horarios", idHorarioTallerEditando), {
+        ...datosHorarioTaller,
+        actualizadoEn: serverTimestamp(),
+        actualizadoPor: usuario.email || "",
+      });
+
+      await Swal.fire({
+        title: "Horario de taller actualizado",
+        text: "El bloque de taller fue actualizado correctamente.",
+        icon: "success",
+        confirmButtonText: "Aceptar",
+      });
+
+      limpiarModoEdicionHorarioTaller();
+
+      mostrarMensajeHorarioTaller(
+        "Bloque de taller actualizado correctamente.",
+        "ok",
+      );
+
+      await cargarHorarioTallerRegistrado();
+
+      return;
     }
 
     await addDoc(collection(db, "horarios"), {
@@ -1767,6 +1883,8 @@ async function registrarHorarioTaller(event) {
       "Horario de taller registrado correctamente.",
       "ok",
     );
+
+    await cargarHorarioTallerRegistrado();
   } catch (error) {
     console.error("Error al registrar horario de taller:", error);
 
@@ -1865,13 +1983,7 @@ if (vistaHorarioTaller) {
     );
 
     if (botonEditar) {
-      console.log("Editar bloque de taller:", botonEditar.dataset.idHorario);
-
-      mostrarMensajeHorarioTaller(
-        "Edición de taller detectada correctamente. Falta conectar el modo edición.",
-        "ok",
-      );
-
+      await iniciarEdicionHorarioTaller(botonEditar.dataset.idHorario);
       return;
     }
 
