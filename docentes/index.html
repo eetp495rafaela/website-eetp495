@@ -66,24 +66,136 @@
       </div>
     </header>
 
-    <main class="contenedor">
+    <main class="contenedor" id="inicio">
       <section class="grupo">
-        <h2>Organización</h2>
+        <h2>Accesos principales</h2>
 
         <div class="grid">
           <a class="tarjeta tarjeta-enlace" href="#mis-horarios-docente">
             <i class="fa-solid fa-calendar-days"></i>
             <h3>Mis Horarios</h3>
-            <p>Consultá tus horarios de aula, taller y educación física.</p>
+            <p>
+              Consultá tus horarios asignados de aula, taller y Educación
+              Física.
+            </p>
           </a>
 
-          <div class="tarjeta">
-            <i class="fa-solid fa-users"></i>
-            <h3>Listas de Estudiantes</h3>
-            <p>Nómina de estudiantes organizada por curso y división.</p>
-          </div>
+          <button
+            class="tarjeta tarjeta-documentacion"
+            id="btnAbrirDocumentacionAcademica"
+            type="button"
+          >
+            <i class="fa-solid fa-file-arrow-up"></i>
+            <h3>Documentación Académica</h3>
+            <p>
+              Cargá programas de examen, material de estudio y planes anuales
+              para tus cursos asignados.
+            </p>
+          </button>
+
+          <a
+            class="tarjeta tarjeta-enlace"
+            href="#"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <i class="fa-solid fa-scale-balanced"></i>
+            <h3>Normativa Vigente</h3>
+            <p>
+              Consultá resoluciones, reglamentos, acuerdos institucionales y
+              documentación oficial.
+            </p>
+          </a>
+
+          <a
+            class="tarjeta tarjeta-enlace"
+            href="#"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <i class="fa-solid fa-folder-open"></i>
+            <h3>Gestiones Docentes</h3>
+            <p>
+              Accedé a formularios y documentos frecuentes para licencias,
+              certificados y otros trámites.
+            </p>
+          </a>
         </div>
       </section>
+
+      <section class="grupo">
+        <h2>Sistemas institucionales</h2>
+
+        <div class="grid">
+          <a
+            class="tarjeta tarjeta-enlace"
+            href="#"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <i class="fa-solid fa-user-check"></i>
+            <h3>Si.R.A. Taller</h3>
+            <p>Sistema de Registro de Asistencia para espacios de Taller.</p>
+          </a>
+
+          <a
+            class="tarjeta tarjeta-enlace"
+            href="#"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <i class="fa-solid fa-person-running"></i>
+            <h3>Si.R.A. Educación Física</h3>
+            <p>Sistema de Registro de Asistencia para Educación Física.</p>
+          </a>
+
+          <a
+            class="tarjeta tarjeta-enlace"
+            href="#"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <i class="fa-solid fa-boxes-stacked"></i>
+            <h3>Inventario Escolar</h3>
+            <p>
+              Acceso al inventario institucional de recursos, herramientas y
+              equipamiento.
+            </p>
+          </a>
+        </div>
+      </section>
+
+      <section class="grupo">
+        <h2>Acompañamiento pedagógico</h2>
+
+        <div class="grid">
+          <a
+            class="tarjeta tarjeta-enlace"
+            href="#"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <i class="fa-solid fa-clipboard-list"></i>
+            <h3>Informes Pedagógicos</h3>
+            <p>
+              Consultá información pedagógica relevante para el acompañamiento
+              de estudiantes.
+            </p>
+          </a>
+
+          <a
+            class="tarjeta tarjeta-enlace"
+            href="#"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <i class="fa-solid fa-users"></i>
+            <h3>Listas de Estudiantes</h3>
+            <p>Nómina de estudiantes organizada por curso, división y grupo.</p>
+          </a>
+        </div>
+      </section>
+
       <section class="grupo seccion-destino" id="mis-horarios-docente">
         <h2>Mis Horarios</h2>
 
@@ -92,10 +204,20 @@
             <div>
               <h3>Horarios asignados</h3>
               <p>
-                Estos horarios se muestran automáticamente según los bloques que
-                tenés asignados como docente.
+                Consultá los bloques horarios que tenés asignados como docente.
               </p>
             </div>
+          </div>
+
+          <div class="acciones">
+            <button
+              class="btn-accion"
+              id="btnVerMisHorariosDocente"
+              type="button"
+            >
+              <i class="fa-solid fa-calendar-days"></i>
+              Ver mis horarios
+            </button>
           </div>
 
           <div class="bloque-horario-docente">
@@ -105,101 +227,66 @@
               id="vistaHorarioAulaDocente"
               class="vista-horario-aula-docente"
             >
-              <p class="mensaje-formulario">Cargando horario de aula...</p>
+              <p class="mensaje-formulario">
+                Todavía no se consultó tu horario de aula. Presioná “Ver mis
+                horarios” para cargarlo.
+              </p>
             </div>
           </div>
 
-          <div class="bloque-horario-docente bloque-horario-pendiente">
+          <div class="bloque-horario-docente">
             <h3>Horario de Taller</h3>
 
-            <p class="mensaje-formulario">
-              Próximamente se mostrarán acá los horarios de taller asignados.
-            </p>
+            <div
+              id="vistaHorarioTallerDocente"
+              class="vista-horario-aula-docente"
+            >
+              <p class="mensaje-formulario">
+                Todavía no se consultó tu horario de taller. Presioná “Ver mis
+                horarios” para cargarlo.
+              </p>
+            </div>
           </div>
 
-          <div class="bloque-horario-docente bloque-horario-pendiente">
+          <div class="bloque-horario-docente">
             <h3>Educación Física</h3>
 
-            <p class="mensaje-formulario">
-              Próximamente se mostrarán acá los horarios de Educación Física
-              asignados.
-            </p>
+            <div
+              id="vistaHorarioEducacionFisicaDocente"
+              class="vista-horario-aula-docente"
+            >
+              <p class="mensaje-formulario">
+                Todavía no se consultó tu horario de Educación Física. Presioná
+                “Ver mis horarios” para cargarlo.
+              </p>
+            </div>
           </div>
         </div>
-      </section>
-      <section class="grupo">
-        <h2>Gestión Docente</h2>
 
-        <div class="grid">
-          <div class="tarjeta">
-            <i class="fa-solid fa-user-check"></i>
-            <h3>Si.R.A. Taller</h3>
-            <p>Registro de asistencia de Taller.</p>
-          </div>
-
-          <div class="tarjeta">
-            <i class="fa-solid fa-person-running"></i>
-            <h3>Si.R.A. Educación Física</h3>
-            <p>Registro de asistencia de Educación Física.</p>
-          </div>
-
-          <div class="tarjeta">
-            <i class="fa-solid fa-chart-column"></i>
-            <h3>Calificaciones</h3>
-            <p>Calificaciones de Taller del Ciclo Básico.</p>
-          </div>
-
-          <div class="tarjeta">
-            <i class="fa-solid fa-file-signature"></i>
-            <h3>Exámenes</h3>
-            <p>Consulta de mesas de examen y estudiantes inscriptos.</p>
-          </div>
-        </div>
+        <a class="btn-volver" href="#inicio">
+          <i class="fa-solid fa-arrow-up"></i>
+          Volver al inicio
+        </a>
       </section>
 
-      <section class="grupo" id="documentacion-academica">
-        <h2>Documentación Académica</h2>
-
-        <div class="grid">
-          <button
-            class="tarjeta tarjeta-documentacion"
-            id="btnAbrirDocumentacionAcademica"
-            type="button"
-          >
-            <i class="fa-solid fa-file-arrow-up"></i>
-            <h3>Documentación Académica</h3>
-            <p>
-              Cargá Planes Anuales, Programas de Examen y Material de Estudio en
-              formato PDF.
-            </p>
-          </button>
-
-          <div class="tarjeta">
-            <i class="fa-solid fa-scale-balanced"></i>
-            <h3>Normativa Vigente</h3>
-            <p>
-              Leyes, resoluciones, reglamentos y documentación institucional.
-            </p>
-          </div>
-
-          <div class="tarjeta">
-            <i class="fa-solid fa-boxes-stacked"></i>
-            <h3>Inventario Escolar</h3>
-            <p>
-              Consulta del inventario institucional de recursos y equipamiento.
-            </p>
-          </div>
-        </div>
-      </section>
-
-      <section class="grupo" id="panelDocumentacionAcademica" hidden>
+      <section
+        class="grupo seccion-destino"
+        id="panelDocumentacionAcademica"
+        hidden
+      >
         <h2>Cargar Documentación Académica</h2>
 
         <div class="panel-info">
-          <p>
-            Seleccioná el tipo de documento, el curso, el espacio curricular y
-            el archivo PDF. Solo se mostrarán los espacios que tengas asignados.
-          </p>
+          <div class="encabezado-listado">
+            <div>
+              <h3>Subir documentación</h3>
+              <p>
+                Seleccioná el tipo de documento, el curso, el espacio curricular
+                y el archivo PDF. Solo se mostrarán los espacios que tengas
+                asignados.
+              </p>
+            </div>
+          </div>
 
           <form id="formDocumentacionAcademica">
             <div class="form-grid-documentacion">
@@ -217,7 +304,7 @@
               </div>
 
               <div class="campo-documentacion">
-                <label for="cicloLectivoDocumento"> Ciclo lectivo </label>
+                <label for="cicloLectivoDocumento">Ciclo lectivo</label>
 
                 <input
                   id="cicloLectivoDocumento"
@@ -228,7 +315,7 @@
               </div>
 
               <div class="campo-documentacion">
-                <label for="cursoDocumentoAcademico"> Curso * </label>
+                <label for="cursoDocumentoAcademico">Curso *</label>
 
                 <select id="cursoDocumentoAcademico" required disabled>
                   <option value="">Primero seleccioná un tipo</option>
@@ -246,7 +333,7 @@
               </div>
 
               <div class="campo-documentacion campo-archivo-documentacion">
-                <label for="archivoDocumentoAcademico"> Archivo PDF * </label>
+                <label for="archivoDocumentoAcademico">Archivo PDF *</label>
 
                 <input
                   id="archivoDocumentoAcademico"
@@ -255,7 +342,7 @@
                   required
                 />
 
-                <small> Solo se permiten archivos PDF. </small>
+                <small>Solo se permiten archivos PDF.</small>
               </div>
             </div>
 
@@ -275,6 +362,7 @@
               class="mensaje-formulario"
             ></p>
           </form>
+
           <div class="documentos-cargados-docente">
             <div class="encabezado-documentos-cargados">
               <div>
@@ -284,6 +372,17 @@
                   curriculares asignados.
                 </p>
               </div>
+            </div>
+
+            <div class="acciones">
+              <button
+                class="btn-accion"
+                id="btnVerDocumentosDocente"
+                type="button"
+              >
+                <i class="fa-solid fa-folder-open"></i>
+                Ver documentación cargada
+              </button>
             </div>
 
             <div class="tabla-documentos-contenedor">
@@ -301,7 +400,8 @@
                 <tbody id="cuerpoTablaDocumentosDocente">
                   <tr>
                     <td colspan="5" class="tabla-documentos-vacia">
-                      Cargando documentación disponible...
+                      Todavía no se consultó la documentación cargada. Presioná
+                      “Ver documentación cargada” para mostrarla.
                     </td>
                   </tr>
                 </tbody>
@@ -309,24 +409,11 @@
             </div>
           </div>
         </div>
-      </section>
 
-      <section class="grupo">
-        <h2>Recursos</h2>
-
-        <div class="grid">
-          <div class="tarjeta">
-            <i class="fa-solid fa-clipboard-list"></i>
-            <h3>Informes Pedagógicos</h3>
-            <p>Seguimiento, observaciones e informes de estudiantes.</p>
-          </div>
-
-          <div class="tarjeta">
-            <i class="fa-solid fa-folder-open"></i>
-            <h3>Gestiones Docentes</h3>
-            <p>Licencias, certificados, formularios y otras gestiones.</p>
-          </div>
-        </div>
+        <a class="btn-volver" href="#inicio">
+          <i class="fa-solid fa-arrow-up"></i>
+          Volver al inicio
+        </a>
       </section>
     </main>
 
