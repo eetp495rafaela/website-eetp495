@@ -48,6 +48,10 @@ const cuerpoTablaInscripcionesSime = document.getElementById(
 
 const mensajeListadoSime = document.getElementById("mensajeListadoSime");
 
+const btnVerMisInscripcionesSime = document.getElementById(
+  "btnVerMisInscripcionesSime",
+);
+
 let configuracionSimeAlumno = null;
 let alumnoSime = null;
 const rolUsuarioEncabezado = document.querySelector("[data-rol-usuario]");
@@ -685,6 +689,26 @@ if (formInscripcionSime) {
   });
 }
 
+if (btnVerMisInscripcionesSime) {
+  btnVerMisInscripcionesSime.addEventListener("click", async () => {
+    btnVerMisInscripcionesSime.disabled = true;
+
+    const textoOriginal = btnVerMisInscripcionesSime.innerHTML;
+
+    btnVerMisInscripcionesSime.innerHTML = `
+      <i class="fa-solid fa-spinner fa-spin"></i>
+      Cargando...
+    `;
+
+    try {
+      await cargarMisInscripcionesSime();
+    } finally {
+      btnVerMisInscripcionesSime.disabled = false;
+      btnVerMisInscripcionesSime.innerHTML = textoOriginal;
+    }
+  });
+}
+
 onAuthStateChanged(auth, async (usuario) => {
   if (!usuario) return;
 
@@ -697,8 +721,6 @@ onAuthStateChanged(auth, async (usuario) => {
     actualizarEncabezadoAlumnoSime(alumnoSime);
 
     cargarAniosCursadoSime(configuracionSimeAlumno.aniosCursado || []);
-
-    await cargarMisInscripcionesSime();
   } catch (error) {
     console.error("Error al cargar S.I.M.E.:", error);
   }
