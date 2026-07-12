@@ -587,6 +587,30 @@
             </button>
           </div>
 
+          <div class="filtros-usuarios filtros-asignaciones">
+            <div class="campo-filtro">
+              <label for="filtroCursoAsignacion">Curso</label>
+
+              <select id="filtroCursoAsignacion">
+                <option value="">Todos los cursos</option>
+              </select>
+            </div>
+
+            <div class="campo-filtro campo-busqueda">
+              <label for="buscarDocenteAsignacion">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                Buscar docente
+              </label>
+
+              <input
+                id="buscarDocenteAsignacion"
+                type="search"
+                placeholder="Nombre o correo del docente..."
+                autocomplete="off"
+              />
+            </div>
+          </div>
+
           <div class="tabla-contenedor">
             <table class="tabla-usuarios">
               <thead>
@@ -1486,32 +1510,63 @@
       <section class="grupo seccion-destino" id="configuracion">
         <h2>Configuración del Portal</h2>
 
-        <div class="panel-info">
-          <div class="encabezado-listado">
-            <div>
-              <h3>Backup del sistema</h3>
-              <p>
-                Generá una copia de seguridad manual de la base de datos del
-                portal institucional. El archivo se guardará automáticamente en
-                la carpeta System_BackUp de Google Drive.
-              </p>
+        <div class="grid-configuracion-portal">
+          <div class="panel-info">
+            <div class="encabezado-listado">
+              <div>
+                <h3>Backup del sistema</h3>
+                <p>
+                  Generá una copia de seguridad manual de la base de datos del
+                  portal institucional. El archivo se guardará automáticamente
+                  en la carpeta System_BackUp de Google Drive.
+                </p>
+              </div>
             </div>
+
+            <div class="acciones">
+              <button
+                type="button"
+                class="btn-accion"
+                id="btnGenerarBackupSistema"
+              >
+                <i class="fa-solid fa-cloud-arrow-down"></i>
+                Generar backup ahora
+              </button>
+            </div>
+
+            <p class="mensaje-formulario" id="mensajeBackupSistema">
+              El sistema también genera un backup automático todos los sábados.
+            </p>
           </div>
 
-          <div class="acciones">
-            <button
-              type="button"
-              class="btn-accion"
-              id="btnGenerarBackupSistema"
-            >
-              <i class="fa-solid fa-cloud-arrow-down"></i>
-              Generar backup ahora
-            </button>
-          </div>
+          <div class="panel-info">
+            <div class="encabezado-listado">
+              <div>
+                <h3>Pizarra general de horarios</h3>
+                <p>
+                  Generá una vista general e imprimible de los horarios
+                  institucionales de Aula, Taller y Educación Física, organizada
+                  por turno y lista para imprimir o guardar como PDF.
+                </p>
+              </div>
+            </div>
 
-          <p class="mensaje-formulario" id="mensajeBackupSistema">
-            El sistema también genera un backup automático todos los sábados.
-          </p>
+            <div class="acciones">
+              <button
+                type="button"
+                class="btn-accion"
+                id="btnGenerarPizarraHorarios"
+              >
+                <i class="fa-solid fa-table-cells-large"></i>
+                Generar pizarra horarios
+              </button>
+            </div>
+
+            <p class="mensaje-formulario" id="mensajePizarraHorarios">
+              La pizarra se generará a demanda y quedará preparada para
+              impresión.
+            </p>
+          </div>
         </div>
 
         <a class="btn-volver" href="#inicio">
@@ -1938,6 +1993,7 @@
     <script type="module" src="../assets/js/sime-admin.js"></script>
     <script type="module" src="../assets/js/horarios-admin.js"></script>
     <script type="module" src="../assets/js/backup-admin.js"></script>
+    <script type="module" src="../assets/js/pizarra-horarios-admin.js"></script>
 
     <script>
       const btnArriba = document.getElementById("btnArriba");

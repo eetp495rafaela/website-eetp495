@@ -35,6 +35,9 @@ const vistaHorarioAulaDocente = document.getElementById(
 const vistaHorarioTallerDocente = document.getElementById(
   "vistaHorarioTallerDocente",
 );
+const vistaHorarioEducacionFisicaDocente = document.getElementById(
+  "vistaHorarioEducacionFisicaDocente",
+);
 
 const btnVerMisHorariosDocente = document.getElementById(
   "btnVerMisHorariosDocente",
@@ -70,6 +73,16 @@ function mostrarMensajeHorarioTallerDocente(texto, tipo = "") {
   if (!vistaHorarioTallerDocente) return;
 
   vistaHorarioTallerDocente.innerHTML = `
+    <p class="mensaje-formulario ${tipo === "error" ? "mensaje-error" : ""}">
+      ${texto}
+    </p>
+  `;
+}
+
+function mostrarMensajeHorarioEducacionFisicaDocente(texto, tipo = "") {
+  if (!vistaHorarioEducacionFisicaDocente) return;
+
+  vistaHorarioEducacionFisicaDocente.innerHTML = `
     <p class="mensaje-formulario ${tipo === "error" ? "mensaje-error" : ""}">
       ${texto}
     </p>
@@ -244,6 +257,80 @@ function renderizarHorarioTallerDocente(bloques) {
   `;
 }
 
+function renderizarHorarioEducacionFisicaDocente(bloques) {
+  if (!vistaHorarioEducacionFisicaDocente) return;
+
+  if (!bloques.length) {
+    mostrarMensajeHorarioEducacionFisicaDocente(
+      "Todavía no tenés horarios de Educación Física cargados.",
+    );
+    return;
+  }
+
+  const htmlDias = DIAS_HORARIO_DOCENTE.map((dia) => {
+    const bloquesDia = bloques
+      .filter((bloque) => bloque.dia === dia.valor)
+      .sort((a, b) =>
+        String(a.horaInicio || "").localeCompare(String(b.horaInicio || "")),
+      );
+
+    return `
+      <div class="dia-horario-docente">
+        <h4>${dia.etiqueta}</h4>
+
+        ${
+          bloquesDia.length
+            ? bloquesDia
+                .map(
+                  (bloque) => `
+                    <div class="tarjeta-bloque-horario-docente">
+                      <div class="bloque-horario-hora-docente">
+                        ${bloque.horaInicio || "-"} a ${bloque.horaFin || "-"}
+                      </div>
+
+                      <div class="bloque-horario-curso-docente">
+                        ${
+                          bloque.cursoNombre ||
+                          `${bloque.cursoAnio || ""}º ${bloque.cursoDivision || ""}`
+                        }
+                      </div>
+
+                      <div class="bloque-horario-materia-docente">
+                        ${bloque.espacioCurricular || "Educación Física"}
+                      </div>
+
+                      ${
+                        bloque.turno
+                          ? `<div class="bloque-horario-turno-docente">
+                              Turno ${obtenerEtiquetaTurnoDocente(bloque.turno)}
+                            </div>`
+                          : ""
+                      }
+
+                      ${
+                        bloque.ubicacion
+                          ? `<div class="bloque-horario-ubicacion-docente">
+                              ${bloque.ubicacion}
+                            </div>`
+                          : ""
+                      }
+                    </div>
+                  `,
+                )
+                .join("")
+            : `<p class="mensaje-formulario">Sin bloques asignados.</p>`
+        }
+      </div>
+    `;
+  }).join("");
+
+  vistaHorarioEducacionFisicaDocente.innerHTML = `
+    <div class="grilla-horario-aula-docente">
+      ${htmlDias}
+    </div>
+  `;
+}
+
 async function cargarHorarioAulaDocente(usuario) {
   if (!vistaHorarioAulaDocente) return;
 
@@ -356,6 +443,67 @@ async function cargarHorarioTallerDocente(usuario) {
   }
 }
 
+async function cargarHorarioEducacionFisicaDocente(usuario) {
+  if (!vistaHorarioEducacionFisicaDocente) return;
+
+  mostrarMensajeHorarioEducacionFisicaDocente(
+    "Cargando horario de Educación Física...",
+  );
+
+  try {
+    const correoDocente = normalizarCorreoDocente(usuario.email);
+
+    const consultaHorarios = query(
+      collection(db, "horarios"),
+      where("estado", "==", "ACTIVO"),
+      where("tipoHorario", "==", "EDUCACION_FISICA"),
+      where("docenteCorreo", "==", correoDocente),
+    );
+
+    const resultado = await getDocs(consultaHorarios);
+
+    const bloques = [];
+
+    resultado.forEach((documento) => {
+      bloques.push({
+        id: documento.id,
+        ...documento.data(),
+      });
+    });
+
+    bloques.sort((a, b) => {
+      const diaA = DIAS_HORARIO_DOCENTE.findIndex((dia) => dia.valor === a.dia);
+      const diaB = DIAS_HORARIO_DOCENTE.findIndex((dia) => dia.valor === b.dia);
+
+      if (diaA !== diaB) return diaA - diaB;
+
+      const horaA = String(a.horaInicio || "");
+      const horaB = String(b.horaInicio || "");
+
+      if (horaA !== horaB) {
+        return horaA.localeCompare(horaB);
+      }
+
+      return String(a.cursoNombre || "").localeCompare(
+        String(b.cursoNombre || ""),
+        "es",
+      );
+    });
+
+    renderizarHorarioEducacionFisicaDocente(bloques);
+  } catch (error) {
+    console.error(
+      "Error al cargar horario de Educación Física docente:",
+      error,
+    );
+
+    mostrarMensajeHorarioEducacionFisicaDocente(
+      error.message || "No se pudo cargar tu horario de Educación Física.",
+      "error",
+    );
+  }
+}
+
 if (btnVerMisHorariosDocente) {
   btnVerMisHorariosDocente.addEventListener("click", async () => {
     if (!usuarioHorarioDocenteActual) {
@@ -378,6 +526,7 @@ if (btnVerMisHorariosDocente) {
     try {
       await cargarHorarioAulaDocente(usuarioHorarioDocenteActual);
       await cargarHorarioTallerDocente(usuarioHorarioDocenteActual);
+      await cargarHorarioEducacionFisicaDocente(usuarioHorarioDocenteActual);
     } finally {
       btnVerMisHorariosDocente.disabled = false;
       btnVerMisHorariosDocente.innerHTML = textoOriginal;
@@ -396,5 +545,8 @@ onAuthStateChanged(auth, (usuario) => {
 
   mostrarMensajeHorarioTallerDocente(
     "Todavía no se consultó tu horario de taller. Presioná “Ver mis horarios” para cargarlo.",
+  );
+  mostrarMensajeHorarioEducacionFisicaDocente(
+    "Todavía no se consultó tu horario de Educación Física. Presioná “Ver mis horarios” para cargarlo.",
   );
 });

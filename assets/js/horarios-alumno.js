@@ -54,6 +54,14 @@ const DIAS_HORARIO_TALLER_ALUMNO = [
   { valor: "VIERNES", etiqueta: "Viernes" },
 ];
 
+const DIAS_HORARIO_EF_ALUMNO = [
+  { valor: "LUNES", etiqueta: "Lunes" },
+  { valor: "MARTES", etiqueta: "Martes" },
+  { valor: "MIERCOLES", etiqueta: "Miércoles" },
+  { valor: "JUEVES", etiqueta: "Jueves" },
+  { valor: "VIERNES", etiqueta: "Viernes" },
+];
+
 function normalizarCorreoHorarioAlumno(correo) {
   return String(correo || "")
     .trim()
@@ -73,6 +81,7 @@ function mostrarMensajeHorarioAlumno(texto, tipo = "") {
 function renderizarHorarioCompletoAlumno(
   bloquesAula,
   bloquesTaller,
+  bloquesEducacionFisica,
   perfilAlumno,
 ) {
   if (!vistaHorarioAulaAlumno) return;
@@ -181,6 +190,67 @@ function renderizarHorarioCompletoAlumno(
     `;
   }).join("");
 
+  const htmlEducacionFisica = DIAS_HORARIO_EF_ALUMNO.map((dia) => {
+    const bloquesDia = bloquesEducacionFisica
+      .filter((bloque) => bloque.dia === dia.valor)
+      .sort((a, b) =>
+        String(a.horaInicio || "").localeCompare(String(b.horaInicio || "")),
+      );
+
+    return `
+      <div class="dia-horario-alumno">
+        <h4>${dia.etiqueta}</h4>
+
+        ${
+          bloquesDia.length
+            ? bloquesDia
+                .map(
+                  (bloque) => `
+                    <div class="tarjeta-bloque-horario-alumno">
+                      <div class="bloque-horario-hora-alumno">
+                        ${bloque.horaInicio || "-"} a ${bloque.horaFin || "-"}
+                      </div>
+
+                      <div class="bloque-horario-materia-alumno">
+                        ${bloque.espacioCurricular || "Educación Física"}
+                      </div>
+
+                      <div class="bloque-horario-docente-alumno">
+                        ${bloque.docenteNombre || "Docente sin cargar"}
+                      </div>
+
+                      ${
+                        bloque.turno
+                          ? `<div class="bloque-horario-ubicacion-alumno">
+                              Turno: ${
+                                String(bloque.turno || "").trim() === "MANANA"
+                                  ? "Mañana"
+                                  : String(bloque.turno || "").trim() ===
+                                      "TARDE"
+                                    ? "Tarde"
+                                    : bloque.turno
+                              }
+                            </div>`
+                          : ""
+                      }
+
+                      ${
+                        bloque.ubicacion
+                          ? `<div class="bloque-horario-ubicacion-alumno">
+                              ${bloque.ubicacion}
+                            </div>`
+                          : ""
+                      }
+                    </div>
+                  `,
+                )
+                .join("")
+            : `<p class="mensaje-formulario">Sin Educación Física cargada.</p>`
+        }
+      </div>
+    `;
+  }).join("");
+
   vistaHorarioAulaAlumno.innerHTML = `
     <div class="encabezado-horario-alumno">
       <strong>Curso:</strong>
@@ -207,7 +277,7 @@ function renderizarHorarioCompletoAlumno(
       }
     </section>
 
-    <section class="bloque-horario-seccion-alumno">
+        <section class="bloque-horario-seccion-alumno">
       <div class="titulo-horario-seccion-alumno">
         <h3>Horario de Taller</h3>
         <p>
@@ -227,6 +297,19 @@ function renderizarHorarioCompletoAlumno(
           : `<p class="mensaje-formulario error">
               Consultá con Preceptoría o Soporte para que asignen tu grupo de taller.
             </p>`
+      }
+    </section>
+
+    <section class="bloque-horario-seccion-alumno">
+      <div class="titulo-horario-seccion-alumno">
+        <h3>Educación Física</h3>
+        <p>Clases de Educación Física correspondientes a tu curso.</p>
+      </div>
+
+      ${
+        bloquesEducacionFisica.length
+          ? `<div class="grilla-horario-aula-alumno">${htmlEducacionFisica}</div>`
+          : `<p class="mensaje-formulario">Todavía no hay horarios de Educación Física cargados para tu curso.</p>`
       }
     </section>
   `;
@@ -274,6 +357,7 @@ async function cargarHorarioAulaAlumno(usuario) {
 
     const bloquesAula = [];
     const bloquesTaller = [];
+    const bloquesEducacionFisica = [];
 
     resultado.forEach((documento) => {
       const datos = documento.data();
@@ -300,6 +384,15 @@ async function cargarHorarioAulaAlumno(usuario) {
         if (grupoTallerBloque !== grupoTallerAlumno) return;
 
         bloquesTaller.push({
+          id: documento.id,
+          ...datos,
+        });
+
+        return;
+      }
+
+      if (tipoHorario === "EDUCACION_FISICA") {
+        bloquesEducacionFisica.push({
           id: documento.id,
           ...datos,
         });
@@ -334,7 +427,27 @@ async function cargarHorarioAulaAlumno(usuario) {
       );
     });
 
-    renderizarHorarioCompletoAlumno(bloquesAula, bloquesTaller, perfilAlumno);
+    bloquesEducacionFisica.sort((a, b) => {
+      const diaA = DIAS_HORARIO_EF_ALUMNO.findIndex(
+        (dia) => dia.valor === a.dia,
+      );
+      const diaB = DIAS_HORARIO_EF_ALUMNO.findIndex(
+        (dia) => dia.valor === b.dia,
+      );
+
+      if (diaA !== diaB) return diaA - diaB;
+
+      return String(a.horaInicio || "").localeCompare(
+        String(b.horaInicio || ""),
+      );
+    });
+
+    renderizarHorarioCompletoAlumno(
+      bloquesAula,
+      bloquesTaller,
+      bloquesEducacionFisica,
+      perfilAlumno,
+    );
   } catch (error) {
     console.error("Error al cargar horario de aula del alumno:", error);
 

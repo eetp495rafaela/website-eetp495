@@ -1,0 +1,517 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: Arial, Helvetica, sans-serif;
+  background: #f3f6fb;
+  color: #10203f;
+}
+
+.barra-acciones {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 18px;
+  background: #003f91;
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18);
+}
+
+.barra-acciones strong {
+  font-size: 15px;
+}
+
+.barra-acciones button {
+  border: 0;
+  border-radius: 8px;
+  padding: 10px 16px;
+  font-weight: 800;
+  cursor: pointer;
+  background: #ffffff;
+  color: #003f91;
+}
+
+.pizarra {
+  width: min(100%, 1500px);
+  margin: 0 auto;
+  padding: 18px;
+}
+
+.encabezado-pizarra {
+  display: grid;
+  grid-template-columns: 76px 1fr;
+  gap: 14px;
+  align-items: center;
+  padding: 16px;
+  margin-bottom: 16px;
+  background: #ffffff;
+  border: 2px solid #003f91;
+  border-radius: 14px;
+}
+
+.encabezado-pizarra img {
+  width: 70px;
+  height: 70px;
+  object-fit: contain;
+}
+
+.encabezado-pizarra h1 {
+  margin: 0;
+  font-size: 28px;
+  color: #003f91;
+  line-height: 1.15;
+}
+
+.encabezado-pizarra p {
+  margin: 6px 0 0;
+  font-size: 14px;
+  color: #334765;
+  font-weight: 700;
+}
+
+.leyenda-colores,
+.seccion-pizarra {
+  background: #ffffff;
+  border: 1px solid #d5dfef;
+  border-radius: 14px;
+  padding: 14px;
+  margin-bottom: 16px;
+  break-inside: avoid;
+}
+
+.leyenda-colores h2,
+.seccion-pizarra h2 {
+  margin: 0 0 12px;
+  color: #003f91;
+  font-size: 22px;
+  border-bottom: 2px solid #003f91;
+  padding-bottom: 6px;
+}
+
+.items-leyenda {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.item-leyenda {
+  display: inline-flex;
+  align-items: center;
+  border: 2px solid var(--color-borde);
+  background: var(--color-fondo);
+  color: var(--color-texto);
+  border-radius: 999px;
+  padding: 5px 10px;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.turno-pizarra {
+  margin-top: 14px;
+  break-inside: avoid;
+}
+
+.turno-pizarra h3 {
+  margin: 0 0 8px;
+  font-size: 18px;
+  color: #172b4d;
+  background: #eaf1ff;
+  border-left: 6px solid #003f91;
+  padding: 8px 10px;
+  border-radius: 8px;
+}
+
+.grilla-dias {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.columna-dia {
+  border: 1px solid #d4deec;
+  border-radius: 10px;
+  background: #f8fbff;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.columna-dia h4 {
+  margin: 0;
+  padding: 8px;
+  text-align: center;
+  background: #003f91;
+  color: #ffffff;
+  font-size: 14px;
+}
+
+.bloques-dia {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 7px;
+}
+
+.tarjeta-horario {
+  border: 2px solid var(--color-borde);
+  border-left-width: 8px;
+  background: var(--color-fondo);
+  color: var(--color-texto);
+  border-radius: 9px;
+  padding: 7px;
+  break-inside: avoid;
+}
+
+.tarjeta-horario-hora {
+  font-size: 13px;
+  font-weight: 900;
+  margin-bottom: 4px;
+}
+
+.tarjeta-horario-curso {
+  font-size: 14px;
+  font-weight: 900;
+  margin-bottom: 3px;
+}
+
+.tarjeta-horario-espacio {
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.tarjeta-horario-docente,
+.tarjeta-horario-extra {
+  margin-top: 4px;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.sin-bloques,
+.sin-datos-seccion {
+  margin: 0;
+  padding: 10px;
+  color: #667085;
+  font-weight: 700;
+  font-size: 12px;
+}
+
+@page {
+  size: legal landscape;
+  margin: 8mm;
+}
+
+@media print {
+  body {
+    background: #ffffff;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .barra-acciones {
+    display: none;
+  }
+
+  .pizarra {
+    width: 100%;
+    padding: 0;
+  }
+
+  .encabezado-pizarra {
+    margin-bottom: 8px;
+    padding: 10px;
+  }
+
+  .encabezado-pizarra img {
+    width: 54px;
+    height: 54px;
+  }
+
+  .encabezado-pizarra h1 {
+    font-size: 22px;
+  }
+
+  .encabezado-pizarra p {
+    font-size: 11px;
+  }
+
+  .leyenda-colores,
+  .seccion-pizarra {
+    margin-bottom: 8px;
+    padding: 8px;
+    border-radius: 8px;
+  }
+
+  .leyenda-colores h2,
+  .seccion-pizarra h2 {
+    font-size: 17px;
+    margin-bottom: 7px;
+  }
+
+  .turno-pizarra {
+    margin-top: 8px;
+  }
+
+  .turno-pizarra h3 {
+    font-size: 14px;
+    padding: 5px 7px;
+    margin-bottom: 5px;
+  }
+
+  .grilla-dias {
+    gap: 5px;
+  }
+
+  .columna-dia h4 {
+    font-size: 11px;
+    padding: 5px;
+  }
+
+  .bloques-dia {
+    gap: 4px;
+    padding: 4px;
+  }
+
+  .tarjeta-horario {
+    padding: 5px;
+    border-left-width: 6px;
+  }
+
+  .tarjeta-horario-hora {
+    font-size: 10px;
+    margin-bottom: 2px;
+  }
+
+  .tarjeta-horario-curso {
+    font-size: 11px;
+    margin-bottom: 2px;
+  }
+
+  .tarjeta-horario-espacio {
+    font-size: 9.5px;
+  }
+
+  .tarjeta-horario-docente,
+  .tarjeta-horario-extra {
+    font-size: 8.5px;
+    margin-top: 2px;
+  }
+
+  .item-leyenda {
+    font-size: 9px;
+    padding: 3px 7px;
+  }
+
+  .sin-bloques,
+  .sin-datos-seccion {
+    font-size: 9px;
+    padding: 5px;
+  }
+}
+
+@media screen and (max-width: 1000px) {
+  .grilla-dias {
+    grid-template-columns: 1fr;
+  }
+
+  .encabezado-pizarra {
+    grid-template-columns: 1fr;
+    text-align: center;
+  }
+
+  .encabezado-pizarra img {
+    margin: 0 auto;
+  }
+}
+/* Nueva organización: Día → Curso → Bloques */
+
+.grilla-dias-por-curso {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.bloque-dia-pizarra {
+  border: 1px solid #d4deec;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #f8fbff;
+  break-inside: avoid;
+}
+
+.bloque-dia-pizarra h4 {
+  margin: 0;
+  padding: 10px 14px;
+  background: #003f91;
+  color: #ffffff;
+  font-size: 18px;
+  font-weight: 900;
+}
+
+.grilla-cursos-dia {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 8px;
+  padding: 10px;
+}
+
+.columna-curso-dia {
+  border: 1px solid #cfd9e8;
+  border-radius: 10px;
+  background: #ffffff;
+  overflow: hidden;
+  min-width: 0;
+  break-inside: avoid;
+}
+
+.columna-curso-dia h5 {
+  margin: 0;
+  padding: 7px 8px;
+  text-align: center;
+  background: #eaf1ff;
+  color: #003f91;
+  font-size: 14px;
+  font-weight: 900;
+  border-bottom: 1px solid #cfd9e8;
+}
+
+.bloques-curso-dia {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 7px;
+}
+
+@media print {
+  .grilla-dias-por-curso {
+    gap: 8px;
+  }
+
+  .bloque-dia-pizarra h4 {
+    padding: 6px 9px;
+    font-size: 13px;
+  }
+
+  .grilla-cursos-dia {
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 5px;
+    padding: 5px;
+  }
+
+  .columna-curso-dia h5 {
+    padding: 4px 5px;
+    font-size: 10px;
+  }
+
+  .bloques-curso-dia {
+    gap: 4px;
+    padding: 4px;
+  }
+}
+/* Ajustes de impresión para evitar páginas vacías */
+
+@media print {
+  @page {
+    size: legal landscape;
+    margin: 6mm;
+  }
+
+  .encabezado-pizarra {
+    break-inside: auto;
+    page-break-inside: auto;
+    margin-bottom: 5px;
+  }
+
+  .leyenda-colores,
+  .seccion-pizarra,
+  .turno-pizarra,
+  .bloque-dia-pizarra {
+    break-inside: auto;
+    page-break-inside: auto;
+  }
+
+  .seccion-pizarra {
+    margin-bottom: 6px;
+    padding: 6px;
+  }
+
+  .seccion-pizarra h2 {
+    font-size: 15px;
+    margin-bottom: 5px;
+    padding-bottom: 4px;
+  }
+
+  .turno-pizarra {
+    margin-top: 6px;
+  }
+
+  .turno-pizarra h3 {
+    font-size: 12px;
+    padding: 4px 6px;
+    margin-bottom: 4px;
+  }
+
+  .bloque-dia-pizarra {
+    margin-bottom: 5px;
+  }
+
+  .bloque-dia-pizarra h4 {
+    padding: 5px 8px;
+    font-size: 12px;
+  }
+
+  .columna-curso-dia,
+  .tarjeta-horario {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  .encabezado-pizarra h1 {
+    font-size: 18px;
+  }
+
+  .encabezado-pizarra p {
+    font-size: 10px;
+  }
+
+  .encabezado-pizarra img {
+    width: 44px;
+    height: 44px;
+  }
+
+  .encabezado-pizarra {
+    grid-template-columns: 52px 1fr;
+    padding: 6px 8px;
+  }
+}
+/* Impresión: cada día en una hoja distinta */
+
+@media print {
+  .bloque-dia-pizarra {
+    break-before: page;
+    page-break-before: always;
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  .bloque-dia-pizarra:first-child {
+    break-before: auto;
+    page-break-before: auto;
+  }
+
+  .bloque-dia-pizarra h4 {
+    break-after: avoid;
+    page-break-after: avoid;
+  }
+
+  .grilla-cursos-dia {
+    break-before: avoid;
+    page-break-before: avoid;
+  }
+}

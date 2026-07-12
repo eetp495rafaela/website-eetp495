@@ -1403,3 +1403,22 @@ body.modal-abierto {
   gap: 8px;
   flex-shrink: 0;
 }
+/* Configuración del portal */
+
+.grid-configuracion-portal {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+  align-items: stretch;
+}
+
+.grid-configuracion-portal .panel-info {
+  margin-top: 0;
+  height: 100%;
+}
+
+@media (max-width: 900px) {
+  .grid-configuracion-portal {
+    grid-template-columns: 1fr;
+  }
+}

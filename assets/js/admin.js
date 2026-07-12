@@ -183,6 +183,13 @@ const mensajeRegistroAsignacion = document.getElementById(
   "mensajeRegistroAsignacion",
 );
 const mensajeAsignaciones = document.getElementById("mensajeAsignaciones");
+
+const filtroCursoAsignacion = document.getElementById("filtroCursoAsignacion");
+
+const buscarDocenteAsignacion = document.getElementById(
+  "buscarDocenteAsignacion",
+);
+
 const modalEditarAsignacion = document.getElementById("modalEditarAsignacion");
 
 const formEditarAsignacion = document.getElementById("formEditarAsignacion");
@@ -242,6 +249,7 @@ const btnGuardarEdicion = document.getElementById("btnGuardarEdicion");
 let usuarioSoporte = null;
 let usuariosCargados = [];
 let estudiantesCargados = [];
+let asignacionesCargadas = [];
 let estudianteEnAsignacion = null;
 let cursoEnEdicion = null;
 let asignacionEnEdicion = null;
@@ -513,6 +521,117 @@ function aplicarFiltrosEstudiantes() {
   });
 
   renderizarEstudiantes(estudiantesFiltrados);
+}
+
+function normalizarTextoFiltro(texto) {
+  return String(texto || "")
+    .trim()
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "");
+}
+
+function cargarCursosFiltroAsignaciones(asignaciones) {
+  if (!filtroCursoAsignacion) return;
+
+  const valorActual = String(filtroCursoAsignacion.value || "").trim();
+
+  const cursos = Array.from(
+    new Set(
+      asignaciones
+        .map((asignacion) => String(asignacion.cursoNombre || "").trim())
+        .filter(Boolean),
+    ),
+  ).sort((a, b) =>
+    a.localeCompare(b, "es", {
+      numeric: true,
+      sensitivity: "base",
+    }),
+  );
+
+  filtroCursoAsignacion.innerHTML = `
+    <option value="">Todos los cursos</option>
+    ${cursos
+      .map(
+        (curso) => `
+          <option value="${curso}">${curso}</option>
+        `,
+      )
+      .join("")}
+  `;
+
+  if (valorActual && cursos.includes(valorActual)) {
+    filtroCursoAsignacion.value = valorActual;
+  }
+}
+
+function renderizarAsignaciones(asignaciones) {
+  if (!cuerpoTablaAsignaciones) return;
+
+  cuerpoTablaAsignaciones.innerHTML = "";
+
+  if (!asignaciones.length) {
+    const fila = document.createElement("tr");
+    const celda = document.createElement("td");
+
+    celda.colSpan = 7;
+    celda.className = "tabla-vacia";
+    celda.textContent = "No se encontraron asignaciones con esos filtros.";
+
+    fila.appendChild(celda);
+    cuerpoTablaAsignaciones.appendChild(fila);
+
+    mostrarMensajeAsignaciones(
+      "No se encontraron asignaciones con esos filtros.",
+    );
+
+    return;
+  }
+
+  asignaciones.forEach((asignacion) => {
+    const fila = document.createElement("tr");
+
+    fila.appendChild(crearCelda(asignacion.docenteNombre));
+    fila.appendChild(crearCelda(asignacion.cursoNombre));
+    fila.appendChild(crearCelda(asignacion.espacioNombre));
+    fila.appendChild(crearCelda(textoTipoEspacio(asignacion.espacioTipo)));
+    fila.appendChild(crearCelda(asignacion.cicloLectivo));
+    fila.appendChild(crearCeldaEstado(asignacion.estado));
+    fila.appendChild(crearCeldaAccionesAsignacion(asignacion));
+
+    cuerpoTablaAsignaciones.appendChild(fila);
+  });
+
+  mostrarMensajeAsignaciones(
+    `${asignaciones.length} asignación(es) mostrada(s).`,
+    "ok",
+  );
+}
+
+function aplicarFiltrosAsignaciones() {
+  const cursoSeleccionado = String(filtroCursoAsignacion?.value || "").trim();
+
+  const textoDocente = normalizarTextoFiltro(buscarDocenteAsignacion?.value);
+
+  const asignacionesFiltradas = asignacionesCargadas.filter((asignacion) => {
+    const cursoNombre = String(asignacion.cursoNombre || "").trim();
+
+    const docenteNombre = normalizarTextoFiltro(asignacion.docenteNombre);
+
+    const docenteCorreo = normalizarTextoFiltro(asignacion.docenteCorreo);
+
+    const coincideCurso =
+      !cursoSeleccionado || cursoNombre === cursoSeleccionado;
+
+    const coincideDocente =
+      !textoDocente ||
+      docenteNombre.includes(textoDocente) ||
+      docenteCorreo.includes(textoDocente);
+
+    return coincideCurso && coincideDocente;
+  });
+
+  renderizarAsignaciones(asignacionesFiltradas);
 }
 
 function mostrarMensajeCurso(texto, tipo = "") {
@@ -2013,7 +2132,7 @@ async function cargarAsignaciones() {
   try {
     const consulta = await getDocs(collection(db, "asignaciones_docentes"));
 
-    const asignaciones = consulta.docs
+    asignacionesCargadas = consulta.docs
       .map((documento) => ({
         id: documento.id,
         ...documento.data(),
@@ -2026,33 +2145,39 @@ async function cargarAsignaciones() {
           return cicloB - cicloA;
         }
 
+        const cursoA = String(a.cursoNombre || "");
+        const cursoB = String(b.cursoNombre || "");
+
+        if (cursoA !== cursoB) {
+          return cursoA.localeCompare(cursoB, "es", {
+            numeric: true,
+            sensitivity: "base",
+          });
+        }
+
         return String(a.docenteNombre || "").localeCompare(
           String(b.docenteNombre || ""),
           "es",
         );
       });
 
-    if (!asignaciones.length) {
+    if (!asignacionesCargadas.length) {
+      const fila = document.createElement("tr");
+      const celda = document.createElement("td");
+
+      celda.colSpan = 7;
+      celda.className = "tabla-vacia";
+      celda.textContent = "Todavía no hay asignaciones registradas.";
+
+      fila.appendChild(celda);
+      cuerpoTablaAsignaciones.appendChild(fila);
+
       mostrarMensajeAsignaciones("Todavía no hay asignaciones registradas.");
       return;
     }
 
-    asignaciones.forEach((asignacion) => {
-      const fila = document.createElement("tr");
-      fila.appendChild(crearCelda(asignacion.docenteNombre));
-      fila.appendChild(crearCelda(asignacion.cursoNombre));
-      fila.appendChild(crearCelda(asignacion.espacioNombre));
-      fila.appendChild(crearCelda(textoTipoEspacio(asignacion.espacioTipo)));
-      fila.appendChild(crearCelda(asignacion.cicloLectivo));
-      fila.appendChild(crearCeldaEstado(asignacion.estado));
-      fila.appendChild(crearCeldaAccionesAsignacion(asignacion));
-      cuerpoTablaAsignaciones.appendChild(fila);
-    });
-
-    mostrarMensajeAsignaciones(
-      `${asignaciones.length} asignación(es) cargada(s).`,
-      "ok",
-    );
+    cargarCursosFiltroAsignaciones(asignacionesCargadas);
+    aplicarFiltrosAsignaciones();
   } catch (error) {
     console.error("Error al cargar asignaciones:", error);
 
@@ -2565,6 +2690,14 @@ if (btnVerAsignaciones) {
     await prepararFormularioAsignaciones();
     await cargarAsignaciones();
   });
+}
+
+if (filtroCursoAsignacion) {
+  filtroCursoAsignacion.addEventListener("change", aplicarFiltrosAsignaciones);
+}
+
+if (buscarDocenteAsignacion) {
+  buscarDocenteAsignacion.addEventListener("input", aplicarFiltrosAsignaciones);
 }
 
 if (btnRegistrarAsignacion) {
