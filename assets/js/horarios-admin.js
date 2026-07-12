@@ -76,6 +76,30 @@ const btnActualizarHorarioTaller = document.getElementById(
 );
 const vistaHorarioTaller = document.getElementById("vistaHorarioTaller");
 const mensajeHorarioTaller = document.getElementById("mensajeHorarioTaller");
+const formHorarioEf = document.getElementById("formHorarioEducacionFisica");
+
+const horarioEfCicloLectivo = document.getElementById("horarioEfCicloLectivo");
+const horarioEfTurno = document.getElementById("horarioEfTurno");
+const horarioEfCurso = document.getElementById("horarioEfCurso");
+const horarioEfDia = document.getElementById("horarioEfDia");
+const horarioEfEspacio = document.getElementById("horarioEfEspacio");
+const horarioEfDocente = document.getElementById("horarioEfDocente");
+const horarioEfHoraInicio = document.getElementById("horarioEfHoraInicio");
+const horarioEfHoraFin = document.getElementById("horarioEfHoraFin");
+const horarioEfUbicacion = document.getElementById("horarioEfUbicacion");
+
+const btnRegistrarHorarioEf = document.getElementById("btnRegistrarHorarioEf");
+
+const btnCancelarEdicionHorarioEf = document.getElementById(
+  "btnCancelarEdicionHorarioEf",
+);
+
+const btnActualizarHorarioEf = document.getElementById(
+  "btnActualizarHorarioEf",
+);
+
+const vistaHorarioEf = document.getElementById("vistaHorarioEf");
+const mensajeHorarioEf = document.getElementById("mensajeHorarioEf");
 
 let cursosHorarios = [];
 let espaciosHorarios = [];
@@ -86,6 +110,9 @@ let materiasHorarioTaller = [];
 let docenteAsignadoHorarioTaller = null;
 let idHorarioTallerEditando = null;
 let horariosTallerCargados = [];
+let docenteAsignadoHorarioEf = null;
+let idHorarioEfEditando = null;
+let horariosEfCargados = [];
 
 function mostrarMensajeHorarioAula(texto, tipo = "") {
   if (!mensajeHorarioAula) return;
@@ -114,6 +141,21 @@ function mostrarMensajeHorarioTaller(texto, tipo = "") {
 
   if (tipo === "ok") {
     mensajeHorarioTaller.classList.add("mensaje-ok");
+  }
+}
+
+function mostrarMensajeHorarioEf(texto, tipo = "") {
+  if (!mensajeHorarioEf) return;
+
+  mensajeHorarioEf.textContent = texto || "";
+  mensajeHorarioEf.classList.remove("mensaje-error", "mensaje-ok");
+
+  if (tipo === "error") {
+    mensajeHorarioEf.classList.add("mensaje-error");
+  }
+
+  if (tipo === "ok") {
+    mensajeHorarioEf.classList.add("mensaje-ok");
   }
 }
 
@@ -149,6 +191,64 @@ function actualizarHorarioFijoTaller() {
   const horario = obtenerHorarioFijoTaller(horarioTallerTurno.value);
 
   horarioTallerHorario.value = horario.texto;
+}
+
+function calcularHoraFinEducacionFisica(horaInicio) {
+  const valor = String(horaInicio || "").trim();
+
+  if (!valor) return "";
+
+  const partes = valor.split(":");
+
+  if (partes.length !== 2) return "";
+
+  const horas = Number(partes[0]);
+  const minutos = Number(partes[1]);
+
+  if (Number.isNaN(horas) || Number.isNaN(minutos)) return "";
+
+  const fecha = new Date();
+  fecha.setHours(horas, minutos, 0, 0);
+  fecha.setMinutes(fecha.getMinutes() + 60);
+
+  const horaFin = String(fecha.getHours()).padStart(2, "0");
+  const minutoFin = String(fecha.getMinutes()).padStart(2, "0");
+
+  return `${horaFin}:${minutoFin}`;
+}
+
+function actualizarHoraFinEducacionFisica() {
+  if (!horarioEfHoraInicio || !horarioEfHoraFin) return;
+
+  horarioEfHoraFin.value = calcularHoraFinEducacionFisica(
+    horarioEfHoraInicio.value,
+  );
+}
+
+function cargarOpcionesHoraInicioEducacionFisica() {
+  if (!horarioEfHoraInicio) return;
+
+  const horas = [];
+
+  for (let hora = 7; hora <= 21; hora++) {
+    for (const minuto of [0, 15, 30, 45]) {
+      const horaTexto = String(hora).padStart(2, "0");
+      const minutoTexto = String(minuto).padStart(2, "0");
+
+      horas.push(`${horaTexto}:${minutoTexto}`);
+    }
+  }
+
+  horarioEfHoraInicio.innerHTML = `
+    <option value="">Seleccionar hora</option>
+    ${horas
+      .map(
+        (hora) => `
+          <option value="${hora}">${hora}</option>
+        `,
+      )
+      .join("")}
+  `;
 }
 
 const BLOQUES_HORARIOS_AULA = {
@@ -269,6 +369,30 @@ function limpiarEspaciosHorarioAula(mensaje = "Seleccioná primero un curso") {
 function ordenarEspaciosHorarios(espacios) {
   return espacios.sort((a, b) =>
     String(a.nombre || "").localeCompare(String(b.nombre || ""), "es"),
+  );
+}
+
+function normalizarTextoHorario(texto) {
+  return String(texto || "")
+    .trim()
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "");
+}
+
+function esEspacioEducacionFisica(datos) {
+  const textosPosibles = [
+    datos.espacioCurricular,
+    datos.espacioNombre,
+    datos.nombreEspacio,
+    datos.nombre,
+    datos.materia,
+    datos.descripcion,
+    datos.tipo,
+  ];
+
+  return textosPosibles.some((texto) =>
+    normalizarTextoHorario(texto).includes("educacion fisica"),
   );
 }
 
@@ -516,6 +640,96 @@ async function cargarDocenteAsignadoHorarioTaller() {
   }
 }
 
+async function cargarDocenteAsignadoHorarioEf() {
+  if (!horarioEfCurso || !horarioEfDocente) return;
+
+  const cursoId = String(horarioEfCurso.value || "").trim();
+  const cicloLectivo = Number(horarioEfCicloLectivo?.value || 0);
+
+  horarioEfDocente.value = "";
+  docenteAsignadoHorarioEf = null;
+
+  if (!cursoId || !cicloLectivo) {
+    return;
+  }
+
+  horarioEfDocente.value = "Buscando docente asignado...";
+
+  try {
+    const consulta = await getDocs(collection(db, "asignaciones_docentes"));
+
+    let asignacionEncontrada = null;
+
+    consulta.forEach((documento) => {
+      if (asignacionEncontrada) return;
+
+      const datos = documento.data();
+
+      const estado = String(datos.estado || "")
+        .trim()
+        .toUpperCase();
+
+      const mismoCurso = String(datos.cursoId || "").trim() === cursoId;
+
+      const mismoCiclo = Number(datos.cicloLectivo || 0) === cicloLectivo;
+
+      const estaActiva = !estado || estado === "ACTIVA" || estado === "ACTIVO";
+
+      const esEducacionFisica = esEspacioEducacionFisica(datos);
+
+      if (mismoCurso && mismoCiclo && estaActiva && esEducacionFisica) {
+        asignacionEncontrada = {
+          espacioId: datos.espacioId || "",
+          espacioCurricular:
+            datos.espacioCurricular ||
+            datos.espacioNombre ||
+            datos.nombreEspacio ||
+            "Educación Física",
+          docenteNombre: datos.docenteNombre || "",
+          docenteCorreo: datos.docenteCorreo || "",
+        };
+      }
+    });
+
+    if (!asignacionEncontrada) {
+      horarioEfDocente.value = "Sin docente asignado";
+      docenteAsignadoHorarioEf = null;
+
+      mostrarMensajeHorarioEf(
+        "No se encontró una asignación docente activa de Educación Física para ese curso.",
+        "error",
+      );
+
+      return;
+    }
+
+    horarioEfDocente.value =
+      asignacionEncontrada.docenteNombre ||
+      asignacionEncontrada.docenteCorreo ||
+      "Docente asignado";
+
+    docenteAsignadoHorarioEf = asignacionEncontrada;
+
+    mostrarMensajeHorarioEf(
+      "Docente de Educación Física cargado correctamente.",
+      "ok",
+    );
+  } catch (error) {
+    console.error(
+      "Error al buscar docente asignado para Educación Física:",
+      error,
+    );
+
+    horarioEfDocente.value = "";
+    docenteAsignadoHorarioEf = null;
+
+    mostrarMensajeHorarioEf(
+      "No se pudo buscar el docente asignado de Educación Física.",
+      "error",
+    );
+  }
+}
+
 function cargarCursosHorarioTallerDesdeCache() {
   if (!horarioTallerCurso) return;
 
@@ -527,6 +741,37 @@ function cargarCursosHorarioTallerDesdeCache() {
   }
 
   horarioTallerCurso.innerHTML = `
+    <option value="">Seleccionar curso</option>
+    ${cursosHorarios
+      .map((curso) => {
+        const nombreCurso = obtenerNombreCursoHorario(curso);
+
+        return `
+          <option
+            value="${curso.id}"
+            data-anio="${curso.anio || ""}"
+            data-division="${curso.division || ""}"
+            data-nombre="${nombreCurso}"
+          >
+            ${nombreCurso}
+          </option>
+        `;
+      })
+      .join("")}
+  `;
+}
+
+function cargarCursosHorarioEfDesdeCache() {
+  if (!horarioEfCurso) return;
+
+  if (!cursosHorarios.length) {
+    horarioEfCurso.innerHTML = `
+      <option value="">No hay cursos activos</option>
+    `;
+    return;
+  }
+
+  horarioEfCurso.innerHTML = `
     <option value="">Seleccionar curso</option>
     ${cursosHorarios
       .map((curso) => {
@@ -724,6 +969,7 @@ async function cargarCursosHorarioAula() {
         .join("")}
     `;
     cargarCursosHorarioTallerDesdeCache();
+    cargarCursosHorarioEfDesdeCache();
 
     mostrarMensajeHorarioAula(
       `Cursos cargados correctamente: ${cursosHorarios.length}.`,
@@ -766,6 +1012,15 @@ if (horarioAulaCicloLectivo) {
 
 if (horarioAulaTurno) {
   horarioAulaTurno.addEventListener("change", renderizarBloquesHorarioAula);
+}
+
+if (horarioEfHoraInicio) {
+  cargarOpcionesHoraInicioEducacionFisica();
+
+  horarioEfHoraInicio.addEventListener(
+    "change",
+    actualizarHoraFinEducacionFisica,
+  );
 }
 
 function obtenerBloquesSeleccionadosHorarioAula() {
@@ -864,6 +1119,53 @@ async function existeBloqueHorarioTaller(datosBloque, idIgnorar = "") {
   return existe;
 }
 
+async function existeBloqueHorarioEf(datosBloque, idIgnorar = "") {
+  const consulta = await getDocs(collection(db, "horarios"));
+  let existe = false;
+
+  consulta.forEach((documento) => {
+    if (existe) return;
+
+    if (idIgnorar && documento.id === idIgnorar) {
+      return;
+    }
+
+    const datos = documento.data();
+
+    const mismoTipo =
+      String(datos.tipoHorario || "")
+        .trim()
+        .toUpperCase() === "EDUCACION_FISICA";
+
+    const mismoCiclo =
+      Number(datos.cicloLectivo || 0) === Number(datosBloque.cicloLectivo);
+
+    const mismoCurso =
+      String(datos.cursoId || "").trim() === String(datosBloque.cursoId);
+
+    const mismoDia = String(datos.dia || "").trim() === String(datosBloque.dia);
+
+    const mismaHoraInicio =
+      String(datos.horaInicio || "").trim() ===
+      String(datosBloque.horaInicio || "").trim();
+
+    const activo = String(datos.estado || "ACTIVO").toUpperCase() === "ACTIVO";
+
+    if (
+      mismoTipo &&
+      mismoCiclo &&
+      mismoCurso &&
+      mismoDia &&
+      mismaHoraInicio &&
+      activo
+    ) {
+      existe = true;
+    }
+  });
+
+  return existe;
+}
+
 const DIAS_HORARIO_AULA = [
   { valor: "LUNES", etiqueta: "Lunes" },
   { valor: "MARTES", etiqueta: "Martes" },
@@ -873,6 +1175,14 @@ const DIAS_HORARIO_AULA = [
 ];
 
 const DIAS_HORARIO_TALLER = [
+  { valor: "LUNES", etiqueta: "Lunes" },
+  { valor: "MARTES", etiqueta: "Martes" },
+  { valor: "MIERCOLES", etiqueta: "Miércoles" },
+  { valor: "JUEVES", etiqueta: "Jueves" },
+  { valor: "VIERNES", etiqueta: "Viernes" },
+];
+
+const DIAS_HORARIO_EF = [
   { valor: "LUNES", etiqueta: "Lunes" },
   { valor: "MARTES", etiqueta: "Martes" },
   { valor: "MIERCOLES", etiqueta: "Miércoles" },
@@ -1060,6 +1370,95 @@ function renderizarHorarioTallerCargado(bloques) {
   `;
 }
 
+function renderizarHorarioEfCargado(bloques) {
+  if (!vistaHorarioEf) return;
+
+  if (!bloques.length) {
+    vistaHorarioEf.innerHTML = `
+      <p class="mensaje-formulario">
+        Todavía no hay bloques de Educación Física cargados para este curso.
+      </p>
+    `;
+    return;
+  }
+
+  const htmlDias = DIAS_HORARIO_EF.map((dia) => {
+    const bloquesDia = bloques
+      .filter((bloque) => bloque.dia === dia.valor)
+      .sort((a, b) =>
+        String(a.horaInicio || "").localeCompare(String(b.horaInicio || "")),
+      );
+
+    return `
+      <div class="dia-horario-admin">
+        <h4>${dia.etiqueta}</h4>
+
+        ${
+          bloquesDia.length
+            ? bloquesDia
+                .map(
+                  (bloque) => `
+                    <div class="tarjeta-bloque-horario-admin">
+                      <div class="encabezado-tarjeta-bloque-horario">
+                        <div class="bloque-horario-hora">
+                          ${bloque.horaInicio || "-"} a ${bloque.horaFin || "-"}
+                        </div>
+
+                        <div class="acciones-bloque-horario">
+  <button
+    class="btn-editar-bloque-horario btn-editar-bloque-horario-ef"
+    type="button"
+    title="Editar bloque de Educación Física"
+    aria-label="Editar bloque de Educación Física"
+    data-id-horario="${bloque.id}"
+  >
+    <i class="fa-solid fa-pen"></i>
+  </button>
+
+  <button
+    class="btn-eliminar-bloque-horario btn-eliminar-bloque-horario-ef"
+    type="button"
+    title="Eliminar bloque de Educación Física"
+    aria-label="Eliminar bloque de Educación Física"
+    data-id-horario="${bloque.id}"
+  >
+    <i class="fa-solid fa-trash"></i>
+  </button>
+</div>
+                      </div>
+
+                      <div class="bloque-horario-materia">
+                        ${bloque.espacioCurricular || "Educación Física"}
+                      </div>
+
+                      <div class="bloque-horario-docente">
+                        ${bloque.docenteNombre || "Docente sin cargar"}
+                      </div>
+
+                      ${
+                        bloque.ubicacion
+                          ? `<div class="bloque-horario-ubicacion">
+                              ${bloque.ubicacion}
+                            </div>`
+                          : ""
+                      }
+                    </div>
+                  `,
+                )
+                .join("")
+            : `<p class="mensaje-formulario">Sin bloques cargados.</p>`
+        }
+      </div>
+    `;
+  }).join("");
+
+  vistaHorarioEf.innerHTML = `
+    <div class="grilla-horario-aula-admin">
+      ${htmlDias}
+    </div>
+  `;
+}
+
 async function cargarHorarioAulaRegistrado() {
   if (!vistaHorarioAula) return;
 
@@ -1222,6 +1621,85 @@ async function cargarHorarioTallerRegistrado() {
   }
 }
 
+async function cargarHorarioEfRegistrado() {
+  if (!vistaHorarioEf) return;
+
+  const cursoId = String(horarioEfCurso?.value || "").trim();
+  const cicloLectivo = Number(horarioEfCicloLectivo?.value || 0);
+  const turno = String(horarioEfTurno?.value || "").trim();
+
+  if (!cursoId) {
+    vistaHorarioEf.innerHTML = `
+      <p class="mensaje-formulario">
+        Seleccioná un curso para ver el horario de Educación Física cargado.
+      </p>
+    `;
+    return;
+  }
+
+  vistaHorarioEf.innerHTML = `
+    <p class="mensaje-formulario">
+      Cargando horario de Educación Física registrado...
+    </p>
+  `;
+
+  try {
+    const consulta = await getDocs(collection(db, "horarios"));
+    const bloques = [];
+
+    consulta.forEach((documento) => {
+      const datos = documento.data();
+
+      const tipoHorario = String(datos.tipoHorario || "")
+        .trim()
+        .toUpperCase();
+
+      const estado = String(datos.estado || "ACTIVO")
+        .trim()
+        .toUpperCase();
+
+      if (tipoHorario !== "EDUCACION_FISICA") return;
+      if (estado !== "ACTIVO") return;
+      if (String(datos.cursoId || "").trim() !== cursoId) return;
+
+      if (cicloLectivo && Number(datos.cicloLectivo || 0) !== cicloLectivo) {
+        return;
+      }
+
+      if (turno && String(datos.turno || "").trim() !== turno) {
+        return;
+      }
+
+      bloques.push({
+        id: documento.id,
+        ...datos,
+      });
+    });
+
+    bloques.sort((a, b) => {
+      const diaA = DIAS_HORARIO_EF.findIndex((dia) => dia.valor === a.dia);
+      const diaB = DIAS_HORARIO_EF.findIndex((dia) => dia.valor === b.dia);
+
+      if (diaA !== diaB) return diaA - diaB;
+
+      return String(a.horaInicio || "").localeCompare(
+        String(b.horaInicio || ""),
+      );
+    });
+
+    horariosEfCargados = bloques;
+    renderizarHorarioEfCargado(bloques);
+  } catch (error) {
+    console.error("Error al cargar horario de Educación Física:", error);
+
+    vistaHorarioEf.innerHTML = `
+      <p class="mensaje-formulario mensaje-error">
+        No se pudo cargar el horario de Educación Física registrado.
+      </p>
+    `;
+  }
+}
+
 async function eliminarBloqueHorarioAula(idHorario) {
   if (!idHorario) return;
 
@@ -1315,6 +1793,54 @@ async function eliminarBloqueHorarioTaller(idHorario) {
   }
 }
 
+async function eliminarBloqueHorarioEf(idHorario) {
+  if (!idHorario) return;
+
+  const confirmacion = await Swal.fire({
+    title: "Eliminar bloque de Educación Física",
+    text: "Se eliminará este bloque del horario de Educación Física.",
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonText: "Sí, eliminar",
+    cancelButtonText: "Cancelar",
+    confirmButtonColor: "#dc2626",
+  });
+
+  if (!confirmacion.isConfirmed) return;
+
+  try {
+    await deleteDoc(doc(db, "horarios", idHorario));
+
+    await Swal.fire({
+      title: "Bloque eliminado",
+      text: "El bloque de Educación Física fue eliminado correctamente.",
+      icon: "success",
+      confirmButtonText: "Aceptar",
+    });
+
+    await cargarHorarioEfRegistrado();
+
+    mostrarMensajeHorarioEf(
+      "Bloque de Educación Física eliminado correctamente.",
+      "ok",
+    );
+  } catch (error) {
+    console.error("Error al eliminar bloque de Educación Física:", error);
+
+    Swal.fire({
+      title: "No se pudo eliminar",
+      text: "Ocurrió un error al eliminar el bloque de Educación Física.",
+      icon: "error",
+      confirmButtonText: "Aceptar",
+    });
+
+    mostrarMensajeHorarioEf(
+      "No se pudo eliminar el bloque de Educación Física.",
+      "error",
+    );
+  }
+}
+
 function activarModoEdicionHorarioAula(idHorario) {
   idHorarioAulaEditando = idHorario;
 
@@ -1364,6 +1890,36 @@ function limpiarModoEdicionHorarioTaller() {
       <i class="fa-solid fa-plus"></i>
       Registrar bloque de taller
     `;
+  }
+}
+
+function activarModoEdicionHorarioEf(idHorario) {
+  idHorarioEfEditando = idHorario;
+
+  if (btnRegistrarHorarioEf) {
+    btnRegistrarHorarioEf.innerHTML = `
+      <i class="fa-solid fa-floppy-disk"></i>
+      Guardar cambios
+    `;
+  }
+
+  if (btnCancelarEdicionHorarioEf) {
+    btnCancelarEdicionHorarioEf.hidden = false;
+  }
+}
+
+function limpiarModoEdicionHorarioEf() {
+  idHorarioEfEditando = null;
+
+  if (btnRegistrarHorarioEf) {
+    btnRegistrarHorarioEf.innerHTML = `
+      <i class="fa-solid fa-plus"></i>
+      Registrar bloque de Educación Física
+    `;
+  }
+
+  if (btnCancelarEdicionHorarioEf) {
+    btnCancelarEdicionHorarioEf.hidden = true;
   }
 }
 
@@ -1475,6 +2031,56 @@ async function iniciarEdicionHorarioTaller(idHorario) {
   );
 
   formHorarioTaller.scrollIntoView({
+    behavior: "smooth",
+    block: "start",
+  });
+}
+
+async function iniciarEdicionHorarioEf(idHorario) {
+  const bloque = horariosEfCargados.find((item) => item.id === idHorario);
+
+  if (!bloque) {
+    Swal.fire({
+      title: "No se pudo editar",
+      text: "No se encontró el bloque de Educación Física seleccionado.",
+      icon: "error",
+      confirmButtonText: "Aceptar",
+    });
+    return;
+  }
+
+  horarioEfCicloLectivo.value = bloque.cicloLectivo || "";
+  horarioEfTurno.value = bloque.turno || "";
+  horarioEfCurso.value = bloque.cursoId || "";
+  horarioEfDia.value = bloque.dia || "";
+  horarioEfHoraInicio.value = bloque.horaInicio || "";
+  horarioEfHoraFin.value = bloque.horaFin || "";
+  horarioEfUbicacion.value = bloque.ubicacion || "";
+
+  await cargarDocenteAsignadoHorarioEf();
+
+  if (!docenteAsignadoHorarioEf) {
+    docenteAsignadoHorarioEf = {
+      espacioId: bloque.espacioId || "",
+      espacioCurricular: bloque.espacioCurricular || "Educación Física",
+      docenteNombre: bloque.docenteNombre || "",
+      docenteCorreo: bloque.docenteCorreo || "",
+    };
+
+    horarioEfDocente.value =
+      docenteAsignadoHorarioEf.docenteNombre ||
+      docenteAsignadoHorarioEf.docenteCorreo ||
+      "Docente asignado";
+  }
+
+  activarModoEdicionHorarioEf(idHorario);
+
+  mostrarMensajeHorarioEf(
+    "Editando bloque de Educación Física. Modificá los datos y guardá los cambios.",
+    "ok",
+  );
+
+  formHorarioEf.scrollIntoView({
     behavior: "smooth",
     block: "start",
   });
@@ -1905,12 +2511,198 @@ async function registrarHorarioTaller(event) {
   }
 }
 
+async function registrarHorarioEf(event) {
+  event.preventDefault();
+
+  const usuario = auth.currentUser;
+
+  if (!usuario) {
+    mostrarMensajeHorarioEf("No se detectó una sesión activa.", "error");
+    return;
+  }
+
+  const cicloLectivo = Number(horarioEfCicloLectivo?.value || 0);
+  const turno = String(horarioEfTurno?.value || "").trim();
+  const cursoId = String(horarioEfCurso?.value || "").trim();
+  const dia = String(horarioEfDia?.value || "").trim();
+  const horaInicio = String(horarioEfHoraInicio?.value || "").trim();
+  const horaFin = String(horarioEfHoraFin?.value || "").trim();
+  const ubicacion = String(horarioEfUbicacion?.value || "").trim();
+
+  const opcionCurso = horarioEfCurso.options[horarioEfCurso.selectedIndex];
+
+  const cursoAnio = Number(opcionCurso?.dataset?.anio || 0);
+
+  const cursoDivision = String(opcionCurso?.dataset?.division || "")
+    .trim()
+    .toUpperCase();
+
+  const cursoNombre = String(opcionCurso?.dataset?.nombre || "").trim();
+
+  if (!cicloLectivo) {
+    mostrarMensajeHorarioEf("Ingresá el ciclo lectivo.", "error");
+    return;
+  }
+
+  if (!turno) {
+    mostrarMensajeHorarioEf("Seleccioná el turno.", "error");
+    return;
+  }
+
+  if (!cursoId) {
+    mostrarMensajeHorarioEf("Seleccioná el curso.", "error");
+    return;
+  }
+
+  if (!dia) {
+    mostrarMensajeHorarioEf("Seleccioná el día.", "error");
+    return;
+  }
+
+  if (!horaInicio) {
+    mostrarMensajeHorarioEf("Seleccioná la hora de inicio.", "error");
+    return;
+  }
+
+  if (!horaFin) {
+    mostrarMensajeHorarioEf(
+      "No se pudo calcular la hora de finalización.",
+      "error",
+    );
+    return;
+  }
+
+  if (!docenteAsignadoHorarioEf) {
+    mostrarMensajeHorarioEf(
+      "No hay docente asignado para Educación Física en ese curso.",
+      "error",
+    );
+    return;
+  }
+
+  const datosHorarioEf = {
+    tipoHorario: "EDUCACION_FISICA",
+    cicloLectivo,
+    turno,
+    cursoId,
+    cursoAnio,
+    cursoDivision,
+    cursoNombre,
+    dia,
+    horaInicio,
+    horaFin,
+    duracionMinutos: 60,
+    espacioId: docenteAsignadoHorarioEf.espacioId || "",
+    espacioCurricular:
+      docenteAsignadoHorarioEf.espacioCurricular || "Educación Física",
+    docenteNombre: docenteAsignadoHorarioEf.docenteNombre || "",
+    docenteCorreo: docenteAsignadoHorarioEf.docenteCorreo || "",
+    ubicacion,
+    estado: "ACTIVO",
+  };
+
+  btnRegistrarHorarioEf.disabled = true;
+
+  mostrarMensajeHorarioEf(
+    idHorarioEfEditando
+      ? "Guardando cambios del bloque de Educación Física..."
+      : "Registrando horario de Educación Física...",
+  );
+
+  try {
+    const yaExiste = await existeBloqueHorarioEf(
+      datosHorarioEf,
+      idHorarioEfEditando,
+    );
+
+    if (yaExiste) {
+      throw new Error(
+        `Ya existe un bloque de Educación Física cargado para ${cursoNombre}, ${dia}, ${horaInicio}.`,
+      );
+    }
+
+    if (idHorarioEfEditando) {
+      await updateDoc(doc(db, "horarios", idHorarioEfEditando), {
+        ...datosHorarioEf,
+        actualizadoEn: serverTimestamp(),
+        actualizadoPor: usuario.email || "",
+      });
+
+      await Swal.fire({
+        title: "Horario actualizado",
+        text: "El bloque de Educación Física fue actualizado correctamente.",
+        icon: "success",
+        confirmButtonText: "Aceptar",
+      });
+
+      limpiarModoEdicionHorarioEf();
+
+      mostrarMensajeHorarioEf(
+        "Bloque de Educación Física actualizado correctamente.",
+        "ok",
+      );
+
+      await cargarHorarioEfRegistrado();
+
+      return;
+    }
+
+    await addDoc(collection(db, "horarios"), {
+      ...datosHorarioEf,
+      creadoEn: serverTimestamp(),
+      creadoPor: usuario.email || "",
+      actualizadoEn: serverTimestamp(),
+      actualizadoPor: usuario.email || "",
+    });
+
+    await Swal.fire({
+      title: "Horario registrado",
+      text: "El bloque de Educación Física fue registrado correctamente.",
+      icon: "success",
+      confirmButtonText: "Aceptar",
+    });
+
+    horarioEfHoraInicio.value = "";
+    horarioEfHoraFin.value = "";
+    horarioEfUbicacion.value = "";
+
+    mostrarMensajeHorarioEf(
+      "Bloque de Educación Física registrado correctamente.",
+      "ok",
+    );
+
+    await cargarHorarioEfRegistrado();
+  } catch (error) {
+    console.error("Error al registrar horario de Educación Física:", error);
+
+    mostrarMensajeHorarioEf(
+      error.message || "No se pudo registrar el horario de Educación Física.",
+      "error",
+    );
+
+    Swal.fire({
+      title: "No se pudo guardar",
+      text:
+        error.message ||
+        "Ocurrió un error al guardar el horario de Educación Física.",
+      icon: "error",
+      confirmButtonText: "Aceptar",
+    });
+  } finally {
+    btnRegistrarHorarioEf.disabled = false;
+  }
+}
+
 if (formHorarioAula) {
   formHorarioAula.addEventListener("submit", registrarHorarioAula);
 }
 
 if (formHorarioTaller) {
   formHorarioTaller.addEventListener("submit", registrarHorarioTaller);
+}
+
+if (formHorarioEf) {
+  formHorarioEf.addEventListener("submit", registrarHorarioEf);
 }
 
 if (btnActualizarHorarioAula) {
@@ -1941,6 +2733,26 @@ if (btnActualizarHorarioTaller) {
     }
 
     await cargarHorarioTallerRegistrado();
+  });
+}
+
+if (btnActualizarHorarioEf) {
+  btnActualizarHorarioEf.addEventListener("click", async () => {
+    if (!cursosHorarios.length) {
+      await cargarCursosHorarioAula();
+
+      if (vistaHorarioEf) {
+        vistaHorarioEf.innerHTML = `
+          <p class="mensaje-formulario">
+            Cursos cargados. Seleccioná curso y turno para cargar el horario de Educación Física.
+          </p>
+        `;
+      }
+
+      return;
+    }
+
+    await cargarHorarioEfRegistrado();
   });
 }
 
@@ -1997,6 +2809,25 @@ if (vistaHorarioTaller) {
   });
 }
 
+if (vistaHorarioEf) {
+  vistaHorarioEf.addEventListener("click", async (event) => {
+    const botonEditar = event.target.closest(".btn-editar-bloque-horario-ef");
+
+    if (botonEditar) {
+      await iniciarEdicionHorarioEf(botonEditar.dataset.idHorario);
+      return;
+    }
+
+    const botonEliminar = event.target.closest(
+      ".btn-eliminar-bloque-horario-ef",
+    );
+
+    if (!botonEliminar) return;
+
+    await eliminarBloqueHorarioEf(botonEliminar.dataset.idHorario);
+  });
+}
+
 if (btnCancelarEdicionHorarioAula) {
   btnCancelarEdicionHorarioAula.addEventListener("click", () => {
     limpiarModoEdicionHorarioAula();
@@ -2008,6 +2839,18 @@ if (btnCancelarEdicionHorarioAula) {
       });
 
     mostrarMensajeHorarioAula("Edición cancelada.");
+  });
+}
+
+if (btnCancelarEdicionHorarioEf) {
+  btnCancelarEdicionHorarioEf.addEventListener("click", () => {
+    limpiarModoEdicionHorarioEf();
+
+    horarioEfHoraInicio.value = "";
+    horarioEfHoraFin.value = "";
+    horarioEfUbicacion.value = "";
+
+    mostrarMensajeHorarioEf("Edición cancelada.");
   });
 }
 
@@ -2043,11 +2886,35 @@ if (horarioTallerCicloLectivo) {
   });
 }
 
+if (horarioEfCurso) {
+  horarioEfCurso.addEventListener("change", async () => {
+    await cargarDocenteAsignadoHorarioEf();
+    await cargarHorarioEfRegistrado();
+  });
+}
+
+if (horarioEfTurno) {
+  horarioEfTurno.addEventListener("change", cargarHorarioEfRegistrado);
+}
+
+if (horarioEfCicloLectivo) {
+  horarioEfCicloLectivo.addEventListener("change", async () => {
+    await cargarDocenteAsignadoHorarioEf();
+    await cargarHorarioEfRegistrado();
+  });
+}
+
 onAuthStateChanged(auth, (usuario) => {
   if (!usuario) return;
 
   if (horarioAulaCurso) {
     horarioAulaCurso.innerHTML = `
+      <option value="">Presioná “Actualizar horario” para cargar cursos</option>
+    `;
+  }
+
+  if (horarioEfCurso) {
+    horarioEfCurso.innerHTML = `
       <option value="">Presioná “Actualizar horario” para cargar cursos</option>
     `;
   }
@@ -2070,6 +2937,14 @@ onAuthStateChanged(auth, (usuario) => {
     vistaHorarioTaller.innerHTML = `
       <p class="mensaje-formulario">
         Todavía no se consultó el horario de taller. Presioná “Actualizar horario” para comenzar.
+      </p>
+    `;
+  }
+
+  if (vistaHorarioEf) {
+    vistaHorarioEf.innerHTML = `
+      <p class="mensaje-formulario">
+        Todavía no se consultó el horario de Educación Física. Presioná “Actualizar horario” para comenzar.
       </p>
     `;
   }

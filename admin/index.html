@@ -1320,6 +1320,161 @@
               </p>
             </div>
           </div>
+
+          <div id="panelHorarioEducacionFisica" class="panel-horario-taller">
+            <div class="separador-usuarios"></div>
+
+            <h3>Horario de Educación Física</h3>
+
+            <p>
+              Cargá los bloques de Educación Física por curso, docente, día,
+              hora de inicio y ubicación. La hora de finalización se calculará
+              automáticamente con una duración de 60 minutos.
+            </p>
+
+            <form
+              id="formHorarioEducacionFisica"
+              class="formulario-usuario"
+              autocomplete="off"
+            >
+              <div class="form-grid">
+                <div class="campo-formulario">
+                  <label for="horarioEfCicloLectivo">Ciclo lectivo *</label>
+                  <input
+                    id="horarioEfCicloLectivo"
+                    type="number"
+                    min="2020"
+                    max="2100"
+                    value="2026"
+                    required
+                  />
+                </div>
+
+                <div class="campo-formulario">
+                  <label for="horarioEfTurno">Turno *</label>
+                  <select id="horarioEfTurno" required>
+                    <option value="">Seleccionar turno</option>
+                    <option value="MANANA">Mañana</option>
+                    <option value="TARDE">Tarde</option>
+                  </select>
+                </div>
+
+                <div class="campo-formulario">
+                  <label for="horarioEfCurso">Curso *</label>
+                  <select id="horarioEfCurso" required>
+                    <option value="">Cargando cursos...</option>
+                  </select>
+                </div>
+
+                <div class="campo-formulario">
+                  <label for="horarioEfDia">Día *</label>
+                  <select id="horarioEfDia" required>
+                    <option value="">Seleccionar día</option>
+                    <option value="LUNES">Lunes</option>
+                    <option value="MARTES">Martes</option>
+                    <option value="MIERCOLES">Miércoles</option>
+                    <option value="JUEVES">Jueves</option>
+                    <option value="VIERNES">Viernes</option>
+                  </select>
+                </div>
+
+                <div class="campo-formulario campo-doble">
+                  <label for="horarioEfEspacio">Espacio curricular</label>
+                  <input
+                    id="horarioEfEspacio"
+                    type="text"
+                    value="Educación Física"
+                    readonly
+                  />
+                </div>
+
+                <div class="campo-formulario campo-doble">
+                  <label for="horarioEfDocente">Docente asignado</label>
+                  <input
+                    id="horarioEfDocente"
+                    type="text"
+                    placeholder="Se completará automáticamente"
+                    readonly
+                  />
+                </div>
+
+                <div class="campo-formulario">
+                  <label for="horarioEfHoraInicio">Hora de inicio *</label>
+                  <select id="horarioEfHoraInicio" required>
+                    <option value="">Seleccionar hora</option>
+                  </select>
+                </div>
+
+                <div class="campo-formulario">
+                  <label for="horarioEfHoraFin">Hora de finalización</label>
+                  <input
+                    id="horarioEfHoraFin"
+                    type="text"
+                    placeholder="Se calculará automáticamente"
+                    readonly
+                  />
+                </div>
+
+                <div class="campo-formulario campo-doble">
+                  <label for="horarioEfUbicacion">Ubicación</label>
+                  <input
+                    id="horarioEfUbicacion"
+                    type="text"
+                    placeholder="Ej.: Gimnasio, Club, Patio, Predio deportivo, etc."
+                  />
+                </div>
+              </div>
+
+              <div class="acciones">
+                <button
+                  class="btn-accion"
+                  id="btnRegistrarHorarioEf"
+                  type="submit"
+                >
+                  <i class="fa-solid fa-plus"></i>
+                  Registrar bloque de Educación Física
+                </button>
+
+                <button
+                  class="btn-secundario"
+                  id="btnCancelarEdicionHorarioEf"
+                  type="button"
+                  hidden
+                >
+                  Cancelar edición
+                </button>
+              </div>
+
+              <p id="mensajeHorarioEf" class="mensaje-formulario"></p>
+            </form>
+
+            <div class="separador-usuarios"></div>
+
+            <div class="encabezado-listado">
+              <div>
+                <h3>Horario de Educación Física cargado</h3>
+                <p>
+                  Los bloques registrados se mostrarán ordenados por día, curso
+                  y horario.
+                </p>
+              </div>
+
+              <button
+                class="btn-accion"
+                id="btnActualizarHorarioEf"
+                type="button"
+              >
+                <i class="fa-solid fa-rotate"></i>
+                Actualizar horario
+              </button>
+            </div>
+
+            <div id="vistaHorarioEf" class="vista-horario-aula">
+              <p class="mensaje-formulario">
+                Todavía no hay bloques de Educación Física cargados.
+              </p>
+            </div>
+          </div>
         </div>
 
         <a class="btn-volver" href="#inicio">
