@@ -1332,17 +1332,31 @@
         <h2>Configuración del Portal</h2>
 
         <div class="panel-info">
-          <p>
-            En esta sección se cargarán enlaces institucionales, accesos
-            externos y avisos generales del portal.
-          </p>
+          <div class="encabezado-listado">
+            <div>
+              <h3>Backup del sistema</h3>
+              <p>
+                Generá una copia de seguridad manual de la base de datos del
+                portal institucional. El archivo se guardará automáticamente en
+                la carpeta System_BackUp de Google Drive.
+              </p>
+            </div>
+          </div>
 
           <div class="acciones">
-            <button class="btn-accion" type="button">
-              <i class="fa-solid fa-sliders"></i>
-              Configurar portal
+            <button
+              type="button"
+              class="btn-accion"
+              id="btnGenerarBackupSistema"
+            >
+              <i class="fa-solid fa-cloud-arrow-down"></i>
+              Generar backup ahora
             </button>
           </div>
+
+          <p class="mensaje-formulario" id="mensajeBackupSistema">
+            El sistema también genera un backup automático todos los sábados.
+          </p>
         </div>
 
         <a class="btn-volver" href="#inicio">
@@ -1768,6 +1782,7 @@
     <script type="module" src="../assets/js/documentacion-admin.js"></script>
     <script type="module" src="../assets/js/sime-admin.js"></script>
     <script type="module" src="../assets/js/horarios-admin.js"></script>
+    <script type="module" src="../assets/js/backup-admin.js"></script>
 
     <script>
       const btnArriba = document.getElementById("btnArriba");

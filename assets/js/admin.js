@@ -1025,6 +1025,7 @@ const PLAN_ESTUDIOS_INICIAL = [
   // CUARTO AÑO
   { anio: 4, nombre: "Automatización y Control", tipo: "AULA" },
   { anio: 4, nombre: "Economía", tipo: "AULA" },
+  { anio: 4, nombre: "Educación Física", tipo: "EDUCACION_FISICA" },
   { anio: 4, nombre: "Formación Ética y Ciudadana", tipo: "AULA" },
   { anio: 4, nombre: "Fundamentos de Gestión", tipo: "AULA" },
   { anio: 4, nombre: "Geografía", tipo: "AULA" },
@@ -1036,6 +1037,7 @@ const PLAN_ESTUDIOS_INICIAL = [
   { anio: 4, nombre: "Taller", tipo: "TALLER" },
 
   // QUINTO AÑO
+  { anio: 5, nombre: "Educación Física", tipo: "EDUCACION_FISICA" },
   { anio: 5, nombre: "Formación Ética y Ciudadana", tipo: "AULA" },
   { anio: 5, nombre: "Hardware III", tipo: "AULA" },
   { anio: 5, nombre: "Lengua Extranjera: Inglés", tipo: "AULA" },
