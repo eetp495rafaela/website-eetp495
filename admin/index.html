@@ -65,66 +65,73 @@
           <a class="tarjeta tarjeta-enlace" href="#usuarios">
             <i class="fa-solid fa-users-gear"></i>
             <h3>Usuarios</h3>
-            <p>Alta, edición, activación y desactivación de cuentas.</p>
-          </a>
-
-          <a class="tarjeta tarjeta-enlace" href="#docentes-cursos">
-            <i class="fa-solid fa-chalkboard-user"></i>
-            <h3>Docentes y Cursos</h3>
-            <p>Vinculación de docentes, materias, talleres y cursos.</p>
+            <p>Alta, edición, roles y estado de las cuentas.</p>
           </a>
 
           <a class="tarjeta tarjeta-enlace" href="#espacios-curriculares">
             <i class="fa-solid fa-book-bookmark"></i>
             <h3>Espacios Curriculares</h3>
-            <p>
-              Importación y administración del Plan de Estudios institucional.
-            </p>
+            <p>Plan de Estudios institucional por año y tipo.</p>
+          </a>
+
+          <a class="tarjeta tarjeta-enlace" href="#cursos">
+            <i class="fa-solid fa-school"></i>
+            <h3>Cursos</h3>
+            <p>Alta, consulta y edición de cursos institucionales.</p>
+          </a>
+
+          <a class="tarjeta tarjeta-enlace" href="#asignaciones-docentes">
+            <i class="fa-solid fa-chalkboard-user"></i>
+            <h3>Asignaciones Docentes</h3>
+            <p>Vinculación de docentes, cursos y espacios.</p>
           </a>
 
           <a class="tarjeta tarjeta-enlace" href="#estudiantes">
             <i class="fa-solid fa-user-graduate"></i>
             <h3>Estudiantes</h3>
-            <p>Consulta y administración de información estudiantil.</p>
+            <p>Curso, grupo de taller y estado de estudiantes.</p>
           </a>
 
           <a class="tarjeta tarjeta-enlace" href="#documentacion-academica">
             <i class="fa-solid fa-folder-open"></i>
             <h3>Documentación Académica</h3>
-            <p>
-              Consulta, revisión y administración de planes, programas y
-              material de estudio.
-            </p>
+            <p>Planes, programas y material de estudio.</p>
           </a>
 
           <a class="tarjeta tarjeta-enlace" href="#sime">
             <i class="fa-solid fa-file-signature"></i>
             <h3>S.I.M.E.</h3>
-            <p>
-              Configuración, consulta y administración de inscripciones a mesas
-              de examen.
-            </p>
+            <p>Inscripciones a mesas y permisos de examen.</p>
           </a>
 
-          <a class="tarjeta tarjeta-enlace" href="#horarios">
+          <a class="tarjeta tarjeta-enlace" href="#horario-aula">
             <i class="fa-solid fa-calendar-days"></i>
-            <h3>Horarios</h3>
-            <p>
-              Carga y administración de horarios de aula, taller y educación
-              física.
-            </p>
+            <h3>Horario de Aula</h3>
+            <p>Carga y consulta de bloques de aula.</p>
+          </a>
+
+          <a class="tarjeta tarjeta-enlace" href="#horario-taller">
+            <i class="fa-solid fa-screwdriver-wrench"></i>
+            <h3>Horario de Taller</h3>
+            <p>Carga y consulta de bloques por grupo de taller.</p>
+          </a>
+
+          <a class="tarjeta tarjeta-enlace" href="#horario-educacion-fisica">
+            <i class="fa-solid fa-person-running"></i>
+            <h3>Horario de Educación Física</h3>
+            <p>Carga y consulta de bloques de Educación Física.</p>
           </a>
 
           <a class="tarjeta tarjeta-enlace" href="#configuracion">
             <i class="fa-solid fa-gears"></i>
-            <h3>Configuración</h3>
-            <p>Enlaces generales, avisos y parámetros del portal.</p>
+            <h3>Configuración del Portal</h3>
+            <p>Backup del sistema y pizarra general.</p>
           </a>
 
           <a class="tarjeta tarjeta-enlace" href="#accesos">
             <i class="fa-solid fa-clock-rotate-left"></i>
             <h3>Accesos Recientes</h3>
-            <p>Consulta de ingresos y actividad general del sistema.</p>
+            <p>Consulta de ingresos y actividad del sistema.</p>
           </a>
         </div>
       </section>
@@ -387,8 +394,8 @@
         </a>
       </section>
 
-      <section class="grupo seccion-destino" id="docentes-cursos">
-        <h2>Docentes y Cursos</h2>
+      <section class="grupo seccion-destino" id="cursos">
+        <h2>Cursos</h2>
 
         <div class="panel-info">
           <p>
@@ -497,6 +504,16 @@
 
           <p id="mensajeCursos" class="mensaje-formulario"></p>
         </div>
+
+        <a class="btn-volver" href="#inicio">
+          <i class="fa-solid fa-arrow-up"></i>
+          Volver al inicio
+        </a>
+      </section>
+
+      <section class="grupo seccion-destino" id="asignaciones-docentes">
+        <h2>Asignaciones Docentes</h2>
+
         <div class="panel-info panel-asignaciones">
           <h3>Asignaciones Docentes</h3>
 
@@ -834,7 +851,7 @@
         </a>
       </section>
       <section class="grupo seccion-destino" id="sime">
-        <h2>S.I.M.E. ~ Sistema de Inscripción a Mesas de Exámenes</h2>
+        <h2>S.I.M.E.</h2>
 
         <div class="panel-info">
           <div class="encabezado-listado">
@@ -1037,23 +1054,10 @@
         </a>
       </section>
 
-      <section class="grupo seccion-destino" id="horarios">
-        <h2>Horarios</h2>
+      <section class="grupo seccion-destino" id="horario-aula">
+        <h2>Horario de Aula</h2>
 
         <div class="panel-info">
-          <div class="encabezado-listado">
-            <div>
-              <h3>Administración de horarios</h3>
-              <p>
-                Desde esta sección se cargarán los horarios institucionales para
-                que cada estudiante y docente vea únicamente lo que le
-                corresponde.
-              </p>
-            </div>
-          </div>
-
-          <div class="separador-usuarios"></div>
-
           <div id="panelHorarioAula">
             <h3>Horario de Aula</h3>
 
@@ -1198,9 +1202,19 @@
               </p>
             </div>
           </div>
-          <div id="panelHorarioTaller" class="panel-horario-taller">
-            <div class="separador-usuarios"></div>
+        </div>
 
+        <a class="btn-volver" href="#inicio">
+          <i class="fa-solid fa-arrow-up"></i>
+          Volver al inicio
+        </a>
+      </section>
+
+      <section class="grupo seccion-destino" id="horario-taller">
+        <h2>Horario de Taller</h2>
+
+        <div class="panel-info">
+          <div id="panelHorarioTaller" class="panel-horario-taller">
             <h3>Horario de Taller</h3>
 
             <p>
@@ -1344,10 +1358,19 @@
               </p>
             </div>
           </div>
+        </div>
 
+        <a class="btn-volver" href="#inicio">
+          <i class="fa-solid fa-arrow-up"></i>
+          Volver al inicio
+        </a>
+      </section>
+
+      <section class="grupo seccion-destino" id="horario-educacion-fisica">
+        <h2>Horario de Educación Física</h2>
+
+        <div class="panel-info">
           <div id="panelHorarioEducacionFisica" class="panel-horario-taller">
-            <div class="separador-usuarios"></div>
-
             <h3>Horario de Educación Física</h3>
 
             <p>
