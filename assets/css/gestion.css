@@ -543,3 +543,1031 @@ body {
     font-size: 0.8rem;
   }
 }
+/* =========================
+   GESTIÓN - LISTADOS INTERNOS
+========================= */
+
+.panel-gestion-listado {
+  align-items: flex-start;
+}
+
+.contenido-panel-gestion {
+  width: 100%;
+}
+
+.acciones-gestion {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 18px;
+}
+
+.btn-gestion {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+
+  min-height: 42px;
+  padding: 10px 16px;
+  border: 0;
+  border-radius: 12px;
+
+  color: #fff;
+  background: var(--gestion-verde);
+  cursor: pointer;
+
+  font-family: inherit;
+  font-size: 0.9rem;
+  font-weight: 800;
+
+  transition:
+    transform 0.2s ease,
+    background 0.2s ease,
+    opacity 0.2s ease;
+}
+
+.btn-gestion:hover {
+  background: var(--gestion-naranja);
+  transform: translateY(-2px);
+}
+
+.btn-gestion:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.vista-gestion {
+  margin-top: 18px;
+}
+
+.mensaje-gestion {
+  margin-top: 12px;
+  color: var(--gestion-texto-suave);
+  font-weight: 700;
+  line-height: 1.5;
+}
+
+.mensaje-gestion.ok {
+  color: var(--gestion-verde);
+}
+
+.mensaje-gestion.error {
+  color: #b42318;
+}
+
+.tabla-gestion-contenedor {
+  width: 100%;
+  overflow-x: auto;
+  border: 1px solid var(--gestion-borde);
+  border-radius: 14px;
+  background: #fff;
+}
+
+.tabla-gestion {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 620px;
+}
+
+.tabla-gestion th,
+.tabla-gestion td {
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--gestion-borde);
+  text-align: left;
+  font-size: 0.92rem;
+}
+
+.tabla-gestion th {
+  color: var(--gestion-azul-oscuro);
+  background: var(--gestion-celeste);
+  font-weight: 900;
+}
+
+.tabla-gestion tr:last-child td {
+  border-bottom: 0;
+}
+
+.estado-gestion {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 5px 9px;
+  border-radius: 999px;
+
+  font-size: 0.75rem;
+  font-weight: 900;
+}
+
+.estado-gestion.activo {
+  color: var(--gestion-verde);
+  background: var(--gestion-verde-suave);
+}
+
+.estado-gestion.inactivo {
+  color: #8a2c0d;
+  background: #fff1d6;
+}
+/* =========================
+   GESTIÓN - FILTROS
+========================= */
+
+.filtros-gestion {
+  display: grid;
+  grid-template-columns: minmax(240px, 2fr) minmax(180px, 1fr) minmax(
+      180px,
+      1fr
+    );
+  gap: 14px;
+  margin-top: 18px;
+}
+
+.campo-filtro-gestion {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.campo-filtro-gestion label {
+  color: var(--gestion-azul-oscuro);
+  font-size: 0.86rem;
+  font-weight: 900;
+}
+
+.campo-filtro-gestion input,
+.campo-filtro-gestion select {
+  width: 100%;
+  min-height: 42px;
+  padding: 9px 11px;
+  border: 1px solid var(--gestion-borde);
+  border-radius: 11px;
+  outline: none;
+
+  color: var(--gestion-texto);
+  background: #ffffff;
+
+  font-family: inherit;
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.campo-filtro-gestion input:focus,
+.campo-filtro-gestion select:focus {
+  border-color: var(--gestion-verde);
+  box-shadow: 0 0 0 3px rgba(22, 131, 107, 0.12);
+}
+
+@media (max-width: 900px) {
+  .filtros-gestion {
+    grid-template-columns: 1fr;
+  }
+}
+/* =========================
+   GESTIÓN - DOCENTES
+========================= */
+
+.grilla-docentes-gestion {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 18px;
+  margin-top: 18px;
+}
+
+.tarjeta-docente-gestion {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+
+  padding: 18px;
+  border: 1px solid var(--gestion-borde);
+  border-radius: 16px;
+
+  background: #ffffff;
+  box-shadow: 0 8px 22px rgba(30, 73, 121, 0.07);
+}
+
+.encabezado-docente-gestion {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+
+  padding-bottom: 12px;
+  border-bottom: 2px solid var(--gestion-celeste);
+}
+
+.encabezado-docente-gestion h4 {
+  margin: 0;
+  color: var(--gestion-azul-oscuro);
+  font-size: 1.05rem;
+  font-weight: 900;
+  line-height: 1.25;
+}
+
+.encabezado-docente-gestion p {
+  margin-top: 4px;
+  color: var(--gestion-texto-suave);
+  font-size: 0.88rem;
+  font-weight: 700;
+  line-height: 1.3;
+  word-break: break-word;
+}
+
+.encabezado-docente-gestion > i {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  flex: 0 0 42px;
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+
+  color: var(--gestion-verde);
+  background: var(--gestion-verde-suave);
+  font-size: 1.2rem;
+}
+
+.cursos-docente-gestion {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.bloque-curso-docente-gestion {
+  border: 1px solid #d8e5ef;
+  border-radius: 13px;
+  overflow: hidden;
+  background: #f8fbff;
+}
+
+.bloque-curso-docente-gestion h5 {
+  margin: 0;
+  padding: 9px 12px;
+
+  color: #ffffff;
+  background: var(--gestion-azul);
+  font-size: 0.92rem;
+  font-weight: 900;
+}
+
+.bloque-curso-docente-gestion ul {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.bloque-curso-docente-gestion li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+
+  padding: 10px 12px;
+  border-bottom: 1px solid #e2edf6;
+
+  color: var(--gestion-texto);
+  background: #ffffff;
+  font-size: 0.9rem;
+  font-weight: 800;
+}
+
+.bloque-curso-docente-gestion li:last-child {
+  border-bottom: 0;
+}
+
+.bloque-curso-docente-gestion li span {
+  line-height: 1.3;
+}
+
+.bloque-curso-docente-gestion li small {
+  flex: 0 0 auto;
+
+  padding: 4px 8px;
+  border-radius: 999px;
+
+  color: var(--gestion-verde);
+  background: var(--gestion-verde-suave);
+  font-size: 0.72rem;
+  font-weight: 900;
+  white-space: nowrap;
+}
+
+@media (max-width: 760px) {
+  .grilla-docentes-gestion {
+    grid-template-columns: 1fr;
+  }
+
+  .tarjeta-docente-gestion {
+    padding: 15px;
+  }
+
+  .encabezado-docente-gestion {
+    align-items: center;
+  }
+
+  .bloque-curso-docente-gestion li {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .bloque-curso-docente-gestion li small {
+    white-space: normal;
+  }
+}
+/* =========================
+   GESTIÓN - DOCENTES POR ESPACIO
+========================= */
+
+.espacios-docente-gestion {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.bloque-espacio-docente-gestion {
+  border: 1px solid #d8e5ef;
+  border-radius: 13px;
+  overflow: hidden;
+  background: #ffffff;
+}
+
+.encabezado-espacio-docente-gestion {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+
+  padding: 10px 12px;
+  background: #f0f7ff;
+  border-bottom: 1px solid #d8e5ef;
+}
+
+.encabezado-espacio-docente-gestion h5 {
+  margin: 0;
+  color: var(--gestion-azul-oscuro);
+  font-size: 0.95rem;
+  font-weight: 900;
+  line-height: 1.25;
+}
+
+.encabezado-espacio-docente-gestion small {
+  flex: 0 0 auto;
+
+  padding: 4px 8px;
+  border-radius: 999px;
+
+  color: var(--gestion-verde);
+  background: var(--gestion-verde-suave);
+  font-size: 0.72rem;
+  font-weight: 900;
+  white-space: nowrap;
+}
+
+.bloque-espacio-docente-gestion p {
+  margin: 0;
+  padding: 11px 12px;
+
+  color: var(--gestion-texto);
+  background: #ffffff;
+
+  font-size: 0.92rem;
+  font-weight: 800;
+  line-height: 1.45;
+}
+
+/* Ocultamos estructura anterior si quedó algún estilo viejo aplicado */
+.cursos-docente-gestion {
+  display: none;
+}
+
+@media (max-width: 760px) {
+  .encabezado-espacio-docente-gestion {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 7px;
+  }
+
+  .encabezado-espacio-docente-gestion small {
+    white-space: normal;
+  }
+}
+/* =========================
+   GESTIÓN - HORARIOS
+========================= */
+
+.grupos-horarios-gestion {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  margin-top: 18px;
+}
+
+.grupo-horario-gestion {
+  border: 1px solid var(--gestion-borde);
+  border-radius: 16px;
+  overflow: hidden;
+
+  background: #ffffff;
+  box-shadow: 0 8px 22px rgba(30, 73, 121, 0.07);
+}
+
+.grupo-horario-gestion h4 {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+
+  margin: 0;
+  padding: 14px 18px;
+
+  color: #ffffff;
+  background: linear-gradient(
+    135deg,
+    var(--gestion-azul-oscuro),
+    var(--gestion-azul)
+  );
+
+  font-size: 1rem;
+  font-weight: 900;
+}
+
+.grupo-horario-gestion h4 span {
+  padding: 5px 10px;
+  border-radius: 999px;
+
+  color: var(--gestion-azul-oscuro);
+  background: #ffffff;
+
+  font-size: 0.78rem;
+  font-weight: 900;
+  white-space: nowrap;
+}
+
+.grilla-horarios-gestion {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 14px;
+  padding: 16px;
+  background: #f8fbff;
+}
+
+.tarjeta-horario-gestion {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+
+  padding: 15px;
+  border: 1px solid #d8e5ef;
+  border-left: 6px solid var(--gestion-verde);
+  border-radius: 14px;
+
+  background: #ffffff;
+  box-shadow: 0 6px 16px rgba(30, 73, 121, 0.06);
+}
+
+.encabezado-horario-gestion {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+
+  padding-bottom: 10px;
+  border-bottom: 1px solid #e1ebf4;
+}
+
+.encabezado-horario-gestion h5 {
+  margin: 0;
+
+  color: var(--gestion-azul-oscuro);
+  font-size: 1rem;
+  font-weight: 900;
+  line-height: 1.25;
+}
+
+.encabezado-horario-gestion p {
+  margin-top: 4px;
+
+  color: var(--gestion-texto);
+  font-size: 0.9rem;
+  font-weight: 800;
+  line-height: 1.3;
+}
+
+.encabezado-horario-gestion span {
+  flex: 0 0 auto;
+
+  padding: 6px 9px;
+  border-radius: 999px;
+
+  color: var(--gestion-verde);
+  background: var(--gestion-verde-suave);
+
+  font-size: 0.78rem;
+  font-weight: 900;
+  white-space: nowrap;
+}
+
+.detalle-horario-gestion {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.detalle-horario-gestion p {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+
+  margin: 0;
+
+  color: var(--gestion-texto-suave);
+  font-size: 0.88rem;
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+.detalle-horario-gestion i {
+  width: 16px;
+  margin-top: 2px;
+
+  color: var(--gestion-verde);
+  text-align: center;
+}
+
+.filtros-horarios-gestion {
+  grid-template-columns: repeat(3, minmax(180px, 1fr));
+}
+
+@media (max-width: 900px) {
+  .filtros-horarios-gestion {
+    grid-template-columns: 1fr;
+  }
+
+  .grilla-horarios-gestion {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 620px) {
+  .grupo-horario-gestion h4 {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .encabezado-horario-gestion {
+    flex-direction: column;
+  }
+
+  .encabezado-horario-gestion span {
+    white-space: normal;
+  }
+}
+/* Ajuste de filtros de horarios con Día */
+
+.filtros-horarios-gestion {
+  grid-template-columns: repeat(4, minmax(160px, 1fr));
+}
+
+@media (max-width: 1100px) {
+  .filtros-horarios-gestion {
+    grid-template-columns: repeat(2, minmax(180px, 1fr));
+  }
+}
+
+@media (max-width: 700px) {
+  .filtros-horarios-gestion {
+    grid-template-columns: 1fr;
+  }
+}
+/* =========================
+   GESTIÓN - DOCUMENTACIÓN ACADÉMICA
+========================= */
+
+.filtros-documentacion-gestion {
+  grid-template-columns: minmax(180px, 1fr) minmax(220px, 1fr) minmax(
+      260px,
+      2fr
+    );
+}
+
+.grilla-documentacion-gestion {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 16px;
+  margin-top: 18px;
+}
+
+.tarjeta-documentacion-gestion {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 14px;
+
+  padding: 16px;
+  border: 1px solid #d8e5ef;
+  border-left: 6px solid var(--gestion-verde);
+  border-radius: 16px;
+
+  background: #ffffff;
+  box-shadow: 0 8px 22px rgba(30, 73, 121, 0.07);
+}
+
+.encabezado-documentacion-gestion {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+
+  padding-bottom: 12px;
+  border-bottom: 1px solid #e1ebf4;
+}
+
+.encabezado-documentacion-gestion h4 {
+  margin: 0;
+
+  color: var(--gestion-azul-oscuro);
+  font-size: 1rem;
+  font-weight: 900;
+  line-height: 1.25;
+}
+
+.encabezado-documentacion-gestion p {
+  margin-top: 5px;
+
+  color: var(--gestion-texto-suave);
+  font-size: 0.9rem;
+  font-weight: 800;
+}
+
+.encabezado-documentacion-gestion span {
+  flex: 0 0 auto;
+
+  padding: 6px 10px;
+  border-radius: 999px;
+
+  color: var(--gestion-verde);
+  background: var(--gestion-verde-suave);
+
+  font-size: 0.75rem;
+  font-weight: 900;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.detalle-documentacion-gestion {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.detalle-documentacion-gestion p {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+
+  margin: 0;
+
+  color: var(--gestion-texto-suave);
+  font-size: 0.9rem;
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+.detalle-documentacion-gestion i {
+  width: 16px;
+  margin-top: 2px;
+
+  color: var(--gestion-verde);
+  text-align: center;
+}
+
+.acciones-documentacion-gestion {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+
+  padding-top: 12px;
+  border-top: 1px solid #e1ebf4;
+}
+
+.btn-documentacion-gestion {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+
+  min-height: 40px;
+  padding: 9px 16px;
+  border-radius: 999px;
+
+  color: #ffffff;
+  background: var(--gestion-verde);
+
+  font-size: 0.88rem;
+  font-weight: 900;
+  text-decoration: none;
+
+  box-shadow: 0 8px 18px rgba(22, 131, 107, 0.18);
+  transition:
+    transform 0.2s ease,
+    background 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.btn-documentacion-gestion:hover {
+  transform: translateY(-2px);
+
+  color: #ffffff;
+  background: var(--gestion-naranja);
+
+  box-shadow: 0 10px 22px rgba(230, 126, 34, 0.22);
+}
+
+.mensaje-documentacion-sin-url {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  min-height: 40px;
+  padding: 9px 14px;
+  border-radius: 999px;
+
+  color: #8a2c0d;
+  background: #fff1d6;
+
+  font-size: 0.84rem;
+  font-weight: 900;
+}
+
+@media (max-width: 900px) {
+  .filtros-documentacion-gestion {
+    grid-template-columns: 1fr;
+  }
+
+  .grilla-documentacion-gestion {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 620px) {
+  .encabezado-documentacion-gestion {
+    flex-direction: column;
+  }
+
+  .encabezado-documentacion-gestion span {
+    white-space: normal;
+  }
+
+  .acciones-documentacion-gestion {
+    justify-content: flex-start;
+  }
+
+  .btn-documentacion-gestion {
+    width: 100%;
+  }
+}
+/* =========================
+   GESTIÓN - S.I.M.E.
+========================= */
+
+.filtros-sime-gestion {
+  grid-template-columns:
+    minmax(150px, 1fr)
+    minmax(160px, 1fr)
+    minmax(160px, 1fr)
+    minmax(260px, 2fr);
+}
+
+.grilla-sime-gestion {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 16px;
+  margin-top: 18px;
+}
+
+.tarjeta-sime-gestion {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+
+  padding: 16px;
+  border: 1px solid #d8e5ef;
+  border-left: 6px solid var(--gestion-verde);
+  border-radius: 16px;
+
+  background: #ffffff;
+  box-shadow: 0 8px 22px rgba(30, 73, 121, 0.07);
+}
+
+.encabezado-sime-gestion {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+
+  padding-bottom: 12px;
+  border-bottom: 1px solid #e1ebf4;
+}
+
+.encabezado-sime-gestion h4 {
+  margin: 0;
+
+  color: var(--gestion-azul-oscuro);
+  font-size: 1rem;
+  font-weight: 900;
+  line-height: 1.25;
+}
+
+.encabezado-sime-gestion p {
+  margin-top: 5px;
+
+  color: var(--gestion-texto-suave);
+  font-size: 0.88rem;
+  font-weight: 800;
+  word-break: break-word;
+}
+
+.estado-sime-gestion {
+  flex: 0 0 auto;
+
+  padding: 6px 10px;
+  border-radius: 999px;
+
+  font-size: 0.75rem;
+  font-weight: 900;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.estado-sime-gestion.activa {
+  color: var(--gestion-verde);
+  background: var(--gestion-verde-suave);
+}
+
+.estado-sime-gestion.anulada {
+  color: #8a2c0d;
+  background: #fff1d6;
+}
+
+.detalle-sime-gestion {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 9px 12px;
+}
+
+.detalle-sime-gestion p {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+
+  margin: 0;
+
+  color: var(--gestion-texto-suave);
+  font-size: 0.88rem;
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+.detalle-sime-gestion i {
+  width: 16px;
+  margin-top: 2px;
+
+  color: var(--gestion-verde);
+  text-align: center;
+}
+
+.materias-contenedor-sime-gestion {
+  padding: 12px;
+  border-radius: 14px;
+
+  background: #f8fbff;
+  border: 1px solid #e1ebf4;
+}
+
+.materias-contenedor-sime-gestion h5 {
+  margin: 0 0 10px;
+
+  color: var(--gestion-azul-oscuro);
+  font-size: 0.9rem;
+  font-weight: 900;
+}
+
+.materias-sime-gestion {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.materias-sime-gestion span,
+.materia-sime-vacia {
+  display: inline-flex;
+  align-items: center;
+
+  padding: 6px 10px;
+  border-radius: 999px;
+
+  color: var(--gestion-azul-oscuro);
+  background: #ffffff;
+  border: 1px solid #d8e5ef;
+
+  font-size: 0.8rem;
+  font-weight: 850;
+  line-height: 1.2;
+}
+
+.acciones-sime-gestion {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+
+  padding-top: 12px;
+  border-top: 1px solid #e1ebf4;
+}
+
+.btn-sime-gestion {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+
+  min-height: 40px;
+  padding: 9px 16px;
+  border: 0;
+  border-radius: 999px;
+
+  color: #ffffff;
+  background: var(--gestion-verde);
+
+  font-family: inherit;
+  font-size: 0.88rem;
+  font-weight: 900;
+  text-decoration: none;
+  cursor: pointer;
+
+  box-shadow: 0 8px 18px rgba(22, 131, 107, 0.18);
+  transition:
+    transform 0.2s ease,
+    background 0.2s ease,
+    box-shadow 0.2s ease,
+    opacity 0.2s ease;
+}
+
+.btn-sime-gestion:hover {
+  transform: translateY(-2px);
+
+  color: #ffffff;
+  background: var(--gestion-naranja);
+
+  box-shadow: 0 10px 22px rgba(230, 126, 34, 0.22);
+}
+
+.btn-sime-gestion:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+@media (max-width: 1100px) {
+  .filtros-sime-gestion {
+    grid-template-columns: repeat(2, minmax(180px, 1fr));
+  }
+}
+
+@media (max-width: 760px) {
+  .filtros-sime-gestion {
+    grid-template-columns: 1fr;
+  }
+
+  .grilla-sime-gestion {
+    grid-template-columns: 1fr;
+  }
+
+  .encabezado-sime-gestion {
+    flex-direction: column;
+  }
+
+  .estado-sime-gestion {
+    white-space: normal;
+  }
+
+  .detalle-sime-gestion {
+    grid-template-columns: 1fr;
+  }
+
+  .acciones-sime-gestion {
+    justify-content: flex-start;
+  }
+
+  .btn-sime-gestion {
+    width: 100%;
+  }
+}
