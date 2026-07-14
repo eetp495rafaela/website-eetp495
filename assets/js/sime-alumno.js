@@ -326,8 +326,63 @@ function formatearTurnoSime(turno) {
     return "";
   }
 
-  if (texto.includes("Apr") || texto.includes("Abr")) {
-    return "Abril 2026";
+  const meses = [
+    "Enero",
+    "Febrero",
+    "Marzo",
+    "Abril",
+    "Mayo",
+    "Junio",
+    "Julio",
+    "Agosto",
+    "Septiembre",
+    "Octubre",
+    "Noviembre",
+    "Diciembre",
+  ];
+
+  const fecha = new Date(texto);
+
+  if (!Number.isNaN(fecha.getTime())) {
+    return `${meses[fecha.getMonth()]} ${fecha.getFullYear()}`;
+  }
+
+  const coincidenciaFecha = texto.match(/^(\d{4})-(\d{2})-\d{2}/);
+
+  if (coincidenciaFecha) {
+    const anio = coincidenciaFecha[1];
+    const mes = Number(coincidenciaFecha[2]);
+
+    if (mes >= 1 && mes <= 12) {
+      return `${meses[mes - 1]} ${anio}`;
+    }
+  }
+
+  const coincidenciaMesAnio = texto.match(
+    /(enero|febrero|marzo|abril|mayo|junio|julio|agosto|septiembre|setiembre|octubre|noviembre|diciembre)\s+(\d{4})/i,
+  );
+
+  if (coincidenciaMesAnio) {
+    const mesTexto = coincidenciaMesAnio[1].toLowerCase();
+    const anio = coincidenciaMesAnio[2];
+
+    const mapaMeses = {
+      enero: "Enero",
+      febrero: "Febrero",
+      marzo: "Marzo",
+      abril: "Abril",
+      mayo: "Mayo",
+      junio: "Junio",
+      julio: "Julio",
+      agosto: "Agosto",
+      septiembre: "Septiembre",
+      setiembre: "Septiembre",
+      octubre: "Octubre",
+      noviembre: "Noviembre",
+      diciembre: "Diciembre",
+    };
+
+    return `${mapaMeses[mesTexto]} ${anio}`;
   }
 
   return texto;

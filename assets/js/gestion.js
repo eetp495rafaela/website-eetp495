@@ -1910,8 +1910,75 @@ function renderizarInscripcionesSimeGestion() {
   }
 
   vistaSimeGestion.innerHTML = `
-    <div class="grilla-sime-gestion">
-      ${inscripciones.map(renderizarTarjetaSimeGestion).join("")}
+    <div class="tabla-sime-gestion-contenedor">
+      <table class="tabla-sime-gestion">
+        <thead>
+          <tr>
+            <th>Fecha</th>
+            <th>Estudiante</th>
+            <th>Curso</th>
+            <th>Año cursado</th>
+            <th>Materias</th>
+            <th>Ver</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          ${inscripciones
+            .map((inscripcion) => {
+              const estado = String(inscripcion.estado || "")
+                .trim()
+                .toUpperCase();
+
+              return `
+                <tr>
+                  <td>${escaparHtmlGestion(
+                    String(inscripcion.fechaInscripcion || "-").split(" ")[0],
+                  )}</td>
+
+                  <td>
+                    <strong>
+                      ${escaparHtmlGestion(
+                        inscripcion.alumnoNombre || "Alumno sin nombre",
+                      )}
+                    </strong>
+                    <small>
+                      ${escaparHtmlGestion(inscripcion.alumnoCorreo || "")}
+                    </small>
+                  </td>
+
+                  <td>
+                    ${
+                      inscripcion.cursoOrigen
+                        ? `${escaparHtmlGestion(inscripcion.cursoOrigen)}º`
+                        : "-"
+                    }
+                  </td>
+
+                  <td>${escaparHtmlGestion(inscripcion.anioCursado || "-")}</td>
+
+                  <td>
+                    ${renderizarMateriasSimeGestion(inscripcion.materias)}
+                  </td>
+
+                 <td>
+  <button
+    class="btn-sime-tabla-gestion btn-ver-permiso-sime-gestion"
+    type="button"
+    title="Ver permiso"
+    aria-label="Ver permiso"
+    data-id-inscripcion="${escaparHtmlGestion(inscripcion.idInscripcion)}"
+    ${inscripcion.tienePermiso ? "" : "disabled"}
+  >
+    <i class="fa-solid fa-eye"></i>
+  </button>
+</td>
+                </tr>
+              `;
+            })
+            .join("")}
+        </tbody>
+      </table>
     </div>
   `;
 
@@ -1948,12 +2015,13 @@ async function abrirPermisoSimeGestion(idInscripcion, boton) {
 
   const ventanaPermiso = window.open("", "_blank");
 
+  const htmlOriginalBoton = boton ? boton.innerHTML : "";
+
   if (boton) {
     boton.disabled = true;
     boton.innerHTML = `
-      <i class="fa-solid fa-spinner fa-spin"></i>
-      Abriendo...
-    `;
+    <i class="fa-solid fa-spinner fa-spin"></i>
+  `;
   }
 
   try {
@@ -2004,10 +2072,11 @@ async function abrirPermisoSimeGestion(idInscripcion, boton) {
   } finally {
     if (boton) {
       boton.disabled = false;
-      boton.innerHTML = `
-        <i class="fa-solid fa-eye"></i>
-        Ver permiso
-      `;
+      boton.innerHTML =
+        htmlOriginalBoton ||
+        `
+      <i class="fa-solid fa-eye"></i>
+    `;
     }
   }
 }
