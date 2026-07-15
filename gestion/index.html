@@ -605,15 +605,83 @@
       <section class="grupo seccion-destino" id="informes-pedagogicos">
         <h2>Informes Pedagógicos</h2>
 
-        <div class="panel-info">
-          <i class="fa-solid fa-clipboard-list"></i>
+        <div class="panel-info panel-gestion-listado">
+          <i class="fa-solid fa-file-lines"></i>
 
-          <div>
-            <h3>Seguimiento pedagógico institucional</h3>
+          <div class="contenido-panel-gestion">
+            <h3>Creación de informes pedagógicos</h3>
+
             <p>
-              Acceso a informes pedagógicos, seguimiento de trayectorias y
-              documentación relacionada con el acompañamiento de estudiantes.
+              Desde esta sección, Dirección o ViceDirección pueden crear
+              informes pedagógicos institucionales desde una plantilla. El
+              archivo quedará guardado en Drive como Google Doc editable y será
+              visible solo en modo lectura, para los docentes autorizados del
+              curso.
             </p>
+
+            <div class="acciones-gestion">
+              <button
+                class="btn-gestion"
+                id="btnCargarOpcionesInformesGestion"
+                type="button"
+              >
+                <i class="fa-solid fa-rotate"></i>
+                Cargar datos
+              </button>
+
+              <button
+                class="btn-gestion"
+                id="btnListarInformesGestion"
+                type="button"
+              >
+                <i class="fa-solid fa-table-list"></i>
+                Ver informes creados
+              </button>
+            </div>
+
+            <form
+              id="formInformePedagogicoGestion"
+              class="form-informe-gestion"
+            >
+              <div class="filtros-gestion filtros-informes-gestion">
+                <div class="campo-filtro-gestion">
+                  <label for="cursoInformeGestion">Curso</label>
+
+                  <select id="cursoInformeGestion" required>
+                    <option value="">Seleccionar curso</option>
+                  </select>
+                </div>
+
+                <div class="campo-filtro-gestion">
+                  <label for="alumnoInformeGestion">Estudiante</label>
+
+                  <select id="alumnoInformeGestion" required disabled>
+                    <option value="">Seleccionar estudiante</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="acciones-gestion">
+                <button
+                  class="btn-gestion"
+                  id="btnCrearInformeGestion"
+                  type="submit"
+                  disabled
+                >
+                  <i class="fa-solid fa-file-circle-plus"></i>
+                  Crear informe
+                </button>
+              </div>
+            </form>
+
+            <div id="vistaInformesGestion" class="vista-gestion">
+              <p class="mensaje-gestion">
+                Todavía no se cargaron los datos. Presioná “Cargar datos” para
+                comenzar.
+              </p>
+            </div>
+
+            <p id="mensajeInformesGestion" class="mensaje-gestion"></p>
           </div>
         </div>
 

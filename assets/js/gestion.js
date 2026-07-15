@@ -29,6 +29,9 @@ const BACKEND_DOCUMENTACION_URL =
 const SIME_BACKEND_URL =
   "https://script.google.com/macros/s/AKfycbwAoJxUZp7KRFneMwMUsfilojhYM7HdBl8_JVue1T9AukKD-EIacqT7UxhdokdSO6TRdQ/exec";
 
+const INFORMES_BACKEND_URL =
+  "https://script.google.com/macros/s/AKfycbwiPaqdCFtfChD_b0xUDOF4zqhbOs_WJ45aVBHW9kn6hnbRTGEp93A4mp2W0r0v7pXt4w/exec";
+
 const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
@@ -146,6 +149,33 @@ const buscarAlumnoSimeGestion = document.getElementById(
   "buscarAlumnoSimeGestion",
 );
 
+const btnCargarOpcionesInformesGestion = document.getElementById(
+  "btnCargarOpcionesInformesGestion",
+);
+const btnListarInformesGestion = document.getElementById(
+  "btnListarInformesGestion",
+);
+const formInformePedagogicoGestion = document.getElementById(
+  "formInformePedagogicoGestion",
+);
+
+const cursoInformeGestion = document.getElementById("cursoInformeGestion");
+
+const alumnoInformeGestion = document.getElementById("alumnoInformeGestion");
+
+const btnCrearInformeGestion = document.getElementById(
+  "btnCrearInformeGestion",
+);
+
+const vistaInformesGestion = document.getElementById("vistaInformesGestion");
+
+const mensajeInformesGestion = document.getElementById(
+  "mensajeInformesGestion",
+);
+
+let cursosInformesGestion = [];
+let estudiantesInformesGestion = [];
+let informesGestionCargados = [];
 let inscripcionesSimeGestionCargadas = [];
 let documentacionGestionCargada = [];
 let horariosGestionCargados = [];
@@ -332,6 +362,785 @@ async function enviarAlBackendDocumentacion(datos) {
   }
 
   return respuesta.json();
+}
+
+async function enviarAlBackendInformesGestion(datos) {
+  const respuesta = await fetch(INFORMES_BACKEND_URL, {
+    method: "POST",
+    headers: {
+      "Content-Type": "text/plain;charset=utf-8",
+    },
+    body: JSON.stringify(datos),
+  });
+
+  if (!respuesta.ok) {
+    throw new Error("No se pudo conectar con el backend de informes.");
+  }
+
+  return respuesta.json();
+}
+
+async function probarSesionInformesGestion() {
+  const usuario = auth.currentUser;
+
+  if (!usuario) {
+    console.warn("No hay sesión activa para probar informes.");
+    return;
+  }
+
+  try {
+    const idToken = await usuario.getIdToken(true);
+
+    const resultado = await enviarAlBackendInformesGestion({
+      accion: "probar_sesion",
+      idToken,
+    });
+
+    console.log("Prueba backend Informes:", resultado);
+  } catch (error) {
+    console.error("Error probando backend Informes:", error);
+  }
+}
+
+async function probarOpcionesCreacionInformeGestion() {
+  const usuario = auth.currentUser;
+
+  if (!usuario) {
+    console.warn("No hay sesión activa para probar opciones de informes.");
+    return;
+  }
+
+  try {
+    const idToken = await usuario.getIdToken(true);
+
+    const resultado = await enviarAlBackendInformesGestion({
+      accion: "obtener_opciones_creacion_informe",
+      idToken,
+    });
+
+    console.log("Opciones creación informe:", resultado);
+  } catch (error) {
+    console.error("Error probando opciones de informes:", error);
+  }
+}
+
+function mostrarMensajeInformesGestion(texto, tipo = "") {
+  if (!mensajeInformesGestion) return;
+
+  mensajeInformesGestion.textContent = texto || "";
+  mensajeInformesGestion.className = "mensaje-gestion";
+
+  if (tipo) {
+    mensajeInformesGestion.classList.add(tipo);
+  }
+}
+
+function cargarCursosInformesGestion() {
+  if (!cursoInformeGestion) return;
+
+  cursoInformeGestion.innerHTML = `
+    <option value="">Seleccionar curso</option>
+    ${cursosInformesGestion
+      .map(
+        (curso) => `
+          <option value="${escaparHtmlGestion(curso.nombre)}">
+            ${escaparHtmlGestion(curso.nombre)}
+          </option>
+        `,
+      )
+      .join("")}
+  `;
+}
+
+function cargarEstudiantesInformeGestion() {
+  if (!alumnoInformeGestion || !cursoInformeGestion) return;
+
+  const cursoSeleccionado = String(cursoInformeGestion.value || "").trim();
+
+  alumnoInformeGestion.innerHTML = `
+    <option value="">Seleccionar estudiante</option>
+  `;
+
+  alumnoInformeGestion.disabled = true;
+
+  if (!cursoSeleccionado) {
+    if (btnCrearInformeGestion) {
+      btnCrearInformeGestion.disabled = true;
+    }
+
+    return;
+  }
+
+  const estudiantesDelCurso = estudiantesInformesGestion
+    .filter((estudiante) => {
+      const cursoEstudiante = String(estudiante.cursoNombre || "").trim();
+
+      return cursoEstudiante === cursoSeleccionado;
+    })
+    .sort((a, b) =>
+      String(a.nombreCompleto || "").localeCompare(
+        String(b.nombreCompleto || ""),
+        "es",
+        {
+          numeric: true,
+          sensitivity: "base",
+        },
+      ),
+    );
+
+  alumnoInformeGestion.innerHTML = `
+    <option value="">Seleccionar estudiante</option>
+    ${estudiantesDelCurso
+      .map(
+        (estudiante) => `
+          <option value="${escaparHtmlGestion(estudiante.correo)}">
+            ${escaparHtmlGestion(estudiante.nombreCompleto)}
+          </option>
+        `,
+      )
+      .join("")}
+  `;
+
+  alumnoInformeGestion.disabled = !estudiantesDelCurso.length;
+
+  if (btnCrearInformeGestion) {
+    btnCrearInformeGestion.disabled = true;
+  }
+
+  if (!estudiantesDelCurso.length) {
+    mostrarMensajeInformesGestion(
+      "No se encontraron estudiantes activos para el curso seleccionado.",
+    );
+    return;
+  }
+
+  mostrarMensajeInformesGestion(
+    `${estudiantesDelCurso.length} estudiante(s) disponible(s) para ${cursoSeleccionado}.`,
+    "ok",
+  );
+}
+
+function verificarFormularioInformeGestion() {
+  if (!btnCrearInformeGestion) return;
+
+  const cursoSeleccionado = String(cursoInformeGestion?.value || "").trim();
+  const alumnoSeleccionado = String(alumnoInformeGestion?.value || "").trim();
+
+  btnCrearInformeGestion.disabled = !cursoSeleccionado || !alumnoSeleccionado;
+}
+
+async function cargarOpcionesInformesGestion() {
+  const usuario = auth.currentUser;
+
+  if (!usuario) {
+    mostrarMensajeInformesGestion(
+      "No se detectó una sesión activa. Volvé a iniciar sesión.",
+      "error",
+    );
+
+    return;
+  }
+
+  try {
+    if (btnCargarOpcionesInformesGestion) {
+      btnCargarOpcionesInformesGestion.disabled = true;
+      btnCargarOpcionesInformesGestion.innerHTML = `
+        <i class="fa-solid fa-spinner fa-spin"></i>
+        Cargando datos...
+      `;
+    }
+
+    mostrarMensajeInformesGestion("");
+
+    if (vistaInformesGestion) {
+      vistaInformesGestion.innerHTML = `
+        <p class="mensaje-gestion">
+          Consultando cursos y estudiantes...
+        </p>
+      `;
+    }
+
+    const idToken = await usuario.getIdToken(true);
+
+    const resultado = await enviarAlBackendInformesGestion({
+      accion: "obtener_opciones_creacion_informe",
+      idToken,
+    });
+
+    if (!resultado.ok) {
+      throw new Error(
+        resultado.mensaje || "No se pudieron cargar los datos para informes.",
+      );
+    }
+
+    cursosInformesGestion = resultado.cursos || [];
+    estudiantesInformesGestion = resultado.estudiantes || [];
+
+    cargarCursosInformesGestion();
+
+    if (alumnoInformeGestion) {
+      alumnoInformeGestion.innerHTML = `
+        <option value="">Seleccionar estudiante</option>
+      `;
+      alumnoInformeGestion.disabled = true;
+    }
+
+    if (btnCrearInformeGestion) {
+      btnCrearInformeGestion.disabled = true;
+    }
+
+    if (vistaInformesGestion) {
+      vistaInformesGestion.innerHTML = `
+        <p class="mensaje-gestion ok">
+          Datos cargados correctamente. Seleccioná un curso para ver sus estudiantes.
+        </p>
+      `;
+    }
+
+    mostrarMensajeInformesGestion(
+      `Cursos cargados: ${cursosInformesGestion.length}. Estudiantes cargados: ${estudiantesInformesGestion.length}.`,
+      "ok",
+    );
+  } catch (error) {
+    console.error("Error al cargar opciones de informes:", error);
+
+    if (vistaInformesGestion) {
+      vistaInformesGestion.innerHTML = `
+        <p class="mensaje-gestion error">
+          No se pudieron cargar los datos para crear informes.
+        </p>
+      `;
+    }
+
+    mostrarMensajeInformesGestion(
+      error.message || "No se pudieron cargar los datos para informes.",
+      "error",
+    );
+
+    if (window.Swal) {
+      Swal.fire({
+        title: "No se pudieron cargar los datos",
+        text:
+          error.message ||
+          "Revisá conexión, sesión activa o permisos del backend.",
+        icon: "error",
+        confirmButtonText: "Aceptar",
+      });
+    }
+  } finally {
+    if (btnCargarOpcionesInformesGestion) {
+      btnCargarOpcionesInformesGestion.disabled = false;
+      btnCargarOpcionesInformesGestion.innerHTML = `
+        <i class="fa-solid fa-rotate"></i>
+        Cargar datos
+      `;
+    }
+  }
+}
+
+async function crearInformePedagogicoGestion(event) {
+  event.preventDefault();
+
+  const usuario = auth.currentUser;
+
+  if (!usuario) {
+    mostrarMensajeInformesGestion(
+      "No se detectó una sesión activa. Volvé a iniciar sesión.",
+      "error",
+    );
+
+    return;
+  }
+
+  const alumnoCorreo = String(alumnoInformeGestion?.value || "").trim();
+
+  if (!alumnoCorreo) {
+    mostrarMensajeInformesGestion(
+      "Seleccioná un estudiante para crear el informe.",
+      "error",
+    );
+
+    return;
+  }
+
+  const alumnoSeleccionado = estudiantesInformesGestion.find(
+    (estudiante) =>
+      String(estudiante.correo || "")
+        .trim()
+        .toLowerCase() === alumnoCorreo.toLowerCase(),
+  );
+
+  const nombreAlumno = alumnoSeleccionado?.nombreCompleto || "el estudiante";
+  const cursoAlumno = alumnoSeleccionado?.cursoNombre || "curso sin asignar";
+
+  const confirmacion = await Swal.fire({
+    title: "Crear informe pedagógico",
+    html: `
+  <p>Se creará un Informe Pedagógico Institucional para:</p>
+  <p>
+    <strong>
+      ${escaparHtmlGestion(nombreAlumno)} de ${escaparHtmlGestion(cursoAlumno)}
+    </strong>
+  </p>
+  <p>El informe quedará guardado en Drive y será visible para los docentes autorizados del curso.</p>
+`,
+    icon: "question",
+    showCancelButton: true,
+    confirmButtonText: "Sí, crear informe",
+    cancelButtonText: "Cancelar",
+    confirmButtonColor: "#009879",
+  });
+
+  if (!confirmacion.isConfirmed) return;
+
+  try {
+    if (btnCrearInformeGestion) {
+      btnCrearInformeGestion.disabled = true;
+      btnCrearInformeGestion.innerHTML = `
+        <i class="fa-solid fa-spinner fa-spin"></i>
+        Creando informe...
+      `;
+    }
+
+    mostrarMensajeInformesGestion("");
+
+    if (vistaInformesGestion) {
+      vistaInformesGestion.innerHTML = `
+        <p class="mensaje-gestion">
+          Creando informe pedagógico en Drive...
+        </p>
+      `;
+    }
+
+    const idToken = await usuario.getIdToken(true);
+
+    const resultado = await enviarAlBackendInformesGestion({
+      accion: "crear_informe_pedagogico",
+      idToken,
+      alumnoCorreo,
+    });
+
+    if (!resultado.ok) {
+      throw new Error(
+        resultado.mensaje || "No se pudo crear el informe pedagógico.",
+      );
+    }
+
+    if (vistaInformesGestion) {
+      vistaInformesGestion.innerHTML = `
+        <div class="resultado-informe-gestion">
+          <p class="mensaje-gestion ok">
+            Informe pedagógico creado correctamente.
+          </p>
+
+          <a
+            class="btn-gestion"
+            href="${escaparHtmlGestion(resultado.informe.driveUrl)}"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <i class="fa-solid fa-eye"></i>
+            Ver informe
+          </a>
+        </div>
+      `;
+    }
+
+    mostrarMensajeInformesGestion(
+      `Informe creado para ${resultado.informe.alumnoNombre}. Docentes autorizados: ${resultado.informe.docentesAutorizados}.`,
+      "ok",
+    );
+
+    if (formInformePedagogicoGestion) {
+      formInformePedagogicoGestion.reset();
+    }
+
+    if (alumnoInformeGestion) {
+      alumnoInformeGestion.innerHTML = `
+        <option value="">Seleccionar estudiante</option>
+      `;
+      alumnoInformeGestion.disabled = true;
+    }
+
+    if (btnCrearInformeGestion) {
+      btnCrearInformeGestion.disabled = true;
+    }
+
+    await Swal.fire({
+      title: "Informe creado",
+      html: `
+        <p>El informe pedagógico fue creado correctamente.</p>
+        <p>Podés abrirlo desde el botón <strong>Ver informe</strong>.</p>
+      `,
+      icon: "success",
+      confirmButtonText: "Aceptar",
+    });
+  } catch (error) {
+    console.error("Error al crear informe pedagógico:", error);
+
+    if (vistaInformesGestion) {
+      vistaInformesGestion.innerHTML = `
+        <p class="mensaje-gestion error">
+          No se pudo crear el informe pedagógico.
+        </p>
+      `;
+    }
+
+    mostrarMensajeInformesGestion(
+      error.message || "No se pudo crear el informe pedagógico.",
+      "error",
+    );
+
+    if (window.Swal) {
+      Swal.fire({
+        title: "No se pudo crear el informe",
+        text:
+          error.message ||
+          "Revisá conexión, permisos o configuración del backend.",
+        icon: "error",
+        confirmButtonText: "Aceptar",
+      });
+    }
+  } finally {
+    if (btnCrearInformeGestion) {
+      btnCrearInformeGestion.innerHTML = `
+        <i class="fa-solid fa-file-circle-plus"></i>
+        Crear informe
+      `;
+
+      verificarFormularioInformeGestion();
+    }
+  }
+}
+
+function formatearFechaInformeGestion(fechaTexto) {
+  const texto = String(fechaTexto || "").trim();
+
+  if (!texto) {
+    return "-";
+  }
+
+  const soloFecha = texto.split(" ")[0];
+  const partes = soloFecha.split("-");
+
+  if (partes.length === 3) {
+    const [anio, mes, dia] = partes;
+    return `${dia}-${mes}-${anio}`;
+  }
+
+  return soloFecha;
+}
+
+function renderizarTablaInformesGestion(informes) {
+  if (!vistaInformesGestion) return;
+
+  if (!informes.length) {
+    vistaInformesGestion.innerHTML = `
+      <p class="mensaje-gestion">
+        Todavía no hay informes pedagógicos creados.
+      </p>
+    `;
+
+    mostrarMensajeInformesGestion("");
+    return;
+  }
+
+  vistaInformesGestion.innerHTML = `
+    <div class="tabla-informes-gestion-contenedor">
+      <table class="tabla-informes-gestion">
+        <thead>
+          <tr>
+            <th>Fecha</th>
+            <th>Estudiante</th>
+            <th>Curso</th>
+            <th>Creado por</th>
+            <th>Docentes</th>
+            <th>Ver</th>
+            <th>Eliminar</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          ${informes
+            .map((informe) => {
+              const driveUrl = String(informe.driveUrl || "").trim();
+
+              return `
+                <tr>
+                  <td>
+                    ${escaparHtmlGestion(
+                      formatearFechaInformeGestion(informe.fechaCreacion),
+                    )}
+                  </td>
+
+                  <td>
+                    <strong>
+                      ${escaparHtmlGestion(
+                        informe.alumnoNombre || "Estudiante sin nombre",
+                      )}
+                    </strong>
+                    <small>
+                      DNI: ${escaparHtmlGestion(informe.alumnoDni || "-")}
+                    </small>
+                  </td>
+
+                  <td>
+                    ${escaparHtmlGestion(informe.cursoNombre || "-")}
+                  </td>
+
+                  <td>
+                    <strong>
+                      ${escaparHtmlGestion(informe.creadoPorNombre || "-")}
+                    </strong>
+                  </td>
+
+                  <td>
+                    ${escaparHtmlGestion(
+                      String(informe.docentesAutorizados?.length || 0),
+                    )}
+                  </td>
+
+                  <td>
+                    ${
+                      driveUrl
+                        ? `
+                          <a
+                            class="btn-informe-tabla-gestion"
+                            href="${escaparHtmlGestion(driveUrl)}"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            title="Ver informe"
+                            aria-label="Ver informe"
+                          >
+                            <i class="fa-solid fa-eye"></i>
+                          </a>
+                        `
+                        : "-"
+                    }
+                  </td>
+
+                  <td>
+                    <button
+                      class="btn-informe-tabla-gestion btn-eliminar-informe-gestion"
+                      type="button"
+                      title="Eliminar informe"
+                      aria-label="Eliminar informe"
+                      data-id-informe="${escaparHtmlGestion(informe.idInforme)}"
+                    >
+                      <i class="fa-solid fa-trash-can"></i>
+                    </button>
+                  </td>
+                </tr>
+              `;
+            })
+            .join("")}
+        </tbody>
+      </table>
+    </div>
+  `;
+
+  mostrarMensajeInformesGestion(
+    `${informes.length} informe(s) pedagógico(s) mostrado(s).`,
+    "ok",
+  );
+}
+
+async function listarInformesGestion() {
+  const usuario = auth.currentUser;
+
+  if (!usuario) {
+    mostrarMensajeInformesGestion(
+      "No se detectó una sesión activa. Volvé a iniciar sesión.",
+      "error",
+    );
+
+    return;
+  }
+
+  try {
+    if (btnListarInformesGestion) {
+      btnListarInformesGestion.disabled = true;
+      btnListarInformesGestion.innerHTML = `
+        <i class="fa-solid fa-spinner fa-spin"></i>
+        Cargando informes...
+      `;
+    }
+
+    mostrarMensajeInformesGestion("");
+
+    if (vistaInformesGestion) {
+      vistaInformesGestion.innerHTML = `
+        <p class="mensaje-gestion">
+          Consultando informes pedagógicos creados...
+        </p>
+      `;
+    }
+
+    const idToken = await usuario.getIdToken(true);
+
+    const resultado = await enviarAlBackendInformesGestion({
+      accion: "listar_informes_gestion",
+      idToken,
+    });
+
+    if (!resultado.ok) {
+      throw new Error(
+        resultado.mensaje || "No se pudieron cargar los informes pedagógicos.",
+      );
+    }
+
+    informesGestionCargados = resultado.informes || [];
+
+    renderizarTablaInformesGestion(informesGestionCargados);
+  } catch (error) {
+    console.error("Error al listar informes pedagógicos:", error);
+
+    if (vistaInformesGestion) {
+      vistaInformesGestion.innerHTML = `
+        <p class="mensaje-gestion error">
+          No se pudieron cargar los informes pedagógicos.
+        </p>
+      `;
+    }
+
+    mostrarMensajeInformesGestion(
+      error.message || "No se pudieron cargar los informes pedagógicos.",
+      "error",
+    );
+
+    if (window.Swal) {
+      Swal.fire({
+        title: "No se pudieron cargar los informes",
+        text:
+          error.message ||
+          "Revisá conexión, sesión activa o permisos del backend.",
+        icon: "error",
+        confirmButtonText: "Aceptar",
+      });
+    }
+  } finally {
+    if (btnListarInformesGestion) {
+      btnListarInformesGestion.disabled = false;
+      btnListarInformesGestion.innerHTML = `
+        <i class="fa-solid fa-table-list"></i>
+        Ver informes creados
+      `;
+    }
+  }
+}
+
+async function eliminarInformePedagogicoGestion(idInforme, boton) {
+  const id = String(idInforme || "").trim();
+
+  if (!id) {
+    mostrarMensajeInformesGestion(
+      "No se recibió el ID del informe a eliminar.",
+      "error",
+    );
+
+    return;
+  }
+
+  const informe = informesGestionCargados.find((item) => {
+    return String(item.idInforme || "").trim() === id;
+  });
+
+  const nombreAlumno = informe?.alumnoNombre || "este estudiante";
+  const cursoAlumno = informe?.cursoNombre || "curso sin asignar";
+
+  const confirmacion = await Swal.fire({
+    title: "¿Eliminar informe pedagógico?",
+    html: `
+      <p>Se eliminará el informe pedagógico de:</p>
+      <p>
+        <strong>
+          ${escaparHtmlGestion(nombreAlumno)} de ${escaparHtmlGestion(cursoAlumno)}
+        </strong>
+      </p>
+      <p>El documento será enviado a la papelera de Drive y dejará de aparecer en el listado.</p>
+    `,
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonText: "Sí, eliminar",
+    cancelButtonText: "Cancelar",
+    confirmButtonColor: "#c0392b",
+  });
+
+  if (!confirmacion.isConfirmed) {
+    return;
+  }
+
+  const usuario = auth.currentUser;
+
+  if (!usuario) {
+    mostrarMensajeInformesGestion(
+      "No se detectó una sesión activa. Volvé a iniciar sesión.",
+      "error",
+    );
+
+    return;
+  }
+
+  const htmlOriginalBoton = boton ? boton.innerHTML : "";
+
+  try {
+    if (boton) {
+      boton.disabled = true;
+      boton.innerHTML = `
+        <i class="fa-solid fa-spinner fa-spin"></i>
+      `;
+    }
+
+    mostrarMensajeInformesGestion("Eliminando informe pedagógico...", "");
+
+    const idToken = await usuario.getIdToken(true);
+
+    const resultado = await enviarAlBackendInformesGestion({
+      accion: "eliminar_informe_pedagogico",
+      idToken,
+      idInforme: id,
+    });
+
+    if (!resultado.ok) {
+      throw new Error(
+        resultado.mensaje || "No se pudo eliminar el informe pedagógico.",
+      );
+    }
+
+    await Swal.fire({
+      title: "Informe eliminado",
+      text: "El informe pedagógico fue eliminado correctamente.",
+      icon: "success",
+      confirmButtonText: "Aceptar",
+    });
+
+    await listarInformesGestion();
+  } catch (error) {
+    console.error("Error al eliminar informe pedagógico:", error);
+
+    mostrarMensajeInformesGestion(
+      error.message || "No se pudo eliminar el informe pedagógico.",
+      "error",
+    );
+
+    await Swal.fire({
+      title: "No se pudo eliminar",
+      text:
+        error.message ||
+        "Revisá conexión, sesión activa o permisos del backend.",
+      icon: "error",
+      confirmButtonText: "Aceptar",
+    });
+  } finally {
+    if (boton) {
+      boton.disabled = false;
+      boton.innerHTML =
+        htmlOriginalBoton ||
+        `
+          <i class="fa-solid fa-trash-can"></i>
+        `;
+    }
+  }
 }
 
 function escaparHtmlGestion(texto) {
@@ -2336,4 +3145,51 @@ if (vistaSimeGestion) {
 
     await abrirPermisoSimeGestion(idInscripcion, botonVerPermiso);
   });
+}
+
+if (btnCargarOpcionesInformesGestion) {
+  btnCargarOpcionesInformesGestion.addEventListener(
+    "click",
+    cargarOpcionesInformesGestion,
+  );
+}
+
+if (btnListarInformesGestion) {
+  btnListarInformesGestion.addEventListener("click", listarInformesGestion);
+}
+
+if (vistaInformesGestion) {
+  vistaInformesGestion.addEventListener("click", function (event) {
+    const botonEliminar = event.target.closest(".btn-eliminar-informe-gestion");
+
+    if (!botonEliminar) {
+      return;
+    }
+
+    eliminarInformePedagogicoGestion(
+      botonEliminar.dataset.idInforme,
+      botonEliminar,
+    );
+  });
+}
+
+if (cursoInformeGestion) {
+  cursoInformeGestion.addEventListener("change", () => {
+    cargarEstudiantesInformeGestion();
+    verificarFormularioInformeGestion();
+  });
+}
+
+if (alumnoInformeGestion) {
+  alumnoInformeGestion.addEventListener(
+    "change",
+    verificarFormularioInformeGestion,
+  );
+}
+
+if (formInformePedagogicoGestion) {
+  formInformePedagogicoGestion.addEventListener(
+    "submit",
+    crearInformePedagogicoGestion,
+  );
 }

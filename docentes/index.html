@@ -10,6 +10,7 @@
     <link rel="stylesheet" href="../assets/css/material-estudio.css" />
     <link rel="stylesheet" href="../assets/css/volver-arriba.css" />
     <link rel="stylesheet" href="../assets/css/horarios-docente.css" />
+    <link rel="stylesheet" href="../assets/css/informes-docente.css" />
 
     <link rel="icon" href="../assets/img/logo.png" />
 
@@ -183,15 +184,13 @@
         <div class="grid">
           <a
             class="tarjeta tarjeta-enlace"
-            href="https://drive.google.com/drive/folders/15JEGf-_w10akOoMmmdtlFycUd-t0Akqe"
-            target="_blank"
-            rel="noopener noreferrer"
+            href="#informes-pedagogicos-docente"
           >
-            <i class="fa-solid fa-clipboard-list"></i>
+            <i class="fa-solid fa-file-lines"></i>
             <h3>Informes Pedagógicos</h3>
             <p>
-              Consultá información pedagógica relevante para el acompañamiento
-              de estudiantes.
+              Consultá los informes pedagógicos de los estudiantes que tenés
+              autorizados.
             </p>
           </a>
 
@@ -465,6 +464,44 @@
           Volver al inicio
         </a>
       </section>
+
+      <section class="grupo seccion-destino" id="informes-pedagogicos-docente">
+        <h2>Informes Pedagógicos</h2>
+
+        <div class="panel-info">
+          <div class="encabezado-listado">
+            <div>
+              <h3>Informes disponibles</h3>
+              <p>
+                Consultá los informes pedagógicos de los estudiantes que tenés
+                autorizados. Los documentos se abren en Google Docs en modo
+                lectura.
+              </p>
+            </div>
+          </div>
+
+          <div class="acciones">
+            <button class="btn-accion" id="btnVerInformesDocente" type="button">
+              <i class="fa-solid fa-table-list"></i>
+              Ver informes
+            </button>
+          </div>
+
+          <div id="vistaInformesDocente" class="vista-informes-docente">
+            <p class="mensaje-formulario">
+              Todavía no se consultaron informes pedagógicos. Presioná “Ver
+              informes” para cargarlos.
+            </p>
+          </div>
+
+          <p id="mensajeInformesDocente" class="mensaje-formulario"></p>
+        </div>
+
+        <a class="btn-volver" href="#inicio">
+          <i class="fa-solid fa-arrow-up"></i>
+          Volver al inicio
+        </a>
+      </section>
     </main>
 
     <a href="#" class="btn-arriba" id="btnArriba" aria-label="Volver al inicio">
@@ -480,5 +517,6 @@
       type="module"
       src="../assets/js/listas-estudiantes-docente.js"
     ></script>
+    <script type="module" src="../assets/js/informes-docente.js"></script>
   </body>
 </html>
