@@ -1,0 +1,781 @@
+/* =====================================================
+   AJUSTES VISUALES - PORTAL DOCENTE
+===================================================== */
+
+:root {
+  --docente-fondo: #10251f;
+  --docente-panel: #17382f;
+  --docente-panel-2: #1c4238;
+  --docente-borde: rgba(167, 243, 208, 0.2);
+  --docente-texto: #f2fbf7;
+  --docente-texto-suave: #c7ddd4;
+  --docente-verde: #34d399;
+  --docente-verde-oscuro: #0f766e;
+  --docente-dorado: #facc15;
+  --docente-naranja: #f59e0b;
+  --docente-tabla: #f8fbfa;
+  --docente-tabla-head: #d9fbe8;
+  --docente-tabla-texto: #18352d;
+}
+
+/* =========================
+   BASE
+========================= */
+
+body {
+  color: var(--docente-texto);
+  background:
+    radial-gradient(
+      circle at top right,
+      rgba(52, 211, 153, 0.14),
+      transparent 34%
+    ),
+    linear-gradient(135deg, #081a17, var(--docente-fondo));
+}
+
+/* =========================
+   TOPBAR
+========================= */
+
+.topbar {
+  background: linear-gradient(90deg, #061814 0%, #0f3d35 55%, #14866f 100%);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 6px 22px rgba(0, 0, 0, 0.22);
+}
+
+.logo h1,
+.logo span,
+.usuario-datos span,
+.usuario-datos small,
+.btn-sitio-publico,
+.btn-cerrar-sesion,
+.usuario,
+.usuario i {
+  color: #ffffff;
+}
+
+.logo span,
+.usuario-datos small {
+  opacity: 0.9;
+}
+
+.usuario {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.22);
+}
+
+.usuario i {
+  background: rgba(0, 0, 0, 0.18);
+}
+
+/* =========================
+   TÍTULOS
+========================= */
+
+.grupo h2 {
+  color: #ffffff;
+  border-left: 0;
+  border-bottom: 3px solid var(--docente-dorado);
+  padding-left: 0;
+  padding-bottom: 10px;
+}
+
+/* =========================
+   TARJETAS
+========================= */
+
+.tarjeta {
+  background: linear-gradient(
+    180deg,
+    var(--docente-panel-2),
+    var(--docente-panel)
+  );
+  border: 1px solid var(--docente-borde);
+  color: var(--docente-texto);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.18);
+}
+
+.tarjeta:hover {
+  border-color: rgba(250, 204, 21, 0.65);
+  box-shadow: 0 18px 38px rgba(0, 0, 0, 0.28);
+}
+
+.tarjeta i {
+  color: var(--docente-dorado);
+}
+
+.tarjeta h3 {
+  color: #ffffff;
+}
+
+.tarjeta p {
+  color: var(--docente-texto-suave);
+}
+
+.tarjeta-documentacion {
+  color: var(--docente-texto);
+}
+
+/* =========================
+   PANELES
+========================= */
+
+.panel-info,
+.bloque-horario-docente,
+.documentos-cargados-docente {
+  background: linear-gradient(
+    180deg,
+    var(--docente-panel-2),
+    var(--docente-panel)
+  );
+  border: 1px solid var(--docente-borde);
+  border-radius: 18px;
+  color: var(--docente-texto);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.16);
+}
+
+.encabezado-listado h3,
+.encabezado-documentos-cargados h3,
+.bloque-horario-docente h3 {
+  color: #ffffff;
+}
+
+.encabezado-listado p,
+.encabezado-documentos-cargados p,
+.panel-info p,
+.mensaje-formulario {
+  color: var(--docente-texto-suave);
+}
+
+/* =========================
+   BOTONES
+========================= */
+
+.btn-accion,
+.btn-informe-docente,
+.btn-documentacion,
+.btn-ver-documento-docente {
+  background: linear-gradient(135deg, #34d399, #22c55e);
+  border-color: transparent;
+  color: #06231b;
+  font-weight: 900;
+  box-shadow: 0 10px 22px rgba(52, 211, 153, 0.18);
+}
+
+.btn-accion:hover,
+.btn-informe-docente:hover,
+.btn-documentacion:hover,
+.btn-ver-documento-docente:hover {
+  background: linear-gradient(135deg, #facc15, #f59e0b);
+  color: #1f2937;
+}
+
+.btn-volver {
+  color: var(--docente-verde);
+}
+
+.btn-volver:hover {
+  color: var(--docente-dorado);
+}
+
+/* =========================
+   FORMULARIOS DOCUMENTACIÓN
+========================= */
+
+.campo-documentacion label {
+  color: #ffffff;
+}
+
+.campo-documentacion input,
+.campo-documentacion select {
+  background: #f8fbfa;
+  border: 1px solid #b7d8cb;
+  color: #18352d;
+  font-weight: 800;
+}
+
+.campo-documentacion small {
+  color: var(--docente-texto-suave);
+}
+
+/* =========================
+   TABLAS
+========================= */
+
+.tabla-documentos-contenedor,
+.tabla-informes-docente-contenedor {
+  background: var(--docente-tabla);
+  border: 1px solid #b7d8cb;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 10px 22px rgba(0, 0, 0, 0.12);
+}
+
+.tabla-documentos,
+.tabla-informes-docente {
+  background: var(--docente-tabla);
+}
+
+.tabla-documentos th,
+.tabla-informes-docente th {
+  background: var(--docente-tabla-head);
+  color: #10251f;
+  border-bottom: 1px solid #b7d8cb;
+}
+
+.tabla-documentos td,
+.tabla-informes-docente td {
+  color: var(--docente-tabla-texto);
+  border-bottom: 1px solid #d8e8e1;
+}
+
+.tabla-documentos-vacia {
+  color: #5c746b;
+}
+
+/* =========================
+   HORARIOS
+========================= */
+
+.vista-horario-aula-docente {
+  color: var(--docente-texto);
+}
+
+.grilla-horario-docente,
+.grilla-horario-aula-docente {
+  gap: 16px;
+}
+
+.dia-horario-docente,
+.dia-horario-aula-docente {
+  background: #123128;
+  border: 1px solid var(--docente-borde);
+  border-radius: 16px;
+}
+
+.dia-horario-docente h4,
+.dia-horario-aula-docente h4 {
+  color: #ffffff;
+  border-bottom-color: rgba(250, 204, 21, 0.28);
+}
+
+.tarjeta-bloque-horario-docente {
+  background: #f8fbfa;
+  color: #18352d;
+  border: 1px solid #c7ddd4;
+}
+
+.bloque-horario-hora-docente {
+  color: #0f766e;
+  font-weight: 900;
+}
+
+.bloque-horario-materia-docente {
+  color: #10251f;
+  font-weight: 900;
+}
+
+.bloque-horario-curso-docente,
+.bloque-horario-ubicacion-docente {
+  color: #5c746b;
+  font-weight: 800;
+}
+
+/* =========================
+   LISTAS DE ESTUDIANTES
+========================= */
+
+.tarjeta-lista-estudiantes-docente {
+  background: linear-gradient(
+    180deg,
+    var(--docente-panel-2),
+    var(--docente-panel)
+  );
+  border: 1px solid var(--docente-borde);
+}
+
+.tarjeta-lista-estudiantes-docente h3,
+.encabezado-lista-estudiantes-docente h3 {
+  color: var(--docente-dorado);
+}
+
+.encabezado-lista-estudiantes-docente {
+  border-bottom-color: rgba(250, 204, 21, 0.35);
+}
+
+.encabezado-lista-estudiantes-docente span {
+  color: var(--docente-texto-suave);
+}
+
+.tarjeta-lista-estudiantes-docente li {
+  background: rgba(255, 255, 255, 0.08);
+  color: #ffffff;
+}
+
+.btn-copiar-lista-estudiantes {
+  border-color: rgba(250, 204, 21, 0.85);
+  background: rgba(250, 204, 21, 0.12);
+  color: var(--docente-dorado);
+}
+
+.btn-copiar-lista-estudiantes:hover {
+  background: var(--docente-dorado);
+  color: #10251f;
+}
+
+/* =========================
+   RESPONSIVE GRID DOCENTE
+========================= */
+
+.grid-docente-principal {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+
+@media (max-width: 1400px) {
+  .grid-docente-principal {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 900px) {
+  .grid-docente-principal {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 600px) {
+  .grid-docente-principal {
+    grid-template-columns: 1fr;
+  }
+}
+/* =====================================================
+   AJUSTES FINOS VISUALES - PORTAL DOCENTE
+===================================================== */
+
+/* =========================
+   TOPBAR - MEJOR CONTRASTE
+========================= */
+
+.logo h1 {
+  color: #ffffff;
+  font-weight: 900;
+}
+
+.logo span {
+  color: rgba(255, 255, 255, 0.88);
+  font-weight: 700;
+}
+
+.topbar {
+  padding-top: 14px;
+  padding-bottom: 14px;
+}
+
+.usuario {
+  min-height: 48px;
+  padding: 10px 16px;
+  border-radius: 14px;
+}
+
+.btn-sitio-publico,
+.btn-cerrar-sesion {
+  min-height: 44px;
+  padding: 10px 18px;
+  border-radius: 14px;
+}
+
+/* =========================
+   TARJETAS SUPERIORES
+========================= */
+
+.tarjeta {
+  min-height: 180px;
+  padding: 24px 16px;
+  justify-content: flex-start;
+  align-items: flex-start;
+  text-align: left;
+}
+
+.tarjeta i {
+  margin-bottom: 14px;
+  font-size: 1.9rem;
+}
+
+.tarjeta h3 {
+  margin-bottom: 8px;
+  font-size: 1.06rem;
+  line-height: 1.25;
+}
+
+.tarjeta p {
+  font-size: 0.92rem;
+  line-height: 1.5;
+}
+
+/* =========================
+   BLOQUES DE SECCIONES
+========================= */
+
+.grupo {
+  margin-bottom: 48px;
+}
+
+.grupo h2 {
+  margin-bottom: 18px;
+  padding-bottom: 10px;
+  font-size: 1.65rem;
+}
+
+/* =========================
+   CONTENEDORES INTERNOS
+========================= */
+
+.bloque-horario-docente,
+.documentos-cargados-docente,
+.panel-info {
+  padding: 24px;
+}
+
+.encabezado-listado,
+.encabezado-documentos-cargados {
+  margin-bottom: 18px;
+}
+
+.encabezado-listado h3,
+.encabezado-documentos-cargados h3,
+.bloque-horario-docente > h3 {
+  margin-bottom: 6px;
+  font-size: 1.2rem;
+  line-height: 1.25;
+}
+
+.encabezado-listado p,
+.encabezado-documentos-cargados p,
+.bloque-horario-docente > p {
+  color: var(--docente-texto-suave);
+  font-size: 0.96rem;
+  line-height: 1.5;
+}
+
+/* =========================
+   BOTONES DE ACCIÓN
+========================= */
+
+.acciones,
+.acciones-horario-docente,
+.acciones-documentacion {
+  margin: 18px 0 22px;
+}
+
+.btn-accion {
+  min-width: 170px;
+  min-height: 42px;
+  padding: 11px 18px;
+  border-radius: 12px;
+  font-size: 0.9rem;
+}
+
+/* =========================
+   SUBSECCIONES DE HORARIOS
+========================= */
+
+.vista-horario-aula-docente,
+.vista-horario-taller-docente,
+.vista-horario-ef-docente {
+  margin-top: 18px;
+  padding: 16px 0 0;
+  border-top: 1px solid rgba(167, 243, 208, 0.16);
+}
+
+.vista-horario-aula-docente h4,
+.vista-horario-taller-docente h4,
+.vista-horario-ef-docente h4 {
+  margin: 0 0 8px;
+  color: #ffffff;
+  font-size: 1.02rem;
+  font-weight: 900;
+}
+
+.vista-horario-aula-docente > p,
+.vista-horario-taller-docente > p,
+.vista-horario-ef-docente > p {
+  margin: 0 0 14px;
+  color: var(--docente-texto-suave);
+  font-size: 0.92rem;
+}
+
+/* =========================
+   MENSAJES VACÍOS
+========================= */
+
+.mensaje-formulario {
+  margin-top: 8px;
+  line-height: 1.45;
+}
+
+/* =========================
+   RESPONSIVE
+========================= */
+
+@media (max-width: 900px) {
+  .tarjeta {
+    min-height: 165px;
+  }
+}
+
+@media (max-width: 600px) {
+  .tarjeta {
+    min-height: auto;
+  }
+
+  .bloque-horario-docente,
+  .documentos-cargados-docente,
+  .panel-info {
+    padding: 18px;
+  }
+}
+/* =====================================================
+   AJUSTE DOCUMENTACIÓN ACADÉMICA - PORTAL DOCENTE
+===================================================== */
+
+/* Panel principal de carga */
+#panelDocumentacionAcademica .panel-info {
+  max-width: 1180px;
+  margin-left: auto;
+  margin-right: auto;
+
+  background: linear-gradient(180deg, #1c4238, #17382f);
+  border: 1px solid rgba(167, 243, 208, 0.22);
+  border-radius: 18px;
+  box-shadow: 0 14px 32px rgba(0, 0, 0, 0.2);
+}
+
+/* Encabezado */
+#panelDocumentacionAcademica .encabezado-listado h3,
+#panelDocumentacionAcademica .encabezado-documentos-cargados h3 {
+  color: #ffffff;
+  font-size: 1.25rem;
+  font-weight: 900;
+}
+
+#panelDocumentacionAcademica .encabezado-listado p,
+#panelDocumentacionAcademica .encabezado-documentos-cargados p {
+  color: #c7ddd4;
+}
+
+/* Formulario */
+#panelDocumentacionAcademica .form-grid-documentacion {
+  gap: 18px;
+}
+
+#panelDocumentacionAcademica .campo-documentacion label {
+  color: #ffffff;
+  font-weight: 900;
+}
+
+#panelDocumentacionAcademica .campo-documentacion input,
+#panelDocumentacionAcademica .campo-documentacion select {
+  min-height: 46px;
+  border: 1px solid #a7f3d0;
+  border-radius: 12px;
+
+  background: #f8fbfa;
+  color: #10251f;
+
+  font-family: inherit;
+  font-size: 0.92rem;
+  font-weight: 850;
+}
+
+#panelDocumentacionAcademica .campo-documentacion input:focus,
+#panelDocumentacionAcademica .campo-documentacion select:focus {
+  outline: none;
+  border-color: #34d399;
+  box-shadow: 0 0 0 3px rgba(52, 211, 153, 0.18);
+}
+
+#panelDocumentacionAcademica .campo-documentacion select:disabled,
+#panelDocumentacionAcademica .campo-documentacion input[readonly] {
+  background: #dbe5ef;
+  color: #475569;
+  border-color: #b7c7d8;
+}
+
+#panelDocumentacionAcademica .campo-documentacion small {
+  color: #c7ddd4;
+  font-weight: 700;
+}
+
+/* Input archivo */
+#panelDocumentacionAcademica input[type="file"] {
+  padding: 10px;
+  background: #f8fbfa;
+  color: #10251f;
+}
+
+#panelDocumentacionAcademica input[type="file"]::file-selector-button {
+  margin-right: 12px;
+  padding: 9px 14px;
+  border: 0;
+  border-radius: 9px;
+
+  background: #0f766e;
+  color: #ffffff;
+
+  font-family: inherit;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+#panelDocumentacionAcademica input[type="file"]::file-selector-button:hover {
+  background: #facc15;
+  color: #10251f;
+}
+
+/* Botón subir documento */
+#panelDocumentacionAcademica #btnSubirDocumentoAcademico {
+  background: linear-gradient(135deg, #34d399, #22c55e);
+  color: #06231b;
+  box-shadow: 0 10px 22px rgba(52, 211, 153, 0.2);
+}
+
+#panelDocumentacionAcademica #btnSubirDocumentoAcademico:hover {
+  background: linear-gradient(135deg, #facc15, #f59e0b);
+  color: #1f2937;
+}
+
+/* Mensaje de asignaciones */
+#panelDocumentacionAcademica #mensajeDocumentacionAcademica.ok,
+#panelDocumentacionAcademica #mensajeDocumentacionAcademica {
+  color: #86efac;
+  font-weight: 900;
+}
+
+/* Bloque documentos disponibles */
+#panelDocumentacionAcademica .documentos-cargados-docente {
+  margin-top: 28px;
+  padding: 24px;
+
+  background: linear-gradient(180deg, #123128, #0f2a23);
+  border: 1px solid rgba(167, 243, 208, 0.22);
+  border-radius: 18px;
+}
+
+/* Tabla documentos */
+#panelDocumentacionAcademica .tabla-documentos-contenedor {
+  margin-top: 18px;
+  border: 1px solid #b7d8cb;
+  border-radius: 16px;
+  overflow: hidden;
+
+  background: #f8fbfa;
+  box-shadow: 0 10px 22px rgba(0, 0, 0, 0.12);
+}
+
+#panelDocumentacionAcademica .tabla-documentos {
+  width: 100%;
+  border-collapse: collapse;
+  background: #f8fbfa;
+}
+
+#panelDocumentacionAcademica .tabla-documentos th {
+  padding: 14px 16px;
+  background: #d9fbe8;
+  color: #10251f;
+  font-size: 0.86rem;
+  font-weight: 900;
+  text-align: left;
+  text-transform: uppercase;
+}
+
+#panelDocumentacionAcademica .tabla-documentos td {
+  padding: 14px 16px;
+  color: #18352d;
+  border-top: 1px solid #d8e8e1;
+  font-size: 0.9rem;
+  font-weight: 750;
+}
+
+#panelDocumentacionAcademica .tabla-documentos-vacia {
+  color: #5c746b;
+  background: #f8fbfa;
+  font-weight: 800;
+  text-align: center;
+}
+
+/* Botón ver documentación cargada */
+#panelDocumentacionAcademica #btnVerDocumentosDocente {
+  background: linear-gradient(135deg, #34d399, #22c55e);
+  color: #06231b;
+}
+
+#panelDocumentacionAcademica #btnVerDocumentosDocente:hover {
+  background: linear-gradient(135deg, #facc15, #f59e0b);
+  color: #1f2937;
+}
+
+/* Responsive */
+@media (max-width: 760px) {
+  #panelDocumentacionAcademica .panel-info,
+  #panelDocumentacionAcademica .documentos-cargados-docente {
+    padding: 20px;
+  }
+
+  #panelDocumentacionAcademica .tabla-documentos {
+    min-width: 760px;
+  }
+}
+/* =====================================================
+   AJUSTE BOTÓN VER DOCUMENTACIÓN - PORTAL DOCENTE
+===================================================== */
+
+#panelDocumentacionAcademica .tabla-documentos .btn-ver-documento,
+#panelDocumentacionAcademica .tabla-documentos .btn-ver-documento-docente,
+#panelDocumentacionAcademica .tabla-documentos a[href],
+#panelDocumentacionAcademica .tabla-documentos button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+
+  min-width: 86px;
+  min-height: 38px;
+  padding: 8px 14px;
+
+  border: 0;
+  border-radius: 10px;
+
+  background: linear-gradient(135deg, #34d399, #22c55e);
+  color: #06231b;
+
+  font-family: inherit;
+  font-size: 0.86rem;
+  font-weight: 900;
+  text-decoration: none;
+
+  cursor: pointer;
+  box-shadow: 0 8px 18px rgba(52, 211, 153, 0.18);
+
+  transition:
+    transform 0.2s ease,
+    background 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+#panelDocumentacionAcademica .tabla-documentos .btn-ver-documento:hover,
+#panelDocumentacionAcademica .tabla-documentos .btn-ver-documento-docente:hover,
+#panelDocumentacionAcademica .tabla-documentos a[href]:hover,
+#panelDocumentacionAcademica .tabla-documentos button:hover {
+  transform: translateY(-2px);
+  background: linear-gradient(135deg, #facc15, #f59e0b);
+  color: #1f2937;
+  text-decoration: none;
+  box-shadow: 0 10px 22px rgba(250, 204, 21, 0.22);
+}
+
+#panelDocumentacionAcademica .tabla-documentos .btn-ver-documento i,
+#panelDocumentacionAcademica .tabla-documentos .btn-ver-documento-docente i,
+#panelDocumentacionAcademica .tabla-documentos a[href] i,
+#panelDocumentacionAcademica .tabla-documentos button i {
+  color: inherit;
+}

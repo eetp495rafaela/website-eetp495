@@ -2,7 +2,7 @@ import {
   initializeApp,
   getApp,
   getApps,
-} from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
+} from "https://www.gstatic.com/firebasejs/12.15.0/firebase-app.js";
 
 import {
   getFirestore,
@@ -10,7 +10,9 @@ import {
   getDocs,
   query,
   where,
-} from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+} from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
+
+import { getAuth } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-auth.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyAARktrOpu-Rz683q4RxTK2h1nmkUaUbuA",
@@ -23,14 +25,16 @@ const firebaseConfig = {
 
 const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
 const db = getFirestore(app);
+const auth = getAuth(app);
 
-const btnGenerarPizarraHorarios = document.getElementById(
-  "btnGenerarPizarraHorarios",
-);
+const btnGenerarPizarraHorarios =
+  document.getElementById("btnGenerarPizarraHorarios") ||
+  document.getElementById("btnGenerarPizarraHorariosGestion");
 
-const mensajePizarraHorarios = document.getElementById(
-  "mensajePizarraHorarios",
-);
+const mensajePizarraHorarios =
+  document.getElementById("mensajePizarraHorarios") ||
+  document.getElementById("mensajePizarraHorariosGestion") ||
+  document.getElementById("mensajeHorariosGestion");
 
 const DIAS_PIZARRA = [
   { valor: "LUNES", etiqueta: "Lunes" },
@@ -468,6 +472,12 @@ function abrirPizarraImprimible(bloques) {
 
 async function generarPizarraHorarios() {
   if (!btnGenerarPizarraHorarios) return;
+
+  const usuario = auth.currentUser;
+
+  if (!usuario) {
+    throw new Error("No se detectó una sesión activa. Volvé a iniciar sesión.");
+  }
 
   const textoOriginal = btnGenerarPizarraHorarios.innerHTML;
 

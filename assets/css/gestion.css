@@ -1854,3 +1854,121 @@ body {
     min-width: 900px;
   }
 }
+/* =====================================================
+   GESTIÓN - DOCUMENTACIÓN ACADÉMICA EN TABLA
+===================================================== */
+
+.tabla-documentacion-gestion-contenedor {
+  width: 100%;
+  margin-top: 20px;
+  border: 1px solid #cfe0f2;
+  border-radius: 14px;
+  overflow-x: auto;
+  background: #ffffff;
+  box-shadow: 0 10px 26px rgba(8, 32, 56, 0.06);
+}
+
+.tabla-documentacion-gestion {
+  width: 100%;
+  min-width: 900px;
+  border-collapse: collapse;
+}
+
+.tabla-documentacion-gestion thead {
+  background: #eaf4ff;
+}
+
+.tabla-documentacion-gestion th {
+  padding: 14px 16px;
+  color: var(--gestion-azul-oscuro);
+  font-size: 0.86rem;
+  font-weight: 900;
+  text-align: left;
+  white-space: nowrap;
+  border-bottom: 1px solid #cfe0f2;
+}
+
+.tabla-documentacion-gestion td {
+  padding: 14px 16px;
+  border-top: 1px solid #edf3f8;
+  color: var(--gestion-texto);
+  font-size: 0.9rem;
+  font-weight: 700;
+  vertical-align: middle;
+}
+
+.tabla-documentacion-gestion tbody tr:hover {
+  background: #f7fbff;
+}
+
+.tabla-documentacion-gestion td strong {
+  display: block;
+  color: var(--gestion-texto);
+  font-size: 0.92rem;
+  font-weight: 900;
+  line-height: 1.25;
+}
+
+.tabla-documentacion-gestion th:nth-child(1),
+.tabla-documentacion-gestion td:nth-child(1) {
+  width: 90px;
+  white-space: nowrap;
+}
+
+.tabla-documentacion-gestion th:nth-child(2),
+.tabla-documentacion-gestion td:nth-child(2) {
+  width: 190px;
+  white-space: nowrap;
+}
+
+.tabla-documentacion-gestion th:nth-child(4),
+.tabla-documentacion-gestion td:nth-child(4) {
+  width: 180px;
+  white-space: nowrap;
+}
+
+.tabla-documentacion-gestion th:nth-child(5),
+.tabla-documentacion-gestion td:nth-child(5) {
+  width: 120px;
+  text-align: center;
+}
+
+.btn-documentacion-tabla-gestion {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+
+  min-width: 82px;
+  min-height: 38px;
+  padding: 8px 14px;
+  border: 0;
+  border-radius: 12px;
+
+  color: #ffffff;
+  background: var(--gestion-verde);
+
+  font-size: 0.86rem;
+  font-weight: 900;
+  text-decoration: none;
+
+  box-shadow: 0 8px 18px rgba(22, 131, 107, 0.18);
+  transition:
+    transform 0.2s ease,
+    background 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.btn-documentacion-tabla-gestion:hover {
+  transform: translateY(-2px);
+  color: #ffffff;
+  background: var(--gestion-naranja);
+  text-decoration: none;
+  box-shadow: 0 10px 22px rgba(230, 126, 34, 0.22);
+}
+
+@media (max-width: 760px) {
+  .tabla-documentacion-gestion {
+    min-width: 820px;
+  }
+}

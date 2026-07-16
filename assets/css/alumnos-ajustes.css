@@ -1,0 +1,819 @@
+/* =====================================================
+   AJUSTES FINALES - PORTAL ALUMNOS
+   Este archivo se carga último y corrige estilos heredados
+===================================================== */
+
+/* =========================
+   TARJETAS PRINCIPALES
+========================= */
+
+.grid {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.tarjeta {
+  min-height: 210px;
+  padding: 24px 18px;
+}
+
+.tarjeta i {
+  color: var(--alumno-verde);
+}
+
+.tarjeta h3 {
+  color: var(--alumno-azul-oscuro);
+}
+
+.tarjeta p {
+  color: var(--alumno-texto-suave);
+}
+
+/* =========================
+   PANELES GENERALES
+========================= */
+
+.panel-info {
+  background: var(--alumno-blanco);
+  border: 1px solid var(--alumno-borde);
+  border-radius: 16px;
+  padding: 26px;
+  margin-top: 18px;
+  box-shadow: 0 8px 22px rgba(30, 73, 121, 0.07);
+  backdrop-filter: none;
+}
+
+.encabezado-listado h3,
+.sime-bloque h3 {
+  color: var(--alumno-azul-oscuro);
+}
+
+.encabezado-listado p,
+.texto-ayuda-sime {
+  color: var(--alumno-texto-suave);
+}
+
+.btn-volver {
+  color: var(--alumno-azul);
+}
+
+.btn-volver:hover {
+  color: var(--alumno-naranja);
+}
+
+/* =========================
+   FORMULARIOS / CAMPOS
+========================= */
+
+.campo-filtro label,
+.campo-materias-sime > label {
+  color: var(--alumno-azul-oscuro);
+}
+
+.campo-filtro select,
+.campo-filtro input {
+  border: 1px solid var(--alumno-borde);
+  color: var(--alumno-texto);
+  background: #ffffff;
+}
+
+.campo-filtro select:focus,
+.campo-filtro input:focus {
+  border-color: var(--alumno-verde);
+  box-shadow: 0 0 0 3px rgba(15, 159, 122, 0.12);
+}
+
+/* =========================
+   BOTONES
+========================= */
+
+.btn-accion,
+.btn-ver-documento-alumno,
+.btn-ver-permiso-sime {
+  border: 0;
+  color: #ffffff;
+  background: var(--alumno-verde);
+  box-shadow: 0 8px 18px rgba(15, 159, 122, 0.18);
+}
+
+.btn-accion:hover,
+.btn-ver-documento-alumno:hover,
+.btn-ver-permiso-sime:hover {
+  color: #ffffff;
+  background: var(--alumno-naranja);
+  border-color: transparent;
+  box-shadow: 0 10px 22px rgba(245, 158, 11, 0.22);
+}
+
+/* =========================
+   TABLAS
+========================= */
+
+.tabla-contenedor {
+  border: 1px solid var(--alumno-borde);
+  border-radius: 14px;
+  background: #ffffff;
+  box-shadow: 0 8px 22px rgba(30, 73, 121, 0.05);
+}
+
+.tabla-usuarios th,
+.tabla-documentacion-alumno th,
+.tabla-sime-alumno th,
+.tabla-docentes-alumno thead th {
+  color: var(--alumno-azul-oscuro);
+  background: var(--alumno-celeste);
+  border-bottom: 1px solid var(--alumno-borde);
+}
+
+.tabla-usuarios td,
+.tabla-documentacion-alumno td,
+.tabla-sime-alumno td,
+.tabla-docentes-alumno tbody td {
+  color: var(--alumno-texto);
+  border-bottom: 1px solid var(--alumno-borde);
+}
+
+.tabla-vacia {
+  color: var(--alumno-texto-suave);
+}
+
+.mensaje-formulario {
+  color: var(--alumno-texto-suave);
+}
+
+.mensaje-formulario.error {
+  color: #b42318;
+}
+
+.mensaje-formulario.ok {
+  color: var(--alumno-verde);
+}
+
+/* =========================
+   HORARIOS
+========================= */
+
+.encabezado-horario-alumno {
+  border: 1px solid #bfdbfe;
+  background: var(--alumno-celeste);
+  color: var(--alumno-azul-oscuro);
+}
+
+.encabezado-horario-alumno strong {
+  color: var(--alumno-verde);
+}
+
+.grilla-horario-aula-alumno {
+  gap: 16px;
+}
+
+.dia-horario-alumno {
+  border: 1px solid var(--alumno-borde);
+  background: #f8fbff;
+  box-shadow: 0 8px 18px rgba(30, 73, 121, 0.05);
+}
+
+.dia-horario-alumno h4 {
+  border-bottom: 1px solid var(--alumno-borde);
+  color: var(--alumno-azul-oscuro);
+}
+
+.tarjeta-bloque-horario-alumno {
+  background: #ffffff;
+  color: var(--alumno-texto);
+  border: 1px solid #d8e7f6;
+  box-shadow: 0 6px 16px rgba(30, 73, 121, 0.06);
+}
+
+.bloque-horario-hora-alumno,
+.bloque-horario-ubicacion-alumno {
+  color: var(--alumno-azul);
+}
+
+.bloque-horario-materia-alumno {
+  color: var(--alumno-azul-oscuro);
+}
+
+.bloque-horario-docente-alumno {
+  color: var(--alumno-texto-suave);
+}
+
+.dia-horario-alumno .mensaje-formulario {
+  background: #ffffff;
+  color: var(--alumno-texto-suave);
+}
+
+/* =========================
+   MIS DOCENTES
+========================= */
+
+.encabezado-agenda-docentes-alumno {
+  background: var(--alumno-celeste);
+  color: var(--alumno-azul-oscuro);
+}
+
+.tabla-docentes-alumno {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.tabla-docentes-alumno tbody tr:hover {
+  background: #f7fbff;
+}
+
+.tabla-docentes-alumno tbody td:first-child,
+.tabla-docentes-alumno tbody td:nth-child(2) {
+  color: var(--alumno-texto);
+}
+
+.enlace-correo-docente-alumno {
+  color: var(--alumno-azul);
+}
+
+.enlace-correo-docente-alumno::before {
+  color: var(--alumno-verde);
+}
+
+.enlace-correo-docente-alumno:hover {
+  color: var(--alumno-naranja);
+}
+
+/* =========================
+   S.I.M.E.
+========================= */
+
+.panel-sime {
+  background: var(--alumno-blanco);
+}
+
+.sime-grid {
+  gap: 22px;
+}
+
+.sime-bloque {
+  background: #f8fbff;
+  border: 1px solid var(--alumno-borde);
+  box-shadow: 0 8px 18px rgba(30, 73, 121, 0.04);
+}
+
+.estado-sime {
+  border: 1px solid var(--alumno-borde);
+  background: var(--alumno-celeste-suave);
+  color: var(--alumno-texto);
+}
+
+.estado-sime.abierto {
+  border-color: #bbf7d0;
+  background: var(--alumno-verde-suave);
+  color: #166534;
+}
+
+.estado-sime.cerrado {
+  border-color: #fde68a;
+  background: #fff7df;
+  color: #92400e;
+}
+
+.lista-materias-sime {
+  border: 1px solid var(--alumno-borde);
+  background: #ffffff;
+  color: var(--alumno-texto);
+}
+
+.item-materia-sime {
+  color: var(--alumno-texto);
+  border-bottom: 1px solid #e2edf6;
+}
+
+.item-materia-sime input {
+  accent-color: var(--alumno-verde);
+}
+
+.etiqueta-estado-sime {
+  background: var(--alumno-verde-suave);
+  color: #166534;
+}
+
+/* =========================
+   RESPONSIVE
+========================= */
+
+@media (max-width: 1320px) {
+  .grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 900px) {
+  .grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .grilla-horario-aula-alumno {
+    grid-template-columns: repeat(2, minmax(220px, 1fr));
+  }
+}
+
+@media (max-width: 760px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+
+  .panel-info {
+    padding: 22px;
+  }
+
+  .btn-accion {
+    width: 100%;
+  }
+}
+
+@media (max-width: 650px) {
+  .tabla-docentes-alumno tbody tr {
+    background: #ffffff;
+    border: 1px solid var(--alumno-borde);
+  }
+
+  .tabla-docentes-alumno tbody td::before {
+    color: var(--alumno-verde);
+  }
+}
+/* =====================================================
+   PRUEBA VISUAL - PALETA ALUMNO AZUL NOCHE
+===================================================== */
+
+.grupo h2 {
+  color: #eaf6ff;
+  border-bottom-color: var(--alumno-verde);
+}
+
+.tarjeta,
+.panel-info,
+.sime-bloque,
+.dia-horario-alumno {
+  background: linear-gradient(180deg, #183653, #142b43);
+  border-color: rgba(148, 210, 255, 0.22);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.18);
+}
+
+.tarjeta h3,
+.encabezado-listado h3,
+.sime-bloque h3,
+.dia-horario-alumno h4,
+.campo-filtro label,
+.campo-materias-sime > label {
+  color: #eaf6ff;
+}
+
+.tarjeta p,
+.encabezado-listado p,
+.texto-ayuda-sime,
+.mensaje-formulario,
+.bloque-horario-docente-alumno {
+  color: #b8cce0;
+}
+
+.tarjeta i,
+.encabezado-horario-alumno strong,
+.enlace-correo-docente-alumno::before {
+  color: var(--alumno-verde);
+}
+
+.btn-accion,
+.btn-ver-documento-alumno,
+.btn-ver-permiso-sime {
+  background: linear-gradient(135deg, #2dd4bf, #22c1dc);
+  color: #062235;
+  font-weight: 900;
+  box-shadow: 0 10px 22px rgba(45, 212, 191, 0.22);
+}
+
+.btn-accion:hover,
+.btn-ver-documento-alumno:hover,
+.btn-ver-permiso-sime:hover {
+  background: linear-gradient(135deg, #fbbf24, #f59e0b);
+  color: #1d2939;
+}
+
+.encabezado-horario-alumno,
+.encabezado-agenda-docentes-alumno,
+.estado-sime {
+  background: rgba(45, 212, 191, 0.12);
+  border-color: rgba(45, 212, 191, 0.28);
+  color: #eaf6ff;
+}
+
+.tarjeta-bloque-horario-alumno,
+.lista-materias-sime,
+.tabla-contenedor {
+  background: #f8fbff;
+  color: #1f3348;
+}
+
+.tabla-usuarios th,
+.tabla-documentacion-alumno th,
+.tabla-sime-alumno th,
+.tabla-docentes-alumno thead th {
+  background: #d8f3ff;
+  color: #0f2742;
+}
+
+.tabla-usuarios td,
+.tabla-documentacion-alumno td,
+.tabla-sime-alumno td,
+.tabla-docentes-alumno tbody td {
+  color: #24364b;
+}
+
+.btn-volver {
+  color: var(--alumno-verde);
+}
+
+.btn-volver:hover {
+  color: var(--alumno-naranja);
+}
+/* =====================================================
+   AJUSTES FINALES VISUAL PORTAL ALUMNO
+===================================================== */
+
+/* =========================
+   TOPBAR
+========================= */
+
+.topbar {
+  background: linear-gradient(90deg, #0c2947 0%, #0f6fa1 55%, #1bb7f0 100%);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.logo h1,
+.logo span,
+.usuario-datos span,
+.usuario-datos small,
+.btn-sitio-publico,
+.btn-cerrar-sesion,
+.usuario,
+.usuario i {
+  color: #ffffff;
+}
+
+.logo span,
+.usuario-datos small {
+  opacity: 0.9;
+}
+
+.usuario {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.22);
+}
+
+.usuario i {
+  background: rgba(0, 0, 0, 0.18);
+}
+
+/* =========================
+   TARJETAS DEL INICIO
+========================= */
+
+.grid {
+  grid-template-columns: repeat(5, minmax(180px, 1fr));
+  gap: 18px;
+}
+
+.tarjeta {
+  min-height: 180px;
+  padding: 24px 18px;
+}
+
+.tarjeta h3 {
+  font-size: 1rem;
+}
+
+.tarjeta p {
+  font-size: 0.9rem;
+  line-height: 1.45;
+}
+
+/* =========================
+   CONTRASTE GENERAL
+========================= */
+
+.tarjeta,
+.panel-info,
+.sime-bloque,
+.dia-horario-alumno {
+  background: linear-gradient(180deg, #15395e, #102f4e);
+  border: 1px solid rgba(88, 201, 255, 0.22);
+}
+
+.grupo h2 {
+  color: #ffffff;
+  border-bottom-color: #14e4d4;
+}
+
+.tarjeta h3,
+.panel-info h3,
+.sime-bloque h3,
+.dia-horario-alumno h4,
+.campo-filtro label,
+.campo-materias-sime > label {
+  color: #ffffff;
+}
+
+.tarjeta p,
+.panel-info p,
+.texto-ayuda-sime,
+.mensaje-formulario,
+.bloque-horario-docente-alumno,
+.bloque-horario-ubicacion-alumno,
+.bloque-horario-docente-alumno {
+  color: #c9dced;
+}
+
+/* =========================
+   BOTONES
+========================= */
+
+.btn-accion,
+.btn-ver-documento-alumno,
+.btn-ver-permiso-sime {
+  background: linear-gradient(135deg, #19e0d2, #19c3f3);
+  border-color: transparent;
+  color: #08243c;
+  font-weight: 900;
+  box-shadow: 0 10px 22px rgba(25, 224, 210, 0.18);
+}
+
+.btn-accion:hover,
+.btn-ver-documento-alumno:hover,
+.btn-ver-permiso-sime:hover {
+  background: linear-gradient(135deg, #ffd54a, #f6b80f);
+  color: #0a2236;
+}
+
+.btn-volver {
+  color: #14e4d4;
+}
+
+.btn-volver:hover {
+  color: #ffd54a;
+}
+
+/* =========================
+   HORARIOS
+========================= */
+
+.encabezado-horario-alumno,
+.encabezado-agenda-docentes-alumno,
+.estado-sime {
+  background: rgba(20, 228, 212, 0.12);
+  border: 1px solid rgba(20, 228, 212, 0.22);
+  color: #ffffff;
+}
+
+.encabezado-horario-alumno strong {
+  color: #14e4d4;
+}
+
+.tarjeta-bloque-horario-alumno {
+  background: #f3f7fb;
+  color: #18324c;
+}
+
+.bloque-horario-hora-alumno {
+  color: #0ea5e9;
+}
+
+.bloque-horario-materia-alumno {
+  color: #0f2742;
+}
+
+.bloque-horario-docente-alumno {
+  color: #7b93aa;
+}
+
+.dia-horario-alumno .mensaje-formulario {
+  background: rgba(255, 255, 255, 0.08);
+  color: #d7e7f5;
+}
+
+/* =========================
+   TABLAS GENERALES
+========================= */
+
+.tabla-contenedor {
+  background: #f3f7fb;
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.tabla-documentacion-alumno th,
+.tabla-sime-alumno th,
+.tabla-docentes-alumno thead th {
+  background: #c8e8f3;
+  color: #0f2742;
+}
+
+.tabla-documentacion-alumno td,
+.tabla-sime-alumno td,
+.tabla-docentes-alumno tbody td {
+  background: #f8fbfe;
+  color: #21384f;
+  border-bottom: 1px solid #d9e7f1;
+}
+
+/* =========================
+   TABLA MIS DOCENTES
+========================= */
+
+.tabla-docentes-alumno {
+  background: #f8fbfe;
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.tabla-docentes-alumno tbody tr:hover {
+  background: #eef6fb;
+}
+
+.tabla-docentes-alumno tbody td:nth-child(1) {
+  color: #2a5d8f;
+  font-weight: 800;
+}
+
+.tabla-docentes-alumno tbody td:nth-child(2) {
+  color: #1f3147;
+  font-weight: 800;
+}
+
+.tabla-docentes-alumno tbody td:nth-child(3) {
+  color: #1f3147;
+}
+
+.enlace-correo-docente-alumno {
+  color: #0ea5e9;
+  font-weight: 800;
+}
+
+.enlace-correo-docente-alumno::before {
+  color: #14e4d4;
+}
+
+.enlace-correo-docente-alumno:hover {
+  color: #0b4f9c;
+}
+
+/* =========================
+   DOCUMENTACIÓN
+========================= */
+
+.filtros-documentacion-alumno label,
+.filtros-documentacion-alumno .campo-filtro label {
+  color: #ffffff;
+}
+
+/* =========================
+   S.I.M.E.
+========================= */
+
+.lista-materias-sime {
+  background: #f8fbfe;
+  color: #21384f;
+}
+
+.mensaje-lista-sime {
+  color: #5c7288;
+}
+
+.item-materia-sime {
+  color: #21384f;
+  border-bottom: 1px solid #dde8f1;
+}
+
+/* =========================
+   RESPONSIVE
+========================= */
+
+@media (max-width: 1400px) {
+  .grid {
+    grid-template-columns: repeat(3, minmax(180px, 1fr));
+  }
+}
+
+@media (max-width: 900px) {
+  .grid {
+    grid-template-columns: repeat(2, minmax(180px, 1fr));
+  }
+}
+
+@media (max-width: 600px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+}
+/* =====================================================
+   AJUSTE SELECTS S.I.M.E. - CONTRASTE
+===================================================== */
+
+#examenes select,
+#examenes .campo-filtro select,
+#anioCursadoSime,
+#cursoOrigenSime {
+  background: #f8fbfe;
+  color: #0f2742;
+  border: 1px solid #8fc8e8;
+  font-weight: 800;
+}
+
+#examenes select option,
+#anioCursadoSime option,
+#cursoOrigenSime option {
+  background: #ffffff;
+  color: #0f2742;
+  font-weight: 700;
+}
+
+#examenes select:focus,
+#anioCursadoSime:focus,
+#cursoOrigenSime:focus {
+  border-color: #14e4d4;
+  box-shadow: 0 0 0 3px rgba(20, 228, 212, 0.18);
+}
+/* =====================================================
+   AJUSTE CONTRASTE HORARIOS Y ESTADO S.I.M.E.
+===================================================== */
+
+/* Textos secundarios dentro de los bloques de horario */
+.tarjeta-bloque-horario-alumno .bloque-horario-docente-alumno,
+.tarjeta-bloque-horario-alumno .bloque-horario-ubicacion-alumno {
+  color: #5f7894;
+  font-weight: 850;
+}
+
+/* Hora del bloque */
+.tarjeta-bloque-horario-alumno .bloque-horario-hora-alumno {
+  color: #0284c7;
+  font-weight: 900;
+}
+
+/* Materia / tipo de clase */
+.tarjeta-bloque-horario-alumno .bloque-horario-materia-alumno {
+  color: #102a43;
+  font-weight: 900;
+}
+
+/* Separadores dentro de la tarjeta */
+.tarjeta-bloque-horario-alumno .bloque-horario-ubicacion-alumno {
+  border-top-color: #cbdceb;
+}
+
+/* Mensajes tipo "Sin taller cargado" / "Sin Educación Física cargada" */
+.dia-horario-alumno .mensaje-formulario {
+  background: rgba(255, 255, 255, 0.1);
+  color: #d8e8f5;
+  font-weight: 850;
+}
+
+/* Etiqueta de estado S.I.M.E. */
+.etiqueta-estado-sime,
+.tabla-sime-alumno .etiqueta-estado-sime {
+  min-height: 30px;
+  padding: 5px 12px;
+  border-radius: 999px;
+
+  background: #dff7ec;
+  color: #05603a;
+
+  font-size: 0.82rem;
+  font-weight: 900;
+  line-height: 1;
+}
+
+/* Por si alguna regla anterior pisa el texto de la celda Estado */
+.tabla-sime-alumno td .etiqueta-estado-sime {
+  color: #05603a;
+}
+/* =====================================================
+   AJUSTE SELECT DOCUMENTACIÓN ALUMNO - CONTRASTE
+===================================================== */
+
+#documentacion-academica select,
+#documentacion-academica .campo-filtro select,
+#filtroTipoDocumentacionAlumno {
+  background: #f8fbfe;
+  color: #0f2742;
+  border: 1px solid #8fc8e8;
+  font-weight: 800;
+}
+
+#documentacion-academica select option,
+#filtroTipoDocumentacionAlumno option {
+  background: #ffffff;
+  color: #0f2742;
+  font-weight: 700;
+}
+
+#documentacion-academica select:focus,
+#filtroTipoDocumentacionAlumno:focus {
+  border-color: #14e4d4;
+  box-shadow: 0 0 0 3px rgba(20, 228, 212, 0.18);
+}

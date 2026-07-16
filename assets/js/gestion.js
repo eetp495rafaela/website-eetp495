@@ -2345,21 +2345,90 @@ function renderizarDocumentacionGestion(documentos) {
 
   if (!documentos.length) {
     vistaDocumentacionGestion.innerHTML = `
-    <p class="mensaje-gestion">
-      No se encontró documentación académica con esos filtros.
-    </p>
-  `;
+      <p class="mensaje-gestion">
+        No hay documentación académica cargada con los filtros seleccionados.
+      </p>
+    `;
 
     mostrarMensajeDocumentacionGestion("");
-
     return;
   }
 
   const documentosOrdenados = ordenarDocumentacionGestion(documentos);
 
   vistaDocumentacionGestion.innerHTML = `
-    <div class="grilla-documentacion-gestion">
-      ${documentosOrdenados.map(renderizarTarjetaDocumentacionGestion).join("")}
+    <div class="tabla-documentacion-gestion-contenedor">
+      <table class="tabla-documentacion-gestion">
+        <thead>
+          <tr>
+            <th>Curso</th>
+            <th>Tipo</th>
+            <th>Espacio Curricular</th>
+            <th>Fecha de carga</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          ${documentosOrdenados
+            .map((documento) => {
+              const driveUrl = String(documento.driveUrl || "").trim();
+
+              return `
+                <tr>
+                  <td>
+                    ${escaparHtmlGestion(documento.curso || "-")}
+                  </td>
+
+                  <td>
+                    ${escaparHtmlGestion(
+                      obtenerEtiquetaTipoDocumentoGestion(
+                        documento.tipoDocumento,
+                      ),
+                    )}
+                  </td>
+
+                  <td>
+                    <strong>
+                      ${escaparHtmlGestion(documento.espacioCurricular || "-")}
+                    </strong>
+                  </td>
+
+                  <td>
+                    ${escaparHtmlGestion(
+                      formatearFechaDocumentacionGestion(documento.fechaCarga),
+                    )}
+                  </td>
+
+                  <td>
+                    ${
+                      driveUrl
+                        ? `
+                          <a
+                            class="btn-documentacion-tabla-gestion"
+                            href="${escaparHtmlGestion(driveUrl)}"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            title="Ver documento"
+                            aria-label="Ver documento"
+                          >
+                            <i class="fa-solid fa-eye"></i>
+                            Ver
+                          </a>
+                        `
+                        : `
+                          <span class="mensaje-documentacion-sin-url">
+                            Sin archivo
+                          </span>
+                        `
+                    }
+                  </td>
+                </tr>
+              `;
+            })
+            .join("")}
+        </tbody>
+      </table>
     </div>
   `;
 

@@ -566,3 +566,47 @@ RESPONSIVE
     width: 100%;
   }
 }
+/* =====================================================
+   PORTAL DOCENTE - GRID PRINCIPAL 5 + 5
+===================================================== */
+
+.grid-docente-principal {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.grid-docente-principal .tarjeta {
+  min-height: 205px;
+  padding: 24px 18px;
+}
+
+.grid-docente-principal .tarjeta i {
+  font-size: 2.25rem;
+}
+
+.grid-docente-principal .tarjeta h3 {
+  font-size: 1rem;
+}
+
+.grid-docente-principal .tarjeta p {
+  font-size: 0.88rem;
+  line-height: 1.45;
+}
+
+@media (max-width: 1400px) {
+  .grid-docente-principal {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 900px) {
+  .grid-docente-principal {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 600px) {
+  .grid-docente-principal {
+    grid-template-columns: 1fr;
+  }
+}
