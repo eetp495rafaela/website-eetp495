@@ -2,12 +2,12 @@ import {
   initializeApp,
   getApp,
   getApps,
-} from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
+} from "https://www.gstatic.com/firebasejs/12.15.0/firebase-app.js";
 
 import {
   getAuth,
   onAuthStateChanged,
-} from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
+} from "https://www.gstatic.com/firebasejs/12.15.0/firebase-auth.js";
 
 import {
   getFirestore,
@@ -19,7 +19,7 @@ import {
   getDoc,
   setDoc,
   serverTimestamp,
-} from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+} from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyAARktrOpu-Rz683q4RxTK2h1nmkUaUbuA",
@@ -479,7 +479,10 @@ async function cargarEstudiantesParaClaseSira() {
   mostrarMensajeSira("");
 
   try {
+    console.log("Si.R.A. - Antes de buscar asistencia existente", clase);
     asistenciaSiraActual = await obtenerAsistenciaExistenteSira(clase);
+    console.log("Si.R.A. - Asistencia existente cargada", asistenciaSiraActual);
+
     let consultaEstudiantes = null;
 
     if (tipo === "TALLER") {
@@ -509,7 +512,15 @@ async function cargarEstudiantesParaClaseSira() {
       );
     }
 
+    console.log("Si.R.A. - Antes de consultar estudiantes", {
+      tipo,
+      cursoId: clase.cursoId,
+      grupoTaller: clase.grupoTaller,
+    });
+
     const resultado = await getDocs(consultaEstudiantes);
+
+    console.log("Si.R.A. - Estudiantes encontrados:", resultado.size);
 
     const estudiantes = [];
 
@@ -584,13 +595,32 @@ function obtenerIdAsistenciaSira(clase) {
 }
 
 async function obtenerAsistenciaExistenteSira(clase) {
-  const idAsistencia = obtenerIdAsistenciaSira(clase);
-  const referencia = doc(db, "asistencias_clases", idAsistencia);
-  const documento = await getDoc(referencia);
+  const usuario = auth.currentUser;
 
-  if (!documento.exists()) {
+  if (!usuario) {
+    throw new Error("No se detectó una sesión activa.");
+  }
+
+  const fecha = String(fechaSiraDocente?.value || "").trim();
+
+  if (!fecha) {
     return null;
   }
+
+  const consulta = query(
+    collection(db, "asistencias_clases"),
+    where("docenteCorreo", "==", usuario.email),
+    where("fecha", "==", fecha),
+    where("horarioId", "==", clase.id),
+  );
+
+  const resultado = await getDocs(consulta);
+
+  if (resultado.empty) {
+    return null;
+  }
+
+  const documento = resultado.docs[0];
 
   return {
     id: documento.id,
