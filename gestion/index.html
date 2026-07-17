@@ -152,6 +152,12 @@
               Taller y Educación Física.
             </p>
           </a>
+
+          <a class="tarjeta tarjeta-enlace" href="#mesas-examen-gestion">
+            <i class="fa-solid fa-calendar-check"></i>
+            <h3>Mesas de Examen</h3>
+            <p>Consulta institucional de mesas publicadas y ocultas.</p>
+          </a>
         </div>
       </section>
 
@@ -684,6 +690,168 @@
 
             <p id="mensajeInformesGestion" class="mensaje-gestion"></p>
           </div>
+        </div>
+
+        <a class="btn-volver" href="#inicio">
+          <i class="fa-solid fa-arrow-up"></i>
+          Volver al inicio
+        </a>
+      </section>
+
+      <section class="grupo seccion-destino" id="mesas-examen-gestion">
+        <h2>Mesas de Examen</h2>
+
+        <div
+          class="panel-gestion-listado panel-mesas-direccion"
+          id="panelMesaDireccionGestion"
+          hidden
+        >
+          <div class="encabezado-listado">
+            <div>
+              <h3>Nueva mesa de examen</h3>
+              <p>
+                Cargá una mesa nueva para el turno vigente. Por seguridad, toda
+                mesa nueva se guardará oculta hasta que Dirección decida
+                publicarla.
+              </p>
+            </div>
+          </div>
+
+          <form id="formMesaGestion" autocomplete="off">
+            <input id="mesaGestionId" type="hidden" />
+
+            <div class="form-grid-gestion form-grid-mesas-gestion">
+              <div class="campo-filtro-gestion">
+                <label for="mesaGestionFecha">Fecha *</label>
+                <input id="mesaGestionFecha" type="date" required />
+              </div>
+
+              <div class="campo-filtro-gestion">
+                <label for="mesaGestionHora">Hora *</label>
+                <select id="mesaGestionHora" required>
+                  <option value="">Seleccionar hora</option>
+                </select>
+              </div>
+
+              <div class="campo-filtro-gestion">
+                <label for="mesaGestionPeriodo">Período *</label>
+                <select id="mesaGestionPeriodo" required>
+                  <option value="">Seleccionar período</option>
+                </select>
+              </div>
+
+              <div class="campo-filtro-gestion">
+                <label for="mesaGestionEstado">Estado *</label>
+                <select id="mesaGestionEstado" required>
+                  <option value="OCULTA" selected>OCULTA</option>
+                  <option value="PUBLICADA">PUBLICADA</option>
+                </select>
+              </div>
+
+              <div class="campo-filtro-gestion">
+                <label for="mesaGestionEspacio">Espacio curricular *</label>
+                <select id="mesaGestionEspacio" required>
+                  <option value="">Cargando espacios curriculares...</option>
+                </select>
+              </div>
+
+              <div class="campo-filtro-gestion campo-mesas-cursos-gestion">
+                <label>Cursos *</label>
+                <div id="mesaGestionCursos" class="opciones-mesas-gestion">
+                  Cargando cursos...
+                </div>
+              </div>
+            </div>
+
+            <div class="acciones-gestion acciones-mesas-form-gestion">
+              <button
+                class="btn-gestion"
+                id="btnGuardarMesaGestion"
+                type="submit"
+              >
+                <i class="fa-solid fa-floppy-disk"></i>
+                Guardar mesa oculta
+              </button>
+
+              <button
+                class="btn-gestion btn-gestion-secundario"
+                id="btnCancelarMesaGestion"
+                type="button"
+                hidden
+              >
+                Cancelar edición
+              </button>
+            </div>
+
+            <p id="mensajeMesaFormGestion" class="mensaje-gestion"></p>
+          </form>
+        </div>
+
+        <div class="panel-gestion-listado">
+          <div class="encabezado-listado">
+            <div>
+              <h3>Consulta de mesas</h3>
+              <p>
+                Mesas de examen cargadas para el turno vigente. Dirección podrá
+                gestionar publicación y edición.
+              </p>
+            </div>
+
+            <div class="acciones-gestion">
+              <button
+                class="btn-gestion"
+                id="btnActualizarMesasGestion"
+                type="button"
+              >
+                <i class="fa-solid fa-rotate"></i>
+                Actualizar mesas
+              </button>
+            </div>
+          </div>
+
+          <div class="filtros-gestion filtros-mesas-gestion">
+            <div class="campo-filtro-gestion">
+              <label for="filtroMesaGestionEspacio">Espacio curricular</label>
+
+              <select id="filtroMesaGestionEspacio">
+                <option value="">Todos los espacios</option>
+              </select>
+            </div>
+
+            <div class="campo-filtro-gestion">
+              <label for="filtroMesaGestionCurso">Curso</label>
+
+              <select id="filtroMesaGestionCurso">
+                <option value="">Todos los cursos</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="tabla-contenedor">
+            <table class="tabla-gestion tabla-mesas-gestion">
+              <thead>
+                <tr>
+                  <th>Fecha</th>
+                  <th>Hora</th>
+                  <th>Espacio curricular</th>
+                  <th>Cursos</th>
+                  <th>Estado</th>
+                  <th class="columna-acciones-mesas-gestion">Acciones</th>
+                </tr>
+              </thead>
+
+              <tbody id="cuerpoTablaMesasGestion">
+                <tr>
+                  <td colspan="6" class="tabla-vacia">
+                    Todavía no se consultaron las mesas. Presioná “Actualizar
+                    mesas” para cargarlas.
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <p id="mensajeMesasGestion" class="mensaje-gestion"></p>
         </div>
 
         <a class="btn-volver" href="#inicio">

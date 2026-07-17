@@ -273,6 +273,12 @@
             <p>Accedé al S.I.M.E. para inscribirte a las mesas de exámenes.</p>
           </a>
 
+          <a class="tarjeta tarjeta-enlace" href="#mesas-examen-alumno">
+            <i class="fa-solid fa-calendar-check"></i>
+            <h3>Mesas de Examen</h3>
+            <p>Consultá las mesas de examen publicadas por la escuela.</p>
+          </a>
+
           <a class="tarjeta tarjeta-enlace" href="#documentacion-academica">
             <i class="fa-solid fa-folder-open"></i>
             <h3>Documentación Académica</h3>
@@ -485,6 +491,80 @@
         </a>
       </section>
 
+      <section class="grupo seccion-destino" id="mesas-examen-alumno">
+        <h2>Mesas de Examen</h2>
+
+        <div class="panel-alumno-mesas">
+          <div class="encabezado-alumno-mesas">
+            <div>
+              <h3>Mesas publicadas</h3>
+              <p>
+                Consultá las mesas de examen disponibles. Podés filtrar por
+                espacio curricular o por curso.
+              </p>
+            </div>
+
+            <div class="acciones-alumno-mesas">
+              <button
+                class="btn-alumno-mesas"
+                id="btnActualizarMesasAlumno"
+                type="button"
+              >
+                <i class="fa-solid fa-rotate"></i>
+                Actualizar mesas
+              </button>
+            </div>
+          </div>
+
+          <div class="filtros-alumno-mesas">
+            <div class="campo-alumno-mesas">
+              <label for="filtroMesaAlumnoEspacio">Espacio curricular</label>
+
+              <select id="filtroMesaAlumnoEspacio">
+                <option value="">Todos los espacios</option>
+              </select>
+            </div>
+
+            <div class="campo-alumno-mesas">
+              <label for="filtroMesaAlumnoCurso">Curso</label>
+
+              <select id="filtroMesaAlumnoCurso">
+                <option value="">Todos los cursos</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="tabla-alumno-mesas-contenedor">
+            <table class="tabla-alumno-mesas">
+              <thead>
+                <tr>
+                  <th>Fecha</th>
+                  <th>Hora</th>
+                  <th>Espacio curricular</th>
+                  <th>Cursos</th>
+                </tr>
+              </thead>
+
+              <tbody id="cuerpoTablaMesasAlumno">
+                <tr>
+                  <td colspan="4" class="tabla-vacia">
+                    Todavía no se consultaron las mesas. Presioná “Actualizar
+                    mesas” para cargarlas.
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <p id="mensajeMesasAlumno" class="mensaje-alumno-mesas"></p>
+        </div>
+
+        <a class="btn-volver" href="#inicio">
+          <i class="fa-solid fa-arrow-up"></i>
+          Volver al inicio
+        </a>
+      </section>
+
       <section class="grupo seccion-destino" id="documentacion-academica">
         <h2>Documentación Académica</h2>
 
@@ -556,6 +636,7 @@
     </a>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script type="module" src="../assets/js/proteger-portal.js"></script>
+    <script type="module" src="../assets/js/mesas-alumno.js"></script>
     <script type="module" src="../assets/js/documentacion-alumno.js"></script>
     <script type="module" src="../assets/js/sime-alumno.js"></script>
     <script src="../assets/js/volver-arriba.js"></script>

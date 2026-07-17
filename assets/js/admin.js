@@ -184,6 +184,59 @@ const mensajeRegistroAsignacion = document.getElementById(
 );
 const mensajeAsignaciones = document.getElementById("mensajeAsignaciones");
 
+// =========================
+// MESAS DE EXAMEN - ADMIN
+// =========================
+
+const formMesaExamenAdmin = document.getElementById("formMesaExamenAdmin");
+const mesaExamenAdminId = document.getElementById("mesaExamenAdminId");
+const mesaExamenAdminFecha = document.getElementById("mesaExamenAdminFecha");
+const mesaExamenAdminHora = document.getElementById("mesaExamenAdminHora");
+const mesaExamenAdminPeriodo = document.getElementById(
+  "mesaExamenAdminPeriodo",
+);
+const mesaExamenAdminEstado = document.getElementById("mesaExamenAdminEstado");
+const mesaExamenAdminEspacio = document.getElementById(
+  "mesaExamenAdminEspacio",
+);
+const mesaExamenAdminCursos = document.getElementById("mesaExamenAdminCursos");
+const btnGuardarMesaExamenAdmin = document.getElementById(
+  "btnGuardarMesaExamenAdmin",
+);
+const btnCancelarMesaExamenAdmin = document.getElementById(
+  "btnCancelarMesaExamenAdmin",
+);
+const mensajeMesaExamenAdmin = document.getElementById(
+  "mensajeMesaExamenAdmin",
+);
+
+const btnActualizarMesasExamenAdmin = document.getElementById(
+  "btnActualizarMesasExamenAdmin",
+);
+const btnLimpiarPeriodoMesasAdmin = document.getElementById(
+  "btnLimpiarPeriodoMesasAdmin",
+);
+const buscarMesaExamenAdmin = document.getElementById("buscarMesaExamenAdmin");
+const filtroMesaExamenAdminEstado = document.getElementById(
+  "filtroMesaExamenAdminEstado",
+);
+const filtroMesaExamenAdminPeriodo = document.getElementById(
+  "filtroMesaExamenAdminPeriodo",
+);
+const filtroMesaExamenAdminCurso = document.getElementById(
+  "filtroMesaExamenAdminCurso",
+);
+const cuerpoTablaMesasExamenAdmin = document.getElementById(
+  "cuerpoTablaMesasExamenAdmin",
+);
+const mensajeListadoMesasExamenAdmin = document.getElementById(
+  "mensajeListadoMesasExamenAdmin",
+);
+
+let mesasExamenAdminCargadas = [];
+let cursosMesasExamenAdmin = [];
+let espaciosMesasExamenAdmin = [];
+
 const filtroCursoAsignacion = document.getElementById("filtroCursoAsignacion");
 
 const buscarDocenteAsignacion = document.getElementById(
@@ -259,6 +312,15 @@ function normalizarCorreo(correo) {
   return String(correo || "")
     .trim()
     .toLowerCase();
+}
+
+function escaparHtml(texto) {
+  return String(texto || "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
 }
 
 function mostrarMensajeRegistro(texto, tipo = "") {
@@ -1359,6 +1421,1028 @@ async function cargarEspaciosCurriculares() {
       "No se pudieron cargar los espacios curriculares.",
       "error",
     );
+  }
+}
+
+// =========================
+// MESAS DE EXAMEN - ADMIN
+// Opciones de formulario
+// =========================
+
+function mostrarMensajeMesaExamenAdmin(texto, tipo = "") {
+  if (!mensajeMesaExamenAdmin) return;
+
+  mensajeMesaExamenAdmin.textContent = texto || "";
+  mensajeMesaExamenAdmin.className = `mensaje-formulario ${tipo}`.trim();
+}
+
+function mostrarMensajeListadoMesasExamenAdmin(texto, tipo = "") {
+  if (!mensajeListadoMesasExamenAdmin) return;
+
+  mensajeListadoMesasExamenAdmin.textContent = texto || "";
+  mensajeListadoMesasExamenAdmin.className =
+    `mensaje-formulario ${tipo}`.trim();
+}
+
+function ordenarCursosMesasAdmin(cursos) {
+  return cursos.sort((a, b) => {
+    const anioA = Number(a.anio || 0);
+    const anioB = Number(b.anio || 0);
+
+    if (anioA !== anioB) return anioA - anioB;
+
+    return String(a.division || "").localeCompare(
+      String(b.division || ""),
+      "es",
+      {
+        numeric: true,
+        sensitivity: "base",
+      },
+    );
+  });
+}
+
+function ordenarEspaciosMesasAdmin(espacios) {
+  return espacios.sort((a, b) => {
+    const anioA = Number(a.anio || 0);
+    const anioB = Number(b.anio || 0);
+
+    if (anioA !== anioB) return anioA - anioB;
+
+    return String(a.nombre || "").localeCompare(String(b.nombre || ""), "es", {
+      numeric: true,
+      sensitivity: "base",
+    });
+  });
+}
+
+async function cargarCursosMesasExamenAdmin() {
+  if (!mesaExamenAdminCursos) return;
+
+  mesaExamenAdminCursos.innerHTML = "Cargando cursos...";
+
+  try {
+    const consulta = await getDocs(collection(db, "cursos"));
+
+    cursosMesasExamenAdmin = consulta.docs
+      .map((documento) => ({
+        id: documento.id,
+        ...documento.data(),
+      }))
+      .filter((curso) => {
+        const estado = String(curso.estado || "ACTIVO")
+          .trim()
+          .toUpperCase();
+
+        return estado === "ACTIVO";
+      });
+
+    ordenarCursosMesasAdmin(cursosMesasExamenAdmin);
+
+    if (!cursosMesasExamenAdmin.length) {
+      mesaExamenAdminCursos.innerHTML = "No hay cursos activos cargados.";
+      return;
+    }
+
+    const cursosAgrupados = cursosMesasExamenAdmin.reduce((grupos, curso) => {
+      const anio = Number(curso.anio || 0);
+
+      if (!grupos[anio]) {
+        grupos[anio] = [];
+      }
+
+      grupos[anio].push(curso);
+
+      return grupos;
+    }, {});
+
+    mesaExamenAdminCursos.innerHTML = [1, 2, 3, 4, 5, 6]
+      .map((anio) => {
+        const cursosDelAnio = (cursosAgrupados[anio] || []).sort((a, b) =>
+          String(a.division || "").localeCompare(
+            String(b.division || ""),
+            "es",
+            {
+              numeric: true,
+              sensitivity: "base",
+            },
+          ),
+        );
+
+        if (!cursosDelAnio.length) {
+          return "";
+        }
+
+        return `
+      <div class="columna-cursos-mesa-admin">
+        <div class="titulo-anio-mesa-admin">
+          ${anio}°
+        </div>
+
+        <div class="checks-anio-mesa-admin">
+          ${cursosDelAnio
+            .map((curso) => {
+              const division = String(curso.division || "").trim();
+
+              return `
+                <label class="item-curso-mesa-admin">
+                  <input
+                    type="checkbox"
+                    value="${curso.id}"
+                    data-nombre="${curso.nombre || ""}"
+                    data-anio="${curso.anio || ""}"
+                    data-division="${curso.division || ""}"
+                  />
+                  <span>${division}</span>
+                </label>
+              `;
+            })
+            .join("")}
+        </div>
+      </div>
+    `;
+      })
+      .join("");
+
+    cargarFiltroCursosMesasAdmin();
+  } catch (error) {
+    console.error("Error al cargar cursos para Mesas de Examen:", error);
+
+    mesaExamenAdminCursos.innerHTML = "No se pudieron cargar los cursos.";
+
+    mostrarMensajeMesaExamenAdmin(
+      "No se pudieron cargar los cursos para mesas.",
+      "error",
+    );
+  }
+}
+
+async function cargarEspaciosMesasExamenAdmin() {
+  if (!mesaExamenAdminEspacio) return;
+
+  mesaExamenAdminEspacio.innerHTML = `
+    <option value="">Cargando espacios curriculares...</option>
+  `;
+
+  try {
+    const consulta = await getDocs(collection(db, "espacios_curriculares"));
+
+    espaciosMesasExamenAdmin = consulta.docs
+      .map((documento) => ({
+        id: documento.id,
+        ...documento.data(),
+      }))
+      .filter((espacio) => {
+        const estado = String(espacio.estado || "ACTIVO")
+          .trim()
+          .toUpperCase();
+
+        return estado === "ACTIVO";
+      });
+
+    ordenarEspaciosMesasAdmin(espaciosMesasExamenAdmin);
+
+    if (!espaciosMesasExamenAdmin.length) {
+      mesaExamenAdminEspacio.innerHTML = `
+        <option value="">No hay espacios activos cargados</option>
+      `;
+      return;
+    }
+
+    mesaExamenAdminEspacio.innerHTML = `
+      <option value="">Seleccionar espacio curricular</option>
+      ${espaciosMesasExamenAdmin
+        .map(
+          (espacio) => `
+            <option
+              value="${espacio.id}"
+              data-nombre="${espacio.nombre || ""}"
+              data-anio="${espacio.anio || ""}"
+              data-tipo="${espacio.tipo || ""}"
+            >
+              ${espacio.anio || "-"}º · ${espacio.nombre || "Sin nombre"}
+            </option>
+          `,
+        )
+        .join("")}
+    `;
+  } catch (error) {
+    console.error(
+      "Error al cargar espacios curriculares para Mesas de Examen:",
+      error,
+    );
+
+    mesaExamenAdminEspacio.innerHTML = `
+      <option value="">Error al cargar espacios</option>
+    `;
+
+    mostrarMensajeMesaExamenAdmin(
+      "No se pudieron cargar los espacios curriculares.",
+      "error",
+    );
+  }
+}
+
+function cargarFiltroCursosMesasAdmin() {
+  if (!filtroMesaExamenAdminCurso) return;
+
+  const valorActual = String(filtroMesaExamenAdminCurso.value || "").trim();
+
+  filtroMesaExamenAdminCurso.innerHTML = `
+    <option value="">Todos los cursos</option>
+    ${cursosMesasExamenAdmin
+      .map(
+        (curso) => `
+          <option value="${curso.nombre || ""}">
+            ${curso.nombre || `${curso.anio}º ${curso.division}`}
+          </option>
+        `,
+      )
+      .join("")}
+  `;
+
+  if (valorActual) {
+    filtroMesaExamenAdminCurso.value = valorActual;
+  }
+}
+
+function cargarHorariosMesasExamenAdmin() {
+  if (!mesaExamenAdminHora) return;
+
+  const valorActual = String(mesaExamenAdminHora.value || "").trim();
+
+  const opciones = ['<option value="">Seleccionar hora</option>'];
+
+  const inicioMinutos = 7 * 60 + 15; // 07:15
+  const finMinutos = 18 * 60; // 18:00
+
+  for (
+    let totalMinutos = inicioMinutos;
+    totalMinutos <= finMinutos;
+    totalMinutos += 15
+  ) {
+    const hora = Math.floor(totalMinutos / 60);
+    const minuto = totalMinutos % 60;
+
+    const hh = String(hora).padStart(2, "0");
+    const mm = String(minuto).padStart(2, "0");
+    const valor = `${hh}:${mm}`;
+
+    opciones.push(`<option value="${valor}">${valor}</option>`);
+  }
+
+  mesaExamenAdminHora.innerHTML = opciones.join("");
+
+  if (
+    valorActual &&
+    opciones.some((opcion) => opcion.includes(`value="${valorActual}"`))
+  ) {
+    mesaExamenAdminHora.value = valorActual;
+  }
+}
+
+function cargarPeriodosMesasExamenAdmin() {
+  if (!mesaExamenAdminPeriodo) return;
+
+  const valorActual = String(mesaExamenAdminPeriodo.value || "").trim();
+
+  const meses = [
+    "Febrero",
+    "Marzo",
+    "Abril",
+    "Mayo",
+    "Junio",
+    "Julio",
+    "Agosto",
+    "Septiembre",
+    "Octubre",
+    "Noviembre",
+    "Diciembre",
+  ];
+
+  const anioActual = new Date().getFullYear();
+  const anios = [anioActual, anioActual + 1];
+
+  const opciones = ['<option value="">Seleccionar período</option>'];
+
+  anios.forEach((anio) => {
+    meses.forEach((mes) => {
+      const periodo = `${mes} ${anio}`;
+      opciones.push(`<option value="${periodo}">${periodo}</option>`);
+    });
+  });
+
+  mesaExamenAdminPeriodo.innerHTML = opciones.join("");
+
+  if (valorActual) {
+    mesaExamenAdminPeriodo.value = valorActual;
+  }
+}
+
+async function prepararFormularioMesasExamenAdmin() {
+  if (!formMesaExamenAdmin) return;
+
+  mostrarMensajeMesaExamenAdmin("Cargando opciones de mesas...");
+
+  cargarHorariosMesasExamenAdmin();
+  cargarPeriodosMesasExamenAdmin();
+
+  await Promise.all([
+    cargarCursosMesasExamenAdmin(),
+    cargarEspaciosMesasExamenAdmin(),
+  ]);
+
+  mostrarMensajeMesaExamenAdmin(
+    "Opciones cargadas. Ya podés registrar una mesa.",
+    "ok",
+  );
+}
+
+// =========================
+// MESAS DE EXAMEN - ADMIN
+// Guardar / listar / editar / eliminar
+// =========================
+
+function obtenerCursosSeleccionadosMesaAdmin() {
+  if (!mesaExamenAdminCursos) return [];
+
+  return Array.from(
+    mesaExamenAdminCursos.querySelectorAll('input[type="checkbox"]:checked'),
+  ).map((checkbox) => ({
+    id: checkbox.value,
+    nombre: checkbox.dataset.nombre || "",
+    anio: Number(checkbox.dataset.anio || 0),
+    division: checkbox.dataset.division || "",
+  }));
+}
+
+function obtenerEspacioSeleccionadoMesaAdmin() {
+  if (!mesaExamenAdminEspacio) return null;
+
+  const opcion = mesaExamenAdminEspacio.selectedOptions[0];
+
+  if (!opcion || !opcion.value) return null;
+
+  return {
+    id: opcion.value,
+    nombre: opcion.dataset.nombre || opcion.textContent || "",
+    anio: Number(opcion.dataset.anio || 0),
+    tipo: opcion.dataset.tipo || "",
+  };
+}
+
+function limpiarFormularioMesaExamenAdmin() {
+  if (!formMesaExamenAdmin) return;
+
+  formMesaExamenAdmin.reset();
+
+  if (mesaExamenAdminId) {
+    mesaExamenAdminId.value = "";
+  }
+
+  if (mesaExamenAdminEstado) {
+    mesaExamenAdminEstado.value = "OCULTA";
+  }
+
+  if (mesaExamenAdminCursos) {
+    mesaExamenAdminCursos
+      .querySelectorAll('input[type="checkbox"]')
+      .forEach((checkbox) => {
+        checkbox.checked = false;
+      });
+  }
+
+  if (btnCancelarMesaExamenAdmin) {
+    btnCancelarMesaExamenAdmin.hidden = true;
+  }
+
+  if (btnGuardarMesaExamenAdmin) {
+    btnGuardarMesaExamenAdmin.innerHTML = `
+      <i class="fa-solid fa-floppy-disk"></i>
+      Guardar mesa
+    `;
+  }
+
+  mostrarMensajeMesaExamenAdmin("");
+}
+
+async function guardarMesaExamenAdmin(event) {
+  event.preventDefault();
+
+  const usuario = auth.currentUser;
+
+  if (!usuario) {
+    mostrarMensajeMesaExamenAdmin(
+      "No se detectó una sesión activa. Volvé a iniciar sesión.",
+      "error",
+    );
+    return;
+  }
+
+  const idMesa = String(mesaExamenAdminId?.value || "").trim();
+  const fecha = String(mesaExamenAdminFecha?.value || "").trim();
+  const hora = String(mesaExamenAdminHora?.value || "").trim();
+  const periodo = String(mesaExamenAdminPeriodo?.value || "").trim();
+  const estado = idMesa
+    ? String(mesaExamenAdminEstado?.value || "OCULTA")
+        .trim()
+        .toUpperCase()
+    : "OCULTA";
+
+  const espacio = obtenerEspacioSeleccionadoMesaAdmin();
+  const cursos = obtenerCursosSeleccionadosMesaAdmin();
+
+  if (!fecha || !hora || !periodo || !estado || !espacio || !cursos.length) {
+    mostrarMensajeMesaExamenAdmin(
+      "Completá fecha, hora, período, espacio curricular y al menos un curso.",
+      "error",
+    );
+
+    if (window.Swal) {
+      Swal.fire({
+        title: "Faltan datos",
+        text: "Completá todos los campos obligatorios antes de guardar.",
+        icon: "warning",
+        confirmButtonText: "Aceptar",
+      });
+    }
+
+    return;
+  }
+
+  const datosMesa = {
+    fecha,
+    hora,
+    periodo,
+    estado,
+    espacioId: espacio.id,
+    espacioNombre: espacio.nombre,
+    espacioAnio: espacio.anio,
+    espacioTipo: espacio.tipo,
+    cursos,
+    cursosNombres: cursos.map((curso) => curso.nombre),
+    actualizadoEn: serverTimestamp(),
+    actualizadoPor: usuario.email || "",
+  };
+
+  try {
+    if (btnGuardarMesaExamenAdmin) {
+      btnGuardarMesaExamenAdmin.disabled = true;
+      btnGuardarMesaExamenAdmin.innerHTML = `
+        <i class="fa-solid fa-spinner fa-spin"></i>
+        Guardando...
+      `;
+    }
+
+    if (idMesa) {
+      await updateDoc(doc(db, "mesas_examen", idMesa), datosMesa);
+    } else {
+      await addDoc(collection(db, "mesas_examen"), {
+        ...datosMesa,
+        creadoEn: serverTimestamp(),
+        creadoPor: usuario.email || "",
+      });
+    }
+
+    await Swal.fire({
+      title: idMesa ? "Mesa actualizada" : "Mesa guardada",
+      text: "La mesa de examen se guardó correctamente.",
+      icon: "success",
+      timer: 1600,
+      showConfirmButton: false,
+    });
+
+    limpiarFormularioMesaExamenAdmin();
+    await cargarMesasExamenAdmin();
+  } catch (error) {
+    console.error("Error al guardar mesa de examen:", error);
+
+    mostrarMensajeMesaExamenAdmin(
+      error.message || "No se pudo guardar la mesa.",
+      "error",
+    );
+
+    if (window.Swal) {
+      Swal.fire({
+        title: "No se pudo guardar",
+        text: error.message || "Revisá conexión o permisos de Firebase.",
+        icon: "error",
+        confirmButtonText: "Aceptar",
+      });
+    }
+  } finally {
+    if (btnGuardarMesaExamenAdmin) {
+      btnGuardarMesaExamenAdmin.disabled = false;
+      btnGuardarMesaExamenAdmin.innerHTML = mesaExamenAdminId?.value
+        ? `<i class="fa-solid fa-floppy-disk"></i> Actualizar mesa`
+        : `<i class="fa-solid fa-floppy-disk"></i> Guardar mesa`;
+    }
+  }
+}
+
+function formatearFechaMesaAdmin(fechaTexto) {
+  const texto = String(fechaTexto || "").trim();
+
+  if (!texto) return "-";
+
+  const partes = texto.split("-");
+
+  if (partes.length === 3) {
+    const [anio, mes, dia] = partes;
+    return `${dia}/${mes}/${anio}`;
+  }
+
+  return texto;
+}
+
+function ordenarMesasExamenAdmin(mesas) {
+  return [...mesas].sort((a, b) => {
+    const fechaA = String(a.fecha || "");
+    const fechaB = String(b.fecha || "");
+
+    if (fechaA !== fechaB) {
+      return fechaA.localeCompare(fechaB);
+    }
+
+    return String(a.hora || "").localeCompare(String(b.hora || ""));
+  });
+}
+
+function cargarFiltrosMesasExamenAdmin() {
+  if (buscarMesaExamenAdmin) {
+    const valorEspacio = String(buscarMesaExamenAdmin.value || "").trim();
+
+    const espacios = Array.from(
+      new Set(
+        mesasExamenAdminCargadas
+          .map((mesa) => String(mesa.espacioNombre || "").trim())
+          .filter(Boolean),
+      ),
+    ).sort((a, b) =>
+      a.localeCompare(b, "es", {
+        numeric: true,
+        sensitivity: "base",
+      }),
+    );
+
+    buscarMesaExamenAdmin.innerHTML = `
+      <option value="">Todos los espacios</option>
+      ${espacios
+        .map(
+          (espacio) => `
+            <option value="${escaparHtml(espacio)}">
+              ${escaparHtml(espacio)}
+            </option>
+          `,
+        )
+        .join("")}
+    `;
+
+    if (valorEspacio && espacios.includes(valorEspacio)) {
+      buscarMesaExamenAdmin.value = valorEspacio;
+    }
+  }
+
+  if (filtroMesaExamenAdminPeriodo) {
+    const valorPeriodo = String(
+      filtroMesaExamenAdminPeriodo.value || "",
+    ).trim();
+
+    const periodos = Array.from(
+      new Set(
+        mesasExamenAdminCargadas
+          .map((mesa) => String(mesa.periodo || "").trim())
+          .filter(Boolean),
+      ),
+    ).sort((a, b) =>
+      a.localeCompare(b, "es", {
+        numeric: true,
+        sensitivity: "base",
+      }),
+    );
+
+    filtroMesaExamenAdminPeriodo.innerHTML = `
+      <option value="">Todos los períodos</option>
+      ${periodos
+        .map(
+          (periodo) => `
+            <option value="${escaparHtml(periodo)}">
+              ${escaparHtml(periodo)}
+            </option>
+          `,
+        )
+        .join("")}
+    `;
+
+    if (valorPeriodo && periodos.includes(valorPeriodo)) {
+      filtroMesaExamenAdminPeriodo.value = valorPeriodo;
+    }
+  }
+}
+
+function aplicarFiltrosMesasExamenAdmin() {
+  const espacioSeleccionado = String(buscarMesaExamenAdmin?.value || "").trim();
+
+  const estado = String(filtroMesaExamenAdminEstado?.value || "")
+    .trim()
+    .toUpperCase();
+
+  const periodo = String(filtroMesaExamenAdminPeriodo?.value || "").trim();
+  const curso = String(filtroMesaExamenAdminCurso?.value || "").trim();
+
+  const filtradas = mesasExamenAdminCargadas.filter((mesa) => {
+    const espacioNombre = String(mesa.espacioNombre || "").toLowerCase();
+    const periodoMesa = String(mesa.periodo || "").trim();
+    const estadoMesa = String(mesa.estado || "")
+      .trim()
+      .toUpperCase();
+
+    const cursosNombres = Array.isArray(mesa.cursosNombres)
+      ? mesa.cursosNombres
+      : [];
+
+    const textoCursos = cursosNombres.join(" ").toLowerCase();
+
+    const coincideEspacio =
+      !espacioSeleccionado || mesa.espacioNombre === espacioSeleccionado;
+
+    const coincideEstado = !estado || estadoMesa === estado;
+    const coincidePeriodo = !periodo || periodoMesa === periodo;
+    const coincideCurso = !curso || cursosNombres.includes(curso);
+
+    return (
+      coincideEspacio && coincideEstado && coincidePeriodo && coincideCurso
+    );
+  });
+
+  renderizarMesasExamenAdmin(filtradas);
+}
+
+function renderizarMesasExamenAdmin(mesas) {
+  if (!cuerpoTablaMesasExamenAdmin) return;
+
+  const ordenadas = ordenarMesasExamenAdmin(mesas);
+
+  if (!ordenadas.length) {
+    cuerpoTablaMesasExamenAdmin.innerHTML = `
+      <tr>
+        <td colspan="7" class="tabla-vacia">
+          No hay mesas de examen para mostrar.
+        </td>
+      </tr>
+    `;
+
+    mostrarMensajeListadoMesasExamenAdmin(
+      "No se encontraron mesas con esos filtros.",
+    );
+    return;
+  }
+
+  cuerpoTablaMesasExamenAdmin.innerHTML = ordenadas
+    .map((mesa) => {
+      const estado = String(mesa.estado || "OCULTA")
+        .trim()
+        .toUpperCase();
+      const estaPublicada = estado === "PUBLICADA";
+
+      const cursos = Array.isArray(mesa.cursosNombres)
+        ? mesa.cursosNombres.join(", ")
+        : "";
+
+      return `
+        <tr>
+          <td>${escaparHtml(formatearFechaMesaAdmin(mesa.fecha))}</td>
+          <td>${escaparHtml(mesa.hora)}</td>
+          <td>
+            <strong>${escaparHtml(mesa.espacioNombre)}</strong>
+          </td>
+          <td class="celda-mesa-cursos">${escaparHtml(cursos)}</td>
+          <td>${escaparHtml(mesa.periodo)}</td>
+          <td>
+            <span class="estado-mesa-admin ${estaPublicada ? "publicada" : "oculta"}">
+              ${estaPublicada ? "PUBLICADA" : "OCULTA"}
+            </span>
+          </td>
+          <td>
+            <div class="acciones-tabla">
+              <button
+                class="btn-tabla btn-editar"
+                type="button"
+                data-accion-mesa="editar"
+                data-id-mesa="${escaparHtml(mesa.id)}"
+              >
+                <i class="fa-solid fa-pen-to-square"></i>
+                Editar
+              </button>
+
+              <button
+                class="btn-tabla ${estaPublicada ? "btn-ocultar-mesa" : "btn-publicar-mesa"}"
+                type="button"
+                data-accion-mesa="estado"
+                data-id-mesa="${escaparHtml(mesa.id)}"
+              >
+                <i class="fa-solid ${estaPublicada ? "fa-eye-slash" : "fa-eye"}"></i>
+                ${estaPublicada ? "Ocultar" : "Publicar"}
+              </button>
+
+              <button
+                class="btn-tabla btn-eliminar-mesa"
+                type="button"
+                data-accion-mesa="eliminar"
+                data-id-mesa="${escaparHtml(mesa.id)}"
+              >
+                <i class="fa-solid fa-trash-can"></i>
+                Eliminar
+              </button>
+            </div>
+          </td>
+        </tr>
+      `;
+    })
+    .join("");
+
+  mostrarMensajeListadoMesasExamenAdmin(
+    `${ordenadas.length} mesa(s) mostrada(s).`,
+    "ok",
+  );
+}
+
+async function cargarMesasExamenAdmin() {
+  if (!cuerpoTablaMesasExamenAdmin) return;
+
+  cuerpoTablaMesasExamenAdmin.innerHTML = `
+    <tr>
+      <td colspan="7" class="tabla-vacia">
+        Cargando mesas de examen...
+      </td>
+    </tr>
+  `;
+
+  try {
+    const consulta = await getDocs(collection(db, "mesas_examen"));
+
+    mesasExamenAdminCargadas = consulta.docs.map((documento) => ({
+      id: documento.id,
+      ...documento.data(),
+    }));
+
+    cargarFiltrosMesasExamenAdmin();
+    aplicarFiltrosMesasExamenAdmin();
+  } catch (error) {
+    console.error("Error al cargar mesas de examen:", error);
+
+    cuerpoTablaMesasExamenAdmin.innerHTML = `
+      <tr>
+        <td colspan="7" class="tabla-vacia">
+          No se pudieron cargar las mesas de examen.
+        </td>
+      </tr>
+    `;
+
+    mostrarMensajeListadoMesasExamenAdmin(
+      error.message || "No se pudieron cargar las mesas.",
+      "error",
+    );
+  }
+}
+
+function editarMesaExamenAdmin(idMesa) {
+  const mesa = mesasExamenAdminCargadas.find((item) => item.id === idMesa);
+
+  if (!mesa) {
+    Swal.fire("Error", "No se encontró la mesa seleccionada.", "error");
+    return;
+  }
+
+  mesaExamenAdminId.value = mesa.id;
+  mesaExamenAdminFecha.value = mesa.fecha || "";
+  mesaExamenAdminHora.value = mesa.hora || "";
+  mesaExamenAdminPeriodo.value = mesa.periodo || "";
+  mesaExamenAdminEstado.value = mesa.estado || "PUBLICADA";
+  mesaExamenAdminEspacio.value = mesa.espacioId || "";
+
+  const idsCursos = Array.isArray(mesa.cursos)
+    ? mesa.cursos.map((curso) => String(curso.id || ""))
+    : [];
+
+  mesaExamenAdminCursos
+    .querySelectorAll('input[type="checkbox"]')
+    .forEach((checkbox) => {
+      checkbox.checked = idsCursos.includes(checkbox.value);
+    });
+
+  if (btnCancelarMesaExamenAdmin) {
+    btnCancelarMesaExamenAdmin.hidden = false;
+  }
+
+  if (btnGuardarMesaExamenAdmin) {
+    btnGuardarMesaExamenAdmin.innerHTML = `
+      <i class="fa-solid fa-floppy-disk"></i>
+      Actualizar mesa
+    `;
+  }
+
+  mostrarMensajeMesaExamenAdmin(
+    "Editando mesa seleccionada. Revisá los datos y guardá los cambios.",
+    "ok",
+  );
+
+  document
+    .getElementById("mesas-examen-admin")
+    ?.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+async function cambiarEstadoMesaExamenAdmin(idMesa) {
+  const mesa = mesasExamenAdminCargadas.find((item) => item.id === idMesa);
+
+  if (!mesa) return;
+
+  const estadoActual = String(mesa.estado || "OCULTA")
+    .trim()
+    .toUpperCase();
+  const nuevoEstado = estadoActual === "PUBLICADA" ? "OCULTA" : "PUBLICADA";
+
+  const confirmacion = await Swal.fire({
+    title: nuevoEstado === "PUBLICADA" ? "¿Publicar mesa?" : "¿Ocultar mesa?",
+    text:
+      nuevoEstado === "PUBLICADA"
+        ? "La mesa volverá a ser visible para docentes y estudiantes."
+        : "La mesa dejará de ser visible para docentes y estudiantes.",
+    icon: "question",
+    showCancelButton: true,
+    confirmButtonText:
+      nuevoEstado === "PUBLICADA" ? "Sí, publicar" : "Sí, ocultar",
+    cancelButtonText: "Cancelar",
+  });
+
+  if (!confirmacion.isConfirmed) return;
+
+  try {
+    await updateDoc(doc(db, "mesas_examen", idMesa), {
+      estado: nuevoEstado,
+      actualizadoEn: serverTimestamp(),
+      actualizadoPor: auth.currentUser?.email || "",
+    });
+
+    await cargarMesasExamenAdmin();
+  } catch (error) {
+    console.error("Error al cambiar estado de mesa:", error);
+
+    Swal.fire({
+      title: "No se pudo cambiar el estado",
+      text: error.message || "Revisá conexión o permisos.",
+      icon: "error",
+      confirmButtonText: "Aceptar",
+    });
+  }
+}
+
+async function eliminarMesaExamenAdmin(idMesa) {
+  const mesa = mesasExamenAdminCargadas.find((item) => item.id === idMesa);
+
+  const confirmacion = await Swal.fire({
+    title: "¿Eliminar mesa?",
+    html: `
+      <p>Se eliminará la mesa:</p>
+      <p><strong>${escaparHtml(mesa?.espacioNombre || "Mesa seleccionada")}</strong></p>
+      <p>Esta acción no se puede deshacer.</p>
+    `,
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonText: "Sí, eliminar",
+    cancelButtonText: "Cancelar",
+    confirmButtonColor: "#b42318",
+  });
+
+  if (!confirmacion.isConfirmed) return;
+
+  try {
+    const batch = writeBatch(db);
+    batch.delete(doc(db, "mesas_examen", idMesa));
+    await batch.commit();
+
+    await Swal.fire({
+      title: "Mesa eliminada",
+      text: "La mesa fue eliminada correctamente.",
+      icon: "success",
+      timer: 1400,
+      showConfirmButton: false,
+    });
+
+    await cargarMesasExamenAdmin();
+  } catch (error) {
+    console.error("Error al eliminar mesa:", error);
+
+    Swal.fire({
+      title: "No se pudo eliminar",
+      text: error.message || "Revisá conexión o permisos.",
+      icon: "error",
+      confirmButtonText: "Aceptar",
+    });
+  }
+}
+
+async function limpiarPeriodoMesasExamenAdmin() {
+  const periodos = Array.from(
+    new Set(
+      mesasExamenAdminCargadas
+        .map((mesa) => String(mesa.periodo || "").trim())
+        .filter(Boolean),
+    ),
+  ).sort((a, b) => a.localeCompare(b, "es"));
+
+  if (!periodos.length) {
+    Swal.fire("Sin períodos", "No hay mesas cargadas para limpiar.", "info");
+    return;
+  }
+
+  const opciones = periodos
+    .map(
+      (periodo) => `
+        <option value="${escaparHtml(periodo)}">
+          ${escaparHtml(periodo)}
+        </option>
+      `,
+    )
+    .join("");
+
+  const seleccion = await Swal.fire({
+    title: "Limpiar período",
+    html: `
+      <p>Seleccioná el período que querés eliminar.</p>
+      <select id="periodoLimpiarMesasAdmin" class="swal2-select">
+        <option value="">Seleccionar período</option>
+        ${opciones}
+      </select>
+    `,
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonText: "Continuar",
+    cancelButtonText: "Cancelar",
+    confirmButtonColor: "#b42318",
+    preConfirm: () => {
+      const periodo = document.getElementById("periodoLimpiarMesasAdmin").value;
+
+      if (!periodo) {
+        Swal.showValidationMessage("Seleccioná un período.");
+        return false;
+      }
+
+      return periodo;
+    },
+  });
+
+  if (!seleccion.isConfirmed) return;
+
+  const periodoSeleccionado = seleccion.value;
+
+  const mesasDelPeriodo = mesasExamenAdminCargadas.filter(
+    (mesa) => String(mesa.periodo || "").trim() === periodoSeleccionado,
+  );
+
+  const confirmacionFinal = await Swal.fire({
+    title: "Confirmación final",
+    html: `
+      <p>Se eliminarán <strong>${mesasDelPeriodo.length}</strong> mesa(s) del período:</p>
+      <p><strong>${escaparHtml(periodoSeleccionado)}</strong></p>
+      <p>Esta acción no se puede deshacer.</p>
+    `,
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonText: "Sí, eliminar período",
+    cancelButtonText: "Cancelar",
+    confirmButtonColor: "#b42318",
+  });
+
+  if (!confirmacionFinal.isConfirmed) return;
+
+  try {
+    const batch = writeBatch(db);
+
+    mesasDelPeriodo.forEach((mesa) => {
+      batch.delete(doc(db, "mesas_examen", mesa.id));
+    });
+
+    await batch.commit();
+
+    await Swal.fire({
+      title: "Período eliminado",
+      text: `Se eliminaron ${mesasDelPeriodo.length} mesa(s).`,
+      icon: "success",
+      timer: 1700,
+      showConfirmButton: false,
+    });
+
+    await cargarMesasExamenAdmin();
+  } catch (error) {
+    console.error("Error al limpiar período:", error);
+
+    Swal.fire({
+      title: "No se pudo limpiar el período",
+      text: error.message || "Revisá conexión o permisos.",
+      icon: "error",
+      confirmButtonText: "Aceptar",
+    });
   }
 }
 
@@ -2740,6 +3824,76 @@ if (formRegistroCurso) {
 if (btnVerCursos) {
   btnVerCursos.addEventListener("click", cargarCursos);
 }
+
+if (formMesaExamenAdmin) {
+  formMesaExamenAdmin.addEventListener("submit", guardarMesaExamenAdmin);
+}
+
+if (btnCancelarMesaExamenAdmin) {
+  btnCancelarMesaExamenAdmin.addEventListener(
+    "click",
+    limpiarFormularioMesaExamenAdmin,
+  );
+}
+
+if (btnActualizarMesasExamenAdmin) {
+  btnActualizarMesasExamenAdmin.addEventListener("click", async () => {
+    await prepararFormularioMesasExamenAdmin();
+    await cargarMesasExamenAdmin();
+  });
+}
+
+if (btnLimpiarPeriodoMesasAdmin) {
+  btnLimpiarPeriodoMesasAdmin.addEventListener(
+    "click",
+    limpiarPeriodoMesasExamenAdmin,
+  );
+}
+
+[
+  buscarMesaExamenAdmin,
+  filtroMesaExamenAdminEstado,
+  filtroMesaExamenAdminPeriodo,
+  filtroMesaExamenAdminCurso,
+]
+  .filter(Boolean)
+  .forEach((control) => {
+    control.addEventListener("input", aplicarFiltrosMesasExamenAdmin);
+    control.addEventListener("change", aplicarFiltrosMesasExamenAdmin);
+  });
+
+if (cuerpoTablaMesasExamenAdmin) {
+  cuerpoTablaMesasExamenAdmin.addEventListener("click", async (event) => {
+    const boton = event.target.closest("button[data-accion-mesa]");
+
+    if (!boton) return;
+
+    const accion = boton.dataset.accionMesa;
+    const idMesa = boton.dataset.idMesa;
+
+    if (!idMesa) return;
+
+    if (accion === "editar") {
+      editarMesaExamenAdmin(idMesa);
+      return;
+    }
+
+    if (accion === "estado") {
+      await cambiarEstadoMesaExamenAdmin(idMesa);
+      return;
+    }
+
+    if (accion === "eliminar") {
+      await eliminarMesaExamenAdmin(idMesa);
+    }
+  });
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  cargarHorariosMesasExamenAdmin();
+  cargarPeriodosMesasExamenAdmin();
+});
+
 if (buscarUsuario) {
   buscarUsuario.addEventListener("input", aplicarFiltrosUsuarios);
 }

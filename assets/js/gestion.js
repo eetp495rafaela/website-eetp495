@@ -10,6 +10,10 @@ import {
   getDocs,
   query,
   where,
+  addDoc,
+  doc,
+  updateDoc,
+  serverTimestamp,
 } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
 
 import { getAuth } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-auth.js";
@@ -181,6 +185,1015 @@ let documentacionGestionCargada = [];
 let horariosGestionCargados = [];
 let asignacionesDocentesGestionCargadas = [];
 let estudiantesGestionCargados = [];
+
+// =========================
+// MESAS DE EXAMEN - GESTIÓN
+// =========================
+
+const panelMesaDireccionGestion = document.getElementById(
+  "panelMesaDireccionGestion",
+);
+
+const formMesaGestion = document.getElementById("formMesaGestion");
+const mesaGestionId = document.getElementById("mesaGestionId");
+const mesaGestionFecha = document.getElementById("mesaGestionFecha");
+const mesaGestionHora = document.getElementById("mesaGestionHora");
+const mesaGestionPeriodo = document.getElementById("mesaGestionPeriodo");
+const mesaGestionEstado = document.getElementById("mesaGestionEstado");
+const mesaGestionEspacio = document.getElementById("mesaGestionEspacio");
+const mesaGestionCursos = document.getElementById("mesaGestionCursos");
+const btnGuardarMesaGestion = document.getElementById("btnGuardarMesaGestion");
+const btnCancelarMesaGestion = document.getElementById(
+  "btnCancelarMesaGestion",
+);
+const mensajeMesaFormGestion = document.getElementById(
+  "mensajeMesaFormGestion",
+);
+
+let cursosMesaGestion = [];
+let espaciosMesaGestion = [];
+
+const btnActualizarMesasGestion = document.getElementById(
+  "btnActualizarMesasGestion",
+);
+
+const filtroMesaGestionEspacio = document.getElementById(
+  "filtroMesaGestionEspacio",
+);
+
+const filtroMesaGestionCurso = document.getElementById(
+  "filtroMesaGestionCurso",
+);
+
+const cuerpoTablaMesasGestion = document.getElementById(
+  "cuerpoTablaMesasGestion",
+);
+
+const mensajeMesasGestion = document.getElementById("mensajeMesasGestion");
+
+let mesasGestionCargadas = [];
+
+// =========================
+// MESAS DE EXAMEN - GESTIÓN
+// Listado y filtros
+// =========================
+
+function mostrarMensajeMesaFormGestion(texto, tipo = "") {
+  if (!mensajeMesaFormGestion) return;
+
+  mensajeMesaFormGestion.textContent = texto || "";
+  mensajeMesaFormGestion.className = "mensaje-gestion";
+
+  if (tipo) {
+    mensajeMesaFormGestion.classList.add(tipo);
+  }
+}
+
+function cargarHorariosMesaGestion() {
+  if (!mesaGestionHora) return;
+
+  const valorActual = String(mesaGestionHora.value || "").trim();
+
+  const opciones = ['<option value="">Seleccionar hora</option>'];
+
+  const inicioMinutos = 7 * 60 + 15;
+  const finMinutos = 18 * 60;
+
+  for (
+    let totalMinutos = inicioMinutos;
+    totalMinutos <= finMinutos;
+    totalMinutos += 15
+  ) {
+    const hora = Math.floor(totalMinutos / 60);
+    const minuto = totalMinutos % 60;
+
+    const hh = String(hora).padStart(2, "0");
+    const mm = String(minuto).padStart(2, "0");
+    const valor = `${hh}:${mm}`;
+
+    opciones.push(`<option value="${valor}">${valor}</option>`);
+  }
+
+  mesaGestionHora.innerHTML = opciones.join("");
+
+  if (valorActual) {
+    mesaGestionHora.value = valorActual;
+  }
+}
+
+function cargarPeriodosMesaGestion() {
+  if (!mesaGestionPeriodo) return;
+
+  const valorActual = String(mesaGestionPeriodo.value || "").trim();
+
+  const meses = [
+    "Febrero",
+    "Marzo",
+    "Abril",
+    "Mayo",
+    "Junio",
+    "Julio",
+    "Agosto",
+    "Septiembre",
+    "Octubre",
+    "Noviembre",
+    "Diciembre",
+  ];
+
+  const anioActual = new Date().getFullYear();
+  const anios = [anioActual, anioActual + 1];
+
+  const opciones = ['<option value="">Seleccionar período</option>'];
+
+  anios.forEach((anio) => {
+    meses.forEach((mes) => {
+      const periodo = `${mes} ${anio}`;
+      opciones.push(`<option value="${periodo}">${periodo}</option>`);
+    });
+  });
+
+  mesaGestionPeriodo.innerHTML = opciones.join("");
+
+  if (valorActual) {
+    mesaGestionPeriodo.value = valorActual;
+  }
+}
+
+function ordenarCursosMesaGestion(cursos) {
+  return cursos.sort((a, b) => {
+    const anioA = Number(a.anio || 0);
+    const anioB = Number(b.anio || 0);
+
+    if (anioA !== anioB) return anioA - anioB;
+
+    return String(a.division || "").localeCompare(
+      String(b.division || ""),
+      "es",
+      {
+        numeric: true,
+        sensitivity: "base",
+      },
+    );
+  });
+}
+
+function ordenarEspaciosMesaGestion(espacios) {
+  return espacios.sort((a, b) => {
+    const anioA = Number(a.anio || 0);
+    const anioB = Number(b.anio || 0);
+
+    if (anioA !== anioB) return anioA - anioB;
+
+    return String(a.nombre || "").localeCompare(String(b.nombre || ""), "es", {
+      numeric: true,
+      sensitivity: "base",
+    });
+  });
+}
+
+async function cargarEspaciosMesaGestion() {
+  if (!mesaGestionEspacio) return;
+
+  mesaGestionEspacio.innerHTML = `
+    <option value="">Cargando espacios curriculares...</option>
+  `;
+
+  try {
+    const consulta = await getDocs(collection(db, "espacios_curriculares"));
+
+    espaciosMesaGestion = consulta.docs
+      .map((documento) => ({
+        id: documento.id,
+        ...documento.data(),
+      }))
+      .filter((espacio) => {
+        const estado = String(espacio.estado || "ACTIVO")
+          .trim()
+          .toUpperCase();
+        return estado === "ACTIVO";
+      });
+
+    ordenarEspaciosMesaGestion(espaciosMesaGestion);
+
+    if (!espaciosMesaGestion.length) {
+      mesaGestionEspacio.innerHTML = `
+        <option value="">No hay espacios activos cargados</option>
+      `;
+      return;
+    }
+
+    mesaGestionEspacio.innerHTML = `
+      <option value="">Seleccionar espacio curricular</option>
+      ${espaciosMesaGestion
+        .map(
+          (espacio) => `
+            <option
+              value="${espacio.id}"
+              data-nombre="${espacio.nombre || ""}"
+              data-anio="${espacio.anio || ""}"
+              data-tipo="${espacio.tipo || ""}"
+            >
+              ${espacio.anio || "-"}º · ${espacio.nombre || "Sin nombre"}
+            </option>
+          `,
+        )
+        .join("")}
+    `;
+  } catch (error) {
+    console.error("Error al cargar espacios para mesas en Gestión:", error);
+
+    mesaGestionEspacio.innerHTML = `
+      <option value="">Error al cargar espacios</option>
+    `;
+
+    mostrarMensajeMesaFormGestion(
+      "No se pudieron cargar los espacios curriculares.",
+      "error",
+    );
+  }
+}
+
+async function cargarCursosMesaGestion() {
+  if (!mesaGestionCursos) return;
+
+  mesaGestionCursos.innerHTML = "Cargando cursos...";
+
+  try {
+    const consulta = await getDocs(collection(db, "cursos"));
+
+    cursosMesaGestion = consulta.docs
+      .map((documento) => ({
+        id: documento.id,
+        ...documento.data(),
+      }))
+      .filter((curso) => {
+        const estado = String(curso.estado || "ACTIVO")
+          .trim()
+          .toUpperCase();
+        return estado === "ACTIVO";
+      });
+
+    ordenarCursosMesaGestion(cursosMesaGestion);
+
+    if (!cursosMesaGestion.length) {
+      mesaGestionCursos.innerHTML = "No hay cursos activos cargados.";
+      return;
+    }
+
+    const cursosAgrupados = cursosMesaGestion.reduce((grupos, curso) => {
+      const anio = Number(curso.anio || 0);
+
+      if (!grupos[anio]) {
+        grupos[anio] = [];
+      }
+
+      grupos[anio].push(curso);
+
+      return grupos;
+    }, {});
+
+    mesaGestionCursos.innerHTML = [1, 2, 3, 4, 5, 6]
+      .map((anio) => {
+        const cursosDelAnio = (cursosAgrupados[anio] || []).sort((a, b) =>
+          String(a.division || "").localeCompare(
+            String(b.division || ""),
+            "es",
+            {
+              numeric: true,
+              sensitivity: "base",
+            },
+          ),
+        );
+
+        if (!cursosDelAnio.length) {
+          return "";
+        }
+
+        return `
+          <div class="columna-cursos-mesa-gestion">
+            <div class="titulo-anio-mesa-gestion">
+              ${anio}°
+            </div>
+
+            <div class="checks-anio-mesa-gestion">
+              ${cursosDelAnio
+                .map((curso) => {
+                  const division = String(curso.division || "").trim();
+
+                  return `
+                    <label class="item-curso-mesa-gestion">
+                      <input
+                        type="checkbox"
+                        value="${curso.id}"
+                        data-nombre="${curso.nombre || ""}"
+                        data-anio="${curso.anio || ""}"
+                        data-division="${curso.division || ""}"
+                      />
+                      <span>${division}</span>
+                    </label>
+                  `;
+                })
+                .join("")}
+            </div>
+          </div>
+        `;
+      })
+      .join("");
+  } catch (error) {
+    console.error("Error al cargar cursos para mesas en Gestión:", error);
+
+    mesaGestionCursos.innerHTML = "No se pudieron cargar los cursos.";
+
+    mostrarMensajeMesaFormGestion("No se pudieron cargar los cursos.", "error");
+  }
+}
+
+async function prepararFormularioMesaGestion() {
+  if (!formMesaGestion) return;
+
+  cargarHorariosMesaGestion();
+  cargarPeriodosMesaGestion();
+
+  mostrarMensajeMesaFormGestion("Cargando opciones de mesas...");
+
+  await Promise.all([cargarEspaciosMesaGestion(), cargarCursosMesaGestion()]);
+
+  mostrarMensajeMesaFormGestion(
+    "Opciones cargadas. Ya podés preparar una mesa.",
+    "ok",
+  );
+}
+
+function obtenerEspacioSeleccionadoMesaGestion() {
+  if (!mesaGestionEspacio) return null;
+
+  const opcion = mesaGestionEspacio.selectedOptions[0];
+
+  if (!opcion || !opcion.value) return null;
+
+  return {
+    id: opcion.value,
+    nombre: opcion.dataset.nombre || opcion.textContent || "",
+    anio: Number(opcion.dataset.anio || 0),
+    tipo: opcion.dataset.tipo || "",
+  };
+}
+
+function obtenerCursosSeleccionadosMesaGestion() {
+  if (!mesaGestionCursos) return [];
+
+  return Array.from(
+    mesaGestionCursos.querySelectorAll('input[type="checkbox"]:checked'),
+  ).map((checkbox) => ({
+    id: checkbox.value,
+    nombre: checkbox.dataset.nombre || "",
+    anio: Number(checkbox.dataset.anio || 0),
+    division: checkbox.dataset.division || "",
+  }));
+}
+
+function limpiarFormularioMesaGestion() {
+  if (!formMesaGestion) return;
+
+  formMesaGestion.reset();
+
+  if (mesaGestionId) {
+    mesaGestionId.value = "";
+  }
+
+  if (mesaGestionEstado) {
+    mesaGestionEstado.value = "OCULTA";
+  }
+
+  if (mesaGestionCursos) {
+    mesaGestionCursos
+      .querySelectorAll('input[type="checkbox"]')
+      .forEach((checkbox) => {
+        checkbox.checked = false;
+      });
+  }
+
+  if (btnCancelarMesaGestion) {
+    btnCancelarMesaGestion.hidden = true;
+  }
+
+  if (btnGuardarMesaGestion) {
+    btnGuardarMesaGestion.innerHTML = `
+      <i class="fa-solid fa-floppy-disk"></i>
+      Guardar mesa oculta
+    `;
+  }
+
+  mostrarMensajeMesaFormGestion("");
+}
+
+async function guardarMesaGestion(event) {
+  event.preventDefault();
+
+  const usuario = auth.currentUser;
+
+  if (!usuario) {
+    mostrarMensajeMesaFormGestion(
+      "No se detectó una sesión activa. Volvé a iniciar sesión.",
+      "error",
+    );
+    return;
+  }
+
+  const rol = String(window.portalUsuario?.rol || "")
+    .trim()
+    .toUpperCase();
+
+  if (rol !== "DIRECCION") {
+    mostrarMensajeMesaFormGestion(
+      "No tenés permisos para cargar mesas de examen.",
+      "error",
+    );
+    return;
+  }
+
+  const idMesa = String(mesaGestionId?.value || "").trim();
+  const fecha = String(mesaGestionFecha?.value || "").trim();
+  const hora = String(mesaGestionHora?.value || "").trim();
+  const periodo = String(mesaGestionPeriodo?.value || "").trim();
+  const estado = idMesa
+    ? String(mesaGestionEstado?.value || "OCULTA")
+        .trim()
+        .toUpperCase()
+    : "OCULTA";
+
+  const espacio = obtenerEspacioSeleccionadoMesaGestion();
+  const cursos = obtenerCursosSeleccionadosMesaGestion();
+
+  if (!fecha || !hora || !periodo || !espacio || !cursos.length) {
+    mostrarMensajeMesaFormGestion(
+      "Completá fecha, hora, período, espacio curricular y al menos un curso.",
+      "error",
+    );
+
+    if (window.Swal) {
+      Swal.fire({
+        title: "Faltan datos",
+        text: "Completá todos los campos obligatorios antes de guardar.",
+        icon: "warning",
+        confirmButtonText: "Aceptar",
+      });
+    }
+
+    return;
+  }
+
+  try {
+    if (btnGuardarMesaGestion) {
+      btnGuardarMesaGestion.disabled = true;
+      btnGuardarMesaGestion.innerHTML = `
+        <i class="fa-solid fa-spinner fa-spin"></i>
+        Guardando...
+      `;
+    }
+
+    const datosMesa = {
+      fecha,
+      hora,
+      periodo,
+
+      estado,
+
+      espacioId: espacio.id,
+      espacioNombre: espacio.nombre,
+      espacioAnio: espacio.anio,
+      espacioTipo: espacio.tipo,
+
+      cursos,
+      cursosNombres: cursos.map((curso) => curso.nombre),
+
+      actualizadoEn: serverTimestamp(),
+      actualizadoPor: usuario.email || "",
+    };
+
+    if (idMesa) {
+      await updateDoc(doc(db, "mesas_examen", idMesa), datosMesa);
+    } else {
+      await addDoc(collection(db, "mesas_examen"), {
+        ...datosMesa,
+        creadoEn: serverTimestamp(),
+        creadoPor: usuario.email || "",
+      });
+    }
+
+    if (window.Swal) {
+      await Swal.fire({
+        title: idMesa ? "Mesa actualizada" : "Mesa guardada",
+        text: idMesa
+          ? "La mesa se actualizó correctamente."
+          : "La mesa se guardó como OCULTA. Podrás publicarla luego desde el listado.",
+        icon: "success",
+        timer: 1800,
+        showConfirmButton: false,
+      });
+    }
+
+    limpiarFormularioMesaGestion();
+    await cargarMesasGestion();
+  } catch (error) {
+    console.error("Error al guardar mesa desde Gestión:", error);
+
+    mostrarMensajeMesaFormGestion(
+      error.message || "No se pudo guardar la mesa.",
+      "error",
+    );
+
+    if (window.Swal) {
+      Swal.fire({
+        title: "No se pudo guardar",
+        text: error.message || "Revisá conexión o permisos de Firebase.",
+        icon: "error",
+        confirmButtonText: "Aceptar",
+      });
+    }
+  } finally {
+    if (btnGuardarMesaGestion) {
+      btnGuardarMesaGestion.disabled = false;
+      btnGuardarMesaGestion.innerHTML = `
+        <i class="fa-solid fa-floppy-disk"></i>
+        Guardar mesa oculta
+      `;
+    }
+  }
+}
+
+async function configurarPanelMesasDireccionGestion() {
+  if (!panelMesaDireccionGestion) return;
+
+  const rol = String(window.portalUsuario?.rol || "")
+    .trim()
+    .toUpperCase();
+
+  const esDireccion = rol === "DIRECCION";
+
+  panelMesaDireccionGestion.hidden = !esDireccion;
+
+  if (esDireccion) {
+    await prepararFormularioMesaGestion();
+  }
+}
+
+function mostrarMensajeMesasGestion(texto, tipo = "") {
+  if (!mensajeMesasGestion) return;
+
+  mensajeMesasGestion.textContent = texto || "";
+  mensajeMesasGestion.className = "mensaje-gestion";
+
+  if (tipo) {
+    mensajeMesasGestion.classList.add(tipo);
+  }
+}
+
+function formatearFechaMesaGestion(fechaTexto) {
+  const texto = String(fechaTexto || "").trim();
+
+  if (!texto) return "-";
+
+  const partes = texto.split("-");
+
+  if (partes.length === 3) {
+    const [anio, mes, dia] = partes;
+    return `${dia}/${mes}/${anio}`;
+  }
+
+  return texto;
+}
+
+function ordenarMesasGestion(mesas) {
+  return [...mesas].sort((a, b) => {
+    const fechaA = String(a.fecha || "");
+    const fechaB = String(b.fecha || "");
+
+    if (fechaA !== fechaB) {
+      return fechaA.localeCompare(fechaB);
+    }
+
+    return String(a.hora || "").localeCompare(String(b.hora || ""));
+  });
+}
+
+function cargarFiltrosMesasGestion() {
+  if (filtroMesaGestionEspacio) {
+    const valorActual = String(filtroMesaGestionEspacio.value || "").trim();
+
+    const espacios = Array.from(
+      new Set(
+        mesasGestionCargadas
+          .map((mesa) => String(mesa.espacioNombre || "").trim())
+          .filter(Boolean),
+      ),
+    ).sort((a, b) =>
+      a.localeCompare(b, "es", {
+        numeric: true,
+        sensitivity: "base",
+      }),
+    );
+
+    filtroMesaGestionEspacio.innerHTML = `
+      <option value="">Todos los espacios</option>
+      ${espacios
+        .map(
+          (espacio) => `
+            <option value="${escaparHtmlGestion(espacio)}">
+              ${escaparHtmlGestion(espacio)}
+            </option>
+          `,
+        )
+        .join("")}
+    `;
+
+    if (valorActual && espacios.includes(valorActual)) {
+      filtroMesaGestionEspacio.value = valorActual;
+    }
+  }
+
+  if (filtroMesaGestionCurso) {
+    const valorActual = String(filtroMesaGestionCurso.value || "").trim();
+
+    const cursos = Array.from(
+      new Set(
+        mesasGestionCargadas
+          .flatMap((mesa) =>
+            Array.isArray(mesa.cursosNombres) ? mesa.cursosNombres : [],
+          )
+          .map((curso) => String(curso || "").trim())
+          .filter(Boolean),
+      ),
+    ).sort((a, b) =>
+      a.localeCompare(b, "es", {
+        numeric: true,
+        sensitivity: "base",
+      }),
+    );
+
+    filtroMesaGestionCurso.innerHTML = `
+      <option value="">Todos los cursos</option>
+      ${cursos
+        .map(
+          (curso) => `
+            <option value="${escaparHtmlGestion(curso)}">
+              ${escaparHtmlGestion(curso)}
+            </option>
+          `,
+        )
+        .join("")}
+    `;
+
+    if (valorActual && cursos.includes(valorActual)) {
+      filtroMesaGestionCurso.value = valorActual;
+    }
+  }
+}
+
+function aplicarFiltrosMesasGestion() {
+  const espacioSeleccionado = String(
+    filtroMesaGestionEspacio?.value || "",
+  ).trim();
+
+  const cursoSeleccionado = String(filtroMesaGestionCurso?.value || "").trim();
+
+  const mesasFiltradas = mesasGestionCargadas.filter((mesa) => {
+    const espacioMesa = String(mesa.espacioNombre || "").trim();
+
+    const cursosMesa = Array.isArray(mesa.cursosNombres)
+      ? mesa.cursosNombres
+      : [];
+
+    const coincideEspacio =
+      !espacioSeleccionado || espacioMesa === espacioSeleccionado;
+
+    const coincideCurso =
+      !cursoSeleccionado || cursosMesa.includes(cursoSeleccionado);
+
+    return coincideEspacio && coincideCurso;
+  });
+
+  renderizarMesasGestion(mesasFiltradas);
+}
+
+function renderizarMesasGestion(mesas) {
+  if (!cuerpoTablaMesasGestion) return;
+
+  const ordenadas = ordenarMesasGestion(mesas);
+
+  if (!ordenadas.length) {
+    cuerpoTablaMesasGestion.innerHTML = `
+      <tr>
+        <td colspan="6" class="tabla-vacia">
+          No hay mesas de examen para mostrar con esos filtros.
+        </td>
+      </tr>
+    `;
+
+    mostrarMensajeMesasGestion("No se encontraron mesas con esos filtros.");
+    return;
+  }
+
+  cuerpoTablaMesasGestion.innerHTML = ordenadas
+    .map((mesa) => {
+      const estado = String(mesa.estado || "OCULTA")
+        .trim()
+        .toUpperCase();
+      const publicada = estado === "PUBLICADA";
+
+      const cursos = Array.isArray(mesa.cursosNombres)
+        ? mesa.cursosNombres.join(", ")
+        : "-";
+
+      return `
+        <tr>
+          <td>${escaparHtmlGestion(formatearFechaMesaGestion(mesa.fecha))}</td>
+          <td>${escaparHtmlGestion(mesa.hora || "-")}</td>
+          <td>
+            <strong>${escaparHtmlGestion(mesa.espacioNombre || "-")}</strong>
+          </td>
+          <td>${escaparHtmlGestion(cursos)}</td>
+          <td>
+            <span class="estado-gestion ${publicada ? "activo" : "inactivo"}">
+              ${publicada ? "PUBLICADA" : "OCULTA"}
+            </span>
+          </td>
+         <td class="columna-acciones-mesas-gestion">
+  ${
+    String(window.portalUsuario?.rol || "")
+      .trim()
+      .toUpperCase() === "DIRECCION"
+      ? `
+        <div class="acciones-mesa-gestion">
+          <button
+            class="btn-gestion btn-mesa-editar-gestion"
+            type="button"
+            data-accion-mesa-gestion="editar"
+            data-id-mesa="${escaparHtmlGestion(mesa.id)}"
+          >
+            <i class="fa-solid fa-pen-to-square"></i>
+            Editar
+          </button>
+
+          <button
+            class="btn-gestion btn-mesa-estado-gestion"
+            type="button"
+            data-accion-mesa-gestion="estado"
+            data-id-mesa="${escaparHtmlGestion(mesa.id)}"
+          >
+            <i class="fa-solid ${publicada ? "fa-eye-slash" : "fa-eye"}"></i>
+            ${publicada ? "Ocultar" : "Publicar"}
+          </button>
+        </div>
+      `
+      : "-"
+  }
+</td>
+        </tr>
+      `;
+    })
+    .join("");
+
+  mostrarMensajeMesasGestion(`${ordenadas.length} mesa(s) mostrada(s).`, "ok");
+}
+
+function editarMesaGestion(idMesa) {
+  const rol = String(window.portalUsuario?.rol || "")
+    .trim()
+    .toUpperCase();
+
+  if (rol !== "DIRECCION") {
+    Swal.fire({
+      title: "Sin permisos",
+      text: "Solo Dirección puede editar mesas.",
+      icon: "warning",
+      confirmButtonText: "Aceptar",
+    });
+    return;
+  }
+
+  const mesa = mesasGestionCargadas.find((item) => item.id === idMesa);
+
+  if (!mesa) {
+    Swal.fire({
+      title: "Mesa no encontrada",
+      text: "No se encontró la mesa seleccionada.",
+      icon: "error",
+      confirmButtonText: "Aceptar",
+    });
+    return;
+  }
+
+  if (mesaGestionId) {
+    mesaGestionId.value = mesa.id;
+  }
+
+  if (mesaGestionFecha) {
+    mesaGestionFecha.value = mesa.fecha || "";
+  }
+
+  if (mesaGestionHora) {
+    mesaGestionHora.value = mesa.hora || "";
+  }
+
+  if (mesaGestionPeriodo) {
+    mesaGestionPeriodo.value = mesa.periodo || "";
+  }
+
+  if (mesaGestionEstado) {
+    mesaGestionEstado.value = mesa.estado || "OCULTA";
+  }
+
+  if (mesaGestionEspacio) {
+    mesaGestionEspacio.value = mesa.espacioId || "";
+  }
+
+  const idsCursos = Array.isArray(mesa.cursos)
+    ? mesa.cursos.map((curso) => String(curso.id || ""))
+    : [];
+
+  if (mesaGestionCursos) {
+    mesaGestionCursos
+      .querySelectorAll('input[type="checkbox"]')
+      .forEach((checkbox) => {
+        checkbox.checked = idsCursos.includes(checkbox.value);
+      });
+  }
+
+  if (btnCancelarMesaGestion) {
+    btnCancelarMesaGestion.hidden = false;
+  }
+
+  if (btnGuardarMesaGestion) {
+    btnGuardarMesaGestion.innerHTML = `
+      <i class="fa-solid fa-floppy-disk"></i>
+      Actualizar mesa
+    `;
+  }
+
+  mostrarMensajeMesaFormGestion(
+    "Editando mesa seleccionada. Revisá los datos y guardá los cambios.",
+    "ok",
+  );
+
+  document
+    .getElementById("panelMesaDireccionGestion")
+    ?.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+async function cambiarEstadoMesaGestion(idMesa) {
+  const rol = String(window.portalUsuario?.rol || "")
+    .trim()
+    .toUpperCase();
+
+  if (rol !== "DIRECCION") {
+    Swal.fire({
+      title: "Sin permisos",
+      text: "Solo Dirección puede publicar u ocultar mesas.",
+      icon: "warning",
+      confirmButtonText: "Aceptar",
+    });
+    return;
+  }
+
+  const mesa = mesasGestionCargadas.find((item) => item.id === idMesa);
+
+  if (!mesa) {
+    Swal.fire({
+      title: "Mesa no encontrada",
+      text: "No se encontró la mesa seleccionada.",
+      icon: "error",
+      confirmButtonText: "Aceptar",
+    });
+    return;
+  }
+
+  const estadoActual = String(mesa.estado || "OCULTA")
+    .trim()
+    .toUpperCase();
+  const nuevoEstado = estadoActual === "PUBLICADA" ? "OCULTA" : "PUBLICADA";
+
+  const confirmacion = await Swal.fire({
+    title: nuevoEstado === "PUBLICADA" ? "¿Publicar mesa?" : "¿Ocultar mesa?",
+    text:
+      nuevoEstado === "PUBLICADA"
+        ? "La mesa será visible para docentes y estudiantes."
+        : "La mesa dejará de ser visible para docentes y estudiantes.",
+    icon: "question",
+    showCancelButton: true,
+    confirmButtonText:
+      nuevoEstado === "PUBLICADA" ? "Sí, publicar" : "Sí, ocultar",
+    cancelButtonText: "Cancelar",
+  });
+
+  if (!confirmacion.isConfirmed) return;
+
+  try {
+    await updateDoc(doc(db, "mesas_examen", idMesa), {
+      estado: nuevoEstado,
+      actualizadoEn: serverTimestamp(),
+      actualizadoPor: auth.currentUser?.email || "",
+    });
+
+    await cargarMesasGestion();
+
+    Swal.fire({
+      title: nuevoEstado === "PUBLICADA" ? "Mesa publicada" : "Mesa oculta",
+      text: "El estado se actualizó correctamente.",
+      icon: "success",
+      timer: 1400,
+      showConfirmButton: false,
+    });
+  } catch (error) {
+    console.error("Error al cambiar estado de mesa desde Gestión:", error);
+
+    Swal.fire({
+      title: "No se pudo actualizar",
+      text: error.message || "Revisá conexión o permisos.",
+      icon: "error",
+      confirmButtonText: "Aceptar",
+    });
+  }
+}
+
+async function cargarMesasGestion() {
+  if (!cuerpoTablaMesasGestion) return;
+
+  try {
+    if (btnActualizarMesasGestion) {
+      btnActualizarMesasGestion.disabled = true;
+      btnActualizarMesasGestion.innerHTML = `
+        <i class="fa-solid fa-spinner fa-spin"></i>
+        Cargando mesas...
+      `;
+    }
+
+    mostrarMensajeMesasGestion("Cargando mesas de examen...");
+
+    cuerpoTablaMesasGestion.innerHTML = `
+      <tr>
+        <td colspan="6" class="tabla-vacia">
+          Consultando mesas de examen...
+        </td>
+      </tr>
+    `;
+
+    const consulta = await getDocs(collection(db, "mesas_examen"));
+
+    mesasGestionCargadas = consulta.docs.map((documento) => ({
+      id: documento.id,
+      ...documento.data(),
+    }));
+
+    if (!mesasGestionCargadas.length) {
+      cuerpoTablaMesasGestion.innerHTML = `
+        <tr>
+          <td colspan="6" class="tabla-vacia">
+            No hay mesas de examen cargadas.
+          </td>
+        </tr>
+      `;
+
+      mostrarMensajeMesasGestion("No hay mesas de examen cargadas.");
+      return;
+    }
+
+    cargarFiltrosMesasGestion();
+    aplicarFiltrosMesasGestion();
+  } catch (error) {
+    console.error("Error al cargar mesas de examen en Gestión:", error);
+
+    cuerpoTablaMesasGestion.innerHTML = `
+      <tr>
+        <td colspan="6" class="tabla-vacia">
+          No se pudieron cargar las mesas de examen.
+        </td>
+      </tr>
+    `;
+
+    mostrarMensajeMesasGestion(
+      error.message || "No se pudieron cargar las mesas de examen.",
+      "error",
+    );
+
+    if (window.Swal) {
+      Swal.fire({
+        title: "No se pudieron cargar las mesas",
+        text: error.message || "Revisá conexión o permisos de Firebase.",
+        icon: "error",
+        confirmButtonText: "Aceptar",
+      });
+    }
+  } finally {
+    if (btnActualizarMesasGestion) {
+      btnActualizarMesasGestion.disabled = false;
+      btnActualizarMesasGestion.innerHTML = `
+        <i class="fa-solid fa-rotate"></i>
+        Actualizar mesas
+      `;
+    }
+  }
+}
 
 function mostrarMensajeCursosGestion(texto, tipo = "") {
   if (!mensajeCursosGestion) return;
@@ -3261,4 +4274,61 @@ if (formInformePedagogicoGestion) {
     "submit",
     crearInformePedagogicoGestion,
   );
+}
+
+// =========================
+// EVENTOS MESAS DE EXAMEN - GESTIÓN
+// =========================
+
+if (btnActualizarMesasGestion) {
+  btnActualizarMesasGestion.addEventListener("click", cargarMesasGestion);
+}
+
+[filtroMesaGestionEspacio, filtroMesaGestionCurso]
+  .filter(Boolean)
+  .forEach((control) => {
+    control.addEventListener("change", aplicarFiltrosMesasGestion);
+  });
+
+window.addEventListener(
+  "portalUsuarioListo",
+  configurarPanelMesasDireccionGestion,
+);
+
+document.addEventListener(
+  "DOMContentLoaded",
+  configurarPanelMesasDireccionGestion,
+);
+
+if (formMesaGestion) {
+  formMesaGestion.addEventListener("submit", guardarMesaGestion);
+}
+
+if (btnCancelarMesaGestion) {
+  btnCancelarMesaGestion.addEventListener(
+    "click",
+    limpiarFormularioMesaGestion,
+  );
+}
+
+if (cuerpoTablaMesasGestion) {
+  cuerpoTablaMesasGestion.addEventListener("click", async (event) => {
+    const boton = event.target.closest("button[data-accion-mesa-gestion]");
+
+    if (!boton) return;
+
+    const accion = boton.dataset.accionMesaGestion;
+    const idMesa = boton.dataset.idMesa;
+
+    if (!idMesa) return;
+
+    if (accion === "editar") {
+      editarMesaGestion(idMesa);
+      return;
+    }
+
+    if (accion === "estado") {
+      await cambiarEstadoMesaGestion(idMesa);
+    }
+  });
 }

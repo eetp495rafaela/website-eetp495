@@ -104,6 +104,14 @@
             <p>Inscripciones a mesas y permisos de examen.</p>
           </a>
 
+          <a class="tarjeta tarjeta-enlace" href="#mesas-examen-admin">
+            <i class="fa-solid fa-calendar-check"></i>
+            <h3>Mesas de Examen</h3>
+            <p>
+              Publicación, edición, ocultamiento y limpieza de mesas publicadas.
+            </p>
+          </a>
+
           <a class="tarjeta tarjeta-enlace" href="#sira-admin">
             <i class="fa-solid fa-user-check"></i>
             <h3>Si.R.A.</h3>
@@ -1054,6 +1062,195 @@
           </div>
 
           <p id="mensajeSimeAdmin" class="mensaje-formulario"></p>
+        </div>
+
+        <a class="btn-volver" href="#inicio">
+          <i class="fa-solid fa-arrow-up"></i>
+          Volver al inicio
+        </a>
+      </section>
+
+      <section class="grupo seccion-destino" id="mesas-examen-admin">
+        <h2>Mesas de Examen</h2>
+
+        <div class="panel-info">
+          <div class="encabezado-listado">
+            <div>
+              <h3>Nueva mesa de examen</h3>
+              <p>
+                Registrá las mesas que serán visibles para docentes y
+                estudiantes cuando estén publicadas.
+              </p>
+            </div>
+          </div>
+
+          <form
+            id="formMesaExamenAdmin"
+            class="formulario-usuario"
+            autocomplete="off"
+          >
+            <input id="mesaExamenAdminId" type="hidden" />
+
+            <div class="form-grid">
+              <div class="campo-formulario">
+                <label for="mesaExamenAdminFecha">Fecha *</label>
+                <input id="mesaExamenAdminFecha" type="date" required />
+              </div>
+
+              <div class="campo-formulario">
+                <label for="mesaExamenAdminHora">Hora *</label>
+                <select id="mesaExamenAdminHora" required>
+                  <option value="">Seleccionar hora</option>
+                </select>
+              </div>
+
+              <div class="campo-formulario">
+                <label for="mesaExamenAdminPeriodo">Período *</label>
+                <select id="mesaExamenAdminPeriodo" required>
+                  <option value="">Seleccionar período</option>
+                </select>
+              </div>
+
+              <div class="campo-formulario">
+                <label for="mesaExamenAdminEstado">Estado *</label>
+                <select id="mesaExamenAdminEstado" required>
+                  <option value="OCULTA" selected>OCULTA</option>
+                  <option value="PUBLICADA">PUBLICADA</option>
+                </select>
+              </div>
+
+              <div class="campo-formulario campo-doble">
+                <label for="mesaExamenAdminEspacio">Espacio curricular *</label>
+                <select id="mesaExamenAdminEspacio" required>
+                  <option value="">Cargando espacios curriculares...</option>
+                </select>
+              </div>
+
+              <div class="campo-formulario campo-mesas-cursos-admin">
+                <label>Cursos *</label>
+                <div id="mesaExamenAdminCursos" class="opciones-mesas-admin">
+                  Cargando cursos...
+                </div>
+              </div>
+            </div>
+
+            <div class="acciones">
+              <button
+                class="btn-accion"
+                id="btnGuardarMesaExamenAdmin"
+                type="submit"
+              >
+                <i class="fa-solid fa-floppy-disk"></i>
+                Guardar mesa
+              </button>
+
+              <button
+                class="btn-secundario"
+                id="btnCancelarMesaExamenAdmin"
+                type="button"
+                hidden
+              >
+                Cancelar edición
+              </button>
+            </div>
+
+            <p id="mensajeMesaExamenAdmin" class="mensaje-formulario"></p>
+          </form>
+        </div>
+
+        <div class="panel-info panel-mesas-admin">
+          <div class="encabezado-listado">
+            <div>
+              <h3>Mesas cargadas</h3>
+              <p>
+                Administrá las mesas publicadas u ocultas. Desde Admin también
+                podés eliminarlas individualmente o limpiar un período completo.
+              </p>
+            </div>
+
+            <div class="acciones-sime-listado">
+              <button
+                class="btn-accion"
+                id="btnActualizarMesasExamenAdmin"
+                type="button"
+              >
+                <i class="fa-solid fa-rotate"></i>
+                Actualizar mesas
+              </button>
+
+              <button
+                class="btn-accion btn-peligro-sime"
+                id="btnLimpiarPeriodoMesasAdmin"
+                type="button"
+              >
+                <i class="fa-solid fa-trash-can"></i>
+                Limpiar período
+              </button>
+            </div>
+          </div>
+
+          <div class="filtros-documentacion-admin filtros-mesas-admin">
+            <div class="campo-filtro">
+              <label for="buscarMesaExamenAdmin">Espacio curricular</label>
+
+              <select id="buscarMesaExamenAdmin">
+                <option value="">Todos los espacios</option>
+              </select>
+            </div>
+
+            <div class="campo-filtro">
+              <label for="filtroMesaExamenAdminEstado">Estado</label>
+
+              <select id="filtroMesaExamenAdminEstado">
+                <option value="">Todas</option>
+                <option value="PUBLICADA">Publicadas</option>
+                <option value="OCULTA">Ocultas</option>
+              </select>
+            </div>
+
+            <div class="campo-filtro">
+              <label for="filtroMesaExamenAdminPeriodo">Período</label>
+
+              <select id="filtroMesaExamenAdminPeriodo">
+                <option value="">Todos los períodos</option>
+              </select>
+            </div>
+
+            <div class="campo-filtro">
+              <label for="filtroMesaExamenAdminCurso">Curso</label>
+
+              <select id="filtroMesaExamenAdminCurso">
+                <option value="">Todos los cursos</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="tabla-contenedor">
+            <table class="tabla-usuarios tabla-mesas-admin">
+              <thead>
+                <tr>
+                  <th>Fecha</th>
+                  <th>Hora</th>
+                  <th>Espacio curricular</th>
+                  <th>Cursos</th>
+                  <th>Período</th>
+                  <th>Estado</th>
+                  <th>Acciones</th>
+                </tr>
+              </thead>
+
+              <tbody id="cuerpoTablaMesasExamenAdmin">
+                <tr>
+                  <td colspan="7" class="tabla-vacia">
+                    Todavía no se consultaron las mesas. Presioná “Actualizar
+                    mesas” para cargarlas.
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <p id="mensajeListadoMesasExamenAdmin" class="mensaje-formulario"></p>
         </div>
 
         <a class="btn-volver" href="#inicio">

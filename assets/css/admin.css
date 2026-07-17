@@ -1705,3 +1705,323 @@ body.modal-abierto {
     grid-template-columns: 1fr;
   }
 }
+/* =====================================================
+   MESAS DE EXAMEN - ADMIN
+===================================================== */
+
+.panel-mesas-admin {
+  margin-top: 22px;
+}
+
+.opciones-mesas-admin {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 10px;
+
+  min-height: 44px;
+  padding: 12px;
+  border: 1px solid var(--borde);
+  border-radius: 12px;
+
+  background: #f8fbff;
+}
+
+.item-curso-mesa-admin {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+
+  padding: 8px 10px;
+  border: 1px solid #cfe0f3;
+  border-radius: 10px;
+
+  background: #ffffff;
+  color: var(--azul-oscuro);
+
+  font-size: 0.88rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.item-curso-mesa-admin input {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--azul-principal);
+}
+
+.filtros-mesas-admin {
+  margin-top: 20px;
+}
+
+.tabla-mesas-admin {
+  min-width: 980px;
+}
+
+.estado-mesa-admin {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  min-width: 92px;
+  padding: 5px 10px;
+  border-radius: 999px;
+
+  font-size: 0.76rem;
+  font-weight: 900;
+}
+
+.estado-mesa-admin.publicada {
+  color: #0d6b3b;
+  background: #dcf7e8;
+}
+
+.estado-mesa-admin.oculta {
+  color: #6b4b00;
+  background: #fff3cd;
+}
+
+.btn-peligro-sime,
+.btn-peligro-mesa {
+  background: #b42318;
+}
+
+.btn-peligro-sime:hover,
+.btn-peligro-mesa:hover {
+  background: #8f1d14;
+}
+
+.btn-ocultar-mesa {
+  background: #f59e0b;
+}
+
+.btn-publicar-mesa {
+  background: #14804a;
+}
+
+.btn-eliminar-mesa {
+  background: #b42318;
+}
+
+.celda-mesa-cursos {
+  max-width: 260px;
+  line-height: 1.45;
+}
+
+@media (max-width: 760px) {
+  .opciones-mesas-admin {
+    grid-template-columns: 1fr;
+  }
+
+  .acciones-sime-listado {
+    width: 100%;
+  }
+
+  .acciones-sime-listado .btn-accion {
+    width: 100%;
+  }
+}
+/* =====================================================
+   FILTROS MESAS ADMIN - 4 COLUMNAS IGUALES
+===================================================== */
+
+.filtros-mesas-admin {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+  align-items: end;
+}
+
+.filtros-mesas-admin .campo-filtro,
+.filtros-mesas-admin .campo-busqueda {
+  min-width: 0;
+}
+
+.filtros-mesas-admin input,
+.filtros-mesas-admin select {
+  width: 100%;
+  min-height: 46px;
+}
+
+@media (max-width: 1000px) {
+  .filtros-mesas-admin {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 620px) {
+  .filtros-mesas-admin {
+    grid-template-columns: 1fr;
+  }
+}
+/* =====================================================
+   CORRECCIÓN FILTROS MESAS ADMIN - FORZAR UNA FILA
+===================================================== */
+
+.filtros-documentacion-admin.filtros-mesas-admin {
+  display: grid !important;
+  grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  gap: 16px !important;
+  align-items: end !important;
+}
+
+.filtros-documentacion-admin.filtros-mesas-admin .campo-filtro {
+  width: 100% !important;
+  min-width: 0 !important;
+}
+
+.filtros-documentacion-admin.filtros-mesas-admin select,
+.filtros-documentacion-admin.filtros-mesas-admin input {
+  width: 100% !important;
+  min-width: 0 !important;
+}
+
+@media (max-width: 1000px) {
+  .filtros-documentacion-admin.filtros-mesas-admin {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+}
+
+@media (max-width: 620px) {
+  .filtros-documentacion-admin.filtros-mesas-admin {
+    grid-template-columns: 1fr !important;
+  }
+}
+/* =====================================================
+   MESAS ADMIN - CURSOS POR FILA
+===================================================== */
+
+.campo-mesas-cursos-admin {
+  grid-column: 1 / -1;
+}
+
+.opciones-mesas-admin {
+  display: flex !important;
+  flex-direction: column;
+  gap: 10px;
+
+  min-height: auto;
+  padding: 12px;
+}
+
+.fila-cursos-mesa-admin {
+  display: grid;
+  grid-template-columns: 110px 1fr;
+  gap: 12px;
+  align-items: center;
+
+  padding: 10px;
+  border: 1px solid #cfe0f3;
+  border-radius: 12px;
+  background: #f8fbff;
+}
+
+.titulo-anio-mesa-admin {
+  color: var(--azul-oscuro);
+  font-size: 0.92rem;
+  font-weight: 900;
+  white-space: nowrap;
+}
+
+.checks-anio-mesa-admin {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.checks-anio-mesa-admin .item-curso-mesa-admin {
+  min-width: 92px;
+  margin: 0;
+}
+
+@media (max-width: 760px) {
+  .fila-cursos-mesa-admin {
+    grid-template-columns: 1fr;
+  }
+
+  .checks-anio-mesa-admin {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .checks-anio-mesa-admin .item-curso-mesa-admin {
+    min-width: 0;
+  }
+}
+/* =====================================================
+   MESAS ADMIN - CURSOS EN COLUMNAS SIMPLES
+===================================================== */
+
+.opciones-mesas-admin {
+  display: grid !important;
+  grid-template-columns: repeat(6, minmax(90px, 1fr)) !important;
+  gap: 12px !important;
+  align-items: start !important;
+
+  min-height: auto !important;
+  padding: 12px !important;
+}
+
+.columna-cursos-mesa-admin {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+
+  padding: 12px;
+  border: 1px solid #cfe0f3;
+  border-radius: 12px;
+
+  background: #f8fbff;
+}
+
+.titulo-anio-mesa-admin {
+  padding-bottom: 8px;
+  border-bottom: 1px solid #cfe0f3;
+
+  color: var(--azul-oscuro);
+  font-size: 1rem;
+  font-weight: 900;
+  text-align: center;
+}
+
+.checks-anio-mesa-admin {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 8px !important;
+}
+
+.checks-anio-mesa-admin .item-curso-mesa-admin {
+  display: flex !important;
+  align-items: center;
+  justify-content: flex-start;
+
+  width: 100% !important;
+  min-width: 0 !important;
+  margin: 0 !important;
+  padding: 8px 10px !important;
+
+  gap: 8px;
+  font-size: 0.95rem;
+  font-weight: 900;
+}
+
+.checks-anio-mesa-admin .item-curso-mesa-admin span {
+  font-weight: 900;
+}
+
+@media (max-width: 1180px) {
+  .opciones-mesas-admin {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  }
+}
+
+@media (max-width: 760px) {
+  .opciones-mesas-admin {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+}
+
+@media (max-width: 520px) {
+  .opciones-mesas-admin {
+    grid-template-columns: 1fr !important;
+  }
+}

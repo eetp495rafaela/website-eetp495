@@ -24,6 +24,7 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
+window.portalDb = db;
 
 function volverAlLogin(mensaje = "") {
   const url = new URL("../login.html", window.location.href);
@@ -193,7 +194,22 @@ onAuthStateChanged(auth, async (user) => {
       volverAlLogin("Tu cuenta no tiene permiso para este portal.");
       return;
     }
+    window.portalUsuario = {
+      correo,
+      nombreCompleto: perfil.nombreCompleto || user.displayName || correo,
+      rol: rolUsuario,
+      estado,
+      tipoVinculo: perfil.tipoVinculo || "",
+    };
+
+    window.dispatchEvent(
+      new CustomEvent("portalUsuarioListo", {
+        detail: window.portalUsuario,
+      }),
+    );
+
     mostrarDatosUsuario(perfil, user, correo, rolUsuario);
+
     console.log("Acceso Autorizado:", {
       correo,
       nombreCompleto: perfil.nombreCompleto || "",

@@ -132,6 +132,12 @@
             </p>
           </a>
 
+          <a class="tarjeta tarjeta-enlace" href="#mesas-examen-docente">
+            <i class="fa-solid fa-calendar-check"></i>
+            <h3>Mesas de Examen</h3>
+            <p>Consultá las mesas de examen publicadas para estudiantes.</p>
+          </a>
+
           <a
             class="tarjeta tarjeta-enlace"
             href="https://docs.google.com/spreadsheets/d/1hD0g7Nz9YcIDhNYOPUeTdj1YfhOL30qvQwk8xgBto1U/edit?usp=sharing"
@@ -260,6 +266,80 @@
               </p>
             </div>
           </div>
+        </div>
+
+        <a class="btn-volver" href="#inicio">
+          <i class="fa-solid fa-arrow-up"></i>
+          Volver al inicio
+        </a>
+      </section>
+
+      <section class="grupo seccion-destino" id="mesas-examen-docente">
+        <h2>Mesas de Examen</h2>
+
+        <div class="panel-docente-mesas">
+          <div class="encabezado-docente-mesas">
+            <div>
+              <h3>Mesas publicadas</h3>
+              <p>
+                Consultá las mesas de examen disponibles. Podés filtrar por
+                espacio curricular o por curso.
+              </p>
+            </div>
+
+            <div class="acciones-docente-mesas">
+              <button
+                class="btn-docente-mesas"
+                id="btnActualizarMesasDocente"
+                type="button"
+              >
+                <i class="fa-solid fa-rotate"></i>
+                Actualizar mesas
+              </button>
+            </div>
+          </div>
+
+          <div class="filtros-docente-mesas">
+            <div class="campo-docente-mesas">
+              <label for="filtroMesaDocenteEspacio">Espacio curricular</label>
+
+              <select id="filtroMesaDocenteEspacio">
+                <option value="">Todos los espacios</option>
+              </select>
+            </div>
+
+            <div class="campo-docente-mesas">
+              <label for="filtroMesaDocenteCurso">Curso</label>
+
+              <select id="filtroMesaDocenteCurso">
+                <option value="">Todos los cursos</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="tabla-docente-mesas-contenedor">
+            <table class="tabla-docente-mesas">
+              <thead>
+                <tr>
+                  <th>Fecha</th>
+                  <th>Hora</th>
+                  <th>Espacio curricular</th>
+                  <th>Cursos</th>
+                </tr>
+              </thead>
+
+              <tbody id="cuerpoTablaMesasDocente">
+                <tr>
+                  <td colspan="4" class="tabla-vacia">
+                    Todavía no se consultaron las mesas. Presioná “Actualizar
+                    mesas” para cargarlas.
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <p id="mensajeMesasDocente" class="mensaje-docente-mesas"></p>
         </div>
 
         <a class="btn-volver" href="#inicio">
@@ -686,6 +766,7 @@
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script type="module" src="../assets/js/proteger-portal.js"></script>
+    <script type="module" src="../assets/js/mesas-docente.js"></script>
     <script type="module" src="../assets/js/material-estudio.js"></script>
     <script src="../assets/js/volver-arriba.js"></script>
     <script type="module" src="../assets/js/horarios-docente.js"></script>

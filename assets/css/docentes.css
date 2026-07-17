@@ -610,3 +610,26 @@ RESPONSIVE
     grid-template-columns: 1fr;
   }
 }
+/* =====================================================
+   MESAS DE EXAMEN - TABLA PORTAL DOCENTE
+===================================================== */
+
+#mesas-examen-docente .tabla-usuarios thead th,
+#mesas-examen-docente .tabla-documentacion-alumno thead th,
+#mesas-examen-docente table thead th {
+  background: #b7e3d1;
+  color: #063b3b;
+  font-size: 0.9rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  padding: 14px 16px;
+  border-bottom: 1px solid #9fd0bc;
+}
+
+#mesas-examen-docente .tabla-usuarios tbody td,
+#mesas-examen-docente .tabla-documentacion-alumno tbody td,
+#mesas-examen-docente table tbody td {
+  color: #18352d;
+  border-top: 1px solid #d8e8e1;
+}
