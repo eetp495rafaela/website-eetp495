@@ -1786,3 +1786,336 @@ html {
     gap: 6px;
   }
 }
+/* =====================================================
+   NOVEDADES - NOTICIA MESAS DE EXÁMENES
+===================================================== */
+
+.novedad-card {
+  max-width: 950px;
+  margin: 40px auto 0;
+  background: #ffffff;
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 15px 40px rgba(15, 45, 75, 0.12);
+  border: 1px solid rgba(32, 84, 134, 0.12);
+}
+
+.novedad-importante {
+  border-top: 6px solid #f1a208;
+}
+
+.novedad-encabezado {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 28px 32px;
+  background: linear-gradient(135deg, #123e67, #1f6393);
+  color: #ffffff;
+}
+
+.novedad-icono {
+  flex-shrink: 0;
+  width: 70px;
+  height: 70px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.15);
+  font-size: 32px;
+}
+
+.novedad-etiqueta {
+  display: inline-block;
+  margin-bottom: 6px;
+  padding: 5px 12px;
+  border-radius: 50px;
+  background: #f1a208;
+  color: #17324d;
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.novedad-encabezado h3 {
+  margin: 0;
+  color: #ffffff;
+  font-size: 1.7rem;
+  line-height: 1.25;
+}
+
+.novedad-fechas {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin: 28px 32px 0;
+  padding: 20px 24px;
+  border-radius: 14px;
+  background: #fff5dd;
+  border-left: 5px solid #f1a208;
+}
+
+.novedad-fechas > i {
+  flex-shrink: 0;
+  font-size: 32px;
+  color: #d88700;
+}
+
+.novedad-fechas div {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.novedad-fechas span {
+  color: #6d5a32;
+  font-size: 0.88rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+.novedad-fechas strong {
+  color: #17324d;
+  font-size: 1.25rem;
+}
+
+.novedad-contenido {
+  padding: 30px 32px 34px;
+}
+
+.novedad-contenido > p {
+  margin: 0 0 20px;
+  color: #3c4c5c;
+  font-size: 1rem;
+  line-height: 1.75;
+}
+
+.novedad-aviso {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  margin: 28px 0;
+  padding: 22px;
+  border-radius: 14px;
+  background: #edf6fc;
+  border: 1px solid #c9e3f4;
+}
+
+.novedad-aviso > i {
+  flex-shrink: 0;
+  margin-top: 2px;
+  color: #1f6393;
+  font-size: 25px;
+}
+
+.novedad-aviso h4 {
+  margin: 0 0 8px;
+  color: #173f64;
+  font-size: 1.1rem;
+}
+
+.novedad-aviso p {
+  margin: 0;
+  color: #455b6f;
+  line-height: 1.65;
+}
+
+.novedad-subtitulo {
+  margin-bottom: 14px !important;
+  color: #17324d !important;
+  font-weight: 800;
+}
+
+.novedad-requisitos {
+  display: grid;
+  gap: 12px;
+  margin: 0 0 26px;
+  padding: 0;
+  list-style: none;
+}
+
+.novedad-requisitos li {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 17px;
+  border-radius: 12px;
+  background: #f7f9fb;
+  border: 1px solid #e3e9ee;
+  color: #354b5f;
+  line-height: 1.5;
+}
+
+.novedad-requisitos li i {
+  flex-shrink: 0;
+  width: 22px;
+  color: #1f6393;
+  font-size: 18px;
+  text-align: center;
+}
+
+.novedad-advertencia {
+  display: flex;
+  align-items: flex-start;
+  gap: 15px;
+  margin: 0 0 26px;
+  padding: 18px 20px;
+  border-radius: 12px;
+  background: #fff2f0;
+  border: 1px solid #f2c8c2;
+}
+
+.novedad-advertencia > i {
+  flex-shrink: 0;
+  margin-top: 3px;
+  color: #c84736;
+  font-size: 22px;
+}
+
+.novedad-advertencia p {
+  margin: 0;
+  color: #67423d;
+  line-height: 1.6;
+}
+
+.btn-novedad-correo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: fit-content;
+  min-height: 50px;
+  margin: 28px auto 14px;
+  padding: 13px 24px;
+  border-radius: 10px;
+  background: #1f6393;
+  color: #ffffff;
+  font-size: 0.95rem;
+  font-weight: 800;
+  text-align: center;
+  text-decoration: none;
+  box-shadow: 0 8px 20px rgba(31, 99, 147, 0.22);
+  transition:
+    transform 0.2s ease,
+    background-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.btn-novedad-correo:hover {
+  background: #174c73;
+  color: #ffffff;
+  transform: translateY(-2px);
+  box-shadow: 0 11px 24px rgba(31, 99, 147, 0.3);
+}
+
+.novedad-correo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin: 0 !important;
+  color: #607283 !important;
+  font-size: 0.9rem !important;
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+
+/* =====================================================
+   NOVEDADES - RESPONSIVE
+===================================================== */
+
+@media (max-width: 768px) {
+  .novedad-card {
+    margin-top: 28px;
+    border-radius: 16px;
+  }
+
+  .novedad-encabezado {
+    align-items: flex-start;
+    gap: 14px;
+    padding: 22px 20px;
+  }
+
+  .novedad-icono {
+    width: 55px;
+    height: 55px;
+    border-radius: 14px;
+    font-size: 25px;
+  }
+
+  .novedad-encabezado h3 {
+    font-size: 1.3rem;
+  }
+
+  .novedad-etiqueta {
+    font-size: 0.68rem;
+  }
+
+  .novedad-fechas {
+    align-items: flex-start;
+    margin: 20px 18px 0;
+    padding: 17px;
+  }
+
+  .novedad-fechas > i {
+    font-size: 27px;
+  }
+
+  .novedad-fechas strong {
+    font-size: 1.08rem;
+  }
+
+  .novedad-contenido {
+    padding: 24px 18px 28px;
+  }
+
+  .novedad-aviso {
+    padding: 18px 16px;
+  }
+
+  .novedad-requisitos li {
+    align-items: flex-start;
+  }
+
+  .novedad-advertencia {
+    padding: 17px 15px;
+  }
+
+  .btn-novedad-correo {
+    width: 100%;
+    padding: 13px 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .novedad-encabezado {
+    flex-direction: column;
+  }
+
+  .novedad-icono {
+    width: 50px;
+    height: 50px;
+  }
+
+  .novedad-fechas {
+    gap: 12px;
+  }
+
+  .novedad-fechas span {
+    font-size: 0.76rem;
+  }
+
+  .novedad-fechas strong {
+    font-size: 1rem;
+  }
+
+  .novedad-contenido > p {
+    font-size: 0.95rem;
+  }
+
+  .novedad-correo {
+    font-size: 0.82rem !important;
+  }
+}
