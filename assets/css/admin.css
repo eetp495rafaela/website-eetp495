@@ -2025,3 +2025,78 @@ body.modal-abierto {
     grid-template-columns: 1fr !important;
   }
 }
+/* =====================================================
+   HORARIO DE AULA - BLOQUES EN 4 COLUMNAS
+===================================================== */
+
+.campo-bloques-horarios-aula-admin {
+  grid-column: 1 / -1;
+}
+
+#bloquesHorarioAula.bloques-horarios-admin {
+  width: 100%;
+}
+
+.bloques-horarios-columnas-admin {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+  width: 100%;
+}
+
+.columna-bloques-horarios-admin {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+
+  padding: 12px;
+  border: 1px solid #cfe0f3;
+  border-radius: 14px;
+  background: #f8fbff;
+}
+
+.titulo-columna-bloques-admin {
+  padding: 8px 10px;
+  border-radius: 10px;
+
+  background: #e8f1ff;
+  color: var(--azul-oscuro);
+  font-size: 0.82rem;
+  font-weight: 900;
+  text-align: center;
+}
+
+.columna-bloques-horarios-admin .bloque-horario-opcion {
+  min-height: 48px;
+  margin: 0;
+}
+
+.columna-bloques-horarios-admin .recreo-horario-admin {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  min-height: 38px;
+  margin: 2px 0 0;
+  padding: 8px 10px;
+
+  border-radius: 10px;
+  background: #e9effb;
+  color: var(--azul-principal);
+
+  font-size: 0.78rem;
+  font-weight: 900;
+  text-align: center;
+}
+
+@media (max-width: 1100px) {
+  .bloques-horarios-columnas-admin {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 620px) {
+  .bloques-horarios-columnas-admin {
+    grid-template-columns: 1fr;
+  }
+}

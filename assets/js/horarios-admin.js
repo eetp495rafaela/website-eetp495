@@ -294,33 +294,106 @@ function renderizarBloquesHorarioAula() {
     return;
   }
 
-  bloquesHorarioAula.innerHTML = bloques
-    .map((bloque) => {
-      if (bloque.tipo === "RECREO") {
-        return `
-          <div class="recreo-horario-admin">
-            Recreo · ${bloque.inicio} a ${bloque.fin}
-          </div>
-        `;
-      }
+  const obtenerBloque = (numero) => {
+    return bloques.find((bloque) => {
+      return (
+        bloque.tipo === "BLOQUE" &&
+        Number(bloque.numero || 0) === Number(numero)
+      );
+    });
+  };
 
-      return `
-        <label class="bloque-horario-opcion">
-          <input
-            type="checkbox"
-            name="bloqueHorarioAula"
-            value="${bloque.numero}"
-            data-inicio="${bloque.inicio}"
-            data-fin="${bloque.fin}"
-          />
+  const obtenerRecreoDespuesDe = (numeroBloque) => {
+    const indiceBloque = bloques.findIndex((bloque) => {
+      return (
+        bloque.tipo === "BLOQUE" &&
+        Number(bloque.numero || 0) === Number(numeroBloque)
+      );
+    });
 
-          <span>
-            Bloque ${bloque.numero} · ${bloque.inicio} a ${bloque.fin}
-          </span>
-        </label>
-      `;
-    })
-    .join("");
+    if (indiceBloque < 0) return null;
+
+    return (
+      bloques.slice(indiceBloque + 1).find((bloque) => {
+        return bloque.tipo === "RECREO";
+      }) || null
+    );
+  };
+
+  const columnas = [
+    {
+      titulo: "Bloques 1 y 2",
+      numeros: [1, 2],
+      recreo: obtenerRecreoDespuesDe(2),
+    },
+    {
+      titulo: "Bloques 3 y 4",
+      numeros: [3, 4],
+      recreo: obtenerRecreoDespuesDe(4),
+    },
+    {
+      titulo: "Bloques 5 y 6",
+      numeros: [5, 6],
+      recreo: obtenerRecreoDespuesDe(6),
+    },
+    {
+      titulo: "Bloque 7",
+      numeros: [7],
+      recreo: null,
+    },
+  ];
+
+  bloquesHorarioAula.innerHTML = `
+    <div class="bloques-horarios-columnas-admin">
+      ${columnas
+        .map((columna) => {
+          const bloquesColumna = columna.numeros
+            .map((numero) => obtenerBloque(numero))
+            .filter(Boolean);
+
+          if (!bloquesColumna.length) return "";
+
+          return `
+            <div class="columna-bloques-horarios-admin">
+              <div class="titulo-columna-bloques-admin">
+                ${columna.titulo}
+              </div>
+
+              ${bloquesColumna
+                .map(
+                  (bloque) => `
+                    <label class="bloque-horario-opcion">
+                      <input
+                        type="checkbox"
+                        name="bloqueHorarioAula"
+                        value="${bloque.numero}"
+                        data-inicio="${bloque.inicio}"
+                        data-fin="${bloque.fin}"
+                      />
+
+                      <span>
+                        Bloque ${bloque.numero} · ${bloque.inicio} a ${bloque.fin}
+                      </span>
+                    </label>
+                  `,
+                )
+                .join("")}
+
+              ${
+                columna.recreo
+                  ? `
+                    <div class="recreo-horario-admin">
+                      Recreo · ${columna.recreo.inicio} a ${columna.recreo.fin}
+                    </div>
+                  `
+                  : ""
+              }
+            </div>
+          `;
+        })
+        .join("")}
+    </div>
+  `;
 }
 
 function obtenerNombreCursoHorario(curso) {
