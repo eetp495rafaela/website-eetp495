@@ -779,3 +779,300 @@ body {
 #panelDocumentacionAcademica .tabla-documentos button i {
   color: inherit;
 }
+/* =====================================================
+   AJUSTE SCROLL - SECCIONES PORTAL DOCENTE
+===================================================== */
+
+#mis-horarios-docente,
+#sira-docente,
+#listas-estudiantes-docente {
+  scroll-margin-top: 115px;
+}
+/* =====================================================
+   Si.R.A. DOCENTE - AJUSTES VISUALES
+===================================================== */
+
+#sira-docente input[type="date"],
+#sira-docente select {
+  width: 100%;
+  min-height: 48px;
+  padding: 10px 14px;
+  border: 1px solid rgba(52, 211, 153, 0.45);
+  border-radius: 14px;
+  background: #f8fffc;
+  color: #0f2742;
+  font-family: inherit;
+  font-size: 0.95rem;
+  font-weight: 850;
+  outline: none;
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.08);
+}
+
+#sira-docente input[type="date"]:focus,
+#sira-docente select:focus {
+  border-color: #facc15;
+  box-shadow:
+    0 0 0 3px rgba(250, 204, 21, 0.18),
+    0 10px 22px rgba(0, 0, 0, 0.12);
+}
+
+#sira-docente input[type="date"]::-webkit-calendar-picker-indicator {
+  cursor: pointer;
+  opacity: 0.85;
+  filter: invert(18%) sepia(39%) saturate(627%) hue-rotate(111deg)
+    brightness(92%) contrast(92%);
+}
+
+#sira-docente #btnRegistrarAsistenciaSira[hidden] {
+  display: none !important;
+}
+
+.sira-clase-seleccionada {
+  margin-top: 22px;
+  margin-bottom: 18px;
+  padding: 18px 20px;
+  border: 1px solid rgba(52, 211, 153, 0.28);
+  border-radius: 16px;
+  background:
+    linear-gradient(135deg, rgba(52, 211, 153, 0.12), rgba(15, 118, 110, 0.16)),
+    rgba(255, 255, 255, 0.04);
+}
+
+.sira-clase-seleccionada h3 {
+  margin-bottom: 10px;
+  color: #facc15;
+  font-size: 1.08rem;
+  font-weight: 900;
+}
+
+.sira-clase-seleccionada p {
+  margin: 4px 0;
+  color: #d9fbe8;
+  font-weight: 750;
+}
+
+.sira-modo-lluvia {
+  margin: 16px 0;
+  padding: 14px 16px;
+  border: 1px solid rgba(56, 189, 248, 0.35);
+  border-radius: 14px;
+  background: rgba(56, 189, 248, 0.12);
+  color: #e0f2fe;
+  font-weight: 800;
+}
+
+.sira-modo-lluvia label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+}
+
+.sira-modo-lluvia input {
+  width: 18px;
+  height: 18px;
+  accent-color: #38bdf8;
+}
+
+.sira-modo-lluvia span {
+  color: #b8d8ea;
+  font-size: 0.86rem;
+  font-weight: 700;
+}
+
+.sira-lista-estudiantes {
+  display: grid;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.sira-estudiante {
+  display: grid;
+  grid-template-columns: minmax(220px, 1fr) auto;
+  gap: 16px;
+  align-items: center;
+  padding: 12px 14px;
+  border: 1px solid rgba(52, 211, 153, 0.22);
+  border-left: 6px solid #34d399;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.95);
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.08);
+}
+
+.sira-estudiante-nombre strong {
+  display: block;
+  color: #102a43;
+  font-size: 0.96rem;
+  font-weight: 900;
+}
+
+.sira-estudiante-nombre small {
+  display: inline-flex;
+  margin-top: 4px;
+  padding: 3px 9px;
+  border-radius: 999px;
+  background: #d9fbe8;
+  color: #065f46;
+  font-size: 0.76rem;
+  font-weight: 900;
+}
+
+.sira-estudiante-controles {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.sira-estudiante-controles select {
+  width: 72px !important;
+  min-height: 40px !important;
+  padding: 6px 10px !important;
+  border-radius: 10px !important;
+  background: #ecfdf5 !important;
+  color: #064e3b !important;
+  font-size: 0.9rem !important;
+  font-weight: 950 !important;
+  box-shadow: none !important;
+}
+
+.sira-estudiante-controles input {
+  width: 210px;
+  min-height: 40px;
+  padding: 8px 12px;
+  border: 1px solid #bdd7cc;
+  border-radius: 10px;
+  background: #ffffff;
+  color: #102a43;
+  font-family: inherit;
+  font-size: 0.88rem;
+  font-weight: 750;
+  outline: none;
+}
+
+.sira-estudiante-controles input:focus {
+  border-color: #34d399;
+  box-shadow: 0 0 0 3px rgba(52, 211, 153, 0.18);
+}
+
+@media (max-width: 760px) {
+  .sira-estudiante {
+    grid-template-columns: 1fr;
+  }
+
+  .sira-estudiante-controles {
+    width: 100%;
+    align-items: stretch;
+  }
+
+  .sira-estudiante-controles select {
+    width: 82px !important;
+  }
+
+  .sira-estudiante-controles input {
+    width: 100%;
+  }
+}
+/* =====================================================
+   PORTAL DOCENTE - ENLACES INSTITUCIONALES
+===================================================== */
+
+#enlaces-institucionales-docente {
+  scroll-margin-top: 115px;
+}
+
+.grid-enlaces-institucionales-docente {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+  margin-top: 22px;
+}
+
+.tarjeta-enlace-institucional-docente {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-height: 170px;
+  padding: 20px;
+  border: 1px solid rgba(52, 211, 153, 0.24);
+  border-radius: 18px;
+  background:
+    linear-gradient(135deg, rgba(52, 211, 153, 0.12), rgba(15, 118, 110, 0.16)),
+    rgba(255, 255, 255, 0.04);
+  color: var(--docente-texto);
+  text-decoration: none;
+  box-shadow: 0 12px 26px rgba(0, 0, 0, 0.16);
+  transition:
+    transform 0.2s ease,
+    border-color 0.2s ease,
+    background 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.tarjeta-enlace-institucional-docente:hover {
+  transform: translateY(-4px);
+  border-color: rgba(250, 204, 21, 0.55);
+  background:
+    linear-gradient(135deg, rgba(250, 204, 21, 0.13), rgba(52, 211, 153, 0.14)),
+    rgba(255, 255, 255, 0.06);
+  color: var(--docente-texto);
+  text-decoration: none;
+  box-shadow: 0 16px 32px rgba(0, 0, 0, 0.22);
+}
+
+.tarjeta-enlace-institucional-docente i {
+  color: var(--docente-dorado);
+  font-size: 1.7rem;
+}
+
+.tarjeta-enlace-institucional-docente h3 {
+  margin: 0;
+  color: var(--docente-texto);
+  font-size: 1rem;
+  font-weight: 900;
+}
+
+.tarjeta-enlace-institucional-docente p {
+  margin: 0;
+  color: var(--docente-texto-suave);
+  font-size: 0.86rem;
+  font-weight: 750;
+  line-height: 1.4;
+}
+
+@media (max-width: 1200px) {
+  .grid-enlaces-institucionales-docente {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 850px) {
+  .grid-enlaces-institucionales-docente {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 560px) {
+  .grid-enlaces-institucionales-docente {
+    grid-template-columns: 1fr;
+  }
+}
+/* =====================================================
+   PORTAL DOCENTE - BOTÓN VOLVER ARRIBA
+===================================================== */
+
+body[data-rol-permitido="DOCENTE"] .btn-arriba {
+  background: linear-gradient(
+    135deg,
+    var(--docente-verde),
+    var(--docente-verde-oscuro)
+  );
+  color: var(--docente-dorado);
+  border: 1px solid rgba(250, 204, 21, 0.45);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.28);
+}
+
+body[data-rol-permitido="DOCENTE"] .btn-arriba:hover {
+  background: linear-gradient(135deg, var(--docente-dorado), #f59e0b);
+  color: var(--docente-verde-oscuro);
+  transform: translateY(-3px);
+}

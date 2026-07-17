@@ -104,6 +104,14 @@
             <p>Inscripciones a mesas y permisos de examen.</p>
           </a>
 
+          <a class="tarjeta tarjeta-enlace" href="#sira-admin">
+            <i class="fa-solid fa-user-check"></i>
+            <h3>Si.R.A.</h3>
+            <p>
+              Consulta y administración de asistencias registradas por docentes.
+            </p>
+          </a>
+
           <a class="tarjeta tarjeta-enlace" href="#horario-aula">
             <i class="fa-solid fa-calendar-days"></i>
             <h3>Horario de Aula</h3>
@@ -1046,6 +1054,70 @@
           </div>
 
           <p id="mensajeSimeAdmin" class="mensaje-formulario"></p>
+        </div>
+
+        <a class="btn-volver" href="#inicio">
+          <i class="fa-solid fa-arrow-up"></i>
+          Volver al inicio
+        </a>
+      </section>
+
+      <section class="grupo seccion-destino" id="sira-admin">
+        <h2>Si.R.A. - Sistema de Registro de Asistencia</h2>
+
+        <div class="panel-info">
+          <div class="encabezado-listado">
+            <div>
+              <h3>Consulta y administración de asistencias</h3>
+              <p>
+                Consultá las asistencias registradas por docentes en espacios de
+                Taller y Educación Física. Desde el panel de soporte también
+                podés eliminar una carga realizada incorrectamente.
+              </p>
+            </div>
+          </div>
+
+          <div class="filtros-documentacion-admin filtros-sira-admin">
+            <div class="campo-filtro">
+              <label for="tipoSiraAdmin">Tipo de asistencia</label>
+
+              <select id="tipoSiraAdmin">
+                <option value="">Seleccionar tipo</option>
+                <option value="TALLER">Taller</option>
+                <option value="EDUCACION_FISICA">Educación Física</option>
+              </select>
+            </div>
+
+            <div class="campo-filtro">
+              <label for="cursoSiraAdmin">Curso</label>
+
+              <select id="cursoSiraAdmin">
+                <option value="">Seleccionar curso</option>
+              </select>
+            </div>
+
+            <div class="campo-filtro">
+              <label for="fechaInicioSiraAdmin">Fecha de inicio</label>
+
+              <input id="fechaInicioSiraAdmin" type="date" />
+            </div>
+          </div>
+
+          <div class="acciones">
+            <button class="btn-accion" id="btnVerSiraAdmin" type="button">
+              <i class="fa-solid fa-table-list"></i>
+              Ver parte semanal
+            </button>
+          </div>
+
+          <div id="vistaSiraAdmin" class="vista-sira-admin">
+            <p class="mensaje-formulario">
+              Seleccioná el tipo de asistencia, el curso y la fecha de inicio
+              para consultar el parte semanal.
+            </p>
+          </div>
+
+          <p id="mensajeSiraAdminPanel" class="mensaje-formulario"></p>
         </div>
 
         <a class="btn-volver" href="#inicio">
@@ -2014,6 +2086,7 @@
     <script type="module" src="../assets/js/admin.js"></script>
     <script type="module" src="../assets/js/documentacion-admin.js"></script>
     <script type="module" src="../assets/js/sime-admin.js"></script>
+    <script type="module" src="../assets/js/sira-admin.js"></script>
     <script type="module" src="../assets/js/horarios-admin.js"></script>
     <script type="module" src="../assets/js/backup-admin.js"></script>
     <script type="module" src="../assets/js/pizarra-horarios-admin.js"></script>

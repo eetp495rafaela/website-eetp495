@@ -935,7 +935,60 @@ html {
 .cerrar:hover {
   color: var(--naranja);
 }
+/* =====================================================
+   NOVEDADES
+===================================================== */
 
+.novedades {
+  padding: 90px 0;
+  background: #f7f9fc;
+}
+
+.novedades-proximamente {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 55px 40px;
+  background: #ffffff;
+  border-radius: 22px;
+  text-align: center;
+  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.08);
+}
+
+.novedades-proximamente i {
+  font-size: 3.2rem;
+  color: var(--azul);
+  margin-bottom: 22px;
+}
+
+.novedades-proximamente h3 {
+  color: var(--azul);
+  font-size: 2rem;
+  margin-bottom: 14px;
+}
+
+.novedades-proximamente p {
+  color: #5b6572;
+  font-size: 1.05rem;
+  line-height: 1.8;
+}
+
+@media (max-width: 768px) {
+  .novedades {
+    padding: 70px 0;
+  }
+
+  .novedades-proximamente {
+    padding: 40px 24px;
+  }
+
+  .novedades-proximamente h3 {
+    font-size: 1.65rem;
+  }
+
+  .novedades-proximamente p {
+    font-size: 0.98rem;
+  }
+}
 /* =====================================================
    CONTACTO
 ===================================================== */

@@ -123,26 +123,13 @@
             </p>
           </a>
 
-          <a
-            class="tarjeta tarjeta-enlace"
-            href="#"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
+          <a class="tarjeta tarjeta-enlace" href="#sira-docente">
             <i class="fa-solid fa-user-check"></i>
-            <h3>Si.R.A. Taller</h3>
-            <p>Sistema de Registro de Asistencia para espacios de Taller.</p>
-          </a>
-
-          <a
-            class="tarjeta tarjeta-enlace"
-            href="#"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <i class="fa-solid fa-person-running"></i>
-            <h3>Si.R.A. Educación Física</h3>
-            <p>Sistema de Registro de Asistencia para Educación Física.</p>
+            <h3>Si.R.A.</h3>
+            <p>
+              Sistema de Registro de Asistencia para espacios de Taller y
+              Educación Física.
+            </p>
           </a>
 
           <a
@@ -191,6 +178,18 @@
             <p>
               Consultá los estudiantes cursando en los cursos que tenés
               asignados.
+            </p>
+          </a>
+
+          <a
+            class="tarjeta tarjeta-enlace"
+            href="#enlaces-institucionales-docente"
+          >
+            <i class="fa-solid fa-link"></i>
+            <h3>Enlaces Institucionales</h3>
+            <p>
+              Accesos útiles a plataformas, trámites y servicios oficiales para
+              docentes.
             </p>
           </a>
         </div>
@@ -268,6 +267,77 @@
           Volver al inicio
         </a>
       </section>
+
+      <section class="grupo seccion-destino" id="sira-docente">
+        <h2>Si.R.A. - Sistema de Registro de Asistencia</h2>
+
+        <div class="panel-info">
+          <div class="encabezado-listado">
+            <div>
+              <h3>Registro de asistencia</h3>
+              <p>
+                Seleccioná una fecha para ver únicamente las clases de Taller o
+                Educación Física que tenés asignadas ese día.
+              </p>
+            </div>
+          </div>
+
+          <div class="form-grid-documentacion">
+            <div class="campo-documentacion">
+              <label for="fechaSiraDocente">Fecha *</label>
+              <input id="fechaSiraDocente" type="date" required />
+            </div>
+
+            <div class="campo-documentacion">
+              <label for="claseSiraDocente">Clase disponible *</label>
+              <select id="claseSiraDocente" disabled>
+                <option value="">Primero seleccioná una fecha</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="acciones">
+            <button
+              class="btn-accion"
+              id="btnCargarAsistenciaSira"
+              type="button"
+            >
+              <i class="fa-solid fa-list-check"></i>
+              Cargar estudiantes
+            </button>
+          </div>
+
+          <div id="infoClaseSiraDocente" class="mensaje-formulario">
+            Seleccioná una fecha para consultar tus clases disponibles.
+          </div>
+
+          <div id="vistaAsistenciaSiraDocente" class="vista-sira-docente">
+            <p class="mensaje-formulario">
+              Todavía no se cargó ninguna clase para registrar asistencia.
+            </p>
+          </div>
+
+          <div class="acciones">
+            <button
+              class="btn-accion"
+              id="btnRegistrarAsistenciaSira"
+              type="button"
+              hidden
+            >
+              <i class="fa-solid fa-floppy-disk"></i>
+              Registrar asistencia
+            </button>
+          </div>
+
+          <p id="mensajeSiraDocente" class="mensaje-formulario"></p>
+        </div>
+
+        <a class="btn-volver" href="#inicio">
+          <i class="fa-solid fa-arrow-up"></i>
+          Volver al inicio
+        </a>
+      </section>
+
       <section class="grupo seccion-destino" id="listas-estudiantes-docente">
         <h2>Listas de Estudiantes</h2>
 
@@ -309,6 +379,121 @@
           Volver al inicio
         </a>
       </section>
+
+      <section
+        class="grupo seccion-destino"
+        id="enlaces-institucionales-docente"
+      >
+        <h2>Enlaces Institucionales</h2>
+
+        <div class="panel-info">
+          <div class="encabezado-listado">
+            <div>
+              <h3>Accesos útiles para docentes</h3>
+              <p>
+                Accedé rápidamente a plataformas, trámites y servicios
+                institucionales de uso frecuente.
+              </p>
+            </div>
+          </div>
+
+          <div class="grid-enlaces-institucionales-docente">
+            <a
+              class="tarjeta-enlace-institucional-docente"
+              href="https://www.santafe.gob.ar/miescuela/#/app/main"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <i class="fa-solid fa-school"></i>
+              <h3>Mi Escuela</h3>
+              <p>Plataforma de Gestión Escolar.</p>
+            </a>
+
+            <a
+              class="tarjeta-enlace-institucional-docente"
+              href="https://www.santafe.gov.ar/milegajo/#/inicio"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <i class="fa-solid fa-id-card"></i>
+              <h3>Mi Legajo</h3>
+              <p>Consulta y gestión del Legajo Personal.</p>
+            </a>
+
+            <a
+              class="tarjeta-enlace-institucional-docente"
+              href="https://www.santafe.gob.ar/portalciudadano/"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <i class="fa-solid fa-user"></i>
+              <h3>Portal Ciudadano</h3>
+              <p>Acceso a servicios digitales del Gobierno Provincial.</p>
+            </a>
+
+            <a
+              class="tarjeta-enlace-institucional-docente"
+              href="https://atencionvirtual.santafe.gob.ar/digital"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <i class="fa-solid fa-headset"></i>
+              <h3>Atención Virtual</h3>
+              <p>Canal digital para consultas, turnos y atención.</p>
+            </a>
+
+            <a
+              class="tarjeta-enlace-institucional-docente"
+              href="https://tramites.santafe.gob.ar/#/autorregistro?$$tab=en_curso"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <i class="fa-solid fa-file-signature"></i>
+              <h3>Trámites Santa Fe</h3>
+              <p>Gestión de trámites, expedientes y domicilio digital.</p>
+            </a>
+
+            <a
+              class="tarjeta-enlace-institucional-docente"
+              href="https://campuseducativo.santafe.edu.ar"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <i class="fa-solid fa-graduation-cap"></i>
+              <h3>Campus Educativo</h3>
+              <p>Acceso al Campus Educativo Provincial.</p>
+            </a>
+
+            <a
+              class="tarjeta-enlace-institucional-docente"
+              href="https://plataformaeducativa.santafe.edu.ar/moodle/"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <i class="fa-solid fa-laptop-file"></i>
+              <h3>Plataforma Educativa</h3>
+              <p>Acceso a la Plataforma Educativa Provincial.</p>
+            </a>
+
+            <a
+              class="tarjeta-enlace-institucional-docente"
+              href="https://www.santafe.gob.ar/sgf/app"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <i class="fa-solid fa-folder-tree"></i>
+              <h3>SGF</h3>
+              <p>Sistema de Gestión de Formación.</p>
+            </a>
+          </div>
+        </div>
+
+        <a class="btn-volver" href="#inicio">
+          <i class="fa-solid fa-arrow-up"></i>
+          Volver al inicio
+        </a>
+      </section>
+
       <section
         class="grupo seccion-destino"
         id="panelDocumentacionAcademica"
@@ -509,5 +694,6 @@
       src="../assets/js/listas-estudiantes-docente.js"
     ></script>
     <script type="module" src="../assets/js/informes-docente.js"></script>
+    <script type="module" src="../assets/js/sira-docente.js"></script>
   </body>
 </html>

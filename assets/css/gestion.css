@@ -1972,3 +1972,252 @@ body {
     min-width: 820px;
   }
 }
+/* =====================================================
+   GESTIÓN - Si.R.A. PARTE SEMANAL
+===================================================== */
+
+#sira-gestion {
+  scroll-margin-top: 115px;
+}
+
+#sira-gestion input[type="date"],
+#sira-gestion select {
+  width: 100%;
+  min-height: 46px;
+  padding: 10px 14px;
+  border: 1px solid #cfe0f2;
+  border-radius: 12px;
+  background: #ffffff;
+  color: var(--gestion-azul-oscuro);
+  font-family: inherit;
+  font-size: 0.92rem;
+  font-weight: 800;
+  outline: none;
+  box-shadow: 0 8px 18px rgba(8, 32, 56, 0.06);
+}
+
+#sira-gestion input[type="date"]:focus,
+#sira-gestion select:focus {
+  border-color: var(--gestion-verde);
+  box-shadow:
+    0 0 0 3px rgba(22, 131, 107, 0.14),
+    0 10px 22px rgba(8, 32, 56, 0.08);
+}
+
+.sira-gestion-encabezado {
+  margin: 22px 0 18px;
+  padding: 18px 20px;
+  border: 1px solid #cfe0f2;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #eaf4ff, #f7fbff);
+  box-shadow: 0 10px 24px rgba(8, 32, 56, 0.06);
+}
+
+.sira-gestion-encabezado h3 {
+  margin: 0 0 6px;
+  color: var(--gestion-azul-oscuro);
+  font-size: 1.2rem;
+  font-weight: 900;
+}
+
+.sira-gestion-encabezado p {
+  margin: 0;
+  color: var(--gestion-texto-suave);
+  font-size: 0.95rem;
+  font-weight: 800;
+}
+
+.sira-gestion-semana {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(240px, 1fr));
+  gap: 14px;
+  align-items: start;
+  overflow-x: auto;
+  padding-bottom: 8px;
+}
+
+.sira-gestion-dia {
+  min-width: 240px;
+  border: 1px solid #cfe0f2;
+  border-radius: 16px;
+  background: #ffffff;
+  box-shadow: 0 10px 24px rgba(8, 32, 56, 0.06);
+  overflow: hidden;
+}
+
+.sira-gestion-dia > h4 {
+  margin: 0;
+  padding: 14px 16px;
+  background: var(--gestion-azul-oscuro);
+  color: #ffffff;
+  font-size: 0.98rem;
+  font-weight: 900;
+  text-align: center;
+}
+
+.sira-gestion-dia > h4 span {
+  display: block;
+  margin-top: 4px;
+  color: #d9ecff;
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+.sira-gestion-dia-vacio {
+  margin: 14px;
+  padding: 16px 12px;
+  border-radius: 12px;
+  background: #f3f7fb;
+  color: var(--gestion-texto-suave);
+  font-size: 0.9rem;
+  font-weight: 800;
+  text-align: center;
+}
+
+.sira-gestion-bloque {
+  margin: 12px;
+  padding: 12px;
+  border: 1px solid #d9e7f3;
+  border-left: 6px solid var(--gestion-verde);
+  border-radius: 14px;
+  background: #f9fcff;
+}
+
+.sira-gestion-bloque header {
+  margin-bottom: 12px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #e3edf6;
+}
+
+.sira-gestion-bloque header h4 {
+  margin: 0 0 6px;
+  color: var(--gestion-azul-oscuro);
+  font-size: 0.96rem;
+  font-weight: 900;
+  line-height: 1.25;
+}
+
+.sira-gestion-bloque header p {
+  margin: 3px 0;
+  color: var(--gestion-texto-suave);
+  font-size: 0.82rem;
+  font-weight: 800;
+}
+
+.sira-gestion-estado {
+  margin-top: 10px;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid #edf3f8;
+  background: #ffffff;
+}
+
+.sira-gestion-estado h5 {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin: 0;
+  padding: 8px 10px;
+  font-size: 0.82rem;
+  font-weight: 900;
+}
+
+.sira-gestion-estado h5 span {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 24px;
+  min-height: 24px;
+  padding: 2px 7px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.75);
+  font-size: 0.78rem;
+  font-weight: 900;
+}
+
+.sira-gestion-estado.presentes h5 {
+  background: #dff7ec;
+  color: #05603a;
+}
+
+.sira-gestion-estado.ausentes h5 {
+  background: #fde2e2;
+  color: #9b1c1c;
+}
+
+.sira-gestion-estado.tarde h5 {
+  background: #fff3cd;
+  color: #8a5a00;
+}
+
+.sira-gestion-estado ul {
+  margin: 0;
+  padding: 8px 10px 10px 22px;
+}
+
+.sira-gestion-estado li {
+  margin: 5px 0;
+  color: var(--gestion-texto);
+  font-size: 0.83rem;
+  font-weight: 800;
+  line-height: 1.25;
+}
+
+.sira-gestion-estado li small {
+  display: block;
+  margin-top: 2px;
+  color: var(--gestion-texto-suave);
+  font-size: 0.76rem;
+  font-weight: 700;
+}
+
+.sira-gestion-sin-datos {
+  margin: 0;
+  padding: 9px 10px;
+  color: #7b8ca0;
+  font-size: 0.8rem;
+  font-weight: 750;
+  font-style: italic;
+}
+
+@media (max-width: 1100px) {
+  .sira-gestion-semana {
+    grid-template-columns: repeat(5, minmax(260px, 1fr));
+  }
+}
+
+@media (max-width: 760px) {
+  .sira-gestion-semana {
+    display: flex;
+    gap: 14px;
+    overflow-x: auto;
+  }
+
+  .sira-gestion-dia {
+    flex: 0 0 82%;
+  }
+}
+/* Ajuste ancho de filtros Si.R.A. Gestión */
+#sira-gestion .filtros-sira-gestion {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(220px, 240px));
+  gap: 16px;
+  align-items: end;
+  justify-content: start;
+}
+
+#sira-gestion .filtros-sira-gestion .campo-filtro-gestion {
+  width: 100%;
+}
+
+#sira-gestion .filtros-sira-gestion input[type="date"],
+#sira-gestion .filtros-sira-gestion select {
+  width: 100%;
+}
+
+@media (max-width: 850px) {
+  #sira-gestion .filtros-sira-gestion {
+    grid-template-columns: 1fr;
+  }
+}

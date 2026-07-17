@@ -144,11 +144,12 @@
             <p>Acceso y seguimiento de informes pedagógicos institucionales.</p>
           </a>
 
-          <a class="tarjeta tarjeta-enlace" href="#accesos-institucionales">
-            <i class="fa-solid fa-link"></i>
-            <h3>Accesos Institucionales</h3>
+          <a class="tarjeta tarjeta-enlace" href="#sira-gestion">
+            <i class="fa-solid fa-user-check"></i>
+            <h3>Si.R.A.</h3>
             <p>
-              Enlaces útiles para la gestión escolar y documentación de trabajo.
+              Consulta institucional de asistencias registradas en espacios de
+              Taller y Educación Física.
             </p>
           </a>
         </div>
@@ -691,18 +692,63 @@
         </a>
       </section>
 
-      <section class="grupo seccion-destino" id="accesos-institucionales">
-        <h2>Accesos Institucionales</h2>
+      <section class="grupo seccion-destino" id="sira-gestion">
+        <h2>Si.R.A. - Sistema de Registro de Asistencia</h2>
 
-        <div class="panel-info">
-          <i class="fa-solid fa-link"></i>
+        <div class="panel-info panel-gestion-listado">
+          <i class="fa-solid fa-user-check"></i>
 
-          <div>
-            <h3>Enlaces útiles de gestión</h3>
+          <div class="contenido-panel-gestion">
+            <h3>Consulta de asistencias</h3>
+
             <p>
-              Accesos directos a herramientas, carpetas, planillas y recursos
-              utilizados por los equipos de gestión institucional.
+              Consultá las asistencias registradas por docentes en espacios de
+              Taller y Educación Física. Seleccioná el tipo, el curso y una
+              fecha de inicio para ver la semana correspondiente de lunes a
+              viernes.
             </p>
+
+            <div class="filtros-gestion filtros-sira-gestion">
+              <div class="campo-filtro-gestion">
+                <label for="tipoSiraGestion">Tipo de asistencia</label>
+
+                <select id="tipoSiraGestion">
+                  <option value="">Seleccionar tipo</option>
+                  <option value="TALLER">Taller</option>
+                  <option value="EDUCACION_FISICA">Educación Física</option>
+                </select>
+              </div>
+
+              <div class="campo-filtro-gestion">
+                <label for="cursoSiraGestion">Curso</label>
+
+                <select id="cursoSiraGestion">
+                  <option value="">Seleccionar curso</option>
+                </select>
+              </div>
+
+              <div class="campo-filtro-gestion">
+                <label for="fechaInicioSiraGestion">Fecha de inicio</label>
+
+                <input id="fechaInicioSiraGestion" type="date" />
+              </div>
+            </div>
+
+            <div class="acciones-gestion">
+              <button class="btn-gestion" id="btnVerSiraGestion" type="button">
+                <i class="fa-solid fa-table-list"></i>
+                Ver parte semanal
+              </button>
+            </div>
+
+            <div id="vistaSiraGestion" class="vista-gestion">
+              <p class="mensaje-gestion">
+                Seleccioná el tipo de asistencia, el curso y la fecha de inicio
+                para consultar el parte semanal.
+              </p>
+            </div>
+
+            <p id="mensajeSiraGestion" class="mensaje-gestion"></p>
           </div>
         </div>
 
@@ -725,6 +771,7 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script type="module" src="../assets/js/proteger-portal.js"></script>
     <script type="module" src="../assets/js/gestion.js"></script>
+    <script type="module" src="../assets/js/sira-gestion.js"></script>
     <script type="module" src="../assets/js/pizarra-horarios-admin.js"></script>
 
     <script>
