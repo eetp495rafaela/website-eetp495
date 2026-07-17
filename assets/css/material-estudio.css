@@ -301,3 +301,9 @@
     padding: 12px 14px;
   }
 }
+.tabla-documentos-vacia {
+  color: #334155 !important;
+  font-weight: 700;
+  text-align: center;
+  padding: 28px 20px;
+}
