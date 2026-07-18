@@ -176,11 +176,13 @@ async function obtenerAlumnosCursando() {
     query(
       collection(db, "usuarios"),
       where("rol", "==", "ALUMNO"),
+      where("estado", "==", "ACTIVO"),
       where("tipoVinculo", "==", "CURSANDO"),
     ),
     query(
       collection(db, "usuarios"),
       where("rol", "==", "ALUMNO"),
+      where("estado", "==", "ACTIVO"),
       where("situacionRevista", "==", "CURSANDO"),
     ),
   ];
