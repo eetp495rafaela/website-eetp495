@@ -1873,17 +1873,50 @@
         <h2>Accesos Recientes</h2>
 
         <div class="panel-info">
-          <p>
-            Más adelante se podrá consultar la actividad de ingreso de usuarios
-            autorizados.
-          </p>
+          <div class="encabezado-listado">
+            <div>
+              <h3>Últimos ingresos al Portal Institucional</h3>
 
-          <div class="acciones">
-            <button class="btn-accion" type="button">
-              <i class="fa-solid fa-list-check"></i>
+              <p>
+                Consultá el último ingreso registrado de cada usuario
+                autorizado, ordenado desde el más reciente.
+              </p>
+            </div>
+
+            <button
+              class="btn-accion"
+              id="btnVerAccesosRecientes"
+              type="button"
+            >
+              <i class="fa-solid fa-clock-rotate-left"></i>
               Ver actividad
             </button>
           </div>
+
+          <div class="tabla-contenedor">
+            <table class="tabla-usuarios tabla-accesos-recientes">
+              <thead>
+                <tr>
+                  <th>Nombre completo</th>
+                  <th>Correo</th>
+                  <th>Rol</th>
+                  <th>Fecha</th>
+                  <th>Hora</th>
+                </tr>
+              </thead>
+
+              <tbody id="cuerpoTablaAccesosRecientes">
+                <tr>
+                  <td colspan="5" class="tabla-vacia">
+                    Todavía no se consultaron los accesos. Presioná “Ver
+                    actividad” para cargarlos.
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <p id="mensajeAccesosRecientes" class="mensaje-formulario"></p>
         </div>
 
         <a class="btn-volver" href="#inicio">
@@ -2289,6 +2322,10 @@
     <script type="module" src="../assets/js/horarios-admin.js"></script>
     <script type="module" src="../assets/js/backup-admin.js"></script>
     <script type="module" src="../assets/js/pizarra-horarios-admin.js"></script>
+    <script
+      type="module"
+      src="../assets/js/accesos-recientes-admin.js"
+    ></script>
 
     <script>
       const btnArriba = document.getElementById("btnArriba");
