@@ -449,6 +449,83 @@ function renderizarUsuarios(usuarios) {
   mostrarMensajeUsuarios(`${usuarios.length} usuario(s) mostrado(s).`, "ok");
 }
 
+async function darDeBajaEstudiante(estudiante) {
+  const correo = normalizarCorreo(estudiante.correo || estudiante.id);
+
+  if (!correo) {
+    await Swal.fire({
+      title: "No se pudo identificar al estudiante",
+      text: "El estudiante no tiene correo asociado.",
+      icon: "error",
+      confirmButtonText: "Aceptar",
+    });
+
+    return;
+  }
+
+  const nombre = estudiante.nombreCompleto || correo;
+  const cursoActual = estudiante.cursoNombre || "Sin curso asignado";
+
+  const confirmacion = await Swal.fire({
+    title: "¿Dar de baja al estudiante?",
+    html: `
+      <p><strong>${escaparHtml(nombre)}</strong></p>
+      <p>${escaparHtml(correo)}</p>
+      <p>Curso actual: <strong>${escaparHtml(cursoActual)}</strong></p>
+      <hr>
+      <p>
+        El estudiante quedará inactivo, se quitará de su curso y no podrá
+        acceder al portal Alumno.
+      </p>
+      <p><strong>Esta acción no elimina registros históricos.</strong></p>
+    `,
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonText: "Sí, dar de baja",
+    cancelButtonText: "Cancelar",
+    confirmButtonColor: "#b42318",
+    reverseButtons: true,
+    focusCancel: true,
+  });
+
+  if (!confirmacion.isConfirmed) return;
+
+  try {
+    await updateDoc(doc(db, "usuarios", correo), {
+      estado: "INACTIVO",
+      tipoVinculo: "BAJA",
+
+      cursoId: null,
+      cursoAnio: null,
+      cursoDivision: null,
+      cursoNombre: null,
+      grupoTaller: null,
+
+      fechaBaja: serverTimestamp(),
+      actualizadoEn: serverTimestamp(),
+      actualizadoPor: normalizarCorreo(usuarioSoporte?.email),
+    });
+
+    await Swal.fire({
+      title: "Estudiante dado de baja",
+      text: "Ya no aparecerá en el curso ni podrá acceder al portal Alumno.",
+      icon: "success",
+      confirmButtonText: "Aceptar",
+    });
+
+    await cargarEstudiantes();
+  } catch (error) {
+    console.error("Error al dar de baja al estudiante:", error);
+
+    await Swal.fire({
+      title: "No se pudo dar de baja",
+      text: "Revisá conexión o permisos de Firebase.",
+      icon: "error",
+      confirmButtonText: "Aceptar",
+    });
+  }
+}
+
 function renderizarEstudiantes(estudiantes) {
   cuerpoTablaEstudiantes.innerHTML = "";
 
@@ -495,6 +572,26 @@ function renderizarEstudiantes(estudiantes) {
     });
 
     contenedorAcciones.appendChild(btnAsignarCurso);
+
+    const estaActivo =
+      String(estudiante.estado || "")
+        .trim()
+        .toUpperCase() === "ACTIVO";
+
+    if (estaActivo) {
+      const btnDarDeBaja = document.createElement("button");
+      btnDarDeBaja.type = "button";
+      btnDarDeBaja.className = "btn-tabla btn-desactivar";
+      btnDarDeBaja.innerHTML =
+        '<i class="fa-solid fa-user-slash"></i> Dar de baja';
+
+      btnDarDeBaja.addEventListener("click", () => {
+        darDeBajaEstudiante(estudiante);
+      });
+
+      contenedorAcciones.appendChild(btnDarDeBaja);
+    }
+
     celdaAcciones.appendChild(contenedorAcciones);
 
     fila.appendChild(celdaAcciones);
