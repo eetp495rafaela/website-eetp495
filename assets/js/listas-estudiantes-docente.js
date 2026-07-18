@@ -2,12 +2,12 @@ import {
   initializeApp,
   getApp,
   getApps,
-} from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
+} from "https://www.gstatic.com/firebasejs/12.15.0/firebase-app.js";
 
 import {
   getAuth,
   onAuthStateChanged,
-} from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
+} from "https://www.gstatic.com/firebasejs/12.15.0/firebase-auth.js";
 
 import {
   getFirestore,
@@ -15,7 +15,7 @@ import {
   getDocs,
   query,
   where,
-} from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+} from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyAARktrOpu-Rz683q4RxTK2h1nmkUaUbuA",
