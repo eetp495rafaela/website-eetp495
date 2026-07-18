@@ -10,6 +10,8 @@ import {
   getFirestore,
   doc,
   getDoc,
+  setDoc,
+  serverTimestamp,
 } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -40,6 +42,62 @@ function normalizarCorreo(correo) {
   return String(correo || "")
     .trim()
     .toLowerCase();
+}
+
+async function registrarUltimoIngreso(user, perfil, correo, rolUsuario) {
+  const marcaSesion = String(user.metadata?.lastSignInTime || "").trim();
+  const claveRegistro = `portal_ultimo_ingreso_${user.uid}`;
+
+  try {
+    const sesionYaRegistrada =
+      marcaSesion && localStorage.getItem(claveRegistro) === marcaSesion;
+
+    if (sesionYaRegistrada) {
+      return;
+    }
+  } catch (error) {
+    console.warn(
+      "No se pudo comprobar el registro local del último ingreso:",
+      error,
+    );
+  }
+
+  try {
+    const referenciaAcceso = doc(db, "accesos_recientes", user.uid);
+
+    await setDoc(
+      referenciaAcceso,
+      {
+        uid: user.uid,
+        nombreCompleto: perfil.nombreCompleto || user.displayName || correo,
+        correo,
+        rol: rolUsuario,
+        ultimoIngreso: serverTimestamp(),
+      },
+      {
+        merge: true,
+      },
+    );
+
+    if (marcaSesion) {
+      try {
+        localStorage.setItem(claveRegistro, marcaSesion);
+      } catch (error) {
+        console.warn(
+          "No se pudo guardar localmente la sesión registrada:",
+          error,
+        );
+      }
+    }
+
+    console.log("Último ingreso registrado:", correo);
+  } catch (error) {
+    /*
+     * El registro de actividad es complementario.
+     * Si falla, el usuario igualmente puede utilizar el portal.
+     */
+    console.warn("No se pudo registrar el último ingreso:", error);
+  }
 }
 
 function obtenerRolesPermitidos() {
@@ -194,6 +252,9 @@ onAuthStateChanged(auth, async (user) => {
       volverAlLogin("Tu cuenta no tiene permiso para este portal.");
       return;
     }
+
+    await registrarUltimoIngreso(user, perfil, correo, rolUsuario);
+
     window.portalUsuario = {
       correo,
       nombreCompleto: perfil.nombreCompleto || user.displayName || correo,
