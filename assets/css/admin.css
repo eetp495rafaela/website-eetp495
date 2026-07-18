@@ -135,7 +135,7 @@ body {
 
 .tarjeta {
   display: flex;
-  min-height: 220px;
+  min-height: 185px;
   padding: 28px 22px;
   border: 1px solid var(--borde);
   border-radius: 18px;
