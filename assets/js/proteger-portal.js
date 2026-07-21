@@ -122,7 +122,9 @@ function normalizarValorComparacion(texto) {
     .trim()
     .toUpperCase()
     .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "");
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[_-]+/g, " ")
+    .replace(/\s+/g, " ");
 }
 
 function ocultarElementoPortalAlumno(selector) {
@@ -146,13 +148,11 @@ function ajustarVistaPortalAlumno(perfil, rolUsuario) {
 
   if (!esCursadaCompleta) return;
 
-  // Tarjetas del inicio
   ocultarElementoPortalAlumno("#tarjetaHorariosAlumno");
   ocultarElementoPortalAlumno('a[href="#horarios"]');
   ocultarElementoPortalAlumno("#tarjetaMisDocentesAlumno");
   ocultarElementoPortalAlumno('a[href="#mis-docentes-alumno"]');
 
-  // Secciones completas
   ocultarElementoPortalAlumno("#horarios");
   ocultarElementoPortalAlumno("#mis-docentes-alumno");
 
