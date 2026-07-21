@@ -117,6 +117,28 @@ function obtenerRolesPermitidos() {
   return rolUnico ? [rolUnico] : [];
 }
 
+function normalizarValorComparacion(texto) {
+  return String(texto || "")
+    .trim()
+    .toUpperCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "");
+}
+
+function ajustarVistaPortalAlumno(perfil, rolUsuario) {
+  if (rolUsuario !== "ALUMNO") return;
+
+  const situacionRevista = normalizarValorComparacion(perfil.situacionRevista);
+
+  if (situacionRevista !== "CURSADA COMPLETA") return;
+
+  document.getElementById("tarjetaHorariosAlumno")?.remove();
+  document.getElementById("tarjetaMisDocentesAlumno")?.remove();
+
+  document.getElementById("horarios")?.remove();
+  document.getElementById("mis-docentes-alumno")?.remove();
+}
+
 function mostrarDatosUsuario(perfil, user, correo, rolUsuario) {
   const elementoNombre = document.querySelector("[data-nombre-usuario]");
   const elementoRol = document.querySelector("[data-rol-usuario]");
@@ -255,12 +277,15 @@ onAuthStateChanged(auth, async (user) => {
 
     await registrarUltimoIngreso(user, perfil, correo, rolUsuario);
 
+    ajustarVistaPortalAlumno(perfil, rolUsuario);
+
     window.portalUsuario = {
       correo,
       nombreCompleto: perfil.nombreCompleto || user.displayName || correo,
       rol: rolUsuario,
       estado,
       tipoVinculo: perfil.tipoVinculo || "",
+      situacionRevista: perfil.situacionRevista || "",
     };
 
     window.dispatchEvent(
