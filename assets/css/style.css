@@ -2119,3 +2119,112 @@ html {
     font-size: 0.82rem !important;
   }
 }
+/* =====================================================
+   PLAN DE ESTUDIOS - TÍTULO DESTACADO
+===================================================== */
+
+.plan-final-destacado {
+  position: relative;
+  margin: 10px auto 55px;
+  padding: 46px 52px;
+
+  background:
+    linear-gradient(135deg, rgba(11, 79, 156, 0.96), rgba(8, 55, 109, 0.96)),
+    #08376d;
+
+  color: #ffffff;
+  border-radius: 26px;
+  overflow: hidden;
+
+  box-shadow: 0 22px 55px rgba(8, 55, 109, 0.28);
+}
+
+.plan-final-destacado::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+
+  background:
+    radial-gradient(
+      circle at top right,
+      rgba(255, 213, 74, 0.22),
+      transparent 34%
+    ),
+    radial-gradient(
+      circle at bottom left,
+      rgba(255, 255, 255, 0.12),
+      transparent 32%
+    );
+
+  pointer-events: none;
+}
+
+.plan-final-destacado .plan-final-icono {
+  position: relative;
+  z-index: 1;
+
+  width: 110px;
+  height: 110px;
+
+  background: #ffffff;
+  color: var(--azul);
+  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.18);
+}
+
+.plan-final-destacado .plan-final-icono i {
+  color: var(--azul);
+  font-size: 3rem;
+}
+
+.plan-final-destacado .plan-final-texto {
+  position: relative;
+  z-index: 1;
+}
+
+.plan-final-destacado .plan-final-texto span {
+  color: #ffd54a;
+  font-size: 0.92rem;
+  letter-spacing: 2px;
+}
+
+.plan-final-destacado .plan-final-texto h3 {
+  color: #ffffff;
+  font-size: 2.25rem;
+  line-height: 1.18;
+  margin-bottom: 18px;
+}
+
+.plan-final-destacado .plan-final-texto p {
+  max-width: 900px;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 1.08rem;
+  line-height: 1.85;
+}
+
+.plan-final-destacado .plan-final-texto strong {
+  color: #ffffff;
+}
+
+@media (max-width: 768px) {
+  .plan-final-destacado {
+    margin: 0 auto 40px;
+    padding: 36px 26px;
+  }
+
+  .plan-final-destacado .plan-final-icono {
+    width: 86px;
+    height: 86px;
+  }
+
+  .plan-final-destacado .plan-final-icono i {
+    font-size: 2.25rem;
+  }
+
+  .plan-final-destacado .plan-final-texto h3 {
+    font-size: 1.65rem;
+  }
+
+  .plan-final-destacado .plan-final-texto p {
+    font-size: 0.98rem;
+  }
+}
