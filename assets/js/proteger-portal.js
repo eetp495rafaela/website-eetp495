@@ -125,18 +125,38 @@ function normalizarValorComparacion(texto) {
     .replace(/[\u0300-\u036f]/g, "");
 }
 
+function ocultarElementoPortalAlumno(selector) {
+  const elemento = document.querySelector(selector);
+
+  if (!elemento) return;
+
+  elemento.style.display = "none";
+  elemento.setAttribute("hidden", "true");
+}
+
 function ajustarVistaPortalAlumno(perfil, rolUsuario) {
   if (rolUsuario !== "ALUMNO") return;
 
   const situacionRevista = normalizarValorComparacion(perfil.situacionRevista);
+  const tipoVinculo = normalizarValorComparacion(perfil.tipoVinculo);
 
-  if (situacionRevista !== "CURSADA COMPLETA") return;
+  const esCursadaCompleta =
+    situacionRevista === "CURSADA COMPLETA" ||
+    tipoVinculo === "CURSADA COMPLETA";
 
-  document.getElementById("tarjetaHorariosAlumno")?.remove();
-  document.getElementById("tarjetaMisDocentesAlumno")?.remove();
+  if (!esCursadaCompleta) return;
 
-  document.getElementById("horarios")?.remove();
-  document.getElementById("mis-docentes-alumno")?.remove();
+  // Tarjetas del inicio
+  ocultarElementoPortalAlumno("#tarjetaHorariosAlumno");
+  ocultarElementoPortalAlumno('a[href="#horarios"]');
+  ocultarElementoPortalAlumno("#tarjetaMisDocentesAlumno");
+  ocultarElementoPortalAlumno('a[href="#mis-docentes-alumno"]');
+
+  // Secciones completas
+  ocultarElementoPortalAlumno("#horarios");
+  ocultarElementoPortalAlumno("#mis-docentes-alumno");
+
+  console.log("Vista Alumno ajustada para Cursada Completa.");
 }
 
 function mostrarDatosUsuario(perfil, user, correo, rolUsuario) {
