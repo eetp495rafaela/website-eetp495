@@ -2546,3 +2546,36 @@ body {
 .btn-mesa-estado-gestion:hover {
   background: #007e65;
 }
+/* =========================
+   DOCENTES - FILTROS
+   ========================= */
+
+.filtros-docentes-gestion {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  align-items: end;
+}
+
+.filtros-docentes-gestion .campo-busqueda-gestion {
+  grid-column: 1 / -1;
+}
+
+.filtros-docentes-gestion .campo-filtro-gestion {
+  min-width: 0;
+}
+
+.filtros-docentes-gestion input,
+.filtros-docentes-gestion select {
+  width: 100%;
+}
+
+@media (max-width: 768px) {
+  .filtros-docentes-gestion {
+    grid-template-columns: 1fr;
+  }
+
+  .filtros-docentes-gestion .campo-busqueda-gestion {
+    grid-column: auto;
+  }
+}
