@@ -364,14 +364,12 @@ function actualizarCampoCursoReferente() {
     return;
   }
 
-  const requiereCurso = cargoRequiereCursoReferente(referenteCargo.value);
+  const esPreceptor = referenteCargo.value === "PRECEPTOR";
 
-  campoCursoReferenteInstitucional.hidden = !requiereCurso;
+  campoCursoReferenteInstitucional.hidden = !esPreceptor;
+  referenteCurso.required = esPreceptor;
 
-  referenteCurso.required = requiereCurso;
-  referenteCurso.disabled = !requiereCurso;
-
-  if (!requiereCurso) {
+  if (!esPreceptor) {
     referenteCurso.value = "";
   }
 }
@@ -385,8 +383,6 @@ function restablecerFormularioReferente() {
 
   campoCursoReferenteInstitucional.hidden = true;
   referenteCurso.required = false;
-  referenteCurso.disabled = true;
-  referenteCurso.value = "";
 
   referentePersona.innerHTML = `
     <option value="">
@@ -506,7 +502,7 @@ async function guardarReferenteInstitucional(event) {
     return;
   }
 
-  const esPreceptor = cargoRequiereCursoReferente(cargo);
+  const esPreceptor = cargo === "PRECEPTOR";
 
   const cursoId = esPreceptor ? String(referenteCurso.value || "").trim() : "";
 
