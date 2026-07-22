@@ -139,6 +139,16 @@
             <p>Carga y consulta de bloques horarios de Educación Física.</p>
           </a>
 
+          <a class="tarjeta tarjeta-enlace" href="#galeria-institucional-admin">
+            <i class="fa-solid fa-images"></i>
+
+            <h3>Galería Institucional</h3>
+
+            <p>
+              Revisión y publicación de fotografías cargadas en Google Drive.
+            </p>
+          </a>
+
           <a class="tarjeta tarjeta-enlace" href="#configuracion">
             <i class="fa-solid fa-gears"></i>
             <h3>Configuración del Portal</h3>
@@ -1802,6 +1812,112 @@
         </a>
       </section>
 
+      <!-- =====================================================
+     GALERÍA INSTITUCIONAL
+===================================================== -->
+
+      <section class="grupo seccion-destino" id="galeria-institucional-admin">
+        <h2>Galería Institucional</h2>
+
+        <div class="panel-info">
+          <div class="encabezado-listado">
+            <div>
+              <h3>Publicación de fotografías</h3>
+
+              <p>
+                Cargá las fotografías directamente en las carpetas
+                correspondientes de Google Drive y luego utilizá este panel para
+                revisar y publicar únicamente las imágenes nuevas.
+              </p>
+            </div>
+          </div>
+
+          <div class="acciones">
+            <button class="btn-accion" id="btnSincronizarGaleria" type="button">
+              <i class="fa-solid fa-cloud-arrow-down"></i>
+              Revisar y publicar fotografías nuevas
+            </button>
+          </div>
+
+          <p id="mensajeSincronizacionGaleria" class="mensaje-formulario"></p>
+
+          <div class="separador-usuarios"></div>
+
+          <div class="encabezado-listado">
+            <div>
+              <h3>Subgalerías institucionales</h3>
+
+              <p>
+                El sistema revisará cada una de estas categorías cuando se
+                ejecute la publicación.
+              </p>
+            </div>
+          </div>
+
+          <div class="tabla-contenedor">
+            <table class="tabla-usuarios tabla-galeria-admin">
+              <thead>
+                <tr>
+                  <th>Subgalería</th>
+                  <th>Carpeta de Google Drive</th>
+                  <th>Estado</th>
+                  <th>Fotografías nuevas</th>
+                </tr>
+              </thead>
+
+              <tbody id="cuerpoTablaGaleriaAdmin">
+                <tr data-categoria="01-HISTORIA-EDIFICIO">
+                  <td>Historia y Edificio</td>
+                  <td>01-HISTORIA-EDIFICIO</td>
+                  <td class="estado-galeria-admin">Sin revisar</td>
+                  <td class="cantidad-galeria-admin">—</td>
+                </tr>
+
+                <tr data-categoria="02-TALLERES">
+                  <td>Talleres</td>
+                  <td>02-TALLERES</td>
+                  <td class="estado-galeria-admin">Sin revisar</td>
+                  <td class="cantidad-galeria-admin">—</td>
+                </tr>
+
+                <tr data-categoria="03-AULAS">
+                  <td>Aulas</td>
+                  <td>03-AULAS</td>
+                  <td class="estado-galeria-admin">Sin revisar</td>
+                  <td class="cantidad-galeria-admin">—</td>
+                </tr>
+
+                <tr data-categoria="04-EXPOS-FERIAS-CONCURSOS">
+                  <td>Exposiciones, Ferias y Concursos</td>
+                  <td>04-EXPOS-FERIAS-CONCURSOS</td>
+                  <td class="estado-galeria-admin">Sin revisar</td>
+                  <td class="cantidad-galeria-admin">—</td>
+                </tr>
+
+                <tr data-categoria="05-ACTOS-ESCOLARES">
+                  <td>Actos Escolares</td>
+                  <td>05-ACTOS-ESCOLARES</td>
+                  <td class="estado-galeria-admin">Sin revisar</td>
+                  <td class="cantidad-galeria-admin">—</td>
+                </tr>
+
+                <tr data-categoria="06-ACTIVIDADES-VARIAS">
+                  <td>Actividades Varias</td>
+                  <td>06-ACTIVIDADES-VARIAS</td>
+                  <td class="estado-galeria-admin">Sin revisar</td>
+                  <td class="cantidad-galeria-admin">—</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <a class="btn-volver" href="#inicio">
+          <i class="fa-solid fa-arrow-up"></i>
+          Volver al inicio
+        </a>
+      </section>
+
       <section class="grupo seccion-destino" id="configuracion">
         <h2>Configuración del Portal</h2>
 
@@ -2322,6 +2438,7 @@
     <script type="module" src="../assets/js/sira-admin.js"></script>
     <script type="module" src="../assets/js/horarios-admin.js"></script>
     <script type="module" src="../assets/js/backup-admin.js"></script>
+    <script type="module" src="../assets/js/galeria-admin.js"></script>
     <script type="module" src="../assets/js/pizarra-horarios-admin.js"></script>
     <script
       type="module"
