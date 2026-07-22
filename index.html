@@ -528,10 +528,10 @@
      GALERÍA INSTITUCIONAL
 ===================================================== -->
 
-      <section class="galeria" id="galeria">
+      <section class="galeria">
         <div class="contenedor">
-          <div class="encabezado-seccion">
-            <span>Nuestra escuela</span>
+          <div class="encabezado-seccion" id="galeria">
+            <span>Nuestra escuela en imágenes</span>
 
             <h2>Galería Institucional</h2>
 
@@ -543,48 +543,95 @@
           </div>
 
           <div class="galeria-grid">
-            <figure class="foto">
-              <img src="assets/img/escuela.jpg" alt="Frente de la escuela" />
+            <figure
+              class="foto galeria-categoria"
+              data-galeria="01-HISTORIA-EDIFICIO"
+              data-titulo="Historia y Edificio"
+              role="button"
+              tabindex="0"
+              aria-label="Abrir galería Historia y Edificio"
+            >
+              <img
+                src="assets/img/escuela.jpg"
+                alt="Historia y edificio de la escuela"
+              />
 
-              <figcaption>Frente de la Escuela</figcaption>
+              <figcaption>Historia y Edificio</figcaption>
             </figure>
 
-            <figure class="foto">
-              <img src="assets/img/talleres.jpg" alt="Talleres" />
+            <figure
+              class="foto galeria-categoria"
+              data-galeria="02-TALLERES"
+              data-titulo="Talleres"
+              role="button"
+              tabindex="0"
+              aria-label="Abrir galería Talleres"
+            >
+              <img src="assets/img/talleres.jpg" alt="Talleres de la escuela" />
 
               <figcaption>Talleres</figcaption>
             </figure>
 
-            <figure class="foto">
-              <img src="assets/img/laboratorio.jpg" alt="Laboratorio" />
-
-              <figcaption>Laboratorio</figcaption>
-            </figure>
-
-            <figure class="foto">
-              <img src="assets/img/aula.jpg" alt="Aulas" />
+            <figure
+              class="foto galeria-categoria"
+              data-galeria="03-AULAS"
+              data-titulo="Aulas"
+              role="button"
+              tabindex="0"
+              aria-label="Abrir galería Aulas"
+            >
+              <img src="assets/img/aula.jpg" alt="Aulas de la escuela" />
 
               <figcaption>Aulas</figcaption>
             </figure>
 
-            <figure class="foto">
-              <img src="assets/img/actos.jpg" alt="Actos escolares" />
+            <figure
+              class="foto galeria-categoria"
+              data-galeria="04-EXPOS-FERIAS-CONCURSOS"
+              data-titulo="Exposiciones, Ferias y Concursos"
+              role="button"
+              tabindex="0"
+              aria-label="Abrir galería Exposiciones, Ferias y Concursos"
+            >
+              <img
+                src="assets/img/laboratorio.jpg"
+                alt="Participación en exposiciones, ferias y concursos"
+              />
 
-              <figcaption>Actos Institucionales</figcaption>
+              <figcaption>Exposiciones, Ferias y Concursos</figcaption>
             </figure>
 
-            <figure class="foto">
-              <img src="assets/img/patio.jpg" alt="Patio" />
+            <figure
+              class="foto galeria-categoria"
+              data-galeria="05-ACTOS-ESCOLARES"
+              data-titulo="Actos Escolares"
+              role="button"
+              tabindex="0"
+              aria-label="Abrir galería Actos Escolares"
+            >
+              <img src="assets/img/actos.jpg" alt="Actos escolares" />
 
-              <figcaption>Patio y espacios comunes</figcaption>
+              <figcaption>Actos Escolares</figcaption>
+            </figure>
+
+            <figure
+              class="foto galeria-categoria"
+              data-galeria="06-ACTIVIDADES-VARIAS"
+              data-titulo="Actividades Varias"
+              role="button"
+              tabindex="0"
+              aria-label="Abrir galería Actividades Varias"
+            >
+              <img
+                src="assets/img/patio.jpg"
+                alt="Actividades institucionales variadas"
+              />
+
+              <figcaption>Actividades Varias</figcaption>
             </figure>
           </div>
         </div>
       </section>
-
-      <!-- =====================================================
-     NOVEDADES
-===================================================== -->
 
       <section class="novedades" id="novedades">
         <div class="contenedor">
@@ -702,13 +749,53 @@
         </div>
       </section>
     </main>
-    <!-- =====================================================
-     LIGHTBOX GALERÍA
-===================================================== -->
-    <div class="lightbox" id="lightbox">
-      <span class="cerrar">&times;</span>
 
-      <img id="imagenLightbox" src="" alt="Imagen ampliada" />
+    <div
+      class="lightbox"
+      id="lightbox"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="tituloLightbox"
+      aria-hidden="true"
+    >
+      <button
+        class="cerrar"
+        id="cerrarLightbox"
+        type="button"
+        aria-label="Cerrar galería"
+      >
+        &times;
+      </button>
+
+      <div class="visor-galeria">
+        <div class="visor-encabezado">
+          <h3 id="tituloLightbox">Galería Institucional</h3>
+
+          <span id="contadorLightbox">1 de 1</span>
+        </div>
+
+        <div class="visor-imagen-contenedor">
+          <button
+            class="visor-flecha visor-anterior"
+            id="btnImagenAnterior"
+            type="button"
+            aria-label="Fotografía anterior"
+          >
+            <i class="bi bi-chevron-left"></i>
+          </button>
+
+          <img id="imagenLightbox" src="" alt="Imagen de la galería" />
+
+          <button
+            class="visor-flecha visor-siguiente"
+            id="btnImagenSiguiente"
+            type="button"
+            aria-label="Fotografía siguiente"
+          >
+            <i class="bi bi-chevron-right"></i>
+          </button>
+        </div>
+      </div>
     </div>
     <section class="contacto" id="contacto">
       <div class="contenedor">
@@ -900,37 +987,8 @@
           btnArriba.classList.remove("mostrar");
         }
       });
-
-      const lightbox = document.getElementById("lightbox");
-      const imagenLightbox = document.getElementById("imagenLightbox");
-      const cerrar = document.querySelector(".cerrar");
-
-      document.querySelectorAll(".foto").forEach((foto) => {
-        foto.addEventListener("click", () => {
-          const imagen = foto.querySelector("img");
-
-          imagenLightbox.src = imagen.src;
-          imagenLightbox.alt = imagen.alt;
-
-          lightbox.classList.add("activo");
-        });
-      });
-
-      cerrar.addEventListener("click", () => {
-        lightbox.classList.remove("activo");
-      });
-
-      lightbox.addEventListener("click", (e) => {
-        if (e.target === lightbox) {
-          lightbox.classList.remove("activo");
-        }
-      });
-
-      document.addEventListener("keydown", (e) => {
-        if (e.key === "Escape") {
-          lightbox.classList.remove("activo");
-        }
-      });
     </script>
+
+    <script src="assets/js/galeria.js"></script>
   </body>
 </html>
