@@ -112,9 +112,10 @@ function normalizarCorreoReferente(correo) {
 
 function textoCargoReferente(cargo) {
   const textos = {
-    DIRECTORA: "Directora",
-    VICE_DIRECTORA: "Vice Directora",
-    PRO_SECRETARIO: "Pro Secretario",
+    DIRECTORA: "Director/a",
+    VICE_DIRECTORA: "Vice Director/a",
+    SECRETARIO: "Secretario/a",
+    PRO_SECRETARIO: "Pro Secretario/a",
     PRECEPTOR: "Preceptor/a",
   };
 
@@ -131,6 +132,7 @@ function obtenerRolParaCargo(cargo) {
   const roles = {
     DIRECTORA: "DIRECCION",
     VICE_DIRECTORA: "DIRECCION",
+    SECRETARIO: "SECRETARIA",
     PRO_SECRETARIO: "SECRETARIA",
     PRECEPTOR: "PRECEPTORIA",
   };
@@ -918,8 +920,9 @@ async function cargarReferentesInstitucionales() {
     const ordenCargos = {
       DIRECTORA: 1,
       VICE_DIRECTORA: 2,
-      PRO_SECRETARIO: 3,
-      PRECEPTOR: 4,
+      SECRETARIO: 3,
+      PRO_SECRETARIO: 4,
+      PRECEPTOR: 5,
     };
 
     referentesInstitucionalesCargados.sort((a, b) => {
