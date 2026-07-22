@@ -2522,6 +2522,60 @@ function cargarEspaciosFiltroDocentesGestion(asignaciones) {
   }
 }
 
+function actualizarFiltrosRelacionadosDocentesGestion(origen = "") {
+  const obtenerAsignacionesPorCurso = (curso) => {
+    if (!curso) {
+      return asignacionesDocentesGestionCargadas;
+    }
+
+    return asignacionesDocentesGestionCargadas.filter(
+      (asignacion) => obtenerCursoAsignacionGestion(asignacion) === curso,
+    );
+  };
+
+  const obtenerAsignacionesPorEspacio = (espacio) => {
+    if (!espacio) {
+      return asignacionesDocentesGestionCargadas;
+    }
+
+    return asignacionesDocentesGestionCargadas.filter(
+      (asignacion) => obtenerNombreEspacioAsignacion(asignacion) === espacio,
+    );
+  };
+
+  const cursoSeleccionado = String(
+    filtroCursoDocenteGestion?.value || "",
+  ).trim();
+
+  const espacioSeleccionado = String(
+    filtroEspacioDocenteGestion?.value || "",
+  ).trim();
+
+  if (origen === "ESPACIO") {
+    cargarCursosFiltroDocentesGestion(
+      obtenerAsignacionesPorEspacio(espacioSeleccionado),
+    );
+
+    const cursoActual = String(filtroCursoDocenteGestion?.value || "").trim();
+
+    cargarEspaciosFiltroDocentesGestion(
+      obtenerAsignacionesPorCurso(cursoActual),
+    );
+
+    return;
+  }
+
+  cargarEspaciosFiltroDocentesGestion(
+    obtenerAsignacionesPorCurso(cursoSeleccionado),
+  );
+
+  const espacioActual = String(filtroEspacioDocenteGestion?.value || "").trim();
+
+  cargarCursosFiltroDocentesGestion(
+    obtenerAsignacionesPorEspacio(espacioActual),
+  );
+}
+
 function agruparAsignacionesPorDocente(asignaciones) {
   const docentes = new Map();
 
@@ -4361,16 +4415,17 @@ if (buscarDocenteGestion) {
 }
 
 if (filtroCursoDocenteGestion) {
-  filtroCursoDocenteGestion.addEventListener(
-    "change",
-    aplicarFiltrosDocentesGestion,
-  );
+  filtroCursoDocenteGestion.addEventListener("change", () => {
+    actualizarFiltrosRelacionadosDocentesGestion("CURSO");
+    aplicarFiltrosDocentesGestion();
+  });
 }
+
 if (filtroEspacioDocenteGestion) {
-  filtroEspacioDocenteGestion.addEventListener(
-    "change",
-    aplicarFiltrosDocentesGestion,
-  );
+  filtroEspacioDocenteGestion.addEventListener("change", () => {
+    actualizarFiltrosRelacionadosDocentesGestion("ESPACIO");
+    aplicarFiltrosDocentesGestion();
+  });
 }
 
 if (filtroTurnoDocenteGestion) {
