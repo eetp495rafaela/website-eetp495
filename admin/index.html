@@ -86,6 +86,15 @@
             <p>Vinculación de docentes con cursos y espacios curriculares.</p>
           </a>
 
+          <a class="tarjeta tarjeta-enlace" href="#referentes-institucionales">
+            <i class="fa-solid fa-people-roof"></i>
+            <h3>Referentes Institucionales</h3>
+            <p>
+              Alta, edición y asignación de autoridades y preceptorías por
+              curso.
+            </p>
+          </a>
+
           <a class="tarjeta tarjeta-enlace" href="#estudiantes">
             <i class="fa-solid fa-user-graduate"></i>
             <h3>Estudiantes</h3>
@@ -675,6 +684,187 @@
 
           <p id="mensajeAsignaciones" class="mensaje-formulario"></p>
         </div>
+        <a class="btn-volver" href="#inicio">
+          <i class="fa-solid fa-arrow-up"></i>
+          Volver al inicio
+        </a>
+      </section>
+
+      <section class="grupo seccion-destino" id="referentes-institucionales">
+        <h2>Referentes Institucionales</h2>
+
+        <div class="panel-info">
+          <div class="encabezado-listado">
+            <div>
+              <h3>Autoridades y preceptorías</h3>
+
+              <p>
+                Administrá la Directora, Vice Directora, Pro Secretario y las
+                preceptorías correspondientes a cada curso.
+              </p>
+            </div>
+          </div>
+
+          <form
+            id="formReferenteInstitucional"
+            class="formulario-usuario"
+            autocomplete="off"
+          >
+            <input id="referenteInstitucionalId" type="hidden" />
+
+            <div class="form-grid">
+              <div class="campo-formulario">
+                <label for="referenteCargo">Cargo *</label>
+
+                <select id="referenteCargo" required>
+                  <option value="">Seleccionar cargo</option>
+                  <option value="DIRECTORA">Directora</option>
+                  <option value="VICE_DIRECTORA">Vice Directora</option>
+                  <option value="PRO_SECRETARIO">Pro Secretario</option>
+                  <option value="PRECEPTOR">Preceptor/a</option>
+                </select>
+              </div>
+
+              <div class="campo-formulario campo-doble">
+                <label for="referentePersona">Persona *</label>
+
+                <select id="referentePersona" required>
+                  <option value="">Seleccionar primero un cargo</option>
+                </select>
+              </div>
+
+              <div
+                class="campo-formulario"
+                id="campoCursoReferenteInstitucional"
+                hidden
+              >
+                <label for="referenteCurso">Curso *</label>
+
+                <select id="referenteCurso">
+                  <option value="">Seleccionar curso</option>
+                </select>
+              </div>
+
+              <div class="campo-formulario">
+                <label for="referenteEstado">Estado</label>
+
+                <select id="referenteEstado">
+                  <option value="ACTIVO" selected>ACTIVO</option>
+                  <option value="INACTIVO">INACTIVO</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="acciones">
+              <button
+                class="btn-accion"
+                id="btnGuardarReferenteInstitucional"
+                type="submit"
+              >
+                <i class="fa-solid fa-floppy-disk"></i>
+                Guardar referente
+              </button>
+
+              <button
+                class="btn-secundario"
+                id="btnCancelarEdicionReferente"
+                type="button"
+                hidden
+              >
+                Cancelar edición
+              </button>
+            </div>
+
+            <p
+              id="mensajeReferenteInstitucional"
+              class="mensaje-formulario"
+            ></p>
+          </form>
+
+          <div class="separador-usuarios"></div>
+
+          <div class="encabezado-listado">
+            <div>
+              <h3>Referentes registrados</h3>
+
+              <p>
+                Las autoridades tienen alcance institucional. Las preceptorías
+                se vinculan individualmente con cada curso.
+              </p>
+            </div>
+
+            <button
+              class="btn-accion"
+              id="btnVerReferentesInstitucionales"
+              type="button"
+            >
+              <i class="fa-solid fa-people-roof"></i>
+              Ver referentes
+            </button>
+          </div>
+
+          <div class="filtros-usuarios filtros-referentes-institucionales">
+            <div class="campo-filtro">
+              <label for="filtroCargoReferente">Cargo</label>
+
+              <select id="filtroCargoReferente">
+                <option value="">Todos los cargos</option>
+                <option value="DIRECTORA">Directora</option>
+                <option value="VICE_DIRECTORA">Vice Directora</option>
+                <option value="PRO_SECRETARIO">Pro Secretario</option>
+                <option value="PRECEPTOR">Preceptor/a</option>
+              </select>
+            </div>
+
+            <div class="campo-filtro">
+              <label for="filtroCursoReferente">Curso</label>
+
+              <select id="filtroCursoReferente">
+                <option value="">Todos los cursos</option>
+              </select>
+            </div>
+
+            <div class="campo-filtro">
+              <label for="filtroEstadoReferente">Estado</label>
+
+              <select id="filtroEstadoReferente">
+                <option value="">Todos los estados</option>
+                <option value="ACTIVO">ACTIVO</option>
+                <option value="INACTIVO">INACTIVO</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="tabla-contenedor">
+            <table class="tabla-usuarios tabla-referentes-institucionales">
+              <thead>
+                <tr>
+                  <th>Cargo</th>
+                  <th>Apellido y nombre</th>
+                  <th>Correo</th>
+                  <th>Curso / Alcance</th>
+                  <th>Estado</th>
+                  <th>Acciones</th>
+                </tr>
+              </thead>
+
+              <tbody id="cuerpoTablaReferentesInstitucionales">
+                <tr>
+                  <td colspan="6" class="tabla-vacia">
+                    Todavía no se consultaron los referentes. Presioná “Ver
+                    referentes” para cargarlos.
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <p
+            id="mensajeReferentesInstitucionales"
+            class="mensaje-formulario"
+          ></p>
+        </div>
+
         <a class="btn-volver" href="#inicio">
           <i class="fa-solid fa-arrow-up"></i>
           Volver al inicio
@@ -2433,6 +2623,7 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
     <script type="module" src="../assets/js/admin.js"></script>
+    <script type="module" src="../assets/js/referentes-admin.js"></script>
     <script type="module" src="../assets/js/documentacion-admin.js"></script>
     <script type="module" src="../assets/js/sime-admin.js"></script>
     <script type="module" src="../assets/js/sira-admin.js"></script>
