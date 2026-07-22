@@ -992,3 +992,160 @@
     grid-template-columns: 1fr;
   }
 }
+/* =====================================================
+   REFERENTES INSTITUCIONALES - MIS DOCENTES
+===================================================== */
+
+.encabezado-mis-docentes-alumno {
+  margin-bottom: 22px;
+}
+
+.referentes-institucionales-alumno {
+  margin-top: 24px;
+}
+
+.cabecera-referentes-alumno {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.cabecera-referentes-alumno > div {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.etiqueta-referentes-alumno {
+  display: inline-flex;
+  align-items: center;
+  min-height: 30px;
+  padding: 6px 12px;
+  border: 1px solid rgba(20, 228, 212, 0.36);
+  border-radius: 999px;
+  background: rgba(20, 228, 212, 0.14);
+  color: #6ff7eb;
+  font-size: 0.8rem;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.cabecera-referentes-alumno strong {
+  color: #ffffff;
+  font-size: 0.95rem;
+}
+
+.grilla-referentes-alumno {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.tarjeta-referente-alumno {
+  min-width: 0;
+  padding: 18px 15px;
+  border: 1px solid #cfe3ef;
+  border-top: 4px solid #14cfc2;
+  border-radius: 14px;
+  background: linear-gradient(180deg, #ffffff, #f3f8fc);
+  box-shadow: 0 8px 20px rgba(4, 31, 54, 0.12);
+}
+
+.icono-referente-alumno {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  margin-bottom: 13px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #d6faf5, #d7effc);
+  color: #087d8c;
+  font-size: 1.15rem;
+}
+
+.datos-referente-alumno {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.cargo-referente-alumno {
+  margin-bottom: 6px;
+  color: #28719b;
+  font-size: 0.76rem;
+  font-weight: 900;
+  letter-spacing: 0.035em;
+  text-transform: uppercase;
+}
+
+.nombre-referente-alumno {
+  min-height: 42px;
+  color: #152f49;
+  font-size: 0.96rem;
+  line-height: 1.35;
+}
+
+.correo-referente-alumno {
+  display: inline-flex;
+  align-items: flex-start;
+  gap: 7px;
+  margin-top: 10px;
+  color: #087fa7;
+  font-size: 0.78rem;
+  font-weight: 750;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+  text-decoration: none;
+}
+
+.correo-referente-alumno i {
+  margin-top: 2px;
+  color: #0ba99f;
+}
+
+.correo-referente-alumno:hover {
+  color: #075985;
+  text-decoration: underline;
+}
+
+.correo-referente-alumno.sin-correo {
+  color: #71869a;
+  font-style: italic;
+  font-weight: 650;
+}
+
+@media (max-width: 1350px) {
+  .grilla-referentes-alumno {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 900px) {
+  .grilla-referentes-alumno {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 600px) {
+  .cabecera-referentes-alumno > div {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .grilla-referentes-alumno {
+    grid-template-columns: 1fr;
+  }
+
+  .tarjeta-referente-alumno {
+    padding: 17px;
+  }
+
+  .nombre-referente-alumno {
+    min-height: auto;
+  }
+}

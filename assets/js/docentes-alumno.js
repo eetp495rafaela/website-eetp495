@@ -38,6 +38,7 @@ const tarjetaMisDocentesAlumno = document.getElementById(
 );
 
 const vistaDocentesAlumno = document.getElementById("vistaDocentesAlumno");
+const vistaReferentesAlumno = document.getElementById("vistaReferentesAlumno");
 
 let usuarioDocentesAlumnoActual = null;
 let docentesAlumnoCargados = false;
@@ -96,6 +97,159 @@ function obtenerNombreEspacioAsignacion(asignacion) {
     String(asignacion.materia || "").trim() ||
     "Espacio curricular sin nombre"
   );
+}
+
+function textoCargoReferenteAlumno(cargo) {
+  const cargos = {
+    DIRECTORA: "Director/a",
+    VICE_DIRECTORA: "Vice Director/a",
+    SECRETARIO: "Secretario/a",
+    PRO_SECRETARIO: "Pro Secretario/a",
+    PRECEPTOR: "Preceptor/a",
+  };
+
+  return cargos[normalizarTextoDocentesAlumno(cargo)] || cargo;
+}
+
+function iconoCargoReferenteAlumno(cargo) {
+  const iconos = {
+    DIRECTORA: "fa-solid fa-user-tie",
+    VICE_DIRECTORA: "fa-solid fa-user-tie",
+    SECRETARIO: "fa-solid fa-folder-open",
+    PRO_SECRETARIO: "fa-solid fa-folder-tree",
+    PRECEPTOR: "fa-solid fa-people-roof",
+  };
+
+  return iconos[normalizarTextoDocentesAlumno(cargo)] || "fa-solid fa-user";
+}
+
+function mostrarMensajeReferentesAlumno(texto, tipo = "") {
+  if (!vistaReferentesAlumno) return;
+
+  vistaReferentesAlumno.innerHTML = `
+    <p class="mensaje-formulario ${tipo === "error" ? "error" : ""}">
+      ${escaparHtmlDocentesAlumno(texto)}
+    </p>
+  `;
+}
+
+function referenteCorrespondeCursoAlumno(referente, perfilAlumno) {
+  const anioReferente = Number(referente.cursoAnio || 0);
+
+  const divisionReferente = normalizarTextoDocentesAlumno(
+    referente.cursoDivision,
+  );
+
+  return (
+    anioReferente === Number(perfilAlumno.cursoAnio) &&
+    divisionReferente ===
+      normalizarTextoDocentesAlumno(perfilAlumno.cursoDivision)
+  );
+}
+
+function renderizarReferentesAlumno(referentes, perfilAlumno) {
+  if (!vistaReferentesAlumno) return;
+
+  const cursoVisible = obtenerNombreCursoAlumno(perfilAlumno);
+
+  const cargosInstitucionales = [
+    "DIRECTORA",
+    "VICE_DIRECTORA",
+    "SECRETARIO",
+    "PRO_SECRETARIO",
+  ];
+
+  const referentesVisibles = cargosInstitucionales.map((cargo) => ({
+    cargo,
+    referente: referentes.find(
+      (item) => normalizarTextoDocentesAlumno(item.cargo) === cargo,
+    ),
+  }));
+
+  const preceptorCurso = referentes.find(
+    (item) =>
+      normalizarTextoDocentesAlumno(item.cargo) === "PRECEPTOR" &&
+      referenteCorrespondeCursoAlumno(item, perfilAlumno),
+  );
+
+  referentesVisibles.push({
+    cargo: "PRECEPTOR",
+    referente: preceptorCurso,
+  });
+
+  vistaReferentesAlumno.innerHTML = `
+    <div class="cabecera-referentes-alumno">
+      <div>
+        <span class="etiqueta-referentes-alumno">
+          Referentes institucionales
+        </span>
+
+        <strong>
+          ${escaparHtmlDocentesAlumno(cursoVisible || "Curso del estudiante")}
+        </strong>
+      </div>
+    </div>
+
+    <div class="grilla-referentes-alumno">
+      ${referentesVisibles
+        .map(({ cargo, referente }) => {
+          const nombre = String(referente?.nombreCompleto || "").trim();
+
+          const correo = normalizarCorreoDocentesAlumno(referente?.correo);
+
+          return `
+            <article class="tarjeta-referente-alumno">
+              <div class="icono-referente-alumno">
+                <i class="${iconoCargoReferenteAlumno(cargo)}"></i>
+              </div>
+
+              <div class="datos-referente-alumno">
+                <span class="cargo-referente-alumno">
+                  ${escaparHtmlDocentesAlumno(textoCargoReferenteAlumno(cargo))}
+                </span>
+
+                <strong class="nombre-referente-alumno">
+                  ${nombre ? escaparHtmlDocentesAlumno(nombre) : "Sin asignar"}
+                </strong>
+
+                ${
+                  correo
+                    ? `
+                      <a
+                        class="correo-referente-alumno"
+                        href="mailto:${escaparHtmlDocentesAlumno(correo)}"
+                      >
+                        <i class="fa-solid fa-envelope"></i>
+                        ${escaparHtmlDocentesAlumno(correo)}
+                      </a>
+                    `
+                    : `
+                      <span class="correo-referente-alumno sin-correo">
+                        Información no disponible
+                      </span>
+                    `
+                }
+              </div>
+            </article>
+          `;
+        })
+        .join("")}
+    </div>
+  `;
+}
+
+async function obtenerReferentesActivosAlumno() {
+  const consultaReferentes = query(
+    collection(db, "referentes_institucionales"),
+    where("estado", "==", "ACTIVO"),
+  );
+
+  const resultadoReferentes = await getDocs(consultaReferentes);
+
+  return resultadoReferentes.docs.map((documento) => ({
+    id: documento.id,
+    ...documento.data(),
+  }));
 }
 
 function renderizarDocentesAlumno(asignaciones, perfilAlumno) {
@@ -215,6 +369,19 @@ async function cargarMisDocentesAlumno() {
   try {
     const perfilAlumno = await obtenerPerfilAlumno(usuarioDocentesAlumnoActual);
 
+    try {
+      const referentes = await obtenerReferentesActivosAlumno();
+
+      renderizarReferentesAlumno(referentes, perfilAlumno);
+    } catch (errorReferentes) {
+      console.error("Error al cargar referentes del alumno:", errorReferentes);
+
+      mostrarMensajeReferentesAlumno(
+        "No se pudieron cargar los referentes institucionales.",
+        "error",
+      );
+    }
+
     const consultaAsignaciones = query(
       collection(db, "asignaciones_docentes"),
       where("cursoAnio", "==", perfilAlumno.cursoAnio),
@@ -271,6 +438,9 @@ onAuthStateChanged(auth, (usuario) => {
   if (!usuario) return;
 
   usuarioDocentesAlumnoActual = usuario;
+  mostrarMensajeReferentesAlumno(
+    "Los referentes institucionales se cargarán automáticamente junto con la agenda docente.",
+  );
 
   mostrarMensajeDocentesAlumno(
     "Seleccioná la tarjeta “Mis docentes” para consultar la agenda de contactos docentes.",
