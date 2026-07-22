@@ -81,6 +81,14 @@ const filtroCursoDocenteGestion = document.getElementById(
   "filtroCursoDocenteGestion",
 );
 
+const filtroEspacioDocenteGestion = document.getElementById(
+  "filtroEspacioDocenteGestion",
+);
+
+const filtroTurnoDocenteGestion = document.getElementById(
+  "filtroTurnoDocenteGestion",
+);
+
 const btnVerHorariosGestion = document.getElementById("btnVerHorariosGestion");
 
 const btnGenerarPizarraHorariosGestion = document.getElementById(
@@ -184,6 +192,7 @@ let inscripcionesSimeGestionCargadas = [];
 let documentacionGestionCargada = [];
 let horariosGestionCargados = [];
 let asignacionesDocentesGestionCargadas = [];
+let horariosDocentesGestionCargados = [];
 let estudiantesGestionCargados = [];
 
 // =========================
@@ -2478,6 +2487,41 @@ function cargarCursosFiltroDocentesGestion(asignaciones) {
   }
 }
 
+function cargarEspaciosFiltroDocentesGestion(asignaciones) {
+  if (!filtroEspacioDocenteGestion) return;
+
+  const valorActual = String(filtroEspacioDocenteGestion.value || "").trim();
+
+  const espacios = Array.from(
+    new Set(asignaciones.map(obtenerNombreEspacioAsignacion).filter(Boolean)),
+  )
+    .filter((espacio) => espacio !== "Espacio sin cargar")
+    .sort((a, b) =>
+      a.localeCompare(b, "es", {
+        numeric: true,
+        sensitivity: "base",
+      }),
+    );
+
+  filtroEspacioDocenteGestion.innerHTML = `
+    <option value="">Todos los espacios curriculares</option>
+
+    ${espacios
+      .map(
+        (espacio) => `
+          <option value="${escaparHtmlGestion(espacio)}">
+            ${escaparHtmlGestion(espacio)}
+          </option>
+        `,
+      )
+      .join("")}
+  `;
+
+  if (valorActual && espacios.includes(valorActual)) {
+    filtroEspacioDocenteGestion.value = valorActual;
+  }
+}
+
 function agruparAsignacionesPorDocente(asignaciones) {
   const docentes = new Map();
 
@@ -2610,6 +2654,122 @@ function textoTipoEspacioGestion(tipo) {
   return tipos[valor] || valor || "Sin tipo";
 }
 
+function normalizarTurnoDocenteGestion(turno) {
+  const valor = normalizarTextoGestion(turno).toUpperCase();
+
+  if (valor === "MANANA") return "MANANA";
+  if (valor === "TARDE") return "TARDE";
+
+  return valor;
+}
+
+function obtenerCursoHorarioDocenteGestion(horario) {
+  const cursoNombre = String(horario.cursoNombre || "").trim();
+
+  if (cursoNombre) {
+    return cursoNombre;
+  }
+
+  const anio = horario.cursoAnio || "";
+  const division = horario.cursoDivision || "";
+
+  if (!anio && !division) {
+    return "";
+  }
+
+  return `${anio}º ${division}`.trim();
+}
+
+function obtenerEspacioHorarioDocenteGestion(horario) {
+  return (
+    String(horario.espacioCurricular || "").trim() ||
+    String(horario.espacioNombre || "").trim()
+  );
+}
+
+function obtenerTurnosAsignacionDocenteGestion(asignacion) {
+  const correoAsignacion = normalizarTextoGestion(asignacion.docenteCorreo);
+
+  const nombreAsignacion = normalizarTextoGestion(asignacion.docenteNombre);
+
+  const cursoIdAsignacion = String(asignacion.cursoId || "").trim();
+
+  const cursoAsignacion = normalizarTextoGestion(
+    obtenerCursoAsignacionGestion(asignacion),
+  );
+
+  const espacioIdAsignacion = String(asignacion.espacioId || "").trim();
+
+  const espacioAsignacion = normalizarTextoGestion(
+    obtenerNombreEspacioAsignacion(asignacion),
+  );
+
+  const turnos = new Set();
+
+  horariosDocentesGestionCargados.forEach((horario) => {
+    const correoHorario = normalizarTextoGestion(horario.docenteCorreo);
+
+    const nombreHorario = normalizarTextoGestion(horario.docenteNombre);
+
+    const mismoDocente =
+      correoAsignacion && correoHorario
+        ? correoAsignacion === correoHorario
+        : Boolean(
+            nombreAsignacion &&
+            nombreHorario &&
+            nombreAsignacion === nombreHorario,
+          );
+
+    if (!mismoDocente) {
+      return;
+    }
+
+    const cursoIdHorario = String(horario.cursoId || "").trim();
+
+    const cursoHorario = normalizarTextoGestion(
+      obtenerCursoHorarioDocenteGestion(horario),
+    );
+
+    const mismoCurso =
+      cursoIdAsignacion && cursoIdHorario
+        ? cursoIdAsignacion === cursoIdHorario
+        : Boolean(
+            cursoAsignacion && cursoHorario && cursoAsignacion === cursoHorario,
+          );
+
+    if (!mismoCurso) {
+      return;
+    }
+
+    const espacioIdHorario = String(horario.espacioId || "").trim();
+
+    const espacioHorario = normalizarTextoGestion(
+      obtenerEspacioHorarioDocenteGestion(horario),
+    );
+
+    const mismoEspacio =
+      espacioIdAsignacion && espacioIdHorario
+        ? espacioIdAsignacion === espacioIdHorario
+        : Boolean(
+            espacioAsignacion &&
+            espacioHorario &&
+            espacioAsignacion === espacioHorario,
+          );
+
+    if (!mismoEspacio) {
+      return;
+    }
+
+    const turno = normalizarTurnoDocenteGestion(horario.turno);
+
+    if (turno === "MANANA" || turno === "TARDE") {
+      turnos.add(turno);
+    }
+  });
+
+  return Array.from(turnos);
+}
+
 function renderizarDocentesGestion(asignaciones) {
   if (!vistaDocentesGestion) return;
 
@@ -2629,9 +2789,62 @@ function renderizarDocentesGestion(asignaciones) {
 
   const docentesAgrupados = agruparAsignacionesPorDocente(asignaciones);
 
+  const filas = docentesAgrupados.flatMap((docente) => {
+    const todasLasAsignaciones = Array.from(docente.cursos.values()).flat();
+
+    const espaciosAgrupados =
+      agruparAsignacionesPorEspacio(todasLasAsignaciones);
+
+    return espaciosAgrupados.map((espacio) => {
+      const cursosOrdenados = Array.from(espacio.cursos).sort((a, b) =>
+        a.localeCompare(b, "es", {
+          numeric: true,
+          sensitivity: "base",
+        }),
+      );
+
+      return `
+        <tr>
+          <td>
+            <strong>
+              ${escaparHtmlGestion(
+                docente.docenteNombre || "Docente sin cargar",
+              )}
+            </strong>
+          </td>
+
+          <td>
+            ${escaparHtmlGestion(espacio.nombre)}
+          </td>
+
+          <td>
+            ${escaparHtmlGestion(cursosOrdenados.join(" · "))}
+          </td>
+
+          <td>
+            ${escaparHtmlGestion(docente.docenteCorreo || "Correo no cargado")}
+          </td>
+        </tr>
+      `;
+    });
+  });
+
   vistaDocentesGestion.innerHTML = `
-    <div class="grilla-docentes-gestion">
-      ${docentesAgrupados.map(renderizarTarjetaDocenteGestion).join("")}
+    <div class="tabla-gestion-contenedor">
+      <table class="tabla-gestion tabla-docentes-gestion">
+        <thead>
+          <tr>
+            <th>Apellido y nombre</th>
+            <th>Espacio Curricular</th>
+            <th>Cursos</th>
+            <th>Correo electrónico</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          ${filas.join("")}
+        </tbody>
+      </table>
     </div>
   `;
 
@@ -2648,11 +2861,26 @@ function aplicarFiltrosDocentesGestion() {
     filtroCursoDocenteGestion?.value || "",
   ).trim();
 
+  const espacioSeleccionado = String(
+    filtroEspacioDocenteGestion?.value || "",
+  ).trim();
+
+  const turnoSeleccionado = String(filtroTurnoDocenteGestion?.value || "")
+    .trim()
+    .toUpperCase();
+
   const asignacionesFiltradas = asignacionesDocentesGestionCargadas.filter(
     (asignacion) => {
       const docenteNombre = normalizarTextoGestion(asignacion.docenteNombre);
+
       const docenteCorreo = normalizarTextoGestion(asignacion.docenteCorreo);
+
       const curso = obtenerCursoAsignacionGestion(asignacion);
+
+      const espacio = obtenerNombreEspacioAsignacion(asignacion);
+
+      const turnosAsignacion =
+        obtenerTurnosAsignacionDocenteGestion(asignacion);
 
       const coincideBusqueda =
         !textoBusqueda ||
@@ -2661,7 +2889,15 @@ function aplicarFiltrosDocentesGestion() {
 
       const coincideCurso = !cursoSeleccionado || curso === cursoSeleccionado;
 
-      return coincideBusqueda && coincideCurso;
+      const coincideEspacio =
+        !espacioSeleccionado || espacio === espacioSeleccionado;
+
+      const coincideTurno =
+        !turnoSeleccionado || turnosAsignacion.includes(turnoSeleccionado);
+
+      return (
+        coincideBusqueda && coincideCurso && coincideEspacio && coincideTurno
+      );
     },
   );
 
@@ -2688,9 +2924,27 @@ async function cargarDocentesGestion() {
       </p>
     `;
 
-    const consulta = await getDocs(collection(db, "asignaciones_docentes"));
+    const consultaAsignaciones = getDocs(
+      collection(db, "asignaciones_docentes"),
+    );
 
-    asignacionesDocentesGestionCargadas = consulta.docs
+    const consultaHorarios = getDocs(
+      query(collection(db, "horarios"), where("estado", "==", "ACTIVO")),
+    );
+
+    const [resultadoAsignaciones, resultadoHorarios] = await Promise.all([
+      consultaAsignaciones,
+      consultaHorarios,
+    ]);
+
+    horariosDocentesGestionCargados = resultadoHorarios.docs.map(
+      (documento) => ({
+        id: documento.id,
+        ...documento.data(),
+      }),
+    );
+
+    asignacionesDocentesGestionCargadas = resultadoAsignaciones.docs
       .map((documento) => ({
         id: documento.id,
         ...documento.data(),
@@ -2733,6 +2987,9 @@ async function cargarDocentesGestion() {
     }
 
     cargarCursosFiltroDocentesGestion(asignacionesDocentesGestionCargadas);
+
+    cargarEspaciosFiltroDocentesGestion(asignacionesDocentesGestionCargadas);
+
     aplicarFiltrosDocentesGestion();
   } catch (error) {
     console.error("Error al cargar docentes en Portal Gestión:", error);
@@ -4105,6 +4362,19 @@ if (buscarDocenteGestion) {
 
 if (filtroCursoDocenteGestion) {
   filtroCursoDocenteGestion.addEventListener(
+    "change",
+    aplicarFiltrosDocentesGestion,
+  );
+}
+if (filtroEspacioDocenteGestion) {
+  filtroEspacioDocenteGestion.addEventListener(
+    "change",
+    aplicarFiltrosDocentesGestion,
+  );
+}
+
+if (filtroTurnoDocenteGestion) {
+  filtroTurnoDocenteGestion.addEventListener(
     "change",
     aplicarFiltrosDocentesGestion,
   );
