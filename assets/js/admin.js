@@ -1307,7 +1307,6 @@ const PLAN_ESTUDIOS_INICIAL = [
   { anio: 4, nombre: "Formación Ética y Ciudadana", tipo: "AULA" },
   { anio: 4, nombre: "Fundamentos de Gestión", tipo: "AULA" },
   { anio: 4, nombre: "Geografía", tipo: "AULA" },
-  { anio: 4, nombre: "Historia", tipo: "AULA" },
   { anio: 4, nombre: "Hardware II", tipo: "AULA" },
   { anio: 4, nombre: "Lengua Extranjera: Inglés", tipo: "AULA" },
   { anio: 4, nombre: "Lengua y Literatura", tipo: "AULA" },
