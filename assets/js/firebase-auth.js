@@ -6,7 +6,7 @@ import {
   signInWithPopup,
   onAuthStateChanged,
   setPersistence,
-  browserLocalPersistence,
+  browserSessionPersistence,
   signOut,
 } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-auth.js";
 
@@ -152,7 +152,7 @@ async function procesarUsuarioAutenticado(user) {
   }
 }
 
-await setPersistence(auth, browserLocalPersistence);
+await setPersistence(auth, browserSessionPersistence);
 
 if (boton) {
   boton.addEventListener("click", async () => {
