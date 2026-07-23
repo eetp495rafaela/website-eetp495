@@ -1877,6 +1877,7 @@ function renderizarTablaInformesGestion(informes) {
             <th>Curso</th>
             <th>Creado por</th>
             <th>Docentes</th>
+            <th>Actualizar docentes</th>
             <th>Ver</th>
             <th>Eliminar</th>
           </tr>
@@ -1886,6 +1887,10 @@ function renderizarTablaInformesGestion(informes) {
           ${informes
             .map((informe) => {
               const driveUrl = String(informe.driveUrl || "").trim();
+
+              const alumnoCorreo = String(informe.alumnoCorreo || "")
+                .trim()
+                .toLowerCase();
 
               return `
                 <tr>
@@ -1901,8 +1906,10 @@ function renderizarTablaInformesGestion(informes) {
                         informe.alumnoNombre || "Estudiante sin nombre",
                       )}
                     </strong>
+
                     <small>
-                      DNI: ${escaparHtmlGestion(informe.alumnoDni || "-")}
+                      DNI:
+                      ${escaparHtmlGestion(informe.alumnoDni || "-")}
                     </small>
                   </td>
 
@@ -1920,6 +1927,29 @@ function renderizarTablaInformesGestion(informes) {
                     ${escaparHtmlGestion(
                       String(informe.docentesAutorizados?.length || 0),
                     )}
+                  </td>
+
+                  <td>
+                    ${
+                      alumnoCorreo
+                        ? `
+                          <button
+                            class="
+                              btn-informe-tabla-gestion
+                              btn-actualizar-docentes-informe-gestion
+                            "
+                            type="button"
+                            title="Actualizar docentes autorizados"
+                            aria-label="Actualizar docentes autorizados"
+                            data-alumno-correo="${escaparHtmlGestion(
+                              alumnoCorreo,
+                            )}"
+                          >
+                            <i class="fa-solid fa-arrows-rotate"></i>
+                          </button>
+                        `
+                        : "-"
+                    }
                   </td>
 
                   <td>
@@ -1943,7 +1973,10 @@ function renderizarTablaInformesGestion(informes) {
 
                   <td>
                     <button
-                      class="btn-informe-tabla-gestion btn-eliminar-informe-gestion"
+                      class="
+                        btn-informe-tabla-gestion
+                        btn-eliminar-informe-gestion
+                      "
                       type="button"
                       title="Eliminar informe"
                       aria-label="Eliminar informe"
@@ -2047,6 +2080,221 @@ async function listarInformesGestion() {
         <i class="fa-solid fa-table-list"></i>
         Ver informes creados
       `;
+    }
+  }
+}
+
+async function actualizarDocentesAutorizadosInformeGestion(
+  alumnoCorreo,
+  boton,
+) {
+  const correo = String(alumnoCorreo || "")
+    .trim()
+    .toLowerCase();
+
+  if (!correo) {
+    mostrarMensajeInformesGestion(
+      "No se recibió el estudiante cuyos informes deben actualizarse.",
+      "error",
+    );
+
+    return;
+  }
+
+  const informe = informesGestionCargados.find(
+    (item) =>
+      String(item.alumnoCorreo || "")
+        .trim()
+        .toLowerCase() === correo,
+  );
+
+  const nombreAlumno = informe?.alumnoNombre || "este estudiante";
+
+  const cursoAlumno = informe?.cursoNombre || "curso sin asignar";
+
+  const confirmacion = await Swal.fire({
+    title: "¿Actualizar docentes autorizados?",
+
+    html: `
+      <p>
+        Se actualizarán los permisos de todos los
+        informes pedagógicos activos de:
+      </p>
+
+      <p>
+        <strong>
+          ${escaparHtmlGestion(nombreAlumno)}
+        </strong>
+      </p>
+
+      <p>
+        Curso registrado actualmente:
+        <strong>
+          ${escaparHtmlGestion(cursoAlumno)}
+        </strong>
+      </p>
+
+      <p>
+        Los docentes actuales recibirán acceso y los
+        docentes que ya no correspondan dejarán de
+        verlo.
+      </p>
+
+      <p>
+        Los documentos y su contenido no serán
+        eliminados ni trasladados.
+      </p>
+    `,
+
+    icon: "question",
+    showCancelButton: true,
+    confirmButtonText: "Sí, actualizar",
+    cancelButtonText: "Cancelar",
+    confirmButtonColor: "#009879",
+  });
+
+  if (!confirmacion.isConfirmed) {
+    return;
+  }
+
+  const usuario = auth.currentUser;
+
+  if (!usuario) {
+    mostrarMensajeInformesGestion(
+      "No se detectó una sesión activa. Volvé a iniciar sesión.",
+      "error",
+    );
+
+    return;
+  }
+
+  const htmlOriginalBoton = boton?.innerHTML || "";
+
+  try {
+    if (boton) {
+      boton.disabled = true;
+
+      boton.innerHTML = `
+        <i class="fa-solid fa-spinner fa-spin"></i>
+      `;
+    }
+
+    mostrarMensajeInformesGestion(
+      `Actualizando docentes autorizados para ${nombreAlumno}...`,
+    );
+
+    const idToken = await usuario.getIdToken(true);
+
+    const resultado = await enviarAlBackendInformesGestion({
+      accion: "actualizar_docentes_informes_estudiante",
+
+      idToken,
+      alumnoCorreo: correo,
+    });
+
+    if (!resultado.ok) {
+      throw new Error(
+        resultado.mensaje ||
+          "No se pudieron actualizar los docentes autorizados.",
+      );
+    }
+
+    const informesActualizados = Number(resultado.informesActualizados || 0);
+
+    const docentesActuales = Number(resultado.docentesActuales || 0);
+
+    const permisosAgregados = Number(resultado.permisosAgregados || 0);
+
+    const permisosEliminados = Number(resultado.permisosEliminados || 0);
+
+    const informesConError = Number(resultado.informesConError || 0);
+
+    await Swal.fire({
+      title: informesConError
+        ? "Actualización parcial"
+        : "Docentes actualizados",
+
+      html: `
+        <p>
+          Los permisos de los informes de
+          <strong>
+            ${escaparHtmlGestion(resultado.alumnoNombre || nombreAlumno)}
+          </strong>
+          fueron revisados.
+        </p>
+
+        <p>
+          <strong>Curso actual:</strong>
+          ${escaparHtmlGestion(resultado.cursoActual || cursoAlumno)}
+        </p>
+
+        <p>
+          <strong>Informes actualizados:</strong>
+          ${informesActualizados}
+        </p>
+
+        <p>
+          <strong>Docentes autorizados:</strong>
+          ${docentesActuales}
+        </p>
+
+        <p>
+          <strong>Permisos agregados:</strong>
+          ${permisosAgregados}
+        </p>
+
+        <p>
+          <strong>Permisos retirados:</strong>
+          ${permisosEliminados}
+        </p>
+
+        ${
+          informesConError
+            ? `
+              <p>
+                <strong>
+                  Informes con error:
+                </strong>
+                ${informesConError}
+              </p>
+            `
+            : ""
+        }
+      `,
+
+      icon: informesConError ? "warning" : "success",
+
+      confirmButtonText: "Aceptar",
+    });
+
+    await listarInformesGestion();
+  } catch (error) {
+    console.error("Error al actualizar docentes autorizados:", error);
+
+    mostrarMensajeInformesGestion(
+      error.message || "No se pudieron actualizar los docentes autorizados.",
+      "error",
+    );
+
+    await Swal.fire({
+      title: "No se pudieron actualizar los docentes",
+
+      text:
+        error.message ||
+        "Revisá conexión, sesión activa o permisos del backend.",
+
+      icon: "error",
+      confirmButtonText: "Aceptar",
+    });
+  } finally {
+    if (boton) {
+      boton.disabled = false;
+
+      boton.innerHTML =
+        htmlOriginalBoton ||
+        `
+          <i class="fa-solid fa-arrows-rotate"></i>
+        `;
     }
   }
 }
@@ -4828,16 +5076,27 @@ if (btnListarInformesGestion) {
 
 if (vistaInformesGestion) {
   vistaInformesGestion.addEventListener("click", function (event) {
-    const botonEliminar = event.target.closest(".btn-eliminar-informe-gestion");
+    const botonActualizar = event.target.closest(
+      ".btn-actualizar-docentes-informe-gestion",
+    );
 
-    if (!botonEliminar) {
+    if (botonActualizar) {
+      actualizarDocentesAutorizadosInformeGestion(
+        botonActualizar.dataset.alumnoCorreo,
+        botonActualizar,
+      );
+
       return;
     }
 
-    eliminarInformePedagogicoGestion(
-      botonEliminar.dataset.idInforme,
-      botonEliminar,
-    );
+    const botonEliminar = event.target.closest(".btn-eliminar-informe-gestion");
+
+    if (botonEliminar) {
+      eliminarInformePedagogicoGestion(
+        botonEliminar.dataset.idInforme,
+        botonEliminar,
+      );
+    }
   });
 }
 
