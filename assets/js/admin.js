@@ -3829,6 +3829,20 @@ async function guardarEdicionUsuario(event) {
   const rol = String(editarRol.value || "")
     .trim()
     .toUpperCase();
+
+  const rolesAdicionales = checksEditarRolesAdicionales
+    .filter((checkbox) => checkbox.checked)
+    .map((checkbox) =>
+      String(checkbox.value || "")
+        .trim()
+        .toUpperCase(),
+    );
+
+  const rolesSeleccionados =
+    rol === "ALUMNO"
+      ? ["ALUMNO"]
+      : Array.from(new Set([rol, ...rolesAdicionales]));
+
   const tipoVinculo = editarTipoVinculo.value.trim();
   const situacionesRevistaValidas = [
     "TITULAR",
@@ -3876,12 +3890,52 @@ async function guardarEdicionUsuario(event) {
     return;
   }
 
-  if (esMiCuenta && rol !== "SOPORTE") {
+  const rolesValidos = [
+    "ALUMNO",
+    "DOCENTE",
+    "SOPORTE",
+    "PRECEPTORIA",
+    "SECRETARIA",
+    "DIRECCION",
+  ];
+
+  if (
+    rolesSeleccionados.some(
+      (rolSeleccionado) => !rolesValidos.includes(rolSeleccionado),
+    )
+  ) {
     mostrarMensajeEdicion(
-      "No podés cambiar tu propio rol desde este panel.",
+      "La selección de roles contiene un valor no válido.",
       "error",
     );
     return;
+  }
+
+  if (rolesSeleccionados.includes("ALUMNO") && rolesSeleccionados.length > 1) {
+    mostrarMensajeEdicion(
+      "El rol ALUMNO no puede combinarse con otros roles.",
+      "error",
+    );
+    return;
+  }
+
+  if (esMiCuenta) {
+    const rolesActuales = obtenerRolesUsuarioAdmin(usuarioEnEdicion);
+
+    const rolesActualesOrdenados = [...rolesActuales].sort();
+    const rolesNuevosOrdenados = [...rolesSeleccionados].sort();
+
+    const rolesSinCambios =
+      JSON.stringify(rolesActualesOrdenados) ===
+      JSON.stringify(rolesNuevosOrdenados);
+
+    if (rol !== "SOPORTE" || !rolesSinCambios) {
+      mostrarMensajeEdicion(
+        "No podés modificar los roles de tu propia cuenta desde este panel.",
+        "error",
+      );
+      return;
+    }
   }
 
   btnGuardarEdicion.disabled = true;
@@ -3891,6 +3945,7 @@ async function guardarEdicionUsuario(event) {
     await updateDoc(doc(db, "usuarios", correo), {
       nombreCompleto,
       rol,
+      roles: rolesSeleccionados,
       tipoVinculo,
       dni: dni || null,
       fechaFinAcceso: fechaFinAcceso || null,
