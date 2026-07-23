@@ -27,6 +27,88 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 window.portalDb = db;
+const TIEMPO_MAXIMO_INACTIVIDAD = 15 * 60 * 1000;
+
+const EVENTOS_ACTIVIDAD = [
+  "mousedown",
+  "mousemove",
+  "keydown",
+  "scroll",
+  "touchstart",
+  "click",
+];
+
+let temporizadorInactividad = null;
+let controlInactividadActivo = false;
+let ultimaActualizacionActividad = 0;
+
+async function cerrarSesionPorInactividad() {
+  controlInactividadActivo = false;
+
+  if (temporizadorInactividad) {
+    clearTimeout(temporizadorInactividad);
+    temporizadorInactividad = null;
+  }
+
+  EVENTOS_ACTIVIDAD.forEach((evento) => {
+    window.removeEventListener(evento, registrarActividadUsuario);
+  });
+
+  try {
+    await signOut(auth);
+  } catch (error) {
+    console.error("Error al cerrar la sesión por inactividad:", error);
+  }
+
+  volverAlLogin();
+}
+
+function reiniciarTemporizadorInactividad() {
+  if (!controlInactividadActivo) {
+    return;
+  }
+
+  if (temporizadorInactividad) {
+    clearTimeout(temporizadorInactividad);
+  }
+
+  temporizadorInactividad = setTimeout(
+    cerrarSesionPorInactividad,
+    TIEMPO_MAXIMO_INACTIVIDAD,
+  );
+}
+
+function registrarActividadUsuario() {
+  const ahora = Date.now();
+
+  /*
+   * Evita reiniciar el temporizador cientos de veces por segundo
+   * mientras el usuario mueve el mouse.
+   */
+  if (ahora - ultimaActualizacionActividad < 1000) {
+    return;
+  }
+
+  ultimaActualizacionActividad = ahora;
+  reiniciarTemporizadorInactividad();
+}
+
+function iniciarControlInactividad() {
+  if (controlInactividadActivo) {
+    return;
+  }
+
+  controlInactividadActivo = true;
+  ultimaActualizacionActividad = Date.now();
+
+  EVENTOS_ACTIVIDAD.forEach((evento) => {
+    window.addEventListener(evento, registrarActividadUsuario, {
+      passive: true,
+    });
+  });
+
+  reiniciarTemporizadorInactividad();
+}
 
 function volverAlLogin(mensaje = "") {
   const url = new URL("../login.html", window.location.href);
@@ -296,7 +378,7 @@ onAuthStateChanged(auth, async (user) => {
     }
 
     await registrarUltimoIngreso(user, perfil, correo, rolUsuario);
-
+    iniciarControlInactividad();
     ajustarVistaPortalAlumno(perfil, rolUsuario);
 
     window.portalUsuario = {
