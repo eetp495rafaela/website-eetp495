@@ -102,6 +102,21 @@
 
           <a
             class="tarjeta tarjeta-enlace"
+            href="#agenda-institucional-docente"
+            id="tarjetaAgendaInstitucionalDocente"
+          >
+            <i class="fa-solid fa-address-book"></i>
+
+            <h3>Agenda Institucional</h3>
+
+            <p>
+              Consultá los datos de contacto de tus colegas, el personal
+              institucional y los estudiantes de tus cursos.
+            </p>
+          </a>
+
+          <a
+            class="tarjeta tarjeta-enlace"
             href="https://docs.google.com/spreadsheets/d/1hD0g7Nz9YcIDhNYOPUeTdj1YfhOL30qvQwk8xgBto1U/edit?usp=sharing"
             target="_blank"
             rel="noopener noreferrer"
@@ -378,6 +393,54 @@
             <p class="mensaje-formulario">
               Todavía no se consultaron las listas de estudiantes. Presioná “Ver
               listas de estudiantes” para cargarlas.
+            </p>
+          </div>
+        </div>
+
+        <a class="btn-volver" href="#inicio">
+          <i class="fa-solid fa-arrow-up"></i>
+          Volver al inicio
+        </a>
+      </section>
+
+      <section class="grupo seccion-destino" id="agenda-institucional-docente">
+        <h2>Agenda Institucional</h2>
+
+        <div class="panel-info">
+          <div class="encabezado-listado">
+            <div>
+              <h3>Contactos de la comunidad educativa</h3>
+
+              <p>
+                Seleccioná una categoría para consultar nombres y correos
+                electrónicos institucionales.
+              </p>
+            </div>
+          </div>
+
+          <div class="form-grid-documentacion">
+            <div class="campo-documentacion">
+              <label for="categoriaAgendaDocente">
+                Contactos que querés consultar
+              </label>
+
+              <select id="categoriaAgendaDocente">
+                <option value="">Seleccionar categoría</option>
+                <option value="COLEGAS">Mis colegas docentes</option>
+                <option value="ADMINISTRACION">
+                  Administración institucional
+                </option>
+                <option value="ALUMNOS">Mis alumnos</option>
+              </select>
+            </div>
+          </div>
+
+          <div
+            id="vistaAgendaInstitucionalDocente"
+            class="vista-agenda-institucional-docente"
+          >
+            <p class="mensaje-formulario">
+              Seleccioná una categoría para consultar la agenda.
             </p>
           </div>
         </div>
@@ -778,6 +841,7 @@
       type="module"
       src="../assets/js/listas-estudiantes-docente.js"
     ></script>
+    <script type="module" src="../assets/js/agenda-docente.js"></script>
     <script type="module" src="../assets/js/informes-docente.js"></script>
     <script type="module" src="../assets/js/sira-docente.js"></script>
   </body>

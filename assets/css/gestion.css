@@ -2579,3 +2579,78 @@ body {
     grid-column: auto;
   }
 }
+/* =========================
+   GESTIÓN - BAJA DE ESTUDIANTES
+========================= */
+
+.tabla-estudiantes-gestion {
+  min-width: 820px;
+}
+
+.celda-acciones-estudiantes-gestion {
+  width: 150px;
+  text-align: center !important;
+  white-space: nowrap;
+}
+
+.btn-baja-estudiante-gestion {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+
+  min-height: 36px;
+  padding: 8px 12px;
+
+  border: 1px solid #dc938d;
+  border-radius: 10px;
+
+  color: #9f2118;
+  background: #fff1f0;
+
+  cursor: pointer;
+
+  font-family: inherit;
+  font-size: 0.8rem;
+  font-weight: 900;
+
+  transition:
+    color 0.2s ease,
+    background 0.2s ease,
+    border-color 0.2s ease,
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.btn-baja-estudiante-gestion:hover {
+  color: #ffffff;
+  background: #b42318;
+  border-color: #b42318;
+
+  box-shadow: 0 6px 14px rgba(180, 35, 24, 0.2);
+  transform: translateY(-1px);
+}
+
+.btn-baja-estudiante-gestion:focus-visible {
+  outline: 3px solid rgba(180, 35, 24, 0.22);
+  outline-offset: 2px;
+}
+
+.btn-baja-estudiante-gestion:disabled {
+  cursor: wait;
+  opacity: 0.65;
+  transform: none;
+  box-shadow: none;
+}
+
+.accion-no-disponible-gestion {
+  color: var(--gestion-texto-suave);
+  font-weight: 800;
+}
+
+@media (max-width: 760px) {
+  .btn-baja-estudiante-gestion {
+    min-height: 38px;
+    padding: 9px 13px;
+  }
+}

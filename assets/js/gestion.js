@@ -2243,6 +2243,180 @@ function cargarCursosFiltroEstudiantesGestion(estudiantes) {
   }
 }
 
+function obtenerRolGestionActual() {
+  return String(window.portalUsuario?.rol || "")
+    .trim()
+    .toUpperCase();
+}
+
+function usuarioPuedeDarDeBajaEstudiantesGestion() {
+  return ["PRECEPTORIA", "SECRETARIA", "DIRECCION"].includes(
+    obtenerRolGestionActual(),
+  );
+}
+
+async function darDeBajaEstudianteGestion(estudiante, boton = null) {
+  const usuario = auth.currentUser;
+
+  if (!usuario) {
+    await Swal.fire({
+      title: "Sesión no disponible",
+      text: "Volvé a iniciar sesión para continuar.",
+      icon: "error",
+      confirmButtonText: "Aceptar",
+    });
+
+    return;
+  }
+
+  if (!usuarioPuedeDarDeBajaEstudiantesGestion()) {
+    await Swal.fire({
+      title: "Acción no autorizada",
+      text: "Tu perfil no tiene permisos para dar de baja estudiantes.",
+      icon: "error",
+      confirmButtonText: "Aceptar",
+    });
+
+    return;
+  }
+
+  const correo = String(estudiante.correo || estudiante.id || "")
+    .trim()
+    .toLowerCase();
+
+  if (!correo) {
+    await Swal.fire({
+      title: "No se pudo identificar al estudiante",
+      text: "El registro no tiene un correo asociado.",
+      icon: "error",
+      confirmButtonText: "Aceptar",
+    });
+
+    return;
+  }
+
+  const rolEstudiante = String(estudiante.rol || "")
+    .trim()
+    .toUpperCase();
+
+  const estadoEstudiante = String(estudiante.estado || "")
+    .trim()
+    .toUpperCase();
+
+  if (rolEstudiante !== "ALUMNO" || estadoEstudiante !== "ACTIVO") {
+    await Swal.fire({
+      title: "La baja no está disponible",
+      text: "Solamente pueden darse de baja estudiantes activos.",
+      icon: "warning",
+      confirmButtonText: "Aceptar",
+    });
+
+    return;
+  }
+
+  const nombre = String(estudiante.nombreCompleto || "").trim() || correo;
+
+  const cursoActual = obtenerCursoEstudianteGestion(estudiante);
+
+  const confirmacion = await Swal.fire({
+    title: "¿Dar de baja al estudiante?",
+
+    html: `
+      <p>
+        <strong>
+          ${escaparHtmlGestion(nombre)}
+        </strong>
+      </p>
+
+      <p>
+        ${escaparHtmlGestion(correo)}
+      </p>
+
+      <p>
+        Curso actual:
+        <strong>
+          ${escaparHtmlGestion(cursoActual)}
+        </strong>
+      </p>
+
+      <hr>
+
+      <p>
+        El estudiante quedará inactivo, se quitará de su
+        curso y no podrá ingresar al Portal Alumno.
+      </p>
+
+      <p>
+        <strong>
+          Esta acción no elimina asistencias, inscripciones
+          ni otros registros históricos.
+        </strong>
+      </p>
+    `,
+
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonText: "Sí, dar de baja",
+    cancelButtonText: "Cancelar",
+    confirmButtonColor: "#b42318",
+    reverseButtons: true,
+    focusCancel: true,
+  });
+
+  if (!confirmacion.isConfirmed) return;
+
+  const contenidoOriginalBoton = boton?.innerHTML || "";
+
+  try {
+    if (boton) {
+      boton.disabled = true;
+
+      boton.innerHTML = `
+        <i class="fa-solid fa-spinner fa-spin"></i>
+        Procesando...
+      `;
+    }
+
+    await updateDoc(doc(db, "usuarios", correo), {
+      estado: "INACTIVO",
+      tipoVinculo: "BAJA",
+
+      cursoId: null,
+      cursoAnio: null,
+      cursoDivision: null,
+      cursoNombre: null,
+      grupoTaller: null,
+
+      fechaBaja: serverTimestamp(),
+      actualizadoEn: serverTimestamp(),
+      actualizadoPor: usuario.email,
+    });
+
+    await Swal.fire({
+      title: "Estudiante dado de baja",
+      text: "El estudiante quedó inactivo y fue desvinculado de su curso.",
+      icon: "success",
+      confirmButtonText: "Aceptar",
+    });
+
+    await cargarEstudiantesGestion();
+  } catch (error) {
+    console.error("Error al dar de baja al estudiante desde Gestión:", error);
+
+    await Swal.fire({
+      title: "No se pudo dar de baja",
+      text: error.message || "Revisá la conexión o los permisos de Firebase.",
+      icon: "error",
+      confirmButtonText: "Aceptar",
+    });
+  } finally {
+    if (boton && boton.isConnected) {
+      boton.disabled = false;
+      boton.innerHTML = contenidoOriginalBoton;
+    }
+  }
+}
+
 function renderizarEstudiantesGestion(estudiantes) {
   if (!vistaEstudiantesGestion) return;
 
@@ -2260,20 +2434,71 @@ function renderizarEstudiantesGestion(estudiantes) {
     return;
   }
 
+  const puedeDarDeBaja = usuarioPuedeDarDeBajaEstudiantesGestion();
+
   const filas = estudiantes
     .map((estudiante) => {
       const estado = crearTextoEstadoCurso(estudiante.estado);
 
+      const estaActivo =
+        String(estudiante.estado || "")
+          .trim()
+          .toUpperCase() === "ACTIVO";
+
+      const correo = String(estudiante.correo || estudiante.id || "")
+        .trim()
+        .toLowerCase();
+
+      const acciones =
+        puedeDarDeBaja && estaActivo
+          ? `
+            <button
+              class="btn-baja-estudiante-gestion"
+              type="button"
+              data-correo-estudiante="${escaparHtmlGestion(correo)}"
+            >
+              <i class="fa-solid fa-user-slash"></i>
+              Dar de baja
+            </button>
+          `
+          : `
+            <span class="accion-no-disponible-gestion">
+              —
+            </span>
+          `;
+
       return `
         <tr>
-          <td>${estudiante.nombreCompleto || "-"}</td>
-          <td>${estudiante.correo || "-"}</td>
-          <td>${obtenerCursoEstudianteGestion(estudiante)}</td>
-          <td>${obtenerGrupoTallerEstudianteGestion(estudiante)}</td>
           <td>
-            <span class="estado-gestion ${estado === "ACTIVO" ? "activo" : "inactivo"}">
-              ${estado}
+            ${escaparHtmlGestion(estudiante.nombreCompleto || "-")}
+          </td>
+
+          <td>
+            ${escaparHtmlGestion(estudiante.correo || correo || "-")}
+          </td>
+
+          <td>
+            ${escaparHtmlGestion(obtenerCursoEstudianteGestion(estudiante))}
+          </td>
+
+          <td>
+            ${escaparHtmlGestion(
+              obtenerGrupoTallerEstudianteGestion(estudiante),
+            )}
+          </td>
+
+          <td>
+            <span
+              class="estado-gestion ${
+                estado === "ACTIVO" ? "activo" : "inactivo"
+              }"
+            >
+              ${escaparHtmlGestion(estado)}
             </span>
+          </td>
+
+          <td class="celda-acciones-estudiantes-gestion">
+            ${acciones}
           </td>
         </tr>
       `;
@@ -2282,7 +2507,7 @@ function renderizarEstudiantesGestion(estudiantes) {
 
   vistaEstudiantesGestion.innerHTML = `
     <div class="tabla-gestion-contenedor">
-      <table class="tabla-gestion">
+      <table class="tabla-gestion tabla-estudiantes-gestion">
         <thead>
           <tr>
             <th>Nombre completo</th>
@@ -2290,6 +2515,7 @@ function renderizarEstudiantesGestion(estudiantes) {
             <th>Curso</th>
             <th>Grupo de Taller</th>
             <th>Estado</th>
+            <th>Acciones</th>
           </tr>
         </thead>
 
@@ -4383,6 +4609,41 @@ if (btnVerCursosGestion) {
 
 if (btnVerEstudiantesGestion) {
   btnVerEstudiantesGestion.addEventListener("click", cargarEstudiantesGestion);
+}
+
+if (vistaEstudiantesGestion) {
+  vistaEstudiantesGestion.addEventListener("click", async (event) => {
+    const boton = event.target.closest(".btn-baja-estudiante-gestion");
+
+    if (!boton) return;
+
+    const correo = String(boton.dataset.correoEstudiante || "")
+      .trim()
+      .toLowerCase();
+
+    if (!correo) return;
+
+    const estudiante = estudiantesGestionCargados.find((registro) => {
+      const correoRegistro = String(registro.correo || registro.id || "")
+        .trim()
+        .toLowerCase();
+
+      return correoRegistro === correo;
+    });
+
+    if (!estudiante) {
+      await Swal.fire({
+        title: "Estudiante no encontrado",
+        text: "Actualizá el listado e intentá nuevamente.",
+        icon: "error",
+        confirmButtonText: "Aceptar",
+      });
+
+      return;
+    }
+
+    await darDeBajaEstudianteGestion(estudiante, boton);
+  });
 }
 
 if (buscarEstudianteGestion) {

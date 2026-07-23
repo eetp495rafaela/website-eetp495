@@ -786,7 +786,8 @@ body {
 #mis-horarios-docente,
 #sira-docente,
 #listas-estudiantes-docente,
-#informes-pedagogicos-docente {
+#informes-pedagogicos-docente,
+#agenda-institucional-docente {
   scroll-margin-top: 115px;
 }
 /* =====================================================

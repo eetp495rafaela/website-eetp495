@@ -438,9 +438,6 @@ onAuthStateChanged(auth, (usuario) => {
   if (!usuario) return;
 
   usuarioDocentesAlumnoActual = usuario;
-  mostrarMensajeReferentesAlumno(
-    "Los referentes institucionales se cargarán automáticamente junto con la agenda docente.",
-  );
 
   mostrarMensajeDocentesAlumno(
     "Seleccioná la tarjeta “Mis docentes” para consultar la agenda de contactos docentes.",

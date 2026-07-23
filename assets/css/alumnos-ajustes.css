@@ -1149,3 +1149,176 @@
     min-height: auto;
   }
 }
+/* =====================================================
+   AJUSTE REFERENTES INSTITUCIONALES
+   Fila 1: Dirección y Vice Dirección
+   Fila 2: Secretaría, Pro Secretaría y Preceptoría
+===================================================== */
+
+.grilla-referentes-alumno {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 14px;
+}
+
+/* Primera fila: dos tarjetas */
+.tarjeta-referente-alumno:nth-child(1),
+.tarjeta-referente-alumno:nth-child(2) {
+  grid-column: span 3;
+}
+
+/* Segunda fila: tres tarjetas */
+.tarjeta-referente-alumno:nth-child(3),
+.tarjeta-referente-alumno:nth-child(4),
+.tarjeta-referente-alumno:nth-child(5) {
+  grid-column: span 2;
+}
+
+.tarjeta-referente-alumno {
+  min-height: auto;
+  padding: 14px 16px;
+  border-top-width: 3px;
+}
+
+/* Ocultar los íconos */
+.icono-referente-alumno {
+  display: none;
+}
+
+.cargo-referente-alumno {
+  margin-bottom: 4px;
+  font-size: 0.74rem;
+}
+
+.nombre-referente-alumno {
+  min-height: auto;
+  font-size: 0.94rem;
+  line-height: 1.3;
+}
+
+.correo-referente-alumno {
+  margin-top: 7px;
+  font-size: 0.79rem;
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+  word-break: normal;
+}
+
+/* Tablet */
+@media (max-width: 900px) {
+  .grilla-referentes-alumno {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .tarjeta-referente-alumno:nth-child(n) {
+    grid-column: span 1;
+  }
+
+  .tarjeta-referente-alumno:last-child {
+    grid-column: 1 / -1;
+  }
+}
+
+/* Celular */
+@media (max-width: 600px) {
+  .grilla-referentes-alumno {
+    grid-template-columns: 1fr;
+  }
+
+  .tarjeta-referente-alumno:nth-child(n) {
+    grid-column: span 1;
+  }
+
+  .tarjeta-referente-alumno {
+    padding: 14px;
+  }
+}
+/* =====================================================
+   MIS COMPAÑEROS - TARJETAS
+===================================================== */
+
+.grilla-companeros-alumno {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+  margin-top: 18px;
+}
+
+.tarjeta-companero-alumno {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-width: 0;
+  min-height: 88px;
+  padding: 15px 17px;
+
+  border: 1px solid #c9deeb;
+  border-left: 4px solid #14d8ca;
+  border-radius: 13px;
+
+  background: linear-gradient(180deg, #ffffff 0%, #f4f9fc 100%);
+
+  box-shadow: 0 7px 17px rgba(3, 35, 58, 0.1);
+
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.tarjeta-companero-alumno:hover {
+  transform: translateY(-2px);
+  border-color: #69cfd3;
+  box-shadow: 0 10px 22px rgba(3, 35, 58, 0.15);
+}
+
+.nombre-companero-alumno {
+  color: #123354;
+  font-size: 0.94rem;
+  font-weight: 900;
+  line-height: 1.35;
+}
+
+.correo-companero-alumno {
+  display: block;
+  margin-top: 7px;
+
+  color: #0788bd;
+  font-size: 0.8rem;
+  font-weight: 750;
+  line-height: 1.35;
+
+  overflow-wrap: anywhere;
+  word-break: break-word;
+
+  text-decoration: none;
+}
+
+.correo-companero-alumno:hover {
+  color: #075985;
+  text-decoration: underline;
+}
+
+.correo-companero-alumno.sin-correo {
+  color: #71869a;
+  font-style: italic;
+}
+
+/* Tablet */
+@media (max-width: 900px) {
+  .grilla-companeros-alumno {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* Celular */
+@media (max-width: 600px) {
+  .grilla-companeros-alumno {
+    grid-template-columns: 1fr;
+  }
+
+  .tarjeta-companero-alumno {
+    min-height: auto;
+    padding: 14px 16px;
+  }
+}

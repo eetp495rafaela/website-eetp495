@@ -271,6 +271,19 @@
             </p>
           </a>
 
+          <a
+           class="tarjeta tarjeta-enlace"
+           href="#mis-companeros-alumno"
+           id="tarjetaMisCompanerosAlumno"
+          >
+            <i class="fa-solid fa-user-group"></i>
+            <h3>Mis compañeros</h3>
+            <p>
+              Consultá los integrantes de tu curso y sus direcciones de correo
+              institucionales.
+            </p>
+          </a>
+
           <a class="tarjeta tarjeta-enlace" href="#examenes">
             <i class="fa-solid fa-file-signature"></i>
             <h3>Inscripción a Exámenes</h3>
@@ -339,7 +352,7 @@
         </a>
       </section>
       <section class="grupo seccion-destino" id="mis-docentes-alumno">
-        <h2>Mis docentes</h2>
+        <h2>Mis docentes y Referentes Institucionales</h2>
 
         <div class="panel-info">
           <div class="encabezado-listado encabezado-mis-docentes-alumno">
@@ -356,10 +369,6 @@
             <div
               id="vistaReferentesAlumno"
               class="referentes-institucionales-alumno"
-            >
-              <p class="mensaje-formulario">
-                Cargando referentes institucionales...
-              </p>
             </div>
           </div>
 
@@ -376,6 +385,42 @@
           Volver al inicio
         </a>
       </section>
+
+      <section
+  class="grupo seccion-destino"
+  id="mis-companeros-alumno"
+>
+  <h2>Mis compañeros</h2>
+
+  <div class="panel-info">
+    <div class="encabezado-listado">
+      <div>
+        <h3>Integrantes de mi curso</h3>
+
+        <p>
+          Consultá los estudiantes que integran tu mismo curso y sus
+          correos electrónicos institucionales.
+        </p>
+      </div>
+    </div>
+
+    <div
+      id="vistaCompanerosAlumno"
+      class="vista-docentes-alumno"
+    >
+      <p class="mensaje-formulario">
+        Seleccioná la tarjeta “Mis compañeros” para consultar los
+        integrantes de tu curso.
+      </p>
+    </div>
+  </div>
+
+  <a class="btn-volver" href="#inicio">
+    <i class="fa-solid fa-arrow-up"></i>
+    Volver al inicio
+  </a>
+</section>
+
       <section class="grupo seccion-destino" id="examenes">
         <h2>Inscripción a Exámenes</h2>
 
@@ -656,5 +701,6 @@
     <script src="../assets/js/volver-arriba.js"></script>
     <script type="module" src="../assets/js/horarios-alumno.js"></script>
     <script type="module" src="../assets/js/docentes-alumno.js"></script>
+    <script type="module" src="../assets/js/mis-companeros-alumno.js"></script>
   </body>
 </html>
