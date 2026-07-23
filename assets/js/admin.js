@@ -297,6 +297,9 @@ const editarCorreoVisible = document.getElementById("editarCorreoVisible");
 const editarNombreCompleto = document.getElementById("editarNombreCompleto");
 const editarDni = document.getElementById("editarDni");
 const editarRol = document.getElementById("editarRol");
+const checksEditarRolesAdicionales = Array.from(
+  document.querySelectorAll('input[name="editarRolesAdicionales"]'),
+);
 const editarTipoVinculo = document.getElementById("editarTipoVinculo");
 const editarFechaFinAcceso = document.getElementById("editarFechaFinAcceso");
 const mensajeEditarUsuario = document.getElementById("mensajeEditarUsuario");
@@ -336,6 +339,52 @@ function actualizarSelectorRolesAdicionales() {
     const coincideConPrincipal = rolCheckbox === rolPrincipal;
 
     checkbox.disabled = esAlumno || coincideConPrincipal;
+
+    if (esAlumno || coincideConPrincipal) {
+      checkbox.checked = false;
+    }
+  });
+}
+
+function obtenerRolesUsuarioAdmin(usuario) {
+  const rolPrincipal = String(usuario?.rol || "")
+    .trim()
+    .toUpperCase();
+
+  const rolesGuardados = Array.isArray(usuario?.roles)
+    ? usuario.roles.map((rol) =>
+        String(rol || "")
+          .trim()
+          .toUpperCase(),
+      )
+    : [];
+
+  return Array.from(new Set([rolPrincipal, ...rolesGuardados])).filter(Boolean);
+}
+
+function actualizarSelectorRolesEdicion() {
+  if (!editarRol) return;
+
+  const rolPrincipal = String(editarRol.value || "")
+    .trim()
+    .toUpperCase();
+
+  const correoEditado = normalizarCorreo(editarCorreo?.value);
+
+  const correoActual = normalizarCorreo(usuarioSoporte?.email);
+
+  const esMiCuenta = Boolean(correoEditado) && correoEditado === correoActual;
+
+  const esAlumno = rolPrincipal === "ALUMNO";
+
+  checksEditarRolesAdicionales.forEach((checkbox) => {
+    const rolCheckbox = String(checkbox.value || "")
+      .trim()
+      .toUpperCase();
+
+    const coincideConPrincipal = rolCheckbox === rolPrincipal;
+
+    checkbox.disabled = esMiCuenta || esAlumno || coincideConPrincipal;
 
     if (esAlumno || coincideConPrincipal) {
       checkbox.checked = false;
@@ -3716,14 +3765,32 @@ function abrirModalEdicion(usuario) {
   editarDni.value = String(usuario.dni || "")
     .replace(/\D/g, "")
     .trim();
-  editarRol.value = String(usuario.rol || "").toUpperCase();
+  editarRol.value = String(usuario.rol || "")
+    .trim()
+    .toUpperCase();
+
+  const rolesUsuario = obtenerRolesUsuarioAdmin(usuario);
+
+  checksEditarRolesAdicionales.forEach((checkbox) => {
+    const rolCheckbox = String(checkbox.value || "")
+      .trim()
+      .toUpperCase();
+
+    checkbox.checked =
+      rolCheckbox !== editarRol.value && rolesUsuario.includes(rolCheckbox);
+  });
+
   editarTipoVinculo.value = usuario.tipoVinculo || "";
   editarFechaFinAcceso.value = usuario.fechaFinAcceso || "";
 
   editarRol.disabled = esMiCuenta;
 
+  actualizarSelectorRolesEdicion();
+
   mostrarMensajeEdicion(
-    esMiCuenta ? "Por seguridad, no podés cambiar tu propio rol." : "",
+    esMiCuenta
+      ? "Por seguridad, no podés cambiar los roles de tu propia cuenta."
+      : "",
   );
 
   modalEditar.classList.add("abierta");
@@ -3852,6 +3919,10 @@ if (rolPrincipalUsuario) {
   );
 
   actualizarSelectorRolesAdicionales();
+}
+
+if (editarRol) {
+  editarRol.addEventListener("change", actualizarSelectorRolesEdicion);
 }
 
 if (formulario) {

@@ -2445,7 +2445,8 @@
             </div>
 
             <div class="campo-formulario">
-              <label for="editarRol">Rol *</label>
+              <label for="editarRol">Rol principal *</label>
+
               <select id="editarRol" required>
                 <option value="ALUMNO">ALUMNO</option>
                 <option value="DOCENTE">DOCENTE</option>
@@ -2454,6 +2455,68 @@
                 <option value="SECRETARIA">SECRETARÍA</option>
                 <option value="DIRECCION">DIRECCIÓN</option>
               </select>
+
+              <small class="ayuda-roles">
+                El rol principal se conserva por compatibilidad con el sistema.
+              </small>
+            </div>
+
+            <div class="campo-formulario campo-doble">
+              <label>Roles adicionales</label>
+
+              <div
+                class="selector-roles-admin"
+                id="editarRolesAdicionalesUsuario"
+              >
+                <label class="opcion-rol-admin">
+                  <input
+                    type="checkbox"
+                    name="editarRolesAdicionales"
+                    value="DOCENTE"
+                  />
+                  <span>DOCENTE</span>
+                </label>
+
+                <label class="opcion-rol-admin">
+                  <input
+                    type="checkbox"
+                    name="editarRolesAdicionales"
+                    value="SOPORTE"
+                  />
+                  <span>SOPORTE</span>
+                </label>
+
+                <label class="opcion-rol-admin">
+                  <input
+                    type="checkbox"
+                    name="editarRolesAdicionales"
+                    value="PRECEPTORIA"
+                  />
+                  <span>PRECEPTORÍA</span>
+                </label>
+
+                <label class="opcion-rol-admin">
+                  <input
+                    type="checkbox"
+                    name="editarRolesAdicionales"
+                    value="SECRETARIA"
+                  />
+                  <span>SECRETARÍA</span>
+                </label>
+
+                <label class="opcion-rol-admin">
+                  <input
+                    type="checkbox"
+                    name="editarRolesAdicionales"
+                    value="DIRECCION"
+                  />
+                  <span>DIRECCIÓN</span>
+                </label>
+              </div>
+
+              <small class="ayuda-roles">
+                ALUMNO es exclusivo y no puede combinarse con otros roles.
+              </small>
             </div>
 
             <div class="campo-formulario">
