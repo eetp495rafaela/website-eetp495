@@ -2171,3 +2171,29 @@ body.modal-abierto {
     grid-template-columns: 1fr;
   }
 }
+/* Roles adicionales dentro del modal de edición */
+#editarRolesAdicionalesUsuario {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.45rem 0.65rem;
+}
+
+#editarRolesAdicionalesUsuario .opcion-rol-admin {
+  min-height: 38px;
+  padding: 0.45rem 0.55rem;
+}
+
+#editarRolesAdicionalesUsuario + .ayuda-roles {
+  margin-top: 0.35rem;
+}
+
+@media (max-width: 760px) {
+  #editarRolesAdicionalesUsuario {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 480px) {
+  #editarRolesAdicionalesUsuario {
+    grid-template-columns: 1fr;
+  }
+}
