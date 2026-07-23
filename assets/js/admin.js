@@ -39,6 +39,11 @@ const db = getFirestore(app);
 const formulario = document.getElementById("formRegistroUsuario");
 const mensajeRegistro = document.getElementById("mensajeRegistroUsuario");
 const btnRegistrar = document.getElementById("btnRegistrarUsuario");
+const rolPrincipalUsuario = document.getElementById("rol");
+
+const checksRolesAdicionalesUsuario = Array.from(
+  document.querySelectorAll('input[name="rolesAdicionales"]'),
+);
 const btnVerUsuarios = document.getElementById("btnVerUsuarios");
 const btnVerEstudiantes = document.getElementById("btnVerEstudiantes");
 
@@ -312,6 +317,30 @@ function normalizarCorreo(correo) {
   return String(correo || "")
     .trim()
     .toLowerCase();
+}
+
+function actualizarSelectorRolesAdicionales() {
+  if (!rolPrincipalUsuario) return;
+
+  const rolPrincipal = String(rolPrincipalUsuario.value || "")
+    .trim()
+    .toUpperCase();
+
+  const esAlumno = rolPrincipal === "ALUMNO";
+
+  checksRolesAdicionalesUsuario.forEach((checkbox) => {
+    const rolCheckbox = String(checkbox.value || "")
+      .trim()
+      .toUpperCase();
+
+    const coincideConPrincipal = rolCheckbox === rolPrincipal;
+
+    checkbox.disabled = esAlumno || coincideConPrincipal;
+
+    if (esAlumno || coincideConPrincipal) {
+      checkbox.checked = false;
+    }
+  });
 }
 
 function escaparHtml(texto) {
@@ -3814,6 +3843,15 @@ async function guardarEdicionUsuario(event) {
   } finally {
     btnGuardarEdicion.disabled = false;
   }
+}
+
+if (rolPrincipalUsuario) {
+  rolPrincipalUsuario.addEventListener(
+    "change",
+    actualizarSelectorRolesAdicionales,
+  );
+
+  actualizarSelectorRolesAdicionales();
 }
 
 if (formulario) {
