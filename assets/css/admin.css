@@ -2171,28 +2171,45 @@ body.modal-abierto {
     grid-template-columns: 1fr;
   }
 }
-/* Roles adicionales dentro del modal de edición */
+/* =========================================================
+   ROLES ADICIONALES EN EDICIÓN DE USUARIO
+   ========================================================= */
+
+.formulario-edicion .campo-roles-edicion {
+  grid-column: 1 / -1;
+}
+
 #editarRolesAdicionalesUsuario {
+  display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 0.45rem 0.65rem;
+  gap: 0.5rem;
+  width: 100%;
 }
 
 #editarRolesAdicionalesUsuario .opcion-rol-admin {
-  min-height: 38px;
-  padding: 0.45rem 0.55rem;
+  min-width: 0;
+  min-height: 40px;
+  margin: 0;
+  padding: 0.5rem 0.65rem;
+  transform: none;
+}
+
+#editarRolesAdicionalesUsuario .opcion-rol-admin span {
+  font-size: 0.8rem;
+  white-space: nowrap;
 }
 
 #editarRolesAdicionalesUsuario + .ayuda-roles {
-  margin-top: 0.35rem;
+  margin-top: 0.4rem;
 }
 
-@media (max-width: 760px) {
+@media (max-width: 650px) {
   #editarRolesAdicionalesUsuario {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
-@media (max-width: 480px) {
+@media (max-width: 460px) {
   #editarRolesAdicionalesUsuario {
     grid-template-columns: 1fr;
   }
