@@ -27,7 +27,63 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 window.portalDb = db;
+
+const CLAVE_ROL_ACTIVO = "rolActivoPortal";
+
+const ROLES_VALIDOS = new Set([
+  "ALUMNO",
+  "DOCENTE",
+  "SOPORTE",
+  "PRECEPTORIA",
+  "SECRETARIA",
+  "DIRECCION",
+]);
+
 const TIEMPO_MAXIMO_INACTIVIDAD = 15 * 60 * 1000;
+
+function normalizarRol(rol) {
+  return String(rol || "")
+    .trim()
+    .toUpperCase();
+}
+
+function obtenerRolesPerfil(perfil) {
+  const rolPrincipal = normalizarRol(perfil.rol);
+
+  const rolesAdicionales = Array.isArray(perfil.roles)
+    ? perfil.roles.map(normalizarRol)
+    : [];
+
+  return Array.from(new Set([rolPrincipal, ...rolesAdicionales])).filter(
+    (rol) => ROLES_VALIDOS.has(rol),
+  );
+}
+
+function obtenerRolActivoSesion() {
+  try {
+    return normalizarRol(sessionStorage.getItem(CLAVE_ROL_ACTIVO));
+  } catch (error) {
+    console.warn("No se pudo consultar el rol activo de la sesión:", error);
+
+    return "";
+  }
+}
+
+function guardarRolActivoSesion(rol) {
+  try {
+    sessionStorage.setItem(CLAVE_ROL_ACTIVO, normalizarRol(rol));
+  } catch (error) {
+    console.warn("No se pudo guardar el rol activo de la sesión:", error);
+  }
+}
+
+function eliminarRolActivoSesion() {
+  try {
+    sessionStorage.removeItem(CLAVE_ROL_ACTIVO);
+  } catch (error) {
+    console.warn("No se pudo eliminar el rol activo de la sesión:", error);
+  }
+}
 
 const EVENTOS_ACTIVIDAD = [
   "mousedown",
@@ -111,6 +167,8 @@ function iniciarControlInactividad() {
 }
 
 function volverAlLogin(mensaje = "") {
+  eliminarRolActivoSesion();
+
   const url = new URL("../login.html", window.location.href);
 
   if (mensaje) {
@@ -282,6 +340,8 @@ if (btnCerrarSesionPortal) {
     if (!resultado.isConfirmed) return;
 
     try {
+      eliminarRolActivoSesion();
+
       await signOut(auth);
       window.location.replace("../login.html");
     } catch (error) {
@@ -355,9 +415,7 @@ onAuthStateChanged(auth, async (user) => {
       .trim()
       .toUpperCase();
 
-    const rolUsuario = String(perfil.rol || "")
-      .trim()
-      .toUpperCase();
+    const rolesUsuario = obtenerRolesPerfil(perfil);
 
     if (estado !== "ACTIVO") {
       await signOut(auth);
@@ -371,9 +429,62 @@ onAuthStateChanged(auth, async (user) => {
       return;
     }
 
-    if (!rolesPermitidos.includes(rolUsuario)) {
+    if (!rolesUsuario.length) {
       await signOut(auth);
-      volverAlLogin("Tu cuenta no tiene permiso para este portal.");
+      volverAlLogin("Tu cuenta no tiene roles válidos configurados.");
+      return;
+    }
+
+    /*
+     * El rol ALUMNO es exclusivo y no puede combinarse
+     * con ningún otro rol institucional.
+     */
+    if (rolesUsuario.includes("ALUMNO") && rolesUsuario.length > 1) {
+      await signOut(auth);
+
+      volverAlLogin("La configuración de roles de esta cuenta no es válida.");
+
+      return;
+    }
+
+    let rolUsuario = obtenerRolActivoSesion();
+
+    /*
+     * Compatibilidad con usuarios que poseen un solo rol.
+     * Si ingresan sin una selección guardada, se toma automáticamente.
+     */
+    if (!rolUsuario && rolesUsuario.length === 1) {
+      rolUsuario = rolesUsuario[0];
+      guardarRolActivoSesion(rolUsuario);
+    }
+
+    /*
+     * Los usuarios con varios roles deben elegir uno
+     * desde la pantalla de ingreso.
+     */
+    if (!rolUsuario) {
+      volverAlLogin("Elegí el rol con el que querés ingresar.");
+
+      return;
+    }
+
+    /*
+     * sessionStorage no otorga permisos.
+     * El rol seleccionado debe existir realmente en Firestore.
+     */
+    if (!rolesUsuario.includes(rolUsuario)) {
+      volverAlLogin("El rol seleccionado no está autorizado para esta cuenta.");
+
+      return;
+    }
+
+    /*
+     * El rol elegido también debe estar permitido
+     * en el portal que se está intentando abrir.
+     */
+    if (!rolesPermitidos.includes(rolUsuario)) {
+      volverAlLogin("El rol seleccionado no tiene permiso para este portal.");
+
       return;
     }
 
@@ -385,6 +496,7 @@ onAuthStateChanged(auth, async (user) => {
       correo,
       nombreCompleto: perfil.nombreCompleto || user.displayName || correo,
       rol: rolUsuario,
+      roles: rolesUsuario,
       estado,
       tipoVinculo: perfil.tipoVinculo || "",
       situacionRevista: perfil.situacionRevista || "",
