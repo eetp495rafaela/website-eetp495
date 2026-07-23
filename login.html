@@ -46,7 +46,7 @@
 
           <h2>Portal Institucional</h2>
 
-          <div class="login-acceso">
+          <div class="login-acceso" id="vistaLogin">
             <p class="texto-acceso">
               Ingresá con tu cuenta institucional o cuenta autorizada.
             </p>
@@ -61,6 +61,25 @@
               <i class="fa-solid fa-house"></i>
               Volver al sitio público
             </a>
+          </div>
+          <div class="selector-roles" id="vistaSeleccionRol" hidden>
+            <p class="texto-acceso">
+              Tu cuenta tiene más de un rol autorizado. Elegí el portal al que
+              querés ingresar.
+            </p>
+
+            <div class="opciones-roles" id="opcionesRoles"></div>
+
+            <button
+              type="button"
+              class="btn-volver-cuenta"
+              id="btnElegirOtraCuenta"
+            >
+              <i class="fa-solid fa-arrow-left"></i>
+              Elegir otra cuenta de Google
+            </button>
+
+            <p class="mensaje-login" id="mensajeSeleccionRol"></p>
           </div>
         </div>
       </div>

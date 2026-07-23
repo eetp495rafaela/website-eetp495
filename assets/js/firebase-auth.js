@@ -28,14 +28,63 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
+
 const provider = new GoogleAuthProvider();
 
 provider.setCustomParameters({
   prompt: "select_account",
 });
 
+const CLAVE_ROL_ACTIVO = "rolActivoPortal";
+
+const PORTALES_POR_ROL = {
+  ALUMNO: {
+    etiqueta: "Estudiante",
+    icono: "fa-user-graduate",
+    url: "alumnos/index.html",
+  },
+
+  DOCENTE: {
+    etiqueta: "Docente",
+    icono: "fa-chalkboard-user",
+    url: "docentes/index.html",
+  },
+
+  SOPORTE: {
+    etiqueta: "Soporte Institucional",
+    icono: "fa-user-gear",
+    url: "admin/index.html",
+  },
+
+  PRECEPTORIA: {
+    etiqueta: "Preceptoría",
+    icono: "fa-clipboard",
+    url: "gestion/index.html",
+  },
+
+  SECRETARIA: {
+    etiqueta: "Secretaría",
+    icono: "fa-folder-open",
+    url: "gestion/index.html",
+  },
+
+  DIRECCION: {
+    etiqueta: "Dirección",
+    icono: "fa-school",
+    url: "gestion/index.html",
+  },
+};
+
 const boton = document.getElementById("btnGoogle");
-const mensaje = document.querySelector(".mensaje-login");
+const mensaje = document.querySelector("#vistaLogin .mensaje-login");
+
+const vistaLogin = document.getElementById("vistaLogin");
+const vistaSeleccionRol = document.getElementById("vistaSeleccionRol");
+const opcionesRoles = document.getElementById("opcionesRoles");
+
+const btnElegirOtraCuenta = document.getElementById("btnElegirOtraCuenta");
+
+const mensajeSeleccionRol = document.getElementById("mensajeSeleccionRol");
 
 function mostrarMensaje(texto) {
   if (mensaje) {
@@ -43,10 +92,130 @@ function mostrarMensaje(texto) {
   }
 }
 
+function mostrarMensajeSeleccionRol(texto) {
+  if (mensajeSeleccionRol) {
+    mensajeSeleccionRol.textContent = texto;
+  }
+}
+
+function mostrarVistaLogin() {
+  if (vistaLogin) {
+    vistaLogin.hidden = false;
+  }
+
+  if (vistaSeleccionRol) {
+    vistaSeleccionRol.hidden = true;
+  }
+
+  if (boton) {
+    boton.disabled = false;
+  }
+}
+
+function mostrarVistaSeleccionRol() {
+  if (vistaLogin) {
+    vistaLogin.hidden = true;
+  }
+
+  if (vistaSeleccionRol) {
+    vistaSeleccionRol.hidden = false;
+  }
+}
+
 function normalizarCorreo(correo) {
   return String(correo || "")
     .trim()
     .toLowerCase();
+}
+
+function normalizarRol(rol) {
+  return String(rol || "")
+    .trim()
+    .toUpperCase();
+}
+
+function obtenerRolesPerfil(perfil) {
+  const rolPrincipal = normalizarRol(perfil.rol);
+
+  const rolesAdicionales = Array.isArray(perfil.roles)
+    ? perfil.roles.map(normalizarRol)
+    : [];
+
+  return Array.from(new Set([rolPrincipal, ...rolesAdicionales])).filter(
+    (rol) => PORTALES_POR_ROL[rol],
+  );
+}
+
+function guardarRolActivo(rol) {
+  sessionStorage.setItem(CLAVE_ROL_ACTIVO, normalizarRol(rol));
+}
+
+function eliminarRolActivo() {
+  sessionStorage.removeItem(CLAVE_ROL_ACTIVO);
+}
+
+function ingresarAlPortalDelRol(rol) {
+  const rolNormalizado = normalizarRol(rol);
+  const portal = PORTALES_POR_ROL[rolNormalizado];
+
+  if (!portal) {
+    mostrarMensajeSeleccionRol(
+      "El rol seleccionado no tiene un portal asignado.",
+    );
+
+    return;
+  }
+
+  guardarRolActivo(rolNormalizado);
+
+  window.location.href = portal.url;
+}
+
+function construirSelectorRoles(perfil) {
+  if (!opcionesRoles) {
+    throw new Error("No se encontró el contenedor para seleccionar el rol.");
+  }
+
+  opcionesRoles.innerHTML = "";
+  mostrarMensajeSeleccionRol("");
+
+  perfil.roles.forEach((rol) => {
+    const portal = PORTALES_POR_ROL[rol];
+
+    if (!portal) {
+      return;
+    }
+
+    const botonRol = document.createElement("button");
+
+    botonRol.type = "button";
+    botonRol.className = "btn-rol-portal";
+    botonRol.dataset.rol = rol;
+
+    const icono = document.createElement("i");
+    icono.className = `fa-solid ${portal.icono}`;
+
+    const texto = document.createElement("span");
+    texto.textContent = `Ingresar como ${portal.etiqueta}`;
+
+    botonRol.append(icono, texto);
+
+    botonRol.addEventListener("click", () => {
+      const botonesRoles = opcionesRoles.querySelectorAll(".btn-rol-portal");
+
+      botonesRoles.forEach((botonOpcion) => {
+        botonOpcion.disabled = true;
+      });
+
+      mostrarMensajeSeleccionRol(`Ingresando como ${portal.etiqueta}...`);
+
+      ingresarAlPortalDelRol(rol);
+    });
+
+    opcionesRoles.appendChild(botonRol);
+  });
+
+  mostrarVistaSeleccionRol();
 }
 
 async function validarPerfilUsuario(user) {
@@ -57,6 +226,7 @@ async function validarPerfilUsuario(user) {
   }
 
   const referenciaUsuario = doc(db, "usuarios", correo);
+
   const documentoUsuario = await getDoc(referenciaUsuario);
 
   if (!documentoUsuario.exists()) {
@@ -68,12 +238,12 @@ async function validarPerfilUsuario(user) {
   }
 
   const perfil = documentoUsuario.data();
+
   const estado = String(perfil.estado || "")
     .trim()
     .toUpperCase();
-  const rol = String(perfil.rol || "")
-    .trim()
-    .toUpperCase();
+
+  const roles = obtenerRolesPerfil(perfil);
 
   if (estado !== "ACTIVO") {
     await signOut(auth);
@@ -83,25 +253,17 @@ async function validarPerfilUsuario(user) {
     );
   }
 
-  if (
-    ![
-      "ALUMNO",
-      "DOCENTE",
-      "SOPORTE",
-      "PRECEPTORIA",
-      "SECRETARIA",
-      "DIRECCION",
-    ].includes(rol)
-  ) {
+  if (!roles.length) {
     await signOut(auth);
 
-    throw new Error("Tu cuenta no tiene un rol válido configurado.");
+    throw new Error("Tu cuenta no tiene ningún rol válido configurado.");
   }
 
   return {
     correo,
     nombreCompleto: perfil.nombreCompleto || user.displayName || correo,
-    rol,
+    rol: roles[0],
+    roles,
     estado,
     tipoVinculo: perfil.tipoVinculo || "",
   };
@@ -111,44 +273,37 @@ async function procesarUsuarioAutenticado(user) {
   mostrarMensaje("Verificando autorización...");
 
   try {
+    eliminarRolActivo();
+
     const perfil = await validarPerfilUsuario(user);
 
     console.log("Perfil autorizado:", perfil);
 
-    mostrarMensaje(
-      `Bienvenido/a, ${perfil.nombreCompleto}. Ingresando al portal...`,
-    );
+    if (perfil.roles.length === 1) {
+      const portal = PORTALES_POR_ROL[perfil.roles[0]];
 
-    setTimeout(() => {
-      if (perfil.rol === "SOPORTE") {
-        window.location.href = "admin/index.html";
-        return;
-      }
+      mostrarMensaje(
+        `Bienvenido/a, ${perfil.nombreCompleto}. Ingresando como ${portal.etiqueta}...`,
+      );
 
-      if (perfil.rol === "DOCENTE") {
-        window.location.href = "docentes/index.html";
-        return;
-      }
+      setTimeout(() => {
+        ingresarAlPortalDelRol(perfil.roles[0]);
+      }, 900);
 
-      if (perfil.rol === "ALUMNO") {
-        window.location.href = "alumnos/index.html";
-        return;
-      }
+      return;
+    }
 
-      if (["PRECEPTORIA", "SECRETARIA", "DIRECCION"].includes(perfil.rol)) {
-        window.location.href = "gestion/index.html";
-        return;
-      }
-
-      mostrarMensaje("Tu cuenta no tiene un portal asignado.");
-      boton.disabled = false;
-    }, 900);
+    construirSelectorRoles(perfil);
   } catch (error) {
     console.error("Error de autorización:", error);
 
+    mostrarVistaLogin();
+
     mostrarMensaje(`Acceso denegado: ${error.message}`);
 
-    boton.disabled = false;
+    if (boton) {
+      boton.disabled = false;
+    }
   }
 }
 
@@ -156,7 +311,12 @@ await setPersistence(auth, browserSessionPersistence);
 
 if (boton) {
   boton.addEventListener("click", async () => {
-    mostrarMensaje("Abriendo acceso con Google...");
+    eliminarRolActivo();
+
+    mostrarMensaje(
+      "Seleccioná la cuenta de Google con la que querés ingresar...",
+    );
+
     boton.disabled = true;
 
     try {
@@ -164,15 +324,50 @@ if (boton) {
     } catch (error) {
       console.error("Error Firebase:", error);
 
-      mostrarMensaje(`Error de acceso: ${error.code || "Desconocido"}`);
+      if (error.code === "auth/popup-closed-by-user") {
+        mostrarMensaje("No se seleccionó ninguna cuenta.");
+      } else {
+        mostrarMensaje(
+          `Error de acceso: ${error.code || error.message || "Desconocido"}`,
+        );
+      }
 
       boton.disabled = false;
     }
   });
 }
 
+if (btnElegirOtraCuenta) {
+  btnElegirOtraCuenta.addEventListener("click", async () => {
+    eliminarRolActivo();
+
+    if (opcionesRoles) {
+      opcionesRoles.innerHTML = "";
+    }
+
+    mostrarMensajeSeleccionRol("");
+
+    try {
+      await signOut(auth);
+
+      mostrarVistaLogin();
+
+      mostrarMensaje(
+        "Presioná “Ingresar con Google” para seleccionar otra cuenta.",
+      );
+    } catch (error) {
+      console.error("Error al cambiar de cuenta:", error);
+
+      mostrarMensajeSeleccionRol(
+        "No se pudo cambiar de cuenta. Intentá nuevamente.",
+      );
+    }
+  });
+}
+
 onAuthStateChanged(auth, async (user) => {
   if (!user) {
+    mostrarVistaLogin();
     return;
   }
 
