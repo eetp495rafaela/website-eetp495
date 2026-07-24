@@ -4004,6 +4004,7 @@ function aplicarFiltrosHorariosGestion() {
   const diaSeleccionado = String(filtroDiaHorarioGestion?.value || "")
     .trim()
     .toUpperCase();
+
   const espacioSeleccionado = String(
     filtroEspacioHorarioGestion?.value || "",
   ).trim();
@@ -4016,17 +4017,23 @@ function aplicarFiltrosHorariosGestion() {
     const tipo = String(horario.tipoHorario || "")
       .trim()
       .toUpperCase();
+
     const turno = String(horario.turno || "")
       .trim()
       .toUpperCase();
+
     const dia = String(horario.dia || "")
       .trim()
       .toUpperCase();
+
     const curso = obtenerCursoHorarioGestion(horario);
+
     const espacio = obtenerEspacioHorarioGestion(horario);
 
     const coincideTipo = !tipoSeleccionado || tipo === tipoSeleccionado;
+
     const coincideTurno = !turnoSeleccionado || turno === turnoSeleccionado;
+
     const coincideDia = !diaSeleccionado || dia === diaSeleccionado;
 
     const coincideEspacio =
@@ -4035,12 +4042,13 @@ function aplicarFiltrosHorariosGestion() {
     const coincideCurso = !cursoSeleccionado || curso === cursoSeleccionado;
 
     return (
-  coincideTipo &&
-  coincideTurno &&
-  coincideDia &&
-  coincideEspacio &&
-  coincideCurso
-);
+      coincideTipo &&
+      coincideTurno &&
+      coincideDia &&
+      coincideEspacio &&
+      coincideCurso
+    );
+  });
 
   renderizarHorariosGestion(horariosFiltrados);
 }
@@ -4088,15 +4096,11 @@ async function cargarHorariosGestion() {
       return;
     }
 
-    cargarCursosFiltroHorariosGestion(
-  horariosGestionCargados,
-);
+    cargarCursosFiltroHorariosGestion(horariosGestionCargados);
 
-cargarEspaciosFiltroHorariosGestion(
-  horariosGestionCargados,
-);
+    cargarEspaciosFiltroHorariosGestion(horariosGestionCargados);
 
-aplicarFiltrosHorariosGestion();
+    aplicarFiltrosHorariosGestion();
   } catch (error) {
     console.error("Error al cargar horarios en Portal Gestión:", error);
 
