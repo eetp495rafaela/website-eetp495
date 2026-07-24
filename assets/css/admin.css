@@ -2222,3 +2222,9 @@ body.modal-abierto {
     grid-template-columns: 1fr;
   }
 }
+#selectAsignacionReferente,
+#selectAsignacionReferente option {
+  font-family: "Nunito Sans", sans-serif !important;
+  font-size: 1rem;
+  font-weight: 600;
+}
