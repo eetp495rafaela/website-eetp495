@@ -3743,45 +3743,58 @@ function ordenarHorariosGestion(horarios) {
   });
 }
 
+const DIAS_HORARIO_GESTION = [
+  { valor: "LUNES", etiqueta: "Lunes" },
+  { valor: "MARTES", etiqueta: "Martes" },
+  { valor: "MIERCOLES", etiqueta: "Miércoles" },
+  { valor: "JUEVES", etiqueta: "Jueves" },
+  { valor: "VIERNES", etiqueta: "Viernes" },
+];
+
 function renderizarTarjetaHorarioGestion(horario) {
   const extra = obtenerExtraHorarioGestion(horario);
 
+  const horarioVisible = escaparHtmlGestion(
+    obtenerHorarioTextoGestion(horario),
+  );
+
+  const espacioVisible = escaparHtmlGestion(
+    obtenerEspacioHorarioGestion(horario),
+  );
+
+  const docenteVisible = escaparHtmlGestion(
+    horario.docenteNombre || "Docente sin cargar",
+  );
+
+  const cursoVisible = escaparHtmlGestion(obtenerCursoHorarioGestion(horario));
+
   return `
-    <article class="tarjeta-horario-gestion">
-      <div class="encabezado-horario-gestion">
-        <div>
-          <h5>${obtenerCursoHorarioGestion(horario)}</h5>
-          <p>${obtenerEspacioHorarioGestion(horario)}</p>
-        </div>
-
-        <span>${obtenerHorarioTextoGestion(horario)}</span>
+    <article class="tarjeta-bloque-horario-gestion">
+      <div class="bloque-horario-hora-gestion">
+        ${horarioVisible}
       </div>
 
-      <div class="detalle-horario-gestion">
-        <p>
-          <i class="fa-solid fa-calendar-day"></i>
-          ${obtenerDiaHorarioGestion(horario.dia)}
-        </p>
-
-        <p>
-          <i class="fa-solid fa-clock"></i>
-          ${obtenerTurnoHorarioGestion(horario.turno)}
-        </p>
-
-        <p>
-          <i class="fa-solid fa-user-tie"></i>
-          ${horario.docenteNombre || "Docente sin cargar"}
-        </p>
-
-        ${
-          extra
-            ? `<p>
-                <i class="fa-solid fa-location-dot"></i>
-                ${extra}
-              </p>`
-            : ""
-        }
+      <div class="bloque-horario-materia-gestion">
+        ${espacioVisible}
       </div>
+
+      <div class="bloque-horario-docente-gestion">
+        ${docenteVisible}
+      </div>
+
+      <div class="bloque-horario-curso-gestion">
+        ${cursoVisible}
+      </div>
+
+      ${
+        extra
+          ? `
+            <div class="bloque-horario-extra-gestion">
+              ${escaparHtmlGestion(extra)}
+            </div>
+          `
+          : ""
+      }
     </article>
   `;
 }
@@ -3793,6 +3806,7 @@ function agruparHorariosPorTipoYTurno(horarios) {
     const tipo = String(horario.tipoHorario || "")
       .trim()
       .toUpperCase();
+
     const turno = String(horario.turno || "")
       .trim()
       .toUpperCase();
@@ -3844,23 +3858,90 @@ function renderizarHorariosGestion(horarios) {
 
   const grupos = agruparHorariosPorTipoYTurno(horarios);
 
+  const diaSeleccionado = String(filtroDiaHorarioGestion?.value || "")
+    .trim()
+    .toUpperCase();
+
+  const diasVisibles = diaSeleccionado
+    ? DIAS_HORARIO_GESTION.filter((dia) => dia.valor === diaSeleccionado)
+    : DIAS_HORARIO_GESTION;
+
   vistaHorariosGestion.innerHTML = `
     <div class="grupos-horarios-gestion">
       ${grupos
-        .map(
-          (grupo) => `
-            <section class="grupo-horario-gestion">
-              <h4>
-                ${obtenerTipoHorarioGestion(grupo.tipo)}
-                <span>${obtenerTurnoHorarioGestion(grupo.turno)}</span>
-              </h4>
+        .map((grupo) => {
+          const columnasDias = diasVisibles
+            .map((dia) => {
+              const horariosDelDia = grupo.horarios
+                .filter(
+                  (horario) =>
+                    String(horario.dia || "")
+                      .trim()
+                      .toUpperCase() === dia.valor,
+                )
+                .sort((a, b) => {
+                  const horaA = String(a.horaInicio || "");
 
-              <div class="grilla-horarios-gestion">
-                ${grupo.horarios.map(renderizarTarjetaHorarioGestion).join("")}
+                  const horaB = String(b.horaInicio || "");
+
+                  if (horaA !== horaB) {
+                    return horaA.localeCompare(horaB, "es");
+                  }
+
+                  return obtenerCursoHorarioGestion(a).localeCompare(
+                    obtenerCursoHorarioGestion(b),
+                    "es",
+                    {
+                      numeric: true,
+                      sensitivity: "base",
+                    },
+                  );
+                });
+
+              return `
+                <section class="dia-horario-gestion">
+                  <h5>${dia.etiqueta}</h5>
+
+                  <div class="lista-bloques-dia-gestion">
+                    ${
+                      horariosDelDia.length
+                        ? horariosDelDia
+                            .map(renderizarTarjetaHorarioGestion)
+                            .join("")
+                        : `
+                          <p class="sin-bloques-horario-gestion">
+                            Sin bloques cargados.
+                          </p>
+                        `
+                    }
+                  </div>
+                </section>
+              `;
+            })
+            .join("");
+
+          return `
+            <section class="grupo-horario-gestion">
+              <div class="titulo-grupo-horario-gestion">
+                <h4>
+                  ${escaparHtmlGestion(obtenerTipoHorarioGestion(grupo.tipo))}
+                </h4>
+
+                <span>
+                  ${escaparHtmlGestion(obtenerTurnoHorarioGestion(grupo.turno))}
+                </span>
+              </div>
+
+              <div
+                class="grilla-horario-semanal-gestion ${
+                  diaSeleccionado ? "grilla-un-dia-gestion" : ""
+                }"
+              >
+                ${columnasDias}
               </div>
             </section>
-          `,
-        )
+          `;
+        })
         .join("")}
     </div>
   `;
