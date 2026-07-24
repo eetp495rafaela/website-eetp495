@@ -141,3 +141,30 @@ dist
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 .vite/
+
+# =====================================================
+# CREDENCIALES PRIVADAS Y SECRETOS
+# Nunca deben subirse al repositorio
+# =====================================================
+
+# Cuentas de servicio de Firebase / Google Cloud
+*firebase-adminsdk*.json
+*service-account*.json
+*service_account*.json
+*serviceAccount*.json
+
+# Credenciales OAuth o Google Cloud
+credentials.json
+client_secret*.json
+google-credentials*.json
+
+# Directorios reservados para secretos
+secrets/
+.secret/
+.credentials/
+
+# Claves privadas y certificados
+*.pem
+*.key
+*.p12
+*.pfx
