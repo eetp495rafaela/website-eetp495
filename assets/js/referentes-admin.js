@@ -1019,60 +1019,6 @@ function renderizarReferentesInstitucionales(referentes) {
   );
 }
 
-function renderizarReferentesInstitucionales(referentes) {
-  if (!cuerpoTablaReferentesInstitucionales) return;
-
-  cuerpoTablaReferentesInstitucionales.innerHTML = "";
-
-  if (!referentes.length) {
-    const fila = document.createElement("tr");
-    const celda = document.createElement("td");
-
-    celda.colSpan = 6;
-    celda.className = "tabla-vacia";
-    celda.textContent = "No se encontraron referentes con esos filtros.";
-
-    fila.appendChild(celda);
-
-    cuerpoTablaReferentesInstitucionales.appendChild(fila);
-
-    mostrarMensajeListadoReferentes(
-      "No se encontraron referentes con esos filtros.",
-    );
-
-    return;
-  }
-
-  referentes.forEach((referente) => {
-    const fila = document.createElement("tr");
-
-    fila.appendChild(crearCeldaReferente(textoCargoReferente(referente.cargo)));
-
-    fila.appendChild(crearCeldaReferente(referente.nombreCompleto));
-
-    fila.appendChild(crearCeldaReferente(referente.correo));
-
-    fila.appendChild(
-      crearCeldaReferente(
-        referente.cargo === "PRECEPTOR"
-          ? referente.cursoNombre
-          : "Institucional",
-      ),
-    );
-
-    fila.appendChild(crearCeldaEstadoReferente(referente.estado));
-
-    fila.appendChild(crearCeldaAccionesReferente(referente));
-
-    cuerpoTablaReferentesInstitucionales.appendChild(fila);
-  });
-
-  mostrarMensajeListadoReferentes(
-    `${referentes.length} referente(s) mostrado(s).`,
-    "ok",
-  );
-}
-
 function aplicarFiltrosReferentesInstitucionales() {
   const cargoSeleccionado = String(filtroCargoReferente?.value || "")
     .trim()
