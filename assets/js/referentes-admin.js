@@ -116,6 +116,7 @@ function textoCargoReferente(cargo) {
     VICE_DIRECTORA: "Vice Director/a",
     SECRETARIO: "Secretario/a",
     PRO_SECRETARIO: "Pro Secretario/a",
+    ASISTENTE_ADMINISTRATIVO: "Asistente Administrativo",
     PRECEPTOR: "Preceptor/a",
   };
 
@@ -134,6 +135,7 @@ function obtenerRolParaCargo(cargo) {
     VICE_DIRECTORA: "DIRECCION",
     SECRETARIO: "SECRETARIA",
     PRO_SECRETARIO: "SECRETARIA",
+    ASISTENTE_ADMINISTRATIVO: "ASISTENTE_ADMINISTRATIVO",
     PRECEPTOR: "PRECEPTORIA",
   };
 
