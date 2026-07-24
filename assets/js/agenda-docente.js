@@ -303,29 +303,74 @@ async function obtenerAdministracionAgendaDocente() {
     PRECEPTOR: 5,
   };
 
-  return resultado.docs
-    .map((documento) => {
-      const datos = {
-        id: documento.id,
-        ...documento.data(),
-      };
+  const contactosAgrupados = new Map();
+
+  resultado.docs.forEach((documento) => {
+    const datos = {
+      id: documento.id,
+      ...documento.data(),
+    };
+
+    const cargo = normalizarTextoAgendaDocente(datos.cargo);
+
+    const nombre = obtenerNombreAgendaDocente(datos);
+
+    const correo = obtenerCorreoAgendaDocente(datos);
+
+    if (correo === correoActual) {
+      return;
+    }
+
+    const identificadorPersona =
+      correo ||
+      String(datos.usuarioId || "").trim() ||
+      normalizarTextoAgendaDocente(nombre);
+
+    const clave = `${cargo}__${identificadorPersona}`;
+
+    if (!contactosAgrupados.has(clave)) {
+      contactosAgrupados.set(clave, {
+        cargo,
+        nombre,
+        correo,
+        cursos: [],
+      });
+    }
+
+    if (cargo === "PRECEPTOR") {
+      const curso =
+        obtenerNombreCursoAgendaDocente(datos) || "Curso sin cargar";
+
+      const contacto = contactosAgrupados.get(clave);
+
+      if (!contacto.cursos.includes(curso)) {
+        contacto.cursos.push(curso);
+      }
+    }
+  });
+
+  return Array.from(contactosAgrupados.values())
+    .map((contacto) => {
+      const cursosOrdenados = [...contacto.cursos].sort((a, b) =>
+        a.localeCompare(b, "es", {
+          numeric: true,
+          sensitivity: "base",
+        }),
+      );
 
       return {
-        cargo: normalizarTextoAgendaDocente(datos.cargo),
-
-        nombre: obtenerNombreAgendaDocente(datos),
-
-        correo: obtenerCorreoAgendaDocente(datos),
+        cargo: contacto.cargo,
+        nombre: contacto.nombre,
+        correo: contacto.correo,
 
         detalle:
-          normalizarTextoAgendaDocente(datos.cargo) === "PRECEPTOR"
-            ? `${textoCargoAgendaDocente(datos.cargo)} · ${
-                obtenerNombreCursoAgendaDocente(datos) || "Curso sin cargar"
-              }`
-            : textoCargoAgendaDocente(datos.cargo),
+          contacto.cargo === "PRECEPTOR"
+            ? `${textoCargoAgendaDocente(
+                contacto.cargo,
+              )} · ${cursosOrdenados.join(", ")}`
+            : textoCargoAgendaDocente(contacto.cargo),
       };
     })
-    .filter((contacto) => contacto.correo !== correoActual)
     .sort((a, b) => {
       const ordenA = ordenCargos[a.cargo] || 99;
 
