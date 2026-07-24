@@ -1,0 +1,469 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function usuarioAutenticado() {
+      return request.auth != null;
+    }
+
+    function esAdministradorInicial() {
+      return usuarioAutenticado()
+        && request.auth.token.email == "soportetecnico.tec495@gmail.com";
+    }
+
+    function perfilUsuario() {
+      return get(
+        /databases/$(database)/documents/usuarios/$(request.auth.token.email)
+      ).data;
+    }
+
+    function usuarioActivo() {
+      return usuarioAutenticado()
+        && perfilUsuario().estado == "ACTIVO";
+    }
+
+    function perfilTieneRol(rolBuscado) {
+  return (
+    perfilUsuario().keys().hasAny(["rol"])
+    && perfilUsuario().rol == rolBuscado
+  )
+  || (
+    perfilUsuario().keys().hasAny(["roles"])
+    && perfilUsuario().roles is list
+    && rolBuscado in perfilUsuario().roles
+  );
+}
+
+function esSoportePorPerfil() {
+  return usuarioActivo()
+    && perfilTieneRol("SOPORTE");
+}
+
+function esSoporte() {
+  return esAdministradorInicial() || esSoportePorPerfil();
+}
+
+function esAlumnoPorPerfil() {
+  return usuarioActivo()
+    && perfilTieneRol("ALUMNO");
+}
+
+function esDocentePorPerfil() {
+  return usuarioActivo()
+    && perfilTieneRol("DOCENTE");
+}
+
+function esGestionInstitucional() {
+  return usuarioActivo()
+    && (
+      perfilTieneRol("DIRECCION")
+      || perfilTieneRol("SECRETARIA")
+      || perfilTieneRol("ASISTENTE_ADMINISTRATIVO")
+      || perfilTieneRol("PRECEPTORIA")
+    );
+}
+
+function esDireccion() {
+  return usuarioActivo()
+    && perfilTieneRol("DIRECCION");
+}
+    function horarioCorrespondeAlDocente() {
+      return esDocentePorPerfil()
+        && resource.data.estado == "ACTIVO"
+        && resource.data.docenteCorreo == request.auth.token.email;
+    }
+
+    function horarioCorrespondeAlAlumno() {
+      return esAlumnoPorPerfil()
+        && resource.data.estado == "ACTIVO"
+        && resource.data.cursoAnio == perfilUsuario().cursoAnio
+        && resource.data.cursoDivision == perfilUsuario().cursoDivision;
+    }
+
+    match /usuarios/{correo} {
+
+      /*
+       * Lectura individual de perfiles.
+       */
+      allow get: if (
+        usuarioAutenticado()
+        && request.auth.token.email == correo
+      )
+      || esSoporte()
+      || (
+        esGestionInstitucional()
+        && resource.data.rol == "ALUMNO"
+      )
+      || (
+        esDocentePorPerfil()
+        && resource.data.rol == "ALUMNO"
+        && resource.data.estado == "ACTIVO"
+        && resource.data.tipoVinculo == "CURSANDO"
+      )
+      || (
+        esDocentePorPerfil()
+        && resource.data.rol == "ALUMNO"
+        && resource.data.estado == "ACTIVO"
+        && resource.data.situacionRevista == "CURSANDO"
+      );
+
+      /*
+       * Consulta de listados de usuarios.
+       */
+allow list: if esSoporte()
+
+  /*
+   * Gestión institucional puede consultar alumnos.
+   */
+  || (
+    esGestionInstitucional()
+    && resource.data.rol == "ALUMNO"
+  )
+
+  /*
+   * Un docente puede consultar a sus colegas activos.
+   * La consulta debe incluir:
+   * rol == DOCENTE y estado == ACTIVO.
+   */
+  || (
+    esDocentePorPerfil()
+    && resource.data.rol == "DOCENTE"
+    && resource.data.estado == "ACTIVO"
+  )
+
+  /*
+   * Los docentes pueden consultar estudiantes activos
+   * que estén cursando.
+   */
+  || (
+    esDocentePorPerfil()
+    && resource.data.rol == "ALUMNO"
+    && resource.data.estado == "ACTIVO"
+    && resource.data.tipoVinculo == "CURSANDO"
+  )
+
+  || (
+    esDocentePorPerfil()
+    && resource.data.rol == "ALUMNO"
+    && resource.data.estado == "ACTIVO"
+    && resource.data.situacionRevista == "CURSANDO"
+  )
+
+  /*
+   * Cada alumno puede consultar únicamente estudiantes
+   * activos de su mismo año y división.
+   */
+  || (
+    esAlumnoPorPerfil()
+    && resource.data.rol == "ALUMNO"
+    && resource.data.estado == "ACTIVO"
+    && resource.data.cursoAnio == perfilUsuario().cursoAnio
+    && resource.data.cursoDivision == perfilUsuario().cursoDivision
+    && resource.data.tipoVinculo == "CURSANDO"
+  )
+
+  || (
+    esAlumnoPorPerfil()
+    && resource.data.rol == "ALUMNO"
+    && resource.data.estado == "ACTIVO"
+    && resource.data.cursoAnio == perfilUsuario().cursoAnio
+    && resource.data.cursoDivision == perfilUsuario().cursoDivision
+    && resource.data.situacionRevista == "CURSANDO"
+  );
+
+      /*
+       * Solo Soporte administra usuarios.
+       */
+      /*
+ * Solo Soporte puede crear o eliminar usuarios.
+ */
+allow create, delete: if esSoporte();
+
+/*
+ * Soporte puede realizar cualquier actualización.
+ *
+ * Gestión Institucional únicamente puede dar de baja
+ * estudiantes activos. No puede modificar docentes,
+ * personal institucional ni otros datos del alumno.
+ */
+allow update: if esSoporte()
+  || (
+    esGestionInstitucional()
+
+    && resource.data.rol == "ALUMNO"
+    && resource.data.estado == "ACTIVO"
+
+    && request.resource.data.rol == "ALUMNO"
+    && request.resource.data.estado == "INACTIVO"
+    && request.resource.data.tipoVinculo == "BAJA"
+
+    && request.resource.data.cursoId == null
+    && request.resource.data.cursoAnio == null
+    && request.resource.data.cursoDivision == null
+    && request.resource.data.cursoNombre == null
+    && request.resource.data.grupoTaller == null
+
+    && request.resource.data.fechaBaja == request.time
+    && request.resource.data.actualizadoEn == request.time
+    && request.resource.data.actualizadoPor
+      == request.auth.token.email
+
+    && request.resource.data
+      .diff(resource.data)
+      .affectedKeys()
+      .hasOnly([
+        "estado",
+        "tipoVinculo",
+        "cursoId",
+        "cursoAnio",
+        "cursoDivision",
+        "cursoNombre",
+        "grupoTaller",
+        "fechaBaja",
+        "actualizadoEn",
+        "actualizadoPor"
+      ])
+  );
+    }
+
+    match /asignaciones_docentes/{asignacionId} {
+      allow get, list: if esSoporte()
+        || esGestionInstitucional()
+        || (
+          esDocentePorPerfil()
+          && resource.data.docenteCorreo == request.auth.token.email
+          && (
+            resource.data.estado == "ACTIVA"
+            || resource.data.estado == "ACTIVO"
+          )
+        )
+        || (
+          esAlumnoPorPerfil()
+          && (
+            resource.data.estado == "ACTIVA"
+            || resource.data.estado == "ACTIVO"
+          )
+          && resource.data.cursoAnio == perfilUsuario().cursoAnio
+          && resource.data.cursoDivision == perfilUsuario().cursoDivision
+        );
+
+      allow create, update, delete: if esSoporte();
+    }
+
+    match /cursos/{cursoId} {
+      allow get, list: if esSoporte()
+        || esGestionInstitucional();
+
+      allow create, update, delete: if esSoporte();
+    }
+
+    match /espacios_curriculares/{espacioId} {
+      allow get, list: if esSoporte()
+        || esGestionInstitucional();
+
+      allow create, update, delete: if esSoporte();
+    }
+
+    match /horarios/{horarioId} {
+      allow get, list: if esSoporte()
+        || (
+          esGestionInstitucional()
+          && resource.data.estado == "ACTIVO"
+        )
+        || horarioCorrespondeAlAlumno()
+        || horarioCorrespondeAlDocente();
+
+      allow create, update, delete: if esSoporte();
+    }
+
+    match /mesas_examen/{mesaId} {
+      allow get, list: if esSoporte()
+        || esGestionInstitucional()
+        || (
+          esDocentePorPerfil()
+          && resource.data.estado == "PUBLICADA"
+        )
+        || (
+          esAlumnoPorPerfil()
+          && resource.data.estado == "PUBLICADA"
+        );
+
+      allow create: if esSoporte()
+        || (
+          esDireccion()
+          && (
+            request.resource.data.estado == "PUBLICADA"
+            || request.resource.data.estado == "OCULTA"
+          )
+        );
+
+      allow update: if esSoporte()
+        || (
+          esDireccion()
+          && (
+            request.resource.data.estado == "PUBLICADA"
+            || request.resource.data.estado == "OCULTA"
+          )
+        );
+
+      allow delete: if esSoporte();
+    }
+
+    match /asistencias_clases/{asistenciaId} {
+      allow get, list: if esSoporte()
+        || esGestionInstitucional()
+        || (
+          esDocentePorPerfil()
+          && resource.data.docenteCorreo == request.auth.token.email
+        );
+
+      allow create: if esSoporte()
+        || (
+          esDocentePorPerfil()
+          && request.resource.data.docenteCorreo
+            == request.auth.token.email
+          && request.resource.data.estado == "ACTIVA"
+          && (
+            request.resource.data.tipoHorario == "TALLER"
+            || request.resource.data.tipoHorario
+              == "EDUCACION_FISICA"
+          )
+        );
+
+      allow update: if esSoporte()
+        || (
+          esDocentePorPerfil()
+          && resource.data.docenteCorreo
+            == request.auth.token.email
+          && request.resource.data.docenteCorreo
+            == request.auth.token.email
+          && request.resource.data.estado == "ACTIVA"
+          && (
+            request.resource.data.tipoHorario == "TALLER"
+            || request.resource.data.tipoHorario
+              == "EDUCACION_FISICA"
+          )
+        );
+
+      allow delete: if esSoporte();
+    }
+
+    match /referentes_institucionales/{referenteId} {
+
+      /*
+       * Soporte puede consultar todos los referentes.
+       *
+       * Gestión, estudiantes y docentes solamente pueden
+       * consultar referentes activos.
+       */
+      allow get, list: if esSoporte()
+        || (
+          (
+            esGestionInstitucional()
+            || esAlumnoPorPerfil()
+            || esDocentePorPerfil()
+          )
+          && resource.data.estado == "ACTIVO"
+        );
+
+      /*
+       * Solo Soporte puede registrar o modificar referentes.
+       */
+      allow create, update: if esSoporte()
+
+        /*
+         * Cargos institucionales permitidos.
+         */
+        && request.resource.data.cargo in [
+          "DIRECTORA",
+          "VICE_DIRECTORA",
+          "SECRETARIO",
+          "PRO_SECRETARIO",
+          "ASISTENTE_ADMINISTRATIVO",
+          "PRECEPTOR"
+        ]
+
+        /*
+         * Estados permitidos.
+         */
+        && request.resource.data.estado in [
+          "ACTIVO",
+          "INACTIVO"
+        ]
+
+        /*
+         * Validación del alcance.
+         */
+        && (
+          /*
+           * Preceptor/a: debe tener un curso asignado.
+           */
+          (
+            request.resource.data.cargo == "PRECEPTOR"
+            && request.resource.data.alcance == "CURSO"
+            && request.resource.data.cursoId is string
+            && request.resource.data.cursoId.size() > 0
+            && request.resource.data.cursoNombre is string
+            && request.resource.data.cursoNombre.size() > 0
+          )
+
+          ||
+
+          /*
+           * Autoridades y personal de Secretaría:
+           * tienen alcance institucional y no llevan curso.
+           */
+          (
+            request.resource.data.cargo in [
+              "DIRECTORA",
+              "VICE_DIRECTORA",
+              "SECRETARIO",
+              "PRO_SECRETARIO",
+              "ASISTENTE_ADMINISTRATIVO"
+            ]
+            && request.resource.data.alcance == "INSTITUCIONAL"
+            && request.resource.data.cursoId == null
+            && request.resource.data.cursoNombre == null
+            && request.resource.data.cursoAnio == null
+            && request.resource.data.cursoDivision == null
+          )
+        );
+
+      /*
+       * Los registros no se eliminan físicamente.
+       * La baja se realiza cambiando el estado.
+       */
+      allow delete: if false;
+    }
+
+    match /accesos_recientes/{uid} {
+
+  /*
+   * Solo Soporte puede consultar la actividad
+   * de todos los usuarios.
+   */
+  allow get, list: if esSoporte();
+
+  /*
+   * Cada usuario activo puede crear o actualizar
+   * únicamente su propio registro de ingreso.
+   */
+  allow create, update: if usuarioActivo()
+    && request.auth.uid == uid
+    && request.resource.data.keys().hasOnly([
+      "uid",
+      "nombreCompleto",
+      "correo",
+      "rol",
+      "ultimoIngreso"
+    ])
+    && request.resource.data.uid == request.auth.uid
+    && request.resource.data.correo
+      == request.auth.token.email
+    && perfilTieneRol(request.resource.data.rol)
+    && request.resource.data.nombreCompleto is string
+    && request.resource.data.ultimoIngreso == request.time;
+}
+  }
+}
