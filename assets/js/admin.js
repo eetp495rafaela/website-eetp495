@@ -3628,6 +3628,7 @@ async function registrarUsuario(event) {
       "SOPORTE",
       "PRECEPTORIA",
       "SECRETARIA",
+      "ASISTENTE_ADMINISTRATIVO",
       "DIRECCION",
     ].includes(rol)
   ) {
@@ -3883,6 +3884,7 @@ async function guardarEdicionUsuario(event) {
       "SOPORTE",
       "PRECEPTORIA",
       "SECRETARIA",
+      "ASISTENTE_ADMINISTRATIVO",
       "DIRECCION",
     ].includes(rol)
   ) {
@@ -3896,6 +3898,7 @@ async function guardarEdicionUsuario(event) {
     "SOPORTE",
     "PRECEPTORIA",
     "SECRETARIA",
+    "ASISTENTE_ADMINISTRATIVO",
     "DIRECCION",
   ];
 
@@ -4637,6 +4640,7 @@ function validarFilasImportacionUsuarios(filas) {
     "DOCENTE",
     "SOPORTE",
     "PRECEPTORIA",
+    "ASISTENTE_ADMINISTRATIVO",
     "SECRETARIA",
     "DIRECCION",
   ];
