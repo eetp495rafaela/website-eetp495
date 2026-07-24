@@ -68,6 +68,12 @@ const PORTALES_POR_ROL = {
     url: "gestion/index.html",
   },
 
+  ASISTENTE_ADMINISTRATIVO: {
+    etiqueta: "Asistente Administrativo",
+    icono: "fa-briefcase",
+    url: "gestion/index.html",
+  },
+
   DIRECCION: {
     etiqueta: "Dirección",
     icono: "fa-school",
