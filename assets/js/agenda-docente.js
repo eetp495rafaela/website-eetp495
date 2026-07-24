@@ -121,6 +121,9 @@ function textoCargoAgendaDocente(cargo) {
     VICE_DIRECTORA: "Vice Director/a",
     SECRETARIO: "Secretario/a",
     PRO_SECRETARIO: "Pro Secretario/a",
+
+    ASISTENTE_ADMINISTRATIVO: "Asistente Administrativo",
+
     PRECEPTOR: "Preceptor/a",
   };
 
@@ -300,7 +303,8 @@ async function obtenerAdministracionAgendaDocente() {
     VICE_DIRECTORA: 2,
     SECRETARIO: 3,
     PRO_SECRETARIO: 4,
-    PRECEPTOR: 5,
+    ASISTENTE_ADMINISTRATIVO: 5,
+    PRECEPTOR: 6,
   };
 
   const contactosAgrupados = new Map();
