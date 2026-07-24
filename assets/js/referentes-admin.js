@@ -804,6 +804,221 @@ function crearCeldaAccionesReferente(referente) {
   return celda;
 }
 
+function obtenerClaveAgrupacionReferente(referente) {
+  const cargo = String(referente.cargo || "")
+    .trim()
+    .toUpperCase();
+
+  const identificadorPersona =
+    String(referente.usuarioId || "").trim() ||
+    normalizarCorreoReferente(referente.correo) ||
+    String(referente.nombreCompleto || "")
+      .trim()
+      .toLowerCase();
+
+  return `${cargo}__${identificadorPersona}`;
+}
+
+function agruparReferentesParaListado(referentes) {
+  const grupos = new Map();
+
+  referentes.forEach((referente) => {
+    const clave = obtenerClaveAgrupacionReferente(referente);
+
+    if (!grupos.has(clave)) {
+      grupos.set(clave, {
+        cargo: referente.cargo,
+        nombreCompleto: referente.nombreCompleto || "",
+        correo: referente.correo || "",
+        registros: [],
+      });
+    }
+
+    grupos.get(clave).registros.push(referente);
+  });
+
+  return Array.from(grupos.values());
+}
+
+function crearCeldaCursosReferenteAgrupado(grupo) {
+  const celda = document.createElement("td");
+
+  if (grupo.cargo !== "PRECEPTOR") {
+    celda.textContent = "Institucional";
+    return celda;
+  }
+
+  const cursos = Array.from(
+    new Set(
+      grupo.registros
+        .map((referente) =>
+          String(referente.cursoNombre || "Curso sin cargar").trim(),
+        )
+        .filter(Boolean),
+    ),
+  ).sort((a, b) =>
+    a.localeCompare(b, "es", {
+      numeric: true,
+      sensitivity: "base",
+    }),
+  );
+
+  cursos.forEach((curso) => {
+    const lineaCurso = document.createElement("div");
+
+    lineaCurso.textContent = curso;
+
+    celda.appendChild(lineaCurso);
+  });
+
+  return celda;
+}
+
+function crearCeldaEstadosReferenteAgrupado(registros) {
+  const estados = Array.from(
+    new Set(
+      registros.map((referente) =>
+        String(referente.estado || "")
+          .trim()
+          .toUpperCase(),
+      ),
+    ),
+  ).filter(Boolean);
+
+  if (estados.length === 1) {
+    return crearCeldaEstadoReferente(estados[0]);
+  }
+
+  const celda = document.createElement("td");
+  const contenedor = document.createElement("div");
+
+  contenedor.className = "acciones-tabla";
+
+  estados.forEach((estado) => {
+    const celdaEstado = crearCeldaEstadoReferente(estado);
+
+    const etiqueta = celdaEstado.firstElementChild;
+
+    if (etiqueta) {
+      contenedor.appendChild(etiqueta);
+    }
+  });
+
+  celda.appendChild(contenedor);
+
+  return celda;
+}
+
+function crearCeldaAccionesReferentesAgrupados(registros) {
+  if (registros.length === 1) {
+    return crearCeldaAccionesReferente(registros[0]);
+  }
+
+  const celda = document.createElement("td");
+  const contenedor = document.createElement("div");
+
+  contenedor.className = "acciones-tabla";
+
+  registros.forEach((referente) => {
+    const curso =
+      referente.cargo === "PRECEPTOR"
+        ? referente.cursoNombre || "Curso sin cargar"
+        : "";
+
+    const btnEditar = crearBotonReferente(
+      "fa-solid fa-pen-to-square",
+      curso ? `Editar · ${curso}` : "Editar",
+      "btn-editar",
+    );
+
+    btnEditar.addEventListener("click", () => {
+      editarReferenteInstitucional(referente);
+    });
+
+    contenedor.appendChild(btnEditar);
+
+    const estaActivo =
+      String(referente.estado || "")
+        .trim()
+        .toUpperCase() === "ACTIVO";
+
+    const btnEstado = crearBotonReferente(
+      estaActivo ? "fa-solid fa-user-slash" : "fa-solid fa-user-check",
+
+      curso
+        ? `${estaActivo ? "Baja" : "Activar"} · ${curso}`
+        : estaActivo
+          ? "Dar de baja"
+          : "Activar",
+
+      estaActivo ? "btn-desactivar" : "btn-activar",
+    );
+
+    btnEstado.addEventListener("click", () => {
+      cambiarEstadoReferente(referente);
+    });
+
+    contenedor.appendChild(btnEstado);
+  });
+
+  celda.appendChild(contenedor);
+
+  return celda;
+}
+
+function renderizarReferentesInstitucionales(referentes) {
+  if (!cuerpoTablaReferentesInstitucionales) {
+    return;
+  }
+
+  cuerpoTablaReferentesInstitucionales.innerHTML = "";
+
+  if (!referentes.length) {
+    const fila = document.createElement("tr");
+    const celda = document.createElement("td");
+
+    celda.colSpan = 6;
+    celda.className = "tabla-vacia";
+
+    celda.textContent = "No se encontraron referentes con esos filtros.";
+
+    fila.appendChild(celda);
+
+    cuerpoTablaReferentesInstitucionales.appendChild(fila);
+
+    mostrarMensajeListadoReferentes(
+      "No se encontraron referentes con esos filtros.",
+    );
+
+    return;
+  }
+
+  const grupos = agruparReferentesParaListado(referentes);
+
+  grupos.forEach((grupo) => {
+    const fila = document.createElement("tr");
+
+    fila.appendChild(crearCeldaReferente(textoCargoReferente(grupo.cargo)));
+
+    fila.appendChild(crearCeldaReferente(grupo.nombreCompleto));
+
+    fila.appendChild(crearCeldaReferente(grupo.correo));
+
+    fila.appendChild(crearCeldaCursosReferenteAgrupado(grupo));
+
+    fila.appendChild(crearCeldaEstadosReferenteAgrupado(grupo.registros));
+
+    fila.appendChild(crearCeldaAccionesReferentesAgrupados(grupo.registros));
+
+    cuerpoTablaReferentesInstitucionales.appendChild(fila);
+  });
+
+  mostrarMensajeListadoReferentes(
+    `${grupos.length} persona(s) mostrada(s) en ${referentes.length} asignación(es).`,
+    "ok",
+  );
+}
+
 function renderizarReferentesInstitucionales(referentes) {
   if (!cuerpoTablaReferentesInstitucionales) return;
 
