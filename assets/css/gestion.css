@@ -1134,7 +1134,7 @@ body {
 /* Filtros de horarios */
 
 .filtros-horarios-gestion {
-  grid-template-columns: repeat(4, minmax(160px, 1fr));
+  grid-template-columns: repeat(5, minmax(150px, 1fr));
 }
 
 /* Responsive */
