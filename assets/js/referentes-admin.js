@@ -909,59 +909,210 @@ function crearCeldaEstadosReferenteAgrupado(registros) {
   return celda;
 }
 
+function ordenarAsignacionesReferente(registros) {
+  return [...registros].sort((a, b) =>
+    String(a.cursoNombre || "").localeCompare(
+      String(b.cursoNombre || ""),
+      "es",
+      {
+        numeric: true,
+        sensitivity: "base",
+      },
+    ),
+  );
+}
+
+async function abrirGestionAsignacionesReferente(registros) {
+  const asignaciones = ordenarAsignacionesReferente(registros);
+
+  if (!asignaciones.length) return;
+
+  const referente = asignaciones[0];
+
+  await Swal.fire({
+    title: "Gestionar asignaciones",
+
+    html: `
+      <div style="text-align:left;">
+        <p style="margin-bottom:16px;">
+          <strong id="nombreGestionReferente"></strong>
+        </p>
+
+        <label
+          for="selectAsignacionReferente"
+          style="
+            display:block;
+            margin-bottom:6px;
+            font-weight:800;
+          "
+        >
+          Curso o alcance
+        </label>
+
+        <select
+          id="selectAsignacionReferente"
+          class="swal2-select"
+          style="
+            width:100%;
+            margin:0;
+          "
+        ></select>
+
+        <div
+          id="estadoAsignacionReferente"
+          style="margin-top:16px;"
+        ></div>
+
+        <div
+          style="
+            display:flex;
+            flex-wrap:wrap;
+            gap:10px;
+            margin-top:20px;
+          "
+        >
+          <button
+            type="button"
+            id="btnEditarAsignacionReferente"
+            class="swal2-confirm swal2-styled"
+            style="
+              margin:0;
+              background:#0b4f9c;
+            "
+          >
+            <i class="fa-solid fa-pen-to-square"></i>
+            Editar asignación
+          </button>
+
+          <button
+            type="button"
+            id="btnEstadoAsignacionReferente"
+            class="swal2-cancel swal2-styled"
+            style="margin:0;"
+          ></button>
+        </div>
+      </div>
+    `,
+
+    showConfirmButton: false,
+    showCloseButton: true,
+    width: 560,
+
+    didOpen: () => {
+      const nombre = document.getElementById("nombreGestionReferente");
+
+      const select = document.getElementById("selectAsignacionReferente");
+
+      const estadoContenedor = document.getElementById(
+        "estadoAsignacionReferente",
+      );
+
+      const btnEditar = document.getElementById("btnEditarAsignacionReferente");
+
+      const btnEstado = document.getElementById("btnEstadoAsignacionReferente");
+
+      if (!nombre || !select || !estadoContenedor || !btnEditar || !btnEstado) {
+        return;
+      }
+
+      nombre.textContent =
+        referente.nombreCompleto || "Referente institucional";
+
+      asignaciones.forEach((asignacion, indice) => {
+        const opcion = document.createElement("option");
+
+        opcion.value = String(indice);
+
+        opcion.textContent =
+          asignacion.cargo === "PRECEPTOR"
+            ? asignacion.cursoNombre || "Curso sin cargar"
+            : "Alcance institucional";
+
+        select.appendChild(opcion);
+      });
+
+      const obtenerAsignacionSeleccionada = () => {
+        const indice = Number(select.value || 0);
+
+        return asignaciones[indice] || asignaciones[0];
+      };
+
+      const actualizarEstadoVisual = () => {
+        const asignacion = obtenerAsignacionSeleccionada();
+
+        const estaActivo =
+          String(asignacion.estado || "")
+            .trim()
+            .toUpperCase() === "ACTIVO";
+
+        estadoContenedor.innerHTML = "";
+
+        const textoEstado = document.createElement("span");
+
+        textoEstado.textContent = "Estado de la asignación: ";
+
+        const etiqueta = document.createElement("span");
+
+        etiqueta.className = estaActivo
+          ? "estado estado-activo"
+          : "estado estado-inactivo";
+
+        etiqueta.textContent = estaActivo ? "ACTIVO" : "INACTIVO";
+
+        estadoContenedor.appendChild(textoEstado);
+
+        estadoContenedor.appendChild(etiqueta);
+
+        btnEstado.innerHTML = estaActivo
+          ? `
+              <i class="fa-solid fa-user-slash"></i>
+              Dar de baja
+            `
+          : `
+              <i class="fa-solid fa-user-check"></i>
+              Activar
+            `;
+
+        btnEstado.style.background = estaActivo ? "#b42318" : "#14804a";
+      };
+
+      select.addEventListener("change", actualizarEstadoVisual);
+
+      btnEditar.addEventListener("click", () => {
+        const asignacion = obtenerAsignacionSeleccionada();
+
+        Swal.close();
+
+        editarReferenteInstitucional(asignacion);
+      });
+
+      btnEstado.addEventListener("click", async () => {
+        const asignacion = obtenerAsignacionSeleccionada();
+
+        Swal.close();
+
+        await cambiarEstadoReferente(asignacion);
+      });
+
+      actualizarEstadoVisual();
+    },
+  });
+}
+
 function crearCeldaAccionesReferentesAgrupados(registros) {
-  if (registros.length === 1) {
-    return crearCeldaAccionesReferente(registros[0]);
-  }
-
   const celda = document.createElement("td");
-  const contenedor = document.createElement("div");
 
-  contenedor.className = "acciones-tabla";
+  const btnGestionar = crearBotonReferente(
+    "fa-solid fa-sliders",
+    "Gestionar",
+    "btn-editar",
+  );
 
-  registros.forEach((referente) => {
-    const curso =
-      referente.cargo === "PRECEPTOR"
-        ? referente.cursoNombre || "Curso sin cargar"
-        : "";
-
-    const btnEditar = crearBotonReferente(
-      "fa-solid fa-pen-to-square",
-      curso ? `Editar · ${curso}` : "Editar",
-      "btn-editar",
-    );
-
-    btnEditar.addEventListener("click", () => {
-      editarReferenteInstitucional(referente);
-    });
-
-    contenedor.appendChild(btnEditar);
-
-    const estaActivo =
-      String(referente.estado || "")
-        .trim()
-        .toUpperCase() === "ACTIVO";
-
-    const btnEstado = crearBotonReferente(
-      estaActivo ? "fa-solid fa-user-slash" : "fa-solid fa-user-check",
-
-      curso
-        ? `${estaActivo ? "Baja" : "Activar"} · ${curso}`
-        : estaActivo
-          ? "Dar de baja"
-          : "Activar",
-
-      estaActivo ? "btn-desactivar" : "btn-activar",
-    );
-
-    btnEstado.addEventListener("click", () => {
-      cambiarEstadoReferente(referente);
-    });
-
-    contenedor.appendChild(btnEstado);
+  btnGestionar.addEventListener("click", () => {
+    abrirGestionAsignacionesReferente(registros);
   });
 
-  celda.appendChild(contenedor);
+  celda.appendChild(btnGestionar);
 
   return celda;
 }
