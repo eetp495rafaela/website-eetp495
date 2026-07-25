@@ -1889,7 +1889,7 @@ function renderizarTablaInformesGestion(informes) {
         <tbody>
           ${informes
             .map((informe) => {
-              const driveUrl = String(informe.driveUrl || "").trim();
+              const idInforme = String(informe.idInforme || "").trim();
 
               const alumnoCorreo = String(informe.alumnoCorreo || "")
                 .trim()
@@ -1957,19 +1957,21 @@ function renderizarTablaInformesGestion(informes) {
 
                   <td>
                     ${
-                      driveUrl
+                      idInforme
                         ? `
-                          <a
-                            class="btn-informe-tabla-gestion"
-                            href="${escaparHtmlGestion(driveUrl)}"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            title="Ver informe"
-                            aria-label="Ver informe"
-                          >
-                            <i class="fa-solid fa-eye"></i>
-                          </a>
-                        `
+      <button
+        class="
+          btn-informe-tabla-gestion
+          btn-ver-informe-gestion
+        "
+        type="button"
+        data-id-informe="${escaparHtmlGestion(idInforme)}"
+        title="Ver informe"
+        aria-label="Ver informe"
+      >
+        <i class="fa-solid fa-eye"></i>
+      </button>
+    `
                         : "-"
                     }
                   </td>
@@ -2083,6 +2085,133 @@ async function listarInformesGestion() {
         <i class="fa-solid fa-table-list"></i>
         Ver informes creados
       `;
+    }
+  }
+}
+
+async function abrirInformePedagogicoGestion(idInforme, boton) {
+  const id = String(idInforme || "").trim();
+
+  if (!id) {
+    mostrarMensajeInformesGestion(
+      "No se recibió el identificador del informe.",
+      "error",
+    );
+
+    return;
+  }
+
+  const usuario = auth.currentUser;
+
+  if (!usuario) {
+    mostrarMensajeInformesGestion(
+      "No se detectó una sesión activa. Volvé a iniciar sesión.",
+      "error",
+    );
+
+    return;
+  }
+
+  const contenidoOriginalBoton = boton ? boton.innerHTML : "";
+
+  const ventanaInforme = window.open("about:blank", "_blank");
+
+  if (!ventanaInforme) {
+    mostrarMensajeInformesGestion(
+      "El navegador bloqueó la ventana del informe. Habilitá las ventanas emergentes para este sitio.",
+      "error",
+    );
+
+    return;
+  }
+
+  ventanaInforme.opener = null;
+
+  ventanaInforme.document.body.innerHTML = `
+    <p style="
+      font-family: Arial, sans-serif;
+      padding: 24px;
+      text-align: center;
+    ">
+      Preparando informe pedagógico...
+    </p>
+  `;
+
+  try {
+    if (boton) {
+      boton.disabled = true;
+      boton.innerHTML = `
+        <i class="fa-solid fa-spinner fa-spin"></i>
+      `;
+    }
+
+    mostrarMensajeInformesGestion("Preparando el informe para su lectura...");
+
+    const idToken = await usuario.getIdToken(true);
+
+    const resultado = await enviarAlBackendInformesGestion({
+      accion: "obtener_informe_gestion",
+      idToken,
+      idInforme: id,
+    });
+
+    if (!resultado.ok) {
+      throw new Error(
+        resultado.mensaje || "No se pudo obtener el informe pedagógico.",
+      );
+    }
+
+    const archivo = resultado.archivo || {};
+
+    const contenidoBase64 = String(archivo.contenidoBase64 || "").trim();
+
+    if (!contenidoBase64) {
+      throw new Error("El servidor no devolvió el contenido del informe.");
+    }
+
+    const contenidoBinario = window.atob(contenidoBase64);
+
+    const bytes = new Uint8Array(contenidoBinario.length);
+
+    for (let indice = 0; indice < contenidoBinario.length; indice++) {
+      bytes[indice] = contenidoBinario.charCodeAt(indice);
+    }
+
+    const archivoPdf = new Blob([bytes], {
+      type: archivo.mimeType || "application/pdf",
+    });
+
+    const urlTemporal = URL.createObjectURL(archivoPdf);
+
+    ventanaInforme.location.href = urlTemporal;
+
+    window.setTimeout(() => {
+      URL.revokeObjectURL(urlTemporal);
+    }, 300000);
+
+    mostrarMensajeInformesGestion("Informe abierto en modo de lectura.", "ok");
+  } catch (error) {
+    console.error("Error al abrir informe pedagógico:", error);
+
+    ventanaInforme.close();
+
+    mostrarMensajeInformesGestion(
+      error.message || "No se pudo abrir el informe pedagógico.",
+      "error",
+    );
+
+    if (window.Swal) {
+      Swal.fire({
+        title: "No se pudo abrir el informe",
+        text: error.message || "Revisá la conexión, la sesión o los permisos.",
+        icon: "error",
+        confirmButtonText: "Aceptar",
+      });
+    }
+  } finally {
+    if (boton) {
+      boton.disabled = false;
+      boton.innerHTML = contenidoOriginalBoton;
     }
   }
 }
@@ -5221,6 +5350,15 @@ if (btnListarInformesGestion) {
 
 if (vistaInformesGestion) {
   vistaInformesGestion.addEventListener("click", function (event) {
+    const botonVer = event.target.closest(".btn-ver-informe-gestion");
+
+    if (botonVer) {
+      event.preventDefault();
+
+      abrirInformePedagogicoGestion(botonVer.dataset.idInforme, botonVer);
+
+      return;
+    }
     const botonActualizar = event.target.closest(
       ".btn-actualizar-docentes-informe-gestion",
     );
