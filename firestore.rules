@@ -7,20 +7,37 @@ service cloud.firestore {
       return request.auth != null;
     }
 
-    function esAdministradorInicial() {
-      return usuarioAutenticado()
-        && request.auth.token.email == "soportetecnico.tec495@gmail.com";
-    }
-
     function perfilUsuario() {
       return get(
         /databases/$(database)/documents/usuarios/$(request.auth.token.email)
       ).data;
     }
 
+    function accesoVigente() {
+      let fechaFinAcceso =
+        perfilUsuario().get("fechaFinAcceso", null);
+
+      return fechaFinAcceso == null
+        || fechaFinAcceso == ""
+        || (
+          fechaFinAcceso is string
+          && fechaFinAcceso.matches(
+            "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+          )
+          && request.time
+            < timestamp.date(
+                int(fechaFinAcceso[0:4]),
+                int(fechaFinAcceso[5:7]),
+                int(fechaFinAcceso[8:10])
+              )
+              + duration.value(27, "h")
+        );
+    }
+
     function usuarioActivo() {
       return usuarioAutenticado()
-        && perfilUsuario().estado == "ACTIVO";
+        && perfilUsuario().estado == "ACTIVO"
+        && accesoVigente();
     }
 
     function perfilTieneRol(rolBuscado) {
@@ -41,7 +58,7 @@ function esSoportePorPerfil() {
 }
 
 function esSoporte() {
-  return esAdministradorInicial() || esSoportePorPerfil();
+  return esSoportePorPerfil();
 }
 
 function esAlumnoPorPerfil() {
