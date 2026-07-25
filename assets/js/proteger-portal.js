@@ -36,6 +36,7 @@ const ROLES_VALIDOS = new Set([
   "SOPORTE",
   "PRECEPTORIA",
   "SECRETARIA",
+  "ASISTENTE_ADMINISTRATIVO",
   "DIRECCION",
 ]);
 
@@ -311,6 +312,7 @@ function mostrarDatosUsuario(perfil, user, correo, rolUsuario) {
     SOPORTE: "Soporte Institucional",
     PRECEPTORIA: "Preceptoría",
     SECRETARIA: "Secretaría",
+    ASISTENTE_ADMINISTRATIVO: "Asistente Administrativo",
     DIRECCION: "Dirección",
   };
 
