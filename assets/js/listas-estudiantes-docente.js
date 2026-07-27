@@ -203,7 +203,42 @@ async function obtenerAlumnosCursando() {
   return Array.from(alumnosPorId.values());
 }
 
-function renderizarListasEstudiantes(cursosAsignados, alumnos) {
+async function obtenerPreceptorasActivas() {
+  const preceptorasPorCurso = new Map();
+
+  const consultaPreceptoras = query(
+    collection(db, "referentes_institucionales"),
+    where("cargo", "==", "PRECEPTOR"),
+    where("estado", "==", "ACTIVO"),
+  );
+
+  const resultado = await getDocs(consultaPreceptoras);
+
+  resultado.forEach((documento) => {
+    const datos = documento.data();
+
+    const curso = {
+      cursoId: String(datos.cursoId || "").trim(),
+      cursoAnio: Number(datos.cursoAnio || 0),
+      cursoDivision: normalizarTextoListas(datos.cursoDivision),
+    };
+
+    const claveCurso = obtenerClaveCurso(curso);
+    const nombreCompleto = String(datos.nombreCompleto || "").trim();
+
+    if (!claveCurso || claveCurso === "0_" || !nombreCompleto) return;
+
+    preceptorasPorCurso.set(claveCurso, nombreCompleto);
+  });
+
+  return preceptorasPorCurso;
+}
+
+function renderizarListasEstudiantes(
+  cursosAsignados,
+  alumnos,
+  preceptorasPorCurso,
+) {
   if (!vistaListasEstudiantesDocente) return;
 
   if (!cursosAsignados.length) {
@@ -244,13 +279,31 @@ function renderizarListasEstudiantes(cursosAsignados, alumnos) {
           sensitivity: "base",
         }),
       );
+      const nombrePreceptora = String(
+        preceptorasPorCurso.get(claveCurso) || "",
+      ).trim();
 
       return `
         <article class="tarjeta-lista-estudiantes-docente">
           <div class="encabezado-lista-estudiantes-docente">
             <div>
               <h3>${escaparHtmlListas(obtenerNombreCurso(curso))}</h3>
-              <span>${alumnosOrdenados.length} estudiante${alumnosOrdenados.length === 1 ? "" : "s"}</span>
+
+${
+  nombrePreceptora
+    ? `
+      <span class="dato-preceptora-lista">
+  <strong>Preceptora:</strong>
+  <span>${escaparHtmlListas(nombrePreceptora)}</span>
+</span>
+    `
+    : ""
+}
+
+<span>
+  ${alumnosOrdenados.length}
+  estudiante${alumnosOrdenados.length === 1 ? "" : "s"}
+</span>
             </div>
 
             <button
@@ -340,8 +393,15 @@ async function cargarListasEstudiantesDocente() {
 
     const cursosAsignados = await obtenerCursosAsignadosDocente(correoDocente);
     const alumnosCursando = await obtenerAlumnosCursando();
+    const preceptorasPorCurso = await obtenerPreceptorasActivas();
 
-    renderizarListasEstudiantes(cursosAsignados, alumnosCursando);
+    console.log("Preceptoras por curso:", preceptorasPorCurso);
+
+    renderizarListasEstudiantes(
+      cursosAsignados,
+      alumnosCursando,
+      preceptorasPorCurso,
+    );
   } catch (error) {
     console.error("Error al cargar listas de estudiantes:", error);
 

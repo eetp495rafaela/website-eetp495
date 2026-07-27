@@ -372,6 +372,74 @@
         </a>
       </section>
 
+      <section class="grupo seccion-destino" id="parte-sira-docente">
+        <h2>Parte de Asistencia</h2>
+
+        <div class="panel-info">
+          <div class="encabezado-listado">
+            <div>
+              <h3>Consulta semanal de asistencia</h3>
+
+              <p>
+                Consultá el parte semanal de asistencia correspondiente a tus
+                cursos de Taller y Educación Física.
+              </p>
+            </div>
+          </div>
+
+          <div class="form-grid-documentacion">
+            <div class="campo-documentacion">
+              <label for="tipoParteSiraDocente"> Tipo de asistencia </label>
+
+              <select id="tipoParteSiraDocente">
+                <option value="">Seleccionar</option>
+                <option value="TALLER">Taller</option>
+                <option value="EDUCACION_FISICA">Educación Física</option>
+              </select>
+            </div>
+
+            <div class="campo-documentacion">
+              <label for="cursoParteSiraDocente"> Curso </label>
+
+              <select id="cursoParteSiraDocente">
+                <option value="">Primero seleccioná un tipo</option>
+              </select>
+            </div>
+
+            <div class="campo-documentacion">
+              <label for="fechaParteSiraDocente"> Fecha de inicio </label>
+
+              <input id="fechaParteSiraDocente" type="date" />
+            </div>
+          </div>
+
+          <div class="acciones">
+            <button
+              class="btn-accion"
+              id="btnVerParteSiraDocente"
+              type="button"
+            >
+              <i class="fa-solid fa-table-list"></i>
+              Ver parte semanal
+            </button>
+          </div>
+
+          <div id="vistaParteSiraDocente">
+            <p class="mensaje-formulario">
+              Seleccioná los filtros y presioná
+              <strong>Ver parte semanal</strong>.
+            </p>
+          </div>
+
+          <p id="mensajeParteSiraDocente" class="mensaje-formulario"></p>
+        </div>
+
+        <a class="btn-volver" href="#inicio">
+          <i class="fa-solid fa-arrow-up"></i>
+          Volver al inicio
+        </a>
+      </section>
+
       <section class="grupo seccion-destino" id="listas-estudiantes-docente">
         <h2>Listas de Estudiantes</h2>
 
@@ -853,5 +921,6 @@
     <script type="module" src="../assets/js/agenda-docente.js"></script>
     <script type="module" src="../assets/js/informes-docente.js"></script>
     <script type="module" src="../assets/js/sira-docente.js"></script>
+    <script type="module" src="../assets/js/parte-sira-docente.js"></script>
   </body>
 </html>
