@@ -1647,3 +1647,19 @@ body[data-rol-permitido="DOCENTE"] .btn-arriba:hover {
   transform: translateY(-1px);
   text-decoration: none;
 }
+/* =====================================================
+   AGENDA INSTITUCIONAL - SCROLL HORIZONTAL RESPONSIVE
+===================================================== */
+
+#agenda-institucional-docente .tabla-documentos-contenedor {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+}
+
+#agenda-institucional-docente .tabla-agenda-docente {
+  width: 100%;
+  min-width: 760px;
+}
