@@ -30,38 +30,302 @@ const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-const tipoSituacionAsistenciaGestion = document.getElementById(
-  "tipoSituacionAsistenciaGestion",
+const cursoSituacionAsistenciaDocente = document.getElementById(
+  "cursoSituacionAsistenciaDocente",
 );
 
-const cursoSituacionAsistenciaGestion = document.getElementById(
-  "cursoSituacionAsistenciaGestion",
+const btnVerSituacionAsistenciaDocente = document.getElementById(
+  "btnVerSituacionAsistenciaDocente",
 );
 
-const btnVerSituacionAsistenciaGestion = document.getElementById(
-  "btnVerSituacionAsistenciaGestion",
+const vistaSituacionAsistenciaDocente = document.getElementById(
+  "vistaSituacionAsistenciaDocente",
 );
 
-const vistaSituacionAsistenciaGestion = document.getElementById(
-  "vistaSituacionAsistenciaGestion",
+const mensajeSituacionAsistenciaDocente = document.getElementById(
+  "mensajeSituacionAsistenciaDocente",
 );
 
-const mensajeSituacionAsistenciaGestion = document.getElementById(
-  "mensajeSituacionAsistenciaGestion",
-);
+let cursosSituacionAsistenciaDocente = [];
 
-let cursosSituacionAsistencia = [];
+function normalizarCorreo(correo) {
+  return String(correo || "")
+    .trim()
+    .toLowerCase();
+}
 
-function mostrarMensajeSituacionAsistencia(texto, tipo = "") {
-  if (!mensajeSituacionAsistenciaGestion) return;
+function escaparHtml(texto) {
+  return String(texto ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
 
-  mensajeSituacionAsistenciaGestion.innerHTML = texto
+function normalizarTipo(tipo) {
+  const valor = String(tipo || "")
+    .trim()
+    .toUpperCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/\s+/g, "_")
+    .replace(/-/g, "_");
+
+  if (valor.includes("TALLER")) {
+    return "TALLER";
+  }
+
+  if (valor.includes("FISICA")) {
+    return "EDUCACION_FISICA";
+  }
+
+  return valor;
+}
+
+function obtenerTipoAsignacion(asignacion) {
+  return normalizarTipo(
+    asignacion.espacioTipo ||
+      asignacion.tipoEspacio ||
+      asignacion.tipoHorario ||
+      asignacion.espacioNombre,
+  );
+}
+
+function obtenerNombreCurso(asignacion) {
+  const cursoNombre = String(asignacion.cursoNombre || "").trim();
+
+  if (cursoNombre) {
+    return cursoNombre;
+  }
+
+  const cursoAnio = Number(asignacion.cursoAnio || 0);
+  const cursoDivision = String(asignacion.cursoDivision || "").trim();
+
+  return `${cursoAnio}° ${cursoDivision}`.trim();
+}
+
+function mostrarMensaje(texto, tipo = "") {
+  if (!mensajeSituacionAsistenciaDocente) return;
+
+  mensajeSituacionAsistenciaDocente.innerHTML = texto
     ? `
       <span class="${tipo === "error" ? "mensaje-error" : ""}">
-        ${texto}
+        ${escaparHtml(texto)}
       </span>
     `
     : "";
+}
+
+async function obtenerAsignacionesDocente(correoDocente) {
+  const asignacionesPorId = new Map();
+
+  const consultas = [
+    query(
+      collection(db, "asignaciones_docentes"),
+      where("docenteCorreo", "==", correoDocente),
+      where("estado", "==", "ACTIVA"),
+    ),
+    query(
+      collection(db, "asignaciones_docentes"),
+      where("docenteCorreo", "==", correoDocente),
+      where("estado", "==", "ACTIVO"),
+    ),
+  ];
+
+  for (const consultaAsignaciones of consultas) {
+    const resultado = await getDocs(consultaAsignaciones);
+
+    resultado.forEach((documento) => {
+      if (asignacionesPorId.has(documento.id)) return;
+
+      asignacionesPorId.set(documento.id, {
+        id: documento.id,
+        ...documento.data(),
+      });
+    });
+  }
+
+  return Array.from(asignacionesPorId.values());
+}
+
+function prepararCursos(asignaciones) {
+  const cursosPorClave = new Map();
+
+  asignaciones.forEach((asignacion) => {
+    const tipo = obtenerTipoAsignacion(asignacion);
+
+    if (tipo !== "TALLER" && tipo !== "EDUCACION_FISICA") {
+      return;
+    }
+
+    const cursoId = String(asignacion.cursoId || "").trim();
+    const cursoAnio = Number(asignacion.cursoAnio || 0);
+    const cursoDivision = String(asignacion.cursoDivision || "").trim();
+    const cursoNombre = obtenerNombreCurso(asignacion);
+
+    const claveCurso = cursoId || `${cursoAnio}_${cursoDivision.toUpperCase()}`;
+
+    if (!claveCurso || claveCurso === "0_") return;
+
+    if (!cursosPorClave.has(claveCurso)) {
+      cursosPorClave.set(claveCurso, {
+        cursoId,
+        cursoAnio,
+        cursoDivision,
+        cursoNombre,
+        tipos: [],
+      });
+    }
+
+    const curso = cursosPorClave.get(claveCurso);
+
+    if (!curso.tipos.includes(tipo)) {
+      curso.tipos.push(tipo);
+    }
+  });
+
+  return Array.from(cursosPorClave.values()).sort((a, b) => {
+    if (a.cursoAnio !== b.cursoAnio) {
+      return a.cursoAnio - b.cursoAnio;
+    }
+
+    return a.cursoDivision.localeCompare(b.cursoDivision, "es", {
+      sensitivity: "base",
+    });
+  });
+}
+
+function renderizarCursos(cursos) {
+  if (!cursoSituacionAsistenciaDocente) return;
+
+  if (!cursos.length) {
+    cursoSituacionAsistenciaDocente.innerHTML = `
+      <option value="">No tenés cursos asignados</option>
+    `;
+
+    cursoSituacionAsistenciaDocente.disabled = true;
+
+    mostrarMensaje(
+      "No se encontraron cursos activos de Taller o Educación Física para tu usuario.",
+      "error",
+    );
+
+    return;
+  }
+
+  cursoSituacionAsistenciaDocente.innerHTML = `
+    <option value="">Seleccionar curso</option>
+
+    ${cursos
+      .map(
+        (curso, index) => `
+          <option value="${index}">
+            ${escaparHtml(curso.cursoNombre)}
+          </option>
+        `,
+      )
+      .join("")}
+  `;
+
+  cursoSituacionAsistenciaDocente.disabled = false;
+  mostrarMensaje("");
+}
+
+async function cargarCursosAsignados(usuario) {
+  if (!cursoSituacionAsistenciaDocente) return;
+
+  cursoSituacionAsistenciaDocente.disabled = true;
+  cursoSituacionAsistenciaDocente.innerHTML = `
+    <option value="">Cargando cursos asignados...</option>
+  `;
+
+  mostrarMensaje("Cargando tus cursos asignados...");
+
+  try {
+    const correoDocente = normalizarCorreo(usuario.email);
+
+    const asignaciones = await obtenerAsignacionesDocente(correoDocente);
+
+    cursosSituacionAsistenciaDocente = prepararCursos(asignaciones);
+
+    renderizarCursos(cursosSituacionAsistenciaDocente);
+  } catch (error) {
+    console.error("Error al cargar cursos de Situación de Asistencia:", error);
+
+    cursoSituacionAsistenciaDocente.innerHTML = `
+      <option value="">No se pudieron cargar los cursos</option>
+    `;
+
+    cursoSituacionAsistenciaDocente.disabled = true;
+
+    mostrarMensaje(
+      error.message || "No se pudieron cargar tus cursos asignados.",
+      "error",
+    );
+  }
+}
+
+let usuarioDocenteActual = null;
+let cursosCargados = false;
+let cargaCursosEnProceso = false;
+
+async function cargarCursosAlAbrirSeccion() {
+  if (
+    window.location.hash !== "#situacion-asistencia-docente" ||
+    !usuarioDocenteActual ||
+    cursosCargados ||
+    cargaCursosEnProceso
+  ) {
+    return;
+  }
+
+  cargaCursosEnProceso = true;
+
+  try {
+    await cargarCursosAsignados(usuarioDocenteActual);
+    cursosCargados = true;
+  } finally {
+    cargaCursosEnProceso = false;
+  }
+}
+
+function obtenerCursoSeleccionado() {
+  const indiceSeleccionado = Number(cursoSituacionAsistenciaDocente?.value);
+
+  if (
+    cursoSituacionAsistenciaDocente?.value === "" ||
+    !Number.isInteger(indiceSeleccionado)
+  ) {
+    return null;
+  }
+
+  return cursosSituacionAsistenciaDocente[indiceSeleccionado] || null;
+}
+
+function validarSeleccionSituacionAsistencia() {
+  const cursoSeleccionado = obtenerCursoSeleccionado();
+
+  if (!cursoSeleccionado) {
+    mostrarMensaje(
+      "Seleccioná un curso para consultar su situación de asistencia.",
+      "error",
+    );
+
+    return;
+  }
+
+  mostrarMensaje("");
+
+  console.log("Curso seleccionado:", cursoSeleccionado);
+  console.log("Tipo asociado:", cursoSeleccionado.tipos);
+}
+
+if (btnVerSituacionAsistenciaDocente) {
+  btnVerSituacionAsistenciaDocente.addEventListener(
+    "click",
+    consultarSituacionAsistencia,
+  );
 }
 
 function obtenerEtiquetaTipo(tipo) {
@@ -221,10 +485,10 @@ function obtenerEstadoAsistencia(porcentaje) {
 }
 
 function renderizarTablaSituacion(estudiantes, cursoNombre, tipoSeleccionado) {
-  if (!vistaSituacionAsistenciaGestion) return;
+  if (!vistaSituacionAsistenciaDocente) return;
 
   if (!estudiantes.length) {
-    vistaSituacionAsistenciaGestion.innerHTML = `
+    vistaSituacionAsistenciaDocente.innerHTML = `
       <p class="mensaje-gestion">
         No hay registros de asistencia para el curso y tipo seleccionados.
       </p>
@@ -245,7 +509,7 @@ function renderizarTablaSituacion(estudiantes, cursoNombre, tipoSeleccionado) {
     (estudiante) => estudiante.porcentaje >= 95,
   ).length;
 
-  vistaSituacionAsistenciaGestion.innerHTML = `
+  vistaSituacionAsistenciaDocente.innerHTML = `
     <div class="sira-gestion-encabezado">
       <h3>Situación de asistencia - ${cursoNombre}</h3>
 
@@ -332,130 +596,57 @@ function renderizarTablaSituacion(estudiantes, cursoNombre, tipoSeleccionado) {
   `;
 }
 
-async function cargarCursosSituacionAsistencia() {
-  if (!cursoSituacionAsistenciaGestion) return;
+async function consultarSituacionAsistencia() {
+  const cursoSeleccionado = obtenerCursoSeleccionado();
 
-  cursoSituacionAsistenciaGestion.innerHTML = `
-    <option value="">Cargando cursos...</option>
-  `;
-
-  try {
-    const consultaCursos = query(
-      collection(db, "cursos"),
-      where("estado", "==", "ACTIVO"),
-    );
-
-    const resultado = await getDocs(consultaCursos);
-    const cursos = [];
-
-    resultado.forEach((documento) => {
-      cursos.push({
-        id: documento.id,
-        ...documento.data(),
-      });
-    });
-
-    cursos.sort((a, b) => {
-      const anioA = Number(a.anio || a.cursoAnio || 0);
-      const anioB = Number(b.anio || b.cursoAnio || 0);
-
-      if (anioA !== anioB) {
-        return anioA - anioB;
-      }
-
-      return String(a.division || a.cursoDivision || "").localeCompare(
-        String(b.division || b.cursoDivision || ""),
-        "es",
-        {
-          sensitivity: "base",
-        },
-      );
-    });
-
-    cursosSituacionAsistencia = cursos;
-
-    cursoSituacionAsistenciaGestion.innerHTML = `
-      <option value="">Seleccionar curso</option>
-
-      ${cursos
-        .map((curso) => {
-          const nombre =
-            curso.nombre ||
-            curso.cursoNombre ||
-            `${curso.anio || curso.cursoAnio}º ${
-              curso.division || curso.cursoDivision
-            }`;
-
-          return `
-            <option value="${curso.id}">
-              ${nombre}
-            </option>
-          `;
-        })
-        .join("")}
-    `;
-  } catch (error) {
-    console.error("Error al cargar cursos de situación de asistencia:", error);
-
-    cursoSituacionAsistenciaGestion.innerHTML = `
-      <option value="">No se pudieron cargar cursos</option>
-    `;
-
-    mostrarMensajeSituacionAsistencia(
-      error.message || "No se pudieron cargar los cursos.",
+  if (!cursoSeleccionado) {
+    mostrarMensaje(
+      "Seleccioná un curso para consultar la situación de asistencia.",
       "error",
     );
+    return;
   }
-}
 
-async function consultarSituacionAsistencia() {
-  const tipo = tipoSituacionAsistenciaGestion?.value || "";
-  const cursoId = cursoSituacionAsistenciaGestion?.value || "";
+  const cursoId = cursoSeleccionado.cursoId;
+  const tipo = cursoSeleccionado.tipos[0];
+  const cursoNombre = cursoSeleccionado.cursoNombre;
 
   if (!tipo || !cursoId) {
-    mostrarMensajeSituacionAsistencia(
-      "Seleccioná el tipo de asistencia y el curso.",
+    mostrarMensaje(
+      "No se pudo determinar el curso o el tipo de asistencia.",
       "error",
     );
 
     return;
   }
 
-  const cursoSeleccionado = cursosSituacionAsistencia.find(
-    (curso) => curso.id === cursoId,
-  );
+  mostrarMensaje("");
 
-  const cursoNombre =
-    cursoSeleccionado?.nombre ||
-    cursoSeleccionado?.cursoNombre ||
-    `${cursoSeleccionado?.anio || cursoSeleccionado?.cursoAnio || ""}º ${
-      cursoSeleccionado?.division || cursoSeleccionado?.cursoDivision || ""
-    }`;
-
-  mostrarMensajeSituacionAsistencia("");
-
-  if (vistaSituacionAsistenciaGestion) {
-    vistaSituacionAsistenciaGestion.innerHTML = `
+  if (vistaSituacionAsistenciaDocente) {
+    vistaSituacionAsistenciaDocente.innerHTML = `
       <p class="mensaje-gestion">
         Consultando situación de asistencia...
       </p>
     `;
   }
 
-  if (btnVerSituacionAsistenciaGestion) {
-    btnVerSituacionAsistenciaGestion.disabled = true;
+  if (btnVerSituacionAsistenciaDocente) {
+    btnVerSituacionAsistenciaDocente.disabled = true;
 
-    btnVerSituacionAsistenciaGestion.innerHTML = `
+    btnVerSituacionAsistenciaDocente.innerHTML = `
       <i class="fa-solid fa-spinner fa-spin"></i>
       Consultando...
     `;
   }
 
   try {
+    const correoDocente = normalizarCorreo(usuarioDocenteActual?.email);
+
     const consultaAsistencias = query(
       collection(db, "asistencias_clases"),
       where("estado", "==", "ACTIVA"),
       where("tipoHorario", "==", tipo),
+      where("docenteCorreo", "==", correoDocente),
     );
 
     const resultado = await getDocs(consultaAsistencias);
@@ -478,23 +669,23 @@ async function consultarSituacionAsistencia() {
   } catch (error) {
     console.error("Error al consultar la situación de asistencia:", error);
 
-    if (vistaSituacionAsistenciaGestion) {
-      vistaSituacionAsistenciaGestion.innerHTML = `
+    if (vistaSituacionAsistenciaDocente) {
+      vistaSituacionAsistenciaDocente.innerHTML = `
         <p class="mensaje-gestion mensaje-error">
           No se pudo consultar la situación de asistencia.
         </p>
       `;
     }
 
-    mostrarMensajeSituacionAsistencia(
+    mostrarMensaje(
       error.message || "No se pudo consultar la situación de asistencia.",
       "error",
     );
   } finally {
-    if (btnVerSituacionAsistenciaGestion) {
-      btnVerSituacionAsistenciaGestion.disabled = false;
+    if (btnVerSituacionAsistenciaDocente) {
+      btnVerSituacionAsistenciaDocente.disabled = false;
 
-      btnVerSituacionAsistenciaGestion.innerHTML = `
+      btnVerSituacionAsistenciaDocente.innerHTML = `
         <i class="fa-solid fa-magnifying-glass-chart"></i>
         Consultar situación
       `;
@@ -502,15 +693,15 @@ async function consultarSituacionAsistencia() {
   }
 }
 
-if (btnVerSituacionAsistenciaGestion) {
-  btnVerSituacionAsistenciaGestion.addEventListener(
-    "click",
-    consultarSituacionAsistencia,
-  );
-}
-
 onAuthStateChanged(auth, (usuario) => {
-  if (!usuario) return;
+  if (!usuario) {
+    usuarioDocenteActual = null;
+    return;
+  }
 
-  cargarCursosSituacionAsistencia();
+  usuarioDocenteActual = usuario;
+
+  cargarCursosAlAbrirSeccion();
 });
+
+window.addEventListener("hashchange", cargarCursosAlAbrirSeccion);

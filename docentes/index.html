@@ -102,6 +102,20 @@
             </p>
           </a>
 
+          <a
+            class="tarjeta tarjeta-enlace"
+            href="#situacion-asistencia-docente"
+          >
+            <i class="fa-solid fa-chart-line"></i>
+
+            <h3>Situación de Asistencia</h3>
+
+            <p>
+              Consultá la situación general de asistencia de los estudiantes en
+              tus cursos asignados.
+            </p>
+          </a>
+
           <a class="tarjeta tarjeta-enlace" href="#listas-estudiantes-docente">
             <i class="fa-solid fa-users"></i>
             <h3>Listas de Estudiantes</h3>
@@ -432,6 +446,61 @@
           </div>
 
           <p id="mensajeParteSiraDocente" class="mensaje-formulario"></p>
+        </div>
+
+        <a class="btn-volver" href="#inicio">
+          <i class="fa-solid fa-arrow-up"></i>
+          Volver al inicio
+        </a>
+      </section>
+
+      <section class="grupo seccion-destino" id="situacion-asistencia-docente">
+        <h2>Situación de Asistencia</h2>
+
+        <div class="panel-info">
+          <div class="encabezado-listado">
+            <div>
+              <h3>Situación general por curso</h3>
+
+              <p>
+                Consultá el estado general de asistencia de los estudiantes en
+                tus cursos asignados.
+              </p>
+            </div>
+          </div>
+
+          <div class="form-grid-documentacion">
+            <div class="campo-documentacion">
+              <label for="cursoSituacionAsistenciaDocente"> Curso </label>
+
+              <select id="cursoSituacionAsistenciaDocente" disabled>
+                <option value="">Cargando cursos asignados...</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="acciones">
+            <button
+              class="btn-accion"
+              id="btnVerSituacionAsistenciaDocente"
+              type="button"
+            >
+              <i class="fa-solid fa-magnifying-glass-chart"></i>
+              Consultar situación
+            </button>
+          </div>
+
+          <div id="vistaSituacionAsistenciaDocente">
+            <p class="mensaje-formulario">
+              Seleccioná un curso y presioná
+              <strong>Consultar situación</strong>.
+            </p>
+          </div>
+
+          <p
+            id="mensajeSituacionAsistenciaDocente"
+            class="mensaje-formulario"
+          ></p>
         </div>
 
         <a class="btn-volver" href="#inicio">
@@ -934,5 +1003,9 @@
     <script type="module" src="../assets/js/informes-docente.js"></script>
     <script type="module" src="../assets/js/sira-docente.js"></script>
     <script type="module" src="../assets/js/parte-sira-docente.js"></script>
+    <script
+      type="module"
+      src="../assets/js/situacion-asistencia-docente.js"
+    ></script>
   </body>
 </html>

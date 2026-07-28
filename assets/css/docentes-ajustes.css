@@ -788,6 +788,7 @@ body {
 #listas-estudiantes-docente,
 #informes-pedagogicos-docente,
 #parte-sira-docente,
+#situacion-asistencia-docente,
 #agenda-institucional-docente {
   scroll-margin-top: 115px;
 }
@@ -1662,4 +1663,228 @@ body[data-rol-permitido="DOCENTE"] .btn-arriba:hover {
 #agenda-institucional-docente .tabla-agenda-docente {
   width: 100%;
   min-width: 760px;
+}
+/* =========================================================
+   SITUACIÓN DE ASISTENCIA - PORTAL DOCENTE
+   ========================================================= */
+
+#situacion-asistencia-docente .sira-gestion-encabezado {
+  margin-top: 1.5rem;
+  padding: 1.25rem 1.4rem;
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(0, 224, 155, 0.35);
+  border-radius: 16px;
+}
+
+#situacion-asistencia-docente .sira-gestion-encabezado h3 {
+  margin: 0 0 0.45rem;
+  color: #ffffff;
+  font-size: 1.2rem;
+  font-weight: 700;
+}
+
+#situacion-asistencia-docente .sira-gestion-encabezado p {
+  margin: 0;
+  color: #bfeee1;
+  font-weight: 600;
+}
+
+/* Tarjetas resumen */
+
+#situacion-asistencia-docente .resumen-situacion-asistencia {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1rem;
+  margin: 1.25rem 0;
+}
+
+#situacion-asistencia-docente .tarjeta-resumen-asistencia {
+  min-height: 96px;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  text-align: center;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 14px;
+  box-shadow: 0 5px 14px rgba(0, 0, 0, 0.16);
+}
+
+#situacion-asistencia-docente .tarjeta-resumen-asistencia span {
+  color: #c4e6de;
+  font-size: 0.92rem;
+}
+
+#situacion-asistencia-docente .tarjeta-resumen-asistencia strong {
+  color: #ffffff;
+  font-size: 1.65rem;
+  line-height: 1;
+}
+
+#situacion-asistencia-docente .tarjeta-resumen-asistencia.riesgo {
+  border-left: 5px solid #ff5a67;
+}
+
+#situacion-asistencia-docente .tarjeta-resumen-asistencia.excelente {
+  border-left: 5px solid #00d68f;
+}
+
+/* Texto de criterio */
+
+#situacion-asistencia-docente .criterio-asistencia {
+  margin: 0 0 1rem;
+  color: #bfeee1;
+  font-size: 0.92rem;
+}
+
+/* Contenedor responsive de la tabla */
+
+#situacion-asistencia-docente .tabla-responsive {
+  width: 100%;
+  overflow-x: auto;
+  border-radius: 12px;
+}
+
+/* Tabla */
+
+#situacion-asistencia-docente .tabla-situacion-asistencia {
+  width: 100%;
+  min-width: 850px;
+  border-collapse: collapse;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+#situacion-asistencia-docente .tabla-situacion-asistencia thead {
+  background: #087f68;
+}
+
+#situacion-asistencia-docente .tabla-situacion-asistencia th {
+  padding: 0.9rem 0.8rem;
+  color: #ffffff;
+  font-size: 0.92rem;
+  font-weight: 700;
+  text-align: center;
+  white-space: nowrap;
+}
+
+#situacion-asistencia-docente .tabla-situacion-asistencia th:first-child {
+  text-align: left;
+}
+
+#situacion-asistencia-docente .tabla-situacion-asistencia td {
+  padding: 0.85rem 0.8rem;
+  color: #f2fffb;
+  text-align: center;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.14);
+}
+
+#situacion-asistencia-docente .tabla-situacion-asistencia th:nth-child(6),
+#situacion-asistencia-docente .tabla-situacion-asistencia td:nth-child(6) {
+  text-align: right;
+}
+
+#situacion-asistencia-docente .tabla-situacion-asistencia td:first-child {
+  text-align: left;
+  white-space: nowrap;
+}
+
+#situacion-asistencia-docente .tabla-situacion-asistencia tbody tr {
+  transition:
+    background-color 0.2s ease,
+    transform 0.2s ease;
+}
+
+#situacion-asistencia-docente .tabla-situacion-asistencia tbody tr:hover {
+  background: rgba(0, 224, 155, 0.1);
+}
+
+#situacion-asistencia-docente .tabla-situacion-asistencia td strong {
+  color: #ffffff;
+}
+
+/* Estados */
+
+#situacion-asistencia-docente .estado-asistencia {
+  display: inline-flex;
+  min-width: 92px;
+  padding: 0.38rem 0.75rem;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+#situacion-asistencia-docente .estado-asistencia-excelente {
+  color: #003d2d;
+  background: #8ff0ce;
+}
+
+#situacion-asistencia-docente .estado-asistencia-muy-buena {
+  color: #003b4a;
+  background: #8ce7f2;
+}
+
+#situacion-asistencia-docente .estado-asistencia-seguimiento {
+  color: #594000;
+  background: #ffe39a;
+}
+
+#situacion-asistencia-docente .estado-asistencia-riesgo {
+  color: #73000b;
+  background: #ffc1c7;
+}
+
+/* Mensajes generados por JavaScript */
+
+#situacion-asistencia-docente .mensaje-gestion {
+  margin: 1rem 0 0;
+  padding: 1rem;
+  color: #d7f8ef;
+  background: rgba(255, 255, 255, 0.07);
+  border-radius: 10px;
+}
+
+#situacion-asistencia-docente .mensaje-gestion.mensaje-error {
+  color: #ffd4d8;
+  border: 1px solid rgba(255, 90, 103, 0.45);
+  background: rgba(255, 90, 103, 0.12);
+}
+
+/* Tablet */
+
+@media (max-width: 1050px) {
+  #situacion-asistencia-docente .resumen-situacion-asistencia {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* Celular */
+
+@media (max-width: 600px) {
+  #situacion-asistencia-docente .sira-gestion-encabezado {
+    padding: 1rem;
+  }
+
+  #situacion-asistencia-docente .resumen-situacion-asistencia {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+
+  #situacion-asistencia-docente .tarjeta-resumen-asistencia {
+    min-height: 82px;
+  }
+
+  #situacion-asistencia-docente .tarjeta-resumen-asistencia strong {
+    font-size: 1.45rem;
+  }
+
+  #situacion-asistencia-docente .tabla-situacion-asistencia th,
+  #situacion-asistencia-docente .tabla-situacion-asistencia td {
+    padding: 0.75rem 0.65rem;
+  }
 }
