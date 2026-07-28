@@ -1606,3 +1606,44 @@ body[data-rol-permitido="DOCENTE"] .btn-arriba:hover {
   font-size: 0.84rem;
   font-weight: 800;
 }
+.encabezado-agenda-docente {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  padding: 0.9rem 1rem;
+  border-radius: 0.8rem;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.titulo-agenda-docente {
+  font-size: 1.05rem;
+}
+
+.cantidad-agenda-docente {
+  font-size: 0.9rem;
+  margin-left: 0.35rem;
+  opacity: 0.9;
+  white-space: nowrap;
+}
+.enlace-correo-agenda-docente {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.35rem 0.75rem;
+  border-radius: 999px;
+
+  color: #003833;
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.enlace-correo-agenda-docente:hover {
+  background: rgba(16, 185, 129, 0.22);
+  border-color: rgba(16, 185, 129, 0.45);
+  transform: translateY(-1px);
+  text-decoration: none;
+}

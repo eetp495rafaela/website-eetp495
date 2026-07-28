@@ -43,6 +43,12 @@ const categoriaAgendaDocente = document.getElementById(
   "categoriaAgendaDocente",
 );
 
+const campoCursoAgendaDocente = document.getElementById(
+  "campoCursoAgendaDocente",
+);
+
+const cursoAgendaDocente = document.getElementById("cursoAgendaDocente");
+
 const vistaAgendaInstitucionalDocente = document.getElementById(
   "vistaAgendaInstitucionalDocente",
 );
@@ -179,15 +185,15 @@ function renderizarAgendaDocente(contactos, categoria) {
 
   vistaAgendaInstitucionalDocente.innerHTML = `
     <div class="encabezado-agenda-docente">
-      <strong>
-        ${escaparHtmlAgendaDocente(titulo)}
-      </strong>
+  <strong class="titulo-agenda-docente">
+    ${escaparHtmlAgendaDocente(titulo)} :
+  </strong>
 
-      <span>
-        · ${contactos.length}
-        ${contactos.length === 1 ? "contacto" : "contactos"}
-      </span>
-    </div>
+  <span class="cantidad-agenda-docente">
+    ${contactos.length}
+    ${contactos.length === 1 ? "contacto" : "contactos"}
+  </span>
+</div>
 
     <div class="tabla-documentos-contenedor">
       <table class="tabla-documentos tabla-agenda-docente">
@@ -455,6 +461,36 @@ async function obtenerCursosAsignadosAgendaDocente() {
   return Array.from(cursosPorClave.values());
 }
 
+async function cargarFiltroCursosAgendaDocente() {
+  if (!campoCursoAgendaDocente || !cursoAgendaDocente) return;
+
+  const cursos = await obtenerCursosAsignadosAgendaDocente();
+
+  cursoAgendaDocente.innerHTML = `
+    <option value="">Todos los cursos</option>
+
+    ${cursos
+      .sort((a, b) =>
+        String(a.cursoNombre || "").localeCompare(
+          String(b.cursoNombre || ""),
+          "es",
+          {
+            numeric: true,
+            sensitivity: "base",
+          },
+        ),
+      )
+      .map(
+        (curso) => `
+          <option value="${escaparHtmlAgendaDocente(curso.cursoNombre)}">
+            ${escaparHtmlAgendaDocente(curso.cursoNombre)}
+          </option>
+        `,
+      )
+      .join("")}
+  `;
+}
+
 /* =====================================================
    ESTUDIANTES POR CURSO
 ===================================================== */
@@ -609,7 +645,7 @@ async function cargarCategoriaAgendaDocente(categoria) {
   mostrarMensajeAgendaDocente("Cargando contactos...");
 
   try {
-    if (cacheAgendaDocente.has(categoria)) {
+    if (categoria !== "ALUMNOS" && cacheAgendaDocente.has(categoria)) {
       renderizarAgendaDocente(cacheAgendaDocente.get(categoria), categoria);
 
       return;
@@ -627,6 +663,14 @@ async function cargarCategoriaAgendaDocente(categoria) {
 
     if (categoria === "ALUMNOS") {
       contactos = await obtenerMisAlumnosAgendaDocente();
+
+      const cursoSeleccionado = cursoAgendaDocente?.value || "";
+
+      if (cursoSeleccionado) {
+        contactos = contactos.filter(
+          (contacto) => contacto.detalle === cursoSeleccionado,
+        );
+      }
     }
 
     cacheAgendaDocente.set(categoria, contactos);
@@ -646,8 +690,22 @@ async function cargarCategoriaAgendaDocente(categoria) {
    EVENTOS
 ===================================================== */
 
-categoriaAgendaDocente?.addEventListener("change", () => {
-  cargarCategoriaAgendaDocente(categoriaAgendaDocente.value);
+categoriaAgendaDocente?.addEventListener("change", async () => {
+  const categoria = categoriaAgendaDocente.value;
+
+  if (categoria === "ALUMNOS") {
+    cursoAgendaDocente.disabled = false;
+    await cargarFiltroCursosAgendaDocente();
+  } else {
+    cursoAgendaDocente.disabled = true;
+    cursoAgendaDocente.value = "";
+  }
+
+  cargarCategoriaAgendaDocente(categoria);
+});
+
+cursoAgendaDocente?.addEventListener("change", () => {
+  cargarCategoriaAgendaDocente("ALUMNOS");
 });
 
 tarjetaAgendaInstitucionalDocente?.addEventListener("click", () => {
