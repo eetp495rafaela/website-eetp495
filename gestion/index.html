@@ -96,32 +96,15 @@
             </p>
           </a>
 
-          <a class="tarjeta tarjeta-enlace" href="#docentes">
-            <i class="fa-solid fa-chalkboard-user"></i>
-            <h3>Docentes</h3>
-            <p>Consulta de docentes, espacios y cursos asignados a cada uno.</p>
-          </a>
-
-          <a class="tarjeta tarjeta-enlace" href="#horarios">
-            <i class="fa-solid fa-calendar-days"></i>
-            <h3>Horarios</h3>
-            <p>Consulta de horarios de aula, taller y Educación Física.</p>
-          </a>
-
-          <a class="tarjeta tarjeta-enlace" href="#documentacion-academica">
-            <i class="fa-solid fa-folder-open"></i>
-            <h3>Documentación Académica</h3>
+          <a
+            class="tarjeta tarjeta-enlace"
+            href="#situacion-asistencia-estudiantes"
+          >
+            <i class="fa-solid fa-chart-column"></i>
+            <h3>Situación de Asistencia</h3>
             <p>
-              Consulta de planes anuales, programas de examen y/o material de
-              estudio publicados por los docentes.
-            </p>
-          </a>
-
-          <a class="tarjeta tarjeta-enlace" href="#sime">
-            <i class="fa-solid fa-file-signature"></i>
-            <h3>S.I.M.E.</h3>
-            <p>
-              Consulta de inscripciones a mesas de examen y permisos generados.
+              Consulta del total de presentes, ausentes y llegadas tarde en
+              Taller y Educación Física.
             </p>
           </a>
 
@@ -134,19 +117,48 @@
             </p>
           </a>
 
+          <a class="tarjeta tarjeta-enlace" href="#docentes">
+            <i class="fa-solid fa-chalkboard-user"></i>
+            <h3>Docentes</h3>
+            <p>Consulta de docentes, espacios y cursos asignados a cada uno.</p>
+          </a>
+
+          <a class="tarjeta tarjeta-enlace" href="#horarios">
+            <i class="fa-solid fa-calendar-days"></i>
+            <h3>Horarios</h3>
+            <p>Consulta de horarios de aula, Taller y Educación Física.</p>
+          </a>
+
           <a class="tarjeta tarjeta-enlace" href="#sira-gestion">
             <i class="fa-solid fa-user-check"></i>
             <h3>Si.R.A.</h3>
             <p>
-              Consulta de asistencias registradas en espacios de Taller y
-              Educación Física.
+              Consulta de partes semanales de asistencia de Taller y Educación
+              Física.
+            </p>
+          </a>
+
+          <a class="tarjeta tarjeta-enlace" href="#documentacion-academica">
+            <i class="fa-solid fa-folder-open"></i>
+            <h3>Documentación Académica</h3>
+            <p>
+              Consulta de planes anuales, programas de examen y material de
+              estudio publicado por los docentes.
+            </p>
+          </a>
+
+          <a class="tarjeta tarjeta-enlace" href="#sime">
+            <i class="fa-solid fa-file-signature"></i>
+            <h3>S.I.M.E.</h3>
+            <p>
+              Consulta de inscripciones a mesas de examen y permisos generados.
             </p>
           </a>
 
           <a class="tarjeta tarjeta-enlace" href="#mesas-examen-gestion">
             <i class="fa-solid fa-calendar-check"></i>
             <h3>Mesas de Examen</h3>
-            <p>Consulta de mesas publicadas y ocultas.</p>
+            <p>Consulta y gestión de mesas de examen publicadas u ocultas.</p>
           </a>
         </div>
       </section>
@@ -218,6 +230,76 @@
             </div>
 
             <p id="mensajeEstudiantesGestion" class="mensaje-gestion"></p>
+          </div>
+        </div>
+
+        <a class="btn-volver" href="#inicio">
+          <i class="fa-solid fa-arrow-up"></i>
+          Volver al inicio
+        </a>
+      </section>
+
+      <section
+        class="grupo seccion-destino"
+        id="situacion-asistencia-estudiantes"
+      >
+        <h2>Situación de Asistencia</h2>
+
+        <div class="panel-info panel-gestion-listado">
+          <i class="fa-solid fa-chart-column"></i>
+
+          <div class="contenido-panel-gestion">
+            <h3>Resumen de asistencia por estudiante</h3>
+
+            <p>
+              Consultá la cantidad total de presentes, ausentes y llegadas tarde
+              registradas en Taller o Educación Física.
+            </p>
+
+            <div class="filtros-gestion filtros-situacion-asistencia">
+              <div class="campo-filtro-gestion">
+                <label for="tipoSituacionAsistenciaGestion">
+                  Tipo de asistencia
+                </label>
+
+                <select id="tipoSituacionAsistenciaGestion">
+                  <option value="">Seleccionar tipo</option>
+                  <option value="TALLER">Taller</option>
+                  <option value="EDUCACION_FISICA">Educación Física</option>
+                </select>
+              </div>
+
+              <div class="campo-filtro-gestion">
+                <label for="cursoSituacionAsistenciaGestion">Curso</label>
+
+                <select id="cursoSituacionAsistenciaGestion">
+                  <option value="">Seleccionar curso</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="acciones-gestion">
+              <button
+                class="btn-gestion"
+                id="btnVerSituacionAsistenciaGestion"
+                type="button"
+              >
+                <i class="fa-solid fa-magnifying-glass-chart"></i>
+                Consultar situación
+              </button>
+            </div>
+
+            <div id="vistaSituacionAsistenciaGestion" class="vista-gestion">
+              <p class="mensaje-gestion">
+                Seleccioná el tipo de asistencia y el curso para consultar la
+                situación de los estudiantes.
+              </p>
+            </div>
+
+            <p
+              id="mensajeSituacionAsistenciaGestion"
+              class="mensaje-gestion"
+            ></p>
           </div>
         </div>
 
@@ -916,6 +998,10 @@
     <script type="module" src="../assets/js/gestion.js"></script>
     <script type="module" src="../assets/js/sira-gestion.js"></script>
     <script type="module" src="../assets/js/pizarra-horarios-admin.js"></script>
+    <script
+      type="module"
+      src="../assets/js/situacion-asistencia-gestion.js"
+    ></script>
 
     <script>
       const btnArriba = document.getElementById("btnArriba");
