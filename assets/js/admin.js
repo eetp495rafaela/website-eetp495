@@ -3587,6 +3587,17 @@ async function registrarUsuario(event) {
   const rol = String(datos.get("rol") || "")
     .trim()
     .toUpperCase();
+
+  const rolesAdicionales = checksRolesAdicionalesUsuario
+    .filter((checkbox) => checkbox.checked && !checkbox.disabled)
+    .map((checkbox) =>
+      String(checkbox.value || "")
+        .trim()
+        .toUpperCase(),
+    );
+
+  const roles = Array.from(new Set([rol, ...rolesAdicionales])).filter(Boolean);
+
   const tipoVinculo = String(datos.get("tipoVinculo") || "").trim();
   const fechaFinAcceso = String(datos.get("fechaFinAcceso") || "").trim();
   const dni = String(datos.get("dni") || "")
@@ -3655,6 +3666,7 @@ async function registrarUsuario(event) {
       correo,
       nombreCompleto,
       rol,
+      roles,
       estado: "ACTIVO",
       tipoVinculo,
       dni: dni || null,
