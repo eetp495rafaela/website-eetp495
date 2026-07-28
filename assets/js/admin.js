@@ -2659,14 +2659,13 @@ async function cargarDocentesAsignacion() {
     const docentes = consulta.docs
       .map((documento) => documento.data())
       .filter((usuario) => {
-        const rol = String(usuario.rol || "")
-          .trim()
-          .toUpperCase();
+        const rolesUsuario = obtenerRolesUsuarioAdmin(usuario);
+
         const estado = String(usuario.estado || "")
           .trim()
           .toUpperCase();
 
-        return rol === "DOCENTE" && estado === "ACTIVO";
+        return rolesUsuario.includes("DOCENTE") && estado === "ACTIVO";
       })
       .sort((a, b) =>
         String(a.nombreCompleto || "").localeCompare(
