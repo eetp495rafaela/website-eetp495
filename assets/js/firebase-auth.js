@@ -1,6 +1,11 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-app.js";
 
 import {
+  initializeAppCheck,
+  ReCaptchaEnterpriseProvider,
+} from "https://www.gstatic.com/firebasejs/12.15.0/firebase-app-check.js";
+
+import {
   getAuth,
   GoogleAuthProvider,
   signInWithPopup,
@@ -26,6 +31,14 @@ const firebaseConfig = {
 };
 
 const app = initializeApp(firebaseConfig);
+
+initializeAppCheck(app, {
+  provider: new ReCaptchaEnterpriseProvider(
+    "6Ld7BmwtAAAAADhZkCRmdmMaJtodHEzLsr4Ep2O8",
+  ),
+  isTokenAutoRefreshEnabled: true,
+});
+
 const auth = getAuth(app);
 const db = getFirestore(app);
 
