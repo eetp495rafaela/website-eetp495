@@ -2250,6 +2250,34 @@
               impresión.
             </p>
           </div>
+
+          <div class="panel-info">
+            <div class="encabezado-listado">
+              <div>
+                <h3>Limpiar registros de asistencia</h3>
+                <p>
+                  Eliminá los registros de asistencia de Taller, Educación
+                  Física o de ambas modalidades. Esta operación no puede
+                  deshacerse.
+                </p>
+              </div>
+            </div>
+
+            <div class="acciones">
+              <button
+                type="button"
+                class="btn-accion"
+                id="btnAbrirLimpiezaAsistencias"
+              >
+                <i class="fa-solid fa-trash-can"></i>
+                Limpiar asistencias
+              </button>
+            </div>
+
+            <p class="mensaje-formulario" id="mensajeLimpiezaAsistencias">
+              Solo se eliminarán documentos de la colección de asistencias.
+            </p>
+          </div>
         </div>
 
         <a class="btn-volver" href="#inicio">
@@ -2257,6 +2285,119 @@
           Volver al inicio
         </a>
       </section>
+
+      <!-- Modal: limpieza de registros de asistencia -->
+      <div
+        class="modal"
+        id="modalLimpiezaAsistencias"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="tituloModalLimpiezaAsistencias"
+        hidden
+      >
+        <div class="modal-contenido">
+          <button
+            type="button"
+            class="modal-cerrar"
+            id="btnCerrarModalLimpiezaAsistencias"
+            aria-label="Cerrar"
+          >
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+
+          <h3 id="tituloModalLimpiezaAsistencias">
+            Limpiar registros de asistencia
+          </h3>
+
+          <p>
+            Seleccioná qué registros querés eliminar. Esta acción será
+            permanente.
+          </p>
+
+          <div class="campo-formulario">
+            <label for="tipoLimpiezaAsistencias"> Registros a eliminar </label>
+
+            <select id="tipoLimpiezaAsistencias">
+              <option value="">Seleccionar una opción</option>
+              <option value="TALLER">Asistencias de Taller</option>
+              <option value="EDUCACION_FISICA">
+                Asistencias de Educación Física
+              </option>
+              <option value="TODAS">Todas las asistencias</option>
+            </select>
+          </div>
+
+          <div class="acciones">
+            <button
+              type="button"
+              class="btn-secundario"
+              id="btnCancelarLimpiezaAsistencias"
+            >
+              Cancelar
+            </button>
+
+            <button
+              type="button"
+              class="btn-accion"
+              id="btnContinuarLimpiezaAsistencias"
+            >
+              <i class="fa-solid fa-triangle-exclamation"></i>
+              Continuar
+            </button>
+          </div>
+
+          <p
+            class="mensaje-formulario"
+            id="mensajeModalLimpiezaAsistencias"
+          ></p>
+        </div>
+      </div>
+
+      <!-- Modal: confirmación de limpieza de asistencias -->
+      <div
+        class="modal"
+        id="modalConfirmacionLimpiezaAsistencias"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="tituloConfirmacionLimpiezaAsistencias"
+        hidden
+      >
+        <div class="modal-contenido modal-confirmacion-peligro">
+          <div class="icono-confirmacion-peligro">
+            <i class="fa-solid fa-triangle-exclamation"></i>
+          </div>
+
+          <h3 id="tituloConfirmacionLimpiezaAsistencias">
+            Confirmar eliminación
+          </h3>
+
+          <p id="textoConfirmacionLimpiezaAsistencias"></p>
+
+          <div class="advertencia-confirmacion">
+            <i class="fa-solid fa-circle-exclamation"></i>
+            <span>Esta acción no se puede deshacer.</span>
+          </div>
+
+          <div class="acciones">
+            <button
+              type="button"
+              class="btn-secundario"
+              id="btnCancelarConfirmacionLimpieza"
+            >
+              Cancelar
+            </button>
+
+            <button
+              type="button"
+              class="btn-peligro"
+              id="btnAceptarConfirmacionLimpieza"
+            >
+              <i class="fa-solid fa-trash-can"></i>
+              Sí, continuar
+            </button>
+          </div>
+        </div>
+      </div>
 
       <section class="grupo seccion-destino" id="accesos">
         <h2>Accesos Recientes</h2>
@@ -2792,6 +2933,10 @@
     <script
       type="module"
       src="../assets/js/accesos-recientes-admin.js"
+    ></script>
+    <script
+      type="module"
+      src="../assets/js/limpieza-asistencias-admin.js"
     ></script>
 
     <script>

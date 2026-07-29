@@ -2230,3 +2230,270 @@ body.modal-abierto {
   font-size: 1rem;
   font-weight: 600;
 }
+/* Modal limpieza de asistencias */
+#modalLimpiezaAsistencias {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 1.5rem;
+  background: rgba(0, 20, 60, 0.65);
+  backdrop-filter: blur(4px);
+}
+
+#modalLimpiezaAsistencias[hidden] {
+  display: none !important;
+}
+
+#modalLimpiezaAsistencias .modal-contenido {
+  position: relative;
+  width: min(100%, 540px);
+  padding: 2rem;
+
+  background: #ffffff;
+  border-radius: 18px;
+  box-shadow: 0 20px 55px rgba(0, 28, 85, 0.3);
+}
+
+#modalLimpiezaAsistencias .modal-contenido h3 {
+  margin: 0 0 0.75rem;
+  color: #073681;
+  font-size: 1.4rem;
+}
+
+#modalLimpiezaAsistencias .modal-contenido > p {
+  margin: 0 0 1.5rem;
+  color: #536582;
+  line-height: 1.5;
+}
+
+#modalLimpiezaAsistencias .modal-cerrar {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 38px;
+  height: 38px;
+  padding: 0;
+
+  color: #073681;
+  background: #eef4ff;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+#modalLimpiezaAsistencias .modal-cerrar:hover {
+  background: #dce8ff;
+}
+
+#modalLimpiezaAsistencias .campo-formulario {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+#modalLimpiezaAsistencias .campo-formulario label {
+  color: #073681;
+  font-weight: 700;
+}
+
+#modalLimpiezaAsistencias .campo-formulario select {
+  width: 100%;
+  padding: 0.85rem 1rem;
+
+  color: #19365f;
+  background: #ffffff;
+  border: 1px solid #cbd8ec;
+  border-radius: 10px;
+  font: inherit;
+}
+
+#modalLimpiezaAsistencias .acciones {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+#modalLimpiezaAsistencias .btn-secundario {
+  padding: 0.8rem 1.2rem;
+
+  color: #073681;
+  background: #ffffff;
+  border: 1px solid #cbd8ec;
+  border-radius: 10px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+#modalLimpiezaAsistencias .btn-accion {
+  padding: 0.8rem 1.2rem;
+}
+
+#modalLimpiezaAsistencias .mensaje-formulario {
+  margin-top: 1rem;
+  margin-bottom: 0;
+}
+
+@media (max-width: 600px) {
+  #modalLimpiezaAsistencias {
+    padding: 1rem;
+  }
+
+  #modalLimpiezaAsistencias .modal-contenido {
+    padding: 1.5rem;
+  }
+
+  #modalLimpiezaAsistencias .acciones {
+    flex-direction: column-reverse;
+  }
+
+  #modalLimpiezaAsistencias .acciones button {
+    width: 100%;
+  }
+}
+#modalConfirmacionLimpiezaAsistencias {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 1.5rem;
+  background: rgba(0, 20, 60, 0.72);
+  backdrop-filter: blur(5px);
+}
+
+#modalConfirmacionLimpiezaAsistencias[hidden] {
+  display: none !important;
+}
+
+#modalConfirmacionLimpiezaAsistencias .modal-confirmacion-peligro {
+  width: min(92vw, 500px);
+  padding: 2rem;
+  text-align: center;
+}
+
+#modalConfirmacionLimpiezaAsistencias .icono-confirmacion-peligro {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 68px;
+  height: 68px;
+  margin: 0 auto 1.2rem;
+
+  color: #b42318;
+  background: #fee4e2;
+  border-radius: 50%;
+  font-size: 1.8rem;
+}
+
+#modalConfirmacionLimpiezaAsistencias h3 {
+  margin: 0 0 0.8rem;
+  color: #073681;
+  font-size: 1.45rem;
+}
+
+#modalConfirmacionLimpiezaAsistencias #textoConfirmacionLimpiezaAsistencias {
+  margin: 0 0 1.2rem;
+  color: #243b63;
+  font-size: 1rem;
+  font-weight: 600;
+  line-height: 1.6;
+}
+
+#modalConfirmacionLimpiezaAsistencias .advertencia-confirmacion {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.55rem;
+
+  margin-bottom: 1.5rem;
+  padding: 0.85rem 1rem;
+
+  color: #912018;
+  background: #fff1f0;
+  border: 1px solid #fecdca;
+  border-radius: 10px;
+  font-weight: 700;
+}
+
+#modalConfirmacionLimpiezaAsistencias .acciones {
+  display: flex;
+  justify-content: center;
+  gap: 0.75rem;
+}
+
+#modalConfirmacionLimpiezaAsistencias .btn-peligro {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+
+  padding: 0.8rem 1.25rem;
+
+  color: #ffffff;
+  background: #b42318;
+  border: none;
+  border-radius: 10px;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+#modalConfirmacionLimpiezaAsistencias .btn-peligro:hover {
+  background: #912018;
+}
+
+@media (max-width: 600px) {
+  #modalConfirmacionLimpiezaAsistencias .acciones {
+    flex-direction: column-reverse;
+  }
+
+  #modalConfirmacionLimpiezaAsistencias .acciones button {
+    width: 100%;
+  }
+}
+#modalConfirmacionLimpiezaAsistencias .modal-contenido {
+  background: #ffffff;
+  opacity: 1;
+}
+#modalConfirmacionLimpiezaAsistencias .modal-contenido {
+  background: #ffffff;
+  border-radius: 24px;
+  box-shadow: 0 25px 70px rgba(0, 28, 85, 0.35);
+  overflow: hidden;
+}
+
+#modalConfirmacionLimpiezaAsistencias .advertencia-confirmacion {
+  border-radius: 16px;
+}
+
+#modalConfirmacionLimpiezaAsistencias .btn-secundario {
+  border-radius: 14px;
+}
+
+#modalConfirmacionLimpiezaAsistencias .btn-peligro {
+  border-radius: 14px;
+}
+
+#modalConfirmacionLimpiezaAsistencias .icono-confirmacion-peligro {
+  border-radius: 50%;
+}
+#modalLimpiezaAsistencias .mensaje-confirmacion {
+  color: #176b3a;
+  font-weight: 700;
+}
