@@ -129,16 +129,20 @@ async function obtenerPerfilAlumnoCompaneros(usuario) {
 }
 
 async function obtenerCompanerosDelCurso(perfilAlumno) {
-  const condicionesComunes = [
-    where("rol", "==", "ALUMNO"),
-    where("estado", "==", "ACTIVO"),
-    where("cursoAnio", "==", perfilAlumno.cursoAnio),
-    where("cursoDivision", "==", perfilAlumno.cursoDivision),
-  ];
+  const cursoId = String(perfilAlumno.cursoId || "").trim();
+
+  const condicionesCurso = cursoId
+    ? [where("cursoId", "==", cursoId)]
+    : [
+        where("cursoAnio", "==", perfilAlumno.cursoAnio),
+        where("cursoDivision", "==", perfilAlumno.cursoDivision),
+      ];
 
   const consultaCompaneros = query(
     collection(db, "usuarios"),
-    ...condicionesComunes,
+    where("rol", "==", "ALUMNO"),
+    where("estado", "==", "ACTIVO"),
+    ...condicionesCurso,
     where("tipoVinculo", "==", "CURSANDO"),
   );
 
