@@ -161,25 +161,6 @@ async function obtenerCompanerosDelCurso(perfilAlumno) {
     }
   });
 
-  const companerosPorClave = new Map();
-
-  consultasCorrectas.forEach((resultado) => {
-    resultado.value.forEach((documento) => {
-      const datos = documento.data();
-
-      const correo = normalizarCorreoCompaneros(datos.correo || documento.id);
-
-      const clave = correo || documento.id;
-
-      if (!companerosPorClave.has(clave)) {
-        companerosPorClave.set(clave, {
-          id: documento.id,
-          ...datos,
-        });
-      }
-    });
-  });
-
   return Array.from(companerosPorClave.values());
 }
 
