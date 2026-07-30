@@ -211,69 +211,29 @@ async function obtenerPerfilAlumnoCompaneros(usuario) {
 ===================================================== */
 
 function crearConsultasCompaneros(perfilAlumno) {
-  const referenciaUsuarios = collection(db, "usuarios");
+  const cursoId = String(perfilAlumno.cursoId || "").trim();
 
-  const condicionesComunes = [
+  if (!cursoId) {
+    throw new Error(
+      "Tu cuenta todavía no tiene un curso identificado. Consultá con Soporte o Preceptoría.",
+    );
+  }
+
+  /*
+   * Consulta única y segura:
+   * solamente estudiantes activos del mismo cursoId.
+   *
+   * Coincide exactamente con las Firestore Rules
+   * utilizadas por la sección “Mis compañeros”.
+   */
+  const consultaCompaneros = query(
+    collection(db, "usuarios"),
     where("rol", "==", "ALUMNO"),
     where("estado", "==", "ACTIVO"),
-  ];
+    where("cursoId", "==", cursoId),
+  );
 
-  const consultas = [];
-
-  /*
-   * Estructura actual:
-   * consulta por cursoId y tipoVinculo.
-   */
-  if (perfilAlumno.cursoId) {
-    consultas.push(
-      query(
-        referenciaUsuarios,
-        ...condicionesComunes,
-        where("cursoId", "==", perfilAlumno.cursoId),
-        where("tipoVinculo", "==", "CURSANDO"),
-      ),
-    );
-
-    /*
-     * Compatibilidad con registros anteriores que
-     * utilicen situacionRevista.
-     */
-    consultas.push(
-      query(
-        referenciaUsuarios,
-        ...condicionesComunes,
-        where("cursoId", "==", perfilAlumno.cursoId),
-        where("situacionRevista", "==", "CURSANDO"),
-      ),
-    );
-  }
-
-  /*
-   * Compatibilidad por año y división.
-   */
-  if (perfilAlumno.cursoAnio && perfilAlumno.cursoDivision) {
-    consultas.push(
-      query(
-        referenciaUsuarios,
-        ...condicionesComunes,
-        where("cursoAnio", "==", perfilAlumno.cursoAnio),
-        where("cursoDivision", "==", perfilAlumno.cursoDivision),
-        where("tipoVinculo", "==", "CURSANDO"),
-      ),
-    );
-
-    consultas.push(
-      query(
-        referenciaUsuarios,
-        ...condicionesComunes,
-        where("cursoAnio", "==", perfilAlumno.cursoAnio),
-        where("cursoDivision", "==", perfilAlumno.cursoDivision),
-        where("situacionRevista", "==", "CURSANDO"),
-      ),
-    );
-  }
-
-  return consultas;
+  return [consultaCompaneros];
 }
 
 function perteneceAlCursoCompaneros(companero, perfilAlumno) {
