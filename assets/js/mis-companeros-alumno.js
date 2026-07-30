@@ -136,41 +136,30 @@ async function obtenerCompanerosDelCurso(perfilAlumno) {
     where("cursoDivision", "==", perfilAlumno.cursoDivision),
   ];
 
-  const consultaTipoVinculo = query(
+  const consultaCompaneros = query(
     collection(db, "usuarios"),
     ...condicionesComunes,
     where("tipoVinculo", "==", "CURSANDO"),
   );
 
-  const consultaSituacionRevista = query(
-    collection(db, "usuarios"),
-    ...condicionesComunes,
-    where("situacionRevista", "==", "CURSANDO"),
-  );
+  const resultadoConsulta = await getDocs(consultaCompaneros);
 
-  const resultados = await Promise.allSettled([
-    getDocs(consultaTipoVinculo),
-    getDocs(consultaSituacionRevista),
-  ]);
+  const companerosPorClave = new Map();
 
-  const consultasCorrectas = resultados.filter(
-    (resultado) => resultado.status === "fulfilled",
-  );
+  resultadoConsulta.forEach((documento) => {
+    const datos = documento.data();
 
-  resultados.forEach((resultado, indice) => {
-    if (resultado.status === "rejected") {
-      console.error(
-        indice === 0
-          ? "Error consulta tipoVinculo:"
-          : "Error consulta situacionRevista:",
-        resultado.reason,
-      );
+    const correo = normalizarCorreoCompaneros(datos.correo || documento.id);
+
+    const clave = correo || documento.id;
+
+    if (!companerosPorClave.has(clave)) {
+      companerosPorClave.set(clave, {
+        id: documento.id,
+        ...datos,
+      });
     }
   });
-
-  if (!consultasCorrectas.length) {
-    throw new Error("No se pudo consultar el listado de estudiantes.");
-  }
 
   const companerosPorClave = new Map();
 
