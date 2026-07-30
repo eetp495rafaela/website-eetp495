@@ -19,6 +19,10 @@ import {
   where,
 } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
 
+/* =====================================================
+   CONFIGURACIÓN FIREBASE
+===================================================== */
+
 const firebaseConfig = {
   apiKey: "AIzaSyAARktrOpu-Rz683q4RxTK2h1nmkUaUbuA",
   authDomain: "portal-institucional-eet-fa5c7.firebaseapp.com",
@@ -33,14 +37,26 @@ const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
+/* =====================================================
+   ELEMENTOS DEL PORTAL
+===================================================== */
+
 const tarjetaMisCompanerosAlumno = document.getElementById(
   "tarjetaMisCompanerosAlumno",
 );
 
 const vistaCompanerosAlumno = document.getElementById("vistaCompanerosAlumno");
 
+/* =====================================================
+   ESTADO DEL MÓDULO
+===================================================== */
+
 let usuarioCompanerosActual = null;
 let companerosAlumnoCargados = false;
+
+/* =====================================================
+   UTILIDADES
+===================================================== */
 
 function normalizarCorreoCompaneros(correo) {
   return String(correo || "")
@@ -48,7 +64,7 @@ function normalizarCorreoCompaneros(correo) {
     .toLowerCase();
 }
 
-function normalizarTextoCompaneros(texto) {
+function normalizarMayusculasCompaneros(texto) {
   return String(texto || "")
     .trim()
     .toUpperCase();
@@ -74,12 +90,21 @@ function mostrarMensajeCompaneros(texto, tipo = "") {
 }
 
 function obtenerNombreCursoCompaneros(perfilAlumno) {
-  return (
-    String(perfilAlumno.cursoNombre || "").trim() ||
-    `${perfilAlumno.cursoAnio || ""}º ${
-      perfilAlumno.cursoDivision || ""
-    }`.trim()
-  );
+  const cursoNombre = String(perfilAlumno.cursoNombre || "").trim();
+
+  if (cursoNombre) {
+    return cursoNombre;
+  }
+
+  const cursoAnio = Number(perfilAlumno.cursoAnio || 0);
+
+  const cursoDivision = String(perfilAlumno.cursoDivision || "").trim();
+
+  if (cursoAnio && cursoDivision) {
+    return `${cursoAnio}º ${cursoDivision}`;
+  }
+
+  return "Curso no identificado";
 }
 
 function obtenerNombreCompanero(companero) {
@@ -90,6 +115,7 @@ function obtenerNombreCompanero(companero) {
   }
 
   const apellido = String(companero.apellido || "").trim();
+
   const nombre = String(companero.nombre || "").trim();
 
   return (
@@ -99,66 +125,271 @@ function obtenerNombreCompanero(companero) {
   );
 }
 
+function obtenerRolesPerfilCompaneros(perfilAlumno) {
+  const roles = new Set();
+
+  const rolPrincipal = normalizarMayusculasCompaneros(perfilAlumno.rol);
+
+  if (rolPrincipal) {
+    roles.add(rolPrincipal);
+  }
+
+  if (Array.isArray(perfilAlumno.roles)) {
+    perfilAlumno.roles.forEach((rol) => {
+      const rolNormalizado = normalizarMayusculasCompaneros(rol);
+
+      if (rolNormalizado) {
+        roles.add(rolNormalizado);
+      }
+    });
+  }
+
+  return roles;
+}
+
+/* =====================================================
+   PERFIL DEL ALUMNO AUTENTICADO
+===================================================== */
+
 async function obtenerPerfilAlumnoCompaneros(usuario) {
-  const correo = normalizarCorreoCompaneros(usuario.email);
+  const correo = normalizarCorreoCompaneros(usuario?.email);
+
+  if (!correo) {
+    throw new Error("No se pudo identificar el correo de la sesión activa.");
+  }
 
   const referenciaUsuario = doc(db, "usuarios", correo);
+
   const documentoUsuario = await getDoc(referenciaUsuario);
 
   if (!documentoUsuario.exists()) {
     throw new Error("No se encontró tu perfil de estudiante.");
   }
 
-  const perfilAlumno = documentoUsuario.data();
+  const datosPerfil = documentoUsuario.data();
 
-  const cursoAnio = Number(perfilAlumno.cursoAnio || 0);
+  const estado = normalizarMayusculasCompaneros(datosPerfil.estado);
 
-  const cursoDivision = normalizarTextoCompaneros(perfilAlumno.cursoDivision);
+  if (estado !== "ACTIVO") {
+    throw new Error("Tu cuenta no se encuentra activa.");
+  }
 
-  if (!cursoAnio || !cursoDivision) {
+  const roles = obtenerRolesPerfilCompaneros(datosPerfil);
+
+  if (!roles.has("ALUMNO")) {
+    throw new Error("Tu cuenta no tiene habilitado el rol de estudiante.");
+  }
+
+  const cursoId = String(datosPerfil.cursoId || "").trim();
+
+  const cursoAnio = Number(datosPerfil.cursoAnio || 0);
+
+  /*
+   * Se conserva exactamente como está guardada en
+   * Firestore. No se transforma antes de consultar.
+   */
+  const cursoDivision = String(datosPerfil.cursoDivision || "").trim();
+
+  if (!cursoId && (!cursoAnio || !cursoDivision)) {
     throw new Error(
       "Tu cuenta todavía no tiene un curso asignado. Consultá con Soporte o Preceptoría.",
     );
   }
 
   return {
-    ...perfilAlumno,
+    ...datosPerfil,
+    correo,
+    estado,
+    cursoId,
     cursoAnio,
     cursoDivision,
   };
 }
 
-async function obtenerCompanerosDelCurso(perfilAlumno) {
-  const consultaCompaneros = query(
-    collection(db, "usuarios"),
+/* =====================================================
+   CONSULTAS DE COMPAÑEROS
+===================================================== */
+
+function crearConsultasCompaneros(perfilAlumno) {
+  const referenciaUsuarios = collection(db, "usuarios");
+
+  const condicionesComunes = [
     where("rol", "==", "ALUMNO"),
     where("estado", "==", "ACTIVO"),
-    where("cursoAnio", "==", perfilAlumno.cursoAnio),
-    where("cursoDivision", "==", perfilAlumno.cursoDivision),
-    where("tipoVinculo", "==", "CURSANDO"),
+  ];
+
+  const consultas = [];
+
+  /*
+   * Estructura actual:
+   * consulta por cursoId y tipoVinculo.
+   */
+  if (perfilAlumno.cursoId) {
+    consultas.push(
+      query(
+        referenciaUsuarios,
+        ...condicionesComunes,
+        where("cursoId", "==", perfilAlumno.cursoId),
+        where("tipoVinculo", "==", "CURSANDO"),
+      ),
+    );
+
+    /*
+     * Compatibilidad con registros anteriores que
+     * utilicen situacionRevista.
+     */
+    consultas.push(
+      query(
+        referenciaUsuarios,
+        ...condicionesComunes,
+        where("cursoId", "==", perfilAlumno.cursoId),
+        where("situacionRevista", "==", "CURSANDO"),
+      ),
+    );
+  }
+
+  /*
+   * Compatibilidad por año y división.
+   */
+  if (perfilAlumno.cursoAnio && perfilAlumno.cursoDivision) {
+    consultas.push(
+      query(
+        referenciaUsuarios,
+        ...condicionesComunes,
+        where("cursoAnio", "==", perfilAlumno.cursoAnio),
+        where("cursoDivision", "==", perfilAlumno.cursoDivision),
+        where("tipoVinculo", "==", "CURSANDO"),
+      ),
+    );
+
+    consultas.push(
+      query(
+        referenciaUsuarios,
+        ...condicionesComunes,
+        where("cursoAnio", "==", perfilAlumno.cursoAnio),
+        where("cursoDivision", "==", perfilAlumno.cursoDivision),
+        where("situacionRevista", "==", "CURSANDO"),
+      ),
+    );
+  }
+
+  return consultas;
+}
+
+function perteneceAlCursoCompaneros(companero, perfilAlumno) {
+  const cursoIdCompanero = String(companero.cursoId || "").trim();
+
+  const mismoCursoId =
+    Boolean(perfilAlumno.cursoId) && cursoIdCompanero === perfilAlumno.cursoId;
+
+  const anioCompanero = Number(companero.cursoAnio || 0);
+
+  const divisionCompanero = normalizarMayusculasCompaneros(
+    companero.cursoDivision,
   );
 
-  const resultadoConsulta = await getDocs(consultaCompaneros);
+  const divisionAlumno = normalizarMayusculasCompaneros(
+    perfilAlumno.cursoDivision,
+  );
+
+  const mismoAnioDivision =
+    Boolean(perfilAlumno.cursoAnio) &&
+    Boolean(divisionAlumno) &&
+    anioCompanero === perfilAlumno.cursoAnio &&
+    divisionCompanero === divisionAlumno;
+
+  return mismoCursoId || mismoAnioDivision;
+}
+
+async function obtenerCompanerosDelCurso(perfilAlumno) {
+  const consultas = crearConsultasCompaneros(perfilAlumno);
+
+  if (!consultas.length) {
+    throw new Error("No se pudo determinar el curso que debe consultarse.");
+  }
+
+  /*
+   * Las consultas se ejecutan de manera independiente.
+   * Si una consulta antigua falla, las demás continúan.
+   */
+  const resultados = await Promise.allSettled(
+    consultas.map((consulta) => getDocs(consulta)),
+  );
+
+  const resultadosCorrectos = resultados.filter(
+    (resultado) => resultado.status === "fulfilled",
+  );
+
+  const resultadosRechazados = resultados.filter(
+    (resultado) => resultado.status === "rejected",
+  );
+
+  resultadosRechazados.forEach((resultado, indice) => {
+    console.warn(
+      `Consulta de compañeros rechazada ${indice + 1}:`,
+      resultado.reason,
+    );
+  });
+
+  if (!resultadosCorrectos.length) {
+    const primerError = resultadosRechazados[0]?.reason;
+
+    console.error(
+      "Todas las consultas de compañeros fueron rechazadas:",
+      primerError,
+    );
+
+    if (primerError?.code === "permission-denied") {
+      throw new Error(
+        "Firestore rechazó la consulta de compañeros por permisos.",
+      );
+    }
+
+    if (primerError?.code === "failed-precondition") {
+      throw new Error(
+        "Firestore necesita crear un índice para consultar los compañeros.",
+      );
+    }
+
+    throw new Error(
+      primerError?.message || "No se pudo consultar la lista de compañeros.",
+    );
+  }
 
   const companerosPorClave = new Map();
 
-  resultadoConsulta.forEach((documento) => {
-    const datos = documento.data();
+  resultadosCorrectos.forEach((resultado) => {
+    resultado.value.forEach((documento) => {
+      const datos = documento.data();
 
-    const correo = normalizarCorreoCompaneros(datos.correo || documento.id);
+      /*
+       * Verificación adicional del curso antes de mostrar
+       * el registro.
+       */
+      if (!perteneceAlCursoCompaneros(datos, perfilAlumno)) {
+        return;
+      }
 
-    const clave = correo || documento.id;
+      const correo = normalizarCorreoCompaneros(datos.correo || documento.id);
 
-    if (!companerosPorClave.has(clave)) {
-      companerosPorClave.set(clave, {
-        id: documento.id,
-        ...datos,
-      });
-    }
+      const clave = correo || documento.id;
+
+      if (!companerosPorClave.has(clave)) {
+        companerosPorClave.set(clave, {
+          id: documento.id,
+          ...datos,
+          correo: datos.correo || documento.id,
+        });
+      }
+    });
   });
 
   return Array.from(companerosPorClave.values());
 }
+
+/* =====================================================
+   RENDERIZADO
+===================================================== */
 
 function renderizarCompanerosAlumno(companeros, perfilAlumno) {
   if (!vistaCompanerosAlumno) return;
@@ -248,6 +479,10 @@ function renderizarCompanerosAlumno(companeros, perfilAlumno) {
   `;
 }
 
+/* =====================================================
+   CARGA PRINCIPAL
+===================================================== */
+
 async function cargarMisCompanerosAlumno() {
   if (!usuarioCompanerosActual) {
     mostrarMensajeCompaneros(
@@ -265,6 +500,13 @@ async function cargarMisCompanerosAlumno() {
       usuarioCompanerosActual,
     );
 
+    console.log("Perfil utilizado para consultar compañeros:", {
+      correo: perfilAlumno.correo,
+      cursoId: perfilAlumno.cursoId,
+      cursoAnio: perfilAlumno.cursoAnio,
+      cursoDivision: perfilAlumno.cursoDivision,
+    });
+
     const companeros = await obtenerCompanerosDelCurso(perfilAlumno);
 
     renderizarCompanerosAlumno(companeros, perfilAlumno);
@@ -280,6 +522,10 @@ async function cargarMisCompanerosAlumno() {
   }
 }
 
+/* =====================================================
+   EVENTOS
+===================================================== */
+
 tarjetaMisCompanerosAlumno?.addEventListener("click", () => {
   setTimeout(() => {
     if (!companerosAlumnoCargados) {
@@ -289,9 +535,23 @@ tarjetaMisCompanerosAlumno?.addEventListener("click", () => {
 });
 
 onAuthStateChanged(auth, (usuario) => {
-  if (!usuario) return;
+  if (!usuario) {
+    usuarioCompanerosActual = null;
+    companerosAlumnoCargados = false;
+    return;
+  }
+
+  const correoAnterior = normalizarCorreoCompaneros(
+    usuarioCompanerosActual?.email,
+  );
+
+  const correoNuevo = normalizarCorreoCompaneros(usuario.email);
 
   usuarioCompanerosActual = usuario;
+
+  if (correoAnterior !== correoNuevo) {
+    companerosAlumnoCargados = false;
+  }
 
   mostrarMensajeCompaneros(
     "Seleccioná la tarjeta “Mis compañeros” para consultar los integrantes de tu curso.",
