@@ -157,6 +157,17 @@ async function obtenerCompanerosDelCurso(perfilAlumno) {
     (resultado) => resultado.status === "fulfilled",
   );
 
+  resultados.forEach((resultado, indice) => {
+    if (resultado.status === "rejected") {
+      console.error(
+        indice === 0
+          ? "Error consulta tipoVinculo:"
+          : "Error consulta situacionRevista:",
+        resultado.reason,
+      );
+    }
+  });
+
   if (!consultasCorrectas.length) {
     throw new Error("No se pudo consultar el listado de estudiantes.");
   }
