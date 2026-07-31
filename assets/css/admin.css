@@ -2497,3 +2497,39 @@ body.modal-abierto {
   color: #176b3a;
   font-weight: 700;
 }
+/* =====================================================
+   ACCESOS RECIENTES
+===================================================== */
+
+.acciones-accesos-recientes {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.btn-limpiar-accesos-recientes {
+  background: #b42318;
+}
+
+.btn-limpiar-accesos-recientes:hover {
+  background: #8f1c13;
+  box-shadow: 0 8px 18px rgba(180, 35, 24, 0.22);
+}
+
+.btn-limpiar-accesos-recientes:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+@media (max-width: 700px) {
+  .acciones-accesos-recientes {
+    width: 100%;
+    flex-direction: column;
+  }
+
+  .acciones-accesos-recientes .btn-accion {
+    width: 100%;
+  }
+}

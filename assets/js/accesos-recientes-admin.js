@@ -4,10 +4,15 @@ import {
   limit,
   orderBy,
   query,
+  writeBatch,
 } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
 
 const btnVerAccesosRecientes = document.getElementById(
   "btnVerAccesosRecientes",
+);
+
+const btnLimpiarAccesosRecientes = document.getElementById(
+  "btnLimpiarAccesosRecientes",
 );
 
 const cuerpoTablaAccesosRecientes = document.getElementById(
@@ -229,6 +234,174 @@ async function cargarAccesosRecientes() {
   }
 }
 
+async function limpiarAccesosRecientes() {
+  if (!btnLimpiarAccesosRecientes) {
+    return;
+  }
+
+  let eliminacionConfirmada = false;
+
+  if (window.Swal) {
+    const confirmacion = await Swal.fire({
+      title: "¿Limpiar accesos recientes?",
+      html: `
+        <p>
+          Se eliminarán todos los registros almacenados en
+          <strong>Accesos Recientes</strong>.
+        </p>
+
+        <p>
+          Esta acción no elimina usuarios ni modifica sus cuentas,
+          pero no se puede deshacer.
+        </p>
+      `,
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Sí, limpiar accesos",
+      cancelButtonText: "Cancelar",
+      confirmButtonColor: "#b42318",
+      reverseButtons: true,
+      focusCancel: true,
+    });
+
+    eliminacionConfirmada = confirmacion.isConfirmed;
+  } else {
+    eliminacionConfirmada = window.confirm(
+      "Se eliminarán todos los accesos recientes registrados. ¿Deseás continuar?",
+    );
+  }
+
+  if (!eliminacionConfirmada) {
+    return;
+  }
+
+  const textoOriginal = btnLimpiarAccesosRecientes.innerHTML;
+
+  btnLimpiarAccesosRecientes.disabled = true;
+
+  if (btnVerAccesosRecientes) {
+    btnVerAccesosRecientes.disabled = true;
+  }
+
+  btnLimpiarAccesosRecientes.innerHTML = `
+    <i class="fa-solid fa-spinner fa-spin"></i>
+    Limpiando accesos...
+  `;
+
+  mostrarMensaje("");
+  mostrarFilaInformativa("Eliminando los accesos registrados...");
+
+  try {
+    const db = await obtenerBaseDeDatos();
+
+    /*
+     * Se consulta la colección completa, no solamente
+     * los últimos 50 documentos que aparecen en la tabla.
+     */
+    const resultado = await getDocs(
+      collection(db, "accesos_recientes"),
+    );
+
+    if (resultado.empty) {
+      mostrarFilaInformativa("Todavía no hay accesos registrados.");
+
+      mostrarMensaje(
+        "No había registros para eliminar.",
+        "mensaje-exito",
+      );
+
+      return;
+    }
+
+    /*
+     * Firestore permite hasta 500 operaciones por lote.
+     * Utilizamos bloques de 450 para conservar margen.
+     */
+    const TAMANIO_LOTE = 450;
+    const documentos = resultado.docs;
+
+    for (
+      let inicio = 0;
+      inicio < documentos.length;
+      inicio += TAMANIO_LOTE
+    ) {
+      const lote = writeBatch(db);
+
+      const documentosDelLote = documentos.slice(
+        inicio,
+        inicio + TAMANIO_LOTE,
+      );
+
+      documentosDelLote.forEach((documento) => {
+        lote.delete(documento.ref);
+      });
+
+      await lote.commit();
+    }
+
+    mostrarFilaInformativa("Todavía no hay accesos registrados.");
+
+    mostrarMensaje(
+      `Se eliminaron correctamente ${documentos.length} ${
+        documentos.length === 1
+          ? "registro de acceso"
+          : "registros de acceso"
+      }.`,
+      "mensaje-exito",
+    );
+
+    if (window.Swal) {
+      await Swal.fire({
+        title: "Accesos eliminados",
+        text: `Se eliminaron ${documentos.length} registros correctamente.`,
+        icon: "success",
+        confirmButtonText: "Aceptar",
+      });
+    }
+  } catch (error) {
+    console.error(
+      "Error al limpiar los accesos recientes:",
+      error,
+    );
+
+    mostrarFilaInformativa(
+      "No se pudieron limpiar los accesos recientes.",
+    );
+
+    mostrarMensaje(
+      error?.code === "permission-denied"
+        ? "Firestore rechazó la eliminación por permisos."
+        : "Ocurrió un error al eliminar la actividad del portal.",
+      "mensaje-error",
+    );
+
+    if (window.Swal) {
+      await Swal.fire({
+        title: "No se pudieron eliminar",
+        text:
+          error?.code === "permission-denied"
+            ? "La cuenta actual no tiene permiso para eliminar estos registros."
+            : "Ocurrió un error al limpiar los accesos recientes.",
+        icon: "error",
+        confirmButtonText: "Aceptar",
+      });
+    }
+  } finally {
+    btnLimpiarAccesosRecientes.disabled = false;
+    btnLimpiarAccesosRecientes.innerHTML = textoOriginal;
+
+    if (btnVerAccesosRecientes) {
+      btnVerAccesosRecientes.disabled = false;
+    }
+  }
+}
+
 if (btnVerAccesosRecientes) {
   btnVerAccesosRecientes.addEventListener("click", cargarAccesosRecientes);
+}
+if (btnLimpiarAccesosRecientes) {
+  btnLimpiarAccesosRecientes.addEventListener(
+    "click",
+    limpiarAccesosRecientes,
+  );
 }
