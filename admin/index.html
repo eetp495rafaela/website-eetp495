@@ -2194,10 +2194,12 @@
         <h2>Configuración del Portal</h2>
 
         <div class="grid-configuracion-portal">
+          <!-- Backup del sistema -->
           <div class="panel-info">
             <div class="encabezado-listado">
               <div>
                 <h3>Backup del sistema</h3>
+
                 <p>
                   Generá una copia de seguridad manual de la base de datos del
                   portal institucional. El archivo se guardará automáticamente
@@ -2222,10 +2224,12 @@
             </p>
           </div>
 
+          <!-- Pizarra general de horarios -->
           <div class="panel-info">
             <div class="encabezado-listado">
               <div>
                 <h3>Pizarra general de horarios</h3>
+
                 <p>
                   Generá una vista general e imprimible de los horarios
                   institucionales de Aula, Taller y Educación Física, organizada
@@ -2251,14 +2255,17 @@
             </p>
           </div>
 
+          <!-- Limpiar registros de asistencia -->
           <div class="panel-info">
             <div class="encabezado-listado">
               <div>
                 <h3>Limpiar registros de asistencia</h3>
+
                 <p>
                   Eliminá los registros de asistencia de Taller, Educación
-                  Física o de ambas modalidades. Esta operación no puede
-                  deshacerse.
+                  Física o de ambas modalidades. Esta operación solo podrá
+                  ejecutarla el Administrador y
+                  <strong>NO PUEDE DESHACERSE</strong>.
                 </p>
               </div>
             </div>
@@ -2277,6 +2284,55 @@
             <p class="mensaje-formulario" id="mensajeLimpiezaAsistencias">
               Solo se eliminarán documentos de la colección de asistencias.
             </p>
+          </div>
+
+          <!-- Administrar usuarios inactivos -->
+          <div class="panel-info panel-usuarios-inactivos">
+            <div class="encabezado-listado">
+              <div>
+                <h3>Administrar usuarios inactivos</h3>
+
+                <p>
+                  Consultá los usuarios inactivos o dados de baja para evaluar
+                  su eliminación individual de la base de datos.
+                </p>
+              </div>
+            </div>
+
+            <div class="acciones">
+              <button
+                type="button"
+                class="btn-accion"
+                id="btnVerUsuariosInactivos"
+              >
+                <i class="fa-solid fa-user-slash"></i>
+                Ver usuarios para eliminar
+              </button>
+            </div>
+
+            <div class="tabla-contenedor">
+              <table class="tabla-usuarios tabla-usuarios-inactivos">
+                <thead>
+                  <tr>
+                    <th>Usuario</th>
+                    <th>Rol</th>
+                    <th>Condición</th>
+                    <th>Acción</th>
+                  </tr>
+                </thead>
+
+                <tbody id="cuerpoTablaUsuariosInactivos">
+                  <tr>
+                    <td colspan="4" class="tabla-vacia">
+                      Todavía no se consultaron los usuarios inactivos. Presioná
+                      “Ver usuarios para eliminar” para cargarlos.
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <p class="mensaje-formulario" id="mensajeUsuariosInactivos"></p>
           </div>
         </div>
 
@@ -2414,24 +2470,24 @@
             </div>
 
             <div class="acciones-accesos-recientes">
-  <button
-    class="btn-accion"
-    id="btnVerAccesosRecientes"
-    type="button"
-  >
-    <i class="fa-solid fa-clock-rotate-left"></i>
-    Ver actividad
-  </button>
+              <button
+                class="btn-accion"
+                id="btnVerAccesosRecientes"
+                type="button"
+              >
+                <i class="fa-solid fa-clock-rotate-left"></i>
+                Ver actividad
+              </button>
 
-  <button
-    class="btn-accion btn-limpiar-accesos-recientes"
-    id="btnLimpiarAccesosRecientes"
-    type="button"
-  >
-    <i class="fa-solid fa-trash-can"></i>
-    Limpiar accesos
-  </button>
-</div>
+              <button
+                class="btn-accion btn-limpiar-accesos-recientes"
+                id="btnLimpiarAccesosRecientes"
+                type="button"
+              >
+                <i class="fa-solid fa-trash-can"></i>
+                Limpiar accesos
+              </button>
+            </div>
           </div>
 
           <div class="tabla-contenedor">
@@ -2948,6 +3004,10 @@
     <script
       type="module"
       src="../assets/js/limpieza-asistencias-admin.js"
+    ></script>
+    <script
+      type="module"
+      src="../assets/js/usuarios-inactivos-admin.js"
     ></script>
 
     <script>

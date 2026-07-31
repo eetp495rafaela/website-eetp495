@@ -1405,9 +1405,11 @@ body.modal-abierto {
 }
 /* Configuración del portal */
 
+/* Configuración del portal */
+
 .grid-configuracion-portal {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 18px;
   align-items: stretch;
 }
@@ -1417,9 +1419,21 @@ body.modal-abierto {
   height: 100%;
 }
 
+/*
+ * La administración de usuarios ocupa
+ * todo el ancho debajo de las tres herramientas.
+ */
+.grid-configuracion-portal .panel-usuarios-inactivos {
+  grid-column: 1 / -1;
+}
+
 @media (max-width: 900px) {
   .grid-configuracion-portal {
     grid-template-columns: 1fr;
+  }
+
+  .grid-configuracion-portal .panel-usuarios-inactivos {
+    grid-column: auto;
   }
 }
 /* =====================================================
