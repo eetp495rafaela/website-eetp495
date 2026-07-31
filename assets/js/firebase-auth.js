@@ -252,7 +252,7 @@ async function validarPerfilUsuario(user) {
     await signOut(auth);
 
     throw new Error(
-      "Tu cuenta Google no está autorizada para usar el Portal Institucional.",
+      "Tu cuenta Google no está autorizada. Si crees que es un error, comunícate con el Administrador del Sitio.",
     );
   }
 
