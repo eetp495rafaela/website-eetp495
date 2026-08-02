@@ -1932,3 +1932,22 @@ body[data-rol-permitido="DOCENTE"] .btn-arriba:hover {
     grid-template-columns: 1fr;
   }
 }
+/* =====================================================
+   PORTAL DOCENTE — MAYOR ANCHO DEL CONTENIDO
+===================================================== */
+
+.contenedor {
+  width: calc(100% - 48px);
+  max-width: 1700px;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 0;
+  padding-right: 0;
+}
+
+/* Tablets y celulares */
+@media (max-width: 800px) {
+  .contenedor {
+    width: calc(100% - 28px);
+  }
+}
