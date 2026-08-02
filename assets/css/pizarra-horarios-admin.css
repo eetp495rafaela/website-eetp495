@@ -1,26 +1,40 @@
+/* =====================================================
+   PIZARRA GENERAL DE HORARIOS — CSS DEPURADO
+   E.E.T.P. N.º 495 “Malvinas Argentinas”
+===================================================== */
+
 * {
   box-sizing: border-box;
 }
 
+html,
 body {
   margin: 0;
+  padding: 0;
+}
+
+body {
   font-family: Arial, Helvetica, sans-serif;
   background: #f3f6fb;
   color: #10203f;
 }
+
+/* =====================================================
+   BARRA DE ACCIONES
+===================================================== */
 
 .barra-acciones {
   position: sticky;
   top: 0;
   z-index: 10;
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  justify-content: space-between;
   gap: 12px;
   padding: 12px 18px;
   background: #003f91;
   color: #ffffff;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18);
+  box-shadow: 0 2px 8px rgb(0 0 0 / 18%);
 }
 
 .barra-acciones strong {
@@ -31,25 +45,29 @@ body {
   border: 0;
   border-radius: 8px;
   padding: 10px 16px;
-  font-weight: 800;
-  cursor: pointer;
   background: #ffffff;
   color: #003f91;
+  font-weight: 800;
+  cursor: pointer;
 }
 
+/* =====================================================
+   CONTENEDOR Y ENCABEZADO
+===================================================== */
+
 .pizarra {
-  width: min(100%, 1500px);
+  width: min(100%, 1800px);
   margin: 0 auto;
   padding: 18px;
 }
 
 .encabezado-pizarra {
   display: grid;
-  grid-template-columns: 76px 1fr;
-  gap: 14px;
+  grid-template-columns: 76px minmax(0, 1fr);
   align-items: center;
-  padding: 16px;
+  gap: 14px;
   margin-bottom: 16px;
+  padding: 16px;
   background: #ffffff;
   border: 2px solid #003f91;
   border-radius: 14px;
@@ -63,134 +81,96 @@ body {
 
 .encabezado-pizarra h1 {
   margin: 0;
-  font-size: 28px;
   color: #003f91;
+  font-size: 28px;
   line-height: 1.15;
 }
 
 .encabezado-pizarra p {
   margin: 6px 0 0;
-  font-size: 14px;
   color: #334765;
+  font-size: 14px;
   font-weight: 700;
 }
 
-.leyenda-colores,
+/* =====================================================
+   SECCIONES Y TURNOS
+===================================================== */
+
 .seccion-pizarra {
+  margin-bottom: 16px;
+  padding: 14px;
   background: #ffffff;
   border: 1px solid #d5dfef;
   border-radius: 14px;
-  padding: 14px;
-  margin-bottom: 16px;
-  break-inside: avoid;
 }
 
-.leyenda-colores h2,
-.seccion-pizarra h2 {
+.seccion-pizarra > h2 {
   margin: 0 0 12px;
-  color: #003f91;
-  font-size: 22px;
-  border-bottom: 2px solid #003f91;
   padding-bottom: 6px;
-}
-
-.items-leyenda {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-.item-leyenda {
-  display: inline-flex;
-  align-items: center;
-  border: 2px solid var(--color-borde);
-  background: var(--color-fondo);
-  color: var(--color-texto);
-  border-radius: 999px;
-  padding: 5px 10px;
-  font-size: 12px;
-  font-weight: 800;
+  color: #003f91;
+  border-bottom: 2px solid #003f91;
+  font-size: 22px;
 }
 
 .turno-pizarra {
   margin-top: 14px;
-  break-inside: avoid;
 }
 
-.turno-pizarra h3 {
+.turno-pizarra > h3 {
   margin: 0 0 8px;
-  font-size: 18px;
+  padding: 8px 10px;
   color: #172b4d;
   background: #eaf1ff;
   border-left: 6px solid #003f91;
-  padding: 8px 10px;
   border-radius: 8px;
+  font-size: 18px;
 }
 
-.grilla-dias {
-  display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
-  gap: 8px;
-}
-
-.columna-dia {
-  border: 1px solid #d4deec;
-  border-radius: 10px;
-  background: #f8fbff;
-  min-width: 0;
-  overflow: hidden;
-}
-
-.columna-dia h4 {
-  margin: 0;
-  padding: 8px;
-  text-align: center;
-  background: #003f91;
-  color: #ffffff;
-  font-size: 14px;
-}
-
-.bloques-dia {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  padding: 7px;
-}
+/* =====================================================
+   TARJETAS
+===================================================== */
 
 .tarjeta-horario {
-  border: 2px solid var(--color-borde);
-  border-left-width: 8px;
+  display: block;
+  width: 100%;
+  min-width: 0;
+  margin: 0;
+  padding: 6px;
+  overflow-wrap: anywhere;
   background: var(--color-fondo);
   color: var(--color-texto);
-  border-radius: 9px;
-  padding: 7px;
-  break-inside: avoid;
+  border: none;
+  border-radius: 4px;
+  box-shadow: none;
 }
 
 .tarjeta-horario-hora {
-  font-size: 13px;
+  margin-bottom: 3px;
+  font-size: 12px;
   font-weight: 900;
-  margin-bottom: 4px;
+  line-height: 1.1;
 }
 
 .tarjeta-horario-curso {
-  font-size: 14px;
+  margin-bottom: 2px;
+  font-size: 13px;
   font-weight: 900;
-  margin-bottom: 3px;
+  line-height: 1.1;
 }
 
 .tarjeta-horario-espacio {
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 800;
-  line-height: 1.2;
+  line-height: 1.15;
 }
 
 .tarjeta-horario-docente,
 .tarjeta-horario-extra {
-  margin-top: 4px;
-  font-size: 11px;
+  margin-top: 3px;
+  font-size: 10px;
   font-weight: 700;
-  line-height: 1.2;
+  line-height: 1.15;
 }
 
 .sin-bloques,
@@ -198,138 +178,13 @@ body {
   margin: 0;
   padding: 10px;
   color: #667085;
-  font-weight: 700;
   font-size: 12px;
+  font-weight: 700;
 }
 
-@page {
-  size: legal landscape;
-  margin: 8mm;
-}
-
-@media print {
-  body {
-    background: #ffffff;
-    -webkit-print-color-adjust: exact;
-    print-color-adjust: exact;
-  }
-
-  .barra-acciones {
-    display: none;
-  }
-
-  .pizarra {
-    width: 100%;
-    padding: 0;
-  }
-
-  .encabezado-pizarra {
-    margin-bottom: 8px;
-    padding: 10px;
-  }
-
-  .encabezado-pizarra img {
-    width: 54px;
-    height: 54px;
-  }
-
-  .encabezado-pizarra h1 {
-    font-size: 22px;
-  }
-
-  .encabezado-pizarra p {
-    font-size: 11px;
-  }
-
-  .leyenda-colores,
-  .seccion-pizarra {
-    margin-bottom: 8px;
-    padding: 8px;
-    border-radius: 8px;
-  }
-
-  .leyenda-colores h2,
-  .seccion-pizarra h2 {
-    font-size: 17px;
-    margin-bottom: 7px;
-  }
-
-  .turno-pizarra {
-    margin-top: 8px;
-  }
-
-  .turno-pizarra h3 {
-    font-size: 14px;
-    padding: 5px 7px;
-    margin-bottom: 5px;
-  }
-
-  .grilla-dias {
-    gap: 5px;
-  }
-
-  .columna-dia h4 {
-    font-size: 11px;
-    padding: 5px;
-  }
-
-  .bloques-dia {
-    gap: 4px;
-    padding: 4px;
-  }
-
-  .tarjeta-horario {
-    padding: 5px;
-    border-left-width: 6px;
-  }
-
-  .tarjeta-horario-hora {
-    font-size: 10px;
-    margin-bottom: 2px;
-  }
-
-  .tarjeta-horario-curso {
-    font-size: 11px;
-    margin-bottom: 2px;
-  }
-
-  .tarjeta-horario-espacio {
-    font-size: 9.5px;
-  }
-
-  .tarjeta-horario-docente,
-  .tarjeta-horario-extra {
-    font-size: 8.5px;
-    margin-top: 2px;
-  }
-
-  .item-leyenda {
-    font-size: 9px;
-    padding: 3px 7px;
-  }
-
-  .sin-bloques,
-  .sin-datos-seccion {
-    font-size: 9px;
-    padding: 5px;
-  }
-}
-
-@media screen and (max-width: 1000px) {
-  .grilla-dias {
-    grid-template-columns: 1fr;
-  }
-
-  .encabezado-pizarra {
-    grid-template-columns: 1fr;
-    text-align: center;
-  }
-
-  .encabezado-pizarra img {
-    margin: 0 auto;
-  }
-}
-/* Nueva organización: Día → Curso → Bloques */
+/* =====================================================
+   AULA: UN DÍA POR GRILLA
+===================================================== */
 
 .grilla-dias-por-curso {
   display: flex;
@@ -338,14 +193,14 @@ body {
 }
 
 .bloque-dia-pizarra {
-  border: 1px solid #d4deec;
-  border-radius: 12px;
+  min-width: 0;
   overflow: hidden;
   background: #f8fbff;
-  break-inside: avoid;
+  border: 1px solid #d4deec;
+  border-radius: 12px;
 }
 
-.bloque-dia-pizarra h4 {
+.bloque-dia-pizarra > h4 {
   margin: 0;
   padding: 10px 14px;
   background: #003f91;
@@ -354,164 +209,910 @@ body {
   font-weight: 900;
 }
 
-.grilla-cursos-dia {
+.grilla-horaria-aula {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
-  gap: 8px;
-  padding: 10px;
+  grid-template-columns: repeat(var(--cantidad-cursos, 1), minmax(0, 1fr));
+  grid-template-rows:
+    30px
+    minmax(70px, auto)
+    minmax(70px, auto)
+    16px
+    minmax(70px, auto)
+    minmax(70px, auto)
+    16px
+    minmax(70px, auto)
+    minmax(70px, auto)
+    16px
+    minmax(70px, auto);
+  gap: 3px;
+  width: 100%;
+  padding: 4px;
 }
 
-.columna-curso-dia {
-  border: 1px solid #cfd9e8;
-  border-radius: 10px;
-  background: #ffffff;
-  overflow: hidden;
+.encabezado-curso-grilla {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   min-width: 0;
-  break-inside: avoid;
-}
-
-.columna-curso-dia h5 {
-  margin: 0;
-  padding: 7px 8px;
+  padding: 4px 2px;
+  background: #e8edf5;
+  color: #172033;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1;
   text-align: center;
-  background: #eaf1ff;
-  color: #003f91;
-  font-size: 14px;
-  font-weight: 900;
-  border-bottom: 1px solid #cfd9e8;
 }
 
-.bloques-curso-dia {
+.celda-bloque-aula {
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  padding: 7px;
+  width: 100%;
+  min-width: 0;
+  height: 100%;
+  overflow: hidden;
+  border-radius: 4px;
 }
 
-@media print {
-  .grilla-dias-por-curso {
-    gap: 8px;
-  }
-
-  .bloque-dia-pizarra h4 {
-    padding: 6px 9px;
-    font-size: 13px;
-  }
-
-  .grilla-cursos-dia {
-    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-    gap: 5px;
-    padding: 5px;
-  }
-
-  .columna-curso-dia h5 {
-    padding: 4px 5px;
-    font-size: 10px;
-  }
-
-  .bloques-curso-dia {
-    gap: 4px;
-    padding: 4px;
-  }
+.celda-bloque-aula-ocupada {
+  gap: 2px;
+  padding: 0;
 }
-/* Ajustes de impresión para evitar páginas vacías */
 
-@media print {
-  @page {
-    size: legal landscape;
-    margin: 6mm;
-  }
+.celda-bloque-aula-ocupada .tarjeta-horario {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  width: 100%;
+  min-width: 0;
+  min-height: 100%;
+  padding: 5px;
+}
 
+.celda-bloque-aula-vacia {
+  align-items: center;
+  justify-content: center;
+  background: repeating-linear-gradient(
+    -45deg,
+    #f6f7f9,
+    #f6f7f9 5px,
+    #eef0f3 5px,
+    #eef0f3 10px
+  );
+  outline: 1px solid #d9dde4;
+  outline-offset: -1px;
+}
+
+.marca-bloque-vacio {
+  color: #9aa1ab;
+  font-size: 9px;
+  font-weight: 700;
+  line-height: 1;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.fila-recreo-aula {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-width: 0;
+  overflow: hidden;
+  background: #dce2ea;
+  border-radius: 3px;
+}
+
+.fila-recreo-aula span {
+  padding: 1px 8px;
+  color: #4d5968;
+  font-size: 9px;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: 0.04em;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.aviso-bloques-fuera-grilla {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-top: 8px;
+  padding: 8px;
+  background: #fff3cd;
+  color: #664d03;
+  border: 1px solid #ffda6a;
+  border-radius: 5px;
+  font-size: 11px;
+}
+
+.aviso-bloques-fuera-grilla strong {
+  width: 100%;
+}
+
+.aviso-bloques-fuera-grilla span {
+  padding: 3px 6px;
+  background: #ffffff;
+  border-radius: 3px;
+}
+
+/* =====================================================
+   TALLER Y EDUCACIÓN FÍSICA: GRILLA SEMANAL
+   Cinco columnas, una por día.
+===================================================== */
+
+.grilla-semanal-pizarra {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 8px;
+  width: 100%;
+}
+
+.columna-dia-semanal {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  overflow: hidden;
+  background: #f8fbff;
+  border: 1px solid #d4deec;
+  border-radius: 10px;
+}
+
+.columna-dia-semanal > h4 {
+  margin: 0;
+  padding: 8px 10px;
+  background: #003f91;
+  color: #ffffff;
+  font-size: 15px;
+  font-weight: 900;
+  line-height: 1;
+  text-align: center;
+}
+
+.bloques-dia-semanal {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-content: flex-start;
+  gap: 5px;
+  min-height: 110px;
+  padding: 5px;
+}
+
+.sin-bloques-dia-semanal {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+  min-height: 80px;
+  color: #98a2b3;
+  background: repeating-linear-gradient(
+    -45deg,
+    #f8fafc,
+    #f8fafc 6px,
+    #f1f5f9 6px,
+    #f1f5f9 12px
+  );
+  text-align: center;
+}
+
+/* =====================================================
+   RESPONSIVE EN PANTALLA
+===================================================== */
+
+@media screen and (max-width: 1100px) {
   .encabezado-pizarra {
-    break-inside: auto;
-    page-break-inside: auto;
-    margin-bottom: 5px;
-  }
-
-  .leyenda-colores,
-  .seccion-pizarra,
-  .turno-pizarra,
-  .bloque-dia-pizarra {
-    break-inside: auto;
-    page-break-inside: auto;
-  }
-
-  .seccion-pizarra {
-    margin-bottom: 6px;
-    padding: 6px;
-  }
-
-  .seccion-pizarra h2 {
-    font-size: 15px;
-    margin-bottom: 5px;
-    padding-bottom: 4px;
-  }
-
-  .turno-pizarra {
-    margin-top: 6px;
-  }
-
-  .turno-pizarra h3 {
-    font-size: 12px;
-    padding: 4px 6px;
-    margin-bottom: 4px;
-  }
-
-  .bloque-dia-pizarra {
-    margin-bottom: 5px;
-  }
-
-  .bloque-dia-pizarra h4 {
-    padding: 5px 8px;
-    font-size: 12px;
-  }
-
-  .columna-curso-dia,
-  .tarjeta-horario {
-    break-inside: avoid;
-    page-break-inside: avoid;
-  }
-
-  .encabezado-pizarra h1 {
-    font-size: 18px;
-  }
-
-  .encabezado-pizarra p {
-    font-size: 10px;
+    grid-template-columns: 1fr;
+    text-align: center;
   }
 
   .encabezado-pizarra img {
-    width: 44px;
-    height: 44px;
+    margin: 0 auto;
   }
 
-  .encabezado-pizarra {
-    grid-template-columns: 52px 1fr;
-    padding: 6px 8px;
+  .bloque-dia-pizarra,
+  .turno-pizarra {
+    overflow-x: auto;
+  }
+
+  .grilla-horaria-aula {
+    grid-template-columns: repeat(
+      var(--cantidad-cursos, 1),
+      minmax(130px, 1fr)
+    );
+    min-width: max-content;
+  }
+
+  .grilla-semanal-pizarra {
+    grid-template-columns: repeat(5, minmax(180px, 1fr));
+    min-width: 920px;
   }
 }
-/* Impresión: cada día en una hoja distinta */
+
+/* =====================================================
+   IMPRESIÓN / PDF — LEGAL APAISADA
+===================================================== */
+
+@page {
+  size: legal landscape;
+  margin: 5mm;
+}
 
 @media print {
-  .bloque-dia-pizarra {
-    break-before: page;
-    page-break-before: always;
-    break-inside: avoid;
+  html,
+  body {
+    width: 100%;
+    margin: 0;
+    padding: 0;
+  }
+
+  body {
+    background: #ffffff;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .barra-acciones,
+  .encabezado-pizarra {
+    display: none !important;
+  }
+
+  .pizarra {
+    width: 100%;
+    max-width: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .seccion-pizarra {
+    margin: 0;
+    padding: 0;
+    background: transparent;
+    border: 0;
+    border-radius: 0;
+  }
+
+  .turno-pizarra {
+    margin: 0;
+  }
+
+  .sin-bloques,
+  .sin-datos-seccion {
+    padding: 2mm;
+    font-size: 8px;
+  }
+
+  .tarjeta-horario {
+    border: none;
+    box-shadow: none;
+    break-inside: avoid-page;
     page-break-inside: avoid;
   }
 
-  .bloque-dia-pizarra:first-child {
+  /* ---------------------------------------------------
+     AULA: se conserva exactamente un día por hoja.
+  --------------------------------------------------- */
+
+  .seccion-pizarra-aula > h2,
+  .seccion-pizarra-aula .turno-pizarra > h3 {
+    display: none;
+  }
+
+  .seccion-pizarra-aula .grilla-dias-por-curso {
+    gap: 0;
+  }
+
+  .seccion-pizarra-aula .bloque-dia-pizarra {
+    display: grid;
+    grid-template-rows: auto auto minmax(0, 1fr) auto;
+    width: 100%;
+    height: 195mm;
+    margin: 0;
+    overflow: hidden;
+    border-radius: 2mm;
+    break-before: page;
+    page-break-before: always;
+    break-inside: avoid-page;
+    page-break-inside: avoid;
+  }
+
+  .seccion-pizarra-aula .turno-pizarra-manana .bloque-dia-pizarra:first-child {
     break-before: auto;
     page-break-before: auto;
   }
 
-  .bloque-dia-pizarra h4 {
-    break-after: avoid;
-    page-break-after: avoid;
+  .seccion-pizarra-aula .bloque-dia-pizarra::before {
+    display: block;
+    padding: 1.4mm 2mm;
+    background: #ffffff;
+    color: #003f91;
+    border-bottom: 0.5mm solid #003f91;
+    font-size: 9px;
+    font-weight: 900;
+    line-height: 1;
   }
 
-  .grilla-cursos-dia {
-    break-before: avoid;
-    page-break-before: avoid;
+  .seccion-pizarra-aula .turno-pizarra-manana .bloque-dia-pizarra::before {
+    content: "E.E.T.P. N.º 495 “Malvinas Argentinas” · Horario de Aula · Turno Mañana";
+  }
+
+  .seccion-pizarra-aula .turno-pizarra-tarde .bloque-dia-pizarra::before {
+    content: "E.E.T.P. N.º 495 “Malvinas Argentinas” · Horario de Aula · Turno Tarde";
+  }
+
+  .seccion-pizarra-aula .bloque-dia-pizarra > h4 {
+    margin: 0;
+    padding: 1.4mm 2mm;
+    font-size: 9px;
+    line-height: 1;
+  }
+
+  .seccion-pizarra-aula .grilla-horaria-aula {
+    min-height: 0;
+    height: 100%;
+    grid-template-columns: repeat(var(--cantidad-cursos, 1), minmax(0, 1fr));
+    grid-template-rows:
+      5.5mm
+      minmax(0, 1fr)
+      minmax(0, 1fr)
+      2.2mm
+      minmax(0, 1fr)
+      minmax(0, 1fr)
+      2.2mm
+      minmax(0, 1fr)
+      minmax(0, 1fr)
+      2.2mm
+      minmax(0, 1fr);
+    gap: 0.6mm;
+    padding: 0.7mm;
+    break-inside: avoid-page;
+    page-break-inside: avoid;
+  }
+
+  .seccion-pizarra-aula .encabezado-curso-grilla {
+    padding: 0.6mm 0.3mm;
+    border-radius: 0.7mm;
+    font-size: 9.4px;
+  }
+
+  .seccion-pizarra-aula .celda-bloque-aula {
+    border-radius: 0.7mm;
+  }
+
+  .seccion-pizarra-aula .celda-bloque-aula-ocupada .tarjeta-horario {
+    width: 100%;
+    min-height: 100%;
+    padding: 1.15mm;
+    border-radius: 0.7mm;
+  }
+
+  .seccion-pizarra-aula .tarjeta-horario-hora {
+    margin-bottom: 0.5mm;
+    font-size: 10.4px;
+    line-height: 1.08;
+  }
+
+  .seccion-pizarra-aula .tarjeta-horario-curso {
+    margin-bottom: 0.4mm;
+    font-size: 10.6px;
+    line-height: 1.08;
+  }
+
+  .seccion-pizarra-aula .tarjeta-horario-espacio {
+    font-size: 10px;
+    line-height: 1.1;
+  }
+
+  .seccion-pizarra-aula .tarjeta-horario-docente,
+  .seccion-pizarra-aula .tarjeta-horario-extra {
+    margin-top: 0.5mm;
+    font-size: 9.2px;
+    line-height: 1.1;
+  }
+
+  .seccion-pizarra-aula .marca-bloque-vacio {
+    font-size: 7.4px;
+  }
+
+  .seccion-pizarra-aula .fila-recreo-aula {
+    border-radius: 0.4mm;
+  }
+
+  .seccion-pizarra-aula .fila-recreo-aula span {
+    padding: 0 1mm;
+    font-size: 7.2px;
+  }
+
+  .seccion-pizarra-aula .aviso-bloques-fuera-grilla {
+    margin-top: 1mm;
+    padding: 1mm;
+    gap: 0.7mm;
+    font-size: 7.7px;
+  }
+
+  /* ---------------------------------------------------
+     TALLER Y EDUCACIÓN FÍSICA
+
+     Cada turno ocupa exactamente una hoja Legal apaisada.
+     La grilla semanal queda contenida en esa página y los
+     bloques se compactan solo para estas dos secciones.
+  --------------------------------------------------- */
+
+  .seccion-pizarra-taller > h2,
+  .seccion-pizarra-educacion-fisica > h2,
+  .seccion-pizarra-taller .turno-pizarra > h3,
+  .seccion-pizarra-educacion-fisica .turno-pizarra > h3 {
+    display: none;
+  }
+
+  .seccion-pizarra-taller .turno-pizarra,
+  .seccion-pizarra-educacion-fisica .turno-pizarra {
+    display: grid;
+    grid-template-rows: auto minmax(0, 1fr);
+
+    width: 100%;
+    height: 195mm;
+    min-height: 195mm;
+    max-height: 195mm;
+    margin: 0;
+    overflow: hidden;
+
+    break-before: page;
+    page-break-before: always;
+    break-inside: avoid-page;
+    page-break-inside: avoid;
+  }
+
+  .seccion-pizarra-taller .turno-pizarra::before,
+  .seccion-pizarra-educacion-fisica .turno-pizarra::before {
+    display: block;
+    padding: 1.4mm 2mm;
+    background: #ffffff;
+    color: #003f91;
+    border-bottom: 0.5mm solid #003f91;
+    font-size: 10.5px;
+    font-weight: 900;
+    line-height: 1;
+  }
+
+  .seccion-pizarra-taller .turno-pizarra-manana::before {
+    content: "E.E.T.P. N.º 495 “Malvinas Argentinas” · Horario de Taller · Turno Mañana";
+  }
+
+  .seccion-pizarra-taller .turno-pizarra-tarde::before {
+    content: "E.E.T.P. N.º 495 “Malvinas Argentinas” · Horario de Taller · Turno Tarde";
+  }
+
+  .seccion-pizarra-educacion-fisica .turno-pizarra-manana::before {
+    content: "E.E.T.P. N.º 495 “Malvinas Argentinas” · Educación Física · Turno Mañana";
+  }
+
+  .seccion-pizarra-educacion-fisica .turno-pizarra-tarde::before {
+    content: "E.E.T.P. N.º 495 “Malvinas Argentinas” · Educación Física · Turno Tarde";
+  }
+
+  .seccion-pizarra-taller .grilla-semanal-pizarra,
+  .seccion-pizarra-educacion-fisica .grilla-semanal-pizarra {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    align-items: stretch;
+    gap: 0.8mm;
+
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+    margin: 0;
+    padding-top: 0.8mm;
+    overflow: hidden;
+
+    break-inside: avoid-page;
+    page-break-inside: avoid;
+  }
+
+  .seccion-pizarra-taller .columna-dia-semanal,
+  .seccion-pizarra-educacion-fisica .columna-dia-semanal {
+    display: grid;
+    grid-template-rows: 6.5mm minmax(0, 1fr);
+
+    min-width: 0;
+    min-height: 0;
+    height: 100%;
+    overflow: hidden;
+
+    background: #f8fbff;
+    border: 0.3mm solid #d4deec;
+    border-radius: 1mm;
+  }
+
+  .seccion-pizarra-taller .columna-dia-semanal > h4,
+  .seccion-pizarra-educacion-fisica .columna-dia-semanal > h4 {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    margin: 0;
+    padding: 0.8mm;
+
+    font-size: 10.5px;
+    line-height: 1;
+  }
+
+  .seccion-pizarra-taller .bloques-dia-semanal,
+  .seccion-pizarra-educacion-fisica .bloques-dia-semanal {
+    display: flex;
+    flex-direction: column;
+    align-content: flex-start;
+    gap: 0.45mm;
+
+    min-height: 0;
+    height: 100%;
+    padding: 0.55mm;
+    overflow: hidden;
+  }
+
+  .seccion-pizarra-taller .bloques-dia-semanal .tarjeta-horario,
+  .seccion-pizarra-educacion-fisica .bloques-dia-semanal .tarjeta-horario {
+    flex: 0 0 auto;
+    padding: 0.85mm 1mm;
+    border-radius: 0.65mm;
+
+    break-inside: avoid-page;
+    page-break-inside: avoid;
+  }
+
+  .seccion-pizarra-taller .bloques-dia-semanal .tarjeta-horario-hora,
+  .seccion-pizarra-educacion-fisica .bloques-dia-semanal .tarjeta-horario-hora {
+    margin-bottom: 0.22mm;
+    font-size: 9.6px;
+    line-height: 1.03;
+  }
+
+  .seccion-pizarra-taller .bloques-dia-semanal .tarjeta-horario-curso,
+  .seccion-pizarra-educacion-fisica
+    .bloques-dia-semanal
+    .tarjeta-horario-curso {
+    margin-bottom: 0.18mm;
+    font-size: 9.8px;
+    line-height: 1.03;
+  }
+
+  .seccion-pizarra-taller .bloques-dia-semanal .tarjeta-horario-espacio,
+  .seccion-pizarra-educacion-fisica
+    .bloques-dia-semanal
+    .tarjeta-horario-espacio {
+    font-size: 9.3px;
+    line-height: 1.04;
+  }
+
+  .seccion-pizarra-taller .bloques-dia-semanal .tarjeta-horario-docente,
+  .seccion-pizarra-taller .bloques-dia-semanal .tarjeta-horario-extra,
+  .seccion-pizarra-educacion-fisica
+    .bloques-dia-semanal
+    .tarjeta-horario-docente,
+  .seccion-pizarra-educacion-fisica
+    .bloques-dia-semanal
+    .tarjeta-horario-extra {
+    margin-top: 0.22mm;
+    font-size: 8.8px;
+    line-height: 1.03;
+  }
+
+  .seccion-pizarra-taller .sin-bloques-dia-semanal,
+  .seccion-pizarra-educacion-fisica .sin-bloques-dia-semanal {
+    min-height: 0;
+    height: 100%;
+    padding: 1.5mm;
+    font-size: 8.5px;
+  }
+}
+
+/* =====================================================
+   AJUSTE DE LEGIBILIDAD EN IMPRESIÓN
+   Taller y Educación Física
+   No modifica Horario de Aula
+===================================================== */
+
+@media print {
+  /* ---------------------------------------------------
+     TALLER
+
+     Las tarjetas se reparten la altura disponible de cada
+     columna. Así se agrandan realmente sin amontonar el
+     texto ni provocar una página adicional.
+  --------------------------------------------------- */
+
+  .seccion-pizarra-taller .bloques-dia-semanal {
+    display: flex;
+    flex-direction: column;
+    gap: 0.45mm;
+    padding: 0.55mm;
+  }
+
+  .seccion-pizarra-taller .bloques-dia-semanal .tarjeta-horario {
+    display: flex;
+    flex: 1 1 0;
+    flex-direction: column;
+    justify-content: center;
+
+    min-height: 0;
+    padding: 0.72mm 0.95mm;
+    border-radius: 0.65mm;
+  }
+
+  /* Turno mañana: tiene menos tarjetas por columna y puede
+     usar una tipografía un poco mayor. */
+  .seccion-pizarra-taller .turno-pizarra-manana .tarjeta-horario-hora {
+    margin-bottom: 0.2mm;
+    font-size: 10.5px;
+    line-height: 1.08;
+  }
+
+  .seccion-pizarra-taller .turno-pizarra-manana .tarjeta-horario-curso {
+    margin-bottom: 0.15mm;
+    font-size: 10.7px;
+    line-height: 1.08;
+  }
+
+  .seccion-pizarra-taller .turno-pizarra-manana .tarjeta-horario-espacio {
+    font-size: 10.1px;
+    line-height: 1.08;
+  }
+
+  .seccion-pizarra-taller .turno-pizarra-manana .tarjeta-horario-docente,
+  .seccion-pizarra-taller .turno-pizarra-manana .tarjeta-horario-extra {
+    margin-top: 0.2mm;
+    font-size: 9.5px;
+    line-height: 1.08;
+  }
+
+  /* Turno tarde: el lunes tiene más tarjetas. Se conserva
+     una letra clara, pero con medidas seguras para que todo
+     permanezca en una sola hoja. */
+  .seccion-pizarra-taller .turno-pizarra-tarde .tarjeta-horario {
+    padding: 0.58mm 0.85mm;
+  }
+
+  .seccion-pizarra-taller .turno-pizarra-tarde .tarjeta-horario-hora {
+    margin-bottom: 0.12mm;
+    font-size: 9.9px;
+    line-height: 1.06;
+  }
+
+  .seccion-pizarra-taller .turno-pizarra-tarde .tarjeta-horario-curso {
+    margin-bottom: 0.1mm;
+    font-size: 10.1px;
+    line-height: 1.06;
+  }
+
+  .seccion-pizarra-taller .turno-pizarra-tarde .tarjeta-horario-espacio {
+    font-size: 9.6px;
+    line-height: 1.06;
+  }
+
+  .seccion-pizarra-taller .turno-pizarra-tarde .tarjeta-horario-docente,
+  .seccion-pizarra-taller .turno-pizarra-tarde .tarjeta-horario-extra {
+    margin-top: 0.12mm;
+    font-size: 9.1px;
+    line-height: 1.06;
+  }
+
+  /* ---------------------------------------------------
+     EDUCACIÓN FÍSICA
+
+     Se conserva el ajuste que ya mejoró su legibilidad.
+  --------------------------------------------------- */
+
+  .seccion-pizarra-educacion-fisica .bloques-dia-semanal {
+    gap: 0.8mm;
+    padding: 0.8mm;
+  }
+
+  .seccion-pizarra-educacion-fisica .bloques-dia-semanal .tarjeta-horario {
+    min-height: 22mm;
+    padding: 1.4mm 1.6mm;
+    border-radius: 1mm;
+  }
+
+  .seccion-pizarra-educacion-fisica .bloques-dia-semanal .tarjeta-horario-hora {
+    margin-bottom: 0.45mm;
+    font-size: 13px;
+    line-height: 1.05;
+  }
+
+  .seccion-pizarra-educacion-fisica
+    .bloques-dia-semanal
+    .tarjeta-horario-curso {
+    margin-bottom: 0.35mm;
+    font-size: 13.2px;
+    line-height: 1.05;
+  }
+
+  .seccion-pizarra-educacion-fisica
+    .bloques-dia-semanal
+    .tarjeta-horario-espacio {
+    font-size: 12.5px;
+    line-height: 1.06;
+  }
+
+  .seccion-pizarra-educacion-fisica
+    .bloques-dia-semanal
+    .tarjeta-horario-docente,
+  .seccion-pizarra-educacion-fisica
+    .bloques-dia-semanal
+    .tarjeta-horario-extra {
+    margin-top: 0.4mm;
+    font-size: 11.8px;
+    line-height: 1.05;
+  }
+}
+
+/* =====================================================
+   TALLER TURNO TARDE — DOS HOJAS POR GRUPOS DE CURSOS
+   Cada hoja conserva Lunes a Viernes.
+===================================================== */
+
+.paginas-taller-tarde {
+  display: grid;
+  gap: 18px;
+}
+
+.pagina-taller-tarde {
+  min-width: 0;
+}
+
+.titulo-cursos-pagina {
+  margin-bottom: 8px;
+  padding: 8px 12px;
+  background: #e8eefb;
+  color: #003f91;
+  border-left: 5px solid #003f91;
+  border-radius: 7px;
+  font-size: 14px;
+  font-weight: 900;
+  line-height: 1.2;
+}
+
+@media print {
+  /* El contenedor general deja de ser una única página. */
+  .seccion-pizarra-taller .turno-pizarra-tarde {
+    display: block;
+    width: 100%;
+    height: auto;
+    min-height: 0;
+    max-height: none;
+    margin: 0;
+    overflow: visible;
+
+    break-before: page;
+    page-break-before: always;
+    break-inside: auto;
+    page-break-inside: auto;
+  }
+
+  /* El encabezado anterior se reemplaza por uno en cada hoja. */
+  .seccion-pizarra-taller .turno-pizarra-tarde::before {
+    display: none;
+    content: none;
+  }
+
+  .seccion-pizarra-taller .turno-pizarra-tarde .paginas-taller-tarde {
+    display: block;
+    width: 100%;
+    margin: 0;
+  }
+
+  .seccion-pizarra-taller .turno-pizarra-tarde .pagina-taller-tarde {
+    display: grid;
+    grid-template-rows: auto minmax(0, 1fr);
+
+    width: 100%;
+    height: 195mm;
+    min-height: 195mm;
+    max-height: 195mm;
+    margin: 0;
+    overflow: hidden;
+
+    break-inside: avoid-page;
+    page-break-inside: avoid;
+  }
+
+  .seccion-pizarra-taller
+    .turno-pizarra-tarde
+    .pagina-taller-tarde
+    + .pagina-taller-tarde {
+    break-before: page;
+    page-break-before: always;
+  }
+
+  .seccion-pizarra-taller .turno-pizarra-tarde .pagina-taller-tarde::before {
+    display: block;
+    content: "E.E.T.P. N.º 495 “Malvinas Argentinas” · Horario de Taller · Turno Tarde · "
+      attr(data-cursos);
+
+    padding: 1.4mm 2mm;
+    background: #ffffff;
+    color: #003f91;
+    border-bottom: 0.5mm solid #003f91;
+    font-size: 11.5px;
+    font-weight: 900;
+    line-height: 1.05;
+  }
+
+  .seccion-pizarra-taller .turno-pizarra-tarde .titulo-cursos-pagina {
+    display: none;
+  }
+
+  .seccion-pizarra-taller
+    .turno-pizarra-tarde
+    .pagina-taller-tarde
+    .grilla-semanal-pizarra {
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+    padding-top: 0.8mm;
+  }
+
+  /* Con solo cinco cursos por hoja, las tarjetas pueden usar
+     más altura y una tipografía claramente mayor. */
+  .seccion-pizarra-taller
+    .turno-pizarra-tarde
+    .pagina-taller-tarde
+    .bloques-dia-semanal {
+    gap: 0.8mm;
+    padding: 0.8mm;
+  }
+
+  .seccion-pizarra-taller
+    .turno-pizarra-tarde
+    .pagina-taller-tarde
+    .tarjeta-horario {
+    display: flex;
+    flex: 1 1 0;
+    flex-direction: column;
+    justify-content: center;
+
+    min-height: 0;
+    padding: 1.15mm 1.35mm;
+    border-radius: 0.9mm;
+  }
+
+  .seccion-pizarra-taller
+    .turno-pizarra-tarde
+    .pagina-taller-tarde
+    .tarjeta-horario-hora {
+    margin-bottom: 0.35mm;
+    font-size: 12.6px;
+    line-height: 1.08;
+  }
+
+  .seccion-pizarra-taller
+    .turno-pizarra-tarde
+    .pagina-taller-tarde
+    .tarjeta-horario-curso {
+    margin-bottom: 0.28mm;
+    font-size: 12.9px;
+    line-height: 1.08;
+  }
+
+  .seccion-pizarra-taller
+    .turno-pizarra-tarde
+    .pagina-taller-tarde
+    .tarjeta-horario-espacio {
+    font-size: 12.1px;
+    line-height: 1.1;
+  }
+
+  .seccion-pizarra-taller
+    .turno-pizarra-tarde
+    .pagina-taller-tarde
+    .tarjeta-horario-docente,
+  .seccion-pizarra-taller
+    .turno-pizarra-tarde
+    .pagina-taller-tarde
+    .tarjeta-horario-extra {
+    margin-top: 0.35mm;
+    font-size: 11.4px;
+    line-height: 1.08;
   }
 }
