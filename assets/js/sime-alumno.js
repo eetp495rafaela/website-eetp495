@@ -124,11 +124,15 @@ async function mostrarAvisoInscripcionesCerradasSime() {
   await Swal.fire({
     title: "Inscripciones no disponibles",
     html: `
-      <p>${mensaje}</p>
-      <p>A partir de la fecha indicada podrás registrar tu inscripción.</p>
-    `,
+    <p>${mensaje}</p>
+    <p>A partir de la fecha indicada podrás registrar tu inscripción.</p>
+  `,
     icon: "info",
     confirmButtonText: "Aceptar",
+
+    customClass: {
+      popup: "modal-sime-inscripciones-cerradas",
+    },
   });
 
   limpiarFormularioInscripcionSime();

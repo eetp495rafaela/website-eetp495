@@ -1359,3 +1359,19 @@
     grid-template-columns: 1fr;
   }
 }
+/* =====================================================
+   MODAL S.I.M.E. — INSCRIPCIONES CERRADAS
+===================================================== */
+
+.modal-sime-inscripciones-cerradas .swal2-title {
+  color: #102a4c;
+}
+
+.modal-sime-inscripciones-cerradas .swal2-html-container {
+  color: #334155 !important;
+}
+
+.modal-sime-inscripciones-cerradas .swal2-html-container p {
+  color: #334155 !important;
+  opacity: 1;
+}
