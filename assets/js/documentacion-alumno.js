@@ -176,11 +176,23 @@ function configurarVistaDocumentacionAlumno(resultado) {
 
   if (contenedorFiltroTipoDocumentacionAlumno) {
     contenedorFiltroTipoDocumentacionAlumno.hidden = esCursadaCompletaAlumno;
+
+    contenedorFiltroTipoDocumentacionAlumno.style.setProperty(
+      "display",
+      esCursadaCompletaAlumno ? "none" : "flex",
+      "important",
+    );
   }
 
   if (contenedorFiltroEspacioDocumentacionAlumno) {
     contenedorFiltroEspacioDocumentacionAlumno.hidden =
       !esCursadaCompletaAlumno;
+
+    contenedorFiltroEspacioDocumentacionAlumno.style.setProperty(
+      "display",
+      esCursadaCompletaAlumno ? "flex" : "none",
+      "important",
+    );
   }
 
   if (filtroTipoDocumentacionAlumno) {
@@ -400,10 +412,22 @@ onAuthStateChanged(auth, (usuario) => {
 
   if (contenedorFiltroTipoDocumentacionAlumno) {
     contenedorFiltroTipoDocumentacionAlumno.hidden = false;
+
+    contenedorFiltroTipoDocumentacionAlumno.style.setProperty(
+      "display",
+      "flex",
+      "important",
+    );
   }
 
   if (contenedorFiltroEspacioDocumentacionAlumno) {
     contenedorFiltroEspacioDocumentacionAlumno.hidden = true;
+
+    contenedorFiltroEspacioDocumentacionAlumno.style.setProperty(
+      "display",
+      "none",
+      "important",
+    );
   }
 
   if (encabezadoTipoCursoDocumentacionAlumno) {

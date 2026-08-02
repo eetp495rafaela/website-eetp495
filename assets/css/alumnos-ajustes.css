@@ -1375,8 +1375,3 @@
   color: #334155 !important;
   opacity: 1;
 }
-/* Ocultar correctamente los filtros de Documentación Académica */
-#contenedorFiltroTipoDocumentacionAlumno[hidden],
-#contenedorFiltroEspacioDocumentacionAlumno[hidden] {
-  display: none !important;
-}
