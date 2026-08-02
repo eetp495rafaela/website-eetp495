@@ -281,6 +281,7 @@ function ajustarVistaPortalAlumno(perfil, rolUsuario) {
   if (rolUsuario !== "ALUMNO") return;
 
   const situacionRevista = normalizarValorComparacion(perfil.situacionRevista);
+
   const tipoVinculo = normalizarValorComparacion(perfil.tipoVinculo);
 
   const esCursadaCompleta =
@@ -289,15 +290,22 @@ function ajustarVistaPortalAlumno(perfil, rolUsuario) {
 
   if (!esCursadaCompleta) return;
 
+  /* Horarios */
   ocultarElementoPortalAlumno("#tarjetaHorariosAlumno");
   ocultarElementoPortalAlumno('a[href="#horarios"]');
+  ocultarElementoPortalAlumno("#horarios");
+
+  /* Mis docentes */
   ocultarElementoPortalAlumno("#tarjetaMisDocentesAlumno");
   ocultarElementoPortalAlumno('a[href="#mis-docentes-alumno"]');
-
-  ocultarElementoPortalAlumno("#horarios");
   ocultarElementoPortalAlumno("#mis-docentes-alumno");
 
-  console.log("Vista Alumno ajustada para Cursada Completa.");
+  /* Mis compañeros */
+  ocultarElementoPortalAlumno("#tarjetaMisCompanerosAlumno");
+  ocultarElementoPortalAlumno('a[href="#mis-companeros-alumno"]');
+  ocultarElementoPortalAlumno("#mis-companeros-alumno");
+
+  console.log("Vista del Portal Alumno ajustada para Cursada Completa.");
 }
 
 function mostrarDatosUsuario(perfil, user, correo, rolUsuario) {
