@@ -37,9 +37,38 @@ const filtroTipoDocumentacionAlumno = document.getElementById(
   "filtroTipoDocumentacionAlumno",
 );
 
+const filtroEspacioDocumentacionAlumno = document.getElementById(
+  "filtroEspacioDocumentacionAlumno",
+);
+
+const contenedorFiltroTipoDocumentacionAlumno = document.getElementById(
+  "contenedorFiltroTipoDocumentacionAlumno",
+);
+
+const contenedorFiltroEspacioDocumentacionAlumno = document.getElementById(
+  "contenedorFiltroEspacioDocumentacionAlumno",
+);
+
+const encabezadoTipoCursoDocumentacionAlumno = document.getElementById(
+  "encabezadoTipoCursoDocumentacionAlumno",
+);
+
+const tituloDocumentacionAlumno = document.getElementById(
+  "tituloDocumentacionAlumno",
+);
+
+const descripcionDocumentacionAlumno = document.getElementById(
+  "descripcionDocumentacionAlumno",
+);
+
+const descripcionTarjetaDocumentacionAlumno = document.getElementById(
+  "descripcionTarjetaDocumentacionAlumno",
+);
+
 const btnVerMiDocumentacion = document.getElementById("btnVerMiDocumentacion");
 
 let documentosAlumno = [];
+let esCursadaCompletaAlumno = false;
 
 function mostrarMensajeDocumentacionAlumno(texto, tipo = "") {
   if (!mensajeDocumentacionAlumno) return;
@@ -73,6 +102,23 @@ function escaparHtml(texto) {
     .replace(/'/g, "&#039;");
 }
 
+function normalizarTextoFiltro(texto) {
+  return String(texto || "")
+    .trim()
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "");
+}
+
+function normalizarSituacionAlumno(texto) {
+  return String(texto || "")
+    .trim()
+    .toUpperCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[\s-]+/g, "_");
+}
+
 function obtenerEtiquetaTipoDocumento(tipoDocumento) {
   const etiquetas = {
     PROGRAMA_EXAMEN: "Programa de Examen",
@@ -80,6 +126,18 @@ function obtenerEtiquetaTipoDocumento(tipoDocumento) {
   };
 
   return etiquetas[tipoDocumento] || "Sin tipo";
+}
+
+function obtenerCursoVisibleDocumento(documento) {
+  const curso = String(documento?.curso || "").trim();
+
+  if (curso) {
+    return curso;
+  }
+
+  const cursoAnio = Number(documento?.cursoAnio || 0);
+
+  return cursoAnio ? `${cursoAnio}º` : "Sin curso";
 }
 
 function formatearFechaCarga(fechaTexto) {
@@ -92,6 +150,88 @@ function formatearFechaCarga(fechaTexto) {
   return fecha.replace(" ", " · ");
 }
 
+function actualizarTextoBotonDocumentacion() {
+  if (!btnVerMiDocumentacion) return;
+
+  btnVerMiDocumentacion.innerHTML = esCursadaCompletaAlumno
+    ? `
+      <i class="fa-solid fa-folder-open"></i>
+      Ver programas de examen
+    `
+    : `
+      <i class="fa-solid fa-folder-open"></i>
+      Ver mi documentación
+    `;
+}
+
+function configurarVistaDocumentacionAlumno(resultado) {
+  const alumno = resultado?.alumno || {};
+
+  const tipoVinculo = normalizarSituacionAlumno(alumno.tipoVinculo);
+
+  esCursadaCompletaAlumno =
+    Boolean(alumno.esCursadaCompleta) ||
+    resultado?.modoConsulta === "CURSADA_COMPLETA" ||
+    tipoVinculo === "CURSADA_COMPLETA";
+
+  if (contenedorFiltroTipoDocumentacionAlumno) {
+    contenedorFiltroTipoDocumentacionAlumno.hidden = esCursadaCompletaAlumno;
+  }
+
+  if (contenedorFiltroEspacioDocumentacionAlumno) {
+    contenedorFiltroEspacioDocumentacionAlumno.hidden =
+      !esCursadaCompletaAlumno;
+  }
+
+  if (filtroTipoDocumentacionAlumno) {
+    filtroTipoDocumentacionAlumno.value = "";
+  }
+
+  if (filtroEspacioDocumentacionAlumno) {
+    filtroEspacioDocumentacionAlumno.value = "";
+  }
+
+  if (encabezadoTipoCursoDocumentacionAlumno) {
+    encabezadoTipoCursoDocumentacionAlumno.textContent = esCursadaCompletaAlumno
+      ? "Curso"
+      : "Tipo";
+  }
+
+  if (tituloDocumentacionAlumno) {
+    tituloDocumentacionAlumno.textContent = esCursadaCompletaAlumno
+      ? "Programas de examen disponibles"
+      : "Documentos disponibles";
+  }
+
+  if (descripcionDocumentacionAlumno) {
+    descripcionDocumentacionAlumno.textContent = esCursadaCompletaAlumno
+      ? "Consultá los programas de examen disponibles de todos los años. Podés buscar por espacio curricular."
+      : "Consultá los programas de examen y el material de estudio correspondiente a tu curso.";
+  }
+
+  if (descripcionTarjetaDocumentacionAlumno) {
+    descripcionTarjetaDocumentacionAlumno.textContent = esCursadaCompletaAlumno
+      ? "Consultá y descargá los programas de examen disponibles para preparar tus materias pendientes."
+      : "Consultá programas de examen y material de estudio de tu curso.";
+  }
+
+  actualizarTextoBotonDocumentacion();
+}
+
+function obtenerMensajeSinDocumentos() {
+  if (esCursadaCompletaAlumno) {
+    const busqueda = String(
+      filtroEspacioDocumentacionAlumno?.value || "",
+    ).trim();
+
+    return busqueda
+      ? "No se encontraron programas de examen para ese espacio curricular."
+      : "No hay programas de examen disponibles.";
+  }
+
+  return "No hay documentación disponible para tu curso.";
+}
+
 function mostrarDocumentosEnTabla(documentos) {
   if (!cuerpoTablaDocumentacionAlumno) return;
 
@@ -99,7 +239,7 @@ function mostrarDocumentosEnTabla(documentos) {
     cuerpoTablaDocumentacionAlumno.innerHTML = `
       <tr>
         <td colspan="4" class="tabla-vacia">
-          No hay documentación disponible para tu curso.
+          ${escaparHtml(obtenerMensajeSinDocumentos())}
         </td>
       </tr>
     `;
@@ -111,11 +251,13 @@ function mostrarDocumentosEnTabla(documentos) {
     .map((documento) => {
       const driveUrl = escaparHtml(documento.driveUrl);
 
+      const primeraColumna = esCursadaCompletaAlumno
+        ? obtenerCursoVisibleDocumento(documento)
+        : obtenerEtiquetaTipoDocumento(documento.tipoDocumento);
+
       return `
         <tr>
-          <td>${escaparHtml(
-            obtenerEtiquetaTipoDocumento(documento.tipoDocumento),
-          )}</td>
+          <td>${escaparHtml(primeraColumna)}</td>
           <td>${escaparHtml(documento.espacioCurricular)}</td>
           <td>${escaparHtml(formatearFechaCarga(documento.fechaCarga))}</td>
           <td>
@@ -126,7 +268,7 @@ function mostrarDocumentosEnTabla(documentos) {
               rel="noopener noreferrer"
             >
               <i class="fa-solid fa-eye"></i>
-              Ver
+              Ver PDF
             </a>
           </td>
         </tr>
@@ -135,16 +277,33 @@ function mostrarDocumentosEnTabla(documentos) {
     .join("");
 }
 
-function aplicarFiltroTipoDocumento() {
-  const tipoSeleccionado = String(
-    filtroTipoDocumentacionAlumno?.value || "",
-  ).trim();
+function aplicarFiltrosDocumentacionAlumno() {
+  let documentosFiltrados = [...documentosAlumno];
 
-  const documentosFiltrados = documentosAlumno.filter(
-    (documento) =>
-      !tipoSeleccionado ||
-      String(documento.tipoDocumento || "").trim() === tipoSeleccionado,
-  );
+  if (esCursadaCompletaAlumno) {
+    const espacioBuscado = normalizarTextoFiltro(
+      filtroEspacioDocumentacionAlumno?.value || "",
+    );
+
+    if (espacioBuscado) {
+      documentosFiltrados = documentosFiltrados.filter((documento) =>
+        normalizarTextoFiltro(documento.espacioCurricular).includes(
+          espacioBuscado,
+        ),
+      );
+    }
+  } else {
+    const tipoSeleccionado = String(
+      filtroTipoDocumentacionAlumno?.value || "",
+    ).trim();
+
+    if (tipoSeleccionado) {
+      documentosFiltrados = documentosFiltrados.filter(
+        (documento) =>
+          String(documento.tipoDocumento || "").trim() === tipoSeleccionado,
+      );
+    }
+  }
 
   mostrarDocumentosEnTabla(documentosFiltrados);
 }
@@ -180,9 +339,13 @@ async function cargarDocumentosAlumno() {
       );
     }
 
-    documentosAlumno = resultado.documentos || [];
+    configurarVistaDocumentacionAlumno(resultado);
 
-    aplicarFiltroTipoDocumento();
+    documentosAlumno = Array.isArray(resultado.documentos)
+      ? resultado.documentos
+      : [];
+
+    aplicarFiltrosDocumentacionAlumno();
 
     mostrarMensajeDocumentacionAlumno("");
   } catch (error) {
@@ -203,35 +366,49 @@ async function cargarDocumentosAlumno() {
   }
 }
 
-if (filtroTipoDocumentacionAlumno) {
-  filtroTipoDocumentacionAlumno.addEventListener(
-    "change",
-    aplicarFiltroTipoDocumento,
-  );
-}
+filtroTipoDocumentacionAlumno?.addEventListener(
+  "change",
+  aplicarFiltrosDocumentacionAlumno,
+);
 
-if (btnVerMiDocumentacion) {
-  btnVerMiDocumentacion.addEventListener("click", async () => {
-    btnVerMiDocumentacion.disabled = true;
+filtroEspacioDocumentacionAlumno?.addEventListener(
+  "input",
+  aplicarFiltrosDocumentacionAlumno,
+);
 
-    const textoOriginal = btnVerMiDocumentacion.innerHTML;
+btnVerMiDocumentacion?.addEventListener("click", async () => {
+  btnVerMiDocumentacion.disabled = true;
 
-    btnVerMiDocumentacion.innerHTML = `
+  btnVerMiDocumentacion.innerHTML = `
       <i class="fa-solid fa-spinner fa-spin"></i>
       Cargando...
     `;
 
-    try {
-      await cargarDocumentosAlumno();
-    } finally {
-      btnVerMiDocumentacion.disabled = false;
-      btnVerMiDocumentacion.innerHTML = textoOriginal;
-    }
-  });
-}
+  try {
+    await cargarDocumentosAlumno();
+  } finally {
+    btnVerMiDocumentacion.disabled = false;
+    actualizarTextoBotonDocumentacion();
+  }
+});
 
 onAuthStateChanged(auth, (usuario) => {
   if (!usuario) return;
+
+  documentosAlumno = [];
+  esCursadaCompletaAlumno = false;
+
+  if (contenedorFiltroTipoDocumentacionAlumno) {
+    contenedorFiltroTipoDocumentacionAlumno.hidden = false;
+  }
+
+  if (contenedorFiltroEspacioDocumentacionAlumno) {
+    contenedorFiltroEspacioDocumentacionAlumno.hidden = true;
+  }
+
+  if (encabezadoTipoCursoDocumentacionAlumno) {
+    encabezadoTipoCursoDocumentacionAlumno.textContent = "Tipo";
+  }
 
   if (cuerpoTablaDocumentacionAlumno) {
     cuerpoTablaDocumentacionAlumno.innerHTML = `
@@ -244,5 +421,6 @@ onAuthStateChanged(auth, (usuario) => {
     `;
   }
 
+  actualizarTextoBotonDocumentacion();
   mostrarMensajeDocumentacionAlumno("");
 });

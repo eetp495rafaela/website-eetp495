@@ -314,8 +314,9 @@
           <a class="tarjeta tarjeta-enlace" href="#documentacion-academica">
             <i class="fa-solid fa-folder-open"></i>
             <h3>Documentación Académica</h3>
-            <p>
-              Consultá programas de examen y material de estudio de tu curso.
+            <p id="descripcionTarjetaDocumentacionAlumno">
+              Consultá programas de examen y material de estudio disponibles
+              según tu situación académica.
             </p>
           </a>
 
@@ -655,10 +656,11 @@
         <div class="panel-info">
           <div class="encabezado-listado">
             <div>
-              <h3>Documentos disponibles</h3>
-              <p>
+              <h3 id="tituloDocumentacionAlumno">Documentos disponibles</h3>
+
+              <p id="descripcionDocumentacionAlumno">
                 Consultá los programas de examen y el material de estudio
-                correspondiente a tu curso.
+                disponibles según tu situación académica.
               </p>
             </div>
           </div>
@@ -671,7 +673,10 @@
           </div>
 
           <div class="filtros-documentacion-alumno">
-            <div class="campo-filtro">
+            <div
+              class="campo-filtro"
+              id="contenedorFiltroTipoDocumentacionAlumno"
+            >
               <label for="filtroTipoDocumentacionAlumno">
                 Tipo de documento
               </label>
@@ -682,13 +687,30 @@
                 <option value="MATERIAL_ESTUDIO">Material de Estudio</option>
               </select>
             </div>
+
+            <div
+              class="campo-filtro"
+              id="contenedorFiltroEspacioDocumentacionAlumno"
+              hidden
+            >
+              <label for="filtroEspacioDocumentacionAlumno">
+                Espacio curricular
+              </label>
+
+              <input
+                id="filtroEspacioDocumentacionAlumno"
+                type="search"
+                placeholder="Buscar por espacio curricular"
+                autocomplete="off"
+              />
+            </div>
           </div>
 
           <div class="tabla-contenedor">
             <table class="tabla-usuarios tabla-documentacion-alumno">
               <thead>
                 <tr>
-                  <th>Tipo</th>
+                  <th id="encabezadoTipoCursoDocumentacionAlumno">Tipo</th>
                   <th>Espacio Curricular</th>
                   <th>Fecha de carga</th>
                   <th>Acciones</th>
