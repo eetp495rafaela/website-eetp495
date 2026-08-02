@@ -174,26 +174,45 @@ function configurarVistaDocumentacionAlumno(resultado) {
     resultado?.modoConsulta === "CURSADA_COMPLETA" ||
     tipoVinculo === "CURSADA_COMPLETA";
 
+  /* =====================================================
+     SELECTOR DE TIPO DE DOCUMENTO
+
+     CURSANDO:
+     Se muestra normalmente.
+
+     CURSADA COMPLETA:
+     Se oculta.
+  ===================================================== */
+
   if (contenedorFiltroTipoDocumentacionAlumno) {
-    contenedorFiltroTipoDocumentacionAlumno.hidden = esCursadaCompletaAlumno;
+    const mostrarSelectorTipo = !esCursadaCompletaAlumno;
+
+    contenedorFiltroTipoDocumentacionAlumno.hidden = !mostrarSelectorTipo;
 
     contenedorFiltroTipoDocumentacionAlumno.style.setProperty(
       "display",
-      esCursadaCompletaAlumno ? "none" : "flex",
+      mostrarSelectorTipo ? "flex" : "none",
       "important",
     );
   }
 
+  /* =====================================================
+     BUSCADOR POR ESPACIO CURRICULAR
+
+     Se oculta para todos los estudiantes.
+  ===================================================== */
+
   if (contenedorFiltroEspacioDocumentacionAlumno) {
-    contenedorFiltroEspacioDocumentacionAlumno.hidden =
-      !esCursadaCompletaAlumno;
+    contenedorFiltroEspacioDocumentacionAlumno.hidden = true;
 
     contenedorFiltroEspacioDocumentacionAlumno.style.setProperty(
       "display",
-      esCursadaCompletaAlumno ? "flex" : "none",
+      "none",
       "important",
     );
   }
+
+  /* Reiniciar valores de filtros */
 
   if (filtroTipoDocumentacionAlumno) {
     filtroTipoDocumentacionAlumno.value = "";
@@ -203,11 +222,19 @@ function configurarVistaDocumentacionAlumno(resultado) {
     filtroEspacioDocumentacionAlumno.value = "";
   }
 
+  /* =====================================================
+     ENCABEZADO DE LA PRIMERA COLUMNA
+  ===================================================== */
+
   if (encabezadoTipoCursoDocumentacionAlumno) {
     encabezadoTipoCursoDocumentacionAlumno.textContent = esCursadaCompletaAlumno
       ? "Curso"
       : "Tipo";
   }
+
+  /* =====================================================
+     TÍTULO DE LA SECCIÓN
+  ===================================================== */
 
   if (tituloDocumentacionAlumno) {
     tituloDocumentacionAlumno.textContent = esCursadaCompletaAlumno
@@ -215,11 +242,19 @@ function configurarVistaDocumentacionAlumno(resultado) {
       : "Documentos disponibles";
   }
 
+  /* =====================================================
+     DESCRIPCIÓN DE LA SECCIÓN
+  ===================================================== */
+
   if (descripcionDocumentacionAlumno) {
     descripcionDocumentacionAlumno.textContent = esCursadaCompletaAlumno
-      ? "Consultá los programas de examen disponibles de todos los años. Podés buscar por espacio curricular."
+      ? "Consultá los programas de examen disponibles de todos los años."
       : "Consultá los programas de examen y el material de estudio correspondiente a tu curso.";
   }
+
+  /* =====================================================
+     DESCRIPCIÓN DE LA TARJETA PRINCIPAL
+  ===================================================== */
 
   if (descripcionTarjetaDocumentacionAlumno) {
     descripcionTarjetaDocumentacionAlumno.textContent = esCursadaCompletaAlumno
