@@ -1888,3 +1888,11 @@ body[data-rol-permitido="DOCENTE"] .btn-arriba:hover {
     padding: 0.75rem 0.65rem;
   }
 }
+.tarjeta-boton-horario-completo {
+  width: 100%;
+  appearance: none;
+  -webkit-appearance: none;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}

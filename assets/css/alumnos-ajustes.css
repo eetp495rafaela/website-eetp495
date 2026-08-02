@@ -1323,3 +1323,11 @@
     padding: 14px 16px;
   }
 }
+.tarjeta-boton-horario-completo {
+  width: 100%;
+  appearance: none;
+  -webkit-appearance: none;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
