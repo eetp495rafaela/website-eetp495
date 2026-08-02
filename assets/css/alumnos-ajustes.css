@@ -1331,3 +1331,31 @@
   text-align: left;
   cursor: pointer;
 }
+/* =====================================================
+   SERVICIOS PARA ESTUDIANTES — GRILLA 3 x 3
+===================================================== */
+
+.grid-servicios-estudiantes {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.grid-servicios-estudiantes .tarjeta {
+  width: 100%;
+  height: 100%;
+}
+
+/* Tablets */
+@media (max-width: 1000px) {
+  .grid-servicios-estudiantes {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* Celulares */
+@media (max-width: 650px) {
+  .grid-servicios-estudiantes {
+    grid-template-columns: 1fr;
+  }
+}
