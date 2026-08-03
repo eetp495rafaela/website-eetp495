@@ -97,8 +97,12 @@
             </p>
           </button>
 
-          <a class="tarjeta tarjeta-enlace" href="#sira-docente">
-            <i class="fa-solid fa-user-check"></i>
+          <a
+            class="tarjeta tarjeta-enlace"
+            href="#sira-docente"
+            data-solo-docente-taller
+            hidden
+          >
             <h3>Si.R.A.</h3>
             <p>
               Sistema de Registro de Asistencia para espacios de Taller y
@@ -106,9 +110,12 @@
             </p>
           </a>
 
-          <a class="tarjeta tarjeta-enlace" href="#parte-sira-docente">
-            <i class="fa-solid fa-clipboard-user"></i>
-
+          <a
+            class="tarjeta tarjeta-enlace"
+            href="#parte-sira-docente"
+            data-solo-docente-taller
+            hidden
+          >
             <h3>Parte de Asistencia</h3>
 
             <p>
@@ -120,9 +127,9 @@
           <a
             class="tarjeta tarjeta-enlace"
             href="#situacion-asistencia-docente"
+            data-solo-docente-taller
+            hidden
           >
-            <i class="fa-solid fa-chart-line"></i>
-
             <h3>Situación de Asistencia</h3>
 
             <p>
@@ -160,8 +167,9 @@
             href="https://docs.google.com/spreadsheets/d/1hD0g7Nz9YcIDhNYOPUeTdj1YfhOL30qvQwk8xgBto1U/edit?usp=sharing"
             target="_blank"
             rel="noopener noreferrer"
+            data-solo-docente-taller
+            hidden
           >
-            <i class="fa-solid fa-chart-column"></i>
             <h3>Registro de Calificaciones</h3>
             <p>
               Acceso a la planilla institucional para registrar y consultar
@@ -235,8 +243,9 @@
             href="https://docs.google.com/spreadsheets/d/1DOCCY-1cXT2BWGwQdeYaRG3r4FasH5ICI-MXOsqyGuQ/edit?gid=1149931630#gid=1149931630"
             target="_blank"
             rel="noopener noreferrer"
+            data-solo-docente-taller
+            hidden
           >
-            <i class="fa-solid fa-boxes-stacked"></i>
             <h3>Inventario Escolar</h3>
             <p>
               Acceso al inventario institucional de recursos, herramientas y
@@ -331,7 +340,12 @@
         </a>
       </section>
 
-      <section class="grupo seccion-destino" id="sira-docente">
+      <section
+        class="grupo seccion-destino"
+        id="parte-sira-docente"
+        data-solo-docente-taller
+        hidden
+      >
         <h2>Si.R.A. - Sistema de Registro de Asistencia</h2>
 
         <div class="panel-info">
@@ -401,7 +415,12 @@
         </a>
       </section>
 
-      <section class="grupo seccion-destino" id="parte-sira-docente">
+      <section
+        class="grupo seccion-destino"
+        id="parte-sira-docente"
+        data-solo-docente-taller
+        hidden
+      >
         <h2>Parte de Asistencia</h2>
 
         <div class="panel-info">
@@ -469,7 +488,12 @@
         </a>
       </section>
 
-      <section class="grupo seccion-destino" id="situacion-asistencia-docente">
+      <section
+        class="grupo seccion-destino"
+        id="situacion-asistencia-docente"
+        data-solo-docente-taller
+        hidden
+      >
         <h2>Situación de Asistencia</h2>
 
         <div class="panel-info">
@@ -1006,6 +1030,10 @@
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script type="module" src="../assets/js/proteger-portal.js"></script>
+    <script
+      type="module"
+      src="../assets/js/permisos-taller-docente.js"
+    ></script>
     <script type="module" src="../assets/js/mesas-docente.js"></script>
     <script type="module" src="../assets/js/material-estudio.js"></script>
     <script src="../assets/js/volver-arriba.js"></script>
