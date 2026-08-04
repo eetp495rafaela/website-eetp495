@@ -808,131 +808,33 @@ body {
 }
 
 /* =====================================================
-   AJUSTE DE LEGIBILIDAD EN IMPRESIÓN
-   Taller y Educación Física
-   No modifica Horario de Aula
+   PIZARRA - EDUCACIÓN FÍSICA
+   Fuente ampliada únicamente para la impresión/PDF.
 ===================================================== */
-
 @media print {
-  /* ---------------------------------------------------
-     TALLER
-
-     Las tarjetas se reparten la altura disponible de cada
-     columna. Así se agrandan realmente sin amontonar el
-     texto ni provocar una página adicional.
-  --------------------------------------------------- */
-
-  .seccion-pizarra-taller .bloques-dia-semanal {
-    display: flex;
-    flex-direction: column;
-    gap: 0.45mm;
-    padding: 0.55mm;
-  }
-
-  .seccion-pizarra-taller .bloques-dia-semanal .tarjeta-horario {
-    display: flex;
-    flex: 1 1 0;
-    flex-direction: column;
-    justify-content: center;
-
-    min-height: 0;
-    padding: 0.72mm 0.95mm;
-    border-radius: 0.65mm;
-  }
-
-  /* Turno mañana: tiene menos tarjetas por columna y puede
-     usar una tipografía un poco mayor. */
-  .seccion-pizarra-taller .turno-pizarra-manana .tarjeta-horario-hora {
-    margin-bottom: 0.2mm;
-    font-size: 10.5px;
-    line-height: 1.08;
-  }
-
-  .seccion-pizarra-taller .turno-pizarra-manana .tarjeta-horario-curso {
-    margin-bottom: 0.15mm;
-    font-size: 10.7px;
-    line-height: 1.08;
-  }
-
-  .seccion-pizarra-taller .turno-pizarra-manana .tarjeta-horario-espacio {
-    font-size: 10.1px;
-    line-height: 1.08;
-  }
-
-  .seccion-pizarra-taller .turno-pizarra-manana .tarjeta-horario-docente,
-  .seccion-pizarra-taller .turno-pizarra-manana .tarjeta-horario-extra {
-    margin-top: 0.2mm;
-    font-size: 9.5px;
-    line-height: 1.08;
-  }
-
-  /* Turno tarde: el lunes tiene más tarjetas. Se conserva
-     una letra clara, pero con medidas seguras para que todo
-     permanezca en una sola hoja. */
-  .seccion-pizarra-taller .turno-pizarra-tarde .tarjeta-horario {
-    padding: 0.58mm 0.85mm;
-  }
-
-  .seccion-pizarra-taller .turno-pizarra-tarde .tarjeta-horario-hora {
-    margin-bottom: 0.12mm;
-    font-size: 9.9px;
-    line-height: 1.06;
-  }
-
-  .seccion-pizarra-taller .turno-pizarra-tarde .tarjeta-horario-curso {
-    margin-bottom: 0.1mm;
-    font-size: 10.1px;
-    line-height: 1.06;
-  }
-
-  .seccion-pizarra-taller .turno-pizarra-tarde .tarjeta-horario-espacio {
-    font-size: 9.6px;
-    line-height: 1.06;
-  }
-
-  .seccion-pizarra-taller .turno-pizarra-tarde .tarjeta-horario-docente,
-  .seccion-pizarra-taller .turno-pizarra-tarde .tarjeta-horario-extra {
-    margin-top: 0.12mm;
-    font-size: 9.1px;
-    line-height: 1.06;
-  }
-
-  /* ---------------------------------------------------
-     EDUCACIÓN FÍSICA
-
-     Se conserva el ajuste que ya mejoró su legibilidad.
-  --------------------------------------------------- */
-
-  .seccion-pizarra-educacion-fisica .bloques-dia-semanal {
-    gap: 0.8mm;
-    padding: 0.8mm;
-  }
-
   .seccion-pizarra-educacion-fisica .bloques-dia-semanal .tarjeta-horario {
-    min-height: 22mm;
-    padding: 1.4mm 1.6mm;
-    border-radius: 1mm;
+    padding: 1.45mm 1.6mm;
   }
 
   .seccion-pizarra-educacion-fisica .bloques-dia-semanal .tarjeta-horario-hora {
-    margin-bottom: 0.45mm;
-    font-size: 13px;
-    line-height: 1.05;
+    margin-bottom: 0.35mm;
+    font-size: 14px;
+    line-height: 1.08;
   }
 
   .seccion-pizarra-educacion-fisica
     .bloques-dia-semanal
     .tarjeta-horario-curso {
-    margin-bottom: 0.35mm;
-    font-size: 13.2px;
-    line-height: 1.05;
+    margin-bottom: 0.3mm;
+    font-size: 14.5px;
+    line-height: 1.08;
   }
 
   .seccion-pizarra-educacion-fisica
     .bloques-dia-semanal
     .tarjeta-horario-espacio {
-    font-size: 12.5px;
-    line-height: 1.06;
+    font-size: 14px;
+    line-height: 1.08;
   }
 
   .seccion-pizarra-educacion-fisica
@@ -940,179 +842,9 @@ body {
     .tarjeta-horario-docente,
   .seccion-pizarra-educacion-fisica
     .bloques-dia-semanal
-    .tarjeta-horario-extra {
-    margin-top: 0.4mm;
-    font-size: 11.8px;
-    line-height: 1.05;
-  }
-}
-
-/* =====================================================
-   TALLER TURNO TARDE — DOS HOJAS POR GRUPOS DE CURSOS
-   Cada hoja conserva Lunes a Viernes.
-===================================================== */
-
-.paginas-taller-tarde {
-  display: grid;
-  gap: 18px;
-}
-
-.pagina-taller-tarde {
-  min-width: 0;
-}
-
-.titulo-cursos-pagina {
-  margin-bottom: 8px;
-  padding: 8px 12px;
-  background: #e8eefb;
-  color: #003f91;
-  border-left: 5px solid #003f91;
-  border-radius: 7px;
-  font-size: 14px;
-  font-weight: 900;
-  line-height: 1.2;
-}
-
-@media print {
-  /* El contenedor general deja de ser una única página. */
-  .seccion-pizarra-taller .turno-pizarra-tarde {
-    display: block;
-    width: 100%;
-    height: auto;
-    min-height: 0;
-    max-height: none;
-    margin: 0;
-    overflow: visible;
-
-    break-before: page;
-    page-break-before: always;
-    break-inside: auto;
-    page-break-inside: auto;
-  }
-
-  /* El encabezado anterior se reemplaza por uno en cada hoja. */
-  .seccion-pizarra-taller .turno-pizarra-tarde::before {
-    display: none;
-    content: none;
-  }
-
-  .seccion-pizarra-taller .turno-pizarra-tarde .paginas-taller-tarde {
-    display: block;
-    width: 100%;
-    margin: 0;
-  }
-
-  .seccion-pizarra-taller .turno-pizarra-tarde .pagina-taller-tarde {
-    display: grid;
-    grid-template-rows: auto minmax(0, 1fr);
-
-    width: 100%;
-    height: 195mm;
-    min-height: 195mm;
-    max-height: 195mm;
-    margin: 0;
-    overflow: hidden;
-
-    break-inside: avoid-page;
-    page-break-inside: avoid;
-  }
-
-  .seccion-pizarra-taller
-    .turno-pizarra-tarde
-    .pagina-taller-tarde
-    + .pagina-taller-tarde {
-    break-before: page;
-    page-break-before: always;
-  }
-
-  .seccion-pizarra-taller .turno-pizarra-tarde .pagina-taller-tarde::before {
-    display: block;
-    content: "E.E.T.P. N.º 495 “Malvinas Argentinas” · Horario de Taller · Turno Tarde · "
-      attr(data-cursos);
-
-    padding: 1.4mm 2mm;
-    background: #ffffff;
-    color: #003f91;
-    border-bottom: 0.5mm solid #003f91;
-    font-size: 11.5px;
-    font-weight: 900;
-    line-height: 1.05;
-  }
-
-  .seccion-pizarra-taller .turno-pizarra-tarde .titulo-cursos-pagina {
-    display: none;
-  }
-
-  .seccion-pizarra-taller
-    .turno-pizarra-tarde
-    .pagina-taller-tarde
-    .grilla-semanal-pizarra {
-    width: 100%;
-    height: 100%;
-    min-height: 0;
-    padding-top: 0.8mm;
-  }
-
-  /* Con solo cinco cursos por hoja, las tarjetas pueden usar
-     más altura y una tipografía claramente mayor. */
-  .seccion-pizarra-taller
-    .turno-pizarra-tarde
-    .pagina-taller-tarde
-    .bloques-dia-semanal {
-    gap: 0.8mm;
-    padding: 0.8mm;
-  }
-
-  .seccion-pizarra-taller
-    .turno-pizarra-tarde
-    .pagina-taller-tarde
-    .tarjeta-horario {
-    display: flex;
-    flex: 1 1 0;
-    flex-direction: column;
-    justify-content: center;
-
-    min-height: 0;
-    padding: 1.15mm 1.35mm;
-    border-radius: 0.9mm;
-  }
-
-  .seccion-pizarra-taller
-    .turno-pizarra-tarde
-    .pagina-taller-tarde
-    .tarjeta-horario-hora {
-    margin-bottom: 0.35mm;
-    font-size: 12.6px;
-    line-height: 1.08;
-  }
-
-  .seccion-pizarra-taller
-    .turno-pizarra-tarde
-    .pagina-taller-tarde
-    .tarjeta-horario-curso {
-    margin-bottom: 0.28mm;
-    font-size: 12.9px;
-    line-height: 1.08;
-  }
-
-  .seccion-pizarra-taller
-    .turno-pizarra-tarde
-    .pagina-taller-tarde
-    .tarjeta-horario-espacio {
-    font-size: 12.1px;
-    line-height: 1.1;
-  }
-
-  .seccion-pizarra-taller
-    .turno-pizarra-tarde
-    .pagina-taller-tarde
-    .tarjeta-horario-docente,
-  .seccion-pizarra-taller
-    .turno-pizarra-tarde
-    .pagina-taller-tarde
     .tarjeta-horario-extra {
     margin-top: 0.35mm;
-    font-size: 11.4px;
+    font-size: 13.5px;
     line-height: 1.08;
   }
 }
