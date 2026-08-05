@@ -332,6 +332,82 @@ function mostrarDatosUsuario(perfil, user, correo, rolUsuario) {
     elementoRol.textContent = rolesLegibles[rolUsuario] || rolUsuario;
   }
 }
+
+function cargarEstilosModalCierreSesion() {
+  if (document.getElementById("estilosModalCierreSesionPortal")) {
+    return;
+  }
+
+  const estilos = document.createElement("style");
+
+  estilos.id = "estilosModalCierreSesionPortal";
+
+  estilos.textContent = `
+  .swal2-popup.modal-cierre-sesion-portal {
+    width: min(420px, calc(100vw - 24px)) !important;
+    max-width: calc(100vw - 24px) !important;
+    height: auto !important;
+    max-height: calc(100dvh - 20px) !important;
+    overflow-y: auto !important;
+    box-sizing: border-box !important;
+    border-radius: 16px !important;
+  }
+
+  @media (max-width: 600px) {
+    .swal2-container {
+      padding: 10px !important;
+    }
+
+    .swal2-popup.modal-cierre-sesion-portal {
+      width: 100% !important;
+      max-width: 100% !important;
+      padding: 12px 14px 14px !important;
+    }
+
+    .modal-cierre-sesion-portal .swal2-icon {
+      width: 52px !important;
+      height: 52px !important;
+      margin: 2px auto 7px !important;
+    }
+
+    .modal-cierre-sesion-portal .swal2-icon-content {
+      font-size: 34px !important;
+    }
+
+    .modal-cierre-sesion-portal .swal2-title {
+      margin: 0 !important;
+      padding: 0 !important;
+      font-size: 1.25rem !important;
+      line-height: 1.2 !important;
+    }
+
+    .modal-cierre-sesion-portal .swal2-html-container {
+      margin: 7px 0 0 !important;
+      padding: 0 !important;
+      font-size: 0.95rem !important;
+      line-height: 1.3 !important;
+    }
+
+    .modal-cierre-sesion-portal .swal2-actions {
+      margin: 10px 0 0 !important;
+      padding: 0 !important;
+    }
+
+    .modal-cierre-sesion-portal .swal2-actions button {
+      min-height: 40px !important;
+      margin-top: 3px !important;
+      margin-bottom: 3px !important;
+      padding: 7px 13px !important;
+      font-size: 0.92rem !important;
+    }
+  }
+`;
+
+  document.head.appendChild(estilos);
+}
+
+cargarEstilosModalCierreSesion();
+
 const btnCerrarSesionPortal = document.getElementById("btnCerrarSesionPortal");
 
 if (btnCerrarSesionPortal) {
@@ -345,6 +421,10 @@ if (btnCerrarSesionPortal) {
       cancelButtonText: "Cancelar",
       reverseButtons: true,
       focusCancel: true,
+
+      customClass: {
+        popup: "modal-cierre-sesion-portal",
+      },
     });
 
     if (!resultado.isConfirmed) return;
