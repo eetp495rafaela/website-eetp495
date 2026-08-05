@@ -270,29 +270,44 @@ async function obtenerColegasAgendaDocente(cursoSeleccionado = "") {
   let correosDocentesDelCurso = null;
 
   if (cursoSeleccionado) {
-    const consultaAsignaciones = query(
-      collection(db, "asignaciones_docentes"),
-      where("cursoNombre", "==", cursoSeleccionado),
+    const estadosAsignacion = ["ACTIVA", "ACTIVO"];
+
+    const consultasAsignaciones = estadosAsignacion.map((estado) =>
+      getDocs(
+        query(
+          collection(db, "asignaciones_docentes"),
+          where("cursoNombre", "==", cursoSeleccionado),
+          where("estado", "==", estado),
+        ),
+      ),
     );
 
-    const resultadoAsignaciones = await getDocs(consultaAsignaciones);
+    const resultadosAsignaciones = await Promise.allSettled(
+      consultasAsignaciones,
+    );
+
+    const resultadosCorrectos = resultadosAsignaciones.filter(
+      (resultado) => resultado.status === "fulfilled",
+    );
+
+    if (!resultadosCorrectos.length) {
+      throw new Error(
+        `No se pudieron consultar los docentes asignados a ${cursoSeleccionado}.`,
+      );
+    }
 
     correosDocentesDelCurso = new Set();
 
-    resultadoAsignaciones.forEach((documento) => {
-      const datos = documento.data();
+    resultadosCorrectos.forEach((resultado) => {
+      resultado.value.forEach((documento) => {
+        const datos = documento.data();
 
-      const estado = normalizarTextoAgendaDocente(datos.estado);
+        const correo = normalizarCorreoAgendaDocente(datos.docenteCorreo);
 
-      if (!["ACTIVA", "ACTIVO"].includes(estado)) {
-        return;
-      }
-
-      const correo = normalizarCorreoAgendaDocente(datos.docenteCorreo);
-
-      if (correo) {
-        correosDocentesDelCurso.add(correo);
-      }
+        if (correo) {
+          correosDocentesDelCurso.add(correo);
+        }
+      });
     });
   }
 
@@ -495,34 +510,110 @@ async function obtenerCursosAsignadosAgendaDocente() {
   return Array.from(cursosPorClave.values());
 }
 
-async function cargarFiltroCursosAgendaDocente() {
+async function obtenerCursosActivosEscuelaAgendaDocente() {
+  const consulta = query(
+    collection(db, "cursos"),
+    where("estado", "==", "ACTIVO"),
+  );
+
+  const resultado = await getDocs(consulta);
+
+  const cursosPorClave = new Map();
+
+  resultado.forEach((documento) => {
+    const datos = documento.data();
+
+    const cursoAnio = Number(datos.anio || datos.cursoAnio || 0);
+
+    const cursoDivision = String(datos.division || datos.cursoDivision || "")
+      .trim()
+      .toUpperCase();
+
+    const cursoNombre = String(datos.nombre || datos.cursoNombre || "").trim();
+
+    if (!cursoAnio || !cursoDivision) {
+      return;
+    }
+
+    const clave = `${cursoAnio}|${cursoDivision}`;
+
+    if (!cursosPorClave.has(clave)) {
+      cursosPorClave.set(clave, {
+        cursoAnio,
+        cursoDivision,
+        cursoNombre: cursoNombre || `${cursoAnio}º ${cursoDivision}`,
+      });
+    }
+  });
+
+  return Array.from(cursosPorClave.values()).sort((a, b) =>
+    String(a.cursoNombre || "").localeCompare(
+      String(b.cursoNombre || ""),
+      "es",
+      {
+        numeric: true,
+        sensitivity: "base",
+      },
+    ),
+  );
+}
+
+async function cargarFiltroCursosAgendaDocente(categoria) {
   if (!campoCursoAgendaDocente || !cursoAgendaDocente) return;
 
-  const cursos = await obtenerCursosAsignadosAgendaDocente();
+  cursoAgendaDocente.disabled = true;
 
   cursoAgendaDocente.innerHTML = `
-    <option value="">Todos los cursos</option>
-
-    ${cursos
-      .sort((a, b) =>
-        String(a.cursoNombre || "").localeCompare(
-          String(b.cursoNombre || ""),
-          "es",
-          {
-            numeric: true,
-            sensitivity: "base",
-          },
-        ),
-      )
-      .map(
-        (curso) => `
-          <option value="${escaparHtmlAgendaDocente(curso.cursoNombre)}">
-            ${escaparHtmlAgendaDocente(curso.cursoNombre)}
-          </option>
-        `,
-      )
-      .join("")}
+    <option value="">Cargando cursos...</option>
   `;
+
+  try {
+    let cursos = [];
+
+    if (categoria === "COLEGAS") {
+      cursos = await obtenerCursosActivosEscuelaAgendaDocente();
+    }
+
+    if (categoria === "ALUMNOS") {
+      cursos = await obtenerCursosAsignadosAgendaDocente();
+    }
+
+    cursoAgendaDocente.innerHTML = `
+      <option value="">Todos los cursos</option>
+
+      ${cursos
+        .sort((a, b) =>
+          String(a.cursoNombre || "").localeCompare(
+            String(b.cursoNombre || ""),
+            "es",
+            {
+              numeric: true,
+              sensitivity: "base",
+            },
+          ),
+        )
+        .map(
+          (curso) => `
+            <option value="${escaparHtmlAgendaDocente(curso.cursoNombre)}">
+              ${escaparHtmlAgendaDocente(curso.cursoNombre)}
+            </option>
+          `,
+        )
+        .join("")}
+    `;
+
+    cursoAgendaDocente.disabled = false;
+  } catch (error) {
+    console.error("Error al cargar cursos de la Agenda:", error);
+
+    cursoAgendaDocente.innerHTML = `
+      <option value="">No se pudieron cargar los cursos</option>
+    `;
+
+    cursoAgendaDocente.disabled = true;
+
+    throw error;
+  }
 }
 
 /* =====================================================
@@ -735,13 +826,25 @@ categoriaAgendaDocente?.addEventListener("change", async () => {
 
   const usaFiltroCurso = ["COLEGAS", "ALUMNOS"].includes(categoria);
 
-  if (usaFiltroCurso) {
-    cursoAgendaDocente.disabled = false;
+  cursoAgendaDocente.value = "";
 
-    await cargarFiltroCursosAgendaDocente();
+  if (usaFiltroCurso) {
+    try {
+      await cargarFiltroCursosAgendaDocente(categoria);
+    } catch (error) {
+      mostrarMensajeAgendaDocente(
+        error.message || "No se pudieron cargar los cursos.",
+        "error",
+      );
+
+      return;
+    }
   } else {
     cursoAgendaDocente.disabled = true;
-    cursoAgendaDocente.value = "";
+
+    cursoAgendaDocente.innerHTML = `
+      <option value="">Todos los cursos</option>
+    `;
   }
 
   await cargarCategoriaAgendaDocente(categoria);
