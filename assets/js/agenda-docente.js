@@ -254,20 +254,49 @@ function renderizarAgendaDocente(contactos, categoria) {
    MIS COLEGAS
 ===================================================== */
 
-async function obtenerColegasAgendaDocente() {
-  const consulta = query(
+async function obtenerColegasAgendaDocente(cursoSeleccionado = "") {
+  const consultaUsuarios = query(
     collection(db, "usuarios"),
     where("rol", "==", "DOCENTE"),
     where("estado", "==", "ACTIVO"),
   );
 
-  const resultado = await getDocs(consulta);
+  const resultadoUsuarios = await getDocs(consultaUsuarios);
 
   const correoActual = normalizarCorreoAgendaDocente(
     usuarioAgendaDocenteActual?.email,
   );
 
-  return resultado.docs
+  let correosDocentesDelCurso = null;
+
+  if (cursoSeleccionado) {
+    const consultaAsignaciones = query(
+      collection(db, "asignaciones_docentes"),
+      where("cursoNombre", "==", cursoSeleccionado),
+    );
+
+    const resultadoAsignaciones = await getDocs(consultaAsignaciones);
+
+    correosDocentesDelCurso = new Set();
+
+    resultadoAsignaciones.forEach((documento) => {
+      const datos = documento.data();
+
+      const estado = normalizarTextoAgendaDocente(datos.estado);
+
+      if (!["ACTIVA", "ACTIVO"].includes(estado)) {
+        return;
+      }
+
+      const correo = normalizarCorreoAgendaDocente(datos.docenteCorreo);
+
+      if (correo) {
+        correosDocentesDelCurso.add(correo);
+      }
+    });
+  }
+
+  return resultadoUsuarios.docs
     .map((documento) => {
       const datos = {
         id: documento.id,
@@ -281,6 +310,11 @@ async function obtenerColegasAgendaDocente() {
       };
     })
     .filter((contacto) => contacto.correo !== correoActual)
+    .filter(
+      (contacto) =>
+        !correosDocentesDelCurso ||
+        correosDocentesDelCurso.has(contacto.correo),
+    )
     .sort((a, b) =>
       a.nombre.localeCompare(b.nombre, "es", {
         sensitivity: "base",
@@ -642,11 +676,19 @@ async function cargarCategoriaAgendaDocente(categoria) {
     return;
   }
 
+  const usaFiltroCurso = ["COLEGAS", "ALUMNOS"].includes(categoria);
+
+  const cursoSeleccionado = usaFiltroCurso
+    ? String(cursoAgendaDocente?.value || "").trim()
+    : "";
+
+  const claveCache = `${categoria}__${cursoSeleccionado || "TODOS"}`;
+
   mostrarMensajeAgendaDocente("Cargando contactos...");
 
   try {
-    if (categoria !== "ALUMNOS" && cacheAgendaDocente.has(categoria)) {
-      renderizarAgendaDocente(cacheAgendaDocente.get(categoria), categoria);
+    if (cacheAgendaDocente.has(claveCache)) {
+      renderizarAgendaDocente(cacheAgendaDocente.get(claveCache), categoria);
 
       return;
     }
@@ -654,7 +696,7 @@ async function cargarCategoriaAgendaDocente(categoria) {
     let contactos = [];
 
     if (categoria === "COLEGAS") {
-      contactos = await obtenerColegasAgendaDocente();
+      contactos = await obtenerColegasAgendaDocente(cursoSeleccionado);
     }
 
     if (categoria === "ADMINISTRACION") {
@@ -664,8 +706,6 @@ async function cargarCategoriaAgendaDocente(categoria) {
     if (categoria === "ALUMNOS") {
       contactos = await obtenerMisAlumnosAgendaDocente();
 
-      const cursoSeleccionado = cursoAgendaDocente?.value || "";
-
       if (cursoSeleccionado) {
         contactos = contactos.filter(
           (contacto) => contacto.detalle === cursoSeleccionado,
@@ -673,7 +713,7 @@ async function cargarCategoriaAgendaDocente(categoria) {
       }
     }
 
-    cacheAgendaDocente.set(categoria, contactos);
+    cacheAgendaDocente.set(claveCache, contactos);
 
     renderizarAgendaDocente(contactos, categoria);
   } catch (error) {
@@ -693,19 +733,26 @@ async function cargarCategoriaAgendaDocente(categoria) {
 categoriaAgendaDocente?.addEventListener("change", async () => {
   const categoria = categoriaAgendaDocente.value;
 
-  if (categoria === "ALUMNOS") {
+  const usaFiltroCurso = ["COLEGAS", "ALUMNOS"].includes(categoria);
+
+  if (usaFiltroCurso) {
     cursoAgendaDocente.disabled = false;
+
     await cargarFiltroCursosAgendaDocente();
   } else {
     cursoAgendaDocente.disabled = true;
     cursoAgendaDocente.value = "";
   }
 
-  cargarCategoriaAgendaDocente(categoria);
+  await cargarCategoriaAgendaDocente(categoria);
 });
 
-cursoAgendaDocente?.addEventListener("change", () => {
-  cargarCategoriaAgendaDocente("ALUMNOS");
+cursoAgendaDocente?.addEventListener("change", async () => {
+  const categoria = categoriaAgendaDocente?.value || "";
+
+  if (["COLEGAS", "ALUMNOS"].includes(categoria)) {
+    await cargarCategoriaAgendaDocente(categoria);
+  }
 });
 
 tarjetaAgendaInstitucionalDocente?.addEventListener("click", () => {

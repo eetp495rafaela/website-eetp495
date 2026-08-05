@@ -832,7 +832,7 @@ function renderizarAsignaciones(asignaciones) {
     fila.appendChild(crearCelda(asignacion.cursoNombre));
     fila.appendChild(crearCelda(asignacion.espacioNombre));
     fila.appendChild(crearCelda(textoTipoEspacio(asignacion.espacioTipo)));
-    fila.appendChild(crearCelda(asignacion.cicloLectivo));
+    fila.appendChild(crearCelda(asignacion.docenteCorreo));
     fila.appendChild(crearCeldaEstado(asignacion.estado));
     fila.appendChild(crearCeldaAccionesAsignacion(asignacion));
 
