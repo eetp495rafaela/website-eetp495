@@ -2680,3 +2680,11 @@ body[data-rol-permitido="DOCENTE"] .btn-arriba:hover {
     gap: 16px;
   }
 }
+/* Mensaje de días sin bloques horarios */
+.dia-horario-docente > .mensaje-formulario,
+.dia-horario-aula-docente > .mensaje-formulario {
+  color: #68172d !important;
+  font-weight: 700;
+  opacity: 1;
+  text-shadow: none;
+}
