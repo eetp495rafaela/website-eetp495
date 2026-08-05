@@ -1957,6 +1957,7 @@ body[data-rol-permitido="DOCENTE"] .btn-arriba:hover {
    Portal Docente
    -----------------------------------------------------
    Este bloque modifica únicamente la paleta de colores.
+   Los antiguos detalles ocres se unifican en bordó oscuro.
    No altera estructura, medidas, grillas ni comportamiento.
 ===================================================== */
 
@@ -1969,7 +1970,7 @@ body[data-rol-permitido="DOCENTE"] .btn-arriba:hover {
   --docente-texto-suave: #74575d;
   --docente-verde: #9b4354;
   --docente-verde-oscuro: #6a2b3a;
-  --docente-dorado: #b8874d;
+  --docente-dorado: #5a1f2f;
   --docente-naranja: #8b3a4a;
   --docente-tabla: #fffdfb;
   --docente-tabla-head: #ead0c2;
@@ -1977,7 +1978,7 @@ body[data-rol-permitido="DOCENTE"] .btn-arriba:hover {
 
   --bordo-marron-profundo: #5a1f2f;
   --bordo-marron-medio: #783144;
-  --bordo-ocre: #b8874d;
+  --bordo-acento: #5a1f2f;
   --bordo-terracota: #8b3a4a;
   --bordo-beige: #f4e7dc;
   --bordo-crema: #fffaf6;
@@ -1996,7 +1997,7 @@ body {
   background:
     radial-gradient(
       circle at top right,
-      rgba(184, 135, 77, 0.14),
+      rgba(90, 31, 47, 0.1),
       transparent 34%
     ),
     linear-gradient(135deg, #fbf4ef 0%, var(--bordo-beige) 55%, #ead8cd 100%);
@@ -2048,7 +2049,7 @@ body {
 
 .grupo h2 {
   color: #512c34;
-  border-bottom-color: var(--bordo-ocre);
+  border-bottom-color: var(--bordo-acento);
 }
 
 .grupo h2::selection {
@@ -2082,7 +2083,7 @@ body {
 
 .tarjeta i,
 .tarjeta-enlace-institucional-docente i {
-  color: var(--bordo-ocre);
+  color: var(--bordo-acento);
 }
 
 .tarjeta h3,
@@ -2167,18 +2168,18 @@ body {
 }
 
 .btn-volver:hover {
-  color: var(--bordo-ocre);
+  color: var(--bordo-acento);
 }
 
 body[data-rol-permitido="DOCENTE"] .btn-arriba {
   background: linear-gradient(135deg, #6b2a3a, #8c4252);
   color: #f3d7b0;
-  border-color: rgba(184, 135, 77, 0.55);
+  border-color: rgba(90, 31, 47, 0.55);
 }
 
 body[data-rol-permitido="DOCENTE"] .btn-arriba:hover {
-  background: linear-gradient(135deg, var(--bordo-ocre), #c79863);
-  color: #512c34;
+  background: linear-gradient(135deg, #5a1f2f, #783144);
+  color: #ffffff;
 }
 
 /* =========================
@@ -2216,8 +2217,8 @@ body[data-rol-permitido="DOCENTE"] .btn-arriba:hover {
 #parte-sira-docente select:focus,
 #situacion-asistencia-docente select:focus,
 .campo-docente-mesas select:focus {
-  border-color: var(--bordo-ocre);
-  box-shadow: 0 0 0 3px rgba(184, 135, 77, 0.18);
+  border-color: var(--bordo-acento);
+  box-shadow: 0 0 0 3px rgba(90, 31, 47, 0.18);
 }
 
 .campo-documentacion small,
@@ -2245,8 +2246,8 @@ body[data-rol-permitido="DOCENTE"] .btn-arriba:hover {
 }
 
 #panelDocumentacionAcademica input[type="file"]::file-selector-button:hover {
-  background: var(--bordo-ocre);
-  color: #3c2529;
+  background: var(--bordo-acento);
+  color: #ffffff;
 }
 
 /* =========================
@@ -2325,7 +2326,7 @@ body[data-rol-permitido="DOCENTE"] .btn-arriba:hover {
 .dia-horario-docente h4,
 .dia-horario-aula-docente h4 {
   color: #512c34;
-  border-bottom-color: rgba(184, 135, 77, 0.4);
+  border-bottom-color: rgba(90, 31, 47, 0.4);
 }
 
 .tarjeta-bloque-horario-docente {
@@ -2358,7 +2359,7 @@ body[data-rol-permitido="DOCENTE"] .btn-arriba:hover {
 }
 
 .encabezado-lista-estudiantes-docente {
-  border-bottom-color: rgba(184, 135, 77, 0.46);
+  border-bottom-color: rgba(90, 31, 47, 0.46);
 }
 
 .encabezado-lista-estudiantes-docente span,
@@ -2371,20 +2372,20 @@ body[data-rol-permitido="DOCENTE"] .btn-arriba:hover {
 }
 
 .tarjeta-lista-estudiantes-docente li {
-  background: rgba(184, 135, 77, 0.09);
+  background: rgba(90, 31, 47, 0.07);
   color: #3c2529;
 }
 
 .btn-copiar-lista-estudiantes {
   border-color: rgba(155, 67, 84, 0.72);
-  background: rgba(184, 135, 77, 0.1);
+  background: rgba(90, 31, 47, 0.08);
   color: #8b3a4a;
 }
 
 .btn-copiar-lista-estudiantes:hover {
-  background: var(--bordo-ocre);
-  border-color: var(--bordo-ocre);
-  color: #3c2529;
+  background: var(--bordo-acento);
+  border-color: var(--bordo-acento);
+  color: #ffffff;
 }
 
 /* =========================
@@ -2409,7 +2410,7 @@ body[data-rol-permitido="DOCENTE"] .btn-arriba:hover {
 #parte-sira-docente .sira-gestion-encabezado,
 #situacion-asistencia-docente .sira-gestion-encabezado {
   background:
-    linear-gradient(135deg, rgba(184, 135, 77, 0.12), rgba(139, 58, 74, 0.08)),
+    linear-gradient(135deg, rgba(90, 31, 47, 0.1), rgba(139, 58, 74, 0.08)),
     #f2e1d9;
   border-color: rgba(155, 67, 84, 0.42);
 }
@@ -2438,7 +2439,7 @@ body[data-rol-permitido="DOCENTE"] .btn-arriba:hover {
 
 .sira-estudiante {
   border-color: rgba(183, 123, 119, 0.48);
-  border-left-color: var(--bordo-ocre);
+  border-left-color: var(--bordo-acento);
   background: #fffdfb;
 }
 
@@ -2463,7 +2464,7 @@ body[data-rol-permitido="DOCENTE"] .btn-arriba:hover {
 }
 
 .sira-estudiante-controles input:focus {
-  border-color: var(--bordo-ocre);
+  border-color: var(--bordo-acento);
 }
 
 /* =========================
@@ -2529,7 +2530,7 @@ body[data-rol-permitido="DOCENTE"] .btn-arriba:hover {
 #parte-sira-docente .mensaje-gestion {
   border-color: rgba(155, 67, 84, 0.34);
   color: #6a2b3a;
-  background: rgba(184, 135, 77, 0.1);
+  background: rgba(90, 31, 47, 0.08);
 }
 
 /* Los colores de presente, ausente y tarde se conservan
@@ -2540,7 +2541,7 @@ body[data-rol-permitido="DOCENTE"] .btn-arriba:hover {
 ========================= */
 
 .encabezado-agenda-docente {
-  background: rgba(184, 135, 77, 0.1);
+  background: rgba(90, 31, 47, 0.08);
   border: 1px solid rgba(183, 123, 119, 0.42);
 }
 
@@ -2567,7 +2568,7 @@ body[data-rol-permitido="DOCENTE"] .btn-arriba:hover {
 
 #mesas-examen-docente .panel-docente-mesas {
   background: rgba(255, 253, 248, 0.97);
-  border-color: rgba(184, 135, 77, 0.4);
+  border-color: rgba(90, 31, 47, 0.4);
   box-shadow: 0 12px 28px rgba(90, 31, 47, 0.12);
 }
 
@@ -2626,12 +2627,12 @@ body[data-rol-permitido="DOCENTE"] .btn-arriba:hover {
 }
 
 #situacion-asistencia-docente .tabla-situacion-asistencia tbody tr:hover {
-  background: rgba(184, 135, 77, 0.1);
+  background: rgba(90, 31, 47, 0.08);
 }
 
 #situacion-asistencia-docente .mensaje-gestion {
   color: #74575d;
-  background: rgba(184, 135, 77, 0.08);
+  background: rgba(90, 31, 47, 0.07);
   border: 1px solid rgba(183, 123, 119, 0.32);
 }
 
