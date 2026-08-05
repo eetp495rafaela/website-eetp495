@@ -1951,3 +1951,689 @@ body[data-rol-permitido="DOCENTE"] .btn-arriba:hover {
     width: calc(100% - 28px);
   }
 }
+
+/* =====================================================
+   TEMA BORDÓ Y BEIGE
+   Portal Docente
+   -----------------------------------------------------
+   Este bloque modifica únicamente la paleta de colores.
+   No altera estructura, medidas, grillas ni comportamiento.
+===================================================== */
+
+:root {
+  --docente-fondo: #f4e7dc;
+  --docente-panel: #fffaf5;
+  --docente-panel-2: #f1ddd2;
+  --docente-borde: rgba(160, 91, 99, 0.34);
+  --docente-texto: #3c2529;
+  --docente-texto-suave: #74575d;
+  --docente-verde: #9b4354;
+  --docente-verde-oscuro: #6a2b3a;
+  --docente-dorado: #b8874d;
+  --docente-naranja: #8b3a4a;
+  --docente-tabla: #fffdfb;
+  --docente-tabla-head: #ead0c2;
+  --docente-tabla-texto: #3c2529;
+
+  --bordo-marron-profundo: #5a1f2f;
+  --bordo-marron-medio: #783144;
+  --bordo-ocre: #b8874d;
+  --bordo-terracota: #8b3a4a;
+  --bordo-beige: #f4e7dc;
+  --bordo-crema: #fffaf6;
+  --bordo-crema-2: #f1ddd2;
+  --bordo-borde: #b77b77;
+  --bordo-texto: #3c2529;
+  --bordo-texto-suave: #74575d;
+}
+
+/* =========================
+   FONDO GENERAL
+========================= */
+
+body {
+  color: var(--bordo-texto);
+  background:
+    radial-gradient(
+      circle at top right,
+      rgba(184, 135, 77, 0.14),
+      transparent 34%
+    ),
+    linear-gradient(135deg, #fbf4ef 0%, var(--bordo-beige) 55%, #ead8cd 100%);
+}
+
+/* =========================
+   BARRA SUPERIOR
+========================= */
+
+.topbar {
+  background: linear-gradient(90deg, #5a1f2f 0%, #74293e 55%, #9a4659 100%);
+  border-bottom-color: rgba(255, 248, 237, 0.22);
+  box-shadow: 0 6px 22px rgba(74, 24, 36, 0.22);
+}
+
+.logo h1,
+.logo span,
+.usuario-datos span,
+.usuario-datos small,
+.btn-sitio-publico,
+.btn-cerrar-sesion,
+.usuario,
+.usuario i {
+  color: #ffffff;
+}
+
+.usuario,
+.btn-sitio-publico,
+.btn-cerrar-sesion {
+  background: rgba(255, 255, 255, 0.13);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.usuario i {
+  background: rgba(61, 43, 32, 0.3);
+}
+
+.btn-sitio-publico:hover {
+  background: rgba(255, 255, 255, 0.24);
+}
+
+.btn-cerrar-sesion:hover {
+  background: #a43b46;
+}
+
+/* =========================
+   TÍTULOS PRINCIPALES
+========================= */
+
+.grupo h2 {
+  color: #512c34;
+  border-bottom-color: var(--bordo-ocre);
+}
+
+.grupo h2::selection {
+  background: #ead0c2;
+}
+
+/* =========================
+   TARJETAS PRINCIPALES
+========================= */
+
+.tarjeta,
+.tarjeta-lista-estudiantes-docente,
+.tarjeta-enlace-institucional-docente {
+  background: linear-gradient(
+    180deg,
+    var(--bordo-crema) 0%,
+    var(--bordo-crema-2) 100%
+  );
+  border-color: rgba(183, 123, 119, 0.58);
+  color: var(--bordo-texto);
+  box-shadow: 0 12px 28px rgba(90, 31, 47, 0.13);
+}
+
+.tarjeta:hover,
+.tarjeta-enlace-institucional-docente:hover {
+  background: linear-gradient(180deg, #fffdfb 0%, #efd8cd 100%);
+  border-color: var(--bordo-terracota);
+  color: var(--bordo-texto);
+  box-shadow: 0 18px 38px rgba(90, 31, 47, 0.2);
+}
+
+.tarjeta i,
+.tarjeta-enlace-institucional-docente i {
+  color: var(--bordo-ocre);
+}
+
+.tarjeta h3,
+.tarjeta-enlace-institucional-docente h3 {
+  color: #512c34;
+}
+
+.tarjeta p,
+.tarjeta-enlace-institucional-docente p {
+  color: var(--bordo-texto-suave);
+}
+
+.tarjeta-documentacion,
+.tarjeta-enlace,
+.tarjeta-enlace:visited,
+.tarjeta-enlace:hover,
+.tarjeta-enlace:focus {
+  color: var(--bordo-texto);
+}
+
+/* =========================
+   PANELES Y CONTENEDORES
+========================= */
+
+.panel-info,
+.bloque-horario-docente,
+.documentos-cargados-docente,
+#panelDocumentacionAcademica .panel-info,
+#panelDocumentacionAcademica .documentos-cargados-docente {
+  background: linear-gradient(180deg, var(--bordo-crema) 0%, #f5e5dc 100%);
+  border-color: rgba(183, 123, 119, 0.52);
+  color: var(--bordo-texto);
+  box-shadow: 0 12px 28px rgba(90, 31, 47, 0.13);
+}
+
+.encabezado-listado h3,
+.encabezado-documentos-cargados h3,
+.bloque-horario-docente h3,
+#panelDocumentacionAcademica .encabezado-listado h3,
+#panelDocumentacionAcademica .encabezado-documentos-cargados h3 {
+  color: #512c34;
+}
+
+.encabezado-listado p,
+.encabezado-documentos-cargados p,
+.panel-info p,
+.bloque-horario-docente > p,
+.mensaje-formulario,
+#panelDocumentacionAcademica .encabezado-listado p,
+#panelDocumentacionAcademica .encabezado-documentos-cargados p {
+  color: var(--bordo-texto-suave);
+}
+
+/* =========================
+   BOTONES
+========================= */
+
+.btn-accion,
+.btn-informe-docente,
+.btn-documentacion,
+.btn-ver-documento-docente,
+.btn-docente-mesas,
+#panelDocumentacionAcademica #btnSubirDocumentoAcademico {
+  background: linear-gradient(135deg, #9b4354, #b65b69);
+  border-color: transparent;
+  color: #ffffff;
+  box-shadow: 0 10px 22px rgba(155, 67, 84, 0.2);
+}
+
+.btn-accion:hover,
+.btn-informe-docente:hover,
+.btn-documentacion:hover,
+.btn-ver-documento-docente:hover,
+.btn-docente-mesas:hover,
+#panelDocumentacionAcademica #btnSubirDocumentoAcademico:hover {
+  background: linear-gradient(135deg, #8b3a4a, #8b3a4a);
+  color: #ffffff;
+}
+
+.btn-volver {
+  color: #8b3a4a;
+}
+
+.btn-volver:hover {
+  color: var(--bordo-ocre);
+}
+
+body[data-rol-permitido="DOCENTE"] .btn-arriba {
+  background: linear-gradient(135deg, #6b2a3a, #8c4252);
+  color: #f3d7b0;
+  border-color: rgba(184, 135, 77, 0.55);
+}
+
+body[data-rol-permitido="DOCENTE"] .btn-arriba:hover {
+  background: linear-gradient(135deg, var(--bordo-ocre), #c79863);
+  color: #512c34;
+}
+
+/* =========================
+   FORMULARIOS
+========================= */
+
+.campo-documentacion label,
+#panelDocumentacionAcademica .campo-documentacion label,
+.campo-docente-mesas label {
+  color: #512c34;
+}
+
+.campo-documentacion input,
+.campo-documentacion select,
+#panelDocumentacionAcademica .campo-documentacion input,
+#panelDocumentacionAcademica .campo-documentacion select,
+#sira-docente input[type="date"],
+#sira-docente select,
+#parte-sira-docente input[type="date"],
+#parte-sira-docente select,
+#situacion-asistencia-docente select,
+.campo-docente-mesas select {
+  background: #fffdfb;
+  border-color: #c29a8f;
+  color: #3c2529;
+}
+
+.campo-documentacion input:focus,
+.campo-documentacion select:focus,
+#panelDocumentacionAcademica .campo-documentacion input:focus,
+#panelDocumentacionAcademica .campo-documentacion select:focus,
+#sira-docente input[type="date"]:focus,
+#sira-docente select:focus,
+#parte-sira-docente input[type="date"]:focus,
+#parte-sira-docente select:focus,
+#situacion-asistencia-docente select:focus,
+.campo-docente-mesas select:focus {
+  border-color: var(--bordo-ocre);
+  box-shadow: 0 0 0 3px rgba(184, 135, 77, 0.18);
+}
+
+.campo-documentacion small,
+#panelDocumentacionAcademica .campo-documentacion small {
+  color: var(--bordo-texto-suave);
+}
+
+#panelDocumentacionAcademica .campo-documentacion select:disabled,
+#panelDocumentacionAcademica .campo-documentacion input[readonly],
+.campo-documentacion select:disabled,
+.campo-documentacion input[readonly] {
+  background: #ece1dc;
+  color: #826a6e;
+  border-color: #cab8b0;
+}
+
+#panelDocumentacionAcademica input[type="file"] {
+  background: #fffdfb;
+  color: #3c2529;
+}
+
+#panelDocumentacionAcademica input[type="file"]::file-selector-button {
+  background: #8c4252;
+  color: #ffffff;
+}
+
+#panelDocumentacionAcademica input[type="file"]::file-selector-button:hover {
+  background: var(--bordo-ocre);
+  color: #3c2529;
+}
+
+/* =========================
+   TABLAS GENERALES
+========================= */
+
+.tabla-documentos-contenedor,
+.tabla-informes-docente-contenedor,
+#panelDocumentacionAcademica .tabla-documentos-contenedor,
+.tabla-docente-mesas-contenedor {
+  background: #fffdfb;
+  border-color: #d5b7aa;
+  box-shadow: 0 10px 22px rgba(90, 31, 47, 0.1);
+}
+
+.tabla-documentos,
+.tabla-informes-docente,
+#panelDocumentacionAcademica .tabla-documentos,
+.tabla-docente-mesas {
+  background: #fffdfb;
+}
+
+.tabla-documentos th,
+.tabla-informes-docente th,
+#panelDocumentacionAcademica .tabla-documentos th,
+.tabla-docente-mesas th,
+#mesas-examen-docente .tabla-usuarios thead th,
+#mesas-examen-docente .tabla-documentacion-alumno thead th,
+#mesas-examen-docente table thead th {
+  background: #ead0c2;
+  color: #512c34;
+  border-bottom-color: #cda799;
+}
+
+.tabla-documentos td,
+.tabla-informes-docente td,
+#panelDocumentacionAcademica .tabla-documentos td,
+.tabla-docente-mesas td,
+#mesas-examen-docente .tabla-usuarios tbody td,
+#mesas-examen-docente .tabla-documentacion-alumno tbody td,
+#mesas-examen-docente table tbody td {
+  color: #3c2529;
+  border-color: #ecddd5;
+}
+
+.tabla-documentos-vacia,
+.tabla-docente-mesas .tabla-vacia,
+.mensaje-docente-mesas,
+.encabezado-docente-mesas p {
+  color: #80676b;
+}
+
+/* =========================
+   HORARIOS DEL DOCENTE
+========================= */
+
+.vista-horario-aula-docente,
+.vista-horario-taller-docente,
+.vista-horario-ef-docente {
+  color: var(--bordo-texto);
+  border-top-color: rgba(160, 91, 99, 0.24);
+}
+
+.vista-horario-aula-docente h4,
+.vista-horario-taller-docente h4,
+.vista-horario-ef-docente h4 {
+  color: #512c34;
+}
+
+.dia-horario-docente,
+.dia-horario-aula-docente {
+  background: #f0ddd2;
+  border-color: rgba(183, 123, 119, 0.55);
+}
+
+.dia-horario-docente h4,
+.dia-horario-aula-docente h4 {
+  color: #512c34;
+  border-bottom-color: rgba(184, 135, 77, 0.4);
+}
+
+.tarjeta-bloque-horario-docente {
+  background: #fffdfb;
+  color: #3c2529;
+  border-color: #dec8bd;
+}
+
+.bloque-horario-hora-docente {
+  color: #9a4352;
+}
+
+.bloque-horario-materia-docente {
+  color: #3c2529;
+}
+
+.bloque-horario-curso-docente,
+.bloque-horario-ubicacion-docente,
+.bloque-horario-turno-docente {
+  color: #7b5e64;
+}
+
+/* =========================
+   LISTAS DE ESTUDIANTES
+========================= */
+
+.tarjeta-lista-estudiantes-docente h3,
+.encabezado-lista-estudiantes-docente h3 {
+  color: #8b3a4a;
+}
+
+.encabezado-lista-estudiantes-docente {
+  border-bottom-color: rgba(184, 135, 77, 0.46);
+}
+
+.encabezado-lista-estudiantes-docente span,
+.dato-preceptora-lista strong {
+  color: #7a5a60;
+}
+
+.dato-preceptora-lista span {
+  color: #3c2529;
+}
+
+.tarjeta-lista-estudiantes-docente li {
+  background: rgba(184, 135, 77, 0.09);
+  color: #3c2529;
+}
+
+.btn-copiar-lista-estudiantes {
+  border-color: rgba(155, 67, 84, 0.72);
+  background: rgba(184, 135, 77, 0.1);
+  color: #8b3a4a;
+}
+
+.btn-copiar-lista-estudiantes:hover {
+  background: var(--bordo-ocre);
+  border-color: var(--bordo-ocre);
+  color: #3c2529;
+}
+
+/* =========================
+   DOCUMENTACIÓN ACADÉMICA
+========================= */
+
+#panelDocumentacionAcademica #mensajeDocumentacionAcademica.ok,
+#panelDocumentacionAcademica #mensajeDocumentacionAcademica {
+  color: #893849;
+}
+
+#panelDocumentacionAcademica .documentos-cargados-docente {
+  background: #f1ddd2;
+  border-color: rgba(183, 123, 119, 0.55);
+}
+
+/* =========================
+   Si.R.A. - REGISTRO
+========================= */
+
+.sira-clase-seleccionada,
+#parte-sira-docente .sira-gestion-encabezado,
+#situacion-asistencia-docente .sira-gestion-encabezado {
+  background:
+    linear-gradient(135deg, rgba(184, 135, 77, 0.12), rgba(139, 58, 74, 0.08)),
+    #f2e1d9;
+  border-color: rgba(155, 67, 84, 0.42);
+}
+
+.sira-clase-seleccionada h3,
+#parte-sira-docente .sira-gestion-encabezado h3,
+#situacion-asistencia-docente .sira-gestion-encabezado h3 {
+  color: #7a2e3f;
+}
+
+.sira-clase-seleccionada p,
+#parte-sira-docente .sira-gestion-encabezado p,
+#situacion-asistencia-docente .sira-gestion-encabezado p {
+  color: #74575d;
+}
+
+.sira-modo-lluvia {
+  border-color: rgba(71, 123, 148, 0.4);
+  background: rgba(161, 202, 218, 0.2);
+  color: #315d70;
+}
+
+.sira-modo-lluvia span {
+  color: #4f7180;
+}
+
+.sira-estudiante {
+  border-color: rgba(183, 123, 119, 0.48);
+  border-left-color: var(--bordo-ocre);
+  background: #fffdfb;
+}
+
+.sira-estudiante-nombre strong {
+  color: #3c2529;
+}
+
+.sira-estudiante-nombre small {
+  background: #edd7cc;
+  color: #6a2b3a;
+}
+
+.sira-estudiante-controles select {
+  background: #f6e9e2 !important;
+  color: #512c34 !important;
+}
+
+.sira-estudiante-controles input {
+  border-color: #d9b8aa;
+  background: #fffdfb;
+  color: #3c2529;
+}
+
+.sira-estudiante-controles input:focus {
+  border-color: var(--bordo-ocre);
+}
+
+/* =========================
+   PARTE SEMANAL
+========================= */
+
+#parte-sira-docente .sira-gestion-dia {
+  background: #f0ddd2;
+  border-color: rgba(183, 123, 119, 0.5);
+}
+
+#parte-sira-docente .sira-gestion-dia > h4 {
+  background: #6e2c3b;
+  color: #ffffff;
+  border-bottom-color: rgba(244, 216, 193, 0.32);
+}
+
+#parte-sira-docente .sira-gestion-dia > h4 span {
+  color: #f2dfd7;
+}
+
+#parte-sira-docente .sira-gestion-bloque {
+  background: #fffdfb;
+  color: #3c2529;
+  border-color: #dfc9bf;
+}
+
+#parte-sira-docente .sira-gestion-bloque header {
+  background: #ead0c2;
+  border-bottom-color: #dec1b5;
+}
+
+#parte-sira-docente .sira-gestion-bloque header h4,
+#parte-sira-docente .sira-gestion-bloque header strong,
+#parte-sira-docente .sira-gestion-estado h5,
+#parte-sira-docente .sira-gestion-estado li,
+#parte-sira-docente .sira-gestion-estado li strong {
+  color: #3c2529;
+}
+
+#parte-sira-docente .sira-gestion-bloque header p {
+  color: #7b5d61;
+}
+
+#parte-sira-docente .sira-gestion-estado,
+#parte-sira-docente .sira-gestion-estado li,
+#parte-sira-docente .sira-gestion-sin-datos {
+  background: #fffdfb;
+  border-color: #ecddd5;
+}
+
+#parte-sira-docente .sira-gestion-estado li small,
+#parte-sira-docente .sira-gestion-sin-datos {
+  color: #80676b;
+}
+
+#parte-sira-docente .sira-gestion-dia-vacio {
+  border-color: rgba(160, 91, 99, 0.36);
+  color: #7b5e64;
+  background: rgba(255, 250, 242, 0.68);
+}
+
+#parte-sira-docente .mensaje-gestion {
+  border-color: rgba(155, 67, 84, 0.34);
+  color: #6a2b3a;
+  background: rgba(184, 135, 77, 0.1);
+}
+
+/* Los colores de presente, ausente y tarde se conservan
+   porque comunican estados funcionales. */
+
+/* =========================
+   AGENDA INSTITUCIONAL
+========================= */
+
+.encabezado-agenda-docente {
+  background: rgba(184, 135, 77, 0.1);
+  border: 1px solid rgba(183, 123, 119, 0.42);
+}
+
+.titulo-agenda-docente,
+.cantidad-agenda-docente {
+  color: #512c34;
+}
+
+.enlace-correo-agenda-docente {
+  background: #ead0c2;
+  border-color: #c9a18a;
+  color: #5a1f2f;
+}
+
+.enlace-correo-agenda-docente:hover {
+  background: #d4ae9f;
+  border-color: #b67d61;
+  color: #3c2529;
+}
+
+/* =========================
+   MESAS DE EXAMEN
+========================= */
+
+#mesas-examen-docente .panel-docente-mesas {
+  background: rgba(255, 253, 248, 0.97);
+  border-color: rgba(184, 135, 77, 0.4);
+  box-shadow: 0 12px 28px rgba(90, 31, 47, 0.12);
+}
+
+.encabezado-docente-mesas h3,
+.campo-docente-mesas label,
+.tabla-docente-mesas th,
+.tabla-docente-mesas td strong {
+  color: #512c34;
+}
+
+.btn-docente-mesas {
+  background: #783144;
+}
+
+.btn-docente-mesas:hover {
+  background: #5a1f2f;
+}
+
+/* =========================
+   SITUACIÓN DE ASISTENCIA
+========================= */
+
+#situacion-asistencia-docente .tarjeta-resumen-asistencia {
+  background: #fffaf5;
+  border-color: rgba(183, 123, 119, 0.48);
+}
+
+#situacion-asistencia-docente .tarjeta-resumen-asistencia span,
+#situacion-asistencia-docente .criterio-asistencia {
+  color: #74575d;
+}
+
+#situacion-asistencia-docente .tarjeta-resumen-asistencia strong {
+  color: #3c2529;
+}
+
+#situacion-asistencia-docente .tabla-situacion-asistencia {
+  background: #fffdfb;
+}
+
+#situacion-asistencia-docente .tabla-situacion-asistencia thead {
+  background: #783144;
+}
+
+#situacion-asistencia-docente .tabla-situacion-asistencia th {
+  color: #ffffff;
+}
+
+#situacion-asistencia-docente .tabla-situacion-asistencia td {
+  color: #3c2529;
+  border-bottom-color: #ecddd5;
+}
+
+#situacion-asistencia-docente .tabla-situacion-asistencia td strong {
+  color: #3c2529;
+}
+
+#situacion-asistencia-docente .tabla-situacion-asistencia tbody tr:hover {
+  background: rgba(184, 135, 77, 0.1);
+}
+
+#situacion-asistencia-docente .mensaje-gestion {
+  color: #74575d;
+  background: rgba(184, 135, 77, 0.08);
+  border: 1px solid rgba(183, 123, 119, 0.32);
+}
+
+/* Los indicadores de excelente, seguimiento y riesgo
+   conservan sus colores semánticos originales. */
