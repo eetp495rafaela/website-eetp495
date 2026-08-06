@@ -5,6 +5,9 @@
 ===================================================== */
 
 document.addEventListener("DOMContentLoaded", () => {
+  const BACKEND_GALERIA_URL =
+    "https://script.google.com/macros/s/AKfycbwgqaaYJLlGZl7CcxcYRwy-qqPrlqKoL2L1qDxk0nqsPCbVZqmmbTS5KaCsdDNxVpq-/exec";
+
   const lightbox = document.getElementById("lightbox");
   const imagenLightbox = document.getElementById("imagenLightbox");
   const tituloLightbox = document.getElementById("tituloLightbox");
@@ -32,12 +35,14 @@ document.addEventListener("DOMContentLoaded", () => {
     return;
   }
 
-  /*
-   * Estas imágenes son temporales.
-   * Se mantienen como portadas de las seis galerías.
-   * Más adelante serán reemplazadas por las fotografías publicadas.
-   */
-  const galerias = {
+  /* =====================================================
+     IMÁGENES DE RESPALDO
+
+     Se utilizarán cuando una categoría todavía no tenga
+     fotografías publicadas o cuando el backend no responda.
+  ===================================================== */
+
+  const galeriasRespaldo = {
     "01-HISTORIA-EDIFICIO": [
       {
         src: "assets/img/escuela.jpg",
@@ -81,8 +86,181 @@ document.addEventListener("DOMContentLoaded", () => {
     ],
   };
 
+  /*
+   * Inicialmente se cargan las imágenes de respaldo.
+   * Cuando responde el backend, se reemplazan únicamente
+   * las categorías que tengan fotografías publicadas.
+   */
+  const galerias = {
+    ...galeriasRespaldo,
+  };
+
   let imagenesGaleriaActual = [];
   let indiceImagenActual = 0;
+
+  /* =====================================================
+     PORTADAS DE LAS CATEGORÍAS
+  ===================================================== */
+
+  function actualizarPortadaCategoria(codigoGaleria, imagen) {
+    if (!imagen?.src) {
+      return;
+    }
+
+    const categoria = Array.from(categoriasGaleria).find((elemento) => {
+      return elemento.dataset.galeria === codigoGaleria;
+    });
+
+    if (!categoria) {
+      return;
+    }
+
+    const imagenPortada = categoria.querySelector("img");
+
+    if (!imagenPortada) {
+      return;
+    }
+
+    const srcRespaldo = imagenPortada.getAttribute("src");
+
+    imagenPortada.dataset.srcRespaldo = srcRespaldo || "";
+    imagenPortada.src = imagen.src;
+    imagenPortada.alt = imagen.alt || categoria.dataset.titulo || "Galería";
+
+    imagenPortada.addEventListener(
+      "error",
+      () => {
+        const respaldo = imagenPortada.dataset.srcRespaldo;
+
+        if (respaldo && imagenPortada.src !== respaldo) {
+          imagenPortada.src = respaldo;
+        }
+      },
+      { once: true },
+    );
+  }
+
+  /* =====================================================
+     CONSULTA AL BACKEND
+  ===================================================== */
+
+  async function cargarGaleriasPublicadas() {
+    const controlador = new AbortController();
+
+    const temporizador = window.setTimeout(() => {
+      controlador.abort();
+    }, 12000);
+
+    try {
+      const urlConsulta =
+        `${BACKEND_GALERIA_URL}?accion=obtener_galeria` + `&_=${Date.now()}`;
+
+      const respuesta = await fetch(urlConsulta, {
+        method: "GET",
+        cache: "no-store",
+        signal: controlador.signal,
+      });
+
+      const texto = await respuesta.text();
+
+      let datos;
+
+      try {
+        datos = JSON.parse(texto || "{}");
+      } catch (error) {
+        console.error("Respuesta recibida del backend:", texto);
+
+        throw new Error(
+          "La respuesta de la galería no pudo interpretarse correctamente.",
+        );
+      }
+
+      if (!respuesta.ok) {
+        throw new Error(
+          datos.mensaje ||
+            `El servidor respondió con el código HTTP ${respuesta.status}.`,
+        );
+      }
+
+      if (!datos.ok || !datos.galerias) {
+        throw new Error(
+          datos.mensaje ||
+            "No fue posible obtener las fotografías institucionales.",
+        );
+      }
+
+      Object.keys(galeriasRespaldo).forEach((codigoGaleria) => {
+        const imagenesPublicadas = datos.galerias[codigoGaleria];
+
+        if (!Array.isArray(imagenesPublicadas)) {
+          return;
+        }
+
+        const imagenesValidas = imagenesPublicadas
+          .filter((imagen) => {
+            return (
+              imagen &&
+              typeof imagen.src === "string" &&
+              imagen.src.trim() !== ""
+            );
+          })
+          .map((imagen) => {
+            return {
+              id: String(imagen.id || "").trim(),
+              src: imagen.src.trim(),
+              alt: String(
+                imagen.alt ||
+                  imagen.nombreArchivo ||
+                  "Fotografía institucional",
+              ).trim(),
+              nombreArchivo: String(imagen.nombreArchivo || "").trim(),
+              fechaPublicacion: String(imagen.fechaPublicacion || "").trim(),
+            };
+          });
+
+        /*
+         * Si la categoría tiene fotografías publicadas,
+         * reemplazamos la imagen temporal.
+         *
+         * Si está vacía, se conserva la portada local.
+         */
+        if (imagenesValidas.length > 0) {
+          galerias[codigoGaleria] = imagenesValidas;
+
+          actualizarPortadaCategoria(codigoGaleria, imagenesValidas[0]);
+        }
+      });
+
+      console.info(
+        `Galería institucional cargada correctamente. Fotografías publicadas: ${
+          Number(datos.total) || 0
+        }.`,
+      );
+    } catch (error) {
+      if (error.name === "AbortError") {
+        console.warn(
+          "La consulta de la galería superó el tiempo máximo de espera. Se utilizarán las imágenes de respaldo.",
+        );
+
+        return;
+      }
+
+      console.error("No fue posible cargar las fotografías publicadas:", error);
+
+      /*
+       * No interrumpimos el sitio.
+       * Se mantienen las seis imágenes locales de respaldo.
+       */
+    } finally {
+      window.clearTimeout(temporizador);
+    }
+  }
+
+  const promesaCargaGaleria = cargarGaleriasPublicadas();
+
+  /* =====================================================
+     VISOR DE IMÁGENES
+  ===================================================== */
 
   function actualizarVisor() {
     const imagenActual = imagenesGaleriaActual[indiceImagenActual];
@@ -92,7 +270,8 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     imagenLightbox.src = imagenActual.src;
-    imagenLightbox.alt = imagenActual.alt;
+    imagenLightbox.alt =
+      imagenActual.alt || imagenActual.nombreArchivo || "Imagen de la galería";
 
     contadorLightbox.textContent = `${indiceImagenActual + 1} de ${imagenesGaleriaActual.length}`;
 
@@ -102,7 +281,13 @@ document.addEventListener("DOMContentLoaded", () => {
     btnImagenSiguiente.disabled = !hayVariasImagenes;
   }
 
-  function abrirGaleria(codigoGaleria, tituloGaleria) {
+  async function abrirGaleria(codigoGaleria, tituloGaleria) {
+    /*
+     * Esperamos la consulta del backend antes de abrir.
+     * Si falla, la promesa igualmente termina y se usa el respaldo.
+     */
+    await promesaCargaGaleria;
+
     const imagenes = galerias[codigoGaleria];
 
     if (!Array.isArray(imagenes) || imagenes.length === 0) {
@@ -132,8 +317,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
     document.body.classList.remove("sin-scroll");
 
-    imagenLightbox.src = "";
+    imagenLightbox.removeAttribute("src");
     imagenLightbox.alt = "Imagen de la galería";
+
+    imagenesGaleriaActual = [];
+    indiceImagenActual = 0;
   }
 
   function mostrarImagenAnterior() {
@@ -158,6 +346,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
     actualizarVisor();
   }
+
+  /* =====================================================
+     EVENTOS
+  ===================================================== */
 
   categoriasGaleria.forEach((categoria) => {
     function abrirCategoria() {
