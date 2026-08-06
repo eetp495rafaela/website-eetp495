@@ -348,7 +348,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   /* =====================================================
-     EVENTOS GALERIA
+     EVENTOS GALERIA NUEVA
   ===================================================== */
 
   categoriasGaleria.forEach((categoria) => {
