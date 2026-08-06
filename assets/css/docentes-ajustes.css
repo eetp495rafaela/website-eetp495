@@ -2146,7 +2146,8 @@ body {
 .btn-documentacion,
 .btn-ver-documento-docente,
 .btn-docente-mesas,
-#panelDocumentacionAcademica #btnSubirDocumentoAcademico {
+#panelDocumentacionAcademica #btnSubirDocumentoAcademico,
+#panelDocumentacionAcademica #btnVerDocumentosDocente {
   background: linear-gradient(135deg, #9b4354, #b65b69);
   border-color: transparent;
   color: #ffffff;
@@ -2158,27 +2159,9 @@ body {
 .btn-documentacion:hover,
 .btn-ver-documento-docente:hover,
 .btn-docente-mesas:hover,
-#panelDocumentacionAcademica #btnSubirDocumentoAcademico:hover {
+#panelDocumentacionAcademica #btnSubirDocumentoAcademico:hover,
+#panelDocumentacionAcademica #btnVerDocumentosDocente:hover {
   background: linear-gradient(135deg, #8b3a4a, #8b3a4a);
-  color: #ffffff;
-}
-
-.btn-volver {
-  color: #8b3a4a;
-}
-
-.btn-volver:hover {
-  color: var(--bordo-acento);
-}
-
-body[data-rol-permitido="DOCENTE"] .btn-arriba {
-  background: linear-gradient(135deg, #6b2a3a, #8c4252);
-  color: #f3d7b0;
-  border-color: rgba(90, 31, 47, 0.55);
-}
-
-body[data-rol-permitido="DOCENTE"] .btn-arriba:hover {
-  background: linear-gradient(135deg, #5a1f2f, #783144);
   color: #ffffff;
 }
 
@@ -2687,4 +2670,8 @@ body[data-rol-permitido="DOCENTE"] .btn-arriba:hover {
   font-weight: 700;
   opacity: 1;
   text-shadow: none;
+}
+/* Flecha blanca del botón Volver arriba */
+body[data-rol-permitido="DOCENTE"] .btn-arriba i {
+  color: #ffffff !important;
 }
