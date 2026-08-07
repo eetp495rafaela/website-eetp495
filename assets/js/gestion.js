@@ -4584,6 +4584,7 @@ async function cargarDocumentacionGestion() {
     const resultado = await enviarAlBackendDocumentacion({
       accion: "obtener_documentos_admin",
       idToken,
+      rolActivo: obtenerRolGestionActual(),
     });
 
     if (!resultado.ok) {
@@ -4980,6 +4981,7 @@ async function abrirPermisoSimeGestion(idInscripcion, boton) {
     const resultado = await enviarAlBackendSimeGestion({
       accion: "obtener_permiso_inscripcion_admin",
       idToken,
+      rolActivo: obtenerRolGestionActual(),
       idInscripcion,
     });
 
@@ -5067,6 +5069,7 @@ async function cargarInscripcionesSimeGestion() {
     const resultado = await enviarAlBackendSimeGestion({
       accion: "listar_inscripciones_admin",
       idToken,
+      rolActivo: obtenerRolGestionActual(),
     });
 
     if (!resultado.ok) {
