@@ -284,6 +284,7 @@ async function cargarDocumentosAdministracion() {
     const resultado = await enviarAlBackend({
       accion: "obtener_documentos_admin",
       idToken,
+      rolActivo: "SOPORTE",
     });
 
     if (!resultado.ok) {
