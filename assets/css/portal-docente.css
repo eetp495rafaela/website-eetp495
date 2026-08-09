@@ -3178,39 +3178,51 @@ body[data-rol-permitido="DOCENTE"] .btn-arriba:hover {
 }
 
 /* =====================================================
-   TEMA BORDÓ Y BEIGE
+   TEMA CLAY BROWN + SOFT BUTTER
    Portal Docente
    -----------------------------------------------------
-   Este bloque modifica únicamente la paleta de colores.
-   Los antiguos detalles ocres se unifican en bordó oscuro.
+   Paleta principal: Clay Brown #6B352A + Soft Butter #FFF1A6.
+   Se utilizan variantes cálidas para mejorar contraste y jerarquía.
    No altera estructura, medidas, grillas ni comportamiento.
 ===================================================== */
 
 :root {
-  --docente-fondo: #f4e7dc;
-  --docente-panel: #fffaf5;
-  --docente-panel-2: #f1ddd2;
-  --docente-borde: rgba(160, 91, 99, 0.34);
-  --docente-texto: #3c2529;
-  --docente-texto-suave: #74575d;
-  --docente-verde: #9b4354;
-  --docente-verde-oscuro: #6a2b3a;
-  --docente-dorado: #5a1f2f;
-  --docente-naranja: #8b3a4a;
-  --docente-tabla: #fffdfb;
-  --docente-tabla-head: #ead0c2;
-  --docente-tabla-texto: #3c2529;
+  --docente-fondo: #fff7cc;
+  --docente-panel: #fffcf0;
+  --docente-panel-2: #fff1a6;
+  --docente-borde: rgba(107, 53, 42, 0.34);
+  --docente-texto: #3b241f;
+  --docente-texto-suave: #725a54;
+  --docente-verde: #8a4a3c;
+  --docente-verde-oscuro: #4a241c;
+  --docente-dorado: #6b352a;
+  --docente-naranja: #8a4a3c;
+  --docente-tabla: #fffdf8;
+  --docente-tabla-head: #fff1a6;
+  --docente-tabla-texto: #3b241f;
 
-  --bordo-marron-profundo: #5a1f2f;
-  --bordo-marron-medio: #783144;
-  --bordo-acento: #5a1f2f;
-  --bordo-terracota: #8b3a4a;
-  --bordo-beige: #f4e7dc;
-  --bordo-crema: #fffaf6;
-  --bordo-crema-2: #f1ddd2;
-  --bordo-borde: #b77b77;
-  --bordo-texto: #3c2529;
-  --bordo-texto-suave: #74575d;
+  /* Paleta principal */
+  --clay: #6b352a;
+  --clay-dark: #4a241c;
+  --clay-deep: #321813;
+  --clay-medium: #8a4a3c;
+  --clay-soft: #b98778;
+  --butter: #fff1a6;
+  --butter-strong: #ffe677;
+  --butter-soft: #fff7cc;
+  --cream: #fffcf0;
+  --warm-white: #fffdf8;
+
+  --bordo-marron-profundo: #6b352a;
+  --bordo-marron-medio: #6b352a;
+  --bordo-acento: #6b352a;
+  --bordo-terracota: #8a4a3c;
+  --bordo-beige: #fff7cc;
+  --bordo-crema: #fffcf0;
+  --bordo-crema-2: #fff1a6;
+  --bordo-borde: #b98778;
+  --bordo-texto: #3b241f;
+  --bordo-texto-suave: #725a54;
 }
 
 /* =========================
@@ -3222,10 +3234,10 @@ body {
   background:
     radial-gradient(
       circle at top right,
-      rgba(90, 31, 47, 0.1),
+      rgba(107, 53, 42, 0.1),
       transparent 34%
     ),
-    linear-gradient(135deg, #fbf4ef 0%, var(--bordo-beige) 55%, #ead8cd 100%);
+    linear-gradient(135deg, #fffdf5 0%, var(--bordo-beige) 55%, #f8e9b8 100%);
 }
 
 /* =========================
@@ -3233,9 +3245,9 @@ body {
 ========================= */
 
 .topbar {
-  background: linear-gradient(90deg, #5a1f2f 0%, #74293e 55%, #9a4659 100%);
+  background: linear-gradient(90deg, #6b352a 0%, #7b4034 55%, #8a4a3c 100%);
   border-bottom-color: rgba(255, 248, 237, 0.22);
-  box-shadow: 0 6px 22px rgba(74, 24, 36, 0.22);
+  box-shadow: 0 6px 22px rgba(74, 36, 28, 0.22);
 }
 
 .logo h1,
@@ -3265,7 +3277,7 @@ body {
 }
 
 .btn-cerrar-sesion:hover {
-  background: #a43b46;
+  background: #8b3d31;
 }
 
 /* =========================
@@ -3273,12 +3285,12 @@ body {
 ========================= */
 
 .grupo h2 {
-  color: #512c34;
+  color: #4a241c;
   border-bottom-color: var(--bordo-acento);
 }
 
 .grupo h2::selection {
-  background: #ead0c2;
+  background: #fff1a6;
 }
 
 /* =========================
@@ -3293,17 +3305,17 @@ body {
     var(--bordo-crema) 0%,
     var(--bordo-crema-2) 100%
   );
-  border-color: rgba(183, 123, 119, 0.58);
+  border-color: rgba(185, 135, 120, 0.58);
   color: var(--bordo-texto);
-  box-shadow: 0 12px 28px rgba(90, 31, 47, 0.13);
+  box-shadow: 0 12px 28px rgba(107, 53, 42, 0.13);
 }
 
 .tarjeta:hover,
 .tarjeta-enlace-institucional-docente:hover {
-  background: linear-gradient(180deg, #fffdfb 0%, #efd8cd 100%);
+  background: linear-gradient(180deg, #fffdf8 0%, #f8e9b8 100%);
   border-color: var(--bordo-terracota);
   color: var(--bordo-texto);
-  box-shadow: 0 18px 38px rgba(90, 31, 47, 0.2);
+  box-shadow: 0 18px 38px rgba(107, 53, 42, 0.2);
 }
 
 .tarjeta i,
@@ -3313,7 +3325,7 @@ body {
 
 .tarjeta h3,
 .tarjeta-enlace-institucional-docente h3 {
-  color: #512c34;
+  color: #4a241c;
 }
 
 .tarjeta p,
@@ -3338,10 +3350,10 @@ body {
 .documentos-cargados-docente,
 #panelDocumentacionAcademica .panel-info,
 #panelDocumentacionAcademica .documentos-cargados-docente {
-  background: linear-gradient(180deg, var(--bordo-crema) 0%, #f5e5dc 100%);
-  border-color: rgba(183, 123, 119, 0.52);
+  background: linear-gradient(180deg, var(--bordo-crema) 0%, #fff7cc 100%);
+  border-color: rgba(185, 135, 120, 0.52);
   color: var(--bordo-texto);
-  box-shadow: 0 12px 28px rgba(90, 31, 47, 0.13);
+  box-shadow: 0 12px 28px rgba(107, 53, 42, 0.13);
 }
 
 .encabezado-listado h3,
@@ -3349,7 +3361,7 @@ body {
 .bloque-horario-docente h3,
 #panelDocumentacionAcademica .encabezado-listado h3,
 #panelDocumentacionAcademica .encabezado-documentos-cargados h3 {
-  color: #512c34;
+  color: #4a241c;
 }
 
 .encabezado-listado p,
@@ -3373,10 +3385,10 @@ body {
 .btn-docente-mesas,
 #panelDocumentacionAcademica #btnSubirDocumentoAcademico,
 #panelDocumentacionAcademica #btnVerDocumentosDocente {
-  background: linear-gradient(135deg, #9b4354, #b65b69);
+  background: linear-gradient(135deg, #8a4a3c, #9a5a4b);
   border-color: transparent;
   color: #ffffff;
-  box-shadow: 0 10px 22px rgba(155, 67, 84, 0.2);
+  box-shadow: 0 10px 22px rgba(138, 74, 60, 0.2);
 }
 
 .btn-accion:hover,
@@ -3386,7 +3398,7 @@ body {
 .btn-docente-mesas:hover,
 #panelDocumentacionAcademica #btnSubirDocumentoAcademico:hover,
 #panelDocumentacionAcademica #btnVerDocumentosDocente:hover {
-  background: linear-gradient(135deg, #8b3a4a, #8b3a4a);
+  background: linear-gradient(135deg, #8a4a3c, #8a4a3c);
   color: #ffffff;
 }
 
@@ -3397,7 +3409,7 @@ body {
 .campo-documentacion label,
 #panelDocumentacionAcademica .campo-documentacion label,
 .campo-docente-mesas label {
-  color: #512c34;
+  color: #4a241c;
 }
 
 .campo-documentacion input,
@@ -3410,9 +3422,9 @@ body {
 #parte-sira-docente select,
 #situacion-asistencia-docente select,
 .campo-docente-mesas select {
-  background: #fffdfb;
-  border-color: #c29a8f;
-  color: #3c2529;
+  background: #fffdf8;
+  border-color: #c9a79c;
+  color: #3b241f;
 }
 
 .campo-documentacion input:focus,
@@ -3426,7 +3438,7 @@ body {
 #situacion-asistencia-docente select:focus,
 .campo-docente-mesas select:focus {
   border-color: var(--bordo-acento);
-  box-shadow: 0 0 0 3px rgba(90, 31, 47, 0.18);
+  box-shadow: 0 0 0 3px rgba(107, 53, 42, 0.18);
 }
 
 .campo-documentacion small,
@@ -3438,18 +3450,18 @@ body {
 #panelDocumentacionAcademica .campo-documentacion input[readonly],
 .campo-documentacion select:disabled,
 .campo-documentacion input[readonly] {
-  background: #ece1dc;
-  color: #826a6e;
-  border-color: #cab8b0;
+  background: #f4eedc;
+  color: #7c6a64;
+  border-color: #d8c8c2;
 }
 
 #panelDocumentacionAcademica input[type="file"] {
-  background: #fffdfb;
-  color: #3c2529;
+  background: #fffdf8;
+  color: #3b241f;
 }
 
 #panelDocumentacionAcademica input[type="file"]::file-selector-button {
-  background: #8c4252;
+  background: #6b352a;
   color: #ffffff;
 }
 
@@ -3466,16 +3478,16 @@ body {
 .tabla-informes-docente-contenedor,
 #panelDocumentacionAcademica .tabla-documentos-contenedor,
 .tabla-docente-mesas-contenedor {
-  background: #fffdfb;
-  border-color: #d5b7aa;
-  box-shadow: 0 10px 22px rgba(90, 31, 47, 0.1);
+  background: #fffdf8;
+  border-color: #d9bfb5;
+  box-shadow: 0 10px 22px rgba(107, 53, 42, 0.1);
 }
 
 .tabla-documentos,
 .tabla-informes-docente,
 #panelDocumentacionAcademica .tabla-documentos,
 .tabla-docente-mesas {
-  background: #fffdfb;
+  background: #fffdf8;
 }
 
 .tabla-documentos th,
@@ -3485,9 +3497,9 @@ body {
 #mesas-examen-docente .tabla-usuarios thead th,
 #mesas-examen-docente .tabla-documentacion-alumno thead th,
 #mesas-examen-docente table thead th {
-  background: #ead0c2;
-  color: #512c34;
-  border-bottom-color: #cda799;
+  background: #fff1a6;
+  color: #4a241c;
+  border-bottom-color: #d6b88e;
 }
 
 .tabla-documentos td,
@@ -3497,15 +3509,15 @@ body {
 #mesas-examen-docente .tabla-usuarios tbody td,
 #mesas-examen-docente .tabla-documentacion-alumno tbody td,
 #mesas-examen-docente table tbody td {
-  color: #3c2529;
-  border-color: #ecddd5;
+  color: #3b241f;
+  border-color: #eee1db;
 }
 
 .tabla-documentos-vacia,
 .tabla-docente-mesas .tabla-vacia,
 .mensaje-docente-mesas,
 .encabezado-docente-mesas p {
-  color: #80676b;
+  color: #7a665f;
 }
 
 /* =========================
@@ -3516,45 +3528,45 @@ body {
 .vista-horario-taller-docente,
 .vista-horario-ef-docente {
   color: var(--bordo-texto);
-  border-top-color: rgba(160, 91, 99, 0.24);
+  border-top-color: rgba(107, 53, 42, 0.24);
 }
 
 .vista-horario-aula-docente h4,
 .vista-horario-taller-docente h4,
 .vista-horario-ef-docente h4 {
-  color: #512c34;
+  color: #4a241c;
 }
 
 .dia-horario-docente,
 .dia-horario-aula-docente {
-  background: #f0ddd2;
-  border-color: rgba(183, 123, 119, 0.55);
+  background: #fff1a6;
+  border-color: rgba(185, 135, 120, 0.55);
 }
 
 .dia-horario-docente h4,
 .dia-horario-aula-docente h4 {
-  color: #512c34;
-  border-bottom-color: rgba(90, 31, 47, 0.4);
+  color: #4a241c;
+  border-bottom-color: rgba(107, 53, 42, 0.4);
 }
 
 .tarjeta-bloque-horario-docente {
-  background: #fffdfb;
-  color: #3c2529;
-  border-color: #dec8bd;
+  background: #fffdf8;
+  color: #3b241f;
+  border-color: #e2ccc3;
 }
 
 .bloque-horario-hora-docente {
-  color: #9a4352;
+  color: #8a4a3c;
 }
 
 .bloque-horario-materia-docente {
-  color: #3c2529;
+  color: #3b241f;
 }
 
 .bloque-horario-curso-docente,
 .bloque-horario-ubicacion-docente,
 .bloque-horario-turno-docente {
-  color: #7b5e64;
+  color: #715a53;
 }
 
 /* =========================
@@ -3563,31 +3575,31 @@ body {
 
 .tarjeta-lista-estudiantes-docente h3,
 .encabezado-lista-estudiantes-docente h3 {
-  color: #8b3a4a;
+  color: #8a4a3c;
 }
 
 .encabezado-lista-estudiantes-docente {
-  border-bottom-color: rgba(90, 31, 47, 0.46);
+  border-bottom-color: rgba(107, 53, 42, 0.46);
 }
 
 .encabezado-lista-estudiantes-docente span,
 .dato-preceptora-lista strong {
-  color: #7a5a60;
+  color: #715a53;
 }
 
 .dato-preceptora-lista span {
-  color: #3c2529;
+  color: #3b241f;
 }
 
 .tarjeta-lista-estudiantes-docente li {
-  background: rgba(90, 31, 47, 0.07);
-  color: #3c2529;
+  background: rgba(107, 53, 42, 0.07);
+  color: #3b241f;
 }
 
 .btn-copiar-lista-estudiantes {
-  border-color: rgba(155, 67, 84, 0.72);
-  background: rgba(90, 31, 47, 0.08);
-  color: #8b3a4a;
+  border-color: rgba(138, 74, 60, 0.72);
+  background: rgba(107, 53, 42, 0.08);
+  color: #8a4a3c;
 }
 
 .btn-copiar-lista-estudiantes:hover {
@@ -3602,12 +3614,12 @@ body {
 
 #panelDocumentacionAcademica #mensajeDocumentacionAcademica.ok,
 #panelDocumentacionAcademica #mensajeDocumentacionAcademica {
-  color: #893849;
+  color: #6b352a;
 }
 
 #panelDocumentacionAcademica .documentos-cargados-docente {
-  background: #f1ddd2;
-  border-color: rgba(183, 123, 119, 0.55);
+  background: #fff1a6;
+  border-color: rgba(185, 135, 120, 0.55);
 }
 
 /* =========================
@@ -3618,21 +3630,21 @@ body {
 #parte-sira-docente .sira-gestion-encabezado,
 #situacion-asistencia-docente .sira-gestion-encabezado {
   background:
-    linear-gradient(135deg, rgba(90, 31, 47, 0.1), rgba(139, 58, 74, 0.08)),
-    #f2e1d9;
-  border-color: rgba(155, 67, 84, 0.42);
+    linear-gradient(135deg, rgba(107, 53, 42, 0.1), rgba(139, 58, 74, 0.08)),
+    #fff7cc;
+  border-color: rgba(138, 74, 60, 0.42);
 }
 
 .sira-clase-seleccionada h3,
 #parte-sira-docente .sira-gestion-encabezado h3,
 #situacion-asistencia-docente .sira-gestion-encabezado h3 {
-  color: #7a2e3f;
+  color: #6b352a;
 }
 
 .sira-clase-seleccionada p,
 #parte-sira-docente .sira-gestion-encabezado p,
 #situacion-asistencia-docente .sira-gestion-encabezado p {
-  color: #74575d;
+  color: #725a54;
 }
 
 .sira-modo-lluvia {
@@ -3646,29 +3658,29 @@ body {
 }
 
 .sira-estudiante {
-  border-color: rgba(183, 123, 119, 0.48);
+  border-color: rgba(185, 135, 120, 0.48);
   border-left-color: var(--bordo-acento);
-  background: #fffdfb;
+  background: #fffdf8;
 }
 
 .sira-estudiante-nombre strong {
-  color: #3c2529;
+  color: #3b241f;
 }
 
 .sira-estudiante-nombre small {
-  background: #edd7cc;
-  color: #6a2b3a;
+  background: #fff1a6;
+  color: #4a241c;
 }
 
 .sira-estudiante-controles select {
-  background: #f6e9e2 !important;
-  color: #512c34 !important;
+  background: #fffbe0 !important;
+  color: #4a241c !important;
 }
 
 .sira-estudiante-controles input {
-  border-color: #d9b8aa;
-  background: #fffdfb;
-  color: #3c2529;
+  border-color: #d9bfb5;
+  background: #fffdf8;
+  color: #3b241f;
 }
 
 .sira-estudiante-controles input:focus {
@@ -3680,29 +3692,29 @@ body {
 ========================= */
 
 #parte-sira-docente .sira-gestion-dia {
-  background: #f0ddd2;
-  border-color: rgba(183, 123, 119, 0.5);
+  background: #fff1a6;
+  border-color: rgba(185, 135, 120, 0.5);
 }
 
 #parte-sira-docente .sira-gestion-dia > h4 {
-  background: #6e2c3b;
+  background: #6b352a;
   color: #ffffff;
-  border-bottom-color: rgba(244, 216, 193, 0.32);
+  border-bottom-color: rgba(255, 241, 166, 0.32);
 }
 
 #parte-sira-docente .sira-gestion-dia > h4 span {
-  color: #f2dfd7;
+  color: #fff7cc;
 }
 
 #parte-sira-docente .sira-gestion-bloque {
-  background: #fffdfb;
-  color: #3c2529;
-  border-color: #dfc9bf;
+  background: #fffdf8;
+  color: #3b241f;
+  border-color: #e2ccc3;
 }
 
 #parte-sira-docente .sira-gestion-bloque header {
-  background: #ead0c2;
-  border-bottom-color: #dec1b5;
+  background: #fff1a6;
+  border-bottom-color: #d9bfb5;
 }
 
 #parte-sira-docente .sira-gestion-bloque header h4,
@@ -3710,35 +3722,35 @@ body {
 #parte-sira-docente .sira-gestion-estado h5,
 #parte-sira-docente .sira-gestion-estado li,
 #parte-sira-docente .sira-gestion-estado li strong {
-  color: #3c2529;
+  color: #3b241f;
 }
 
 #parte-sira-docente .sira-gestion-bloque header p {
-  color: #7b5d61;
+  color: #715a53;
 }
 
 #parte-sira-docente .sira-gestion-estado,
 #parte-sira-docente .sira-gestion-estado li,
 #parte-sira-docente .sira-gestion-sin-datos {
-  background: #fffdfb;
-  border-color: #ecddd5;
+  background: #fffdf8;
+  border-color: #eee1db;
 }
 
 #parte-sira-docente .sira-gestion-estado li small,
 #parte-sira-docente .sira-gestion-sin-datos {
-  color: #80676b;
+  color: #7a665f;
 }
 
 #parte-sira-docente .sira-gestion-dia-vacio {
-  border-color: rgba(160, 91, 99, 0.36);
-  color: #7b5e64;
-  background: rgba(255, 250, 242, 0.68);
+  border-color: rgba(107, 53, 42, 0.36);
+  color: #715a53;
+  background: rgba(255, 252, 240, 0.68);
 }
 
 #parte-sira-docente .mensaje-gestion {
-  border-color: rgba(155, 67, 84, 0.34);
-  color: #6a2b3a;
-  background: rgba(90, 31, 47, 0.08);
+  border-color: rgba(138, 74, 60, 0.34);
+  color: #4a241c;
+  background: rgba(107, 53, 42, 0.08);
 }
 
 /* Los colores de presente, ausente y tarde se conservan
@@ -3749,25 +3761,25 @@ body {
 ========================= */
 
 .encabezado-agenda-docente {
-  background: rgba(90, 31, 47, 0.08);
-  border: 1px solid rgba(183, 123, 119, 0.42);
+  background: rgba(107, 53, 42, 0.08);
+  border: 1px solid rgba(185, 135, 120, 0.42);
 }
 
 .titulo-agenda-docente,
 .cantidad-agenda-docente {
-  color: #512c34;
+  color: #4a241c;
 }
 
 .enlace-correo-agenda-docente {
-  background: #ead0c2;
-  border-color: #c9a18a;
-  color: #5a1f2f;
+  background: #fff1a6;
+  border-color: #d6b88e;
+  color: #6b352a;
 }
 
 .enlace-correo-agenda-docente:hover {
-  background: #d4ae9f;
-  border-color: #b67d61;
-  color: #3c2529;
+  background: #f0d987;
+  border-color: #b98778;
+  color: #3b241f;
 }
 
 /* =========================
@@ -3776,23 +3788,23 @@ body {
 
 #mesas-examen-docente .panel-docente-mesas {
   background: rgba(255, 253, 248, 0.97);
-  border-color: rgba(90, 31, 47, 0.4);
-  box-shadow: 0 12px 28px rgba(90, 31, 47, 0.12);
+  border-color: rgba(107, 53, 42, 0.4);
+  box-shadow: 0 12px 28px rgba(107, 53, 42, 0.12);
 }
 
 .encabezado-docente-mesas h3,
 .campo-docente-mesas label,
 .tabla-docente-mesas th,
 .tabla-docente-mesas td strong {
-  color: #512c34;
+  color: #4a241c;
 }
 
 .btn-docente-mesas {
-  background: #783144;
+  background: #6b352a;
 }
 
 .btn-docente-mesas:hover {
-  background: #5a1f2f;
+  background: #6b352a;
 }
 
 /* =========================
@@ -3800,25 +3812,25 @@ body {
 ========================= */
 
 #situacion-asistencia-docente .tarjeta-resumen-asistencia {
-  background: #fffaf5;
-  border-color: rgba(183, 123, 119, 0.48);
+  background: #fffcf0;
+  border-color: rgba(185, 135, 120, 0.48);
 }
 
 #situacion-asistencia-docente .tarjeta-resumen-asistencia span,
 #situacion-asistencia-docente .criterio-asistencia {
-  color: #74575d;
+  color: #725a54;
 }
 
 #situacion-asistencia-docente .tarjeta-resumen-asistencia strong {
-  color: #3c2529;
+  color: #3b241f;
 }
 
 #situacion-asistencia-docente .tabla-situacion-asistencia {
-  background: #fffdfb;
+  background: #fffdf8;
 }
 
 #situacion-asistencia-docente .tabla-situacion-asistencia thead {
-  background: #783144;
+  background: #6b352a;
 }
 
 #situacion-asistencia-docente .tabla-situacion-asistencia th {
@@ -3826,22 +3838,22 @@ body {
 }
 
 #situacion-asistencia-docente .tabla-situacion-asistencia td {
-  color: #3c2529;
-  border-bottom-color: #ecddd5;
+  color: #3b241f;
+  border-bottom-color: #eee1db;
 }
 
 #situacion-asistencia-docente .tabla-situacion-asistencia td strong {
-  color: #3c2529;
+  color: #3b241f;
 }
 
 #situacion-asistencia-docente .tabla-situacion-asistencia tbody tr:hover {
-  background: rgba(90, 31, 47, 0.08);
+  background: rgba(107, 53, 42, 0.08);
 }
 
 #situacion-asistencia-docente .mensaje-gestion {
-  color: #74575d;
-  background: rgba(90, 31, 47, 0.07);
-  border: 1px solid rgba(183, 123, 119, 0.32);
+  color: #725a54;
+  background: rgba(107, 53, 42, 0.07);
+  border: 1px solid rgba(185, 135, 120, 0.32);
 }
 
 /* =====================================================
@@ -3891,7 +3903,7 @@ body {
 /* Mensaje de días sin bloques horarios */
 .dia-horario-docente > .mensaje-formulario,
 .dia-horario-aula-docente > .mensaje-formulario {
-  color: #68172d !important;
+  color: #6b352a !important;
   font-weight: 700;
   opacity: 1;
   text-shadow: none;
