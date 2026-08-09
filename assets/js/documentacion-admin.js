@@ -86,6 +86,7 @@ function obtenerEtiquetaTipoDocumento(tipoDocumento) {
     PLAN_ANUAL: "Plan Anual",
     PROGRAMA_EXAMEN: "Programa de Examen",
     MATERIAL_ESTUDIO: "Material de Estudio",
+    INFORME_PEDAGOGICO: "Informe Pedagógico",
   };
 
   return etiquetas[tipoDocumento] || "Sin tipo";
@@ -98,7 +99,26 @@ function formatearFechaCarga(fechaTexto) {
     return "Sin fecha";
   }
 
-  return fecha.replace(" ", " · ");
+  const coincidencia = fecha.match(
+    /^(\d{4})-(\d{2})-(\d{2})(?:[T ](\d{2}):(\d{2})(?::(\d{2}))?)?/,
+  );
+
+  if (!coincidencia) {
+    return fecha.replace(" ", " · ");
+  }
+
+  const [, anio, mes, dia, hora, minuto, segundo] = coincidencia;
+  const fechaFormateada = `${dia}-${mes}-${anio}`;
+
+  if (!hora || !minuto) {
+    return fechaFormateada;
+  }
+
+  const horaFormateada = segundo
+    ? `${hora}:${minuto}:${segundo}`
+    : `${hora}:${minuto}`;
+
+  return `${fechaFormateada} · ${horaFormateada}`;
 }
 
 function cargarOpcionesFiltroCurso(documentos) {
@@ -220,13 +240,29 @@ function mostrarDocumentosEnTabla(documentos) {
     .map((documento) => {
       const idDocumento = escaparHtml(documento.id);
       const driveUrl = escaparHtml(documento.driveUrl);
+      const origenDocumento = escaparHtml(
+        documento.origen || "DOCUMENTACION_ACADEMICA",
+      );
+      const estadoInforme = String(documento.estadoInforme || "")
+        .trim()
+        .toUpperCase();
+      const esInformePedagogico =
+        String(documento.tipoDocumento || "").trim() === "INFORME_PEDAGOGICO";
+
+      const etiquetaTipo = obtenerEtiquetaTipoDocumento(
+        documento.tipoDocumento,
+      );
+
+      const tipoVisible = esInformePedagogico
+        ? `${escaparHtml(etiquetaTipo)}<br><small>${
+            estadoInforme === "ARCHIVADO_BAJA_ALUMNO" ? "ARCHIVADO" : "ACTIVO"
+          }</small>`
+        : escaparHtml(etiquetaTipo);
 
       return `
         <tr>
           <td>${escaparHtml(documento.curso)}</td>
-          <td>${escaparHtml(
-            obtenerEtiquetaTipoDocumento(documento.tipoDocumento),
-          )}</td>
+          <td>${tipoVisible}</td>
           <td>${escaparHtml(documento.espacioCurricular)}</td>
           <td>${escaparHtml(formatearFechaCarga(documento.fechaCarga))}</td>
           <td>
@@ -245,6 +281,8 @@ function mostrarDocumentosEnTabla(documentos) {
                 class="btn-documento-admin btn-eliminar-documento-admin"
                 type="button"
                 data-id-documento="${idDocumento}"
+                data-origen-documento="${origenDocumento}"
+                data-estado-informe="${escaparHtml(estadoInforme)}"
               >
                 <i class="fa-solid fa-trash-can"></i>
                 Eliminar
@@ -282,9 +320,8 @@ async function cargarDocumentosAdministracion() {
     const idToken = await usuario.getIdToken(true);
 
     const resultado = await enviarAlBackend({
-      accion: "obtener_documentos_admin",
+      accion: "obtener_documentos_soporte",
       idToken,
-      rolActivo: "SOPORTE",
     });
 
     if (!resultado.ok) {
@@ -318,20 +355,54 @@ async function cargarDocumentosAdministracion() {
   }
 }
 
-async function eliminarDocumentoAcademico(idDocumento) {
+async function eliminarDocumentoAcademico(documento) {
   const usuario = auth.currentUser;
 
   if (!usuario) {
     throw new Error("No se detectó una sesión activa. Volvé a iniciar sesión.");
   }
 
+  const idDocumento = String(documento?.id || "").trim();
+  const origenDocumento = String(documento?.origen || "DOCUMENTACION_ACADEMICA")
+    .trim()
+    .toUpperCase();
+
+  const esInformePedagogico = origenDocumento === "INFORME_PEDAGOGICO";
+
+  const estadoInforme = String(documento?.estadoInforme || "")
+    .trim()
+    .toUpperCase();
+
+  const esArchivado = estadoInforme === "ARCHIVADO_BAJA_ALUMNO";
+
+  const detalle = esInformePedagogico
+    ? String(documento?.espacioCurricular || "Informe Pedagógico").trim()
+    : String(documento?.espacioCurricular || "Documento académico").trim();
+
   const confirmacion = await Swal.fire({
-    title: "¿Eliminar documento?",
-    html: `
-      <p>El PDF será enviado a la papelera de Drive.</p>
-      <p>También se eliminará su registro de Firestore.</p>
-      <p><strong>Esta acción no se puede deshacer desde el portal.</strong></p>
-    `,
+    title: esInformePedagogico
+      ? "¿Eliminar Informe Pedagógico?"
+      : "¿Eliminar documento?",
+    html: esInformePedagogico
+      ? `
+        <p>
+          Se eliminará definitivamente el Informe Pedagógico de
+          <strong>${escaparHtml(detalle)}</strong>.
+        </p>
+        ${
+          esArchivado
+            ? `<p><strong>Este informe está ARCHIVADO como antecedente institucional.</strong></p>`
+            : ""
+        }
+        <p>El archivo de Google Drive será enviado a la papelera.</p>
+        <p>También se eliminará su registro de Firestore.</p>
+        <p><strong>Esta acción no se puede deshacer desde el portal.</strong></p>
+      `
+      : `
+        <p>El PDF será enviado a la papelera de Drive.</p>
+        <p>También se eliminará su registro de Firestore.</p>
+        <p><strong>Esta acción no se puede deshacer desde el portal.</strong></p>
+      `,
     icon: "warning",
     showCancelButton: true,
     confirmButtonText: "Sí, eliminar",
@@ -345,19 +416,34 @@ async function eliminarDocumentoAcademico(idDocumento) {
 
   const idToken = await usuario.getIdToken(true);
 
+  const accion = esInformePedagogico
+    ? "eliminar_informe_pedagogico_admin"
+    : "eliminar_documento_admin";
+
   const resultado = await enviarAlBackend({
-    accion: "eliminar_documento_admin",
+    accion,
     idToken,
     idDocumento,
   });
 
   if (!resultado.ok) {
-    throw new Error(resultado.mensaje || "No se pudo eliminar el documento.");
+    throw new Error(
+      resultado.mensaje ||
+        (esInformePedagogico
+          ? "No se pudo eliminar el Informe Pedagógico."
+          : "No se pudo eliminar el documento."),
+    );
   }
 
   await Swal.fire({
-    title: "Documento eliminado",
-    text: resultado.mensaje || "El documento fue eliminado correctamente.",
+    title: esInformePedagogico
+      ? "Informe Pedagógico eliminado"
+      : "Documento eliminado",
+    text:
+      resultado.mensaje ||
+      (esInformePedagogico
+        ? "El Informe Pedagógico fue eliminado correctamente."
+        : "El documento fue eliminado correctamente."),
     icon: "success",
     confirmButtonText: "Aceptar",
   });
@@ -393,6 +479,11 @@ if (cuerpoTablaDocumentacionAdmin) {
     if (!botonEliminar) return;
 
     const idDocumento = String(botonEliminar.dataset.idDocumento || "").trim();
+    const origenDocumento = String(
+      botonEliminar.dataset.origenDocumento || "DOCUMENTACION_ACADEMICA",
+    )
+      .trim()
+      .toUpperCase();
 
     if (!idDocumento) {
       mostrarMensajeDocumentacionAdmin(
@@ -405,7 +496,22 @@ if (cuerpoTablaDocumentacionAdmin) {
     botonEliminar.disabled = true;
 
     try {
-      await eliminarDocumentoAcademico(idDocumento);
+      const documento = documentosAdministracion.find((item) => {
+        return (
+          String(item.id || "").trim() === idDocumento &&
+          String(item.origen || "DOCUMENTACION_ACADEMICA")
+            .trim()
+            .toUpperCase() === origenDocumento
+        );
+      });
+
+      if (!documento) {
+        throw new Error(
+          "No se encontró el documento seleccionado en el listado actual.",
+        );
+      }
+
+      await eliminarDocumentoAcademico(documento);
     } catch (error) {
       console.error("Error al eliminar documentación académica:", error);
 
