@@ -4615,8 +4615,6 @@ if (archivoImportacionCursosAlumnos) {
         return;
       }
 
-      console.log("Filas de cursos de alumnos:", filas);
-
       const validacionCursos = validarFilasImportacionCursosAlumnos(filas);
 
       if (!validacionCursos.correcto) {
@@ -5025,7 +5023,6 @@ archivoImportacionUsuarios.addEventListener("change", async () => {
       return;
     }
 
-    console.log("Filas importadas desde Excel:", filas);
     const validacion = validarFilasImportacionUsuarios(filas);
 
     if (!validacion.correcto) {
@@ -5072,11 +5069,6 @@ archivoImportacionUsuarios.addEventListener("change", async () => {
 
       return;
     }
-
-    console.log(
-      "Usuarios validados correctamente:",
-      validacion.usuariosValidos,
-    );
 
     const confirmacionImportacion = await Swal.fire({
       title: "Usuarios listos para importar",

@@ -1405,50 +1405,6 @@ async function enviarAlBackendInformesGestion(datos) {
   return respuesta.json();
 }
 
-async function probarSesionInformesGestion() {
-  const usuario = auth.currentUser;
-
-  if (!usuario) {
-    console.warn("No hay sesión activa para probar informes.");
-    return;
-  }
-
-  try {
-    const idToken = await usuario.getIdToken(true);
-
-    const resultado = await enviarAlBackendInformesGestion({
-      accion: "probar_sesion",
-      idToken,
-    });
-
-    console.log("Prueba backend Informes:", resultado);
-  } catch (error) {
-    console.error("Error probando backend Informes:", error);
-  }
-}
-
-async function probarOpcionesCreacionInformeGestion() {
-  const usuario = auth.currentUser;
-
-  if (!usuario) {
-    console.warn("No hay sesión activa para probar opciones de informes.");
-    return;
-  }
-
-  try {
-    const idToken = await usuario.getIdToken(true);
-
-    const resultado = await enviarAlBackendInformesGestion({
-      accion: "obtener_opciones_creacion_informe",
-      idToken,
-    });
-
-    console.log("Opciones creación informe:", resultado);
-  } catch (error) {
-    console.error("Error probando opciones de informes:", error);
-  }
-}
-
 function mostrarMensajeInformesGestion(texto, tipo = "") {
   if (!mensajeInformesGestion) return;
 
