@@ -241,40 +241,165 @@ async function obtenerUsuarioFirebaseActual() {
   });
 }
 
+function crearIdSolicitudBajaGlobal() {
+  if (window.crypto && typeof window.crypto.randomUUID === "function") {
+    return window.crypto.randomUUID();
+  }
+
+  return [
+    Date.now().toString(36),
+    Math.random().toString(36).slice(2),
+    Math.random().toString(36).slice(2),
+  ].join("-");
+}
+
+function decodificarBase64Utf8BajaGlobal(valorBase64) {
+  const binario = window.atob(String(valorBase64 || ""));
+
+  const bytes = Uint8Array.from(binario, (caracter) => caracter.charCodeAt(0));
+
+  return new TextDecoder("utf-8").decode(bytes);
+}
+
 async function llamarBackendBajaGlobal(datos) {
-  const respuesta = await fetch(BAJA_GLOBAL_BACKEND_URL, {
-    method: "POST",
-    headers: {
-      "Content-Type": "text/plain;charset=utf-8",
-    },
-    body: JSON.stringify(datos),
+  /*
+   * No usamos fetch() directamente contra Apps Script.
+   *
+   * ContentService redirige la respuesta a googleusercontent.com
+   * y un navegador servido desde GitHub Pages puede bloquear la
+   * lectura de esa respuesta por política de origen.
+   *
+   * Se envía un POST de formulario a un iframe oculto y el
+   * backend responde con HtmlService + postMessage().
+   *
+   * El Firebase ID Token sigue viajando en el CUERPO del POST;
+   * no se coloca en la URL.
+   */
+  const requestId = crearIdSolicitudBajaGlobal();
+
+  const nombreIframe = `baja-global-${requestId.replace(/[^a-zA-Z0-9_-]/g, "")}`;
+
+  const iframe = document.createElement("iframe");
+
+  iframe.name = nombreIframe;
+  iframe.hidden = true;
+  iframe.setAttribute("aria-hidden", "true");
+  iframe.style.display = "none";
+
+  const formulario = document.createElement("form");
+
+  formulario.method = "POST";
+  formulario.action = BAJA_GLOBAL_BACKEND_URL;
+  formulario.target = nombreIframe;
+  formulario.style.display = "none";
+
+  const campos = {
+    transport: "iframe",
+    requestId,
+    targetOrigin: window.location.origin,
+    payload: JSON.stringify(datos),
+  };
+
+  Object.entries(campos).forEach(([nombre, valor]) => {
+    const input = document.createElement("input");
+
+    input.type = "hidden";
+    input.name = nombre;
+    input.value = String(valor ?? "");
+
+    formulario.appendChild(input);
   });
 
-  if (!respuesta.ok) {
-    throw new Error(
-      `No se pudo establecer comunicación con el backend de baja global (HTTP ${respuesta.status}).`,
-    );
-  }
+  document.body.appendChild(iframe);
+  document.body.appendChild(formulario);
 
-  let resultado;
+  return new Promise((resolve, reject) => {
+    let finalizada = false;
 
-  try {
-    resultado = await respuesta.json();
-  } catch (error) {
-    throw new Error(
-      "El backend de baja global devolvió una respuesta que no pudo interpretarse.",
-    );
-  }
+    const limpiar = () => {
+      if (finalizada) {
+        return;
+      }
 
-  if (!resultado || resultado.ok !== true) {
-    throw new Error(
-      String(
-        resultado?.mensaje || "El backend rechazó la operación de baja global.",
-      ),
-    );
-  }
+      finalizada = true;
 
-  return resultado;
+      window.removeEventListener("message", recibirMensaje);
+
+      window.clearTimeout(temporizador);
+
+      formulario.remove();
+
+      /*
+       * Se demora apenas la eliminación del iframe para permitir
+       * que termine por completo el envío del postMessage().
+       */
+      window.setTimeout(() => {
+        iframe.remove();
+      }, 0);
+    };
+
+    const recibirMensaje = (event) => {
+      const mensaje = event?.data;
+
+      if (
+        !mensaje ||
+        mensaje.canal !== "EETP495_BAJA_GLOBAL" ||
+        mensaje.requestId !== requestId
+      ) {
+        return;
+      }
+
+      try {
+        const json = decodificarBase64Utf8BajaGlobal(mensaje.payloadBase64);
+
+        const resultado = JSON.parse(json);
+
+        limpiar();
+
+        if (!resultado || resultado.ok !== true) {
+          reject(
+            new Error(
+              String(
+                resultado?.mensaje ||
+                  "El backend rechazó la operación de baja global.",
+              ),
+            ),
+          );
+
+          return;
+        }
+
+        resolve(resultado);
+      } catch (error) {
+        limpiar();
+
+        reject(
+          new Error(
+            error?.message ||
+              "No se pudo interpretar la respuesta del backend de baja global.",
+          ),
+        );
+      }
+    };
+
+    const temporizador = window.setTimeout(() => {
+      limpiar();
+
+      reject(
+        new Error(
+          "El backend de baja global no respondió dentro del tiempo esperado.",
+        ),
+      );
+    }, 120000);
+
+    window.addEventListener("message", recibirMensaje);
+
+    /*
+     * El submit de formulario entre orígenes está permitido por
+     * el navegador; no depende de CORS como fetch().
+     */
+    formulario.submit();
+  });
 }
 
 function obtenerCorreoUsuario(usuario) {
