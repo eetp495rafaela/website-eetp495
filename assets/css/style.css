@@ -405,8 +405,7 @@ footer {
   max-width: 1400px;
   margin: auto;
   display: grid;
-  grid-template-columns: 600px 1fr;
-  gap: 60px;
+  grid-template-columns: 1fr;
   align-items: center;
 }
 .historia-imagen img {
@@ -475,8 +474,7 @@ html {
 /* ---------- Introducción ---------- */
 .oferta-intro {
   display: grid;
-  grid-template-columns: 1.2fr 0.8fr;
-  gap: 60px;
+  grid-template-columns: 1fr;
   align-items: center;
   margin-bottom: 80px;
 }
