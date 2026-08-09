@@ -2675,3 +2675,33 @@ body.sin-scroll {
     padding: 16px 18px;
   }
 }
+
+/* =====================================================
+   PLAN DE ESTUDIOS — DESPLIEGUE EN ESCRITORIO
+===================================================== */
+
+@media (min-width: 993px) and (hover: hover) and (pointer: fine) {
+  .plan-grid {
+    align-items: start;
+  }
+
+  .anio > ul {
+    max-height: 0;
+    overflow: hidden;
+    opacity: 0;
+    margin: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+
+    transition:
+      max-height 0.45s ease,
+      opacity 0.25s ease,
+      padding 0.35s ease;
+  }
+
+  .anio:hover > ul {
+    max-height: 1500px;
+    opacity: 1;
+    padding: 25px 28px;
+  }
+}
