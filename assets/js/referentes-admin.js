@@ -865,13 +865,7 @@ function crearCeldaCursosReferenteAgrupado(grupo) {
     }),
   );
 
-  cursos.forEach((curso) => {
-    const lineaCurso = document.createElement("div");
-
-    lineaCurso.textContent = curso;
-
-    celda.appendChild(lineaCurso);
-  });
+  celda.textContent = cursos.join(" · ");
 
   return celda;
 }
