@@ -32,6 +32,9 @@ const firebaseConfig = {
   appId: "1:658183549494:web:84fe7da91b1ea8990f1e97",
 };
 
+const INFORMES_BACKEND_URL =
+  "https://script.google.com/macros/s/AKfycbwiPaqdCFtfChD_b0xUDOF4zqhbOs_WJ45aVBHW9kn6hnbRTGEp93A4mp2W0r0v7pXt4w/exec";
+
 const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
@@ -320,6 +323,77 @@ function normalizarCorreo(correo) {
   return String(correo || "")
     .trim()
     .toLowerCase();
+}
+
+async function enviarAlBackendInformesAdmin(datos) {
+  const respuesta = await fetch(INFORMES_BACKEND_URL, {
+    method: "POST",
+    headers: {
+      "Content-Type": "text/plain;charset=utf-8",
+    },
+    body: JSON.stringify(datos),
+  });
+
+  if (!respuesta.ok) {
+    throw new Error(
+      "No se pudo establecer comunicación con el backend de Informes Pedagógicos.",
+    );
+  }
+
+  return respuesta.json();
+}
+
+async function sincronizarPermisosInformesUsuarioAdmin(correoObjetivo) {
+  const correo = normalizarCorreo(correoObjetivo);
+  const usuario = auth.currentUser;
+
+  if (!correo) {
+    throw new Error("No se recibió el usuario a sincronizar.");
+  }
+
+  if (!usuario) {
+    throw new Error("No hay una sesión activa para sincronizar permisos.");
+  }
+
+  let ultimoError = null;
+
+  // La operación es idempotente. Se reintenta una vez ante un fallo transitorio.
+  for (let intento = 1; intento <= 2; intento += 1) {
+    try {
+      const idToken = await usuario.getIdToken(true);
+
+      const resultado = await enviarAlBackendInformesAdmin({
+        accion: "sincronizar_permisos_usuario",
+        idToken,
+        correoObjetivo: correo,
+      });
+
+      if (!resultado?.ok) {
+        const detalleErrores = Array.isArray(resultado?.errores)
+          ? resultado.errores
+              .map((item) => String(item?.mensaje || "").trim())
+              .filter(Boolean)
+              .join(" | ")
+          : "";
+
+        throw new Error(
+          detalleErrores ||
+            resultado?.mensaje ||
+            "La sincronización de permisos quedó incompleta.",
+        );
+      }
+
+      return resultado;
+    } catch (error) {
+      ultimoError = error;
+
+      if (intento < 2) {
+        await new Promise((resolve) => setTimeout(resolve, 500));
+      }
+    }
+  }
+
+  throw ultimoError || new Error("No se pudieron sincronizar los permisos.");
 }
 
 function actualizarSelectorRolesAdicionales() {
@@ -3734,6 +3808,8 @@ async function cambiarEstadoUsuario(usuario) {
 
   if (!resultado.isConfirmed) return;
 
+  let estadoActualizado = false;
+
   try {
     await updateDoc(doc(db, "usuarios", correo), {
       estado: nuevoEstado,
@@ -3741,19 +3817,47 @@ async function cambiarEstadoUsuario(usuario) {
       actualizadoPor: correoActual,
     });
 
+    estadoActualizado = true;
+
     mostrarMensajeUsuarios(
-      `Cuenta ${accion === "activar" ? "activada" : "desactivada"} correctamente.`,
+      `Cuenta ${accion === "activar" ? "activada" : "desactivada"}. Sincronizando permisos...`,
+    );
+
+    await sincronizarPermisosInformesUsuarioAdmin(correo);
+
+    mostrarMensajeUsuarios(
+      `Cuenta ${accion === "activar" ? "activada" : "desactivada"} correctamente. Permisos de Informes Pedagógicos sincronizados.`,
       "ok",
     );
 
     await cargarUsuarios();
   } catch (error) {
-    console.error("Error al cambiar estado:", error);
+    console.error("Error al cambiar estado o sincronizar permisos:", error);
 
-    mostrarMensajeUsuarios(
-      "No se pudo actualizar el estado del usuario.",
-      "error",
-    );
+    if (estadoActualizado) {
+      mostrarMensajeUsuarios(
+        "El estado de la cuenta se actualizó, pero la sincronización de permisos de Informes Pedagógicos quedó incompleta.",
+        "error",
+      );
+
+      await cargarUsuarios();
+
+      await Swal.fire({
+        title: "Permisos sin sincronizar",
+        html: `
+          <p>El estado de <strong>${escaparHtml(usuario.nombreCompleto || correo)}</strong> fue actualizado.</p>
+          <p>Pero no se pudo completar la sincronización de permisos de Informes Pedagógicos.</p>
+          <p><strong>No consideres finalizada la operación hasta corregir este punto.</strong></p>
+        `,
+        icon: "error",
+        confirmButtonText: "Aceptar",
+      });
+    } else {
+      mostrarMensajeUsuarios(
+        "No se pudo actualizar el estado del usuario.",
+        "error",
+      );
+    }
   }
 }
 
@@ -3855,6 +3959,15 @@ async function guardarEdicionUsuario(event) {
       ? ["ALUMNO"]
       : Array.from(new Set([rol, ...rolesAdicionales]));
 
+  const rolesActuales = obtenerRolesUsuarioAdmin(usuarioEnEdicion);
+
+  const rolesActualesOrdenados = [...rolesActuales].sort();
+  const rolesNuevosOrdenados = [...rolesSeleccionados].sort();
+
+  const cambiaronRoles =
+    JSON.stringify(rolesActualesOrdenados) !==
+    JSON.stringify(rolesNuevosOrdenados);
+
   const tipoVinculo = editarTipoVinculo.value.trim();
   const situacionesRevistaValidas = [
     "TITULAR",
@@ -3871,6 +3984,7 @@ async function guardarEdicionUsuario(event) {
     );
     return;
   }
+
   const fechaFinAcceso = editarFechaFinAcceso.value.trim();
   const dni = String(editarDni.value || "")
     .replace(/\D/g, "")
@@ -3880,6 +3994,7 @@ async function guardarEdicionUsuario(event) {
     mostrarMensajeEdicion("Completá nombre y rol antes de guardar.", "error");
     return;
   }
+
   if (dni && (dni.length < 7 || dni.length > 8)) {
     mostrarMensajeEdicion(
       "El DNI debe tener entre 7 y 8 números, sin puntos.",
@@ -3934,14 +4049,7 @@ async function guardarEdicionUsuario(event) {
   }
 
   if (esMiCuenta) {
-    const rolesActuales = obtenerRolesUsuarioAdmin(usuarioEnEdicion);
-
-    const rolesActualesOrdenados = [...rolesActuales].sort();
-    const rolesNuevosOrdenados = [...rolesSeleccionados].sort();
-
-    const rolesSinCambios =
-      JSON.stringify(rolesActualesOrdenados) ===
-      JSON.stringify(rolesNuevosOrdenados);
+    const rolesSinCambios = !cambiaronRoles;
 
     if (rol !== "SOPORTE" || !rolesSinCambios) {
       mostrarMensajeEdicion(
@@ -3955,6 +4063,8 @@ async function guardarEdicionUsuario(event) {
   btnGuardarEdicion.disabled = true;
   mostrarMensajeEdicion("Guardando cambios...");
 
+  let usuarioActualizado = false;
+
   try {
     await updateDoc(doc(db, "usuarios", correo), {
       nombreCompleto,
@@ -3967,15 +4077,48 @@ async function guardarEdicionUsuario(event) {
       actualizadoPor: correoActual,
     });
 
+    usuarioActualizado = true;
+
+    if (cambiaronRoles) {
+      mostrarMensajeEdicion(
+        "Roles guardados. Sincronizando permisos de Informes Pedagógicos...",
+      );
+
+      await sincronizarPermisosInformesUsuarioAdmin(correo);
+    }
+
     cerrarModalEdicion();
 
-    mostrarMensajeUsuarios("Usuario actualizado correctamente.", "ok");
+    mostrarMensajeUsuarios(
+      cambiaronRoles
+        ? "Usuario actualizado correctamente. Permisos de Informes Pedagógicos sincronizados."
+        : "Usuario actualizado correctamente.",
+      "ok",
+    );
 
     await cargarUsuarios();
   } catch (error) {
-    console.error("Error al editar usuario:", error);
+    console.error("Error al editar usuario o sincronizar permisos:", error);
 
-    mostrarMensajeEdicion("No se pudieron guardar los cambios.", "error");
+    if (usuarioActualizado && cambiaronRoles) {
+      mostrarMensajeEdicion(
+        "Los roles se guardaron, pero la sincronización de permisos de Informes Pedagógicos quedó incompleta. Podés volver a presionar Guardar cambios para reintentar.",
+        "error",
+      );
+
+      await Swal.fire({
+        title: "Permisos sin sincronizar",
+        html: `
+          <p>Los cambios de roles de <strong>${escaparHtml(nombreCompleto || correo)}</strong> fueron guardados.</p>
+          <p>Pero no se pudo completar la sincronización de permisos de Informes Pedagógicos.</p>
+          <p>Volvé a presionar <strong>Guardar cambios</strong> para reintentar.</p>
+        `,
+        icon: "error",
+        confirmButtonText: "Aceptar",
+      });
+    } else {
+      mostrarMensajeEdicion("No se pudieron guardar los cambios.", "error");
+    }
   } finally {
     btnGuardarEdicion.disabled = false;
   }
