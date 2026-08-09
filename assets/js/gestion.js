@@ -1845,15 +1845,14 @@ function formatearFechaInformeGestion(fechaTexto) {
     return "-";
   }
 
-  const soloFecha = texto.split(" ")[0];
-  const partes = soloFecha.split("-");
+  const coincidencia = texto.match(/^(\d{4})-(\d{2})-(\d{2})/);
 
-  if (partes.length === 3) {
-    const [anio, mes, dia] = partes;
+  if (coincidencia) {
+    const [, anio, mes, dia] = coincidencia;
     return `${dia}-${mes}-${anio}`;
   }
 
-  return soloFecha;
+  return texto;
 }
 
 function renderizarTablaInformesGestion(informes) {
@@ -1878,10 +1877,12 @@ function renderizarTablaInformesGestion(informes) {
             <th>Fecha</th>
             <th>Estudiante</th>
             <th>Curso</th>
-            <th>Creado por</th>
+            <th>Estado</th>
+            <th>Creado/Editado por</th>
             <th>Docentes</th>
             <th>Actualizar docentes</th>
             <th>Ver</th>
+            <th>Editar</th>
             <th>Eliminar</th>
           </tr>
         </thead>
@@ -1894,6 +1895,34 @@ function renderizarTablaInformesGestion(informes) {
               const alumnoCorreo = String(informe.alumnoCorreo || "")
                 .trim()
                 .toLowerCase();
+
+              const estadoInforme = String(informe.estado || "ACTIVO")
+                .trim()
+                .toUpperCase();
+
+              const informeArchivado =
+                estadoInforme === "ARCHIVADO_BAJA_ALUMNO";
+
+              const autorOriginalBruto = String(
+                informe.creadoPorNombre || "",
+              ).trim();
+
+              const autorOriginal =
+                autorOriginalBruto.toUpperCase() === "USUARIO_ELIMINADO"
+                  ? "Autor original no registrado"
+                  : autorOriginalBruto || "Autor original no registrado";
+
+              const ultimoEditorBruto = String(
+                informe.ultimaEdicionPorNombre || autorOriginal,
+              ).trim();
+
+              const ultimoEditor =
+                ultimoEditorBruto.toUpperCase() === "USUARIO_ELIMINADO"
+                  ? autorOriginal
+                  : ultimoEditorBruto || autorOriginal;
+
+              const mostrarAutorOriginal =
+                autorOriginal && ultimoEditor && autorOriginal !== ultimoEditor;
 
               return `
                 <tr>
@@ -1921,9 +1950,20 @@ function renderizarTablaInformesGestion(informes) {
                   </td>
 
                   <td>
+                    ${informeArchivado ? "ARCHIVADO" : "ACTIVO"}
+                  </td>
+
+                  <td>
                     <strong>
-                      ${escaparHtmlGestion(informe.creadoPorNombre || "-")}
+                      ${escaparHtmlGestion(ultimoEditor)}
                     </strong>
+                    ${
+                      mostrarAutorOriginal
+                        ? `<small>Creado por: ${escaparHtmlGestion(
+                            autorOriginal,
+                          )}</small>`
+                        : ""
+                    }
                   </td>
 
                   <td>
@@ -1934,7 +1974,7 @@ function renderizarTablaInformesGestion(informes) {
 
                   <td>
                     ${
-                      alumnoCorreo
+                      alumnoCorreo && !informeArchivado
                         ? `
                           <button
                             class="
@@ -1959,36 +1999,63 @@ function renderizarTablaInformesGestion(informes) {
                     ${
                       idInforme
                         ? `
-      <button
-        class="
-          btn-informe-tabla-gestion
-          btn-ver-informe-gestion
-        "
-        type="button"
-        data-id-informe="${escaparHtmlGestion(idInforme)}"
-        title="Ver informe"
-        aria-label="Ver informe"
-      >
-        <i class="fa-solid fa-eye"></i>
-      </button>
-    `
+                          <button
+                            class="
+                              btn-informe-tabla-gestion
+                              btn-ver-informe-gestion
+                            "
+                            type="button"
+                            data-id-informe="${escaparHtmlGestion(idInforme)}"
+                            title="Ver informe en modo lectura"
+                            aria-label="Ver informe en modo lectura"
+                          >
+                            <i class="fa-solid fa-eye"></i>
+                          </button>
+                        `
                         : "-"
                     }
                   </td>
 
                   <td>
-                    <button
-                      class="
-                        btn-informe-tabla-gestion
-                        btn-eliminar-informe-gestion
-                      "
-                      type="button"
-                      title="Eliminar informe"
-                      aria-label="Eliminar informe"
-                      data-id-informe="${escaparHtmlGestion(informe.idInforme)}"
-                    >
-                      <i class="fa-solid fa-trash-can"></i>
-                    </button>
+                    ${
+                      idInforme && informe.puedeEditar
+                        ? `
+                          <button
+                            class="
+                              btn-informe-tabla-gestion
+                              btn-editar-informe-gestion
+                            "
+                            type="button"
+                            data-id-informe="${escaparHtmlGestion(idInforme)}"
+                            title="Editar informe en Google Docs"
+                            aria-label="Editar informe en Google Docs"
+                          >
+                            <i class="fa-solid fa-pen-to-square"></i>
+                          </button>
+                        `
+                        : "-"
+                    }
+                  </td>
+
+                  <td>
+                    ${
+                      informeArchivado
+                        ? "-"
+                        : `
+                          <button
+                            class="
+                              btn-informe-tabla-gestion
+                              btn-eliminar-informe-gestion
+                            "
+                            type="button"
+                            title="Eliminar informe"
+                            aria-label="Eliminar informe"
+                            data-id-informe="${escaparHtmlGestion(idInforme)}"
+                          >
+                            <i class="fa-solid fa-trash-can"></i>
+                          </button>
+                        `
+                    }
                   </td>
                 </tr>
               `;
@@ -2003,6 +2070,88 @@ function renderizarTablaInformesGestion(informes) {
     `${informes.length} informe(s) pedagógico(s) mostrado(s).`,
     "ok",
   );
+}
+
+async function editarInformePedagogicoGestion(idInforme, boton) {
+  const id = String(idInforme || "").trim();
+
+  if (!id) {
+    mostrarMensajeInformesGestion(
+      "No se recibió el identificador del informe a editar.",
+      "error",
+    );
+    return;
+  }
+
+  const usuario = auth.currentUser;
+
+  if (!usuario) {
+    mostrarMensajeInformesGestion(
+      "No se detectó una sesión activa. Volvé a iniciar sesión.",
+      "error",
+    );
+    return;
+  }
+
+  const contenidoOriginal = boton ? boton.innerHTML : "";
+  const ventanaEdicion = window.open("about:blank", "_blank");
+
+  if (!ventanaEdicion) {
+    mostrarMensajeInformesGestion(
+      "El navegador bloqueó la ventana de edición. Habilitá las ventanas emergentes para este sitio.",
+      "error",
+    );
+    return;
+  }
+
+  ventanaEdicion.opener = null;
+  ventanaEdicion.document.body.innerHTML = `
+    <p style="font-family: Arial, sans-serif; padding: 24px; text-align: center;">
+      Preparando edición del informe...
+    </p>
+  `;
+
+  try {
+    if (boton) {
+      boton.disabled = true;
+      boton.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i>`;
+    }
+
+    const idToken = await usuario.getIdToken(true);
+
+    const resultado = await enviarAlBackendInformesGestion({
+      accion: "obtener_enlace_edicion_informe",
+      idToken,
+      idInforme: id,
+    });
+
+    if (!resultado.ok || !resultado.urlEdicion) {
+      throw new Error(
+        resultado.mensaje || "No se pudo preparar el informe para edición.",
+      );
+    }
+
+    ventanaEdicion.location.href = resultado.urlEdicion;
+
+    mostrarMensajeInformesGestion(
+      "Informe abierto en Google Docs para edición.",
+      "ok",
+    );
+  } catch (error) {
+    ventanaEdicion.close();
+
+    console.error("Error al editar informe pedagógico:", error);
+
+    mostrarMensajeInformesGestion(
+      error.message || "No se pudo abrir el informe para edición.",
+      "error",
+    );
+  } finally {
+    if (boton) {
+      boton.disabled = false;
+      boton.innerHTML = contenidoOriginal;
+    }
+  }
 }
 
 async function listarInformesGestion() {
@@ -5362,6 +5511,20 @@ if (vistaInformesGestion) {
 
       return;
     }
+
+    const botonEditar = event.target.closest(".btn-editar-informe-gestion");
+
+    if (botonEditar) {
+      event.preventDefault();
+
+      editarInformePedagogicoGestion(
+        botonEditar.dataset.idInforme,
+        botonEditar,
+      );
+
+      return;
+    }
+
     const botonActualizar = event.target.closest(
       ".btn-actualizar-docentes-informe-gestion",
     );
