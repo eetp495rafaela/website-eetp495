@@ -814,11 +814,24 @@ async function mostrarPrimeraConfirmacionEliminacion(usuario, boton = null) {
       error?.message || "No se pudo prevalidar la baja global.",
     );
 
-    mostrarMensaje(mensajeError, "error");
+    const esLimiteCuota =
+      mensajeError.includes("429") ||
+      mensajeError.includes("RESOURCE_EXHAUSTED") ||
+      mensajeError.toLowerCase().includes("quota exceeded");
+
+    const tituloModal = esLimiteCuota
+      ? "Límite diario alcanzado"
+      : "No se pudo continuar";
+
+    const mensajeModal = esLimiteCuota
+      ? "Se alcanzó temporalmente el límite diario de consultas de la base de datos. No se realizó ninguna eliminación. Intentá nuevamente más tarde."
+      : mensajeError;
+
+    mostrarMensaje(mensajeModal, "error");
 
     await Swal.fire({
-      title: "No se pudo continuar",
-      text: mensajeError,
+      title: tituloModal,
+      text: mensajeModal,
       icon: "error",
       confirmButtonText: "Aceptar",
     });
