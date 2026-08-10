@@ -26,10 +26,62 @@
 
 body {
   font-family: "Nunito Sans", sans-serif;
-
-  background: linear-gradient(135deg, #06274d, #0b4f9c);
-
   min-height: 100vh;
+  position: relative;
+  isolation: isolate;
+  background: linear-gradient(135deg, #06274d, #0b4f9c);
+  overflow-x: hidden;
+}
+
+/* =====================================================
+   COLLAGE FOTOGRÁFICO DEL LOGIN
+===================================================== */
+
+.login-fondos {
+  position: fixed;
+  inset: 0;
+
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  grid-template-rows: repeat(2, 1fr);
+
+  width: 100%;
+  height: 100vh;
+
+  background: #06274d;
+
+  overflow: hidden;
+
+  pointer-events: none;
+
+  z-index: 0;
+}
+
+.login-fondo {
+  min-width: 0;
+  min-height: 0;
+
+  background-color: #06274d;
+
+  background-repeat: no-repeat;
+  background-position: center center;
+  background-size: cover auto;
+}
+
+.login-fondo-1 {
+  background-image: var(--login-fondo-1, none);
+}
+
+.login-fondo-2 {
+  background-image: var(--login-fondo-2, none);
+}
+
+.login-fondo-3 {
+  background-image: var(--login-fondo-3, none);
+}
+
+.login-fondo-4 {
+  background-image: var(--login-fondo-4, none);
 }
 
 /* =====================================================
@@ -39,6 +91,9 @@ body {
 .portal {
   width: 100%;
   min-height: 100vh;
+
+  position: relative;
+  z-index: 1;
 
   display: flex;
   justify-content: center;
@@ -54,8 +109,11 @@ body {
 .circulo {
   width: 700px;
   height: 700px;
+
   position: relative;
+
   border-radius: 50%;
+
   background: rgba(255, 255, 255, 0.05);
 
   border: 2px solid rgba(255, 255, 255, 0.1);
@@ -85,9 +143,9 @@ body {
   text-align: center;
 }
 
-/*=====================================================
-LOGO
-=====================================================*/
+/* =====================================================
+   LOGO
+===================================================== */
 
 .logo-contenedor {
   width: 170px;
@@ -111,6 +169,7 @@ LOGO
 
   backdrop-filter: blur(6px);
 }
+
 .logo {
   width: 95px;
 
@@ -192,15 +251,25 @@ LOGO
 
 .btn-ingresar {
   width: 100%;
+
   margin-top: 10px;
+
   height: 55px;
+
   border: none;
+
   border-radius: 12px;
+
   background: var(--naranja);
+
   color: white;
+
   font-size: 1rem;
+
   font-weight: 700;
+
   cursor: pointer;
+
   transition: 0.3s;
 }
 
@@ -209,6 +278,7 @@ LOGO
 
   transform: translateY(-3px);
 }
+
 /* =====================================================
    RELOJ
 ===================================================== */
@@ -225,6 +295,7 @@ LOGO
 
   z-index: 1;
 }
+
 /* =====================================================
    MARCAS DEL RELOJ
 ===================================================== */
@@ -234,11 +305,16 @@ LOGO
 
   top: 0;
   left: 50%;
+
   width: 3px;
   height: 16px;
+
   background: rgba(255, 255, 255, 0.35);
+
   border-radius: 3px;
+
   transform-origin: center 340px;
+
   transition: 0.15s;
 }
 
@@ -249,6 +325,7 @@ LOGO
     0 0 10px #ffd54a,
     0 0 20px #ffd54a;
 }
+
 .principal {
   height: 28px;
 
@@ -256,6 +333,7 @@ LOGO
 
   background: rgba(255, 255, 255, 0.65);
 }
+
 .marca.blanca {
   background: #e8f1ff;
 
@@ -263,9 +341,10 @@ LOGO
     0 0 10px #e8f1ff,
     0 0 20px #e8f1ff;
 }
-/*=====================================================
-MENSAJES LOGIN
-=====================================================*/
+
+/* =====================================================
+   MENSAJES LOGIN
+===================================================== */
 
 .mensaje-login {
   margin-top: 20px;
@@ -278,6 +357,7 @@ MENSAJES LOGIN
 
   font-weight: 600;
 }
+
 /* =====================================================
    RESPONSIVE - PORTAL INSTITUCIONAL
 ===================================================== */
@@ -289,12 +369,14 @@ MENSAJES LOGIN
 
   .portal {
     min-height: 100svh;
+
     padding: 24px 16px;
   }
 
   .circulo {
     width: 100%;
     max-width: 460px;
+
     height: auto;
     min-height: 0;
 
@@ -309,18 +391,21 @@ MENSAJES LOGIN
 
   /* En celular ocultamos el reloj para priorizar
      comodidad, legibilidad y espacio del formulario */
+
   .reloj {
     display: none;
   }
 
   .login {
     width: 100%;
+
     max-width: 340px;
   }
 
   .logo-contenedor {
     width: 140px;
     height: 140px;
+
     margin-bottom: 18px;
   }
 
@@ -330,17 +415,20 @@ MENSAJES LOGIN
 
   .login h1 {
     font-size: 1.75rem;
+
     line-height: 1.2;
   }
 
   .login h2 {
     font-size: 0.98rem;
+
     margin-top: 8px;
     margin-bottom: 28px;
   }
 
   .campo {
     padding: 14px 16px;
+
     margin-bottom: 15px;
   }
 
@@ -350,11 +438,13 @@ MENSAJES LOGIN
 
   .btn-ingresar {
     height: 52px;
+
     margin-top: 8px;
   }
 
   .mensaje-login {
     margin-top: 16px;
+
     font-size: 0.9rem;
   }
 }
@@ -370,12 +460,14 @@ MENSAJES LOGIN
 
   .circulo {
     border-radius: 24px;
+
     padding: 34px 20px;
   }
 
   .logo-contenedor {
     width: 120px;
     height: 120px;
+
     margin-bottom: 16px;
   }
 
@@ -389,6 +481,7 @@ MENSAJES LOGIN
 
   .login h2 {
     font-size: 0.92rem;
+
     margin-bottom: 24px;
   }
 
@@ -400,6 +493,7 @@ MENSAJES LOGIN
     height: 50px;
   }
 }
+
 /* =====================================================
    VOLVER AL SITIO PÚBLICO
 ===================================================== */
@@ -408,14 +502,17 @@ MENSAJES LOGIN
   display: inline-flex;
   align-items: center;
   justify-content: center;
+
   gap: 9px;
 
   margin-top: 18px;
 
   color: #e8f1ff;
+
   text-decoration: none;
 
   font-size: 0.92rem;
+
   font-weight: 700;
 
   transition: 0.25s;
@@ -423,25 +520,33 @@ MENSAJES LOGIN
 
 .btn-volver-sitio:hover {
   color: #ffd54a;
+
   transform: translateX(-4px);
 }
+
 .texto-acceso {
   color: #ffffff;
 }
+
 .volver-sitio-publico {
   display: inline-flex;
   align-items: center;
   justify-content: center;
+
   gap: 8px;
 
   margin-top: 18px;
 
   color: #ffffff;
+
   font-size: 0.9rem;
+
   font-weight: 700;
+
   text-decoration: none;
 
   opacity: 0.9;
+
   transition:
     opacity 0.2s ease,
     transform 0.2s ease;
@@ -449,15 +554,19 @@ MENSAJES LOGIN
 
 .volver-sitio-publico:hover {
   color: #ffffff;
+
   opacity: 1;
+
   transform: translateY(-2px);
 }
+
 /* =====================================================
    SELECTOR DE ROLES
 ===================================================== */
 
 .selector-roles {
   width: 100%;
+
   text-align: center;
 }
 
@@ -468,29 +577,37 @@ MENSAJES LOGIN
 .opciones-roles {
   display: flex;
   flex-direction: column;
+
   gap: 12px;
+
   margin-top: 22px;
 }
 
 .btn-rol-portal {
   width: 100%;
+
   min-height: 55px;
 
   display: flex;
   align-items: center;
   justify-content: center;
+
   gap: 10px;
 
   padding: 13px 18px;
 
   border: 1px solid rgba(255, 255, 255, 0.22);
+
   border-radius: 12px;
 
   background: rgba(255, 255, 255, 0.1);
+
   color: var(--blanco);
 
   font-family: inherit;
+
   font-size: 1rem;
+
   font-weight: 700;
 
   cursor: pointer;
@@ -503,13 +620,17 @@ MENSAJES LOGIN
 
 .btn-rol-portal:hover {
   background: var(--naranja);
+
   border-color: var(--naranja);
+
   transform: translateY(-2px);
 }
 
 .btn-rol-portal:disabled {
   opacity: 0.65;
+
   cursor: not-allowed;
+
   transform: none;
 }
 
@@ -517,18 +638,23 @@ MENSAJES LOGIN
   display: inline-flex;
   align-items: center;
   justify-content: center;
+
   gap: 8px;
 
   margin-top: 22px;
+
   padding: 0;
 
   border: none;
+
   background: transparent;
 
   color: #e8f1ff;
 
   font-family: inherit;
+
   font-size: 0.9rem;
+
   font-weight: 700;
 
   cursor: pointer;
@@ -540,12 +666,14 @@ MENSAJES LOGIN
 
 .btn-volver-cuenta:hover {
   color: #ffd54a;
+
   transform: translateX(-3px);
 }
 
 @media (max-width: 420px) {
   .btn-rol-portal {
     min-height: 50px;
+
     font-size: 0.95rem;
   }
 
