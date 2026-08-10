@@ -781,6 +781,14 @@ async function guardarAsistenciaSira() {
     if (btnRegistrarAsistenciaSira) {
       btnRegistrarAsistenciaSira.hidden = true;
     }
+    const seccionSiraDocente = document.getElementById("sira-docente");
+
+    if (seccionSiraDocente) {
+      seccionSiraDocente.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    }
   } catch (error) {
     console.error("Error al guardar asistencia Si.R.A.:", error);
 
