@@ -57,6 +57,10 @@ body {
   z-index: 0;
 }
 
+/* =====================================================
+   FOTOGRAFÍAS
+===================================================== */
+
 .login-fondo {
   min-width: 0;
   min-height: 0;
@@ -65,8 +69,14 @@ body {
 
   background-repeat: no-repeat;
   background-position: center center;
-  background-size: cover auto;
+  background-size: cover;
+
+  filter: brightness(0.88) saturate(0.86) contrast(0.98);
 }
+
+/* =====================================================
+   ASIGNACIÓN DE FONDOS
+===================================================== */
 
 .login-fondo-1 {
   background-image: var(--login-fondo-1, none);
@@ -82,6 +92,33 @@ body {
 
 .login-fondo-4 {
   background-image: var(--login-fondo-4, none);
+}
+
+/* =====================================================
+   CAPA DE VIDRIO SOBRE TODO EL COLLAGE
+===================================================== */
+
+.login-fondos::after {
+  content: "";
+
+  position: absolute;
+  inset: 0;
+
+  z-index: 5;
+
+  background:
+    radial-gradient(
+      circle at center,
+      rgba(2, 22, 55, 0.22) 0%,
+      rgba(4, 34, 72, 0.14) 52%,
+      rgba(5, 37, 70, 0.1) 100%
+    ),
+    rgba(8, 38, 74, 0.06);
+
+  backdrop-filter: saturate(0.92);
+  -webkit-backdrop-filter: saturate(0.92);
+
+  pointer-events: none;
 }
 
 /* =====================================================

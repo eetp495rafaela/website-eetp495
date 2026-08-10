@@ -2,120 +2,456 @@
 
 /* =====================================================
    FONDOS ALEATORIOS DEL LOGIN
-   - Lee assets/img/login-fondos/fondos.json
-   - Elige 4 imágenes
-   - Cambia automáticamente cada 1 hora
+   E.E.T.P. N° 495
+
+   FUNCIONAMIENTO:
+   - Detecta automáticamente fondo-01.jpg, fondo-02.jpg...
+   - No necesita fondos.json
+   - Elige 4 imágenes distintas en cada carga
+   - Evita repetir las imágenes de la carga anterior
+     siempre que haya suficientes fotografías
+   - Da prioridad a las imágenes que hace más tiempo
+     que no aparecen
+   - Si se agregan nuevas imágenes consecutivas,
+     las detecta automáticamente
+===================================================== */
+
+/* =====================================================
+   CONFIGURACIÓN
 ===================================================== */
 
 const RUTA_FONDOS = "assets/img/login-fondos/";
 const RUTA_FONDOS_CSS = "../img/login-fondos/";
-const ARCHIVO_INDICE = `${RUTA_FONDOS}fondos.json`;
+
 const CANTIDAD_FONDOS = 4;
-const HORAS_POR_BLOQUE = 1;
+
+/*
+  Límite de seguridad.
+
+  No significa que debas tener 999 imágenes.
+  Simplemente evita una búsqueda infinita por error.
+*/
+const MAXIMO_FONDOS = 999;
+
+/*
+  Datos guardados localmente para recordar:
+  - cuántos fondos fueron detectados
+  - cuáles aparecieron recientemente
+*/
+const CLAVE_CANTIDAD_FONDOS = "eetp495_login_cantidad_fondos_v1";
+const CLAVE_ESTADO_FONDOS = "eetp495_login_estado_fondos_v1";
+
+/* =====================================================
+   INICIO
+===================================================== */
 
 document.addEventListener("DOMContentLoaded", () => {
   iniciarFondosLogin();
 });
 
+/* =====================================================
+   INICIAR FONDOS
+===================================================== */
+
 async function iniciarFondosLogin() {
   try {
-    const nombresFondos = await cargarFondosDisponibles();
+    const fondosDisponibles = await obtenerFondosDisponibles();
 
-    if (!Array.isArray(nombresFondos) || !nombresFondos.length) {
+    if (!fondosDisponibles.length) {
       console.warn("No se encontraron fondos para el login.");
       return;
     }
 
-    aplicarFondosLogin(nombresFondos);
+    if (fondosDisponibles.length < CANTIDAD_FONDOS) {
+      console.warn(
+        `Se encontraron solamente ${fondosDisponibles.length} fondos. ` +
+          `Se necesitan al menos ${CANTIDAD_FONDOS} para completar el collage.`,
+      );
+    }
+
+    const fondosSeleccionados = seleccionarFondosConRotacion(
+      fondosDisponibles,
+      CANTIDAD_FONDOS,
+    );
+
+    aplicarFondosLogin(fondosSeleccionados);
   } catch (error) {
     console.error("No se pudieron cargar los fondos del login:", error);
   }
 }
 
-async function cargarFondosDisponibles() {
-  const respuesta = await fetch(`${ARCHIVO_INDICE}?_=${Date.now()}`, {
-    method: "GET",
-    cache: "no-store",
-  });
+/* =====================================================
+   OBTENER FONDOS DISPONIBLES
+===================================================== */
 
-  if (!respuesta.ok) {
-    throw new Error(`No se pudo leer fondos.json (HTTP ${respuesta.status}).`);
+async function obtenerFondosDisponibles() {
+  let cantidadConocida = obtenerCantidadGuardada();
+
+  /*
+    Primera visita desde este navegador.
+
+    Si todavía no conocemos cuántas fotografías existen,
+    buscamos desde fondo-01.jpg en adelante.
+  */
+  if (cantidadConocida <= 0) {
+    cantidadConocida = await detectarCantidadDesdeCero();
+  } else {
+    /*
+      Verificamos que el último fondo conocido siga
+      existiendo.
+
+      Si desapareció, volvemos a realizar el conteo.
+    */
+    const ultimoConocido = obtenerNombreFondo(cantidadConocida);
+
+    const ultimoExiste = await comprobarArchivo(ultimoConocido);
+
+    if (!ultimoExiste) {
+      cantidadConocida = await detectarCantidadDesdeCero();
+    } else {
+      /*
+        Comprobamos si se agregaron nuevas fotografías.
+
+        Por ejemplo:
+
+        Ya conocíamos:
+        fondo-01.jpg ... fondo-16.jpg
+
+        Ahora existe:
+        fondo-17.jpg
+
+        Se incorpora automáticamente.
+      */
+      let siguienteNumero = cantidadConocida + 1;
+
+      while (siguienteNumero <= MAXIMO_FONDOS) {
+        const siguienteArchivo = obtenerNombreFondo(siguienteNumero);
+
+        const existe = await comprobarArchivo(siguienteArchivo);
+
+        if (!existe) {
+          break;
+        }
+
+        cantidadConocida = siguienteNumero;
+        siguienteNumero += 1;
+      }
+    }
   }
 
-  const datos = await respuesta.json();
+  guardarCantidadFondos(cantidadConocida);
 
-  if (!Array.isArray(datos)) {
-    throw new Error("El archivo fondos.json no contiene un arreglo válido.");
-  }
-
-  return datos.map((nombre) => String(nombre || "").trim()).filter(Boolean);
+  return crearListaFondos(cantidadConocida);
 }
 
-function aplicarFondosLogin(fondosDisponibles) {
-  const fondosSeleccionados = seleccionarFondosPorBloqueHorario(
-    fondosDisponibles,
-    CANTIDAD_FONDOS,
+/* =====================================================
+   DETECCIÓN INICIAL
+===================================================== */
+
+async function detectarCantidadDesdeCero() {
+  let cantidad = 0;
+
+  for (let numero = 1; numero <= MAXIMO_FONDOS; numero += 1) {
+    const nombreArchivo = obtenerNombreFondo(numero);
+
+    const existe = await comprobarArchivo(nombreArchivo);
+
+    if (!existe) {
+      break;
+    }
+
+    cantidad = numero;
+  }
+
+  return cantidad;
+}
+
+/* =====================================================
+   CREAR NOMBRE DEL ARCHIVO
+===================================================== */
+
+function obtenerNombreFondo(numero) {
+  return `fondo-${String(numero).padStart(2, "0")}.jpg`;
+}
+
+/* =====================================================
+   CREAR LISTA DE FONDOS
+===================================================== */
+
+function crearListaFondos(cantidad) {
+  const fondos = [];
+
+  for (let numero = 1; numero <= cantidad; numero += 1) {
+    fondos.push(obtenerNombreFondo(numero));
+  }
+
+  return fondos;
+}
+
+/* =====================================================
+   COMPROBAR SI UN ARCHIVO EXISTE
+===================================================== */
+
+async function comprobarArchivo(nombreArchivo) {
+  const url = `${RUTA_FONDOS}${nombreArchivo}`;
+
+  try {
+    /*
+      HEAD permite comprobar la existencia del archivo
+      sin descargar toda la fotografía.
+    */
+    let respuesta = await fetch(url, {
+      method: "HEAD",
+      cache: "no-store",
+    });
+
+    /*
+      Algunos servidores pueden no aceptar HEAD.
+      Si eso ocurre, hacemos una comprobación alternativa.
+    */
+    if (respuesta.status === 405) {
+      respuesta = await fetch(url, {
+        method: "GET",
+        cache: "no-store",
+      });
+    }
+
+    return respuesta.ok;
+  } catch (error) {
+    console.warn(`No se pudo comprobar ${nombreArchivo}.`, error);
+
+    return false;
+  }
+}
+
+/* =====================================================
+   SELECCIONAR 4 FONDOS
+
+   La selección no es solamente aleatoria.
+
+   También recuerda qué imágenes fueron utilizadas
+   recientemente para reducir las repeticiones.
+===================================================== */
+
+function seleccionarFondosConRotacion(fondos, cantidad) {
+  if (!fondos.length) {
+    return [];
+  }
+
+  const estado = obtenerEstadoFondos();
+
+  estado.carga += 1;
+
+  const ultimaSeleccion = Array.isArray(estado.ultimaSeleccion)
+    ? estado.ultimaSeleccion
+    : [];
+
+  const ultimaSeleccionSet = new Set(ultimaSeleccion);
+
+  /*
+    Primero intentamos eliminar completamente las
+    fotografías utilizadas en la carga inmediatamente
+    anterior.
+
+    Esto funciona siempre que queden al menos
+    4 imágenes disponibles.
+  */
+  let candidatos = fondos.filter(
+    (nombreArchivo) => !ultimaSeleccionSet.has(nombreArchivo),
   );
 
-  for (let i = 0; i < CANTIDAD_FONDOS; i += 1) {
-    const nombreArchivo = fondosSeleccionados[i];
+  /*
+    Si hay pocas fotografías y excluir las últimas
+    nos deja menos de cuatro, usamos nuevamente
+    toda la colección.
+  */
+  if (candidatos.length < cantidad) {
+    candidatos = [...fondos];
+  }
+
+  /*
+    Asignamos a cada fotografía:
+    - cuándo apareció por última vez
+    - un valor aleatorio para desempatar
+  */
+  const candidatosOrdenados = candidatos
+    .map((nombreArchivo) => {
+      return {
+        nombre: nombreArchivo,
+
+        ultimoUso: Number(estado.ultimoUso?.[nombreArchivo] || 0),
+
+        azar: Math.random(),
+      };
+    })
+
+    /*
+      Primero aparecen las fotografías que hace
+      más tiempo que no fueron utilizadas.
+
+      Si varias tienen la misma antigüedad,
+      el orden entre ellas es aleatorio.
+    */
+    .sort((a, b) => {
+      if (a.ultimoUso !== b.ultimoUso) {
+        return a.ultimoUso - b.ultimoUso;
+      }
+
+      return a.azar - b.azar;
+    });
+
+  /*
+    Creamos un grupo de candidatos suficientemente
+    amplio para mantener variedad.
+
+    Con cuatro imágenes por pantalla intentamos
+    trabajar sobre las 8 menos utilizadas recientemente.
+  */
+  const tamanioGrupo = Math.min(
+    candidatosOrdenados.length,
+    Math.max(cantidad, cantidad * 2),
+  );
+
+  const grupoPreferido = candidatosOrdenados
+    .slice(0, tamanioGrupo)
+    .map((elemento) => elemento.nombre);
+
+  mezclarArray(grupoPreferido);
+
+  const seleccion = grupoPreferido.slice(
+    0,
+    Math.min(cantidad, grupoPreferido.length),
+  );
+
+  /*
+    Registramos cuándo fue utilizada cada fotografía.
+  */
+  seleccion.forEach((nombreArchivo) => {
+    estado.ultimoUso[nombreArchivo] = estado.carga;
+  });
+
+  estado.ultimaSeleccion = [...seleccion];
+
+  /*
+    Eliminamos del historial posibles archivos que
+    ya no formen parte de la colección actual.
+  */
+  Object.keys(estado.ultimoUso).forEach((nombreArchivo) => {
+    if (!fondos.includes(nombreArchivo)) {
+      delete estado.ultimoUso[nombreArchivo];
+    }
+  });
+
+  guardarEstadoFondos(estado);
+
+  return seleccion;
+}
+
+/* =====================================================
+   MEZCLAR ARRAY ALEATORIAMENTE
+===================================================== */
+
+function mezclarArray(array) {
+  for (let i = array.length - 1; i > 0; i -= 1) {
+    const j = Math.floor(Math.random() * (i + 1));
+
+    [array[i], array[j]] = [array[j], array[i]];
+  }
+
+  return array;
+}
+
+/* =====================================================
+   APLICAR FONDOS AL CSS
+===================================================== */
+
+function aplicarFondosLogin(fondosSeleccionados) {
+  for (let indice = 0; indice < CANTIDAD_FONDOS; indice += 1) {
+    const nombreArchivo = fondosSeleccionados[indice];
+
+    const propiedad = `--login-fondo-${indice + 1}`;
 
     if (!nombreArchivo) {
-      document.body.style.removeProperty(`--login-fondo-${i + 1}`);
+      document.body.style.removeProperty(propiedad);
       continue;
     }
 
     document.body.style.setProperty(
-      `--login-fondo-${i + 1}`,
+      propiedad,
       `url("${RUTA_FONDOS_CSS}${nombreArchivo}")`,
     );
   }
 }
 
-function seleccionarFondosPorBloqueHorario(fondos, cantidad) {
-  const copia = [...fondos];
-  const semilla = obtenerSemillaBloqueHorarioActual();
-  mezclarDeterministicamente(copia, semilla);
+/* =====================================================
+   ESTADO DE ROTACIÓN
+===================================================== */
 
-  const seleccion = copia.slice(0, cantidad);
+function obtenerEstadoFondos() {
+  const estadoInicial = {
+    carga: 0,
+    ultimoUso: {},
+    ultimaSeleccion: [],
+  };
 
-  if (seleccion.length === cantidad) {
-    return seleccion;
-  }
+  try {
+    const guardado = localStorage.getItem(CLAVE_ESTADO_FONDOS);
 
-  let indice = 0;
+    if (!guardado) {
+      return estadoInicial;
+    }
 
-  while (seleccion.length < cantidad && copia.length > 0) {
-    seleccion.push(copia[indice % copia.length]);
-    indice += 1;
-  }
+    const estado = JSON.parse(guardado);
 
-  return seleccion;
-}
+    return {
+      carga: Number(estado.carga) || 0,
 
-function obtenerSemillaBloqueHorarioActual() {
-  const ahora = new Date();
+      ultimoUso:
+        estado.ultimoUso && typeof estado.ultimoUso === "object"
+          ? estado.ultimoUso
+          : {},
 
-  const anio = ahora.getFullYear();
-  const mes = ahora.getMonth() + 1;
-  const dia = ahora.getDate();
-  const bloqueHora = Math.floor(ahora.getHours() / HORAS_POR_BLOQUE);
+      ultimaSeleccion: Array.isArray(estado.ultimaSeleccion)
+        ? estado.ultimaSeleccion
+        : [],
+    };
+  } catch (error) {
+    console.warn("No se pudo recuperar el historial de fondos.", error);
 
-  return Number(`${anio}${mes}${dia}${bloqueHora}`);
-}
-
-function mezclarDeterministicamente(array, semillaInicial) {
-  let semilla = semillaInicial;
-
-  for (let i = array.length - 1; i > 0; i -= 1) {
-    semilla = generarSiguienteSemilla(semilla);
-
-    const j = semilla % (i + 1);
-
-    [array[i], array[j]] = [array[j], array[i]];
+    return estadoInicial;
   }
 }
 
-function generarSiguienteSemilla(semilla) {
-  return (semilla * 1664525 + 1013904223) % 4294967296;
+/* =====================================================
+   GUARDAR ESTADO
+===================================================== */
+
+function guardarEstadoFondos(estado) {
+  try {
+    localStorage.setItem(CLAVE_ESTADO_FONDOS, JSON.stringify(estado));
+  } catch (error) {
+    console.warn("No se pudo guardar el historial de fondos.", error);
+  }
+}
+
+/* =====================================================
+   CANTIDAD DE FONDOS DETECTADA
+===================================================== */
+
+function obtenerCantidadGuardada() {
+  try {
+    const cantidad = Number(localStorage.getItem(CLAVE_CANTIDAD_FONDOS));
+
+    return Number.isInteger(cantidad) && cantidad > 0 ? cantidad : 0;
+  } catch (error) {
+    return 0;
+  }
+}
+
+function guardarCantidadFondos(cantidad) {
+  try {
+    localStorage.setItem(CLAVE_CANTIDAD_FONDOS, String(cantidad));
+  } catch (error) {
+    console.warn("No se pudo guardar la cantidad de fondos.", error);
+  }
 }
