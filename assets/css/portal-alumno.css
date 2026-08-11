@@ -2254,3 +2254,10 @@ html {
   color: #334155 !important;
   opacity: 1;
 }
+/* =====================================================
+   MODAL CERRAR SESIÓN - PORTAL ALUMNO
+===================================================== */
+
+.modal-cierre-sesion-portal .swal2-html-container {
+  color: #3f5f86 !important;
+}

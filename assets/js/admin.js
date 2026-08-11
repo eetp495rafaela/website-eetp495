@@ -537,6 +537,10 @@ function crearCeldaAcciones(usuario) {
 
   contenedor.className = "acciones-tabla";
 
+  /* =====================================================
+     EDITAR
+  ===================================================== */
+
   const btnEditar = crearBoton(
     "fa-solid fa-pen-to-square",
     "Editar",
@@ -549,19 +553,43 @@ function crearCeldaAcciones(usuario) {
 
   contenedor.appendChild(btnEditar);
 
+  /* =====================================================
+     DATOS DEL USUARIO
+  ===================================================== */
+
   const correoActual = normalizarCorreo(usuarioSoporte?.email);
+
   const esMiCuenta = normalizarCorreo(usuario.correo) === correoActual;
 
-  if (!esMiCuenta) {
-    const estadoActual = String(usuario.estado || "")
-      .trim()
-      .toUpperCase();
+  const estadoActual = String(usuario.estado || "")
+    .trim()
+    .toUpperCase();
 
+  const tipoVinculo = String(usuario.tipoVinculo || "")
+    .trim()
+    .toUpperCase();
+
+  const rolesUsuario = obtenerRolesUsuarioAdmin(usuario);
+
+  const esAlumno = rolesUsuario.includes("ALUMNO");
+
+  const estaDeBaja = esAlumno && tipoVinculo === "BAJA";
+
+  /* =====================================================
+     ACTIVAR / DESACTIVAR
+
+     Solamente cambia el estado.
+     No modifica tipoVinculo.
+  ===================================================== */
+
+  if (!esMiCuenta && !estaDeBaja) {
     const estaActivo = estadoActual === "ACTIVO";
 
     const btnEstado = crearBoton(
       estaActivo ? "fa-solid fa-user-slash" : "fa-solid fa-user-check",
+
       estaActivo ? "Desactivar" : "Activar",
+
       estaActivo ? "btn-desactivar" : "btn-activar",
     );
 
@@ -570,6 +598,27 @@ function crearCeldaAcciones(usuario) {
     });
 
     contenedor.appendChild(btnEstado);
+  }
+
+  /* =====================================================
+     DAR DE BAJA
+
+     Solo para alumnos que todavía
+     NO tengan tipoVinculo = BAJA.
+  ===================================================== */
+
+  if (!esMiCuenta && esAlumno && !estaDeBaja) {
+    const btnDarDeBaja = crearBoton(
+      "fa-solid fa-user-xmark",
+      "Dar de baja",
+      "btn-desactivar",
+    );
+
+    btnDarDeBaja.addEventListener("click", () => {
+      darDeBajaEstudiante(usuario, "usuarios");
+    });
+
+    contenedor.appendChild(btnDarDeBaja);
   }
 
   celda.appendChild(contenedor);
@@ -601,7 +650,7 @@ function renderizarUsuarios(usuarios) {
   mostrarMensajeUsuarios(`${usuarios.length} usuario(s) mostrado(s).`, "ok");
 }
 
-async function darDeBajaEstudiante(estudiante) {
+async function darDeBajaEstudiante(estudiante, origen = "estudiantes") {
   const correo = normalizarCorreo(estudiante.correo || estudiante.id);
 
   if (!correo) {
@@ -616,35 +665,117 @@ async function darDeBajaEstudiante(estudiante) {
   }
 
   const nombre = estudiante.nombreCompleto || correo;
+
   const cursoActual = estudiante.cursoNombre || "Sin curso asignado";
 
+  const estadoActual = String(estudiante.estado || "")
+    .trim()
+    .toUpperCase();
+
+  const tipoVinculoActual = String(estudiante.tipoVinculo || "")
+    .trim()
+    .toUpperCase();
+
+  /* =====================================================
+     BAJA YA COMPLETADA
+  ===================================================== */
+
+  if (estadoActual === "INACTIVO" && tipoVinculoActual === "BAJA") {
+    await Swal.fire({
+      title: "La baja ya está completa",
+      text: "El estudiante ya se encuentra inactivo y con vínculo BAJA.",
+      icon: "info",
+      confirmButtonText: "Aceptar",
+    });
+
+    return;
+  }
+
+  /* =====================================================
+     DETERMINAR TIPO DE OPERACIÓN
+  ===================================================== */
+
+  const completarBaja =
+    estadoActual === "INACTIVO" && tipoVinculoActual !== "BAJA";
+
   const confirmacion = await Swal.fire({
-    title: "¿Dar de baja al estudiante?",
+    title: completarBaja
+      ? "¿Completar la baja del estudiante?"
+      : "¿Dar de baja al estudiante?",
+
     html: `
-      <p><strong>${escaparHtml(nombre)}</strong></p>
-      <p>${escaparHtml(correo)}</p>
-      <p>Curso actual: <strong>${escaparHtml(cursoActual)}</strong></p>
-      <hr>
       <p>
-        El estudiante quedará inactivo, se quitará de su curso y no podrá
-        acceder al portal Alumno.
+        <strong>
+          ${escaparHtml(nombre)}
+        </strong>
       </p>
-      <p><strong>Esta acción no elimina registros históricos.</strong></p>
+
+      <p>
+        ${escaparHtml(correo)}
+      </p>
+
+      <p>
+        Curso actual:
+        <strong>
+          ${escaparHtml(cursoActual)}
+        </strong>
+      </p>
+
+      <hr>
+
+      ${
+        completarBaja
+          ? `
+            <p>
+              La cuenta ya se encuentra inactiva.
+              Se completará la baja formal del estudiante.
+            </p>
+
+            <p>
+              Su situación pasará a
+              <strong>BAJA</strong>.
+            </p>
+          `
+          : `
+            <p>
+              El estudiante quedará inactivo,
+              se quitará de su curso y no podrá
+              acceder al Portal Alumno.
+            </p>
+          `
+      }
+
+      <p>
+        <strong>
+          Esta acción no elimina registros históricos.
+        </strong>
+      </p>
     `,
+
     icon: "warning",
     showCancelButton: true,
-    confirmButtonText: "Sí, dar de baja",
+
+    confirmButtonText: completarBaja ? "Sí, completar baja" : "Sí, dar de baja",
+
     cancelButtonText: "Cancelar",
     confirmButtonColor: "#b42318",
+
     reverseButtons: true,
     focusCancel: true,
   });
 
-  if (!confirmacion.isConfirmed) return;
+  if (!confirmacion.isConfirmed) {
+    return;
+  }
+
+  /* =====================================================
+     ACTUALIZAR FIRESTORE
+  ===================================================== */
 
   try {
     await updateDoc(doc(db, "usuarios", correo), {
       estado: "INACTIVO",
+
       tipoVinculo: "BAJA",
 
       cursoId: null,
@@ -654,23 +785,39 @@ async function darDeBajaEstudiante(estudiante) {
       grupoTaller: null,
 
       fechaBaja: serverTimestamp(),
+
       actualizadoEn: serverTimestamp(),
+
       actualizadoPor: normalizarCorreo(usuarioSoporte?.email),
     });
 
+    /* =================================================
+       ÉXITO
+    ================================================= */
+
     await Swal.fire({
-      title: "Estudiante dado de baja",
-      text: "Ya no aparecerá en el curso ni podrá acceder al portal Alumno.",
+      title: completarBaja ? "Baja completada" : "Estudiante dado de baja",
+
+      text: "El estudiante quedó inactivo y con situación BAJA.",
+
       icon: "success",
       confirmButtonText: "Aceptar",
     });
 
-    await cargarEstudiantes();
+    /* =================================================
+       REFRESCAR LA VISTA CORRECTA
+    ================================================= */
+
+    if (origen === "usuarios") {
+      await cargarUsuarios();
+    } else {
+      await cargarEstudiantes();
+    }
   } catch (error) {
     console.error("Error al dar de baja al estudiante:", error);
 
     await Swal.fire({
-      title: "No se pudo dar de baja",
+      title: "No se pudo completar la baja",
       text: "Revisá conexión o permisos de Firebase.",
       icon: "error",
       confirmButtonText: "Aceptar",
@@ -711,19 +858,36 @@ function renderizarEstudiantes(estudiantes) {
     const contenedorAcciones = document.createElement("div");
     contenedorAcciones.className = "acciones-tabla";
 
-    const btnAsignarCurso = document.createElement("button");
-    btnAsignarCurso.type = "button";
-    btnAsignarCurso.className = "btn-tabla btn-editar";
+    const tipoVinculoEstudiante = String(estudiante.tipoVinculo || "")
+      .trim()
+      .toUpperCase();
 
-    btnAsignarCurso.innerHTML = estudiante.cursoNombre
-      ? '<i class="fa-solid fa-pen-to-square"></i> Editar'
-      : '<i class="fa-solid fa-school"></i> Asignar curso';
+    const esCursadaCompleta = tipoVinculoEstudiante === "CURSADA_COMPLETA";
 
-    btnAsignarCurso.addEventListener("click", () => {
-      abrirModalAsignarCursoEstudiante(estudiante);
-    });
+    /* =====================================================
+   ASIGNAR / EDITAR CURSO
 
-    contenedorAcciones.appendChild(btnAsignarCurso);
+   Los alumnos con CURSADA_COMPLETA ya finalizaron
+   su cursado y no deben tener curso, división ni
+   grupo de Taller asignados.
+===================================================== */
+
+    if (!esCursadaCompleta) {
+      const btnAsignarCurso = document.createElement("button");
+
+      btnAsignarCurso.type = "button";
+      btnAsignarCurso.className = "btn-tabla btn-editar";
+
+      btnAsignarCurso.innerHTML = estudiante.cursoNombre
+        ? '<i class="fa-solid fa-pen-to-square"></i> Editar'
+        : '<i class="fa-solid fa-school"></i> Asignar curso';
+
+      btnAsignarCurso.addEventListener("click", () => {
+        abrirModalAsignarCursoEstudiante(estudiante);
+      });
+
+      contenedorAcciones.appendChild(btnAsignarCurso);
+    }
 
     const estaActivo =
       String(estudiante.estado || "")
@@ -980,11 +1144,39 @@ function cerrarModalEditarCurso() {
 }
 
 function abrirModalAsignarCursoEstudiante(estudiante) {
+  const tipoVinculo = String(estudiante.tipoVinculo || "")
+    .trim()
+    .toUpperCase();
+
+  /* =====================================================
+     CURSADA COMPLETA
+  ===================================================== */
+
+  if (tipoVinculo === "CURSADA_COMPLETA") {
+    Swal.fire({
+      title: "Asignación no disponible",
+
+      text: "Este estudiante tiene Cursada Completa y no corresponde asignarle curso, división ni grupo de Taller.",
+
+      icon: "info",
+
+      confirmButtonText: "Aceptar",
+    });
+
+    return;
+  }
+
+  /* =====================================================
+     ABRIR MODAL
+  ===================================================== */
+
   estudianteEnAsignacion = estudiante;
 
   asignarCursoEstudianteCorreo.value = estudiante.correo || "";
 
-  subtituloAsignarCursoEstudiante.textContent = `${estudiante.nombreCompleto || "Estudiante"} — ${estudiante.correo || ""}`;
+  subtituloAsignarCursoEstudiante.textContent = `${
+    estudiante.nombreCompleto || "Estudiante"
+  } — ${estudiante.correo || ""}`;
 
   asignarCursoEstudianteAnio.value = estudiante.cursoAnio || "";
 
@@ -995,6 +1187,7 @@ function abrirModalAsignarCursoEstudiante(estudiante) {
   mensajeAsignarCursoEstudiante.textContent = "";
 
   modalAsignarCursoEstudiante.classList.add("mostrar");
+
   modalAsignarCursoEstudiante.setAttribute("aria-hidden", "false");
 
   document.body.style.overflow = "hidden";

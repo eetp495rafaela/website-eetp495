@@ -552,10 +552,20 @@ function confirmarAccion({
   });
 }
 async function aprobarSolicitud(solicitud, btnAprobar, btnRechazar) {
-  const confirmado = window.confirm(
-    `¿Aprobar la solicitud de ${solicitud.nombreCompleto}?\n\n` +
-      "Se creará un usuario ALUMNO con situación CURSADA COMPLETA.",
-  );
+  const confirmado = await confirmarAccion({
+    titulo: "Aprobar solicitud",
+
+    texto:
+      `¿Confirmás que querés aprobar la solicitud de ` +
+      `${solicitud.nombreCompleto}? ` +
+      `Se creará un usuario Alumno con situación Cursada Completa.`,
+
+    tipo: "aprobar",
+
+    textoConfirmar: "Aprobar",
+
+    icono: "fa-user-check",
+  });
 
   if (!confirmado) {
     return;
