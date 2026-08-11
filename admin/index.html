@@ -2289,6 +2289,57 @@
             </p>
           </div>
 
+          <!-- Solicitudes de alta de estudiantes -->
+          <div class="panel-info panel-solicitudes-alta">
+            <div class="encabezado-listado">
+              <div>
+                <h3>Solicitudes de alta de estudiantes</h3>
+
+                <p>
+                  Consultá las solicitudes pendientes de estudiantes con cursada
+                  completa.
+                </p>
+              </div>
+            </div>
+
+            <div class="acciones">
+              <button
+                type="button"
+                class="btn-accion"
+                id="btnVerSolicitudesAlta"
+              >
+                <i class="fa-solid fa-list-check"></i>
+                Ver solicitudes
+              </button>
+            </div>
+
+            <div class="tabla-contenedor">
+              <table class="tabla-usuarios tabla-solicitudes-alta">
+                <thead>
+                  <tr>
+                    <th>Apellido y nombre</th>
+                    <th>Correo</th>
+                    <th>DNI</th>
+                    <th>Fecha</th>
+                    <th>Estado</th>
+                    <th>Acción</th>
+                  </tr>
+                </thead>
+
+                <tbody id="cuerpoTablaSolicitudesAlta">
+                  <tr>
+                    <td colspan="6" class="tabla-vacia">
+                      Todavía no se consultaron las solicitudes. Presioná “Ver
+                      solicitudes” para cargarlas.
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <p class="mensaje-formulario" id="mensajeSolicitudesAlta"></p>
+          </div>
+
           <!-- Administrar usuarios inactivos -->
           <div class="panel-info panel-usuarios-inactivos">
             <div class="encabezado-listado">
@@ -2988,6 +3039,47 @@
       <i class="fa-solid fa-arrow-up"></i>
     </button>
 
+    <!-- =====================================================
+     MODAL DE CONFIRMACIÓN
+===================================================== -->
+
+    <div class="modal-confirmacion" id="modalConfirmacionSolicitud" hidden>
+      <div class="modal-confirmacion-fondo"></div>
+
+      <div
+        class="modal-confirmacion-contenido"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="tituloModalConfirmacion"
+      >
+        <div class="modal-confirmacion-icono" id="iconoModalConfirmacion">
+          <i class="fa-solid fa-circle-question"></i>
+        </div>
+
+        <h3 id="tituloModalConfirmacion">Confirmar acción</h3>
+
+        <p id="textoModalConfirmacion"></p>
+
+        <div class="modal-confirmacion-acciones">
+          <button
+            type="button"
+            class="btn-modal-cancelar"
+            id="btnCancelarModalConfirmacion"
+          >
+            Cancelar
+          </button>
+
+          <button
+            type="button"
+            class="btn-modal-confirmar"
+            id="btnAceptarModalConfirmacion"
+          >
+            Confirmar
+          </button>
+        </div>
+      </div>
+    </div>
+
     <script type="module" src="../assets/js/proteger-portal.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
@@ -3008,6 +3100,7 @@
       type="module"
       src="../assets/js/limpieza-asistencias-admin.js"
     ></script>
+    <script type="module" src="../assets/js/solicitudes-alta-admin.js"></script>
     <script
       type="module"
       src="../assets/js/usuarios-inactivos-admin.js"

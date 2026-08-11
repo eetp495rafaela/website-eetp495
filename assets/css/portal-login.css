@@ -718,3 +718,301 @@ body {
     font-size: 0.86rem;
   }
 }
+/* =====================================================
+   SOLICITUD DE ACCESO - ALUMNO CON CURSADA COMPLETA
+===================================================== */
+
+.acceso-nuevo-alumno {
+  width: 100%;
+
+  margin-top: 4px;
+  padding-top: 18px;
+
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.texto-nuevo-alumno {
+  margin-bottom: 10px;
+
+  color: #dce8f7;
+
+  font-size: 0.86rem;
+  font-weight: 600;
+
+  line-height: 1.4;
+}
+
+/* Botón secundario.
+   No debe competir visualmente con "Ingresar con Google". */
+
+.btn-solicitar-acceso {
+  width: 100%;
+
+  min-height: 45px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  gap: 9px;
+
+  padding: 10px 16px;
+
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 11px;
+
+  background: rgba(255, 255, 255, 0.06);
+
+  color: #ffffff;
+
+  font-family: inherit;
+
+  font-size: 0.9rem;
+  font-weight: 700;
+
+  cursor: pointer;
+
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+
+  transition:
+    background 0.22s ease,
+    border-color 0.22s ease,
+    color 0.22s ease,
+    transform 0.22s ease;
+}
+
+.btn-solicitar-acceso i {
+  color: #ffd54a;
+
+  font-size: 0.95rem;
+
+  transition: color 0.22s ease;
+}
+
+.btn-solicitar-acceso:hover {
+  background: rgba(255, 255, 255, 0.11);
+
+  border-color: rgba(255, 213, 74, 0.75);
+
+  transform: translateY(-2px);
+}
+
+.btn-solicitar-acceso:hover i {
+  color: var(--naranja);
+}
+
+/* =====================================================
+   RESPONSIVE
+===================================================== */
+
+@media (max-width: 768px) {
+  .acceso-nuevo-alumno {
+    padding-top: 16px;
+  }
+
+  .texto-nuevo-alumno {
+    font-size: 0.83rem;
+  }
+
+  .btn-solicitar-acceso {
+    min-height: 44px;
+
+    font-size: 0.87rem;
+  }
+}
+
+@media (max-width: 420px) {
+  .acceso-nuevo-alumno {
+    padding-top: 14px;
+  }
+
+  .texto-nuevo-alumno {
+    font-size: 0.8rem;
+  }
+
+  .btn-solicitar-acceso {
+    min-height: 43px;
+
+    padding: 9px 12px;
+
+    font-size: 0.84rem;
+  }
+}
+/* =====================================================
+   VISTA SOLICITUD DE ACCESO - ALUMNO
+===================================================== */
+
+/*
+   La solicitud necesita un poco más de ancho que
+   el login normal porque contiene más información.
+*/
+
+body:has(#vistaSolicitudAlumno:not([hidden])) .login {
+  width: 460px;
+}
+
+/* Logo más compacto únicamente en esta vista */
+
+body:has(#vistaSolicitudAlumno:not([hidden])) .logo-contenedor {
+  width: 160px;
+  height: 160px;
+
+  margin-bottom: 5px;
+}
+
+body:has(#vistaSolicitudAlumno:not([hidden])) .logo {
+  width: 95px;
+}
+
+/* Título institucional */
+
+body:has(#vistaSolicitudAlumno:not([hidden])) .login h1 {
+  font-size: 1.8rem;
+}
+
+body:has(#vistaSolicitudAlumno:not([hidden])) .login h2 {
+  margin-top: 2px;
+  margin-bottom: 20px;
+}
+
+/* =====================================================
+   TEXTOS DE LA SOLICITUD
+===================================================== */
+
+.titulo-solicitud-alumno {
+  margin-bottom: 6px;
+
+  color: #ffffff;
+
+  font-size: 0.92rem;
+  font-weight: 600;
+
+  line-height: 1.3;
+
+  white-space: nowrap;
+}
+
+.descripcion-solicitud-alumno {
+  margin-bottom: 14px;
+
+  color: #dce8f7;
+
+  font-size: 0.84rem;
+  font-weight: 600;
+
+  line-height: 1.3;
+}
+
+/* =====================================================
+   BOTÓN VERIFICAR GOOGLE
+===================================================== */
+
+#vistaSolicitudAlumno #btnGoogleSolicitud {
+  min-height: 44px;
+
+  margin-bottom: 14px;
+}
+
+/* =====================================================
+   CAMPOS
+===================================================== */
+
+#vistaSolicitudAlumno .campo {
+  min-height: 48px;
+
+  padding: 12px 16px;
+
+  margin-bottom: 12px;
+}
+
+/* =====================================================
+   VOLVER
+===================================================== */
+
+#vistaSolicitudAlumno .btn-volver-cuenta {
+  margin-top: 10px;
+}
+
+/* =====================================================
+   MENSAJE DE VERIFICACIÓN
+===================================================== */
+
+#vistaSolicitudAlumno .mensaje-login {
+  margin-top: 10px;
+
+  min-height: 18px;
+
+  font-size: 0.86rem;
+
+  line-height: 1.25;
+}
+
+/* =====================================================
+   RESPONSIVE
+===================================================== */
+
+@media (max-width: 768px) {
+  body:has(#vistaSolicitudAlumno:not([hidden])) .login {
+    width: 100%;
+    max-width: 340px;
+  }
+
+  .titulo-solicitud-alumno {
+    font-size: 0.86rem;
+
+    white-space: normal;
+  }
+
+  .descripcion-solicitud-alumno {
+    font-size: 0.82rem;
+  }
+}
+/* =====================================================
+   AJUSTE BOTÓN ENVIAR SOLICITUD
+===================================================== */
+
+#vistaSolicitudAlumno form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+#vistaSolicitudAlumno .campo {
+  margin-bottom: 0;
+}
+
+#vistaSolicitudAlumno #btnEnviarSolicitud {
+  width: 70%;
+  max-width: 300px;
+
+  height: 48px;
+  min-height: 48px;
+
+  margin: 4px auto 0;
+
+  background: var(--naranja);
+  color: var(--azul-oscuro);
+
+  font-size: 0.95rem;
+  font-weight: 800;
+
+  box-shadow: none;
+}
+
+#vistaSolicitudAlumno #btnEnviarSolicitud i {
+  color: var(--azul-oscuro);
+}
+
+#vistaSolicitudAlumno #btnEnviarSolicitud:hover {
+  background: #d98208;
+  color: var(--azul-oscuro);
+}
+
+#vistaSolicitudAlumno #btnEnviarSolicitud:hover i {
+  color: var(--azul-oscuro);
+}
+
+#vistaSolicitudAlumno .btn-volver-cuenta {
+  margin-top: 8px;
+}

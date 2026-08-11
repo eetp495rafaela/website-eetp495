@@ -19,6 +19,8 @@ import {
   getFirestore,
   doc,
   getDoc,
+  setDoc,
+  serverTimestamp,
 } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -49,6 +51,7 @@ provider.setCustomParameters({
 });
 
 const CLAVE_ROL_ACTIVO = "rolActivoPortal";
+const CLAVE_MODO_SOLICITUD = "modoSolicitudAlumno";
 
 const PORTALES_POR_ROL = {
   ALUMNO: {
@@ -94,16 +97,60 @@ const PORTALES_POR_ROL = {
   },
 };
 
+/* =====================================================
+   LOGIN NORMAL
+===================================================== */
+
 const boton = document.getElementById("btnGoogle");
+
 const mensaje = document.querySelector("#vistaLogin .mensaje-login");
 
 const vistaLogin = document.getElementById("vistaLogin");
+
 const vistaSeleccionRol = document.getElementById("vistaSeleccionRol");
+
 const opcionesRoles = document.getElementById("opcionesRoles");
 
 const btnElegirOtraCuenta = document.getElementById("btnElegirOtraCuenta");
 
 const mensajeSeleccionRol = document.getElementById("mensajeSeleccionRol");
+
+/* =====================================================
+   SOLICITUD DE ALUMNO
+===================================================== */
+
+const vistaSolicitudAlumno = document.getElementById("vistaSolicitudAlumno");
+
+const btnGoogleSolicitud = document.getElementById("btnGoogleSolicitud");
+
+const btnVolverLoginSolicitud = document.getElementById(
+  "btnVolverLoginSolicitud",
+);
+
+const solicitudCorreo = document.getElementById("solicitudCorreo");
+
+const mensajeSolicitudAlumno = document.getElementById(
+  "mensajeSolicitudAlumno",
+);
+
+const formSolicitudAlumno = document.getElementById("formSolicitudAlumno");
+
+const solicitudNombreCompleto = document.getElementById(
+  "solicitudNombreCompleto",
+);
+
+const solicitudDni = document.getElementById("solicitudDni");
+
+const btnEnviarSolicitud = document.getElementById("btnEnviarSolicitud");
+const tituloSolicitudAlumno = document.getElementById("tituloSolicitudAlumno");
+
+const descripcionSolicitudAlumno = document.getElementById(
+  "descripcionSolicitudAlumno",
+);
+
+/* =====================================================
+   MENSAJES
+===================================================== */
 
 function mostrarMensaje(texto) {
   if (mensaje) {
@@ -117,6 +164,16 @@ function mostrarMensajeSeleccionRol(texto) {
   }
 }
 
+function mostrarMensajeSolicitud(texto) {
+  if (mensajeSolicitudAlumno) {
+    mensajeSolicitudAlumno.textContent = texto;
+  }
+}
+
+/* =====================================================
+   VISTAS
+===================================================== */
+
 function mostrarVistaLogin() {
   if (vistaLogin) {
     vistaLogin.hidden = false;
@@ -124,6 +181,10 @@ function mostrarVistaLogin() {
 
   if (vistaSeleccionRol) {
     vistaSeleccionRol.hidden = true;
+  }
+
+  if (vistaSolicitudAlumno) {
+    vistaSolicitudAlumno.hidden = true;
   }
 
   if (boton) {
@@ -136,10 +197,32 @@ function mostrarVistaSeleccionRol() {
     vistaLogin.hidden = true;
   }
 
+  if (vistaSolicitudAlumno) {
+    vistaSolicitudAlumno.hidden = true;
+  }
+
   if (vistaSeleccionRol) {
     vistaSeleccionRol.hidden = false;
   }
 }
+
+function mostrarVistaSolicitudAlumno() {
+  if (vistaLogin) {
+    vistaLogin.hidden = true;
+  }
+
+  if (vistaSeleccionRol) {
+    vistaSeleccionRol.hidden = true;
+  }
+
+  if (vistaSolicitudAlumno) {
+    vistaSolicitudAlumno.hidden = false;
+  }
+}
+
+/* =====================================================
+   NORMALIZACIÓN
+===================================================== */
 
 function normalizarCorreo(correo) {
   return String(correo || "")
@@ -152,6 +235,10 @@ function normalizarRol(rol) {
     .trim()
     .toUpperCase();
 }
+
+/* =====================================================
+   ROLES
+===================================================== */
 
 function obtenerRolesPerfil(perfil) {
   const rolPrincipal = normalizarRol(perfil.rol);
@@ -173,8 +260,61 @@ function eliminarRolActivo() {
   sessionStorage.removeItem(CLAVE_ROL_ACTIVO);
 }
 
+/* =====================================================
+   MODO SOLICITUD
+===================================================== */
+
+function activarModoSolicitud() {
+  sessionStorage.setItem(CLAVE_MODO_SOLICITUD, "1");
+}
+
+function desactivarModoSolicitud() {
+  sessionStorage.removeItem(CLAVE_MODO_SOLICITUD);
+}
+
+function estaEnModoSolicitud() {
+  return sessionStorage.getItem(CLAVE_MODO_SOLICITUD) === "1";
+}
+
+/* =====================================================
+   CORREO VERIFICADO DE LA SOLICITUD
+===================================================== */
+
+function completarCorreoSolicitud(user) {
+  const correo = String(user?.email || "").trim();
+
+  if (!correo) {
+    throw new Error("La cuenta Google no tiene un correo disponible.");
+  }
+
+  if (solicitudCorreo) {
+    solicitudCorreo.value = correo;
+  }
+
+  mostrarVistaSolicitudAlumno();
+
+  /*
+    No mostramos otro mensaje porque el correo
+    ya queda visible en el campo correspondiente.
+  */
+  mostrarMensajeSolicitud("");
+}
+
+function limpiarCorreoSolicitud() {
+  if (solicitudCorreo) {
+    solicitudCorreo.value = "";
+  }
+
+  mostrarMensajeSolicitud("");
+}
+
+/* =====================================================
+   INGRESAR AL PORTAL
+===================================================== */
+
 function ingresarAlPortalDelRol(rol) {
   const rolNormalizado = normalizarRol(rol);
+
   const portal = PORTALES_POR_ROL[rolNormalizado];
 
   if (!portal) {
@@ -190,12 +330,17 @@ function ingresarAlPortalDelRol(rol) {
   window.location.href = portal.url;
 }
 
+/* =====================================================
+   SELECTOR DE ROLES
+===================================================== */
+
 function construirSelectorRoles(perfil) {
   if (!opcionesRoles) {
     throw new Error("No se encontró el contenedor para seleccionar el rol.");
   }
 
   opcionesRoles.innerHTML = "";
+
   mostrarMensajeSeleccionRol("");
 
   perfil.roles.forEach((rol) => {
@@ -208,13 +353,17 @@ function construirSelectorRoles(perfil) {
     const botonRol = document.createElement("button");
 
     botonRol.type = "button";
+
     botonRol.className = "btn-rol-portal";
+
     botonRol.dataset.rol = rol;
 
     const icono = document.createElement("i");
+
     icono.className = `fa-solid ${portal.icono}`;
 
     const texto = document.createElement("span");
+
     texto.textContent = `Ingresar como ${portal.etiqueta}`;
 
     botonRol.append(icono, texto);
@@ -237,6 +386,10 @@ function construirSelectorRoles(perfil) {
   mostrarVistaSeleccionRol();
 }
 
+/* =====================================================
+   VALIDAR USUARIO YA REGISTRADO
+===================================================== */
+
 async function validarPerfilUsuario(user) {
   const correo = normalizarCorreo(user.email);
 
@@ -252,7 +405,7 @@ async function validarPerfilUsuario(user) {
     await signOut(auth);
 
     throw new Error(
-      "Tu cuenta Google no está autorizada. Si crees que es un error, comunícate con el Administrador del Sitio.",
+      "Esta cuenta no está autorizada. Comunícate con soportetecnico.tec495@gmail.com",
     );
   }
 
@@ -280,13 +433,22 @@ async function validarPerfilUsuario(user) {
 
   return {
     correo,
+
     nombreCompleto: perfil.nombreCompleto || user.displayName || correo,
+
     rol: roles[0],
+
     roles,
+
     estado,
+
     tipoVinculo: perfil.tipoVinculo || "",
   };
 }
+
+/* =====================================================
+   PROCESAR LOGIN NORMAL
+===================================================== */
 
 async function procesarUsuarioAutenticado(user) {
   mostrarMensaje("Verificando autorización...");
@@ -318,7 +480,7 @@ async function procesarUsuarioAutenticado(user) {
 
     mostrarVistaLogin();
 
-    mostrarMensaje(`Acceso denegado: ${error.message}`);
+    mostrarMensaje(error.message);
 
     if (boton) {
       boton.disabled = false;
@@ -326,10 +488,20 @@ async function procesarUsuarioAutenticado(user) {
   }
 }
 
+/* =====================================================
+   PERSISTENCIA
+===================================================== */
+
 await setPersistence(auth, browserSessionPersistence);
+
+/* =====================================================
+   BOTÓN LOGIN NORMAL
+===================================================== */
 
 if (boton) {
   boton.addEventListener("click", async () => {
+    desactivarModoSolicitud();
+
     eliminarRolActivo();
 
     mostrarMensaje(
@@ -356,8 +528,331 @@ if (boton) {
   });
 }
 
+/* =====================================================
+   VERIFICAR GOOGLE PARA SOLICITUD
+
+   NO escribe nada en Firestore.
+===================================================== */
+
+if (btnGoogleSolicitud) {
+  btnGoogleSolicitud.addEventListener("click", async () => {
+    activarModoSolicitud();
+
+    eliminarRolActivo();
+
+    mostrarMensajeSolicitud("Elegí tu cuenta de Google...");
+
+    btnGoogleSolicitud.disabled = true;
+
+    try {
+      const resultado = await signInWithPopup(auth, provider);
+
+      completarCorreoSolicitud(resultado.user);
+    } catch (error) {
+      console.error("Error al verificar el correo de la solicitud:", error);
+
+      desactivarModoSolicitud();
+
+      if (error.code === "auth/popup-closed-by-user") {
+        mostrarMensajeSolicitud("No se seleccionó ninguna cuenta.");
+      } else {
+        mostrarMensajeSolicitud(
+          `No se pudo verificar la cuenta: ${
+            error.code || error.message || "Error desconocido"
+          }`,
+        );
+      }
+    } finally {
+      btnGoogleSolicitud.disabled = false;
+    }
+  });
+}
+
+/* =====================================================
+   ENVIAR SOLICITUD DE ALTA
+
+   IMPORTANTE:
+   - NO crea usuarios.
+   - NO asigna roles.
+   - NO modifica la colección usuarios.
+   - Solo crea una solicitud PENDIENTE.
+===================================================== */
+
+if (formSolicitudAlumno) {
+  formSolicitudAlumno.addEventListener("submit", async (event) => {
+    event.preventDefault();
+
+    mostrarMensajeSolicitud("");
+
+    const user = auth.currentUser;
+
+    /* ================================================
+         CUENTA GOOGLE
+      ================================================= */
+
+    if (!user || !user.email) {
+      mostrarMensajeSolicitud("Primero verificá tu cuenta de Google.");
+
+      return;
+    }
+
+    const correoAutenticado = String(user.email).trim();
+
+    /* ================================================
+         DATOS DEL FORMULARIO
+      ================================================= */
+
+    const nombreCompleto = String(solicitudNombreCompleto?.value || "")
+      .trim()
+      .replace(/\s+/g, " ");
+
+    const dni = String(solicitudDni?.value || "").replace(/\D/g, "");
+
+    /* ================================================
+         VALIDACIONES
+      ================================================= */
+
+    if (nombreCompleto.length < 5) {
+      mostrarMensajeSolicitud("Ingresá tu apellido y nombre completo.");
+
+      solicitudNombreCompleto?.focus();
+
+      return;
+    }
+
+    if (!/^[0-9]{7,8}$/.test(dni)) {
+      mostrarMensajeSolicitud("Ingresá un DNI válido de 7 u 8 números.");
+
+      solicitudDni?.focus();
+
+      return;
+    }
+
+    /* ================================================
+         BLOQUEAMOS EL BOTÓN DURANTE EL PROCESO
+      ================================================= */
+
+    if (btnEnviarSolicitud) {
+      btnEnviarSolicitud.disabled = true;
+    }
+
+    mostrarMensajeSolicitud("");
+
+    if (btnEnviarSolicitud) {
+      btnEnviarSolicitud.innerHTML = `
+    <i class="fa-solid fa-spinner fa-spin"></i>
+    Enviando...
+  `;
+    }
+
+    try {
+      /* ==============================================
+           1. COMPROBAR SI YA ES USUARIO DEL PORTAL
+
+           Esto es solo una comprobación amigable.
+           Las reglas de Firestore también lo impiden.
+        =============================================== */
+
+      const correoUsuario = normalizarCorreo(correoAutenticado);
+
+      const referenciaUsuario = doc(db, "usuarios", correoUsuario);
+
+      const usuarioExistente = await getDoc(referenciaUsuario);
+
+      if (usuarioExistente.exists()) {
+        mostrarMensajeSolicitud(
+          "Esta cuenta ya tiene acceso al Portal Institucional.",
+        );
+
+        return;
+      }
+
+      /* ==============================================
+           2. COMPROBAR SI YA ENVIÓ UNA SOLICITUD
+        =============================================== */
+
+      const referenciaSolicitud = doc(db, "solicitudes_alta_alumnos", user.uid);
+
+      const solicitudExistente = await getDoc(referenciaSolicitud);
+
+      if (solicitudExistente.exists()) {
+        const datos = solicitudExistente.data();
+
+        const estado = String(datos.estado || "PENDIENTE").toUpperCase();
+
+        mostrarMensajeSolicitud("");
+
+        if (estado === "PENDIENTE") {
+          if (tituloSolicitudAlumno) {
+            tituloSolicitudAlumno.textContent =
+              "Ya tenés una solicitud enviada.";
+          }
+
+          if (descripcionSolicitudAlumno) {
+            descripcionSolicitudAlumno.textContent =
+              "La escuela puede demorar hasta 24 hs en procesar el alta.";
+          }
+
+          if (btnEnviarSolicitud) {
+            btnEnviarSolicitud.innerHTML = `
+        <i class="fa-solid fa-check"></i>
+        Solicitud Enviada.
+      `;
+
+            btnEnviarSolicitud.disabled = true;
+          }
+
+          if (solicitudNombreCompleto) {
+            solicitudNombreCompleto.disabled = true;
+          }
+
+          if (solicitudDni) {
+            solicitudDni.disabled = true;
+          }
+
+          if (btnGoogleSolicitud) {
+            btnGoogleSolicitud.disabled = true;
+          }
+
+          return;
+        }
+
+        /* Para otros estados lo dejamos preparado
+     hasta que implementemos aprobación/rechazo. */
+
+        if (btnEnviarSolicitud) {
+          btnEnviarSolicitud.innerHTML = `
+      <i class="fa-solid fa-paper-plane"></i>
+      Enviar solicitud
+    `;
+        }
+
+        mostrarMensajeSolicitud(
+          `La solicitud asociada a esta cuenta tiene estado: ${estado}.`,
+        );
+
+        return;
+      }
+
+      /* ==============================================
+           3. CREAR SOLICITUD
+
+           Los únicos datos que aporta el alumno son:
+           - nombreCompleto
+           - correo
+           - dni
+
+           Estado y fecha los controla el sistema.
+        =============================================== */
+
+      await setDoc(referenciaSolicitud, {
+        uid: user.uid,
+
+        correo: correoAutenticado,
+
+        nombreCompleto,
+
+        dni,
+
+        estado: "PENDIENTE",
+
+        fechaSolicitud: serverTimestamp(),
+      });
+
+      /* ==============================================
+   ÉXITO
+============================================== */
+
+      mostrarMensajeSolicitud("");
+
+      if (tituloSolicitudAlumno) {
+        tituloSolicitudAlumno.textContent = "Solicitud enviada correctamente.";
+      }
+
+      if (descripcionSolicitudAlumno) {
+        descripcionSolicitudAlumno.textContent =
+          "La escuela puede demorar hasta 24 hs en procesar el alta.";
+      }
+
+      if (btnEnviarSolicitud) {
+        btnEnviarSolicitud.innerHTML = `
+    <i class="fa-solid fa-check"></i>
+    Solicitud Enviada.
+  `;
+
+        btnEnviarSolicitud.disabled = true;
+      }
+
+      if (solicitudNombreCompleto) {
+        solicitudNombreCompleto.disabled = true;
+      }
+
+      if (solicitudDni) {
+        solicitudDni.disabled = true;
+      }
+
+      if (btnGoogleSolicitud) {
+        btnGoogleSolicitud.disabled = true;
+      }
+    } catch (error) {
+      console.error("Error al enviar la solicitud:", error);
+
+      if (error.code === "permission-denied") {
+        mostrarMensajeSolicitud(
+          "No se pudo enviar la solicitud. Verificá que la cuenta no tenga ya acceso al Portal.",
+        );
+      } else {
+        mostrarMensajeSolicitud(
+          "No se pudo enviar la solicitud. Intentá nuevamente.",
+        );
+      }
+      if (btnEnviarSolicitud) {
+        btnEnviarSolicitud.innerHTML = `
+    <i class="fa-solid fa-paper-plane"></i>
+    Enviar solicitud
+  `;
+      }
+    } finally {
+      /*
+          Si los campos siguen habilitados significa
+          que la solicitud no fue creada.
+        */
+
+      if (btnEnviarSolicitud && !solicitudNombreCompleto?.disabled) {
+        btnEnviarSolicitud.disabled = false;
+      }
+    }
+  });
+}
+
+/* =====================================================
+   VOLVER DESDE SOLICITUD
+===================================================== */
+
+if (btnVolverLoginSolicitud) {
+  btnVolverLoginSolicitud.addEventListener("click", async () => {
+    desactivarModoSolicitud();
+
+    limpiarCorreoSolicitud();
+
+    try {
+      if (auth.currentUser) {
+        await signOut(auth);
+      }
+    } catch (error) {
+      console.error("Error al cerrar la identificación de solicitud:", error);
+    }
+  });
+}
+
+/* =====================================================
+   CAMBIAR CUENTA EN SELECTOR DE ROLES
+===================================================== */
+
 if (btnElegirOtraCuenta) {
   btnElegirOtraCuenta.addEventListener("click", async () => {
+    desactivarModoSolicitud();
+
     eliminarRolActivo();
 
     if (opcionesRoles) {
@@ -384,11 +879,41 @@ if (btnElegirOtraCuenta) {
   });
 }
 
+/* =====================================================
+   OBSERVADOR DE AUTENTICACIÓN
+===================================================== */
+
 onAuthStateChanged(auth, async (user) => {
   if (!user) {
-    mostrarVistaLogin();
+    if (!estaEnModoSolicitud()) {
+      mostrarVistaLogin();
+    }
+
     return;
   }
+
+  /*
+      Si estamos verificando una solicitud,
+      NO buscamos todavía al usuario en
+      la colección usuarios.
+    */
+
+  if (estaEnModoSolicitud()) {
+    try {
+      completarCorreoSolicitud(user);
+    } catch (error) {
+      console.error("Error al recuperar el correo de la solicitud:", error);
+
+      mostrarMensajeSolicitud(error.message);
+    }
+
+    return;
+  }
+
+  /*
+      Login institucional normal.
+      Funciona como hasta ahora.
+    */
 
   await procesarUsuarioAutenticado(user);
 });

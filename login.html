@@ -30,20 +30,32 @@
   </head>
 
   <body>
+    <!-- =====================================================
+         FONDOS DEL LOGIN
+    ====================================================== -->
+
     <div class="login-fondos" aria-hidden="true">
       <div class="login-fondo login-fondo-1"></div>
       <div class="login-fondo login-fondo-2"></div>
       <div class="login-fondo login-fondo-3"></div>
       <div class="login-fondo login-fondo-4"></div>
     </div>
+
+    <!-- =====================================================
+         PORTAL
+    ====================================================== -->
+
     <main class="portal">
       <div class="circulo">
         <div class="reloj"></div>
+
         <div class="login">
+          <!-- LOGO -->
+
           <div class="logo-contenedor">
             <img
               src="assets/img/logo.png"
-              alt="Logo E.E.T.P. Nº495"
+              alt="Logo E.E.T.P. Nº 495"
               class="logo"
             />
           </div>
@@ -51,6 +63,10 @@
           <h1>E.E.T.P. Nº 495</h1>
 
           <h2>Portal Institucional</h2>
+
+          <!-- =================================================
+               VISTA PRINCIPAL DEL LOGIN
+          ================================================== -->
 
           <div class="login-acceso" id="vistaLogin">
             <p class="texto-acceso">
@@ -63,11 +79,132 @@
             </button>
 
             <p class="mensaje-login"></p>
+
+            <!-- NUEVO ACCESO PARA ESTUDIANTES -->
+
+            <div class="acceso-nuevo-alumno">
+              <p class="texto-nuevo-alumno">
+                ¿Finalizaste el cursado y no tenés acceso?
+              </p>
+
+              <button
+                type="button"
+                class="btn-solicitar-acceso"
+                id="btnSolicitarAcceso"
+              >
+                <i class="fa-solid fa-user-graduate"></i>
+                Solicitar acceso como estudiante
+              </button>
+            </div>
+
             <a class="volver-sitio-publico" href="index.html">
               <i class="fa-solid fa-house"></i>
               Volver al sitio público
             </a>
           </div>
+
+          <!-- =================================================
+               SOLICITUD DE ACCESO COMO ESTUDIANTE
+
+               Por ahora esta vista es solamente visual.
+               No guarda absolutamente ningún dato.
+          ================================================== -->
+
+          <div class="selector-roles" id="vistaSolicitudAlumno" hidden>
+            <p class="titulo-solicitud-alumno" id="tituloSolicitudAlumno">
+              Solicitud de acceso para estudiantes con cursada completa.
+            </p>
+
+            <p
+              class="descripcion-solicitud-alumno"
+              id="descripcionSolicitudAlumno"
+            >
+              Completá tus datos y verificá tu cuenta de Google.
+            </p>
+
+            <button
+              type="button"
+              class="btn-solicitar-acceso"
+              id="btnGoogleSolicitud"
+              style="margin-bottom: 18px"
+            >
+              <i class="fa-brands fa-google"></i>
+              Verificar correo con Google
+            </button>
+
+            <form id="formSolicitudAlumno" autocomplete="off">
+              <!-- APELLIDO Y NOMBRE -->
+
+              <div class="campo">
+                <i class="fa-solid fa-user"></i>
+
+                <input
+                  type="text"
+                  id="solicitudNombreCompleto"
+                  name="nombreCompleto"
+                  placeholder="Apellido y nombre completo"
+                  autocomplete="name"
+                  required
+                />
+              </div>
+
+              <!-- CORREO -->
+
+              <div class="campo">
+                <i class="fa-solid fa-envelope"></i>
+
+                <input
+                  type="email"
+                  id="solicitudCorreo"
+                  name="correo"
+                  placeholder="Correo de tu cuenta Google"
+                  readonly
+                />
+              </div>
+
+              <!-- DNI -->
+
+              <div class="campo">
+                <i class="fa-solid fa-id-card"></i>
+
+                <input
+                  type="text"
+                  id="solicitudDni"
+                  name="dni"
+                  placeholder="DNI"
+                  inputmode="numeric"
+                  autocomplete="off"
+                  maxlength="8"
+                  required
+                />
+              </div>
+
+              <button
+                type="submit"
+                class="btn-ingresar"
+                id="btnEnviarSolicitud"
+              >
+                <i class="fa-solid fa-paper-plane"></i>
+                Enviar solicitud
+              </button>
+            </form>
+
+            <button
+              type="button"
+              class="btn-volver-cuenta"
+              id="btnVolverLoginSolicitud"
+            >
+              <i class="fa-solid fa-arrow-left"></i>
+              Volver al inicio de sesión
+            </button>
+
+            <p class="mensaje-login" id="mensajeSolicitudAlumno"></p>
+          </div>
+
+          <!-- =================================================
+               SELECTOR DE ROLES
+          ================================================== -->
+
           <div class="selector-roles" id="vistaSeleccionRol" hidden>
             <p class="texto-acceso">
               Tu cuenta tiene más de un rol autorizado. Elegí el portal al que
@@ -91,8 +228,106 @@
       </div>
     </main>
 
+    <!-- =====================================================
+         JAVASCRIPT
+    ====================================================== -->
+
     <script src="assets/js/login-fondo.js"></script>
 
     <script type="module" src="assets/js/firebase-auth.js"></script>
+
+    <!-- =====================================================
+         NAVEGACIÓN VISUAL DE LA SOLICITUD
+
+         IMPORTANTE:
+         Por ahora este código solamente muestra y oculta
+         las vistas. No utiliza Firebase ni guarda datos.
+    ====================================================== -->
+
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        const vistaLogin = document.getElementById("vistaLogin");
+
+        const vistaSolicitudAlumno = document.getElementById(
+          "vistaSolicitudAlumno",
+        );
+
+        const vistaSeleccionRol = document.getElementById("vistaSeleccionRol");
+
+        const btnSolicitarAcceso =
+          document.getElementById("btnSolicitarAcceso");
+
+        const btnVolverLoginSolicitud = document.getElementById(
+          "btnVolverLoginSolicitud",
+        );
+
+        const formSolicitudAlumno = document.getElementById(
+          "formSolicitudAlumno",
+        );
+
+        /* ================================================
+           ABRIR SOLICITUD
+        ================================================= */
+
+        if (btnSolicitarAcceso) {
+          btnSolicitarAcceso.addEventListener("click", () => {
+            if (vistaLogin) {
+              vistaLogin.hidden = true;
+            }
+
+            if (vistaSeleccionRol) {
+              vistaSeleccionRol.hidden = true;
+            }
+
+            if (vistaSolicitudAlumno) {
+              vistaSolicitudAlumno.hidden = false;
+            }
+          });
+        }
+
+        /* ================================================
+           VOLVER AL LOGIN
+        ================================================= */
+
+        if (btnVolverLoginSolicitud) {
+          btnVolverLoginSolicitud.addEventListener("click", () => {
+            if (vistaSolicitudAlumno) {
+              vistaSolicitudAlumno.hidden = true;
+            }
+
+            if (vistaSeleccionRol) {
+              vistaSeleccionRol.hidden = true;
+            }
+
+            if (vistaLogin) {
+              vistaLogin.hidden = false;
+            }
+
+            /*
+              Como todavía no estamos guardando nada,
+              limpiamos lo escrito si el usuario vuelve.
+            */
+
+            if (formSolicitudAlumno) {
+              formSolicitudAlumno.reset();
+            }
+          });
+        }
+
+        /* ================================================
+           DNI: SOLO NÚMEROS
+
+           Todavía no validamos ni enviamos nada.
+        ================================================= */
+
+        const campoDni = document.getElementById("solicitudDni");
+
+        if (campoDni) {
+          campoDni.addEventListener("input", () => {
+            campoDni.value = campoDni.value.replace(/\D/g, "");
+          });
+        }
+      });
+    </script>
   </body>
 </html>
