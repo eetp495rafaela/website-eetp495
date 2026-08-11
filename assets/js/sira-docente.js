@@ -758,6 +758,7 @@ async function guardarAsistenciaSira() {
         title: "Asistencia registrada",
         text: "El registro de asistencia se guardó correctamente.",
         confirmButtonText: "Aceptar",
+        returnFocus: false,
       });
     }
 
@@ -784,9 +785,25 @@ async function guardarAsistenciaSira() {
     const seccionSiraDocente = document.getElementById("sira-docente");
 
     if (seccionSiraDocente) {
-      seccionSiraDocente.scrollIntoView({
-        behavior: "smooth",
-        block: "start",
+      /*
+       * Esperamos a que el navegador termine de
+       * recalcular la página después de ocultar
+       * la lista de estudiantes.
+       */
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          const margenSuperior = 115;
+
+          const posicion =
+            seccionSiraDocente.getBoundingClientRect().top +
+            window.scrollY -
+            margenSuperior;
+
+          window.scrollTo({
+            top: Math.max(0, posicion),
+            behavior: "smooth",
+          });
+        });
       });
     }
   } catch (error) {
