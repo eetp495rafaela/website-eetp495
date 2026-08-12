@@ -53,6 +53,17 @@ const DIAS_HORARIO_DOCENTE = [
   { valor: "VIERNES", etiqueta: "Viernes" },
 ];
 
+const TURNOS_HORARIO_DOCENTE = [
+  {
+    valor: "MANANA",
+    etiqueta: "Turno Mañana",
+  },
+  {
+    valor: "TARDE",
+    etiqueta: "Turno Tarde",
+  },
+];
+
 function normalizarCorreoDocente(correo) {
   return String(correo || "")
     .trim()
@@ -105,71 +116,103 @@ function renderizarHorarioAulaDocente(bloques) {
 
   if (!bloques.length) {
     mostrarMensajeHorarioDocente("Todavía no tenés horarios de aula cargados.");
+
     return;
   }
 
   const htmlDias = DIAS_HORARIO_DOCENTE.map((dia) => {
-    const bloquesDia = bloques
-      .filter((bloque) => bloque.dia === dia.valor)
-      .sort((a, b) => {
-        const horaA = String(a.horaInicio || "");
-        const horaB = String(b.horaInicio || "");
+    const bloquesDia = bloques.filter((bloque) => bloque.dia === dia.valor);
 
-        if (horaA !== horaB) {
-          return horaA.localeCompare(horaB);
-        }
+    const htmlTurnos = TURNOS_HORARIO_DOCENTE.map((turno) => {
+      const bloquesTurno = bloquesDia
+        .filter(
+          (bloque) =>
+            String(bloque.turno || "")
+              .trim()
+              .toUpperCase() === turno.valor,
+        )
+        .sort((a, b) => {
+          const horaA = String(a.horaInicio || "");
 
-        return String(a.cursoNombre || "").localeCompare(
-          String(b.cursoNombre || ""),
-          "es",
-        );
-      });
+          const horaB = String(b.horaInicio || "");
+
+          if (horaA !== horaB) {
+            return horaA.localeCompare(horaB);
+          }
+
+          return String(a.cursoNombre || "").localeCompare(
+            String(b.cursoNombre || ""),
+            "es",
+          );
+        });
+
+      if (!bloquesTurno.length) {
+        return "";
+      }
+
+      return `
+              <div class="grupo-turno-horario-docente">
+
+                <h5 class="titulo-turno-horario-docente">
+                  ${turno.etiqueta}
+                </h5>
+
+                ${bloquesTurno
+                  .map(
+                    (bloque) => `
+                      <div class="tarjeta-bloque-horario-docente">
+
+                        <div class="bloque-horario-hora-docente">
+                          ${bloque.horaInicio} a ${bloque.horaFin}
+                        </div>
+
+                        <div class="bloque-horario-curso-docente">
+                          ${
+                            bloque.cursoNombre ||
+                            `${bloque.cursoAnio}º ${bloque.cursoDivision}`
+                          }
+                        </div>
+
+                        <div class="bloque-horario-materia-docente">
+                          ${bloque.espacioCurricular || "-"}
+                        </div>
+
+                        ${
+                          bloque.ubicacion
+                            ? `
+                              <div class="bloque-horario-ubicacion-docente">
+                                ${bloque.ubicacion}
+                              </div>
+                            `
+                            : ""
+                        }
+
+                      </div>
+                    `,
+                  )
+                  .join("")}
+
+              </div>
+            `;
+    }).join("");
 
     return `
-      <div class="dia-horario-docente">
-        <h4>${dia.etiqueta}</h4>
+        <div class="dia-horario-docente">
 
-        ${
-          bloquesDia.length
-            ? bloquesDia
-                .map(
-                  (bloque) => `
-                    <div class="tarjeta-bloque-horario-docente">
-                      <div class="bloque-horario-hora-docente">
-                        ${bloque.horaInicio} a ${bloque.horaFin}
-                      </div>
+          <h4>${dia.etiqueta}</h4>
 
-                      <div class="bloque-horario-curso-docente">
-                        ${bloque.cursoNombre || `${bloque.cursoAnio}º ${bloque.cursoDivision}`}
-                      </div>
+          ${
+            bloquesDia.length
+              ? htmlTurnos
+              : `
+                <p class="mensaje-formulario">
+                  Sin bloques asignados.
+                </p>
+              `
+          }
 
-                      <div class="bloque-horario-materia-docente">
-                        ${bloque.espacioCurricular || "-"}
-                      </div>
-
-                      ${
-                        bloque.turno
-                          ? `<div class="bloque-horario-turno-docente">
-                              Turno ${obtenerEtiquetaTurnoDocente(bloque.turno)}
-                            </div>`
-                          : ""
-                      }
-
-                      ${
-                        bloque.ubicacion
-                          ? `<div class="bloque-horario-ubicacion-docente">
-                              ${bloque.ubicacion}
-                            </div>`
-                          : ""
-                      }
-                    </div>
-                  `,
-                )
-                .join("")
-            : `<p class="mensaje-formulario">Sin bloques asignados.</p>`
-        }
-      </div>
-    `;
+        </div>
+      `;
   }).join("");
 
   vistaHorarioAulaDocente.innerHTML = `
@@ -186,68 +229,101 @@ function renderizarHorarioTallerDocente(bloques) {
     mostrarMensajeHorarioTallerDocente(
       "Todavía no tenés horarios de taller cargados.",
     );
+
     return;
   }
 
   const htmlDias = DIAS_HORARIO_DOCENTE.map((dia) => {
-    const bloquesDia = bloques
-      .filter((bloque) => bloque.dia === dia.valor)
-      .sort((a, b) =>
-        String(a.horaInicio || "").localeCompare(String(b.horaInicio || "")),
-      );
+    const bloquesDia = bloques.filter((bloque) => bloque.dia === dia.valor);
+
+    const htmlTurnos = TURNOS_HORARIO_DOCENTE.map((turno) => {
+      const bloquesTurno = bloquesDia
+        .filter(
+          (bloque) =>
+            String(bloque.turno || "")
+              .trim()
+              .toUpperCase() === turno.valor,
+        )
+        .sort((a, b) =>
+          String(a.horaInicio || "").localeCompare(String(b.horaInicio || "")),
+        );
+
+      if (!bloquesTurno.length) {
+        return "";
+      }
+
+      return `
+              <div class="grupo-turno-horario-docente">
+
+                <h5 class="titulo-turno-horario-docente">
+                  ${turno.etiqueta}
+                </h5>
+
+                ${bloquesTurno
+                  .map(
+                    (bloque) => `
+                      <div class="tarjeta-bloque-horario-docente">
+
+                        <div class="bloque-horario-hora-docente">
+                          ${
+                            bloque.horarioTexto ||
+                            `${bloque.horaInicio || "-"} a ${
+                              bloque.horaFin || "-"
+                            }`
+                          }
+                        </div>
+
+                        <div class="bloque-horario-curso-docente">
+                          ${
+                            bloque.cursoNombre ||
+                            `${bloque.cursoAnio}º ${bloque.cursoDivision}`
+                          }
+                        </div>
+
+                        <div class="bloque-horario-materia-docente">
+                          ${bloque.espacioCurricular || "-"}
+                        </div>
+
+                        <div class="bloque-horario-turno-docente">
+                          Grupo ${bloque.grupoTaller || "-"}
+                        </div>
+
+                        ${
+                          bloque.ubicacion
+                            ? `
+                              <div class="bloque-horario-ubicacion-docente">
+                                ${bloque.ubicacion}
+                              </div>
+                            `
+                            : ""
+                        }
+
+                      </div>
+                    `,
+                  )
+                  .join("")}
+
+              </div>
+            `;
+    }).join("");
 
     return `
-      <div class="dia-horario-docente">
-        <h4>${dia.etiqueta}</h4>
+        <div class="dia-horario-docente">
 
-        ${
-          bloquesDia.length
-            ? bloquesDia
-                .map(
-                  (bloque) => `
-                    <div class="tarjeta-bloque-horario-docente">
-                      <div class="bloque-horario-hora-docente">
-                        ${
-                          bloque.horarioTexto ||
-                          `${bloque.horaInicio || "-"} a ${bloque.horaFin || "-"}`
-                        }
-                      </div>
+          <h4>${dia.etiqueta}</h4>
 
-                      <div class="bloque-horario-curso-docente">
-                        ${bloque.cursoNombre || `${bloque.cursoAnio}º ${bloque.cursoDivision}`}
-                      </div>
+          ${
+            bloquesDia.length
+              ? htmlTurnos
+              : `
+                <p class="mensaje-formulario">
+                  Sin bloques asignados.
+                </p>
+              `
+          }
 
-                      <div class="bloque-horario-materia-docente">
-                        ${bloque.espacioCurricular || "-"}
-                      </div>
-
-                      <div class="bloque-horario-turno-docente">
-                        Grupo ${bloque.grupoTaller || "-"}
-                      </div>
-
-                      ${
-                        bloque.turno
-                          ? `<div class="bloque-horario-turno-docente">
-                              Turno ${obtenerEtiquetaTurnoDocente(bloque.turno)}
-                            </div>`
-                          : ""
-                      }
-
-                      ${
-                        bloque.ubicacion
-                          ? `<div class="bloque-horario-ubicacion-docente">
-                              ${bloque.ubicacion}
-                            </div>`
-                          : ""
-                      }
-                    </div>
-                  `,
-                )
-                .join("")
-            : `<p class="mensaje-formulario">Sin bloques asignados.</p>`
-        }
-      </div>
-    `;
+        </div>
+      `;
   }).join("");
 
   vistaHorarioTallerDocente.innerHTML = `
@@ -258,70 +334,102 @@ function renderizarHorarioTallerDocente(bloques) {
 }
 
 function renderizarHorarioEducacionFisicaDocente(bloques) {
-  if (!vistaHorarioEducacionFisicaDocente) return;
+  if (!vistaHorarioEducacionFisicaDocente) {
+    return;
+  }
 
   if (!bloques.length) {
     mostrarMensajeHorarioEducacionFisicaDocente(
       "Todavía no tenés horarios de Educación Física cargados.",
     );
+
     return;
   }
 
   const htmlDias = DIAS_HORARIO_DOCENTE.map((dia) => {
-    const bloquesDia = bloques
-      .filter((bloque) => bloque.dia === dia.valor)
-      .sort((a, b) =>
-        String(a.horaInicio || "").localeCompare(String(b.horaInicio || "")),
-      );
+    const bloquesDia = bloques.filter((bloque) => bloque.dia === dia.valor);
+
+    const htmlTurnos = TURNOS_HORARIO_DOCENTE.map((turno) => {
+      const bloquesTurno = bloquesDia
+        .filter(
+          (bloque) =>
+            String(bloque.turno || "")
+              .trim()
+              .toUpperCase() === turno.valor,
+        )
+        .sort((a, b) =>
+          String(a.horaInicio || "").localeCompare(String(b.horaInicio || "")),
+        );
+
+      if (!bloquesTurno.length) {
+        return "";
+      }
+
+      return `
+              <div class="grupo-turno-horario-docente">
+
+                <h5 class="titulo-turno-horario-docente">
+                  ${turno.etiqueta}
+                </h5>
+
+                ${bloquesTurno
+                  .map(
+                    (bloque) => `
+                      <div class="tarjeta-bloque-horario-docente">
+
+                        <div class="bloque-horario-hora-docente">
+                          ${bloque.horaInicio || "-"} a ${bloque.horaFin || "-"}
+                        </div>
+
+                        <div class="bloque-horario-curso-docente">
+                          ${
+                            bloque.cursoNombre ||
+                            `${bloque.cursoAnio || ""}º ${
+                              bloque.cursoDivision || ""
+                            }`
+                          }
+                        </div>
+
+                        <div class="bloque-horario-materia-docente">
+                          ${bloque.espacioCurricular || "Educación Física"}
+                        </div>
+
+                        ${
+                          bloque.ubicacion
+                            ? `
+                              <div class="bloque-horario-ubicacion-docente">
+                                ${bloque.ubicacion}
+                              </div>
+                            `
+                            : ""
+                        }
+
+                      </div>
+                    `,
+                  )
+                  .join("")}
+
+              </div>
+            `;
+    }).join("");
 
     return `
-      <div class="dia-horario-docente">
-        <h4>${dia.etiqueta}</h4>
+        <div class="dia-horario-docente">
 
-        ${
-          bloquesDia.length
-            ? bloquesDia
-                .map(
-                  (bloque) => `
-                    <div class="tarjeta-bloque-horario-docente">
-                      <div class="bloque-horario-hora-docente">
-                        ${bloque.horaInicio || "-"} a ${bloque.horaFin || "-"}
-                      </div>
+          <h4>${dia.etiqueta}</h4>
 
-                      <div class="bloque-horario-curso-docente">
-                        ${
-                          bloque.cursoNombre ||
-                          `${bloque.cursoAnio || ""}º ${bloque.cursoDivision || ""}`
-                        }
-                      </div>
+          ${
+            bloquesDia.length
+              ? htmlTurnos
+              : `
+                <p class="mensaje-formulario">
+                  Sin bloques asignados.
+                </p>
+              `
+          }
 
-                      <div class="bloque-horario-materia-docente">
-                        ${bloque.espacioCurricular || "Educación Física"}
-                      </div>
-
-                      ${
-                        bloque.turno
-                          ? `<div class="bloque-horario-turno-docente">
-                              Turno ${obtenerEtiquetaTurnoDocente(bloque.turno)}
-                            </div>`
-                          : ""
-                      }
-
-                      ${
-                        bloque.ubicacion
-                          ? `<div class="bloque-horario-ubicacion-docente">
-                              ${bloque.ubicacion}
-                            </div>`
-                          : ""
-                      }
-                    </div>
-                  `,
-                )
-                .join("")
-            : `<p class="mensaje-formulario">Sin bloques asignados.</p>`
-        }
-      </div>
-    `;
+        </div>
+      `;
   }).join("");
 
   vistaHorarioEducacionFisicaDocente.innerHTML = `

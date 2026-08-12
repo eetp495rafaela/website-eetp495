@@ -3912,3 +3912,55 @@ body {
 body[data-rol-permitido="DOCENTE"] .btn-arriba i {
   color: #ffffff !important;
 }
+/* =====================================================
+   HORARIOS DOCENTE - SEPARACIÓN POR TURNOS
+===================================================== */
+
+.grupo-turno-horario-docente {
+  margin-top: 14px;
+}
+
+/* Separación visual cuando hay más de un turno en el día */
+.grupo-turno-horario-docente + .grupo-turno-horario-docente {
+  margin-top: 22px;
+  padding-top: 18px;
+  border-top: 2px solid rgba(107, 53, 42, 0.28);
+}
+
+/* Encabezado Turno Mañana / Turno Tarde */
+.titulo-turno-horario-docente {
+  margin: 0 0 10px;
+  padding: 7px 10px;
+
+  border: 1px solid rgba(138, 74, 60, 0.3);
+  border-radius: 10px;
+
+  background: rgba(107, 53, 42, 0.09);
+  color: #6b352a;
+
+  font-size: 0.82rem;
+  font-weight: 900;
+  line-height: 1.2;
+
+  text-align: center;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+/* Primer turno del día */
+.dia-horario-docente > .grupo-turno-horario-docente:first-of-type {
+  margin-top: 0;
+}
+
+/* Ajuste para celular */
+@media (max-width: 650px) {
+  .grupo-turno-horario-docente + .grupo-turno-horario-docente {
+    margin-top: 18px;
+    padding-top: 15px;
+  }
+
+  .titulo-turno-horario-docente {
+    font-size: 0.8rem;
+    padding: 7px 9px;
+  }
+}
