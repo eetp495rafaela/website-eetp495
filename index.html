@@ -51,7 +51,7 @@
     <main>
       <section class="hero">
         <div class="hero-contenido">
-          <h2>Formando técnicos para el futuro.</h2>
+          <h2>18 años formando técnicos para el futuro</h2>
           <p>
             Educación técnica, innovación, compromiso y excelencia al servicio
             de la comunidad.
@@ -59,6 +59,7 @@
           <a href="#accesos" class="btn-principal"> Conocé la institución </a>
         </div>
       </section>
+
       <section class="accesos" id="accesos">
         <div class="contenedor">
           <h2>Descubrí Nuestra Escuela</h2>
@@ -1076,7 +1077,22 @@
         }
       });
     </script>
+    <!--
+    <script>
+      const fechaActual = new Date();
 
+      let anios = fechaActual.getFullYear() - 2008;
+
+      const mesActual = fechaActual.getMonth();
+      const diaActual = fechaActual.getDate();
+
+      if (mesActual < 7 || (mesActual === 7 && diaActual < 10)) {
+        anios--;
+      }
+
+      document.getElementById("anios-escuela").textContent = anios;
+    </script>
+  -->
     <script src="assets/js/galeria.js"></script>
   </body>
 </html>
