@@ -938,9 +938,7 @@ function aplicarFiltrosUsuarios() {
     const nombre = String(usuario.nombreCompleto || "").toLowerCase();
     const correo = String(usuario.correo || "").toLowerCase();
 
-    const rol = String(usuario.rol || "")
-      .trim()
-      .toUpperCase();
+    const rolesUsuario = obtenerRolesUsuarioAdmin(usuario);
     const estado = String(usuario.estado || "")
       .trim()
       .toUpperCase();
@@ -950,7 +948,8 @@ function aplicarFiltrosUsuarios() {
       nombre.includes(textoBusqueda) ||
       correo.includes(textoBusqueda);
 
-    const coincideRol = !rolSeleccionado || rol === rolSeleccionado;
+    const coincideRol =
+      !rolSeleccionado || rolesUsuario.includes(rolSeleccionado);
 
     const coincideEstado = !estadoSeleccionado || estado === estadoSeleccionado;
 
