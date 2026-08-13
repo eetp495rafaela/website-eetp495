@@ -405,8 +405,9 @@
             <h3>Horarios institucionales</h3>
 
             <p>
-              Consulta de horarios de aula, taller y Educación Física para
-              acompañar la organización diaria de la institución.
+              Consulta de horarios de aula, taller, educación física y
+              profesores de taller disponibles para acompañar la organización
+              diaria de la institución.
             </p>
 
             <div class="acciones-gestion">
@@ -427,8 +428,20 @@
                 <i class="fa-solid fa-table-cells-large"></i>
                 Generar pizarra horarios
               </button>
+              <button
+                class="btn-gestion"
+                id="btnDocentesLibresTallerGestion"
+                type="button"
+              >
+                <i class="fa-solid fa-user-clock"></i>
+                Ver docentes libres de Taller
+              </button>
             </div>
-
+            <div
+              id="vistaDocentesLibresTallerGestion"
+              class="vista-gestion"
+              hidden
+            ></div>
             <div class="filtros-gestion filtros-horarios-gestion">
               <div class="campo-filtro-gestion">
                 <label for="filtroTipoHorarioGestion">Tipo de horario</label>

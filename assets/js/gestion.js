@@ -94,6 +94,15 @@ const btnVerHorariosGestion = document.getElementById("btnVerHorariosGestion");
 const btnGenerarPizarraHorariosGestion = document.getElementById(
   "btnGenerarPizarraHorariosGestion",
 );
+const btnDocentesLibresTallerGestion = document.getElementById(
+  "btnDocentesLibresTallerGestion",
+);
+
+const vistaDocentesLibresTallerGestion = document.getElementById(
+  "vistaDocentesLibresTallerGestion",
+);
+
+let docentesLibresTallerGestionCargados = false;
 
 const vistaHorariosGestion = document.getElementById("vistaHorariosGestion");
 
@@ -4368,6 +4377,372 @@ async function cargarHorariosGestion() {
   }
 }
 
+function obtenerClaveDocenteLibreTallerGestion(datos) {
+  const correo = normalizarTextoGestion(datos?.docenteCorreo);
+  const nombre = normalizarTextoGestion(datos?.docenteNombre);
+
+  return correo || nombre;
+}
+
+function construirTablaDocentesLibresTallerGestion(disponibilidadTurno) {
+  const cantidadFilas = Math.max(
+    1,
+    ...DIAS_HORARIO_GESTION.map(
+      (dia) => disponibilidadTurno[dia.valor]?.length || 0,
+    ),
+  );
+
+  const filas = Array.from({ length: cantidadFilas }, (_, indice) => {
+    const celdas = DIAS_HORARIO_GESTION.map((dia) => {
+      const nombres = disponibilidadTurno[dia.valor] || [];
+      const nombre = nombres[indice] || "";
+
+      if (!nombre && indice === 0 && !nombres.length) {
+        return "<td>—</td>";
+      }
+
+      return `<td>${escaparHtmlGestion(nombre)}</td>`;
+    }).join("");
+
+    return `<tr>${celdas}</tr>`;
+  }).join("");
+
+  return `
+    <div class="tabla-gestion-contenedor">
+      <table class="tabla-gestion tabla-docentes-libres-taller">
+        <thead>
+          <tr>
+            ${DIAS_HORARIO_GESTION.map(
+              (dia) => `<th>${dia.etiqueta}</th>`,
+            ).join("")}
+          </tr>
+        </thead>
+
+        <tbody>
+          ${filas}
+        </tbody>
+      </table>
+    </div>
+  `;
+}
+
+async function cargarDocentesLibresTallerGestion() {
+  if (!vistaDocentesLibresTallerGestion) return;
+
+  const textoOriginal = btnDocentesLibresTallerGestion?.innerHTML || "";
+
+  try {
+    if (btnDocentesLibresTallerGestion) {
+      btnDocentesLibresTallerGestion.disabled = true;
+
+      btnDocentesLibresTallerGestion.innerHTML = `
+        <i class="fa-solid fa-spinner fa-spin"></i>
+        Consultando docentes...
+      `;
+    }
+
+    vistaDocentesLibresTallerGestion.hidden = false;
+
+    vistaDocentesLibresTallerGestion.innerHTML = `
+      <p class="mensaje-gestion">
+        Consultando docentes de Taller y horarios activos...
+      </p>
+    `;
+
+    const [resultadoAsignaciones, resultadoHorarios] = await Promise.all([
+      getDocs(collection(db, "asignaciones_docentes")),
+
+      getDocs(
+        query(collection(db, "horarios"), where("estado", "==", "ACTIVO")),
+      ),
+    ]);
+
+    const asignacionesTallerActivas = resultadoAsignaciones.docs
+      .map((documento) => ({
+        id: documento.id,
+        ...documento.data(),
+      }))
+      .filter((asignacion) => {
+        const estado = String(asignacion.estado || "")
+          .trim()
+          .toUpperCase();
+
+        const tipo = String(asignacion.espacioTipo || "")
+          .trim()
+          .toUpperCase();
+
+        const estaActiva =
+          !estado || estado === "ACTIVA" || estado === "ACTIVO";
+
+        return estaActiva && tipo === "TALLER";
+      });
+
+    const horariosActivos = resultadoHorarios.docs.map((documento) => ({
+      id: documento.id,
+      ...documento.data(),
+    }));
+
+    const docentesTaller = new Map();
+
+    asignacionesTallerActivas.forEach((asignacion) => {
+      const clave = obtenerClaveDocenteLibreTallerGestion(asignacion);
+
+      if (!clave) return;
+
+      if (!docentesTaller.has(clave)) {
+        docentesTaller.set(clave, {
+          nombre:
+            String(asignacion.docenteNombre || "").trim() ||
+            "Docente sin cargar",
+
+          turnos: new Set(),
+        });
+      }
+    });
+
+    /*
+     * El turno del docente de Taller se obtiene
+     * de sus bloques de TALLER activos.
+     */
+    horariosActivos.forEach((horario) => {
+      const tipo = String(horario.tipoHorario || "")
+        .trim()
+        .toUpperCase();
+
+      if (tipo !== "TALLER") return;
+
+      const clave = obtenerClaveDocenteLibreTallerGestion(horario);
+
+      const turno = normalizarTurnoDocenteGestion(horario.turno);
+
+      if (!docentesTaller.has(clave)) return;
+
+      if (turno !== "MANANA" && turno !== "TARDE") {
+        return;
+      }
+
+      docentesTaller.get(clave).turnos.add(turno);
+    });
+
+    /*
+     * Registramos por separado los bloques de TALLER
+     * y los bloques de AULA.
+     *
+     * - Si tiene TALLER, no se mostrará como libre.
+     * - Si no tiene TALLER pero tiene AULA,
+     *   se mostrará indicando "(En clase de aula)".
+     */
+    const bloquesTaller = new Set();
+    const bloquesAula = new Map();
+
+    horariosActivos.forEach((horario) => {
+      const clave = obtenerClaveDocenteLibreTallerGestion(horario);
+
+      const turno = normalizarTurnoDocenteGestion(horario.turno);
+
+      const dia = String(horario.dia || "")
+        .trim()
+        .toUpperCase();
+
+      const tipoHorario = String(horario.tipoHorario || "")
+        .trim()
+        .toUpperCase();
+
+      if (!clave) return;
+
+      if (turno !== "MANANA" && turno !== "TARDE") {
+        return;
+      }
+
+      if (!DIAS_HORARIO_GESTION.some((item) => item.valor === dia)) {
+        return;
+      }
+
+      const claveBloque = `${clave}__${turno}__${dia}`;
+
+      if (tipoHorario === "TALLER") {
+        bloquesTaller.add(claveBloque);
+      }
+
+      if (tipoHorario === "AULA") {
+        if (!bloquesAula.has(claveBloque)) {
+          bloquesAula.set(claveBloque, []);
+        }
+
+        bloquesAula.get(claveBloque).push({
+          espacio: obtenerEspacioHorarioGestion(horario),
+          curso: obtenerCursoHorarioGestion(horario),
+          horario: obtenerHorarioTextoGestion(horario),
+          horaInicio: String(horario.horaInicio || "").trim(),
+        });
+      }
+    });
+
+    const crearDisponibilidadVacia = () =>
+      Object.fromEntries(DIAS_HORARIO_GESTION.map((dia) => [dia.valor, []]));
+
+    const disponibilidad = {
+      MANANA: crearDisponibilidadVacia(),
+      TARDE: crearDisponibilidadVacia(),
+    };
+
+    docentesTaller.forEach((docente, clave) => {
+      docente.turnos.forEach((turno) => {
+        DIAS_HORARIO_GESTION.forEach((dia) => {
+          const claveDiaTurno = `${clave}__${turno}__${dia.valor}`;
+
+          const tieneTaller = bloquesTaller.has(claveDiaTurno);
+
+          const clasesAula = bloquesAula.get(claveDiaTurno) || [];
+
+          if (!tieneTaller) {
+            const clasesOrdenadas = [...clasesAula].sort((a, b) =>
+              a.horaInicio.localeCompare(b.horaInicio),
+            );
+
+            const clasesAgrupadas = [];
+
+            clasesOrdenadas.forEach((clase) => {
+              const horas = String(clase.horario || "").match(/\d{1,2}:\d{2}/g);
+
+              const horaInicio =
+                horas?.length >= 1 ? horas[0] : clase.horaInicio;
+
+              const horaFin = horas?.length >= 2 ? horas[1] : "";
+
+              const ultimoGrupo = clasesAgrupadas[clasesAgrupadas.length - 1];
+
+              /*
+               * Solo agrupamos si la clase inmediatamente
+               * anterior corresponde al mismo espacio
+               * curricular y al mismo curso.
+               *
+               * Si en el medio aparece otra clase,
+               * comienza un grupo nuevo.
+               */
+              const puedeAgruparse =
+                ultimoGrupo &&
+                ultimoGrupo.espacio === clase.espacio &&
+                ultimoGrupo.curso === clase.curso;
+
+              if (puedeAgruparse) {
+                ultimoGrupo.horaFin = horaFin;
+              } else {
+                clasesAgrupadas.push({
+                  espacio: clase.espacio,
+                  curso: clase.curso,
+                  horaInicio,
+                  horaFin,
+                  horario: clase.horario,
+                });
+              }
+            });
+
+            const detalleAula = clasesAgrupadas
+              .map((clase) => {
+                const horarioAgrupado =
+                  clase.horaInicio && clase.horaFin
+                    ? `${clase.horaInicio} a ${clase.horaFin}`
+                    : clase.horario;
+
+                return `${clase.espacio} con ${clase.curso}\n ${horarioAgrupado}`;
+              })
+              .join("\n");
+
+            const nombreMostrar = clasesOrdenadas.length
+              ? `${docente.nombre}\n${detalleAula}`
+              : docente.nombre;
+
+            disponibilidad[turno][dia.valor].push(nombreMostrar);
+          }
+        });
+      });
+    });
+
+    ["MANANA", "TARDE"].forEach((turno) => {
+      DIAS_HORARIO_GESTION.forEach((dia) => {
+        disponibilidad[turno][dia.valor].sort((a, b) =>
+          a.localeCompare(b, "es", {
+            sensitivity: "base",
+          }),
+        );
+      });
+    });
+
+    vistaDocentesLibresTallerGestion.innerHTML = `
+      <h4>Turno mañana</h4>
+
+      ${construirTablaDocentesLibresTallerGestion(disponibilidad.MANANA)}
+
+      <h4>Turno tarde</h4>
+
+      ${construirTablaDocentesLibresTallerGestion(disponibilidad.TARDE)}
+    `;
+    docentesLibresTallerGestionCargados = true;
+  } catch (error) {
+    console.error(
+      "Error al consultar docentes libres de Taller en Portal Gestión:",
+      error,
+    );
+
+    vistaDocentesLibresTallerGestion.hidden = false;
+
+    vistaDocentesLibresTallerGestion.innerHTML = `
+      <p class="mensaje-gestion error">
+        No se pudo consultar la disponibilidad de los docentes de Taller.
+      </p>
+    `;
+  } finally {
+    if (btnDocentesLibresTallerGestion) {
+      btnDocentesLibresTallerGestion.disabled = false;
+
+      btnDocentesLibresTallerGestion.innerHTML =
+        textoOriginal ||
+        `
+          <i class="fa-solid fa-user-clock"></i>
+          Ver docentes libres de Taller
+        `;
+    }
+  }
+}
+
+async function alternarDocentesLibresTallerGestion() {
+  if (!btnDocentesLibresTallerGestion || !vistaDocentesLibresTallerGestion) {
+    return;
+  }
+
+  if (!vistaDocentesLibresTallerGestion.hidden) {
+    vistaDocentesLibresTallerGestion.hidden = true;
+
+    btnDocentesLibresTallerGestion.innerHTML = `
+      <i class="fa-solid fa-user-clock"></i>
+      Ver docentes libres de Taller
+    `;
+
+    return;
+  }
+
+  if (docentesLibresTallerGestionCargados) {
+    vistaDocentesLibresTallerGestion.hidden = false;
+
+    btnDocentesLibresTallerGestion.innerHTML = `
+      <i class="fa-solid fa-eye-slash"></i>
+      Ocultar docentes libres de Taller
+    `;
+
+    return;
+  }
+
+  await cargarDocentesLibresTallerGestion();
+
+  if (docentesLibresTallerGestionCargados) {
+    btnDocentesLibresTallerGestion.innerHTML = `
+      <i class="fa-solid fa-eye-slash"></i>
+      Ocultar docentes libres de Taller
+    `;
+  }
+}
+
 function mostrarMensajeDocumentacionGestion(texto, tipo = "") {
   if (!mensajeDocumentacionGestion) return;
 
@@ -5327,6 +5702,13 @@ if (filtroTurnoDocenteGestion) {
 }
 if (btnVerHorariosGestion) {
   btnVerHorariosGestion.addEventListener("click", cargarHorariosGestion);
+}
+
+if (btnDocentesLibresTallerGestion) {
+  btnDocentesLibresTallerGestion.addEventListener(
+    "click",
+    alternarDocentesLibresTallerGestion,
+  );
 }
 
 if (filtroTipoHorarioGestion) {

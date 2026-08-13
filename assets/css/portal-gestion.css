@@ -2769,3 +2769,21 @@ body {
     grid-template-columns: 1fr;
   }
 }
+/* =====================================================
+   DOCENTES LIBRES DE TALLER
+===================================================== */
+
+.tabla-docentes-libres-taller {
+  width: 100%;
+  table-layout: fixed;
+}
+
+.tabla-docentes-libres-taller th,
+.tabla-docentes-libres-taller td {
+  width: 20%;
+  text-align: left;
+  vertical-align: top;
+}
+.tabla-docentes-libres-taller td {
+  white-space: pre-line;
+}
