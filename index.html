@@ -642,7 +642,106 @@
           </div>
         </div>
       </section>
+      <!-- =====================================================
+     CALENDARIO ESCOLAR
+===================================================== -->
 
+      <section class="calendario-escolar" id="calendario-escolar">
+        <div class="contenedor">
+          <div class="encabezado-seccion">
+            <span>Fechas importantes</span>
+
+            <h2>
+              Calendario Escolar <span id="anioCalendarioEscolar">2026</span>
+            </h2>
+
+            <p>
+              Consultá las principales fechas, períodos y actividades previstas
+              durante el ciclo lectivo.
+            </p>
+          </div>
+
+          <div class="calendario-controles">
+            <button
+              class="calendario-flecha calendario-anterior"
+              id="calendarioAnterior"
+              type="button"
+              aria-label="Ver meses anteriores"
+            >
+              <i class="fa-solid fa-chevron-left"></i>
+            </button>
+
+            <button
+              class="calendario-flecha calendario-siguiente"
+              id="calendarioSiguiente"
+              type="button"
+              aria-label="Ver meses siguientes"
+            >
+              <i class="fa-solid fa-chevron-right"></i>
+            </button>
+          </div>
+
+          <div class="calendario-meses">
+            <!-- JULIO -->
+            <article class="calendario-mes">
+              <div class="calendario-mes-encabezado">
+                <span>2026</span>
+                <h3>Julio</h3>
+              </div>
+
+              <div class="calendario-eventos">
+                <p class="calendario-sin-eventos">
+                  Sin eventos destacados cargados.
+                </p>
+              </div>
+            </article>
+
+            <!-- AGOSTO -->
+            <article class="calendario-mes calendario-mes-destacado">
+              <div class="calendario-mes-encabezado">
+                <span>2026</span>
+                <h3>Agosto</h3>
+              </div>
+
+              <div class="calendario-eventos">
+                <article class="calendario-evento">
+                  <div class="calendario-evento-fecha">
+                    <strong>18 al 21</strong>
+                    <span>Agosto</span>
+                  </div>
+
+                  <div class="calendario-evento-contenido">
+                    <span class="calendario-evento-etiqueta">
+                      Mesas de Exámenes
+                    </span>
+
+                    <h4>Período de inscripción</h4>
+
+                    <p>
+                      Inscripción a Mesas de Exámenes a través del Portal
+                      Institucional.
+                    </p>
+                  </div>
+                </article>
+              </div>
+            </article>
+
+            <!-- SEPTIEMBRE -->
+            <article class="calendario-mes">
+              <div class="calendario-mes-encabezado">
+                <span>2026</span>
+                <h3>Septiembre</h3>
+              </div>
+
+              <div class="calendario-eventos">
+                <p class="calendario-sin-eventos">
+                  Sin eventos destacados cargados.
+                </p>
+              </div>
+            </article>
+          </div>
+        </div>
+      </section>
       <section class="novedades" id="novedades">
         <div class="contenedor">
           <div class="encabezado-seccion">
@@ -1079,5 +1178,6 @@
     </script>
 
     <script src="assets/js/galeria.js"></script>
+    <script src="assets/js/calendario-escolar.js"></script>
   </body>
 </html>
