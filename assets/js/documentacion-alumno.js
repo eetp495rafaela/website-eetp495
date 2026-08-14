@@ -285,7 +285,7 @@ function mostrarDocumentosEnTabla(documentos) {
   if (!Array.isArray(documentos) || !documentos.length) {
     cuerpoTablaDocumentacionAlumno.innerHTML = `
       <tr>
-        <td colspan="4" class="tabla-vacia">
+        <td colspan="5" class="tabla-vacia">
           ${escaparHtml(obtenerMensajeSinDocumentos())}
         </td>
       </tr>
@@ -297,6 +297,10 @@ function mostrarDocumentosEnTabla(documentos) {
   cuerpoTablaDocumentacionAlumno.innerHTML = documentos
     .map((documento) => {
       const driveUrl = escaparHtml(documento.driveUrl);
+      const tituloMaterial =
+        documento.tipoDocumento === "MATERIAL_ESTUDIO"
+          ? String(documento.tituloMaterial || "").trim()
+          : "—";
 
       const primeraColumna = esCursadaCompletaAlumno
         ? obtenerCursoVisibleDocumento(documento)
@@ -306,6 +310,7 @@ function mostrarDocumentosEnTabla(documentos) {
         <tr>
           <td>${escaparHtml(primeraColumna)}</td>
           <td>${escaparHtml(documento.espacioCurricular)}</td>
+          <td>${escaparHtml(tituloMaterial)}</td>
           <td>${escaparHtml(formatearFechaCarga(documento.fechaCarga))}</td>
           <td>
             <a
@@ -366,7 +371,7 @@ async function cargarDocumentosAlumno() {
 
   cuerpoTablaDocumentacionAlumno.innerHTML = `
     <tr>
-      <td colspan="4" class="tabla-vacia">
+      <td colspan="5" class="tabla-vacia">
         Cargando documentación disponible...
       </td>
     </tr>
@@ -400,7 +405,7 @@ async function cargarDocumentosAlumno() {
 
     cuerpoTablaDocumentacionAlumno.innerHTML = `
       <tr>
-        <td colspan="4" class="tabla-vacia">
+        <td colspan="5" class="tabla-vacia">
           No se pudo cargar la documentación disponible.
         </td>
       </tr>
@@ -472,7 +477,7 @@ onAuthStateChanged(auth, (usuario) => {
   if (cuerpoTablaDocumentacionAlumno) {
     cuerpoTablaDocumentacionAlumno.innerHTML = `
       <tr>
-        <td colspan="4" class="tabla-vacia">
+        <td colspan="5" class="tabla-vacia">
           Todavía no se consultó tu documentación. Presioná “Ver mi documentación”
           para cargarla.
         </td>

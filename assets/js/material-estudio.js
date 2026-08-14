@@ -70,6 +70,12 @@ const btnVerDocumentosDocente = document.getElementById(
   "btnVerDocumentosDocente",
 );
 
+const campoTituloMaterialEstudio = document.getElementById(
+  "campoTituloMaterialEstudio",
+);
+
+const tituloMaterialEstudio = document.getElementById("tituloMaterialEstudio");
+
 let opcionesDocumentacion = [];
 
 function mostrarMensajeDocumentacion(texto, tipo = "") {
@@ -255,7 +261,7 @@ function mostrarDocumentosEnTabla(documentos) {
   if (!Array.isArray(documentos) || !documentos.length) {
     cuerpoTablaDocumentosDocente.innerHTML = `
       <tr>
-        <td colspan="5" class="tabla-documentos-vacia">
+        <td colspan="6" class="tabla-documentos-vacia">
           No hay documentación cargada para tus cursos y espacios curriculares asignados.
         </td>
       </tr>
@@ -267,6 +273,10 @@ function mostrarDocumentosEnTabla(documentos) {
   cuerpoTablaDocumentosDocente.innerHTML = documentos
     .map((documento) => {
       const url = escaparHtml(documento.driveUrl);
+      const tituloMaterial =
+        documento.tipoDocumento === "MATERIAL_ESTUDIO"
+          ? String(documento.tituloMaterial || "").trim()
+          : "—";
 
       return `
         <tr>
@@ -275,6 +285,7 @@ function mostrarDocumentosEnTabla(documentos) {
             obtenerEtiquetaTipoDocumento(documento.tipoDocumento),
           )}</td>
           <td>${escaparHtml(documento.espacioCurricular)}</td>
+          <td>${escaparHtml(tituloMaterial)}</td>
           <td>${escaparHtml(formatearFechaCarga(documento.fechaCarga))}</td>
           <td>
             <a
@@ -304,7 +315,7 @@ async function cargarDocumentosDisponibles() {
 
   cuerpoTablaDocumentosDocente.innerHTML = `
     <tr>
-      <td colspan="5" class="tabla-documentos-vacia">
+      <td colspan="6" class="tabla-documentos-vacia">
         Cargando documentación disponible...
       </td>
     </tr>
@@ -324,6 +335,29 @@ async function cargarDocumentosDisponibles() {
   }
 
   mostrarDocumentosEnTabla(resultado.documentos || []);
+}
+
+function actualizarCampoTituloMaterialEstudio() {
+  if (
+    !tipoDocumentoAcademico ||
+    !campoTituloMaterialEstudio ||
+    !tituloMaterialEstudio
+  ) {
+    return;
+  }
+
+  const esMaterialEstudio =
+    String(tipoDocumentoAcademico.value || "")
+      .trim()
+      .toUpperCase() === "MATERIAL_ESTUDIO";
+
+  campoTituloMaterialEstudio.hidden = !esMaterialEstudio;
+
+  tituloMaterialEstudio.required = esMaterialEstudio;
+
+  if (!esMaterialEstudio) {
+    tituloMaterialEstudio.value = "";
+  }
 }
 
 if (btnAbrirDocumentacionAcademica) {
@@ -350,7 +384,7 @@ if (btnAbrirDocumentacionAcademica) {
       if (cuerpoTablaDocumentosDocente) {
         cuerpoTablaDocumentosDocente.innerHTML = `
           <tr>
-            <td colspan="5" class="tabla-documentos-vacia">
+            <td colspan="6" class="tabla-documentos-vacia">
               Todavía no se consultó la documentación cargada. Presioná
               “Ver documentación cargada” para mostrarla.
             </td>
@@ -394,7 +428,7 @@ if (btnVerDocumentosDocente) {
       if (cuerpoTablaDocumentosDocente) {
         cuerpoTablaDocumentosDocente.innerHTML = `
           <tr>
-            <td colspan="5" class="tabla-documentos-vacia">
+            <td colspan="6" class="tabla-documentos-vacia">
               No se pudo cargar la documentación disponible.
             </td>
           </tr>
@@ -445,6 +479,15 @@ if (btnProbarConexionDocumentacion) {
   });
 }
 
+if (tipoDocumentoAcademico) {
+  tipoDocumentoAcademico.addEventListener(
+    "change",
+    actualizarCampoTituloMaterialEstudio,
+  );
+
+  actualizarCampoTituloMaterialEstudio();
+}
+
 if (cursoDocumentoAcademico) {
   cursoDocumentoAcademico.addEventListener("change", cargarEspaciosDisponibles);
 }
@@ -458,6 +501,8 @@ if (formDocumentacionAcademica) {
     const tipoDocumento = String(tipoDocumentoAcademico.value || "")
       .trim()
       .toUpperCase();
+
+    const tituloMaterial = String(tituloMaterialEstudio?.value || "").trim();
 
     const cursoAnio = String(cursoDocumentoAcademico.value || "").trim();
 
@@ -481,6 +526,14 @@ if (formDocumentacionAcademica) {
     if (!tipoDocumento || !cursoAnio || !espacioId) {
       mostrarMensajeDocumentacion(
         "Seleccioná tipo de documento, curso y espacio curricular.",
+        "error",
+      );
+      return;
+    }
+
+    if (tipoDocumento === "MATERIAL_ESTUDIO" && !tituloMaterial) {
+      mostrarMensajeDocumentacion(
+        "Ingresá un Título / Tema para el material de estudio.",
         "error",
       );
       return;
@@ -533,6 +586,7 @@ if (formDocumentacionAcademica) {
         cursoAnio,
         espacioId,
         espacioNombre: opcionEspacio?.dataset.nombre || "",
+        tituloMaterial,
         nombreOriginal: archivo.name,
         tipoMime: "application/pdf",
         archivoBase64,
@@ -559,6 +613,9 @@ if (formDocumentacionAcademica) {
       });
 
       archivoDocumentoAcademico.value = "";
+      if (tituloMaterialEstudio) {
+        tituloMaterialEstudio.value = "";
+      }
 
       await cargarDocumentosDisponibles();
 

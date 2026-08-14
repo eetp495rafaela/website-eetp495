@@ -713,31 +713,47 @@
                 </select>
               </div>
 
-              <div class="campo-documentacion campo-archivo-documentacion">
-                <label for="archivoDocumentoAcademico">Archivo PDF *</label>
+              <div class="fila-carga-documentacion">
+                <div
+                  class="campo-documentacion campo-titulo-material"
+                  id="campoTituloMaterialEstudio"
+                  hidden
+                >
+                  <label for="tituloMaterialEstudio"> Título / Tema * </label>
 
-                <input
-                  id="archivoDocumentoAcademico"
-                  type="file"
-                  accept="application/pdf,.pdf"
-                  required
-                />
+                  <input
+                    id="tituloMaterialEstudio"
+                    type="text"
+                    maxlength="120"
+                    placeholder="Ej.: Sensores y actuadores"
+                  />
+                </div>
 
-                <small>Solo se permiten archivos PDF.</small>
+                <div class="campo-documentacion campo-archivo-documentacion">
+                  <label for="archivoDocumentoAcademico"> Archivo PDF * </label>
+
+                  <input
+                    id="archivoDocumentoAcademico"
+                    type="file"
+                    accept="application/pdf,.pdf"
+                    required
+                  />
+
+                  <small>Solo se permiten archivos PDF.</small>
+                </div>
+
+                <div class="acciones acciones-subir-documentacion">
+                  <button
+                    class="btn-accion"
+                    id="btnSubirDocumentoAcademico"
+                    type="submit"
+                  >
+                    <i class="fa-solid fa-cloud-arrow-up"></i>
+                    Subir documento
+                  </button>
+                </div>
               </div>
             </div>
-
-            <div class="acciones">
-              <button
-                class="btn-accion"
-                id="btnSubirDocumentoAcademico"
-                type="submit"
-              >
-                <i class="fa-solid fa-cloud-arrow-up"></i>
-                Subir documento
-              </button>
-            </div>
-
             <p
               id="mensajeDocumentacionAcademica"
               class="mensaje-formulario"
@@ -773,6 +789,7 @@
                     <th>Curso</th>
                     <th>Tipo</th>
                     <th>Espacio Curricular</th>
+                    <th>Título / Tema</th>
                     <th>Fecha de carga</th>
                     <th>Acciones</th>
                   </tr>
@@ -780,7 +797,7 @@
 
                 <tbody id="cuerpoTablaDocumentosDocente">
                   <tr>
-                    <td colspan="5" class="tabla-documentos-vacia">
+                    <td colspan="6" class="tabla-documentos-vacia">
                       Todavía no se consultó la documentación cargada. Presioná
                       “Ver documentación cargada” para mostrarla.
                     </td>

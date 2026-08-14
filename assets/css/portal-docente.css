@@ -642,7 +642,8 @@ RESPONSIVE
 }
 
 #panelDocumentacionAcademica .panel-info {
-  max-width: 1120px;
+  max-width: none;
+  width: 100%;
   margin: 0 auto;
   padding: 34px;
   border: 1px solid rgba(255, 255, 255, 0.16);
@@ -1765,7 +1766,8 @@ body {
 
 /* Panel principal de carga */
 #panelDocumentacionAcademica .panel-info {
-  max-width: 1180px;
+  max-width: none;
+  width: 100%;
   margin-left: auto;
   margin-right: auto;
 
@@ -3963,4 +3965,44 @@ body[data-rol-permitido="DOCENTE"] .btn-arriba i {
     font-size: 0.8rem;
     padding: 7px 9px;
   }
+}
+/* =====================================================
+   FILA FINAL - DOCUMENTACIÓN ACADÉMICA
+===================================================== */
+
+.fila-carga-documentacion {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.5fr) auto;
+  gap: 18px;
+  align-items: start;
+}
+
+.fila-carga-documentacion .campo-archivo-documentacion {
+  grid-column: auto;
+}
+
+#panelDocumentacionAcademica .acciones-subir-documentacion {
+  margin-top: 0;
+}
+
+#panelDocumentacionAcademica .acciones-subir-documentacion .btn-accion {
+  white-space: nowrap;
+}
+
+@media (max-width: 760px) {
+  .fila-carga-documentacion {
+    grid-template-columns: 1fr;
+  }
+
+  #panelDocumentacionAcademica .acciones-subir-documentacion .btn-accion {
+    width: 100%;
+  }
+}
+#panelDocumentacionAcademica .acciones-subir-documentacion {
+  align-self: start;
+  padding-top: 28px;
+}
+#campoTituloMaterialEstudio[hidden] {
+  display: none !important;
 }

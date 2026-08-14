@@ -227,7 +227,7 @@ function mostrarDocumentosEnTabla(documentos) {
   if (!Array.isArray(documentos) || !documentos.length) {
     cuerpoTablaDocumentacionAdmin.innerHTML = `
       <tr>
-        <td colspan="5" class="tabla-vacia">
+        <td colspan="6" class="tabla-vacia">
           No hay documentación académica cargada.
         </td>
       </tr>
@@ -240,6 +240,10 @@ function mostrarDocumentosEnTabla(documentos) {
     .map((documento) => {
       const idDocumento = escaparHtml(documento.id);
       const driveUrl = escaparHtml(documento.driveUrl);
+      const tituloMaterial =
+        documento.tipoDocumento === "MATERIAL_ESTUDIO"
+          ? String(documento.tituloMaterial || "").trim()
+          : "—";
       const origenDocumento = escaparHtml(
         documento.origen || "DOCUMENTACION_ACADEMICA",
       );
@@ -264,6 +268,7 @@ function mostrarDocumentosEnTabla(documentos) {
           <td>${escaparHtml(documento.curso)}</td>
           <td>${tipoVisible}</td>
           <td>${escaparHtml(documento.espacioCurricular)}</td>
+          <td>${escaparHtml(tituloMaterial)}</td>
           <td>${escaparHtml(formatearFechaCarga(documento.fechaCarga))}</td>
           <td>
             <div class="acciones-documentacion-admin">
@@ -310,7 +315,7 @@ async function cargarDocumentosAdministracion() {
 
   cuerpoTablaDocumentacionAdmin.innerHTML = `
     <tr>
-      <td colspan="5" class="tabla-vacia">
+      <td colspan="6" class="tabla-vacia">
         Cargando documentación académica...
       </td>
     </tr>
@@ -342,7 +347,7 @@ async function cargarDocumentosAdministracion() {
 
     cuerpoTablaDocumentacionAdmin.innerHTML = `
       <tr>
-        <td colspan="5" class="tabla-vacia">
+        <td colspan="6" class="tabla-vacia">
           No se pudo cargar la documentación académica.
         </td>
       </tr>
