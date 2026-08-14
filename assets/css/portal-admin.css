@@ -2126,7 +2126,7 @@ body.modal-abierto {
 
 .selector-roles-admin {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(6, minmax(0, 1fr));
   gap: 0.65rem;
   margin-top: 0.35rem;
 }
@@ -2849,5 +2849,18 @@ body.modal-abierto {
   .btn-modal-cancelar,
   .btn-modal-confirmar {
     width: 100%;
+  }
+}
+.campo-roles-adicionales {
+  grid-column: 1 / -1;
+}
+
+.campo-roles-adicionales .selector-roles-admin {
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+}
+
+@media (max-width: 650px) {
+  .campo-roles-adicionales .selector-roles-admin {
+    grid-template-columns: 1fr;
   }
 }
