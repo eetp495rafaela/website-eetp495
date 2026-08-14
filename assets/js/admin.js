@@ -5428,6 +5428,10 @@ if (btnCerrarSesion) {
       cancelButtonText: "Cancelar",
       reverseButtons: true,
       focusCancel: true,
+
+      customClass: {
+        popup: "modal-cierre-sesion-portal",
+      },
     });
 
     if (!resultado.isConfirmed) return;
