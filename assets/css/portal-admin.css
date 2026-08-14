@@ -2864,3 +2864,42 @@ body.modal-abierto {
     grid-template-columns: 1fr;
   }
 }
+.panel-calendario-escolar-admin {
+  grid-column: 1 / -1;
+  width: 100%;
+}
+.panel-calendario-escolar-admin .form-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.campo-calendario-titulo-admin {
+  grid-column: span 1;
+}
+
+.campo-calendario-descripcion-admin {
+  grid-column: span 2;
+}
+
+.campo-calendario-descripcion-admin textarea {
+  width: 100%;
+  padding: 12px 14px;
+  resize: vertical;
+  font-family: inherit;
+  font-size: inherit;
+}
+@media (max-width: 900px) {
+  .panel-calendario-escolar-admin .form-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .campo-calendario-titulo-admin,
+  .campo-calendario-descripcion-admin {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 700px) {
+  .panel-calendario-escolar-admin .form-grid {
+    grid-template-columns: 1fr;
+  }
+}

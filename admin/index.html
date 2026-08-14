@@ -2340,6 +2340,100 @@
             <p class="mensaje-formulario" id="mensajeSolicitudesAlta"></p>
           </div>
 
+          <!-- Calendario Escolar -->
+          <div class="panel-info panel-calendario-escolar-admin">
+            <div class="encabezado-listado">
+              <div>
+                <h3>Calendario Escolar</h3>
+
+                <p>
+                  Cargá las fechas y actividades que se mostrarán en el
+                  Calendario Escolar del sitio público.
+                </p>
+              </div>
+            </div>
+
+            <form
+              id="formCalendarioEscolarAdmin"
+              class="formulario-calendario-admin"
+              autocomplete="off"
+            >
+              <div class="form-grid">
+                <div class="campo-formulario">
+                  <label for="calendarioFechaInicioAdmin">
+                    Fecha de inicio *
+                  </label>
+
+                  <input id="calendarioFechaInicioAdmin" type="date" required />
+                </div>
+
+                <div class="campo-formulario">
+                  <label for="calendarioFechaFinAdmin">
+                    Fecha de finalización *
+                  </label>
+
+                  <input id="calendarioFechaFinAdmin" type="date" required />
+                </div>
+
+                <div class="campo-formulario">
+                  <label for="calendarioEtiquetaAdmin"> Etiqueta * </label>
+
+                  <input
+                    id="calendarioEtiquetaAdmin"
+                    type="text"
+                    maxlength="60"
+                    placeholder="Ej.: Mesas de Exámenes"
+                    required
+                  />
+                </div>
+
+                <div class="campo-formulario campo-calendario-titulo-admin">
+                  <label for="calendarioTituloAdmin"> Título * </label>
+
+                  <input
+                    id="calendarioTituloAdmin"
+                    type="text"
+                    maxlength="120"
+                    placeholder="Ej.: Período de inscripción"
+                    required
+                  />
+                </div>
+
+                <div
+                  class="campo-formulario campo-calendario-descripcion-admin"
+                >
+                  <label for="calendarioDescripcionAdmin">
+                    Descripción *
+                  </label>
+
+                  <textarea
+                    id="calendarioDescripcionAdmin"
+                    rows="3"
+                    maxlength="300"
+                    placeholder="Breve descripción del evento"
+                    required
+                  ></textarea>
+                </div>
+              </div>
+
+              <div class="acciones">
+                <button
+                  type="submit"
+                  class="btn-accion"
+                  id="btnGuardarEventoCalendarioAdmin"
+                >
+                  <i class="fa-solid fa-calendar-plus"></i>
+                  Guardar evento
+                </button>
+              </div>
+
+              <p
+                class="mensaje-formulario"
+                id="mensajeCalendarioEscolarAdmin"
+              ></p>
+            </form>
+          </div>
+
           <!-- Administrar usuarios inactivos -->
           <div class="panel-info panel-usuarios-inactivos">
             <div class="encabezado-listado">
@@ -3104,6 +3198,10 @@
     <script
       type="module"
       src="../assets/js/usuarios-inactivos-admin.js"
+    ></script>
+    <script
+      type="module"
+      src="../assets/js/calendario-escolar-admin.js"
     ></script>
 
     <script>
