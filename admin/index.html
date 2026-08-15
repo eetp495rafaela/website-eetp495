@@ -2425,6 +2425,15 @@
                   <i class="fa-solid fa-calendar-plus"></i>
                   Guardar evento
                 </button>
+                <button
+                  type="button"
+                  class="btn-accion"
+                  id="btnCancelarEdicionCalendarioAdmin"
+                  hidden
+                >
+                  <i class="fa-solid fa-xmark"></i>
+                  Cancelar edición
+                </button>
               </div>
 
               <p
@@ -2432,6 +2441,56 @@
                 id="mensajeCalendarioEscolarAdmin"
               ></p>
             </form>
+            <!-- Eventos publicados -->
+            <div class="calendario-eventos-admin">
+              <div class="encabezado-listado">
+                <div>
+                  <h3>Eventos publicados</h3>
+
+                  <p>
+                    Consultá, editá o eliminá los eventos cargados en el
+                    Calendario Escolar.
+                  </p>
+                </div>
+
+                <button
+                  type="button"
+                  class="btn-accion"
+                  id="btnActualizarEventosCalendarioAdmin"
+                >
+                  <i class="fa-solid fa-arrows-rotate"></i>
+                  Actualizar eventos
+                </button>
+              </div>
+
+              <div class="tabla-contenedor">
+                <table class="tabla-usuarios tabla-calendario-admin">
+                  <thead>
+                    <tr>
+                      <th>Fecha de inicio</th>
+                      <th>Fecha de finalización</th>
+                      <th>Etiqueta</th>
+                      <th>Título</th>
+                      <th>Acciones</th>
+                    </tr>
+                  </thead>
+
+                  <tbody id="cuerpoTablaCalendarioAdmin">
+                    <tr>
+                      <td colspan="5" class="tabla-vacia">
+                        Todavía no se consultaron los eventos publicados.
+                        Presioná “Actualizar eventos” para cargarlos.
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
+              <p
+                class="mensaje-formulario"
+                id="mensajeListadoCalendarioAdmin"
+              ></p>
+            </div>
           </div>
 
           <!-- Administrar usuarios inactivos -->

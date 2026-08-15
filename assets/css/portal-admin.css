@@ -2903,3 +2903,30 @@ body.modal-abierto {
     grid-template-columns: 1fr;
   }
 }
+/* =====================================================
+   CALENDARIO ESCOLAR - BOTONES DE ACCIONES
+===================================================== */
+
+.tabla-calendario-admin td:last-child {
+  white-space: nowrap;
+}
+
+.tabla-calendario-admin td:last-child .btn-accion {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+
+  width: auto;
+  min-width: 100px;
+  flex: 0 0 auto;
+
+  padding: 8px 12px;
+  margin-right: 8px;
+
+  font-size: 0.9rem;
+}
+
+.tabla-calendario-admin td:last-child .btn-accion:last-child {
+  margin-right: 0;
+}

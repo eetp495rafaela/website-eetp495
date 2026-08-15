@@ -125,8 +125,8 @@
 
           <a class="tarjeta tarjeta-enlace" href="#horarios">
             <i class="fa-solid fa-calendar-days"></i>
-            <h3>Horarios</h3>
-            <p>Consulta de horarios de aula, Taller y Educación Física.</p>
+            <h3>Organización Institucional</h3>
+            <p>Horarios, docentes disponibles y Calendario Escolar.</p>
           </a>
 
           <a class="tarjeta tarjeta-enlace" href="#sira-gestion">
@@ -396,18 +396,17 @@
       </section>
 
       <section class="grupo seccion-destino" id="horarios">
-        <h2>Horarios</h2>
+        <h2>Organización Institucional</h2>
 
         <div class="panel-info panel-gestion-listado">
           <i class="fa-solid fa-calendar-days"></i>
 
           <div class="contenido-panel-gestion">
-            <h3>Horarios institucionales</h3>
+            <h3>Herramientas de organización institucional</h3>
 
             <p>
-              Consulta de horarios de aula, taller, educación física y
-              profesores de taller disponibles para acompañar la organización
-              diaria de la institución.
+              Consultá horarios, generá la pizarra institucional, verificá
+              docentes disponibles de Taller y administrá el Calendario Escolar.
             </p>
 
             <div class="acciones-gestion">
@@ -436,12 +435,181 @@
                 <i class="fa-solid fa-user-clock"></i>
                 Ver docentes libres de Taller
               </button>
+
+              <button
+                class="btn-gestion"
+                id="btnCalendarioEscolarGestion"
+                type="button"
+              >
+                <i class="fa-solid fa-calendar-days"></i>
+                Gestionar Calendario Escolar
+              </button>
             </div>
             <div
               id="vistaDocentesLibresTallerGestion"
               class="vista-gestion"
               hidden
             ></div>
+
+            <div
+              id="vistaCalendarioEscolarGestion"
+              class="vista-gestion calendario-escolar-gestion"
+              hidden
+            >
+              <div class="encabezado-listado">
+                <div>
+                  <h3>Calendario Escolar</h3>
+                  <p>
+                    Cargá y administrá las fechas y actividades que se mostrarán
+                    en el Calendario Escolar del sitio público.
+                  </p>
+                </div>
+              </div>
+
+              <form id="formCalendarioEscolarGestion" autocomplete="off">
+                <div class="form-grid-gestion form-grid-calendario-gestion">
+                  <div class="campo-filtro-gestion">
+                    <label for="calendarioFechaInicioGestion">
+                      Fecha de inicio *
+                    </label>
+
+                    <input
+                      id="calendarioFechaInicioGestion"
+                      type="date"
+                      required
+                    />
+                  </div>
+
+                  <div class="campo-filtro-gestion">
+                    <label for="calendarioFechaFinGestion">
+                      Fecha de finalización *
+                    </label>
+
+                    <input
+                      id="calendarioFechaFinGestion"
+                      type="date"
+                      required
+                    />
+                  </div>
+
+                  <div class="campo-filtro-gestion">
+                    <label for="calendarioEtiquetaGestion"> Etiqueta * </label>
+
+                    <input
+                      id="calendarioEtiquetaGestion"
+                      type="text"
+                      maxlength="60"
+                      placeholder="Ej.: Mesas de Exámenes"
+                      required
+                    />
+                  </div>
+
+                  <div class="campo-filtro-gestion">
+                    <label for="calendarioTituloGestion"> Título * </label>
+
+                    <input
+                      id="calendarioTituloGestion"
+                      type="text"
+                      maxlength="120"
+                      placeholder="Ej.: Período de inscripción"
+                      required
+                    />
+                  </div>
+
+                  <div
+                    class="campo-filtro-gestion campo-calendario-descripcion-gestion"
+                  >
+                    <label for="calendarioDescripcionGestion">
+                      Descripción *
+                    </label>
+
+                    <textarea
+                      id="calendarioDescripcionGestion"
+                      rows="3"
+                      maxlength="300"
+                      placeholder="Breve descripción del evento"
+                      required
+                    ></textarea>
+                  </div>
+                </div>
+
+                <div class="acciones-gestion acciones-calendario-gestion">
+                  <button
+                    type="submit"
+                    class="btn-gestion"
+                    id="btnGuardarEventoCalendarioGestion"
+                  >
+                    <i class="fa-solid fa-calendar-plus"></i>
+                    Guardar evento
+                  </button>
+
+                  <button
+                    type="button"
+                    class="btn-gestion btn-gestion-secundario"
+                    id="btnCancelarEdicionCalendarioGestion"
+                    hidden
+                  >
+                    <i class="fa-solid fa-xmark"></i>
+                    Cancelar edición
+                  </button>
+                </div>
+
+                <p
+                  id="mensajeCalendarioEscolarGestion"
+                  class="mensaje-gestion"
+                ></p>
+              </form>
+
+              <div class="calendario-eventos-gestion">
+                <div class="encabezado-listado">
+                  <div>
+                    <h3>Eventos publicados</h3>
+                    <p>
+                      Consultá, editá o eliminá los eventos cargados en el
+                      Calendario Escolar.
+                    </p>
+                  </div>
+
+                  <button
+                    type="button"
+                    class="btn-gestion"
+                    id="btnActualizarEventosCalendarioGestion"
+                  >
+                    <i class="fa-solid fa-arrows-rotate"></i>
+                    Actualizar eventos
+                  </button>
+                </div>
+
+                <div class="tabla-contenedor">
+                  <table class="tabla-gestion tabla-calendario-gestion">
+                    <thead>
+                      <tr>
+                        <th>Fecha de inicio</th>
+                        <th>Fecha de finalización</th>
+                        <th>Etiqueta</th>
+                        <th>Título</th>
+                        <th>Acciones</th>
+                      </tr>
+                    </thead>
+
+                    <tbody id="cuerpoTablaCalendarioGestion">
+                      <tr>
+                        <td colspan="5" class="tabla-vacia">
+                          Todavía no se consultaron los eventos publicados.
+                          Presioná “Actualizar eventos” para cargarlos.
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+
+                <p
+                  id="mensajeListadoCalendarioGestion"
+                  class="mensaje-gestion"
+                ></p>
+              </div>
+            </div>
+
             <div class="filtros-gestion filtros-horarios-gestion">
               <div class="campo-filtro-gestion">
                 <label for="filtroTipoHorarioGestion">Tipo de horario</label>
@@ -496,7 +664,7 @@
               </div>
             </div>
 
-            <div id="vistaHorariosGestion" class="vista-gestion">
+            <div id="vistaHorariosGestion" class="vista-gestion" hidden>
               <p class="mensaje-gestion">
                 Todavía no se consultaron los horarios. Presioná “Ver horarios”
                 para cargarlos.

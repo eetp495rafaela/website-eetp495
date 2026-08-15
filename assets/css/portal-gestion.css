@@ -2787,3 +2787,110 @@ body {
 .tabla-docentes-libres-taller td {
   white-space: pre-line;
 }
+#horarios .acciones-gestion {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+
+#horarios .acciones-gestion .btn-gestion {
+  width: 100%;
+  justify-content: center;
+}
+@media (max-width: 992px) {
+  #horarios .acciones-gestion {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 576px) {
+  #horarios .acciones-gestion {
+    grid-template-columns: 1fr;
+  }
+}
+/* =====================================================
+   CALENDARIO ESCOLAR - PORTAL GESTIÓN
+===================================================== */
+
+.calendario-escolar-gestion {
+  margin-top: 18px;
+  padding-top: 18px;
+  border-top: 1px solid rgba(15, 39, 66, 0.12);
+}
+
+.form-grid-calendario-gestion {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.campo-calendario-descripcion-gestion {
+  grid-column: span 2;
+}
+
+.campo-calendario-descripcion-gestion textarea {
+  width: 100%;
+  padding: 12px 14px;
+  resize: vertical;
+  font-family: inherit;
+  font-size: inherit;
+  box-sizing: border-box;
+}
+
+.acciones-calendario-gestion {
+  margin-top: 16px;
+}
+
+.calendario-eventos-gestion {
+  margin-top: 28px;
+}
+
+.tabla-calendario-gestion {
+  width: 100%;
+}
+
+.tabla-calendario-gestion td:last-child {
+  white-space: nowrap;
+}
+
+.tabla-calendario-gestion td:last-child .btn-gestion {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+
+  width: auto;
+  min-width: 100px;
+
+  padding: 8px 12px;
+  margin-right: 8px;
+
+  font-size: 0.9rem;
+}
+
+.tabla-calendario-gestion td:last-child .btn-gestion:last-child {
+  margin-right: 0;
+}
+
+@media (max-width: 900px) {
+  .form-grid-calendario-gestion {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .campo-calendario-descripcion-gestion {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 700px) {
+  .form-grid-calendario-gestion {
+    grid-template-columns: 1fr;
+  }
+
+  .campo-calendario-descripcion-gestion {
+    grid-column: auto;
+  }
+}
+#btnActualizarEventosCalendarioGestion {
+  margin-bottom: 14px;
+}

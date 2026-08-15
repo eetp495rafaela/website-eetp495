@@ -36,6 +36,9 @@ const SIME_BACKEND_URL =
 const INFORMES_BACKEND_URL =
   "https://script.google.com/macros/s/AKfycbwiPaqdCFtfChD_b0xUDOF4zqhbOs_WJ45aVBHW9kn6hnbRTGEp93A4mp2W0r0v7pXt4w/exec";
 
+const BACKEND_CALENDARIO_ESCOLAR_URL =
+  "https://script.google.com/macros/s/AKfycbzRqnjl70VJosj9WHL-JGBn0hQ5COZtYQKNiYrJFfyfrdMQ_xDSJxNt0B7RUUbgW2z4iw/exec";
+
 const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
@@ -101,6 +104,60 @@ const btnDocentesLibresTallerGestion = document.getElementById(
 const vistaDocentesLibresTallerGestion = document.getElementById(
   "vistaDocentesLibresTallerGestion",
 );
+
+const btnCalendarioEscolarGestion = document.getElementById(
+  "btnCalendarioEscolarGestion",
+);
+
+const vistaCalendarioEscolarGestion = document.getElementById(
+  "vistaCalendarioEscolarGestion",
+);
+
+const formCalendarioEscolarGestion = document.getElementById(
+  "formCalendarioEscolarGestion",
+);
+
+const calendarioFechaInicioGestion = document.getElementById(
+  "calendarioFechaInicioGestion",
+);
+
+const calendarioFechaFinGestion = document.getElementById(
+  "calendarioFechaFinGestion",
+);
+
+const calendarioEtiquetaGestion = document.getElementById(
+  "calendarioEtiquetaGestion",
+);
+
+const calendarioTituloGestion = document.getElementById(
+  "calendarioTituloGestion",
+);
+
+const calendarioDescripcionGestion = document.getElementById(
+  "calendarioDescripcionGestion",
+);
+
+const btnGuardarEventoCalendarioGestion = document.getElementById(
+  "btnGuardarEventoCalendarioGestion",
+);
+
+const mensajeCalendarioEscolarGestion = document.getElementById(
+  "mensajeCalendarioEscolarGestion",
+);
+
+const btnActualizarEventosCalendarioGestion = document.getElementById(
+  "btnActualizarEventosCalendarioGestion",
+);
+
+const cuerpoTablaCalendarioGestion = document.getElementById(
+  "cuerpoTablaCalendarioGestion",
+);
+
+const mensajeListadoCalendarioGestion = document.getElementById(
+  "mensajeListadoCalendarioGestion",
+);
+
+let eventosCalendarioGestion = [];
 
 let docentesLibresTallerGestionCargados = false;
 
@@ -203,6 +260,7 @@ let informesGestionCargados = [];
 let inscripcionesSimeGestionCargadas = [];
 let documentacionGestionCargada = [];
 let horariosGestionCargados = [];
+let horariosGestionConsultados = false;
 let asignacionesDocentesGestionCargadas = [];
 let horariosDocentesGestionCargados = [];
 let estudiantesGestionCargados = [];
@@ -4299,6 +4357,8 @@ function aplicarFiltrosHorariosGestion() {
 async function cargarHorariosGestion() {
   if (!vistaHorariosGestion) return;
 
+  vistaHorariosGestion.hidden = false;
+
   try {
     if (btnVerHorariosGestion) {
       btnVerHorariosGestion.disabled = true;
@@ -4322,6 +4382,7 @@ async function cargarHorariosGestion() {
     );
 
     const consulta = await getDocs(consultaHorariosActivos);
+    horariosGestionConsultados = true;
 
     horariosGestionCargados = consulta.docs.map((documento) => ({
       id: documento.id,
@@ -4370,11 +4431,41 @@ async function cargarHorariosGestion() {
     if (btnVerHorariosGestion) {
       btnVerHorariosGestion.disabled = false;
       btnVerHorariosGestion.innerHTML = `
-        <i class="fa-solid fa-calendar-days"></i>
-        Ver horarios
-      `;
+  <i class="fa-solid fa-eye-slash"></i>
+  Ocultar horarios
+`;
     }
   }
+}
+
+async function alternarHorariosGestion() {
+  if (!btnVerHorariosGestion || !vistaHorariosGestion) {
+    return;
+  }
+
+  if (!vistaHorariosGestion.hidden) {
+    vistaHorariosGestion.hidden = true;
+
+    btnVerHorariosGestion.innerHTML = `
+      <i class="fa-solid fa-calendar-days"></i>
+      Ver horarios
+    `;
+
+    return;
+  }
+
+  if (horariosGestionConsultados) {
+    vistaHorariosGestion.hidden = false;
+
+    btnVerHorariosGestion.innerHTML = `
+      <i class="fa-solid fa-eye-slash"></i>
+      Ocultar horarios
+    `;
+
+    return;
+  }
+
+  await cargarHorariosGestion();
 }
 
 function obtenerClaveDocenteLibreTallerGestion(datos) {
@@ -5608,6 +5699,289 @@ async function cargarInscripcionesSimeGestion() {
   }
 }
 
+function mostrarMensajeCalendarioGestion(texto, tipo = "") {
+  if (!mensajeCalendarioEscolarGestion) {
+    return;
+  }
+
+  mensajeCalendarioEscolarGestion.textContent = texto || "";
+
+  mensajeCalendarioEscolarGestion.className = "mensaje-gestion";
+
+  if (tipo) {
+    mensajeCalendarioEscolarGestion.classList.add(tipo);
+  }
+}
+
+async function enviarAlBackendCalendarioGestion(datos) {
+  const respuesta = await fetch(BACKEND_CALENDARIO_ESCOLAR_URL, {
+    method: "POST",
+    headers: {
+      "Content-Type": "text/plain;charset=utf-8",
+    },
+    body: JSON.stringify(datos),
+  });
+
+  if (!respuesta.ok) {
+    throw new Error(
+      "No se pudo establecer comunicación con el Calendario Escolar.",
+    );
+  }
+
+  return respuesta.json();
+}
+
+/* =====================================================
+   CALENDARIO ESCOLAR - LISTADO
+===================================================== */
+
+function mostrarMensajeListadoCalendarioGestion(texto, tipo = "") {
+  if (!mensajeListadoCalendarioGestion) {
+    return;
+  }
+
+  mensajeListadoCalendarioGestion.textContent = texto || "";
+
+  mensajeListadoCalendarioGestion.className = "mensaje-gestion";
+
+  if (tipo) {
+    mensajeListadoCalendarioGestion.classList.add(tipo);
+  }
+}
+
+function formatearFechaCalendarioGestion(fechaISO) {
+  const partes = String(fechaISO || "").split("-");
+
+  if (partes.length !== 3) {
+    return fechaISO || "-";
+  }
+
+  return `${partes[2]}/${partes[1]}/${partes[0]}`;
+}
+
+async function cargarEventosCalendarioGestion() {
+  if (!cuerpoTablaCalendarioGestion) {
+    return;
+  }
+
+  cuerpoTablaCalendarioGestion.innerHTML = `
+    <tr>
+      <td colspan="5" class="tabla-vacia">
+        Cargando eventos...
+      </td>
+    </tr>
+  `;
+
+  mostrarMensajeListadoCalendarioGestion("Consultando eventos publicados...");
+
+  try {
+    const respuesta = await fetch(BACKEND_CALENDARIO_ESCOLAR_URL);
+
+    if (!respuesta.ok) {
+      throw new Error("No se pudieron consultar los eventos.");
+    }
+
+    const datos = await respuesta.json();
+
+    if (!datos.ok) {
+      throw new Error(datos.error || "No se pudieron consultar los eventos.");
+    }
+
+    eventosCalendarioGestion = Array.isArray(datos.eventos)
+      ? datos.eventos
+      : [];
+
+    eventosCalendarioGestion.sort((a, b) =>
+      String(a.fechaInicio || "").localeCompare(String(b.fechaInicio || "")),
+    );
+
+    cuerpoTablaCalendarioGestion.innerHTML = "";
+
+    if (!eventosCalendarioGestion.length) {
+      cuerpoTablaCalendarioGestion.innerHTML = `
+        <tr>
+          <td colspan="5" class="tabla-vacia">
+            Todavía no hay eventos publicados.
+          </td>
+        </tr>
+      `;
+
+      mostrarMensajeListadoCalendarioGestion(
+        "Todavía no hay eventos publicados.",
+      );
+
+      return;
+    }
+
+    eventosCalendarioGestion.forEach((evento) => {
+      const fila = document.createElement("tr");
+
+      fila.innerHTML = `
+          <td>
+            ${formatearFechaCalendarioGestion(evento.fechaInicio)}
+          </td>
+
+          <td>
+            ${formatearFechaCalendarioGestion(evento.fechaFin)}
+          </td>
+
+          <td>${evento.etiqueta || "-"}</td>
+
+          <td>${evento.titulo || "-"}</td>
+
+          <td>—</td>
+        `;
+
+      cuerpoTablaCalendarioGestion.appendChild(fila);
+    });
+
+    mostrarMensajeListadoCalendarioGestion(
+      `${eventosCalendarioGestion.length} evento(s) cargado(s).`,
+      "ok",
+    );
+  } catch (error) {
+    console.error(
+      "Error al cargar eventos del Calendario Escolar en Gestión:",
+      error,
+    );
+
+    cuerpoTablaCalendarioGestion.innerHTML = `
+      <tr>
+        <td colspan="5" class="tabla-vacia">
+          No se pudieron cargar los eventos.
+        </td>
+      </tr>
+    `;
+
+    mostrarMensajeListadoCalendarioGestion(
+      error.message || "No se pudieron cargar los eventos.",
+      "error",
+    );
+  }
+}
+
+if (formCalendarioEscolarGestion) {
+  formCalendarioEscolarGestion.addEventListener("submit", async (event) => {
+    event.preventDefault();
+
+    const usuario = auth.currentUser;
+
+    if (!usuario) {
+      mostrarMensajeCalendarioGestion(
+        "No se detectó una sesión activa.",
+        "error",
+      );
+      return;
+    }
+
+    const eventoCalendario = {
+      fechaInicio: calendarioFechaInicioGestion.value.trim(),
+
+      fechaFin: calendarioFechaFinGestion.value.trim(),
+
+      etiqueta: calendarioEtiquetaGestion.value.trim(),
+
+      titulo: calendarioTituloGestion.value.trim(),
+
+      descripcion: calendarioDescripcionGestion.value.trim(),
+    };
+
+    if (
+      !eventoCalendario.fechaInicio ||
+      !eventoCalendario.fechaFin ||
+      !eventoCalendario.etiqueta ||
+      !eventoCalendario.titulo ||
+      !eventoCalendario.descripcion
+    ) {
+      mostrarMensajeCalendarioGestion(
+        "Completá todos los campos obligatorios.",
+        "error",
+      );
+      return;
+    }
+
+    if (eventoCalendario.fechaFin < eventoCalendario.fechaInicio) {
+      mostrarMensajeCalendarioGestion(
+        "La fecha de finalización no puede ser anterior a la fecha de inicio.",
+        "error",
+      );
+      return;
+    }
+
+    const confirmacion = await Swal.fire({
+      title: "Guardar evento",
+      text: "¿Confirmás agregar este evento al Calendario Escolar?",
+      icon: "question",
+      showCancelButton: true,
+      confirmButtonText: "Sí, guardar",
+      cancelButtonText: "Cancelar",
+    });
+
+    if (!confirmacion.isConfirmed) {
+      return;
+    }
+
+    const textoOriginal = btnGuardarEventoCalendarioGestion.innerHTML;
+
+    try {
+      btnGuardarEventoCalendarioGestion.disabled = true;
+
+      btnGuardarEventoCalendarioGestion.innerHTML = `
+          <i class="fa-solid fa-spinner fa-spin"></i>
+          Guardando...
+        `;
+
+      mostrarMensajeCalendarioGestion("Guardando evento...");
+
+      const idToken = await usuario.getIdToken(true);
+
+      const resultado = await enviarAlBackendCalendarioGestion({
+        accion: "guardar_evento_calendario",
+
+        idToken,
+
+        rolActivo: obtenerRolGestionActual(),
+
+        evento: eventoCalendario,
+      });
+
+      if (!resultado.ok) {
+        throw new Error(resultado.error || "No se pudo guardar el evento.");
+      }
+
+      formCalendarioEscolarGestion.reset();
+
+      mostrarMensajeCalendarioGestion(
+        resultado.mensaje || "Evento guardado correctamente.",
+        "ok",
+      );
+
+      await cargarEventosCalendarioGestion();
+
+      await Swal.fire({
+        title: "Evento guardado",
+        text: "El evento fue agregado correctamente al Calendario Escolar.",
+        icon: "success",
+        confirmButtonText: "Aceptar",
+      });
+    } catch (error) {
+      console.error(
+        "Error al guardar evento del Calendario Escolar desde Gestión:",
+        error,
+      );
+
+      mostrarMensajeCalendarioGestion(
+        error.message || "No se pudo guardar el evento.",
+        "error",
+      );
+    } finally {
+      btnGuardarEventoCalendarioGestion.disabled = false;
+
+      btnGuardarEventoCalendarioGestion.innerHTML = textoOriginal;
+    }
+  });
+}
+
 if (btnVerCursosGestion) {
   btnVerCursosGestion.addEventListener("click", cargarCursosGestion);
 }
@@ -5701,7 +6075,7 @@ if (filtroTurnoDocenteGestion) {
   );
 }
 if (btnVerHorariosGestion) {
-  btnVerHorariosGestion.addEventListener("click", cargarHorariosGestion);
+  btnVerHorariosGestion.addEventListener("click", alternarHorariosGestion);
 }
 
 if (btnDocentesLibresTallerGestion) {
@@ -5709,6 +6083,31 @@ if (btnDocentesLibresTallerGestion) {
     "click",
     alternarDocentesLibresTallerGestion,
   );
+}
+
+if (btnActualizarEventosCalendarioGestion) {
+  btnActualizarEventosCalendarioGestion.addEventListener(
+    "click",
+    cargarEventosCalendarioGestion,
+  );
+}
+
+if (btnCalendarioEscolarGestion && vistaCalendarioEscolarGestion) {
+  btnCalendarioEscolarGestion.addEventListener("click", () => {
+    const estaOculto = vistaCalendarioEscolarGestion.hidden;
+
+    vistaCalendarioEscolarGestion.hidden = !estaOculto;
+
+    btnCalendarioEscolarGestion.innerHTML = estaOculto
+      ? `
+            <i class="fa-solid fa-calendar-xmark"></i>
+            Ocultar Calendario Escolar
+          `
+      : `
+            <i class="fa-solid fa-calendar-days"></i>
+            Gestionar Calendario Escolar
+          `;
+  });
 }
 
 if (filtroTipoHorarioGestion) {

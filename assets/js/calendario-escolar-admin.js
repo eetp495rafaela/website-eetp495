@@ -48,6 +48,18 @@ const calendarioFechaFinAdmin = document.getElementById(
   "calendarioFechaFinAdmin",
 );
 
+const btnActualizarEventosCalendarioAdmin = document.getElementById(
+  "btnActualizarEventosCalendarioAdmin",
+);
+
+const cuerpoTablaCalendarioAdmin = document.getElementById(
+  "cuerpoTablaCalendarioAdmin",
+);
+
+const mensajeListadoCalendarioAdmin = document.getElementById(
+  "mensajeListadoCalendarioAdmin",
+);
+
 const calendarioEtiquetaAdmin = document.getElementById(
   "calendarioEtiquetaAdmin",
 );
@@ -62,9 +74,16 @@ const btnGuardarEventoCalendarioAdmin = document.getElementById(
   "btnGuardarEventoCalendarioAdmin",
 );
 
+const btnCancelarEdicionCalendarioAdmin = document.getElementById(
+  "btnCancelarEdicionCalendarioAdmin",
+);
+
 const mensajeCalendarioEscolarAdmin = document.getElementById(
   "mensajeCalendarioEscolarAdmin",
 );
+
+let eventosCalendarioAdmin = [];
+let idEventoEditandoCalendarioAdmin = "";
 
 /* =====================================================
    MENSAJES
@@ -104,6 +123,295 @@ async function enviarAlBackendCalendario(datos) {
   }
 
   return respuesta.json();
+}
+
+function iniciarEdicionCalendarioAdmin(evento) {
+  idEventoEditandoCalendarioAdmin = evento.id || "";
+
+  calendarioFechaInicioAdmin.value = evento.fechaInicio || "";
+
+  calendarioFechaFinAdmin.value = evento.fechaFin || "";
+
+  calendarioEtiquetaAdmin.value = evento.etiqueta || "";
+
+  calendarioTituloAdmin.value = evento.titulo || "";
+
+  calendarioDescripcionAdmin.value = evento.descripcion || "";
+
+  btnGuardarEventoCalendarioAdmin.innerHTML = `
+    <i class="fa-solid fa-floppy-disk"></i>
+    Guardar cambios
+  `;
+
+  if (btnCancelarEdicionCalendarioAdmin) {
+    btnCancelarEdicionCalendarioAdmin.hidden = false;
+  }
+
+  mostrarMensajeCalendarioAdmin("Estás editando un evento existente.");
+
+  calendarioFechaInicioAdmin.scrollIntoView({
+    behavior: "smooth",
+    block: "center",
+  });
+
+  setTimeout(() => {
+    calendarioFechaInicioAdmin.focus({
+      preventScroll: true,
+    });
+  }, 400);
+}
+
+function cancelarEdicionCalendarioAdmin() {
+  idEventoEditandoCalendarioAdmin = "";
+
+  formCalendarioEscolarAdmin.reset();
+
+  btnGuardarEventoCalendarioAdmin.innerHTML = `
+    <i class="fa-solid fa-calendar-plus"></i>
+    Guardar evento
+  `;
+
+  if (btnCancelarEdicionCalendarioAdmin) {
+    btnCancelarEdicionCalendarioAdmin.hidden = true;
+  }
+
+  mostrarMensajeCalendarioAdmin("");
+}
+
+if (btnCancelarEdicionCalendarioAdmin) {
+  btnCancelarEdicionCalendarioAdmin.addEventListener(
+    "click",
+    cancelarEdicionCalendarioAdmin,
+  );
+}
+
+/* =====================================================
+   LISTADO DE EVENTOS
+===================================================== */
+
+function mostrarMensajeListadoCalendarioAdmin(texto, tipo = "") {
+  if (!mensajeListadoCalendarioAdmin) {
+    return;
+  }
+
+  mensajeListadoCalendarioAdmin.textContent = texto || "";
+
+  mensajeListadoCalendarioAdmin.className = "mensaje-formulario";
+
+  if (tipo) {
+    mensajeListadoCalendarioAdmin.classList.add(tipo);
+  }
+}
+
+function formatearFechaCalendarioAdmin(fechaISO) {
+  const partes = String(fechaISO || "").split("-");
+
+  if (partes.length !== 3) {
+    return fechaISO || "-";
+  }
+
+  return `${partes[2]}/${partes[1]}/${partes[0]}`;
+}
+
+async function cargarEventosCalendarioAdmin() {
+  if (!cuerpoTablaCalendarioAdmin) {
+    return;
+  }
+
+  cuerpoTablaCalendarioAdmin.innerHTML = `
+    <tr>
+      <td colspan="5" class="tabla-vacia">
+        Cargando eventos...
+      </td>
+    </tr>
+  `;
+
+  mostrarMensajeListadoCalendarioAdmin("Consultando eventos publicados...");
+
+  try {
+    const respuesta = await fetch(BACKEND_CALENDARIO_ESCOLAR_URL);
+
+    if (!respuesta.ok) {
+      throw new Error("No se pudieron consultar los eventos.");
+    }
+
+    const datos = await respuesta.json();
+
+    if (!datos.ok) {
+      throw new Error(datos.error || "No se pudieron consultar los eventos.");
+    }
+
+    eventosCalendarioAdmin = Array.isArray(datos.eventos) ? datos.eventos : [];
+
+    const eventos = eventosCalendarioAdmin;
+
+    eventos.sort((a, b) =>
+      String(a.fechaInicio || "").localeCompare(String(b.fechaInicio || "")),
+    );
+
+    cuerpoTablaCalendarioAdmin.innerHTML = "";
+
+    if (!eventos.length) {
+      cuerpoTablaCalendarioAdmin.innerHTML = `
+        <tr>
+          <td colspan="5" class="tabla-vacia">
+            Todavía no hay eventos publicados.
+          </td>
+        </tr>
+      `;
+
+      mostrarMensajeListadoCalendarioAdmin(
+        "Todavía no hay eventos publicados.",
+      );
+
+      return;
+    }
+
+    eventos.forEach((evento) => {
+      const fila = document.createElement("tr");
+
+      const fechaInicio = document.createElement("td");
+
+      fechaInicio.textContent = formatearFechaCalendarioAdmin(
+        evento.fechaInicio,
+      );
+
+      const fechaFin = document.createElement("td");
+
+      fechaFin.textContent = formatearFechaCalendarioAdmin(evento.fechaFin);
+
+      const etiqueta = document.createElement("td");
+
+      etiqueta.textContent = evento.etiqueta || "-";
+
+      const titulo = document.createElement("td");
+
+      titulo.textContent = evento.titulo || "-";
+
+      const acciones = document.createElement("td");
+
+      const btnEditar = document.createElement("button");
+
+      btnEditar.type = "button";
+      btnEditar.className = "btn-accion";
+      btnEditar.innerHTML = `
+  <i class="fa-solid fa-pen"></i>
+  Editar
+`;
+
+      btnEditar.addEventListener("click", () => {
+        iniciarEdicionCalendarioAdmin(evento);
+      });
+
+      acciones.appendChild(btnEditar);
+
+      const btnEliminar = document.createElement("button");
+
+      btnEliminar.type = "button";
+      btnEliminar.className = "btn-accion";
+      btnEliminar.innerHTML = `
+  <i class="fa-solid fa-trash"></i>
+  Eliminar
+`;
+
+      btnEliminar.addEventListener("click", async () => {
+        const confirmacion = await Swal.fire({
+          title: "Eliminar evento",
+          text: "¿Confirmás eliminar este evento del Calendario Escolar?",
+          icon: "warning",
+          showCancelButton: true,
+          confirmButtonText: "Sí, eliminar",
+          cancelButtonText: "Cancelar",
+        });
+
+        if (!confirmacion.isConfirmed) {
+          return;
+        }
+
+        try {
+          const usuario = auth.currentUser;
+
+          if (!usuario) {
+            throw new Error("No se detectó una sesión activa.");
+          }
+
+          const idToken = await usuario.getIdToken(true);
+
+          const resultado = await enviarAlBackendCalendario({
+            accion: "eliminar_evento_calendario",
+
+            idToken,
+
+            idEvento: evento.id,
+          });
+
+          if (!resultado.ok) {
+            throw new Error(
+              resultado.error || "No se pudo eliminar el evento.",
+            );
+          }
+
+          await cargarEventosCalendarioAdmin();
+
+          await Swal.fire({
+            title: "Evento eliminado",
+            text: "El evento fue eliminado correctamente del Calendario Escolar.",
+            icon: "success",
+            confirmButtonText: "Aceptar",
+          });
+        } catch (error) {
+          console.error(
+            "Error al eliminar evento del Calendario Escolar:",
+            error,
+          );
+
+          await Swal.fire({
+            title: "No se pudo eliminar",
+            text: error.message || "Ocurrió un error al eliminar el evento.",
+            icon: "error",
+            confirmButtonText: "Aceptar",
+          });
+        }
+      });
+
+      acciones.appendChild(btnEliminar);
+
+      fila.appendChild(fechaInicio);
+      fila.appendChild(fechaFin);
+      fila.appendChild(etiqueta);
+      fila.appendChild(titulo);
+      fila.appendChild(acciones);
+
+      cuerpoTablaCalendarioAdmin.appendChild(fila);
+    });
+
+    mostrarMensajeListadoCalendarioAdmin(
+      `${eventos.length} evento(s) cargado(s).`,
+      "ok",
+    );
+  } catch (error) {
+    console.error("Error al cargar eventos del Calendario Escolar:", error);
+
+    cuerpoTablaCalendarioAdmin.innerHTML = `
+      <tr>
+        <td colspan="5" class="tabla-vacia">
+          No se pudieron cargar los eventos.
+        </td>
+      </tr>
+    `;
+
+    mostrarMensajeListadoCalendarioAdmin(
+      error.message || "No se pudieron cargar los eventos.",
+      "error",
+    );
+  }
+}
+
+if (btnActualizarEventosCalendarioAdmin) {
+  btnActualizarEventosCalendarioAdmin.addEventListener(
+    "click",
+    cargarEventosCalendarioAdmin,
+  );
 }
 
 /* =====================================================
@@ -188,10 +496,16 @@ if (formCalendarioEscolarAdmin) {
 
       const idToken = await usuario.getIdToken(true);
 
+      const estaEditando = Boolean(idEventoEditandoCalendarioAdmin);
+
       const resultado = await enviarAlBackendCalendario({
-        accion: "guardar_evento_calendario",
+        accion: estaEditando
+          ? "editar_evento_calendario"
+          : "guardar_evento_calendario",
 
         idToken,
+
+        idEvento: estaEditando ? idEventoEditandoCalendarioAdmin : "",
 
         evento: eventoCalendario,
       });
@@ -200,7 +514,11 @@ if (formCalendarioEscolarAdmin) {
         throw new Error(resultado.error || "No se pudo guardar el evento.");
       }
 
-      formCalendarioEscolarAdmin.reset();
+      const fueEdicion = Boolean(idEventoEditandoCalendarioAdmin);
+
+      cancelarEdicionCalendarioAdmin();
+
+      await cargarEventosCalendarioAdmin();
 
       mostrarMensajeCalendarioAdmin(
         resultado.mensaje || "Evento guardado correctamente.",
@@ -208,8 +526,12 @@ if (formCalendarioEscolarAdmin) {
       );
 
       await Swal.fire({
-        title: "Evento guardado",
-        text: "El evento fue agregado correctamente al Calendario Escolar.",
+        title: fueEdicion ? "Evento actualizado" : "Evento guardado",
+
+        text: fueEdicion
+          ? "Los cambios fueron guardados correctamente."
+          : "El evento fue agregado correctamente al Calendario Escolar.",
+
         icon: "success",
         confirmButtonText: "Aceptar",
       });
@@ -223,7 +545,16 @@ if (formCalendarioEscolarAdmin) {
     } finally {
       btnGuardarEventoCalendarioAdmin.disabled = false;
 
-      btnGuardarEventoCalendarioAdmin.innerHTML = textoOriginal;
+      btnGuardarEventoCalendarioAdmin.innerHTML =
+        idEventoEditandoCalendarioAdmin
+          ? `
+      <i class="fa-solid fa-floppy-disk"></i>
+      Guardar cambios
+    `
+          : `
+      <i class="fa-solid fa-calendar-plus"></i>
+      Guardar evento
+    `;
     }
   });
 }
