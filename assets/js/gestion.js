@@ -161,6 +161,10 @@ let eventosCalendarioGestion = [];
 
 let docentesLibresTallerGestionCargados = false;
 
+const filtrosHorariosGestion = document.getElementById(
+  "filtrosHorariosGestion",
+);
+
 const vistaHorariosGestion = document.getElementById("vistaHorariosGestion");
 
 const mensajeHorariosGestion = document.getElementById(
@@ -4356,9 +4360,13 @@ function aplicarFiltrosHorariosGestion() {
 
 async function cargarHorariosGestion() {
   if (!vistaHorariosGestion) return;
-
+  if (filtrosHorariosGestion) {
+    filtrosHorariosGestion.hidden = false;
+  }
   vistaHorariosGestion.hidden = false;
-
+  if (mensajeHorariosGestion) {
+    mensajeHorariosGestion.hidden = false;
+  }
   try {
     if (btnVerHorariosGestion) {
       btnVerHorariosGestion.disabled = true;
@@ -4444,23 +4452,27 @@ async function alternarHorariosGestion() {
   }
 
   if (!vistaHorariosGestion.hidden) {
+    filtrosHorariosGestion.hidden = true;
     vistaHorariosGestion.hidden = true;
+    mensajeHorariosGestion.hidden = true;
 
     btnVerHorariosGestion.innerHTML = `
-      <i class="fa-solid fa-calendar-days"></i>
-      Ver horarios
-    `;
+    <i class="fa-solid fa-calendar-days"></i>
+    Ver horarios
+  `;
 
     return;
   }
 
   if (horariosGestionConsultados) {
+    filtrosHorariosGestion.hidden = false;
     vistaHorariosGestion.hidden = false;
+    mensajeHorariosGestion.hidden = false;
 
     btnVerHorariosGestion.innerHTML = `
-      <i class="fa-solid fa-eye-slash"></i>
-      Ocultar horarios
-    `;
+    <i class="fa-solid fa-eye-slash"></i>
+    Ocultar horarios
+  `;
 
     return;
   }
