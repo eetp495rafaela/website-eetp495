@@ -2264,3 +2264,6 @@ html {
 .texto-modal-oscuro {
   color: #475569 !important;
 }
+#horarios .bloque-horario-seccion-alumno + .bloque-horario-seccion-alumno {
+  margin-top: 24px;
+}

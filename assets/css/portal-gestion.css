@@ -2894,3 +2894,7 @@ body {
 #btnActualizarEventosCalendarioGestion {
   margin-bottom: 14px;
 }
+/* Ocultar filtros de horarios cuando corresponde */
+#filtrosHorariosGestion[hidden] {
+  display: none !important;
+}

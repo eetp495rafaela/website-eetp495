@@ -37,6 +37,7 @@ const vistaHorarioAulaAlumno = document.getElementById(
 const btnVerMiHorario = document.getElementById("btnVerMiHorario");
 
 let usuarioHorarioAlumnoActual = null;
+let horarioAlumnoCargado = false;
 
 const DIAS_HORARIO_AULA_ALUMNO = [
   { valor: "LUNES", etiqueta: "Lunes" },
@@ -465,23 +466,67 @@ if (btnVerMiHorario) {
         "No se detectó una sesión activa. Volvé a iniciar sesión.",
         "error",
       );
+
       return;
     }
 
+    /*
+     * Si el horario ya fue cargado,
+     * solamente lo mostramos u ocultamos.
+     */
+    if (horarioAlumnoCargado) {
+      const estaOculto = vistaHorarioAulaAlumno.hidden;
+
+      vistaHorarioAulaAlumno.hidden = !estaOculto;
+
+      btnVerMiHorario.innerHTML = estaOculto
+        ? `
+              <i class="fa-solid fa-eye-slash"></i>
+              Ocultar mi horario
+            `
+        : `
+              <i class="fa-solid fa-calendar-days"></i>
+              Ver mi horario
+            `;
+
+      return;
+    }
+
+    /*
+     * Primera consulta:
+     * cargamos el horario normalmente.
+     */
     btnVerMiHorario.disabled = true;
 
-    const textoOriginal = btnVerMiHorario.innerHTML;
-
     btnVerMiHorario.innerHTML = `
-      <i class="fa-solid fa-spinner fa-spin"></i>
-      Cargando...
-    `;
+        <i class="fa-solid fa-spinner fa-spin"></i>
+        Cargando...
+      `;
+
+    vistaHorarioAulaAlumno.hidden = false;
 
     try {
       await cargarHorarioAulaAlumno(usuarioHorarioAlumnoActual);
+
+      horarioAlumnoCargado = Boolean(
+        vistaHorarioAulaAlumno.querySelector(".bloque-horario-seccion-alumno"),
+      );
+
+      if (horarioAlumnoCargado) {
+        btnVerMiHorario.innerHTML = `
+            <i class="fa-solid fa-eye-slash"></i>
+            Ocultar mi horario
+          `;
+      }
     } finally {
       btnVerMiHorario.disabled = false;
-      btnVerMiHorario.innerHTML = textoOriginal;
+
+      if (!horarioAlumnoCargado) {
+        btnVerMiHorario.innerHTML = `
+            <i class="fa-solid fa-calendar-days"></i>
+            Ver mi horario
+          `;
+      }
     }
   });
 }
