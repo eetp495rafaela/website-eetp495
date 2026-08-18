@@ -4006,3 +4006,34 @@ body[data-rol-permitido="DOCENTE"] .btn-arriba i {
 #campoTituloMaterialEstudio[hidden] {
   display: none !important;
 }
+/* Situación de Asistencia - curso y botón en la misma fila */
+.fila-situacion-asistencia-docente {
+  display: grid;
+  grid-template-columns: minmax(280px, 1fr) auto;
+  gap: 16px;
+  align-items: end;
+  max-width: 1000px;
+  margin-top: 20px;
+}
+
+.fila-situacion-asistencia-docente .campo-documentacion {
+  width: 100%;
+}
+
+.fila-situacion-asistencia-docente #cursoSituacionAsistenciaDocente {
+  width: 100%;
+}
+
+.fila-situacion-asistencia-docente #btnVerSituacionAsistenciaDocente {
+  margin: 0;
+  white-space: nowrap;
+}
+@media (max-width: 760px) {
+  .fila-situacion-asistencia-docente {
+    grid-template-columns: 1fr;
+  }
+
+  .fila-situacion-asistencia-docente #btnVerSituacionAsistenciaDocente {
+    width: 100%;
+  }
+}
