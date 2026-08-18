@@ -2930,3 +2930,16 @@ body.modal-abierto {
 .tabla-calendario-admin td:last-child .btn-accion:last-child {
   margin-right: 0;
 }
+/* Separación de botones de Estudiantes en móvil */
+@media (max-width: 700px) {
+  .acciones-usuarios-listado {
+    width: 100%;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 16px;
+  }
+
+  .acciones-usuarios-listado .btn-accion {
+    width: 100%;
+  }
+}
