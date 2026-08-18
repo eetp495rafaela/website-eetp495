@@ -48,6 +48,7 @@ const campoCursoAgendaDocente = document.getElementById(
 );
 
 const cursoAgendaDocente = document.getElementById("cursoAgendaDocente");
+const buscarAgendaDocente = document.getElementById("buscarAgendaDocente");
 
 const vistaAgendaInstitucionalDocente = document.getElementById(
   "vistaAgendaInstitucionalDocente",
@@ -165,6 +166,12 @@ function renderizarAgendaDocente(contactos, categoria) {
   if (!vistaAgendaInstitucionalDocente) return;
 
   const titulo = obtenerTituloCategoriaAgenda(categoria);
+  const encabezadoDetalle =
+    {
+      COLEGAS: "Espacio curricular",
+      ADMINISTRACION: "Cargo",
+      ALUMNOS: "Curso",
+    }[categoria] || "Detalle";
 
   if (!contactos.length) {
     vistaAgendaInstitucionalDocente.innerHTML = `
@@ -200,7 +207,7 @@ function renderizarAgendaDocente(contactos, categoria) {
         <thead>
           <tr>
             <th>Apellido y nombre</th>
-            <th>Cargo / Curso</th>
+            <th>${escaparHtmlAgendaDocente(encabezadoDetalle)}</th>
             <th>Correo electrónico</th>
           </tr>
         </thead>
@@ -222,9 +229,11 @@ function renderizarAgendaDocente(contactos, categoria) {
                     </strong>
                   </td>
 
-                  <td data-label="Cargo / Curso">
-                    ${escaparHtmlAgendaDocente(detalle || "-")}
-                  </td>
+                  <td
+  data-label="${escaparHtmlAgendaDocente(encabezadoDetalle)}"
+>
+  ${escaparHtmlAgendaDocente(detalle || "-")}
+</td>
 
                   <td data-label="Correo electrónico">
                     ${
@@ -267,49 +276,71 @@ async function obtenerColegasAgendaDocente(cursoSeleccionado = "") {
     usuarioAgendaDocenteActual?.email,
   );
 
-  let correosDocentesDelCurso = null;
+  const estadosAsignacion = ["ACTIVA", "ACTIVO"];
 
-  if (cursoSeleccionado) {
-    const estadosAsignacion = ["ACTIVA", "ACTIVO"];
-
-    const consultasAsignaciones = estadosAsignacion.map((estado) =>
-      getDocs(
+  const consultasAsignaciones = estadosAsignacion.map((estado) => {
+    if (cursoSeleccionado) {
+      return getDocs(
         query(
           collection(db, "asignaciones_docentes"),
           where("cursoNombre", "==", cursoSeleccionado),
           where("estado", "==", estado),
         ),
-      ),
-    );
-
-    const resultadosAsignaciones = await Promise.allSettled(
-      consultasAsignaciones,
-    );
-
-    const resultadosCorrectos = resultadosAsignaciones.filter(
-      (resultado) => resultado.status === "fulfilled",
-    );
-
-    if (!resultadosCorrectos.length) {
-      throw new Error(
-        `No se pudieron consultar los docentes asignados a ${cursoSeleccionado}.`,
       );
     }
 
-    correosDocentesDelCurso = new Set();
+    return getDocs(
+      query(
+        collection(db, "asignaciones_docentes"),
+        where("estado", "==", estado),
+      ),
+    );
+  });
 
-    resultadosCorrectos.forEach((resultado) => {
-      resultado.value.forEach((documento) => {
-        const datos = documento.data();
+  const resultadosAsignaciones = await Promise.allSettled(
+    consultasAsignaciones,
+  );
 
-        const correo = normalizarCorreoAgendaDocente(datos.docenteCorreo);
+  const resultadosCorrectos = resultadosAsignaciones.filter(
+    (resultado) => resultado.status === "fulfilled",
+  );
 
-        if (correo) {
-          correosDocentesDelCurso.add(correo);
-        }
-      });
-    });
+  if (!resultadosCorrectos.length) {
+    throw new Error("No se pudieron consultar las asignaciones docentes.");
   }
+
+  /*
+   * Agrupamos los espacios curriculares
+   * por correo de docente.
+   */
+  const espaciosPorDocente = new Map();
+
+  resultadosCorrectos.forEach((resultado) => {
+    resultado.value.forEach((documento) => {
+      const datos = documento.data();
+
+      const correo = normalizarCorreoAgendaDocente(datos.docenteCorreo);
+
+      if (!correo) {
+        return;
+      }
+
+      const espacio = String(
+        datos.espacioNombre ||
+          datos.espacioCurricular ||
+          datos.nombreEspacio ||
+          "",
+      ).trim();
+
+      if (!espaciosPorDocente.has(correo)) {
+        espaciosPorDocente.set(correo, new Set());
+      }
+
+      if (espacio) {
+        espaciosPorDocente.get(correo).add(espacio);
+      }
+    });
+  });
 
   return resultadoUsuarios.docs
     .map((documento) => {
@@ -318,17 +349,29 @@ async function obtenerColegasAgendaDocente(cursoSeleccionado = "") {
         ...documento.data(),
       };
 
+      const correo = obtenerCorreoAgendaDocente(datos);
+
+      const espacios = Array.from(espaciosPorDocente.get(correo) || []).sort(
+        (a, b) =>
+          a.localeCompare(b, "es", {
+            sensitivity: "base",
+          }),
+      );
+
       return {
         nombre: obtenerNombreAgendaDocente(datos),
-        correo: obtenerCorreoAgendaDocente(datos),
-        detalle: "Docente",
+
+        correo,
+
+        detalle: espacios.length
+          ? espacios.join(" · ")
+          : "Sin espacio asignado",
       };
     })
     .filter((contacto) => contacto.correo !== correoActual)
     .filter(
       (contacto) =>
-        !correosDocentesDelCurso ||
-        correosDocentesDelCurso.has(contacto.correo),
+        !cursoSeleccionado || espaciosPorDocente.has(contacto.correo),
     )
     .sort((a, b) =>
       a.nombre.localeCompare(b.nombre, "es", {
@@ -817,12 +860,49 @@ async function cargarCategoriaAgendaDocente(categoria) {
   }
 }
 
+function filtrarAgendaDocentePorNombre() {
+  const categoria = categoriaAgendaDocente?.value || "";
+
+  if (!categoria) {
+    return;
+  }
+
+  const usaFiltroCurso = ["COLEGAS", "ALUMNOS"].includes(categoria);
+
+  const cursoSeleccionado = usaFiltroCurso
+    ? String(cursoAgendaDocente?.value || "").trim()
+    : "";
+
+  const claveCache = `${categoria}__${cursoSeleccionado || "TODOS"}`;
+
+  const contactosOriginales = cacheAgendaDocente.get(claveCache) || [];
+
+  const textoBusqueda = normalizarTextoAgendaDocente(
+    buscarAgendaDocente?.value || "",
+  );
+
+  if (!textoBusqueda) {
+    renderizarAgendaDocente(contactosOriginales, categoria);
+
+    return;
+  }
+
+  const contactosFiltrados = contactosOriginales.filter((contacto) =>
+    normalizarTextoAgendaDocente(contacto.nombre).includes(textoBusqueda),
+  );
+
+  renderizarAgendaDocente(contactosFiltrados, categoria);
+}
+
 /* =====================================================
    EVENTOS
 ===================================================== */
 
 categoriaAgendaDocente?.addEventListener("change", async () => {
   const categoria = categoriaAgendaDocente.value;
+  if (buscarAgendaDocente) {
+    buscarAgendaDocente.value = "";
+  }
 
   const usaFiltroCurso = ["COLEGAS", "ALUMNOS"].includes(categoria);
 
@@ -851,6 +931,9 @@ categoriaAgendaDocente?.addEventListener("change", async () => {
 });
 
 cursoAgendaDocente?.addEventListener("change", async () => {
+  if (buscarAgendaDocente) {
+    buscarAgendaDocente.value = "";
+  }
   const categoria = categoriaAgendaDocente?.value || "";
 
   if (["COLEGAS", "ALUMNOS"].includes(categoria)) {
@@ -867,6 +950,8 @@ tarjetaAgendaInstitucionalDocente?.addEventListener("click", () => {
     }
   }, 250);
 });
+
+buscarAgendaDocente?.addEventListener("input", filtrarAgendaDocentePorNombre);
 
 /* =====================================================
    INICIO

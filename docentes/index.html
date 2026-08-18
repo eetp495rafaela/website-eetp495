@@ -616,19 +616,32 @@
               <select id="categoriaAgendaDocente">
                 <option value="">Seleccionar categoría</option>
                 <option value="COLEGAS">Mis colegas docentes</option>
+
                 <option value="ADMINISTRACION">
                   Administración institucional
                 </option>
+
                 <option value="ALUMNOS">Mis alumnos</option>
               </select>
             </div>
 
             <div class="campo-documentacion" id="campoCursoAgendaDocente">
-              <label for="cursoAgendaDocente"> Curso </label>
+              <label for="cursoAgendaDocente">Curso</label>
 
               <select id="cursoAgendaDocente" disabled>
                 <option value="">Todos los cursos</option>
               </select>
+            </div>
+
+            <div class="campo-documentacion">
+              <label for="buscarAgendaDocente"> Buscar por nombre </label>
+
+              <input
+                id="buscarAgendaDocente"
+                type="text"
+                placeholder="Ej.: Pérez, María..."
+                autocomplete="off"
+              />
             </div>
           </div>
 
