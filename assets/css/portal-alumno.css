@@ -2261,3 +2261,6 @@ html {
 .modal-cierre-sesion-portal .swal2-html-container {
   color: #3f5f86 !important;
 }
+.texto-modal-oscuro {
+  color: #475569 !important;
+}

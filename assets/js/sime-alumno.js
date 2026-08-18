@@ -713,6 +713,9 @@ if (formInscripcionSime) {
         `,
         icon: "success",
         confirmButtonText: "Aceptar",
+        customClass: {
+          htmlContainer: "texto-modal-oscuro",
+        },
       });
 
       formInscripcionSime.reset();
