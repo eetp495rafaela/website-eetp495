@@ -1413,7 +1413,7 @@ body.modal-abierto {
 
 .grid-configuracion-portal {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 18px;
   align-items: stretch;
 }
@@ -2942,4 +2942,7 @@ body.modal-abierto {
   .acciones-usuarios-listado .btn-accion {
     width: 100%;
   }
+}
+.panel-periodos-asistencia {
+  scroll-margin-top: 90px;
 }

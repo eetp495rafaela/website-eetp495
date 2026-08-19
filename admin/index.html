@@ -2222,9 +2222,8 @@
                 <h3>Backup del sistema</h3>
 
                 <p>
-                  Generá una copia de seguridad manual de la base de datos del
-                  portal institucional. El archivo se guardará automáticamente
-                  en la carpeta System_BackUp de Google Drive.
+                  Generá una copia de seguridad manual del portal en Google
+                  Drive.
                 </p>
               </div>
             </div>
@@ -2252,9 +2251,7 @@
                 <h3>Pizarra general de horarios</h3>
 
                 <p>
-                  Generá una vista general e imprimible de los horarios
-                  institucionales de Aula, Taller y Educación Física, organizada
-                  por turno y lista para imprimir o guardar como PDF.
+                  Generá una vista imprimible de los horarios institucionales.
                 </p>
               </div>
             </div>
@@ -2282,10 +2279,8 @@
                 <h3>Limpiar registros de asistencia</h3>
 
                 <p>
-                  Eliminá los registros de asistencia de Taller, Educación
-                  Física o de ambas modalidades. Esta operación solo podrá
-                  ejecutarla el Administrador y
-                  <strong>NO PUEDE DESHACERSE</strong>.
+                  Eliminá los registros de asistencia. Sólo para el
+                  Administrador <strong>'NO PUEDE DESHACERSE'</strong>.
                 </p>
               </div>
             </div>
@@ -2303,6 +2298,35 @@
 
             <p class="mensaje-formulario" id="mensajeLimpiezaAsistencias">
               Se eliminarán documentos de la colección de asistencias.
+            </p>
+          </div>
+
+          <!-- Períodos de asistencia -->
+          <div class="panel-info">
+            <div class="encabezado-listado">
+              <div>
+                <h3>Períodos de asistencia</h3>
+
+                <p>
+                  Definí las fechas de inicio y fin de cada trimestre para
+                  consultas de asistencia.
+                </p>
+              </div>
+            </div>
+
+            <div class="acciones">
+              <button
+                type="button"
+                class="btn-accion"
+                id="btnConfigurarPeriodosAsistencia"
+              >
+                <i class="fa-solid fa-calendar-days"></i>
+                Configurar trimestres
+              </button>
+            </div>
+
+            <p class="mensaje-formulario">
+              Las fechas se aplicarán a las consultas por trimestre.
             </p>
           </div>
 
@@ -2558,6 +2582,80 @@
 
             <p class="mensaje-formulario" id="mensajeUsuariosInactivos"></p>
           </div>
+        </div>
+
+        <!-- Configuración de períodos de asistencia -->
+        <div
+          class="panel-info panel-periodos-asistencia"
+          id="panelPeriodosAsistencia"
+          hidden
+        >
+          <div class="encabezado-listado">
+            <div>
+              <h3>Períodos de asistencia</h3>
+              <p>
+                Definí las fechas correspondientes a cada trimestre del ciclo
+                lectivo.
+              </p>
+            </div>
+          </div>
+
+          <div class="form-grid-periodos-asistencia">
+            <div class="campo-documentacion">
+              <label for="cicloLectivoPeriodos">Ciclo lectivo</label>
+              <input
+                type="number"
+                id="cicloLectivoPeriodos"
+                min="2020"
+                max="2100"
+              />
+            </div>
+
+            <div></div>
+
+            <div class="campo-documentacion">
+              <label for="trimestre1Inicio">1° Trimestre · Inicio</label>
+              <input type="date" id="trimestre1Inicio" />
+            </div>
+
+            <div class="campo-documentacion">
+              <label for="trimestre1Fin">1° Trimestre · Fin</label>
+              <input type="date" id="trimestre1Fin" />
+            </div>
+
+            <div class="campo-documentacion">
+              <label for="trimestre2Inicio">2° Trimestre · Inicio</label>
+              <input type="date" id="trimestre2Inicio" />
+            </div>
+
+            <div class="campo-documentacion">
+              <label for="trimestre2Fin">2° Trimestre · Fin</label>
+              <input type="date" id="trimestre2Fin" />
+            </div>
+
+            <div class="campo-documentacion">
+              <label for="trimestre3Inicio">3° Trimestre · Inicio</label>
+              <input type="date" id="trimestre3Inicio" />
+            </div>
+
+            <div class="campo-documentacion">
+              <label for="trimestre3Fin">3° Trimestre · Fin</label>
+              <input type="date" id="trimestre3Fin" />
+            </div>
+          </div>
+
+          <div class="acciones">
+            <button
+              type="button"
+              class="btn-accion"
+              id="btnGuardarPeriodosAsistencia"
+            >
+              <i class="fa-solid fa-floppy-disk"></i>
+              Guardar períodos
+            </button>
+          </div>
+
+          <p class="mensaje-formulario" id="mensajePeriodosAsistencia"></p>
         </div>
 
         <a class="btn-volver" href="#inicio">

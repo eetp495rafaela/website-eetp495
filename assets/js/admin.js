@@ -193,6 +193,126 @@ const mensajeRegistroAsignacion = document.getElementById(
 const mensajeAsignaciones = document.getElementById("mensajeAsignaciones");
 
 // =========================
+// PERÍODOS DE ASISTENCIA
+// =========================
+
+const btnConfigurarPeriodosAsistencia = document.getElementById(
+  "btnConfigurarPeriodosAsistencia",
+);
+
+const panelPeriodosAsistencia = document.getElementById(
+  "panelPeriodosAsistencia",
+);
+
+const cicloLectivoPeriodos = document.getElementById("cicloLectivoPeriodos");
+
+const trimestre1Inicio = document.getElementById("trimestre1Inicio");
+const trimestre1Fin = document.getElementById("trimestre1Fin");
+
+const trimestre2Inicio = document.getElementById("trimestre2Inicio");
+const trimestre2Fin = document.getElementById("trimestre2Fin");
+
+const trimestre3Inicio = document.getElementById("trimestre3Inicio");
+const trimestre3Fin = document.getElementById("trimestre3Fin");
+
+const btnGuardarPeriodosAsistencia = document.getElementById(
+  "btnGuardarPeriodosAsistencia",
+);
+
+const mensajePeriodosAsistencia = document.getElementById(
+  "mensajePeriodosAsistencia",
+);
+
+async function guardarPeriodosAsistencia() {
+  if (!usuarioSoporte) {
+    mensajePeriodosAsistencia.textContent = "Esperando validación de sesión.";
+    mensajePeriodosAsistencia.className = "mensaje-formulario error";
+    return;
+  }
+
+  const cicloLectivo = Number(cicloLectivoPeriodos?.value || 0);
+
+  const t1Inicio = trimestre1Inicio?.value || "";
+  const t1Fin = trimestre1Fin?.value || "";
+
+  const t2Inicio = trimestre2Inicio?.value || "";
+  const t2Fin = trimestre2Fin?.value || "";
+
+  const t3Inicio = trimestre3Inicio?.value || "";
+  const t3Fin = trimestre3Fin?.value || "";
+
+  if (
+    !cicloLectivo ||
+    !t1Inicio ||
+    !t1Fin ||
+    !t2Inicio ||
+    !t2Fin ||
+    !t3Inicio ||
+    !t3Fin
+  ) {
+    mensajePeriodosAsistencia.textContent =
+      "Completá el ciclo lectivo y todas las fechas.";
+    mensajePeriodosAsistencia.className = "mensaje-formulario error";
+    return;
+  }
+
+  if (t1Inicio > t1Fin || t2Inicio > t2Fin || t3Inicio > t3Fin) {
+    mensajePeriodosAsistencia.textContent =
+      "La fecha de inicio de cada trimestre debe ser anterior a su fecha de finalización.";
+    mensajePeriodosAsistencia.className = "mensaje-formulario error";
+    return;
+  }
+
+  try {
+    btnGuardarPeriodosAsistencia.disabled = true;
+
+    mensajePeriodosAsistencia.textContent =
+      "Guardando períodos de asistencia...";
+    mensajePeriodosAsistencia.className = "mensaje-formulario";
+
+    await setDoc(
+      doc(db, "configuracion_periodos", String(cicloLectivo)),
+      {
+        cicloLectivo,
+
+        trimestre1Inicio: t1Inicio,
+        trimestre1Fin: t1Fin,
+
+        trimestre2Inicio: t2Inicio,
+        trimestre2Fin: t2Fin,
+
+        trimestre3Inicio: t3Inicio,
+        trimestre3Fin: t3Fin,
+
+        actualizadoEn: serverTimestamp(),
+        actualizadoPor: normalizarCorreo(usuarioSoporte.email),
+      },
+      { merge: true },
+    );
+
+    mensajePeriodosAsistencia.textContent = `Períodos del ciclo lectivo ${cicloLectivo} guardados correctamente.`;
+
+    mensajePeriodosAsistencia.className = "mensaje-formulario ok";
+  } catch (error) {
+    console.error("Error al guardar períodos de asistencia:", error);
+
+    mensajePeriodosAsistencia.textContent =
+      "No se pudieron guardar los períodos. Revisá conexión o permisos de Firebase.";
+
+    mensajePeriodosAsistencia.className = "mensaje-formulario error";
+  } finally {
+    btnGuardarPeriodosAsistencia.disabled = false;
+  }
+}
+
+if (btnGuardarPeriodosAsistencia) {
+  btnGuardarPeriodosAsistencia.addEventListener(
+    "click",
+    guardarPeriodosAsistencia,
+  );
+}
+
+// =========================
 // MESAS DE EXAMEN - ADMIN
 // =========================
 
@@ -5413,6 +5533,25 @@ if (modalEditar) {
   modalEditar.addEventListener("click", (event) => {
     if (event.target === modalEditar) {
       cerrarModalEdicion();
+    }
+  });
+}
+
+if (btnConfigurarPeriodosAsistencia && panelPeriodosAsistencia) {
+  btnConfigurarPeriodosAsistencia.addEventListener("click", () => {
+    const estaOculto = panelPeriodosAsistencia.hasAttribute("hidden");
+
+    if (estaOculto) {
+      panelPeriodosAsistencia.removeAttribute("hidden");
+      if (cicloLectivoPeriodos && !cicloLectivoPeriodos.value) {
+        cicloLectivoPeriodos.value = new Date().getFullYear();
+      }
+      panelPeriodosAsistencia.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    } else {
+      panelPeriodosAsistencia.setAttribute("hidden", "");
     }
   });
 }
