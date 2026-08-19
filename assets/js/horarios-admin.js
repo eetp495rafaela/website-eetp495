@@ -108,9 +108,11 @@ let idHorarioAulaEditando = null;
 let horariosAulaCargados = [];
 let materiasHorarioTaller = [];
 let docenteAsignadoHorarioTaller = null;
+let docentesAsignadosHorarioTaller = [];
 let idHorarioTallerEditando = null;
 let horariosTallerCargados = [];
 let docenteAsignadoHorarioEf = null;
+let docentesAsignadosHorarioEf = [];
 let idHorarioEfEditando = null;
 let horariosEfCargados = [];
 
@@ -638,23 +640,26 @@ async function cargarDocenteAsignadoHorarioTaller() {
   const espacioId = String(horarioTallerEspacio.value || "").trim();
   const cicloLectivo = Number(horarioTallerCicloLectivo?.value || 0);
 
-  horarioTallerDocente.value = "";
+  docentesAsignadosHorarioTaller = [];
   docenteAsignadoHorarioTaller = null;
 
   if (!cursoId || !espacioId || !cicloLectivo) {
+    horarioTallerDocente.innerHTML = `
+      <option value="">Seleccioná primero un taller</option>
+    `;
     return;
   }
 
-  horarioTallerDocente.value = "Buscando docente asignado...";
+  horarioTallerDocente.innerHTML = `
+    <option value="">Buscando docentes asignados...</option>
+  `;
 
   try {
     const consulta = await getDocs(collection(db, "asignaciones_docentes"));
 
-    let asignacionEncontrada = null;
+    const asignacionesEncontradas = [];
 
     consulta.forEach((documento) => {
-      if (asignacionEncontrada) return;
-
       const datos = documento.data();
 
       const estado = String(datos.estado || "")
@@ -670,16 +675,26 @@ async function cargarDocenteAsignadoHorarioTaller() {
       const estaActiva = !estado || estado === "ACTIVA" || estado === "ACTIVO";
 
       if (mismoCurso && mismoEspacio && mismoCiclo && estaActiva) {
-        asignacionEncontrada = {
+        asignacionesEncontradas.push({
+          asignacionId: documento.id,
+          espacioId: datos.espacioId || "",
+          espacioCurricular:
+            datos.espacioCurricular ||
+            datos.espacioNombre ||
+            datos.nombreEspacio ||
+            "",
           docenteNombre: datos.docenteNombre || "",
           docenteCorreo: datos.docenteCorreo || "",
-        };
+        });
       }
     });
 
-    if (!asignacionEncontrada) {
-      horarioTallerDocente.value = "Sin docente asignado";
-      docenteAsignadoHorarioTaller = null;
+    docentesAsignadosHorarioTaller = asignacionesEncontradas;
+
+    if (!docentesAsignadosHorarioTaller.length) {
+      horarioTallerDocente.innerHTML = `
+        <option value="">Sin docente asignado</option>
+      `;
 
       mostrarMensajeHorarioTaller(
         "No se encontró una asignación docente activa para ese curso y taller.",
@@ -689,25 +704,53 @@ async function cargarDocenteAsignadoHorarioTaller() {
       return;
     }
 
-    horarioTallerDocente.value =
-      asignacionEncontrada.docenteNombre ||
-      asignacionEncontrada.docenteCorreo ||
-      "Docente asignado";
+    horarioTallerDocente.innerHTML = `
+      <option value="">Seleccionar docente</option>
 
-    docenteAsignadoHorarioTaller = asignacionEncontrada;
+      ${docentesAsignadosHorarioTaller
+        .map(
+          (asignacion, indice) => `
+            <option value="${indice}">
+              ${
+                asignacion.docenteNombre ||
+                asignacion.docenteCorreo ||
+                "Docente asignado"
+              }
+            </option>
+          `,
+        )
+        .join("")}
+    `;
+
+    if (docentesAsignadosHorarioTaller.length === 1) {
+      horarioTallerDocente.value = "0";
+
+      docenteAsignadoHorarioTaller = docentesAsignadosHorarioTaller[0];
+
+      mostrarMensajeHorarioTaller(
+        "Docente asignado cargado correctamente.",
+        "ok",
+      );
+
+      return;
+    }
 
     mostrarMensajeHorarioTaller(
-      "Docente asignado cargado correctamente.",
+      "Hay más de un docente asignado. Seleccioná el docente correspondiente a este bloque de Taller.",
       "ok",
     );
   } catch (error) {
-    console.error("Error al buscar docente asignado para taller:", error);
+    console.error("Error al buscar docentes asignados para taller:", error);
 
-    horarioTallerDocente.value = "";
+    docentesAsignadosHorarioTaller = [];
     docenteAsignadoHorarioTaller = null;
 
+    horarioTallerDocente.innerHTML = `
+      <option value="">No se pudieron cargar los docentes</option>
+    `;
+
     mostrarMensajeHorarioTaller(
-      "No se pudo buscar el docente asignado para taller.",
+      "No se pudieron buscar los docentes asignados para taller.",
       "error",
     );
   }
@@ -719,23 +762,26 @@ async function cargarDocenteAsignadoHorarioEf() {
   const cursoId = String(horarioEfCurso.value || "").trim();
   const cicloLectivo = Number(horarioEfCicloLectivo?.value || 0);
 
-  horarioEfDocente.value = "";
+  docentesAsignadosHorarioEf = [];
   docenteAsignadoHorarioEf = null;
 
   if (!cursoId || !cicloLectivo) {
+    horarioEfDocente.innerHTML = `
+      <option value="">Seleccioná primero un curso</option>
+    `;
     return;
   }
 
-  horarioEfDocente.value = "Buscando docente asignado...";
+  horarioEfDocente.innerHTML = `
+    <option value="">Buscando docentes asignados...</option>
+  `;
 
   try {
     const consulta = await getDocs(collection(db, "asignaciones_docentes"));
 
-    let asignacionEncontrada = null;
+    const asignacionesEncontradas = [];
 
     consulta.forEach((documento) => {
-      if (asignacionEncontrada) return;
-
       const datos = documento.data();
 
       const estado = String(datos.estado || "")
@@ -751,7 +797,8 @@ async function cargarDocenteAsignadoHorarioEf() {
       const esEducacionFisica = esEspacioEducacionFisica(datos);
 
       if (mismoCurso && mismoCiclo && estaActiva && esEducacionFisica) {
-        asignacionEncontrada = {
+        asignacionesEncontradas.push({
+          asignacionId: documento.id,
           espacioId: datos.espacioId || "",
           espacioCurricular:
             datos.espacioCurricular ||
@@ -760,13 +807,16 @@ async function cargarDocenteAsignadoHorarioEf() {
             "Educación Física",
           docenteNombre: datos.docenteNombre || "",
           docenteCorreo: datos.docenteCorreo || "",
-        };
+        });
       }
     });
 
-    if (!asignacionEncontrada) {
-      horarioEfDocente.value = "Sin docente asignado";
-      docenteAsignadoHorarioEf = null;
+    docentesAsignadosHorarioEf = asignacionesEncontradas;
+
+    if (!docentesAsignadosHorarioEf.length) {
+      horarioEfDocente.innerHTML = `
+        <option value="">Sin docente asignado</option>
+      `;
 
       mostrarMensajeHorarioEf(
         "No se encontró una asignación docente activa de Educación Física para ese curso.",
@@ -776,28 +826,55 @@ async function cargarDocenteAsignadoHorarioEf() {
       return;
     }
 
-    horarioEfDocente.value =
-      asignacionEncontrada.docenteNombre ||
-      asignacionEncontrada.docenteCorreo ||
-      "Docente asignado";
+    horarioEfDocente.innerHTML = `
+      <option value="">Seleccionar docente</option>
 
-    docenteAsignadoHorarioEf = asignacionEncontrada;
+      ${docentesAsignadosHorarioEf
+        .map(
+          (asignacion, indice) => `
+            <option value="${indice}">
+              ${
+                asignacion.docenteNombre ||
+                asignacion.docenteCorreo ||
+                "Docente asignado"
+              }
+            </option>
+          `,
+        )
+        .join("")}
+    `;
+
+    if (docentesAsignadosHorarioEf.length === 1) {
+      horarioEfDocente.value = "0";
+      docenteAsignadoHorarioEf = docentesAsignadosHorarioEf[0];
+
+      mostrarMensajeHorarioEf(
+        "Docente de Educación Física cargado correctamente.",
+        "ok",
+      );
+
+      return;
+    }
 
     mostrarMensajeHorarioEf(
-      "Docente de Educación Física cargado correctamente.",
+      "Hay más de un docente asignado. Seleccioná el docente correspondiente a este bloque horario.",
       "ok",
     );
   } catch (error) {
     console.error(
-      "Error al buscar docente asignado para Educación Física:",
+      "Error al buscar docentes asignados para Educación Física:",
       error,
     );
 
-    horarioEfDocente.value = "";
+    docentesAsignadosHorarioEf = [];
     docenteAsignadoHorarioEf = null;
 
+    horarioEfDocente.innerHTML = `
+      <option value="">No se pudieron cargar los docentes</option>
+    `;
+
     mostrarMensajeHorarioEf(
-      "No se pudo buscar el docente asignado de Educación Física.",
+      "No se pudieron buscar los docentes asignados de Educación Física.",
       "error",
     );
   }
@@ -1094,6 +1171,20 @@ if (horarioEfHoraInicio) {
     "change",
     actualizarHoraFinEducacionFisica,
   );
+}
+
+if (horarioEfDocente) {
+  horarioEfDocente.addEventListener("change", () => {
+    const indiceSeleccionado = horarioEfDocente.value;
+
+    if (indiceSeleccionado === "") {
+      docenteAsignadoHorarioEf = null;
+      return;
+    }
+
+    docenteAsignadoHorarioEf =
+      docentesAsignadosHorarioEf[Number(indiceSeleccionado)] || null;
+  });
 }
 
 function obtenerBloquesSeleccionadosHorarioAula() {
@@ -2084,16 +2175,27 @@ async function iniciarEdicionHorarioTaller(idHorario) {
 
   await cargarDocenteAsignadoHorarioTaller();
 
-  if (!docenteAsignadoHorarioTaller) {
+  const indiceDocenteBloque = docentesAsignadosHorarioTaller.findIndex(
+    (asignacion) =>
+      (bloque.asignacionId &&
+        asignacion.asignacionId === bloque.asignacionId) ||
+      (!bloque.asignacionId &&
+        asignacion.docenteCorreo === bloque.docenteCorreo),
+  );
+
+  if (indiceDocenteBloque >= 0) {
+    horarioTallerDocente.value = String(indiceDocenteBloque);
+
+    docenteAsignadoHorarioTaller =
+      docentesAsignadosHorarioTaller[indiceDocenteBloque];
+  } else {
     docenteAsignadoHorarioTaller = {
+      asignacionId: bloque.asignacionId || "",
+      espacioId: bloque.espacioId || "",
+      espacioCurricular: bloque.espacioCurricular || "",
       docenteNombre: bloque.docenteNombre || "",
       docenteCorreo: bloque.docenteCorreo || "",
     };
-
-    horarioTallerDocente.value =
-      docenteAsignadoHorarioTaller.docenteNombre ||
-      docenteAsignadoHorarioTaller.docenteCorreo ||
-      "Docente asignado";
   }
 
   activarModoEdicionHorarioTaller(idHorario);
@@ -2132,18 +2234,26 @@ async function iniciarEdicionHorarioEf(idHorario) {
 
   await cargarDocenteAsignadoHorarioEf();
 
-  if (!docenteAsignadoHorarioEf) {
+  const indiceDocenteBloque = docentesAsignadosHorarioEf.findIndex(
+    (asignacion) =>
+      (bloque.asignacionId &&
+        asignacion.asignacionId === bloque.asignacionId) ||
+      (!bloque.asignacionId &&
+        asignacion.docenteCorreo === bloque.docenteCorreo),
+  );
+
+  if (indiceDocenteBloque >= 0) {
+    horarioEfDocente.value = String(indiceDocenteBloque);
+
+    docenteAsignadoHorarioEf = docentesAsignadosHorarioEf[indiceDocenteBloque];
+  } else {
     docenteAsignadoHorarioEf = {
+      asignacionId: bloque.asignacionId || "",
       espacioId: bloque.espacioId || "",
       espacioCurricular: bloque.espacioCurricular || "Educación Física",
       docenteNombre: bloque.docenteNombre || "",
       docenteCorreo: bloque.docenteCorreo || "",
     };
-
-    horarioEfDocente.value =
-      docenteAsignadoHorarioEf.docenteNombre ||
-      docenteAsignadoHorarioEf.docenteCorreo ||
-      "Docente asignado";
   }
 
   activarModoEdicionHorarioEf(idHorario);
@@ -2458,6 +2568,20 @@ async function registrarHorarioTaller(event) {
     return;
   }
 
+  if (horarioTallerDocente) {
+    horarioTallerDocente.addEventListener("change", () => {
+      const indiceSeleccionado = horarioTallerDocente.value;
+
+      if (indiceSeleccionado === "") {
+        docenteAsignadoHorarioTaller = null;
+        return;
+      }
+
+      docenteAsignadoHorarioTaller =
+        docentesAsignadosHorarioTaller[Number(indiceSeleccionado)] || null;
+    });
+  }
+
   if (!horarioFijo.inicio || !horarioFijo.fin) {
     mostrarMensajeHorarioTaller(
       "No se pudo determinar el horario del turno.",
@@ -2487,6 +2611,9 @@ async function registrarHorarioTaller(event) {
     horaInicio: horarioFijo.inicio,
     horaFin: horarioFijo.fin,
     horarioTexto: horarioFijo.texto,
+
+    asignacionId: docenteAsignadoHorarioTaller.asignacionId || "",
+
     espacioId,
     espacioCurricular,
     docenteNombre: docenteAsignadoHorarioTaller.docenteNombre || "",
@@ -2664,7 +2791,10 @@ async function registrarHorarioEf(event) {
     dia,
     horaInicio,
     horaFin,
+    horarioTexto: `${horaInicio} a ${horaFin}`,
     duracionMinutos: 60,
+    asignacionId: docenteAsignadoHorarioEf.asignacionId || "",
+
     espacioId: docenteAsignadoHorarioEf.espacioId || "",
     espacioCurricular:
       docenteAsignadoHorarioEf.espacioCurricular || "Educación Física",

@@ -780,6 +780,114 @@
 
           <p id="mensajeAsignaciones" class="mensaje-formulario"></p>
         </div>
+        <div class="separador-usuarios"></div>
+
+        <div class="panel-info panel-asignaciones">
+          <h3>Reemplazos Docentes</h3>
+
+          <p>
+            Registrá reemplazos temporales para asignaciones de Taller o
+            Educación Física sin modificar la asignación ni el horario
+            permanente del docente titular.
+          </p>
+
+          <form
+            id="formReemplazoDocente"
+            class="formulario-usuario"
+            autocomplete="off"
+          >
+            <div class="form-grid">
+              <div class="campo-formulario campo-doble">
+                <label for="reemplazoTitular">Docente titular *</label>
+
+                <select id="reemplazoTitular" required>
+                  <option value="">Cargando docentes...</option>
+                </select>
+              </div>
+
+              <div class="campo-formulario campo-doble">
+                <label for="reemplazoAsignacion"
+                  >Asignación a reemplazar *</label
+                >
+
+                <select id="reemplazoAsignacion" required>
+                  <option value="">
+                    Seleccioná primero un docente titular
+                  </option>
+                </select>
+              </div>
+
+              <div class="campo-formulario campo-doble">
+                <label for="reemplazoDocente">Docente reemplazante *</label>
+
+                <select id="reemplazoDocente" required>
+                  <option value="">Cargando docentes...</option>
+                </select>
+              </div>
+
+              <div class="campo-formulario">
+                <label for="reemplazoFechaDesde">Fecha desde *</label>
+
+                <input id="reemplazoFechaDesde" type="date" required />
+              </div>
+
+              <div class="campo-formulario">
+                <label for="reemplazoFechaHasta">Fecha hasta *</label>
+
+                <input id="reemplazoFechaHasta" type="date" required />
+              </div>
+            </div>
+
+            <div class="acciones">
+              <button
+                class="btn-accion"
+                id="btnRegistrarReemplazo"
+                type="submit"
+              >
+                <i class="fa-solid fa-user-clock"></i>
+                Registrar reemplazo
+              </button>
+            </div>
+
+            <p id="mensajeReemplazoDocente" class="mensaje-formulario"></p>
+          </form>
+
+          <div class="separador-usuarios"></div>
+
+          <div class="encabezado-listado">
+            <div>
+              <h3>Reemplazos registrados</h3>
+
+              <p>Reemplazos temporales vigentes, futuros y finalizados.</p>
+            </div>
+
+            <button class="btn-accion" id="btnVerReemplazos" type="button">
+              <i class="fa-solid fa-list"></i>
+              Ver reemplazos
+            </button>
+          </div>
+
+          <div class="tabla-contenedor">
+            <table class="tabla-usuarios">
+              <thead>
+                <tr>
+                  <th>Titular</th>
+                  <th>Reemplazante</th>
+                  <th>Curso</th>
+                  <th>Espacio curricular</th>
+                  <th>Desde</th>
+                  <th>Hasta</th>
+                  <th>Estado</th>
+                  <th>Acciones</th>
+                </tr>
+              </thead>
+
+              <tbody id="cuerpoTablaReemplazos"></tbody>
+            </table>
+          </div>
+
+          <p id="mensajeReemplazos" class="mensaje-formulario"></p>
+        </div>
         <a class="btn-volver" href="#inicio">
           <i class="fa-solid fa-arrow-up"></i>
           Volver al inicio
@@ -1862,13 +1970,11 @@
                 </div>
 
                 <div class="campo-formulario campo-doble">
-                  <label for="horarioTallerDocente">Docente asignado</label>
-                  <input
-                    id="horarioTallerDocente"
-                    type="text"
-                    placeholder="Se completará automáticamente"
-                    readonly
-                  />
+                  <label for="horarioTallerDocente">Docente asignado *</label>
+
+                  <select id="horarioTallerDocente" required>
+                    <option value="">Seleccioná primero un taller</option>
+                  </select>
                 </div>
 
                 <div class="campo-formulario campo-doble">
@@ -2011,13 +2117,11 @@
                 </div>
 
                 <div class="campo-formulario campo-doble">
-                  <label for="horarioEfDocente">Docente asignado</label>
-                  <input
-                    id="horarioEfDocente"
-                    type="text"
-                    placeholder="Se completará automáticamente"
-                    readonly
-                  />
+                  <label for="horarioEfDocente">Docente asignado *</label>
+
+                  <select id="horarioEfDocente" required>
+                    <option value="">Seleccioná primero un curso</option>
+                  </select>
                 </div>
 
                 <div class="campo-formulario">
@@ -3378,6 +3482,10 @@
     <script type="module" src="../assets/js/sime-admin.js"></script>
     <script type="module" src="../assets/js/sira-admin.js"></script>
     <script type="module" src="../assets/js/horarios-admin.js"></script>
+    <script
+      type="module"
+      src="../assets/js/reemplazos-docentes-admin.js"
+    ></script>
     <script type="module" src="../assets/js/backup-admin.js"></script>
     <script type="module" src="../assets/js/galeria-admin.js"></script>
     <script type="module" src="../assets/js/pizarra-horarios-admin.js"></script>
