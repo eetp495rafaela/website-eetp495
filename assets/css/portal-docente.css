@@ -4012,7 +4012,7 @@ body[data-rol-permitido="DOCENTE"] .btn-arriba i {
 /* Situación de Asistencia - curso y botón en la misma fila */
 .fila-situacion-asistencia-docente {
   display: grid;
-  grid-template-columns: minmax(280px, 1fr) auto;
+  grid-template-columns: minmax(280px, 1fr) minmax(140px, 170px) auto;
   gap: 16px;
   align-items: end;
   max-width: 1000px;

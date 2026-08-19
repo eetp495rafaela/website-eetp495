@@ -223,6 +223,57 @@ const mensajePeriodosAsistencia = document.getElementById(
   "mensajePeriodosAsistencia",
 );
 
+async function cargarPeriodosAsistencia(cicloLectivo) {
+  if (!cicloLectivo) return;
+
+  try {
+    mensajePeriodosAsistencia.textContent =
+      "Cargando períodos de asistencia...";
+    mensajePeriodosAsistencia.className = "mensaje-formulario";
+
+    const referencia = doc(db, "configuracion_periodos", String(cicloLectivo));
+
+    const documento = await getDoc(referencia);
+
+    if (!documento.exists()) {
+      trimestre1Inicio.value = "";
+      trimestre1Fin.value = "";
+      trimestre2Inicio.value = "";
+      trimestre2Fin.value = "";
+      trimestre3Inicio.value = "";
+      trimestre3Fin.value = "";
+
+      mensajePeriodosAsistencia.textContent = `Todavía no hay períodos configurados para ${cicloLectivo}.`;
+
+      mensajePeriodosAsistencia.className = "mensaje-formulario";
+
+      return;
+    }
+
+    const datos = documento.data();
+
+    trimestre1Inicio.value = datos.trimestre1Inicio || "";
+    trimestre1Fin.value = datos.trimestre1Fin || "";
+
+    trimestre2Inicio.value = datos.trimestre2Inicio || "";
+    trimestre2Fin.value = datos.trimestre2Fin || "";
+
+    trimestre3Inicio.value = datos.trimestre3Inicio || "";
+    trimestre3Fin.value = datos.trimestre3Fin || "";
+
+    mensajePeriodosAsistencia.textContent = `Períodos del ciclo lectivo ${cicloLectivo} cargados correctamente.`;
+
+    mensajePeriodosAsistencia.className = "mensaje-formulario ok";
+  } catch (error) {
+    console.error("Error al cargar períodos de asistencia:", error);
+
+    mensajePeriodosAsistencia.textContent =
+      "No se pudieron cargar los períodos. Revisá conexión o permisos de Firebase.";
+
+    mensajePeriodosAsistencia.className = "mensaje-formulario error";
+  }
+}
+
 async function guardarPeriodosAsistencia() {
   if (!usuarioSoporte) {
     mensajePeriodosAsistencia.textContent = "Esperando validación de sesión.";
@@ -5538,14 +5589,18 @@ if (modalEditar) {
 }
 
 if (btnConfigurarPeriodosAsistencia && panelPeriodosAsistencia) {
-  btnConfigurarPeriodosAsistencia.addEventListener("click", () => {
+  btnConfigurarPeriodosAsistencia.addEventListener("click", async () => {
     const estaOculto = panelPeriodosAsistencia.hasAttribute("hidden");
 
     if (estaOculto) {
       panelPeriodosAsistencia.removeAttribute("hidden");
+
       if (cicloLectivoPeriodos && !cicloLectivoPeriodos.value) {
         cicloLectivoPeriodos.value = new Date().getFullYear();
       }
+
+      await cargarPeriodosAsistencia(cicloLectivoPeriodos.value);
+
       panelPeriodosAsistencia.scrollIntoView({
         behavior: "smooth",
         block: "start",
@@ -5553,6 +5608,16 @@ if (btnConfigurarPeriodosAsistencia && panelPeriodosAsistencia) {
     } else {
       panelPeriodosAsistencia.setAttribute("hidden", "");
     }
+  });
+}
+
+if (cicloLectivoPeriodos) {
+  cicloLectivoPeriodos.addEventListener("change", async () => {
+    const cicloLectivo = Number(cicloLectivoPeriodos.value || 0);
+
+    if (!cicloLectivo) return;
+
+    await cargarPeriodosAsistencia(cicloLectivo);
   });
 }
 

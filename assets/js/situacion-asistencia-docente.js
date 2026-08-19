@@ -13,6 +13,8 @@ import {
   getFirestore,
   collection,
   getDocs,
+  doc,
+  getDoc,
   query,
   where,
 } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
@@ -32,6 +34,10 @@ const db = getFirestore(app);
 
 const cursoSituacionAsistenciaDocente = document.getElementById(
   "cursoSituacionAsistenciaDocente",
+);
+
+const periodoSituacionAsistenciaDocente = document.getElementById(
+  "periodoSituacionAsistenciaDocente",
 );
 
 const btnVerSituacionAsistenciaDocente = document.getElementById(
@@ -301,6 +307,57 @@ function obtenerCursoSeleccionado() {
   }
 
   return cursosSituacionAsistenciaDocente[indiceSeleccionado] || null;
+}
+
+async function obtenerPeriodosAsistencia(cicloLectivo) {
+  const referencia = doc(db, "configuracion_periodos", String(cicloLectivo));
+
+  const documento = await getDoc(referencia);
+
+  if (!documento.exists()) {
+    return null;
+  }
+
+  return documento.data();
+}
+
+function obtenerRangoPeriodo(periodoSeleccionado, periodos) {
+  if (!periodos) {
+    return null;
+  }
+
+  switch (periodoSeleccionado) {
+    case "TRIMESTRE_1":
+      return {
+        desde: periodos.trimestre1Inicio || "",
+        hasta: periodos.trimestre1Fin || "",
+        nombre: "1° Trimestre",
+      };
+
+    case "TRIMESTRE_2":
+      return {
+        desde: periodos.trimestre2Inicio || "",
+        hasta: periodos.trimestre2Fin || "",
+        nombre: "2° Trimestre",
+      };
+
+    case "TRIMESTRE_3":
+      return {
+        desde: periodos.trimestre3Inicio || "",
+        hasta: periodos.trimestre3Fin || "",
+        nombre: "3° Trimestre",
+      };
+
+    case "ANUAL":
+      return {
+        desde: periodos.trimestre1Inicio || "",
+        hasta: periodos.trimestre3Fin || "",
+        nombre: "Anual",
+      };
+
+    default:
+      return null;
+  }
 }
 
 function validarSeleccionSituacionAsistencia() {
@@ -611,9 +668,14 @@ async function consultarSituacionAsistencia() {
   const tipo = cursoSeleccionado.tipos[0];
   const cursoNombre = cursoSeleccionado.cursoNombre;
 
+  const periodoSeleccionado =
+    periodoSituacionAsistenciaDocente?.value || "ANUAL";
+
+  const cicloLectivo = new Date().getFullYear();
+
   if (!tipo || !cursoId) {
-    mostrarMensaje(
-      "No se pudo determinar el curso o el tipo de asistencia.",
+    mostrarMensajeSituacionAsistencia(
+      "Seleccioná el tipo de asistencia y el curso.",
       "error",
     );
 
@@ -640,6 +702,22 @@ async function consultarSituacionAsistencia() {
   }
 
   try {
+    const periodos = await obtenerPeriodosAsistencia(cicloLectivo);
+
+    if (!periodos) {
+      throw new Error(
+        `No hay períodos de asistencia configurados para el ciclo lectivo ${cicloLectivo}.`,
+      );
+    }
+
+    const rangoPeriodo = obtenerRangoPeriodo(periodoSeleccionado, periodos);
+
+    if (!rangoPeriodo?.desde || !rangoPeriodo?.hasta) {
+      throw new Error(
+        "El período seleccionado no tiene fechas configuradas correctamente.",
+      );
+    }
+
     const correoDocente = normalizarCorreo(usuarioDocenteActual?.email);
 
     const consultaAsistencias = query(
@@ -656,6 +734,13 @@ async function consultarSituacionAsistencia() {
       const datos = documento.data();
 
       if (datos.cursoId !== cursoId) return;
+
+      if (
+        datos.fecha < rangoPeriodo.desde ||
+        datos.fecha > rangoPeriodo.hasta
+      ) {
+        return;
+      }
 
       asistencias.push({
         id: documento.id,

@@ -2898,3 +2898,39 @@ body {
 #filtrosHorariosGestion[hidden] {
   display: none !important;
 }
+/* Situación de Asistencia - filtros y botón en una sola fila */
+.filtros-situacion-asistencia {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+  align-items: end;
+}
+
+.filtros-situacion-asistencia .campo-filtro-gestion,
+.filtros-situacion-asistencia .accion-situacion-asistencia {
+  width: 100%;
+  min-width: 0;
+}
+
+.filtros-situacion-asistencia select,
+.filtros-situacion-asistencia .btn-gestion {
+  width: 100%;
+  min-height: 46px;
+  box-sizing: border-box;
+}
+
+.filtros-situacion-asistencia .accion-situacion-asistencia {
+  margin: 0;
+}
+
+@media (max-width: 900px) {
+  .filtros-situacion-asistencia {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 600px) {
+  .filtros-situacion-asistencia {
+    grid-template-columns: 1fr;
+  }
+}

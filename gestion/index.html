@@ -278,17 +278,28 @@
                   <option value="">Seleccionar curso</option>
                 </select>
               </div>
-            </div>
 
-            <div class="acciones-gestion">
-              <button
-                class="btn-gestion"
-                id="btnVerSituacionAsistenciaGestion"
-                type="button"
-              >
-                <i class="fa-solid fa-magnifying-glass-chart"></i>
-                Consultar situación
-              </button>
+              <div class="campo-filtro-gestion">
+                <label for="periodoSituacionAsistenciaGestion">Período</label>
+
+                <select id="periodoSituacionAsistenciaGestion">
+                  <option value="ANUAL">Anual</option>
+                  <option value="TRIMESTRE_1">1° Trimestre</option>
+                  <option value="TRIMESTRE_2">2° Trimestre</option>
+                  <option value="TRIMESTRE_3">3° Trimestre</option>
+                </select>
+              </div>
+
+              <div class="acciones-gestion accion-situacion-asistencia">
+                <button
+                  class="btn-gestion"
+                  id="btnVerSituacionAsistenciaGestion"
+                  type="button"
+                >
+                  <i class="fa-solid fa-magnifying-glass-chart"></i>
+                  Consultar situación
+                </button>
+              </div>
             </div>
 
             <div id="vistaSituacionAsistenciaGestion" class="vista-gestion">
