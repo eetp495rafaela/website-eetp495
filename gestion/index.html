@@ -1,221 +1,186 @@
 <!doctype html>
 <html lang="es">
   <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
-    <meta name="robots" content="noindex, nofollow" />
-
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <meta content="noindex, nofollow" name="robots" />
     <title>Portal Gestión Institucional | E.E.T.P. Nº 495</title>
-
-    <link rel="stylesheet" href="../assets/css/portal-gestion.css" />
-    <link rel="icon" href="../assets/img/logo.png" />
-
+    <link href="../assets/css/portal-gestion.css" rel="stylesheet" />
+    <link href="../assets/img/logo.png" rel="icon" />
     <link
-      rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
-    />
-
-    <link
       rel="stylesheet"
-      href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css"
     />
-
     <link
-      href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;600;700;800&display=swap"
+      href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;600;700;800&amp;display=swap"
       rel="stylesheet"
     />
   </head>
-
   <body
     data-roles-permitidos="PRECEPTORIA,SECRETARIA,ASISTENTE_ADMINISTRATIVO,DIRECCION"
   >
     <header class="topbar">
       <div class="logo">
-        <img src="../assets/img/logo.png" alt="Logo E.E.T.P. Nº 495" />
-
+        <img alt="Logo E.E.T.P. Nº 495" src="../assets/img/logo.png" />
         <div>
           <h1>E.E.T.P. Nº 495</h1>
-          <span>Portal Gestión Institucional</span>
+          <span> Portal Gestión Institucional </span>
         </div>
       </div>
-
       <div class="acciones-topbar">
         <div class="usuario usuario-perfil">
-          <i class="fa-solid fa-building-columns"></i>
-
+          <i class="fa-solid fa-building-columns"> </i>
           <div class="usuario-datos">
-            <span data-nombre-usuario>Cargando usuario...</span>
-            <small data-rol-usuario>Gestión Institucional</small>
+            <span data-nombre-usuario=""> Cargando usuario... </span>
+            <small data-rol-usuario=""> Gestión Institucional </small>
           </div>
         </div>
-
         <a class="btn-sitio-publico" href="../index.html">
-          <i class="fa-solid fa-house"></i>
+          <i class="fa-solid fa-house"> </i>
           Sitio público
         </a>
-
         <button
           class="btn-cerrar-sesion"
           id="btnCerrarSesionPortal"
           type="button"
         >
-          <i class="fa-solid fa-right-from-bracket"></i>
+          <i class="fa-solid fa-right-from-bracket"> </i>
           Cerrar sesión
         </button>
       </div>
     </header>
-
     <main class="contenedor" id="inicio">
       <section class="bienvenida">
         <div>
           <span class="etiqueta-bienvenida">
-            <i class="fa-solid fa-shield-heart"></i>
+            <i class="fa-solid fa-shield-heart"> </i>
             Gestión autorizada
           </span>
-
           <h2>Gestión Institucional</h2>
-
           <p>
             Accedé a las herramientas institucionales disponibles para la
             gestión de la institución.
           </p>
         </div>
-
-        <i class="fa-solid fa-school-flag icono-bienvenida"></i>
+        <i class="fa-solid fa-school-flag icono-bienvenida"> </i>
       </section>
-
       <section class="grupo">
         <h2>Herramientas Institucionales</h2>
-
         <div class="grid">
           <a class="tarjeta tarjeta-enlace" href="#estudiantes">
-            <i class="fa-solid fa-user-graduate"></i>
+            <i class="fa-solid fa-user-graduate"> </i>
             <h3>Estudiantes</h3>
             <p>
               Consulta y organización de estudiantes por curso, división y grupo
               de taller.
             </p>
           </a>
-
-          <a
-            class="tarjeta tarjeta-enlace"
-            href="#situacion-asistencia-estudiantes"
-          >
-            <i class="fa-solid fa-chart-column"></i>
-            <h3>Situación de Asistencia</h3>
-            <p>
-              Consulta del total de presentes, ausentes y llegadas tarde en
-              Taller y Educación Física.
-            </p>
-          </a>
-
-          <a class="tarjeta tarjeta-enlace" href="#informes-pedagogicos">
-            <i class="fa-solid fa-clipboard-list"></i>
-            <h3>Informes Pedagógico-Didácticos</h3>
-            <p>
-              Acceso y seguimiento de informes pedagógico-didácticos de
-              estudiantes.
-            </p>
-          </a>
-
           <a class="tarjeta tarjeta-enlace" href="#docentes">
-            <i class="fa-solid fa-chalkboard-user"></i>
+            <i class="fa-solid fa-chalkboard-user"> </i>
             <h3>Docentes</h3>
             <p>Consulta de docentes, espacios y cursos asignados a cada uno.</p>
           </a>
-
+          <a
+            class="tarjeta tarjeta-enlace"
+            hidden=""
+            href="#reemplazos-docentes-gestion"
+            id="tarjetaReemplazosDocentesGestion"
+          >
+            <i class="fa-solid fa-user-clock"> </i>
+            <h3>Reemplazos Docentes</h3>
+            <p>
+              Registro, consulta y finalización de reemplazos temporales de
+              docentes.
+            </p>
+          </a>
           <a class="tarjeta tarjeta-enlace" href="#horarios">
-            <i class="fa-solid fa-calendar-days"></i>
+            <i class="fa-solid fa-calendar-days"> </i>
             <h3>Organización Institucional</h3>
             <p>Horarios, docentes disponibles y Calendario Escolar.</p>
           </a>
-
           <a class="tarjeta tarjeta-enlace" href="#sira-gestion">
-            <i class="fa-solid fa-user-check"></i>
-            <h3>Si.R.A.</h3>
+            <i class="fa-solid fa-user-check"> </i>
+            <h3>Si.R.A. y Situación de Asistencia</h3>
             <p>
-              Consulta de partes semanales de asistencia de Taller y Educación
-              Física.
+              Consulta de partes semanales y situación general de asistencia de
+              Taller y Educación Física.
             </p>
           </a>
-
           <a class="tarjeta tarjeta-enlace" href="#documentacion-academica">
-            <i class="fa-solid fa-folder-open"></i>
+            <i class="fa-solid fa-folder-open"> </i>
             <h3>Documentación Académica</h3>
             <p>
               Consulta de planes anuales, programas de examen y material de
               estudio publicado por los docentes.
             </p>
           </a>
-
           <a class="tarjeta tarjeta-enlace" href="#sime">
-            <i class="fa-solid fa-file-signature"></i>
+            <i class="fa-solid fa-file-signature"> </i>
             <h3>S.I.M.E.</h3>
             <p>
               Consulta de inscripciones a mesas de examen y permisos generados.
             </p>
           </a>
-
+          <a class="tarjeta tarjeta-enlace" href="#informes-pedagogicos">
+            <i class="fa-solid fa-clipboard-list"> </i>
+            <h3>Informes Pedagógico-Didácticos</h3>
+            <p>
+              Acceso y seguimiento de informes pedagógico-didácticos de
+              estudiantes.
+            </p>
+          </a>
           <a class="tarjeta tarjeta-enlace" href="#mesas-examen-gestion">
-            <i class="fa-solid fa-calendar-check"></i>
+            <i class="fa-solid fa-calendar-check"> </i>
             <h3>Mesas de Examen</h3>
             <p>Consulta y gestión de mesas de examen publicadas u ocultas.</p>
           </a>
         </div>
       </section>
-
       <section class="grupo seccion-destino" id="estudiantes">
         <h2>Estudiantes</h2>
-
         <div class="panel-info panel-gestion-listado">
-          <i class="fa-solid fa-user-graduate"></i>
-
+          <i class="fa-solid fa-user-graduate"> </i>
           <div class="contenido-panel-gestion">
             <h3>Información estudiantil</h3>
-
             <p>
               Consulta de estudiantes registrados, curso actual, grupo de taller
               y estado de acceso al portal.
             </p>
-
             <div class="acciones-gestion">
               <button
                 class="btn-gestion"
                 id="btnVerEstudiantesGestion"
                 type="button"
               >
-                <i class="fa-solid fa-user-graduate"></i>
+                <i class="fa-solid fa-user-graduate"> </i>
                 Ver estudiantes
               </button>
             </div>
-
             <div class="filtros-gestion">
               <div class="campo-filtro-gestion campo-busqueda-gestion">
                 <label for="buscarEstudianteGestion">
-                  <i class="fa-solid fa-magnifying-glass"></i>
+                  <i class="fa-solid fa-magnifying-glass"> </i>
                   Buscar estudiante
                 </label>
-
                 <input
-                  id="buscarEstudianteGestion"
-                  type="search"
-                  placeholder="Nombre o correo..."
                   autocomplete="off"
+                  id="buscarEstudianteGestion"
+                  placeholder="Nombre o correo..."
+                  type="search"
                 />
               </div>
-
               <div class="campo-filtro-gestion">
-                <label for="filtroCursoEstudianteGestion">Curso</label>
-
+                <label for="filtroCursoEstudianteGestion"> Curso </label>
                 <select id="filtroCursoEstudianteGestion">
                   <option value="">Todos los cursos</option>
                 </select>
               </div>
-
               <div class="campo-filtro-gestion">
-                <label for="filtroEstadoEstudianteGestion">Estado</label>
-
+                <label for="filtroEstadoEstudianteGestion"> Estado </label>
                 <select id="filtroEstadoEstudianteGestion">
                   <option value="">Todos los estados</option>
                   <option value="ACTIVO">ACTIVO</option>
@@ -223,166 +188,69 @@
                 </select>
               </div>
             </div>
-
-            <div id="vistaEstudiantesGestion" class="vista-gestion">
+            <div class="vista-gestion" id="vistaEstudiantesGestion">
               <p class="mensaje-gestion">
                 Todavía no se consultaron los estudiantes. Presioná “Ver
                 estudiantes” para cargarlos.
               </p>
             </div>
-
-            <p id="mensajeEstudiantesGestion" class="mensaje-gestion"></p>
+            <p class="mensaje-gestion" id="mensajeEstudiantesGestion"></p>
           </div>
         </div>
-
         <a class="btn-volver" href="#inicio">
-          <i class="fa-solid fa-arrow-up"></i>
+          <i class="fa-solid fa-arrow-up"> </i>
           Volver al inicio
         </a>
       </section>
-
-      <section
-        class="grupo seccion-destino"
-        id="situacion-asistencia-estudiantes"
-      >
-        <h2>Situación de Asistencia</h2>
-
-        <div class="panel-info panel-gestion-listado">
-          <i class="fa-solid fa-chart-column"></i>
-
-          <div class="contenido-panel-gestion">
-            <h3>Resumen de asistencia por estudiante</h3>
-
-            <p>
-              Consultá la cantidad total de presentes, ausentes y llegadas tarde
-              registradas en Taller o Educación Física.
-            </p>
-
-            <div class="filtros-gestion filtros-situacion-asistencia">
-              <div class="campo-filtro-gestion">
-                <label for="tipoSituacionAsistenciaGestion">
-                  Tipo de asistencia
-                </label>
-
-                <select id="tipoSituacionAsistenciaGestion">
-                  <option value="">Seleccionar tipo</option>
-                  <option value="TALLER">Taller</option>
-                  <option value="EDUCACION_FISICA">Educación Física</option>
-                </select>
-              </div>
-
-              <div class="campo-filtro-gestion">
-                <label for="cursoSituacionAsistenciaGestion">Curso</label>
-
-                <select id="cursoSituacionAsistenciaGestion">
-                  <option value="">Seleccionar curso</option>
-                </select>
-              </div>
-
-              <div class="campo-filtro-gestion">
-                <label for="periodoSituacionAsistenciaGestion">Período</label>
-
-                <select id="periodoSituacionAsistenciaGestion">
-                  <option value="ANUAL">Anual</option>
-                  <option value="TRIMESTRE_1">1° Trimestre</option>
-                  <option value="TRIMESTRE_2">2° Trimestre</option>
-                  <option value="TRIMESTRE_3">3° Trimestre</option>
-                </select>
-              </div>
-
-              <div class="acciones-gestion accion-situacion-asistencia">
-                <button
-                  class="btn-gestion"
-                  id="btnVerSituacionAsistenciaGestion"
-                  type="button"
-                >
-                  <i class="fa-solid fa-magnifying-glass-chart"></i>
-                  Consultar situación
-                </button>
-              </div>
-            </div>
-
-            <div id="vistaSituacionAsistenciaGestion" class="vista-gestion">
-              <p class="mensaje-gestion">
-                Seleccioná el tipo de asistencia y el curso para consultar la
-                situación de los estudiantes.
-              </p>
-            </div>
-
-            <p
-              id="mensajeSituacionAsistenciaGestion"
-              class="mensaje-gestion"
-            ></p>
-          </div>
-        </div>
-
-        <a class="btn-volver" href="#inicio">
-          <i class="fa-solid fa-arrow-up"></i>
-          Volver al inicio
-        </a>
-      </section>
-
       <section class="grupo seccion-destino" id="docentes">
         <h2>Docentes</h2>
-
         <div class="panel-info panel-gestion-listado">
-          <i class="fa-solid fa-chalkboard-user"></i>
-
+          <i class="fa-solid fa-chalkboard-user"> </i>
           <div class="contenido-panel-gestion">
             <h3>Información docente</h3>
-
             <p>
               Consulta de docentes, cursos asignados y espacios curriculares
               vinculados para el ciclo lectivo.
             </p>
-
             <div class="acciones-gestion">
               <button
                 class="btn-gestion"
                 id="btnVerDocentesGestion"
                 type="button"
               >
-                <i class="fa-solid fa-chalkboard-user"></i>
+                <i class="fa-solid fa-chalkboard-user"> </i>
                 Ver docentes
               </button>
             </div>
-
             <div class="filtros-gestion filtros-docentes-gestion">
               <div class="campo-filtro-gestion campo-busqueda-gestion">
                 <label for="buscarDocenteGestion">
-                  <i class="fa-solid fa-magnifying-glass"></i>
+                  <i class="fa-solid fa-magnifying-glass"> </i>
                   Buscar docente
                 </label>
-
                 <input
-                  id="buscarDocenteGestion"
-                  type="search"
-                  placeholder="Apellido, nombre o correo..."
                   autocomplete="off"
+                  id="buscarDocenteGestion"
+                  placeholder="Apellido, nombre o correo..."
+                  type="search"
                 />
               </div>
-
               <div class="campo-filtro-gestion">
-                <label for="filtroCursoDocenteGestion">Curso</label>
-
+                <label for="filtroCursoDocenteGestion"> Curso </label>
                 <select id="filtroCursoDocenteGestion">
                   <option value="">Todos los cursos</option>
                 </select>
               </div>
-
               <div class="campo-filtro-gestion">
                 <label for="filtroEspacioDocenteGestion">
                   Espacio Curricular
                 </label>
-
                 <select id="filtroEspacioDocenteGestion">
                   <option value="">Todos los espacios curriculares</option>
                 </select>
               </div>
-
               <div class="campo-filtro-gestion">
-                <label for="filtroTurnoDocenteGestion">Turno</label>
-
+                <label for="filtroTurnoDocenteGestion"> Turno </label>
                 <select id="filtroTurnoDocenteGestion">
                   <option value="">Todos los turnos</option>
                   <option value="MANANA">Mañana</option>
@@ -390,54 +258,184 @@
                 </select>
               </div>
             </div>
-
-            <div id="vistaDocentesGestion" class="vista-gestion">
+            <div class="vista-gestion" id="vistaDocentesGestion">
               <p class="mensaje-gestion">
                 Todavía no se consultaron los docentes. Presioná “Ver docentes”
                 para cargarlos.
               </p>
             </div>
-
-            <p id="mensajeDocentesGestion" class="mensaje-gestion"></p>
+            <p class="mensaje-gestion" id="mensajeDocentesGestion"></p>
           </div>
         </div>
-
         <a class="btn-volver" href="#inicio">
-          <i class="fa-solid fa-arrow-up"></i>
+          <i class="fa-solid fa-arrow-up"> </i>
           Volver al inicio
         </a>
       </section>
-
+      <section
+        class="grupo seccion-destino"
+        hidden=""
+        id="reemplazos-docentes-gestion"
+      >
+        <h2>Reemplazos Docentes</h2>
+        <div
+          class="panel-info panel-gestion-listado"
+          id="panelRegistroReemplazoGestion"
+        >
+          <i class="fa-solid fa-user-clock"> </i>
+          <div class="contenido-panel-gestion">
+            <h3>Registrar reemplazo temporal</h3>
+            <p>
+              Registrá un docente reemplazante para una asignación de Taller o
+              Educación Física durante un período determinado.
+            </p>
+            <form autocomplete="off" id="formReemplazoDocenteGestion">
+              <div class="filtros-gestion">
+                <div class="campo-filtro-gestion">
+                  <label for="reemplazoTitularGestion">
+                    Docente titular *
+                  </label>
+                  <select id="reemplazoTitularGestion" required="">
+                    <option value="">Seleccionar docente titular</option>
+                  </select>
+                </div>
+                <div class="campo-filtro-gestion">
+                  <label for="reemplazoAsignacionGestion">
+                    Asignación a reemplazar *
+                  </label>
+                  <select
+                    disabled=""
+                    id="reemplazoAsignacionGestion"
+                    required=""
+                  >
+                    <option value="">
+                      Seleccioná primero un docente titular
+                    </option>
+                  </select>
+                </div>
+                <div class="campo-filtro-gestion">
+                  <label for="reemplazoDocenteGestion">
+                    Docente reemplazante *
+                  </label>
+                  <select id="reemplazoDocenteGestion" required="">
+                    <option value="">Seleccionar docente reemplazante</option>
+                  </select>
+                </div>
+                <div class="campo-filtro-gestion">
+                  <label for="reemplazoFechaDesdeGestion">
+                    Fecha desde *
+                  </label>
+                  <input
+                    id="reemplazoFechaDesdeGestion"
+                    required=""
+                    type="date"
+                  />
+                </div>
+                <div class="campo-filtro-gestion">
+                  <label for="reemplazoFechaHastaGestion">
+                    Fecha hasta *
+                  </label>
+                  <input
+                    id="reemplazoFechaHastaGestion"
+                    required=""
+                    type="date"
+                  />
+                </div>
+              </div>
+              <div class="acciones-gestion">
+                <button
+                  class="btn-gestion"
+                  id="btnRegistrarReemplazoGestion"
+                  type="submit"
+                >
+                  <i class="fa-solid fa-user-plus"> </i>
+                  Registrar reemplazo
+                </button>
+              </div>
+              <p
+                class="mensaje-gestion"
+                id="mensajeReemplazoDocenteGestion"
+              ></p>
+            </form>
+          </div>
+        </div>
+        <div class="panel-info panel-gestion-listado">
+          <i class="fa-solid fa-list"> </i>
+          <div class="contenido-panel-gestion">
+            <div class="encabezado-listado">
+              <div>
+                <h3>Reemplazos registrados</h3>
+                <p>
+                  Consultá los reemplazos temporales registrados y finalizalos
+                  anticipadamente cuando corresponda.
+                </p>
+              </div>
+              <div class="acciones-gestion">
+                <button
+                  class="btn-gestion"
+                  id="btnVerReemplazosGestion"
+                  type="button"
+                >
+                  <i class="fa-solid fa-arrows-rotate"> </i>
+                  Ver reemplazos
+                </button>
+              </div>
+            </div>
+            <div class="tabla-contenedor">
+              <table class="tabla-gestion">
+                <thead>
+                  <tr>
+                    <th>Titular</th>
+                    <th>Reemplazante</th>
+                    <th>Curso / Espacio</th>
+                    <th>Desde</th>
+                    <th>Hasta</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
+                  </tr>
+                </thead>
+                <tbody id="cuerpoTablaReemplazosGestion">
+                  <tr>
+                    <td class="tabla-vacia" colspan="7">
+                      Todavía no se consultaron los reemplazos registrados.
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <p class="mensaje-gestion" id="mensajeReemplazosGestion"></p>
+          </div>
+        </div>
+        <a class="btn-volver" href="#inicio">
+          <i class="fa-solid fa-arrow-up"> </i>
+          Volver al inicio
+        </a>
+      </section>
       <section class="grupo seccion-destino" id="horarios">
         <h2>Organización Institucional</h2>
-
         <div class="panel-info panel-gestion-listado">
-          <i class="fa-solid fa-calendar-days"></i>
-
+          <i class="fa-solid fa-calendar-days"> </i>
           <div class="contenido-panel-gestion">
             <h3>Herramientas de organización institucional</h3>
-
             <p>
               Consultá horarios, generá la pizarra institucional, verificá
               docentes disponibles de Taller y administrá el Calendario Escolar.
             </p>
-
             <div class="acciones-gestion">
               <button
                 class="btn-gestion"
                 id="btnVerHorariosGestion"
                 type="button"
               >
-                <i class="fa-solid fa-calendar-days"></i>
+                <i class="fa-solid fa-calendar-days"> </i>
                 Ver horarios
               </button>
-
               <button
                 class="btn-gestion"
                 id="btnGenerarPizarraHorariosGestion"
                 type="button"
               >
-                <i class="fa-solid fa-table-cells-large"></i>
+                <i class="fa-solid fa-table-cells-large"> </i>
                 Generar pizarra horarios
               </button>
               <button
@@ -445,29 +443,27 @@
                 id="btnDocentesLibresTallerGestion"
                 type="button"
               >
-                <i class="fa-solid fa-user-clock"></i>
+                <i class="fa-solid fa-user-clock"> </i>
                 Ver docentes libres de Taller
               </button>
-
               <button
                 class="btn-gestion"
                 id="btnCalendarioEscolarGestion"
                 type="button"
               >
-                <i class="fa-solid fa-calendar-days"></i>
+                <i class="fa-solid fa-calendar-days"> </i>
                 Gestionar Calendario Escolar
               </button>
             </div>
             <div
-              id="vistaDocentesLibresTallerGestion"
               class="vista-gestion"
-              hidden
+              hidden=""
+              id="vistaDocentesLibresTallerGestion"
             ></div>
-
             <div
-              id="vistaCalendarioEscolarGestion"
               class="vista-gestion calendario-escolar-gestion"
-              hidden
+              hidden=""
+              id="vistaCalendarioEscolarGestion"
             >
               <div class="encabezado-listado">
                 <div>
@@ -478,101 +474,87 @@
                   </p>
                 </div>
               </div>
-
-              <form id="formCalendarioEscolarGestion" autocomplete="off">
+              <form autocomplete="off" id="formCalendarioEscolarGestion">
                 <div class="form-grid-gestion form-grid-calendario-gestion">
                   <div class="campo-filtro-gestion">
                     <label for="calendarioFechaInicioGestion">
                       Fecha de inicio *
                     </label>
-
                     <input
                       id="calendarioFechaInicioGestion"
+                      required=""
                       type="date"
-                      required
                     />
                   </div>
-
                   <div class="campo-filtro-gestion">
                     <label for="calendarioFechaFinGestion">
                       Fecha de finalización *
                     </label>
-
                     <input
                       id="calendarioFechaFinGestion"
+                      required=""
                       type="date"
-                      required
                     />
                   </div>
-
                   <div class="campo-filtro-gestion">
                     <label for="calendarioEtiquetaGestion"> Etiqueta * </label>
-
                     <input
                       id="calendarioEtiquetaGestion"
-                      type="text"
                       maxlength="60"
                       placeholder="Ej.: Mesas de Exámenes"
-                      required
+                      required=""
+                      type="text"
                     />
                   </div>
-
                   <div class="campo-filtro-gestion">
                     <label for="calendarioTituloGestion"> Título * </label>
-
                     <input
                       id="calendarioTituloGestion"
-                      type="text"
                       maxlength="120"
                       placeholder="Ej.: Período de inscripción"
-                      required
+                      required=""
+                      type="text"
                     />
                   </div>
-
                   <div
                     class="campo-filtro-gestion campo-calendario-descripcion-gestion"
                   >
                     <label for="calendarioDescripcionGestion">
                       Descripción *
                     </label>
-
                     <textarea
                       id="calendarioDescripcionGestion"
-                      rows="3"
                       maxlength="300"
                       placeholder="Breve descripción del evento"
-                      required
+                      required=""
+                      rows="3"
                     ></textarea>
                   </div>
                 </div>
-
                 <div class="acciones-gestion acciones-calendario-gestion">
                   <button
-                    type="submit"
                     class="btn-gestion"
                     id="btnGuardarEventoCalendarioGestion"
+                    type="submit"
                   >
-                    <i class="fa-solid fa-calendar-plus"></i>
+                    <i class="fa-solid fa-calendar-plus"> </i>
                     Guardar evento
                   </button>
-
                   <button
-                    type="button"
                     class="btn-gestion btn-gestion-secundario"
+                    hidden=""
                     id="btnCancelarEdicionCalendarioGestion"
-                    hidden
+                    type="button"
                   >
-                    <i class="fa-solid fa-xmark"></i>
+                    <i class="fa-solid fa-xmark"> </i>
                     Cancelar edición
                   </button>
                 </div>
-
                 <p
-                  id="mensajeCalendarioEscolarGestion"
                   class="mensaje-gestion"
+                  id="mensajeCalendarioEscolarGestion"
                 ></p>
               </form>
-
               <div class="calendario-eventos-gestion">
                 <div class="encabezado-listado">
                   <div>
@@ -582,17 +564,15 @@
                       Calendario Escolar.
                     </p>
                   </div>
-
                   <button
-                    type="button"
                     class="btn-gestion"
                     id="btnActualizarEventosCalendarioGestion"
+                    type="button"
                   >
-                    <i class="fa-solid fa-arrows-rotate"></i>
+                    <i class="fa-solid fa-arrows-rotate"> </i>
                     Actualizar eventos
                   </button>
                 </div>
-
                 <div class="tabla-contenedor">
                   <table class="tabla-gestion tabla-calendario-gestion">
                     <thead>
@@ -604,10 +584,9 @@
                         <th>Acciones</th>
                       </tr>
                     </thead>
-
                     <tbody id="cuerpoTablaCalendarioGestion">
                       <tr>
-                        <td colspan="5" class="tabla-vacia">
+                        <td class="tabla-vacia" colspan="5">
                           Todavía no se consultaron los eventos publicados.
                           Presioná “Actualizar eventos” para cargarlos.
                         </td>
@@ -615,22 +594,19 @@
                     </tbody>
                   </table>
                 </div>
-
                 <p
-                  id="mensajeListadoCalendarioGestion"
                   class="mensaje-gestion"
+                  id="mensajeListadoCalendarioGestion"
                 ></p>
               </div>
             </div>
-
             <div
-              id="filtrosHorariosGestion"
               class="filtros-gestion filtros-horarios-gestion"
-              hidden
+              hidden=""
+              id="filtrosHorariosGestion"
             >
               <div class="campo-filtro-gestion">
-                <label for="filtroTipoHorarioGestion">Tipo de horario</label>
-
+                <label for="filtroTipoHorarioGestion"> Tipo de horario </label>
                 <select id="filtroTipoHorarioGestion">
                   <option value="">Todos los tipos</option>
                   <option value="AULA">Horario de Aula</option>
@@ -640,20 +616,16 @@
                   </option>
                 </select>
               </div>
-
               <div class="campo-filtro-gestion">
-                <label for="filtroTurnoHorarioGestion">Turno</label>
-
+                <label for="filtroTurnoHorarioGestion"> Turno </label>
                 <select id="filtroTurnoHorarioGestion">
                   <option value="">Todos los turnos</option>
                   <option value="MANANA">Mañana</option>
                   <option value="TARDE">Tarde</option>
                 </select>
               </div>
-
               <div class="campo-filtro-gestion">
-                <label for="filtroDiaHorarioGestion">Día</label>
-
+                <label for="filtroDiaHorarioGestion"> Día </label>
                 <select id="filtroDiaHorarioGestion">
                   <option value="">Todos los días</option>
                   <option value="LUNES">Lunes</option>
@@ -667,74 +639,182 @@
                 <label for="filtroEspacioHorarioGestion">
                   Espacio curricular
                 </label>
-
                 <select id="filtroEspacioHorarioGestion">
                   <option value="">Todos los espacios</option>
                 </select>
               </div>
               <div class="campo-filtro-gestion">
-                <label for="filtroCursoHorarioGestion">Curso</label>
-
+                <label for="filtroCursoHorarioGestion"> Curso </label>
                 <select id="filtroCursoHorarioGestion">
                   <option value="">Todos los cursos</option>
                 </select>
               </div>
             </div>
-
-            <div id="vistaHorariosGestion" class="vista-gestion" hidden>
+            <div class="vista-gestion" hidden="" id="vistaHorariosGestion">
               <p class="mensaje-gestion">
                 Todavía no se consultaron los horarios. Presioná “Ver horarios”
                 para cargarlos.
               </p>
             </div>
-
-            <p id="mensajeHorariosGestion" class="mensaje-gestion" hidden></p>
+            <p
+              class="mensaje-gestion"
+              hidden=""
+              id="mensajeHorariosGestion"
+            ></p>
           </div>
         </div>
-
         <a class="btn-volver" href="#inicio">
-          <i class="fa-solid fa-arrow-up"></i>
+          <i class="fa-solid fa-arrow-up"> </i>
           Volver al inicio
         </a>
       </section>
-
+      <section class="grupo seccion-destino" id="sira-gestion">
+        <h2>Si.R.A. - Sistema de Registro de Asistencia</h2>
+        <div class="panel-info panel-gestion-listado">
+          <i class="fa-solid fa-user-check"> </i>
+          <div class="contenido-panel-gestion">
+            <h3>Consulta de asistencias</h3>
+            <p>
+              Consultá las asistencias registradas por docentes en espacios de
+              Taller y Educación Física. Seleccioná el tipo, el curso y una
+              fecha de inicio para ver el parte semanal.
+            </p>
+            <div class="filtros-gestion filtros-sira-gestion">
+              <div class="campo-filtro-gestion">
+                <label for="tipoSiraGestion"> Tipo de asistencia </label>
+                <select id="tipoSiraGestion">
+                  <option value="">Seleccionar tipo</option>
+                  <option value="TALLER">Taller</option>
+                  <option value="EDUCACION_FISICA">Educación Física</option>
+                </select>
+              </div>
+              <div class="campo-filtro-gestion">
+                <label for="cursoSiraGestion"> Curso </label>
+                <select id="cursoSiraGestion">
+                  <option value="">Seleccionar curso</option>
+                </select>
+              </div>
+              <div class="campo-filtro-gestion">
+                <label for="fechaInicioSiraGestion"> Fecha de inicio </label>
+                <input id="fechaInicioSiraGestion" type="date" />
+              </div>
+            </div>
+            <div class="acciones-gestion">
+              <button class="btn-gestion" id="btnVerSiraGestion" type="button">
+                <i class="fa-solid fa-table-list"> </i>
+                Ver parte semanal
+              </button>
+            </div>
+            <div class="vista-gestion" id="vistaSiraGestion">
+              <p class="mensaje-gestion">
+                Seleccioná el tipo de asistencia, el curso y la fecha de inicio
+                para consultar el parte semanal.
+              </p>
+            </div>
+            <p class="mensaje-gestion" id="mensajeSiraGestion"></p>
+          </div>
+        </div>
+        <a class="btn-volver" href="#inicio">
+          <i class="fa-solid fa-arrow-up"> </i>
+          Volver al inicio
+        </a>
+      </section>
+      <section
+        class="grupo seccion-destino"
+        id="situacion-asistencia-estudiantes"
+      >
+        <h2>Situación de Asistencia</h2>
+        <div class="panel-info panel-gestion-listado">
+          <i class="fa-solid fa-chart-column"> </i>
+          <div class="contenido-panel-gestion">
+            <h3>Resumen de asistencia por estudiante</h3>
+            <p>
+              Consultá la cantidad total de presentes, ausentes y llegadas tarde
+              registradas en Taller o Educación Física.
+            </p>
+            <div class="filtros-gestion filtros-situacion-asistencia">
+              <div class="campo-filtro-gestion">
+                <label for="tipoSituacionAsistenciaGestion">
+                  Tipo de asistencia
+                </label>
+                <select id="tipoSituacionAsistenciaGestion">
+                  <option value="">Seleccionar tipo</option>
+                  <option value="TALLER">Taller</option>
+                  <option value="EDUCACION_FISICA">Educación Física</option>
+                </select>
+              </div>
+              <div class="campo-filtro-gestion">
+                <label for="cursoSituacionAsistenciaGestion"> Curso </label>
+                <select id="cursoSituacionAsistenciaGestion">
+                  <option value="">Seleccionar curso</option>
+                </select>
+              </div>
+              <div class="campo-filtro-gestion">
+                <label for="periodoSituacionAsistenciaGestion"> Período </label>
+                <select id="periodoSituacionAsistenciaGestion">
+                  <option value="ANUAL">Anual</option>
+                  <option value="TRIMESTRE_1">1° Trimestre</option>
+                  <option value="TRIMESTRE_2">2° Trimestre</option>
+                  <option value="TRIMESTRE_3">3° Trimestre</option>
+                </select>
+              </div>
+              <div class="acciones-gestion accion-situacion-asistencia">
+                <button
+                  class="btn-gestion"
+                  id="btnVerSituacionAsistenciaGestion"
+                  type="button"
+                >
+                  <i class="fa-solid fa-magnifying-glass-chart"> </i>
+                  Consultar situación
+                </button>
+              </div>
+            </div>
+            <div class="vista-gestion" id="vistaSituacionAsistenciaGestion">
+              <p class="mensaje-gestion">
+                Seleccioná el tipo de asistencia y el curso para consultar la
+                situación de los estudiantes.
+              </p>
+            </div>
+            <p
+              class="mensaje-gestion"
+              id="mensajeSituacionAsistenciaGestion"
+            ></p>
+          </div>
+        </div>
+        <a class="btn-volver" href="#inicio">
+          <i class="fa-solid fa-arrow-up"> </i>
+          Volver al inicio
+        </a>
+      </section>
       <section class="grupo seccion-destino" id="documentacion-academica">
         <h2>Documentación Académica</h2>
-
         <div class="panel-info panel-gestion-listado">
-          <i class="fa-solid fa-folder-open"></i>
-
+          <i class="fa-solid fa-folder-open"> </i>
           <div class="contenido-panel-gestion">
             <h3>Planes, programas y material de estudio</h3>
-
             <p>
               Consulta de documentación académica publicada por los docentes:
               planes anuales, programas de examen y material de estudio.
             </p>
-
             <div class="acciones-gestion">
               <button
                 class="btn-gestion"
                 id="btnVerDocumentacionGestion"
                 type="button"
               >
-                <i class="fa-solid fa-folder-open"></i>
+                <i class="fa-solid fa-folder-open"> </i>
                 Ver documentación
               </button>
             </div>
-
             <div class="filtros-gestion filtros-documentacion-gestion">
               <div class="campo-filtro-gestion">
-                <label for="filtroCursoDocumentacionGestion">Curso</label>
-
+                <label for="filtroCursoDocumentacionGestion"> Curso </label>
                 <select id="filtroCursoDocumentacionGestion">
                   <option value="">Todos los cursos</option>
                 </select>
               </div>
-
               <div class="campo-filtro-gestion">
-                <label for="filtroTipoDocumentacionGestion">Tipo</label>
-
+                <label for="filtroTipoDocumentacionGestion"> Tipo </label>
                 <select id="filtroTipoDocumentacionGestion">
                   <option value="">Todos los tipos</option>
                   <option value="PLAN_ANUAL">Plan Anual</option>
@@ -742,68 +822,56 @@
                   <option value="MATERIAL_ESTUDIO">Material de Estudio</option>
                 </select>
               </div>
-
               <div class="campo-filtro-gestion campo-busqueda-gestion">
                 <label for="buscarEspacioDocumentacionGestion">
-                  <i class="fa-solid fa-magnifying-glass"></i>
+                  <i class="fa-solid fa-magnifying-glass"> </i>
                   Espacio curricular
                 </label>
-
                 <input
-                  id="buscarEspacioDocumentacionGestion"
-                  type="search"
-                  placeholder="Buscar materia, taller o espacio..."
                   autocomplete="off"
+                  id="buscarEspacioDocumentacionGestion"
+                  placeholder="Buscar materia, taller o espacio..."
+                  type="search"
                 />
               </div>
             </div>
-
-            <div id="vistaDocumentacionGestion" class="vista-gestion">
+            <div class="vista-gestion" id="vistaDocumentacionGestion">
               <p class="mensaje-gestion">
                 Todavía no se consultó la documentación académica. Presioná “Ver
                 documentación” para cargarla.
               </p>
             </div>
-
-            <p id="mensajeDocumentacionGestion" class="mensaje-gestion"></p>
+            <p class="mensaje-gestion" id="mensajeDocumentacionGestion"></p>
           </div>
         </div>
-
         <a class="btn-volver" href="#inicio">
-          <i class="fa-solid fa-arrow-up"></i>
+          <i class="fa-solid fa-arrow-up"> </i>
           Volver al inicio
         </a>
       </section>
-
       <section class="grupo seccion-destino" id="sime">
         <h2>S.I.M.E.</h2>
-
         <div class="panel-info panel-gestion-listado">
-          <i class="fa-solid fa-file-signature"></i>
-
+          <i class="fa-solid fa-file-signature"> </i>
           <div class="contenido-panel-gestion">
             <h3>Sistema de Inscripción a Mesas de Examen</h3>
-
             <p>
               Consulta de inscripciones realizadas por estudiantes, materias
               seleccionadas y permisos generados para rendir examen.
             </p>
-
             <div class="acciones-gestion">
               <button
                 class="btn-gestion"
                 id="btnVerInscripcionesSimeGestion"
                 type="button"
               >
-                <i class="fa-solid fa-list-check"></i>
+                <i class="fa-solid fa-list-check"> </i>
                 Ver inscripciones
               </button>
             </div>
-
             <div class="filtros-gestion filtros-sime-gestion">
               <div class="campo-filtro-gestion">
-                <label for="filtroCursoSimeGestion">Curso origen</label>
-
+                <label for="filtroCursoSimeGestion"> Curso origen </label>
                 <select id="filtroCursoSimeGestion">
                   <option value="">Todos los cursos</option>
                   <option value="1">1º</option>
@@ -814,153 +882,130 @@
                   <option value="6">6º</option>
                 </select>
               </div>
-
               <div class="campo-filtro-gestion">
-                <label for="filtroAnioCursadoSimeGestion">Año cursado</label>
-
+                <label for="filtroAnioCursadoSimeGestion"> Año cursado </label>
                 <select id="filtroAnioCursadoSimeGestion">
                   <option value="">Todos los años</option>
                 </select>
               </div>
-
               <div class="campo-filtro-gestion">
-                <label for="filtroEstadoSimeGestion">Estado</label>
-
+                <label for="filtroEstadoSimeGestion"> Estado </label>
                 <select id="filtroEstadoSimeGestion">
                   <option value="">Todos los estados</option>
                   <option value="ACTIVA">Activa</option>
                   <option value="ANULADA">Anulada</option>
                 </select>
               </div>
-
               <div class="campo-filtro-gestion campo-busqueda-gestion">
                 <label for="buscarAlumnoSimeGestion">
-                  <i class="fa-solid fa-magnifying-glass"></i>
+                  <i class="fa-solid fa-magnifying-glass"> </i>
                   Buscar estudiante
                 </label>
-
                 <input
-                  id="buscarAlumnoSimeGestion"
-                  type="search"
-                  placeholder="Nombre, correo o DNI..."
                   autocomplete="off"
+                  id="buscarAlumnoSimeGestion"
+                  placeholder="Nombre, correo o DNI..."
+                  type="search"
                 />
               </div>
             </div>
-
-            <div id="vistaSimeGestion" class="vista-gestion">
+            <div class="vista-gestion" id="vistaSimeGestion">
               <p class="mensaje-gestion">
                 Todavía no se consultaron las inscripciones. Presioná “Ver
                 inscripciones” para cargarlas.
               </p>
             </div>
-
-            <p id="mensajeSimeGestion" class="mensaje-gestion"></p>
+            <p class="mensaje-gestion" id="mensajeSimeGestion"></p>
           </div>
         </div>
-
         <a class="btn-volver" href="#inicio">
-          <i class="fa-solid fa-arrow-up"></i>
+          <i class="fa-solid fa-arrow-up"> </i>
           Volver al inicio
         </a>
       </section>
-
       <section class="grupo seccion-destino" id="informes-pedagogicos">
         <h2>Informes Pedagógico-Didácticos</h2>
-
         <div class="panel-info panel-gestion-listado">
-          <i class="fa-solid fa-file-lines"></i>
-
+          <i class="fa-solid fa-file-lines"> </i>
           <div class="contenido-panel-gestion">
             <h3>Creación de informes pedagógico-didácticos</h3>
-
             <p>
               Desde esta sección, Dirección o Vice Dirección, pueden crear
               informes pedagógico-didácticos. El archivo creado quedará guardado
-              como documento <strong>editable para los Directivos</strong> y
-              será visible sólo en <strong>Modo Lectura</strong>, para los
-              docentes autorizados del curso.
+              como documento
+              <strong> editable para los Directivos </strong>
+              y será visible sólo en
+              <strong> Modo Lectura </strong>
+              , para los docentes autorizados del curso.
             </p>
-
             <div class="acciones-gestion">
               <button
                 class="btn-gestion"
                 id="btnCargarOpcionesInformesGestion"
                 type="button"
               >
-                <i class="fa-solid fa-rotate"></i>
+                <i class="fa-solid fa-rotate"> </i>
                 Cargar datos
               </button>
-
               <button
                 class="btn-gestion"
                 id="btnListarInformesGestion"
                 type="button"
               >
-                <i class="fa-solid fa-table-list"></i>
+                <i class="fa-solid fa-table-list"> </i>
                 Ver informes creados
               </button>
             </div>
-
             <form
-              id="formInformePedagogicoGestion"
               class="form-informe-gestion"
+              id="formInformePedagogicoGestion"
             >
               <div class="filtros-gestion filtros-informes-gestion">
                 <div class="campo-filtro-gestion">
-                  <label for="cursoInformeGestion">Curso</label>
-
-                  <select id="cursoInformeGestion" required>
+                  <label for="cursoInformeGestion"> Curso </label>
+                  <select id="cursoInformeGestion" required="">
                     <option value="">Seleccionar curso</option>
                   </select>
                 </div>
-
                 <div class="campo-filtro-gestion">
-                  <label for="alumnoInformeGestion">Estudiante</label>
-
-                  <select id="alumnoInformeGestion" required disabled>
+                  <label for="alumnoInformeGestion"> Estudiante </label>
+                  <select disabled="" id="alumnoInformeGestion" required="">
                     <option value="">Seleccionar estudiante</option>
                   </select>
                 </div>
               </div>
-
               <div class="acciones-gestion">
                 <button
                   class="btn-gestion"
+                  disabled=""
                   id="btnCrearInformeGestion"
                   type="submit"
-                  disabled
                 >
-                  <i class="fa-solid fa-file-circle-plus"></i>
+                  <i class="fa-solid fa-file-circle-plus"> </i>
                   Crear informe
                 </button>
               </div>
             </form>
-
-            <div id="vistaInformesGestion" class="vista-gestion">
+            <div class="vista-gestion" id="vistaInformesGestion">
               <p class="mensaje-gestion">
                 Todavía no se cargaron los datos. Presioná “Cargar datos” para
                 comenzar.
               </p>
             </div>
-
-            <p id="mensajeInformesGestion" class="mensaje-gestion"></p>
+            <p class="mensaje-gestion" id="mensajeInformesGestion"></p>
           </div>
         </div>
-
         <a class="btn-volver" href="#inicio">
-          <i class="fa-solid fa-arrow-up"></i>
+          <i class="fa-solid fa-arrow-up"> </i>
           Volver al inicio
         </a>
       </section>
-
       <section class="grupo seccion-destino" id="mesas-examen-gestion">
         <h2>Mesas de Examen</h2>
-
         <div
           class="panel-gestion-listado panel-mesas-direccion"
+          hidden=""
           id="panelMesaDireccionGestion"
-          hidden
         >
           <div class="encabezado-listado">
             <div>
@@ -972,77 +1017,66 @@
               </p>
             </div>
           </div>
-
-          <form id="formMesaGestion" autocomplete="off">
+          <form autocomplete="off" id="formMesaGestion">
             <input id="mesaGestionId" type="hidden" />
-
             <div class="form-grid-gestion form-grid-mesas-gestion">
               <div class="campo-filtro-gestion">
-                <label for="mesaGestionFecha">Fecha *</label>
-                <input id="mesaGestionFecha" type="date" required />
+                <label for="mesaGestionFecha"> Fecha * </label>
+                <input id="mesaGestionFecha" required="" type="date" />
               </div>
-
               <div class="campo-filtro-gestion">
-                <label for="mesaGestionHora">Hora *</label>
-                <select id="mesaGestionHora" required>
+                <label for="mesaGestionHora"> Hora * </label>
+                <select id="mesaGestionHora" required="">
                   <option value="">Seleccionar hora</option>
                 </select>
               </div>
-
               <div class="campo-filtro-gestion">
-                <label for="mesaGestionPeriodo">Período *</label>
-                <select id="mesaGestionPeriodo" required>
+                <label for="mesaGestionPeriodo"> Período * </label>
+                <select id="mesaGestionPeriodo" required="">
                   <option value="">Seleccionar período</option>
                 </select>
               </div>
-
               <div class="campo-filtro-gestion">
-                <label for="mesaGestionEstado">Estado *</label>
-                <select id="mesaGestionEstado" required>
-                  <option value="OCULTA" selected>OCULTA</option>
+                <label for="mesaGestionEstado"> Estado * </label>
+                <select id="mesaGestionEstado" required="">
+                  <option selected="" value="OCULTA">OCULTA</option>
                   <option value="PUBLICADA">PUBLICADA</option>
                 </select>
               </div>
-
               <div class="campo-filtro-gestion">
-                <label for="mesaGestionEspacio">Espacio curricular *</label>
-                <select id="mesaGestionEspacio" required>
+                <label for="mesaGestionEspacio"> Espacio curricular * </label>
+                <select id="mesaGestionEspacio" required="">
                   <option value="">Cargando espacios curriculares...</option>
                 </select>
               </div>
-
               <div class="campo-filtro-gestion campo-mesas-cursos-gestion">
-                <label>Cursos *</label>
-                <div id="mesaGestionCursos" class="opciones-mesas-gestion">
+                <label> Cursos * </label>
+                <div class="opciones-mesas-gestion" id="mesaGestionCursos">
                   Cargando cursos...
                 </div>
               </div>
             </div>
-
             <div class="acciones-gestion acciones-mesas-form-gestion">
               <button
                 class="btn-gestion"
                 id="btnGuardarMesaGestion"
                 type="submit"
               >
-                <i class="fa-solid fa-floppy-disk"></i>
+                <i class="fa-solid fa-floppy-disk"> </i>
                 Guardar mesa oculta
               </button>
-
               <button
                 class="btn-gestion btn-gestion-secundario"
+                hidden=""
                 id="btnCancelarMesaGestion"
                 type="button"
-                hidden
               >
                 Cancelar edición
               </button>
             </div>
-
-            <p id="mensajeMesaFormGestion" class="mensaje-gestion"></p>
+            <p class="mensaje-gestion" id="mensajeMesaFormGestion"></p>
           </form>
         </div>
-
         <div class="panel-gestion-listado">
           <div class="encabezado-listado">
             <div>
@@ -1052,37 +1086,31 @@
                 gestionar publicación y/o edición.
               </p>
             </div>
-
             <div class="acciones-gestion">
               <button
                 class="btn-gestion"
                 id="btnActualizarMesasGestion"
                 type="button"
               >
-                <i class="fa-solid fa-rotate"></i>
+                <i class="fa-solid fa-rotate"> </i>
                 Actualizar mesas
               </button>
             </div>
           </div>
-
           <div class="filtros-gestion filtros-mesas-gestion">
             <div class="campo-filtro-gestion">
-              <label for="filtroMesaGestionEspacio">Espacio curricular</label>
-
+              <label for="filtroMesaGestionEspacio"> Espacio curricular </label>
               <select id="filtroMesaGestionEspacio">
                 <option value="">Todos los espacios</option>
               </select>
             </div>
-
             <div class="campo-filtro-gestion">
-              <label for="filtroMesaGestionCurso">Curso</label>
-
+              <label for="filtroMesaGestionCurso"> Curso </label>
               <select id="filtroMesaGestionCurso">
                 <option value="">Todos los cursos</option>
               </select>
             </div>
           </div>
-
           <div class="tabla-contenedor">
             <table class="tabla-gestion tabla-mesas-gestion">
               <thead>
@@ -1095,10 +1123,9 @@
                   <th class="columna-acciones-mesas-gestion">Acciones</th>
                 </tr>
               </thead>
-
               <tbody id="cuerpoTablaMesasGestion">
                 <tr>
-                  <td colspan="6" class="tabla-vacia">
+                  <td class="tabla-vacia" colspan="6">
                     Todavía no se consultaron las mesas. Presioná “Actualizar
                     mesas” para cargarlas.
                   </td>
@@ -1106,101 +1133,35 @@
               </tbody>
             </table>
           </div>
-
-          <p id="mensajeMesasGestion" class="mensaje-gestion"></p>
+          <p class="mensaje-gestion" id="mensajeMesasGestion"></p>
         </div>
-
         <a class="btn-volver" href="#inicio">
-          <i class="fa-solid fa-arrow-up"></i>
-          Volver al inicio
-        </a>
-      </section>
-
-      <section class="grupo seccion-destino" id="sira-gestion">
-        <h2>Si.R.A. - Sistema de Registro de Asistencia</h2>
-
-        <div class="panel-info panel-gestion-listado">
-          <i class="fa-solid fa-user-check"></i>
-
-          <div class="contenido-panel-gestion">
-            <h3>Consulta de asistencias</h3>
-
-            <p>
-              Consultá las asistencias registradas por docentes en espacios de
-              Taller y Educación Física. Seleccioná el tipo, el curso y una
-              fecha de inicio para ver el parte semanal.
-            </p>
-
-            <div class="filtros-gestion filtros-sira-gestion">
-              <div class="campo-filtro-gestion">
-                <label for="tipoSiraGestion">Tipo de asistencia</label>
-
-                <select id="tipoSiraGestion">
-                  <option value="">Seleccionar tipo</option>
-                  <option value="TALLER">Taller</option>
-                  <option value="EDUCACION_FISICA">Educación Física</option>
-                </select>
-              </div>
-
-              <div class="campo-filtro-gestion">
-                <label for="cursoSiraGestion">Curso</label>
-
-                <select id="cursoSiraGestion">
-                  <option value="">Seleccionar curso</option>
-                </select>
-              </div>
-
-              <div class="campo-filtro-gestion">
-                <label for="fechaInicioSiraGestion">Fecha de inicio</label>
-
-                <input id="fechaInicioSiraGestion" type="date" />
-              </div>
-            </div>
-
-            <div class="acciones-gestion">
-              <button class="btn-gestion" id="btnVerSiraGestion" type="button">
-                <i class="fa-solid fa-table-list"></i>
-                Ver parte semanal
-              </button>
-            </div>
-
-            <div id="vistaSiraGestion" class="vista-gestion">
-              <p class="mensaje-gestion">
-                Seleccioná el tipo de asistencia, el curso y la fecha de inicio
-                para consultar el parte semanal.
-              </p>
-            </div>
-
-            <p id="mensajeSiraGestion" class="mensaje-gestion"></p>
-          </div>
-        </div>
-
-        <a class="btn-volver" href="#inicio">
-          <i class="fa-solid fa-arrow-up"></i>
+          <i class="fa-solid fa-arrow-up"> </i>
           Volver al inicio
         </a>
       </section>
     </main>
-
     <button
+      aria-label="Volver al inicio"
       class="btn-arriba"
       id="btnArriba"
       type="button"
-      aria-label="Volver al inicio"
     >
-      <i class="fa-solid fa-arrow-up"></i>
+      <i class="fa-solid fa-arrow-up"> </i>
     </button>
-
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script type="module" src="../assets/js/proteger-portal.js"></script>
-    <script type="module" src="../assets/js/gestion.js"></script>
-    <script type="module" src="../assets/js/sira-gestion.js"></script>
-    <script type="module" src="../assets/js/pizarra-horarios-admin.js"></script>
+    <script src="../assets/js/proteger-portal.js" type="module"></script>
+    <script src="../assets/js/gestion.js" type="module"></script>
+    <script src="../assets/js/sira-gestion.js" type="module"></script>
     <script
       type="module"
-      src="../assets/js/situacion-asistencia-gestion.js"
+      src="../assets/js/reemplazos-docentes-gestion.js"
     ></script>
-
+    <script src="../assets/js/pizarra-horarios-admin.js" type="module"></script>
+    <script
+      src="../assets/js/situacion-asistencia-gestion.js"
+      type="module"
+    ></script>
     <script>
       const btnArriba = document.getElementById("btnArriba");
 

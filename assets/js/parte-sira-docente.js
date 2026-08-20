@@ -338,7 +338,7 @@ function cargarCursosEnSelectorParteSira() {
 async function obtenerAsignacionesParteSiraDocente(correoDocente) {
   const asignacionesPorId = new Map();
 
-  const consultas = [
+  const consultasAsignaciones = [
     query(
       collection(db, "asignaciones_docentes"),
       where("docenteCorreo", "==", correoDocente),
@@ -351,7 +351,7 @@ async function obtenerAsignacionesParteSiraDocente(correoDocente) {
     ),
   ];
 
-  for (const consultaAsignaciones of consultas) {
+  for (const consultaAsignaciones of consultasAsignaciones) {
     const resultado = await getDocs(consultaAsignaciones);
 
     resultado.forEach((documento) => {
@@ -363,6 +363,83 @@ async function obtenerAsignacionesParteSiraDocente(correoDocente) {
       });
     });
   }
+
+  /*
+   * Reemplazos vigentes:
+   * se comportan como asignaciones temporales
+   * para Parte de Asistencia.
+   */
+  const consultaReemplazos = query(
+    collection(db, "reemplazos_docentes"),
+    where("reemplazanteCorreo", "==", correoDocente),
+  );
+
+  const resultadoReemplazos = await getDocs(consultaReemplazos);
+
+  const hoy = new Date();
+
+  const fechaHoy = [
+    hoy.getFullYear(),
+    String(hoy.getMonth() + 1).padStart(2, "0"),
+    String(hoy.getDate()).padStart(2, "0"),
+  ].join("-");
+
+  resultadoReemplazos.forEach((documento) => {
+    const reemplazo = documento.data();
+
+    const estado = String(reemplazo.estado || "")
+      .trim()
+      .toUpperCase();
+
+    const tipoHorario = String(reemplazo.tipoHorario || "")
+      .trim()
+      .toUpperCase();
+
+    const fechaDesde = String(reemplazo.fechaDesde || "").trim();
+
+    const fechaHasta = String(reemplazo.fechaHasta || "").trim();
+
+    const vigente =
+      estado === "ACTIVO" &&
+      (tipoHorario === "TALLER" || tipoHorario === "EDUCACION_FISICA") &&
+      fechaDesde &&
+      fechaHasta &&
+      fechaHoy >= fechaDesde &&
+      fechaHoy <= fechaHasta;
+
+    if (!vigente) return;
+
+    asignacionesPorId.set(`REEMPLAZO_${documento.id}`, {
+      id: `REEMPLAZO_${documento.id}`,
+
+      docenteCorreo: reemplazo.reemplazanteCorreo || "",
+
+      docenteNombre: reemplazo.reemplazanteNombre || "",
+
+      cursoId: reemplazo.cursoId || "",
+
+      cursoNombre: reemplazo.cursoNombre || "",
+
+      cursoAnio: reemplazo.cursoAnio || 0,
+
+      cursoDivision: reemplazo.cursoDivision || "",
+
+      espacioId: reemplazo.espacioId || "",
+
+      espacioNombre: reemplazo.espacioNombre || "",
+
+      espacioTipo: tipoHorario,
+
+      tipoHorario,
+
+      cicloLectivo: reemplazo.cicloLectivo || 0,
+
+      estado: "ACTIVA",
+
+      esReemplazoTemporal: true,
+      reemplazoId: documento.id,
+    });
+  });
 
   return Array.from(asignacionesPorId.values());
 }
@@ -638,33 +715,52 @@ async function consultarParteSemanalParteSiraDocente() {
   }
 
   try {
-    const consultaAsistencias = query(
-      collection(db, "asistencias_clases"),
-      where("estado", "==", "ACTIVA"),
-      where("tipoHorario", "==", tipoSeleccionado),
-      where("docenteCorreo", "==", usuarioParteSiraDocenteActual.email),
+    const correoDocente = normalizarCorreoParteSira(
+      usuarioParteSiraDocenteActual.email,
     );
 
-    const resultado = await getDocs(consultaAsistencias);
+    const consultasAsistencias = [
+      query(
+        collection(db, "asistencias_clases"),
+        where("estado", "==", "ACTIVA"),
+        where("tipoHorario", "==", tipoSeleccionado),
+        where("docenteCorreo", "==", correoDocente),
+      ),
 
-    const asistencias = [];
+      query(
+        collection(db, "asistencias_clases"),
+        where("estado", "==", "ACTIVA"),
+        where("tipoHorario", "==", tipoSeleccionado),
+        where("docenteTitularCorreo", "==", correoDocente),
+      ),
+    ];
 
-    resultado.forEach((documento) => {
-      const datos = documento.data();
+    const resultadosAsistencias = await Promise.all(
+      consultasAsistencias.map((consulta) => getDocs(consulta)),
+    );
 
-      if (String(datos.cursoId || "").trim() !== cursoId) {
-        return;
-      }
+    const asistenciasPorId = new Map();
 
-      if (datos.fecha < fechaDesde || datos.fecha > fechaHasta) {
-        return;
-      }
+    resultadosAsistencias.forEach((resultado) => {
+      resultado.forEach((documento) => {
+        const datos = documento.data();
 
-      asistencias.push({
-        id: documento.id,
-        ...datos,
+        if (String(datos.cursoId || "").trim() !== cursoId) {
+          return;
+        }
+
+        if (datos.fecha < fechaDesde || datos.fecha > fechaHasta) {
+          return;
+        }
+
+        asistenciasPorId.set(documento.id, {
+          id: documento.id,
+          ...datos,
+        });
       });
     });
+
+    const asistencias = Array.from(asistenciasPorId.values());
 
     renderizarParteSemanalParteSira(
       fechas,

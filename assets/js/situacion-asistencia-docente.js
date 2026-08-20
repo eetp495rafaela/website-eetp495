@@ -152,6 +152,78 @@ async function obtenerAsignacionesDocente(correoDocente) {
     });
   }
 
+  const consultaReemplazos = query(
+    collection(db, "reemplazos_docentes"),
+    where("reemplazanteCorreo", "==", correoDocente),
+  );
+
+  const resultadoReemplazos = await getDocs(consultaReemplazos);
+
+  const hoy = new Date();
+
+  const fechaHoy = [
+    hoy.getFullYear(),
+    String(hoy.getMonth() + 1).padStart(2, "0"),
+    String(hoy.getDate()).padStart(2, "0"),
+  ].join("-");
+
+  resultadoReemplazos.forEach((documento) => {
+    const reemplazo = documento.data();
+
+    const estado = String(reemplazo.estado || "")
+      .trim()
+      .toUpperCase();
+
+    const tipoHorario = String(reemplazo.tipoHorario || "")
+      .trim()
+      .toUpperCase();
+
+    const fechaDesde = String(reemplazo.fechaDesde || "").trim();
+
+    const fechaHasta = String(reemplazo.fechaHasta || "").trim();
+
+    const vigente =
+      estado === "ACTIVO" &&
+      (tipoHorario === "TALLER" || tipoHorario === "EDUCACION_FISICA") &&
+      fechaDesde &&
+      fechaHasta &&
+      fechaHoy >= fechaDesde &&
+      fechaHoy <= fechaHasta;
+
+    if (!vigente) return;
+
+    asignacionesPorId.set(`REEMPLAZO_${documento.id}`, {
+      id: `REEMPLAZO_${documento.id}`,
+
+      docenteCorreo: reemplazo.reemplazanteCorreo || "",
+
+      docenteNombre: reemplazo.reemplazanteNombre || "",
+
+      cursoId: reemplazo.cursoId || "",
+
+      cursoNombre: reemplazo.cursoNombre || "",
+
+      cursoAnio: reemplazo.cursoAnio || 0,
+
+      cursoDivision: reemplazo.cursoDivision || "",
+
+      espacioId: reemplazo.espacioId || "",
+
+      espacioNombre: reemplazo.espacioNombre || "",
+
+      espacioTipo: tipoHorario,
+
+      tipoHorario,
+
+      cicloLectivo: reemplazo.cicloLectivo || 0,
+
+      estado: "ACTIVA",
+
+      esReemplazoTemporal: true,
+      reemplazoId: documento.id,
+    });
+  });
+
   return Array.from(asignacionesPorId.values());
 }
 
@@ -720,33 +792,49 @@ async function consultarSituacionAsistencia() {
 
     const correoDocente = normalizarCorreo(usuarioDocenteActual?.email);
 
-    const consultaAsistencias = query(
-      collection(db, "asistencias_clases"),
-      where("estado", "==", "ACTIVA"),
-      where("tipoHorario", "==", tipo),
-      where("docenteCorreo", "==", correoDocente),
+    const consultasAsistencias = [
+      query(
+        collection(db, "asistencias_clases"),
+        where("estado", "==", "ACTIVA"),
+        where("tipoHorario", "==", tipo),
+        where("docenteCorreo", "==", correoDocente),
+      ),
+
+      query(
+        collection(db, "asistencias_clases"),
+        where("estado", "==", "ACTIVA"),
+        where("tipoHorario", "==", tipo),
+        where("docenteTitularCorreo", "==", correoDocente),
+      ),
+    ];
+
+    const resultadosAsistencias = await Promise.all(
+      consultasAsistencias.map((consulta) => getDocs(consulta)),
     );
 
-    const resultado = await getDocs(consultaAsistencias);
-    const asistencias = [];
+    const asistenciasPorId = new Map();
 
-    resultado.forEach((documento) => {
-      const datos = documento.data();
+    resultadosAsistencias.forEach((resultado) => {
+      resultado.forEach((documento) => {
+        const datos = documento.data();
 
-      if (datos.cursoId !== cursoId) return;
+        if (datos.cursoId !== cursoId) return;
 
-      if (
-        datos.fecha < rangoPeriodo.desde ||
-        datos.fecha > rangoPeriodo.hasta
-      ) {
-        return;
-      }
+        if (
+          datos.fecha < rangoPeriodo.desde ||
+          datos.fecha > rangoPeriodo.hasta
+        ) {
+          return;
+        }
 
-      asistencias.push({
-        id: documento.id,
-        ...datos,
+        asistenciasPorId.set(documento.id, {
+          id: documento.id,
+          ...datos,
+        });
       });
     });
+
+    const asistencias = Array.from(asistenciasPorId.values());
 
     const estudiantes = agruparSituacionPorEstudiante(asistencias);
 

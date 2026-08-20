@@ -157,6 +157,67 @@ async function obtenerCursosAsignadosDocente(correoDocente) {
     });
   }
 
+  const consultaReemplazos = query(
+    collection(db, "reemplazos_docentes"),
+    where("reemplazanteCorreo", "==", correoDocente),
+  );
+
+  const resultadoReemplazos = await getDocs(consultaReemplazos);
+
+  const hoy = new Date();
+
+  const fechaHoy = [
+    hoy.getFullYear(),
+    String(hoy.getMonth() + 1).padStart(2, "0"),
+    String(hoy.getDate()).padStart(2, "0"),
+  ].join("-");
+
+  resultadoReemplazos.forEach((documento) => {
+    const reemplazo = documento.data();
+
+    const estado = String(reemplazo.estado || "")
+      .trim()
+      .toUpperCase();
+
+    const tipoHorario = String(reemplazo.tipoHorario || "")
+      .trim()
+      .toUpperCase();
+
+    const fechaDesde = String(reemplazo.fechaDesde || "").trim();
+
+    const fechaHasta = String(reemplazo.fechaHasta || "").trim();
+
+    const vigente =
+      estado === "ACTIVO" &&
+      (tipoHorario === "TALLER" || tipoHorario === "EDUCACION_FISICA") &&
+      fechaDesde &&
+      fechaHasta &&
+      fechaHoy >= fechaDesde &&
+      fechaHoy <= fechaHasta;
+
+    if (!vigente) return;
+
+    const curso = {
+      cursoId: String(reemplazo.cursoId || "").trim(),
+
+      cursoAnio: Number(reemplazo.cursoAnio || 0),
+
+      cursoDivision: normalizarTextoListas(reemplazo.cursoDivision),
+
+      cursoNombre: String(reemplazo.cursoNombre || "").trim(),
+
+      curso: String(reemplazo.cursoNombre || "").trim(),
+    };
+
+    const claveCurso = obtenerClaveCurso(curso);
+
+    if (!claveCurso || claveCurso === "0_") return;
+
+    if (!cursosPorClave.has(claveCurso)) {
+      cursosPorClave.set(claveCurso, curso);
+    }
+  });
+
   return Array.from(cursosPorClave.values()).sort((a, b) => {
     if (Number(a.cursoAnio || 0) !== Number(b.cursoAnio || 0)) {
       return Number(a.cursoAnio || 0) - Number(b.cursoAnio || 0);

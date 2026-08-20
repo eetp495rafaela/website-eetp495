@@ -51,6 +51,16 @@ function normalizarTexto(texto) {
     .toUpperCase();
 }
 
+function obtenerFechaActualPermisosDocente() {
+  const hoy = new Date();
+
+  const anio = hoy.getFullYear();
+  const mes = String(hoy.getMonth() + 1).padStart(2, "0");
+  const dia = String(hoy.getDate()).padStart(2, "0");
+
+  return `${anio}-${mes}-${dia}`;
+}
+
 function obtenerElementosSoloTaller() {
   return Array.from(document.querySelectorAll(SELECTOR_ELEMENTOS_TALLER));
 }
@@ -107,18 +117,64 @@ async function obtenerAsignacionesActivasDocente(correoDocente) {
   return Array.from(asignacionesPorId.values());
 }
 
-function tieneAsignacionTaller(asignaciones) {
+async function obtenerReemplazosVigentesDocente(correoDocente) {
+  const consulta = query(
+    collection(db, "reemplazos_docentes"),
+    where("reemplazanteCorreo", "==", correoDocente),
+  );
+
+  const resultado = await getDocs(consulta);
+
+  const hoy = obtenerFechaActualPermisosDocente();
+
+  const reemplazos = [];
+
+  resultado.forEach((documento) => {
+    const reemplazo = {
+      id: documento.id,
+      ...documento.data(),
+    };
+
+    const estado = normalizarTexto(reemplazo.estado);
+    const tipoHorario = normalizarTexto(reemplazo.tipoHorario);
+    const fechaDesde = String(reemplazo.fechaDesde || "").trim();
+    const fechaHasta = String(reemplazo.fechaHasta || "").trim();
+
+    const esTipoSira =
+      tipoHorario === "TALLER" || tipoHorario === "EDUCACION_FISICA";
+
+    const estaVigente =
+      estado === "ACTIVO" &&
+      esTipoSira &&
+      fechaDesde &&
+      fechaHasta &&
+      hoy >= fechaDesde &&
+      hoy <= fechaHasta;
+
+    if (estaVigente) {
+      reemplazos.push(reemplazo);
+    }
+  });
+
+  return reemplazos;
+}
+
+function tieneAsignacionSira(asignaciones) {
   return asignaciones.some((asignacion) => {
     const estado = normalizarTexto(asignacion.estado);
     const espacioTipo = normalizarTexto(asignacion.espacioTipo);
 
-    return ["ACTIVA", "ACTIVO"].includes(estado) && espacioTipo === "TALLER";
+    return (
+      ["ACTIVA", "ACTIVO"].includes(estado) &&
+      (espacioTipo === "TALLER" || espacioTipo === "EDUCACION_FISICA")
+    );
   });
 }
 
 /*
-  Los elementos permanecen ocultos hasta confirmar
-  que el docente posee una asignación activa de Taller.
+  Las herramientas permanecen ocultas hasta confirmar
+  que el docente posee una asignación activa de Taller /
+  Educación Física o un reemplazo vigente.
 */
 establecerVisibilidadHerramientasTaller(false);
 
@@ -136,26 +192,29 @@ onAuthStateChanged(auth, async (usuario) => {
       return;
     }
 
-    const asignaciones = await obtenerAsignacionesActivasDocente(correoDocente);
+    const [asignaciones, reemplazosVigentes] = await Promise.all([
+      obtenerAsignacionesActivasDocente(correoDocente),
+      obtenerReemplazosVigentesDocente(correoDocente),
+    ]);
 
-    const esDocenteTaller = tieneAsignacionTaller(asignaciones);
+    const tieneAsignacion = tieneAsignacionSira(asignaciones);
+    const tieneReemplazo = reemplazosVigentes.length > 0;
 
-    establecerVisibilidadHerramientasTaller(esDocenteTaller);
-    controlarAccesoPorHash(esDocenteTaller);
+    const puedeUsarHerramientasSira = tieneAsignacion || tieneReemplazo;
+
+    establecerVisibilidadHerramientasTaller(puedeUsarHerramientasSira);
+
+    controlarAccesoPorHash(puedeUsarHerramientasSira);
 
     window.addEventListener("hashchange", () => {
-      controlarAccesoPorHash(esDocenteTaller);
+      controlarAccesoPorHash(puedeUsarHerramientasSira);
     });
   } catch (error) {
     console.error(
-      "No se pudieron verificar los permisos de Taller del docente:",
+      "No se pudieron verificar los permisos de asistencia del docente:",
       error,
     );
 
-    /*
-      Ante un error de conexión o permisos, las herramientas
-      permanecen ocultas por seguridad.
-    */
     establecerVisibilidadHerramientasTaller(false);
     controlarAccesoPorHash(false);
   }
