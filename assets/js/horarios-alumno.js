@@ -316,6 +316,110 @@ function renderizarHorarioCompletoAlumno(
   `;
 }
 
+function obtenerFechaActualHorarioAlumno() {
+  const hoy = new Date();
+
+  const anio = hoy.getFullYear();
+  const mes = String(hoy.getMonth() + 1).padStart(2, "0");
+  const dia = String(hoy.getDate()).padStart(2, "0");
+
+  return `${anio}-${mes}-${dia}`;
+}
+
+function reemplazoHorarioAlumnoEstaVigente(reemplazo) {
+  const estado = String(reemplazo.estado || "")
+    .trim()
+    .toUpperCase();
+
+  const fechaDesde = String(reemplazo.fechaDesde || "").trim();
+
+  const fechaHasta = String(reemplazo.fechaHasta || "").trim();
+
+  const hoy = obtenerFechaActualHorarioAlumno();
+
+  return (
+    estado === "ACTIVO" &&
+    fechaDesde &&
+    fechaHasta &&
+    hoy >= fechaDesde &&
+    hoy <= fechaHasta
+  );
+}
+
+function bloqueHorarioAlumnoPerteneceAReemplazo(bloque, reemplazo) {
+  const tipoBloque = String(bloque.tipoHorario || "")
+    .trim()
+    .toUpperCase();
+
+  const tipoReemplazo = String(reemplazo.tipoHorario || "")
+    .trim()
+    .toUpperCase();
+
+  if (tipoBloque !== tipoReemplazo) {
+    return false;
+  }
+
+  if (
+    normalizarCorreoHorarioAlumno(bloque.docenteCorreo) !==
+    normalizarCorreoHorarioAlumno(reemplazo.titularCorreo)
+  ) {
+    return false;
+  }
+
+  const asignacionBloque = String(bloque.asignacionId || "").trim();
+
+  const asignacionReemplazo = String(
+    reemplazo.asignacionTitularId || "",
+  ).trim();
+
+  if (asignacionBloque && asignacionReemplazo) {
+    return asignacionBloque === asignacionReemplazo;
+  }
+
+  return (
+    String(bloque.cursoId || "").trim() ===
+      String(reemplazo.cursoId || "").trim() &&
+    String(bloque.espacioId || "").trim() ===
+      String(reemplazo.espacioId || "").trim()
+  );
+}
+
+function aplicarReemplazoVisualHorarioAlumno(bloque, reemplazos) {
+  const tipoHorario = String(bloque.tipoHorario || "")
+    .trim()
+    .toUpperCase();
+
+  if (tipoHorario !== "TALLER" && tipoHorario !== "EDUCACION_FISICA") {
+    return bloque;
+  }
+
+  const reemplazo = reemplazos.find(
+    (item) =>
+      reemplazoHorarioAlumnoEstaVigente(item) &&
+      bloqueHorarioAlumnoPerteneceAReemplazo(bloque, item),
+  );
+
+  if (!reemplazo) {
+    return bloque;
+  }
+
+  return {
+    ...bloque,
+
+    docenteTitularNombre: bloque.docenteNombre || "",
+
+    docenteTitularCorreo: bloque.docenteCorreo || "",
+
+    docenteNombre: `${
+      reemplazo.reemplazanteNombre ||
+      reemplazo.reemplazanteCorreo ||
+      "Docente reemplazante"
+    } (Reemplazante)`,
+
+    docenteCorreo: reemplazo.reemplazanteCorreo || "",
+  };
+}
+
 async function cargarHorarioAulaAlumno(usuario) {
   if (!vistaHorarioAulaAlumno) return;
 
@@ -352,6 +456,24 @@ async function cargarHorarioAulaAlumno(usuario) {
 
     const resultado = await getDocs(consultaHorarios);
 
+    const cursoId = String(perfilAlumno.cursoId || "").trim();
+
+    let reemplazosHorarioAlumno = [];
+
+    if (cursoId) {
+      const consultaReemplazos = query(
+        collection(db, "reemplazos_docentes"),
+        where("cursoId", "==", cursoId),
+      );
+
+      const resultadoReemplazos = await getDocs(consultaReemplazos);
+
+      reemplazosHorarioAlumno = resultadoReemplazos.docs.map((documento) => ({
+        id: documento.id,
+        ...documento.data(),
+      }));
+    }
+
     const grupoTallerAlumno = String(perfilAlumno.grupoTaller || "")
       .trim()
       .toUpperCase();
@@ -361,7 +483,15 @@ async function cargarHorarioAulaAlumno(usuario) {
     const bloquesEducacionFisica = [];
 
     resultado.forEach((documento) => {
-      const datos = documento.data();
+      const datosOriginales = {
+        id: documento.id,
+        ...documento.data(),
+      };
+
+      const datos = aplicarReemplazoVisualHorarioAlumno(
+        datosOriginales,
+        reemplazosHorarioAlumno,
+      );
 
       const tipoHorario = String(datos.tipoHorario || "")
         .trim()
