@@ -195,6 +195,96 @@ function renderizarClasesSira(clases) {
   }
 }
 
+function reemplazoSiraEstaVigenteEnFecha(reemplazo, fechaSeleccionada) {
+  const estado = String(reemplazo.estado || "")
+    .trim()
+    .toUpperCase();
+
+  const tipo = String(reemplazo.tipoHorario || "")
+    .trim()
+    .toUpperCase();
+
+  const fechaDesde = String(reemplazo.fechaDesde || "").trim();
+  const fechaHasta = String(reemplazo.fechaHasta || "").trim();
+
+  return (
+    estado === "ACTIVO" &&
+    (tipo === "TALLER" || tipo === "EDUCACION_FISICA") &&
+    fechaDesde &&
+    fechaHasta &&
+    fechaSeleccionada >= fechaDesde &&
+    fechaSeleccionada <= fechaHasta
+  );
+}
+
+function bloqueSiraPerteneceAReemplazo(bloque, reemplazo) {
+  const asignacionBloque = String(bloque.asignacionId || "").trim();
+
+  const asignacionReemplazo = String(
+    reemplazo.asignacionTitularId || "",
+  ).trim();
+
+  if (asignacionBloque && asignacionReemplazo) {
+    return asignacionBloque === asignacionReemplazo;
+  }
+
+  return (
+    normalizarCorreoSira(bloque.docenteCorreo) ===
+      normalizarCorreoSira(reemplazo.titularCorreo) &&
+    String(bloque.cursoId || "").trim() ===
+      String(reemplazo.cursoId || "").trim() &&
+    String(bloque.espacioId || "").trim() ===
+      String(reemplazo.espacioId || "").trim()
+  );
+}
+
+async function obtenerReemplazosSiraDocente(correoDocente, fechaSeleccionada) {
+  const consultaTitular = query(
+    collection(db, "reemplazos_docentes"),
+    where("titularCorreo", "==", correoDocente),
+  );
+
+  const consultaReemplazante = query(
+    collection(db, "reemplazos_docentes"),
+    where("reemplazanteCorreo", "==", correoDocente),
+  );
+
+  const [resultadoTitular, resultadoReemplazante] = await Promise.all([
+    getDocs(consultaTitular),
+    getDocs(consultaReemplazante),
+  ]);
+
+  const comoTitular = [];
+  const comoReemplazante = [];
+
+  resultadoTitular.forEach((documento) => {
+    const reemplazo = {
+      id: documento.id,
+      ...documento.data(),
+    };
+
+    if (reemplazoSiraEstaVigenteEnFecha(reemplazo, fechaSeleccionada)) {
+      comoTitular.push(reemplazo);
+    }
+  });
+
+  resultadoReemplazante.forEach((documento) => {
+    const reemplazo = {
+      id: documento.id,
+      ...documento.data(),
+    };
+
+    if (reemplazoSiraEstaVigenteEnFecha(reemplazo, fechaSeleccionada)) {
+      comoReemplazante.push(reemplazo);
+    }
+  });
+
+  return {
+    comoTitular,
+    comoReemplazante,
+  };
+}
+
 async function cargarClasesSiraPorFecha() {
   limpiarVistaSira();
 
@@ -218,6 +308,7 @@ async function cargarClasesSiraPorFecha() {
   }
 
   const diaSeleccionado = obtenerDiaSiraDesdeFecha(fechaSeleccionada);
+
   const correoDocente = normalizarCorreoSira(usuarioSiraActual.email);
 
   if (infoClaseSiraDocente) {
@@ -227,17 +318,21 @@ async function cargarClasesSiraPorFecha() {
   mostrarMensajeSira("");
 
   try {
-    const consultaHorarios = query(
+    const consultaHorariosPropios = query(
       collection(db, "horarios"),
       where("estado", "==", "ACTIVO"),
       where("docenteCorreo", "==", correoDocente),
     );
 
-    const resultado = await getDocs(consultaHorarios);
+    const [resultadoPropios, reemplazos] = await Promise.all([
+      getDocs(consultaHorariosPropios),
 
-    const clases = [];
+      obtenerReemplazosSiraDocente(correoDocente, fechaSeleccionada),
+    ]);
 
-    resultado.forEach((documento) => {
+    const clasesPropias = [];
+
+    resultadoPropios.forEach((documento) => {
       const datos = documento.data();
 
       const tipoHorario = String(datos.tipoHorario || "")
@@ -254,13 +349,97 @@ async function cargarClasesSiraPorFecha() {
       if (!esSira) return;
       if (diaHorario !== diaSeleccionado) return;
 
-      clases.push({
+      clasesPropias.push({
         id: documento.id,
         ...datos,
       });
     });
 
-    clases.sort((a, b) => {
+    /*
+     * Si el docente es titular de una asignación
+     * reemplazada en esa fecha, esa clase deja
+     * de estar disponible para él.
+     */
+    const clases = clasesPropias.filter(
+      (clase) =>
+        !reemplazos.comoTitular.some((reemplazo) =>
+          bloqueSiraPerteneceAReemplazo(clase, reemplazo),
+        ),
+    );
+
+    /*
+     * Agregamos las clases que el docente está
+     * cubriendo como reemplazante.
+     */
+    for (const reemplazo of reemplazos.comoReemplazante) {
+      const titularCorreo = normalizarCorreoSira(reemplazo.titularCorreo);
+
+      const consultaHorariosTitular = query(
+        collection(db, "horarios"),
+        where("estado", "==", "ACTIVO"),
+        where("docenteCorreo", "==", titularCorreo),
+      );
+
+      const resultadoTitular = await getDocs(consultaHorariosTitular);
+
+      resultadoTitular.forEach((documento) => {
+        const datos = documento.data();
+
+        const tipoHorario = String(datos.tipoHorario || "")
+          .trim()
+          .toUpperCase();
+
+        const diaHorario = String(datos.dia || "")
+          .trim()
+          .toUpperCase();
+
+        if (tipoHorario !== "TALLER" && tipoHorario !== "EDUCACION_FISICA") {
+          return;
+        }
+
+        if (diaHorario !== diaSeleccionado) {
+          return;
+        }
+
+        const bloque = {
+          id: documento.id,
+          ...datos,
+        };
+
+        if (!bloqueSiraPerteneceAReemplazo(bloque, reemplazo)) {
+          return;
+        }
+
+        /*
+         * Guardamos estos datos para usarlos
+         * más adelante al registrar la asistencia.
+         */
+        clases.push({
+          ...bloque,
+
+          esReemplazoTemporal: true,
+          reemplazoId: reemplazo.id,
+
+          docenteTitularCorreo: reemplazo.titularCorreo || "",
+
+          docenteTitularNombre: reemplazo.titularNombre || "",
+
+          reemplazanteCorreo: reemplazo.reemplazanteCorreo || "",
+
+          reemplazanteNombre: reemplazo.reemplazanteNombre || "",
+        });
+      });
+    }
+
+    /*
+     * Evitamos que eventualmente se repita
+     * el mismo bloque.
+     */
+    const clasesSinDuplicados = Array.from(
+      new Map(clases.map((clase) => [clase.id, clase])).values(),
+    );
+
+    clasesSinDuplicados.sort((a, b) => {
       const horaA = String(a.horaInicio || "");
       const horaB = String(b.horaInicio || "");
 
@@ -274,9 +453,9 @@ async function cargarClasesSiraPorFecha() {
       );
     });
 
-    clasesSiraDisponibles = clases;
+    clasesSiraDisponibles = clasesSinDuplicados;
 
-    renderizarClasesSira(clases);
+    renderizarClasesSira(clasesSinDuplicados);
   } catch (error) {
     console.error("Error al cargar clases Si.R.A.:", error);
 
@@ -588,7 +767,6 @@ function obtenerIdAsistenciaSira(clase) {
     clase.cursoId,
     clase.grupoTaller || "curso-completo",
     clase.id,
-    usuarioSiraActual?.email || "",
   ];
 
   return partes.map(limpiarTextoIdSira).filter(Boolean).join("_");
@@ -609,7 +787,7 @@ async function obtenerAsistenciaExistenteSira(clase) {
 
   const consulta = query(
     collection(db, "asistencias_clases"),
-    where("docenteCorreo", "==", usuario.email),
+    where("docenteCorreo", "==", normalizarCorreoSira(usuario.email)),
     where("fecha", "==", fecha),
     where("horarioId", "==", clase.id),
   );
@@ -691,7 +869,8 @@ async function guardarAsistenciaSira() {
     };
   });
 
-  const idAsistencia = obtenerIdAsistenciaSira(claseSiraSeleccionada);
+  const idAsistencia =
+    asistenciaSiraActual?.id || obtenerIdAsistenciaSira(claseSiraSeleccionada);
   const referencia = doc(db, "asistencias_clases", idAsistencia);
 
   const datosAsistencia = {
@@ -718,10 +897,30 @@ async function guardarAsistenciaSira() {
     horaFin: claseSiraSeleccionada.horaFin || "",
 
     docenteCorreo: normalizarCorreoSira(usuarioSiraActual.email),
-    docenteNombre:
-      claseSiraSeleccionada.docenteNombre ||
-      usuarioSiraActual.displayName ||
-      "",
+
+    docenteNombre: claseSiraSeleccionada.esReemplazoTemporal
+      ? claseSiraSeleccionada.reemplazanteNombre ||
+        usuarioSiraActual.displayName ||
+        ""
+      : claseSiraSeleccionada.docenteNombre ||
+        usuarioSiraActual.displayName ||
+        "",
+
+    docenteTitularCorreo: claseSiraSeleccionada.esReemplazoTemporal
+      ? normalizarCorreoSira(claseSiraSeleccionada.docenteTitularCorreo)
+      : normalizarCorreoSira(usuarioSiraActual.email),
+
+    docenteTitularNombre: claseSiraSeleccionada.esReemplazoTemporal
+      ? claseSiraSeleccionada.docenteTitularNombre || ""
+      : claseSiraSeleccionada.docenteNombre ||
+        usuarioSiraActual.displayName ||
+        "",
+
+    reemplazoId: claseSiraSeleccionada.esReemplazoTemporal
+      ? claseSiraSeleccionada.reemplazoId || ""
+      : "",
+
+    asignacionId: claseSiraSeleccionada.asignacionId || "",
 
     modoLluvia,
     estado: "ACTIVA",

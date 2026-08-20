@@ -495,6 +495,108 @@ async function cargarHorarioAulaDocente(usuario) {
   }
 }
 
+function obtenerFechaActualHorarioDocente() {
+  const hoy = new Date();
+
+  const anio = hoy.getFullYear();
+  const mes = String(hoy.getMonth() + 1).padStart(2, "0");
+  const dia = String(hoy.getDate()).padStart(2, "0");
+
+  return `${anio}-${mes}-${dia}`;
+}
+
+function reemplazoDocenteEstaVigente(reemplazo) {
+  const estado = String(reemplazo.estado || "")
+    .trim()
+    .toUpperCase();
+
+  const tipoHorario = String(reemplazo.tipoHorario || "")
+    .trim()
+    .toUpperCase();
+
+  const fechaDesde = String(reemplazo.fechaDesde || "").trim();
+  const fechaHasta = String(reemplazo.fechaHasta || "").trim();
+
+  const hoy = obtenerFechaActualHorarioDocente();
+
+  return (
+    estado === "ACTIVO" &&
+    tipoHorario === "TALLER" &&
+    fechaDesde &&
+    fechaHasta &&
+    hoy >= fechaDesde &&
+    hoy <= fechaHasta
+  );
+}
+
+function bloquePerteneceAReemplazo(bloque, reemplazo) {
+  const asignacionBloque = String(bloque.asignacionId || "").trim();
+
+  const asignacionReemplazo = String(
+    reemplazo.asignacionTitularId || "",
+  ).trim();
+
+  if (asignacionBloque && asignacionReemplazo) {
+    return asignacionBloque === asignacionReemplazo;
+  }
+
+  return (
+    normalizarCorreoDocente(bloque.docenteCorreo) ===
+      normalizarCorreoDocente(reemplazo.titularCorreo) &&
+    String(bloque.cursoId || "").trim() ===
+      String(reemplazo.cursoId || "").trim() &&
+    String(bloque.espacioId || "").trim() ===
+      String(reemplazo.espacioId || "").trim()
+  );
+}
+
+async function obtenerReemplazosTallerDocente(correoDocente) {
+  const consultaComoTitular = query(
+    collection(db, "reemplazos_docentes"),
+    where("titularCorreo", "==", correoDocente),
+  );
+
+  const consultaComoReemplazante = query(
+    collection(db, "reemplazos_docentes"),
+    where("reemplazanteCorreo", "==", correoDocente),
+  );
+
+  const [resultadoTitular, resultadoReemplazante] = await Promise.all([
+    getDocs(consultaComoTitular),
+    getDocs(consultaComoReemplazante),
+  ]);
+
+  const comoTitular = [];
+  const comoReemplazante = [];
+
+  resultadoTitular.forEach((documento) => {
+    const reemplazo = {
+      id: documento.id,
+      ...documento.data(),
+    };
+
+    if (reemplazoDocenteEstaVigente(reemplazo)) {
+      comoTitular.push(reemplazo);
+    }
+  });
+
+  resultadoReemplazante.forEach((documento) => {
+    const reemplazo = {
+      id: documento.id,
+      ...documento.data(),
+    };
+
+    if (reemplazoDocenteEstaVigente(reemplazo)) {
+      comoReemplazante.push(reemplazo);
+    }
+  });
+
+  return {
+    comoTitular,
+    comoReemplazante,
+  };
+}
+
 async function cargarHorarioTallerDocente(usuario) {
   if (!vistaHorarioTallerDocente) return;
 
@@ -503,29 +605,75 @@ async function cargarHorarioTallerDocente(usuario) {
   try {
     const correoDocente = normalizarCorreoDocente(usuario.email);
 
-    const consultaHorarios = query(
+    const consultaHorariosPropios = query(
       collection(db, "horarios"),
       where("estado", "==", "ACTIVO"),
       where("tipoHorario", "==", "TALLER"),
       where("docenteCorreo", "==", correoDocente),
     );
 
-    const resultado = await getDocs(consultaHorarios);
+    const [resultadoPropios, reemplazos] = await Promise.all([
+      getDocs(consultaHorariosPropios),
+      obtenerReemplazosTallerDocente(correoDocente),
+    ]);
 
-    const bloques = [];
+    const bloquesPropios = [];
 
-    resultado.forEach((documento) => {
-      bloques.push({
+    resultadoPropios.forEach((documento) => {
+      bloquesPropios.push({
         id: documento.id,
         ...documento.data(),
       });
     });
 
+    const bloques = bloquesPropios.filter(
+      (bloque) =>
+        !reemplazos.comoTitular.some((reemplazo) =>
+          bloquePerteneceAReemplazo(bloque, reemplazo),
+        ),
+    );
+
+    for (const reemplazo of reemplazos.comoReemplazante) {
+      const titularCorreo = normalizarCorreoDocente(reemplazo.titularCorreo);
+
+      const consultaHorariosTitular = query(
+        collection(db, "horarios"),
+        where("estado", "==", "ACTIVO"),
+        where("tipoHorario", "==", "TALLER"),
+        where("docenteCorreo", "==", titularCorreo),
+      );
+
+      const resultadoTitular = await getDocs(consultaHorariosTitular);
+
+      resultadoTitular.forEach((documento) => {
+        const bloque = {
+          id: documento.id,
+          ...documento.data(),
+        };
+
+        if (bloquePerteneceAReemplazo(bloque, reemplazo)) {
+          bloques.push({
+            ...bloque,
+
+            esReemplazoTemporal: true,
+            reemplazoId: reemplazo.id,
+
+            docenteTitularCorreo: reemplazo.titularCorreo || "",
+
+            docenteTitularNombre: reemplazo.titularNombre || "",
+          });
+        }
+      });
+    }
+
     bloques.sort((a, b) => {
       const diaA = DIAS_HORARIO_DOCENTE.findIndex((dia) => dia.valor === a.dia);
+
       const diaB = DIAS_HORARIO_DOCENTE.findIndex((dia) => dia.valor === b.dia);
 
-      if (diaA !== diaB) return diaA - diaB;
+      if (diaA !== diaB) {
+        return diaA - diaB;
+      }
 
       const horaA = String(a.horaInicio || "");
       const horaB = String(b.horaInicio || "");
@@ -551,6 +699,77 @@ async function cargarHorarioTallerDocente(usuario) {
   }
 }
 
+function reemplazoEducacionFisicaEstaVigente(reemplazo) {
+  const estado = String(reemplazo.estado || "")
+    .trim()
+    .toUpperCase();
+
+  const tipoHorario = String(reemplazo.tipoHorario || "")
+    .trim()
+    .toUpperCase();
+
+  const fechaDesde = String(reemplazo.fechaDesde || "").trim();
+  const fechaHasta = String(reemplazo.fechaHasta || "").trim();
+
+  const hoy = obtenerFechaActualHorarioDocente();
+
+  return (
+    estado === "ACTIVO" &&
+    tipoHorario === "EDUCACION_FISICA" &&
+    fechaDesde &&
+    fechaHasta &&
+    hoy >= fechaDesde &&
+    hoy <= fechaHasta
+  );
+}
+
+async function obtenerReemplazosEducacionFisicaDocente(correoDocente) {
+  const consultaComoTitular = query(
+    collection(db, "reemplazos_docentes"),
+    where("titularCorreo", "==", correoDocente),
+  );
+
+  const consultaComoReemplazante = query(
+    collection(db, "reemplazos_docentes"),
+    where("reemplazanteCorreo", "==", correoDocente),
+  );
+
+  const [resultadoTitular, resultadoReemplazante] = await Promise.all([
+    getDocs(consultaComoTitular),
+    getDocs(consultaComoReemplazante),
+  ]);
+
+  const comoTitular = [];
+  const comoReemplazante = [];
+
+  resultadoTitular.forEach((documento) => {
+    const reemplazo = {
+      id: documento.id,
+      ...documento.data(),
+    };
+
+    if (reemplazoEducacionFisicaEstaVigente(reemplazo)) {
+      comoTitular.push(reemplazo);
+    }
+  });
+
+  resultadoReemplazante.forEach((documento) => {
+    const reemplazo = {
+      id: documento.id,
+      ...documento.data(),
+    };
+
+    if (reemplazoEducacionFisicaEstaVigente(reemplazo)) {
+      comoReemplazante.push(reemplazo);
+    }
+  });
+
+  return {
+    comoTitular,
+    comoReemplazante,
+  };
+}
+
 async function cargarHorarioEducacionFisicaDocente(usuario) {
   if (!vistaHorarioEducacionFisicaDocente) return;
 
@@ -561,29 +780,75 @@ async function cargarHorarioEducacionFisicaDocente(usuario) {
   try {
     const correoDocente = normalizarCorreoDocente(usuario.email);
 
-    const consultaHorarios = query(
+    const consultaHorariosPropios = query(
       collection(db, "horarios"),
       where("estado", "==", "ACTIVO"),
       where("tipoHorario", "==", "EDUCACION_FISICA"),
       where("docenteCorreo", "==", correoDocente),
     );
 
-    const resultado = await getDocs(consultaHorarios);
+    const [resultadoPropios, reemplazos] = await Promise.all([
+      getDocs(consultaHorariosPropios),
+      obtenerReemplazosEducacionFisicaDocente(correoDocente),
+    ]);
 
-    const bloques = [];
+    const bloquesPropios = [];
 
-    resultado.forEach((documento) => {
-      bloques.push({
+    resultadoPropios.forEach((documento) => {
+      bloquesPropios.push({
         id: documento.id,
         ...documento.data(),
       });
     });
 
+    const bloques = bloquesPropios.filter(
+      (bloque) =>
+        !reemplazos.comoTitular.some((reemplazo) =>
+          bloquePerteneceAReemplazo(bloque, reemplazo),
+        ),
+    );
+
+    for (const reemplazo of reemplazos.comoReemplazante) {
+      const titularCorreo = normalizarCorreoDocente(reemplazo.titularCorreo);
+
+      const consultaHorariosTitular = query(
+        collection(db, "horarios"),
+        where("estado", "==", "ACTIVO"),
+        where("tipoHorario", "==", "EDUCACION_FISICA"),
+        where("docenteCorreo", "==", titularCorreo),
+      );
+
+      const resultadoTitular = await getDocs(consultaHorariosTitular);
+
+      resultadoTitular.forEach((documento) => {
+        const bloque = {
+          id: documento.id,
+          ...documento.data(),
+        };
+
+        if (bloquePerteneceAReemplazo(bloque, reemplazo)) {
+          bloques.push({
+            ...bloque,
+
+            esReemplazoTemporal: true,
+            reemplazoId: reemplazo.id,
+
+            docenteTitularCorreo: reemplazo.titularCorreo || "",
+
+            docenteTitularNombre: reemplazo.titularNombre || "",
+          });
+        }
+      });
+    }
+
     bloques.sort((a, b) => {
       const diaA = DIAS_HORARIO_DOCENTE.findIndex((dia) => dia.valor === a.dia);
+
       const diaB = DIAS_HORARIO_DOCENTE.findIndex((dia) => dia.valor === b.dia);
 
-      if (diaA !== diaB) return diaA - diaB;
+      if (diaA !== diaB) {
+        return diaA - diaB;
+      }
 
       const horaA = String(a.horaInicio || "");
       const horaB = String(b.horaInicio || "");

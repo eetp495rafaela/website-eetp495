@@ -13,6 +13,7 @@ import {
   getDoc,
   getDocs,
   addDoc,
+  updateDoc,
   serverTimestamp,
 } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
 
@@ -46,6 +47,12 @@ const btnRegistrarReemplazo = document.getElementById("btnRegistrarReemplazo");
 const mensajeReemplazoDocente = document.getElementById(
   "mensajeReemplazoDocente",
 );
+
+const btnVerReemplazos = document.getElementById("btnVerReemplazos");
+
+const cuerpoTablaReemplazos = document.getElementById("cuerpoTablaReemplazos");
+
+const mensajeReemplazos = document.getElementById("mensajeReemplazos");
 
 function normalizarCorreo(correo) {
   return String(correo || "")
@@ -514,6 +521,222 @@ async function registrarReemplazoDocente(evento) {
 
 if (formReemplazoDocente) {
   formReemplazoDocente.addEventListener("submit", registrarReemplazoDocente);
+}
+
+function formatearFechaReemplazo(fecha) {
+  const valor = String(fecha || "").trim();
+
+  if (!valor) return "-";
+
+  const partes = valor.split("-");
+
+  if (partes.length !== 3) {
+    return valor;
+  }
+
+  return `${partes[2]}/${partes[1]}/${partes[0]}`;
+}
+
+function obtenerEstadoVisualReemplazo(reemplazo) {
+  const estado = String(reemplazo.estado || "")
+    .trim()
+    .toUpperCase();
+
+  if (estado !== "ACTIVO") {
+    return "INACTIVO";
+  }
+
+  const hoy = new Date();
+  const anio = hoy.getFullYear();
+  const mes = String(hoy.getMonth() + 1).padStart(2, "0");
+  const dia = String(hoy.getDate()).padStart(2, "0");
+
+  const fechaHoy = `${anio}-${mes}-${dia}`;
+
+  if (fechaHoy < reemplazo.fechaDesde) {
+    return "FUTURO";
+  }
+
+  if (fechaHoy > reemplazo.fechaHasta) {
+    return "FINALIZADO";
+  }
+
+  return "VIGENTE";
+}
+
+async function desactivarReemplazo(idReemplazo) {
+  const id = String(idReemplazo || "").trim();
+
+  if (!id) return;
+
+  const resultado = await Swal.fire({
+    icon: "warning",
+    title: "¿Finalizar reemplazo?",
+    text: "El reemplazo quedará inactivo desde este momento.",
+    showCancelButton: true,
+    confirmButtonText: "Sí, finalizar",
+    cancelButtonText: "Cancelar",
+  });
+
+  if (!resultado.isConfirmed) {
+    return;
+  }
+
+  const usuarioActual = auth.currentUser;
+
+  if (!usuarioActual) {
+    Swal.fire({
+      icon: "error",
+      title: "Sesión no válida",
+      text: "No se pudo validar la sesión actual.",
+    });
+
+    return;
+  }
+
+  try {
+    await updateDoc(doc(db, "reemplazos_docentes", id), {
+      estado: "INACTIVO",
+      actualizadoEn: serverTimestamp(),
+      actualizadoPor: normalizarCorreo(usuarioActual.email),
+      finalizadoEn: serverTimestamp(),
+      finalizadoPor: normalizarCorreo(usuarioActual.email),
+    });
+
+    await Swal.fire({
+      icon: "success",
+      title: "Reemplazo finalizado",
+      text: "El reemplazo fue desactivado correctamente.",
+      confirmButtonText: "Aceptar",
+    });
+
+    await cargarReemplazosRegistrados();
+  } catch (error) {
+    console.error("Error al finalizar reemplazo:", error);
+
+    Swal.fire({
+      icon: "error",
+      title: "No se pudo finalizar",
+      text: error.message || "No se pudo desactivar el reemplazo.",
+    });
+  }
+}
+
+async function cargarReemplazosRegistrados() {
+  if (!cuerpoTablaReemplazos) return;
+
+  cuerpoTablaReemplazos.innerHTML = `
+    <tr>
+      <td colspan="8" class="tabla-vacia">
+        Cargando reemplazos...
+      </td>
+    </tr>
+  `;
+
+  if (mensajeReemplazos) {
+    mensajeReemplazos.textContent = "";
+  }
+
+  try {
+    const consulta = await getDocs(collection(db, "reemplazos_docentes"));
+
+    const reemplazos = consulta.docs
+      .map((documento) => ({
+        id: documento.id,
+        ...documento.data(),
+      }))
+      .sort((a, b) =>
+        String(b.fechaDesde || "").localeCompare(String(a.fechaDesde || "")),
+      );
+
+    if (!reemplazos.length) {
+      cuerpoTablaReemplazos.innerHTML = `
+        <tr>
+          <td colspan="8" class="tabla-vacia">
+            No hay reemplazos registrados.
+          </td>
+        </tr>
+      `;
+
+      return;
+    }
+
+    cuerpoTablaReemplazos.innerHTML = "";
+
+    reemplazos.forEach((reemplazo) => {
+      const fila = document.createElement("tr");
+
+      const estadoVisual = obtenerEstadoVisualReemplazo(reemplazo);
+
+      fila.innerHTML = `
+        <td>${reemplazo.titularNombre || reemplazo.titularCorreo || "-"}</td>
+
+        <td>${
+          reemplazo.reemplazanteNombre || reemplazo.reemplazanteCorreo || "-"
+        }</td>
+
+        <td>${reemplazo.cursoNombre || "-"}</td>
+
+        <td>${reemplazo.espacioNombre || "-"}</td>
+
+        <td>${formatearFechaReemplazo(reemplazo.fechaDesde)}</td>
+
+        <td>${formatearFechaReemplazo(reemplazo.fechaHasta)}</td>
+
+        <td>${estadoVisual}</td>
+
+<td>
+  ${
+    String(reemplazo.estado || "")
+      .trim()
+      .toUpperCase() === "ACTIVO"
+      ? `
+        <button
+          type="button"
+          class="btn-accion btn-finalizar-reemplazo"
+          data-id="${reemplazo.id}"
+        >
+          Finalizar
+        </button>
+      `
+      : "-"
+  }
+</td>
+      `;
+
+      cuerpoTablaReemplazos.appendChild(fila);
+    });
+
+    cuerpoTablaReemplazos
+      .querySelectorAll(".btn-finalizar-reemplazo")
+      .forEach((boton) => {
+        boton.addEventListener("click", () => {
+          desactivarReemplazo(boton.dataset.id);
+        });
+      });
+
+    if (mensajeReemplazos) {
+      mensajeReemplazos.textContent = `${reemplazos.length} reemplazo(s) registrado(s).`;
+    }
+  } catch (error) {
+    console.error("Error al cargar reemplazos registrados:", error);
+
+    cuerpoTablaReemplazos.innerHTML = `
+      <tr>
+        <td colspan="8" class="tabla-vacia">
+          No se pudieron cargar los reemplazos.
+        </td>
+      </tr>
+    `;
+
+    if (mensajeReemplazos) {
+      mensajeReemplazos.textContent = "No se pudieron cargar los reemplazos.";
+    }
+  }
+}
+
+if (btnVerReemplazos) {
+  btnVerReemplazos.addEventListener("click", cargarReemplazosRegistrados);
 }
 
 cargarDocentesReemplazos();
