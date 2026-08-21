@@ -2267,3 +2267,105 @@ html {
 #horarios .bloque-horario-seccion-alumno + .bloque-horario-seccion-alumno {
   margin-top: 24px;
 }
+/* =====================================================
+   TARJETAS INICIO ALUMNO - FORMATO COMPACTO TIPO GESTIÓN
+===================================================== */
+
+.grid-servicios-estudiantes {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.grid-servicios-estudiantes .tarjeta {
+  display: grid;
+  grid-template-columns: 58px minmax(0, 1fr);
+  grid-template-rows: auto auto;
+  column-gap: 16px;
+  row-gap: 4px;
+
+  width: 100%;
+  min-height: 135px;
+  padding: 20px;
+
+  align-items: center;
+  justify-content: initial;
+
+  text-align: left;
+}
+
+/* Ícono a la izquierda */
+.grid-servicios-estudiantes .tarjeta > i {
+  grid-column: 1;
+  grid-row: 1 / 3;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 54px;
+  height: 54px;
+  margin: 0;
+
+  border-radius: 14px;
+
+  background: rgba(45, 212, 191, 0.14);
+  color: var(--alumno-verde);
+
+  font-size: 1.8rem;
+}
+
+/* Título */
+.grid-servicios-estudiantes .tarjeta > h3 {
+  grid-column: 2;
+  grid-row: 1;
+
+  align-self: end;
+
+  margin: 0;
+
+  color: #ffffff;
+  font-size: 1.05rem;
+  font-weight: 800;
+  line-height: 1.25;
+}
+
+/* Descripción */
+.grid-servicios-estudiantes .tarjeta > p {
+  grid-column: 2;
+  grid-row: 2;
+
+  align-self: start;
+
+  margin: 0;
+
+  color: var(--alumno-texto-suave);
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+/* El botón "Ver Horario Completo" debe comportarse
+   visualmente igual que las tarjetas enlace */
+.grid-servicios-estudiantes button.tarjeta {
+  font-family: inherit;
+  text-align: left;
+}
+
+/* TABLET */
+@media (max-width: 1100px) {
+  .grid-servicios-estudiantes {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* CELULAR */
+@media (max-width: 650px) {
+  .grid-servicios-estudiantes {
+    grid-template-columns: 1fr;
+  }
+
+  .grid-servicios-estudiantes .tarjeta {
+    min-height: 125px;
+    padding: 18px;
+  }
+}
