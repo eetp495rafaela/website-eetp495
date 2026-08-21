@@ -3073,14 +3073,3 @@ body {
   outline: 2px solid rgba(10, 157, 125, 0.25);
   outline-offset: 2px;
 }
-/* Reemplazos Docentes - botón Eliminar */
-.btn-accion.btn-eliminar-reemplazo {
-  background: #dc3545;
-  color: #ffffff;
-  border-color: #dc3545;
-}
-
-.btn-accion.btn-eliminar-reemplazo:hover {
-  background: #b02a37;
-  border-color: #b02a37;
-}

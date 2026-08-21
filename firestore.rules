@@ -13,48 +13,88 @@ service cloud.firestore {
       ).data;
     }
 
-    function accesoVigente() {
-      let fechaFinAcceso =
-        perfilUsuario().get("fechaFinAcceso", null);
+   function accesoVigentePerfil(perfil) {
+  let fechaFinAcceso =
+    perfil.get("fechaFinAcceso", null);
 
-      return fechaFinAcceso == null
-        || fechaFinAcceso == ""
-        || (
-          fechaFinAcceso is string
-          && fechaFinAcceso.matches(
-            "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+  return fechaFinAcceso == null
+    || fechaFinAcceso == ""
+    || (
+      fechaFinAcceso is string
+      && fechaFinAcceso.matches(
+        "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+      )
+      && request.time
+        < timestamp.date(
+            int(fechaFinAcceso[0:4]),
+            int(fechaFinAcceso[5:7]),
+            int(fechaFinAcceso[8:10])
           )
-          && request.time
-            < timestamp.date(
-                int(fechaFinAcceso[0:4]),
-                int(fechaFinAcceso[5:7]),
-                int(fechaFinAcceso[8:10])
-              )
-              + duration.value(27, "h")
-        );
-    }
+          + duration.value(27, "h")
+    );
+}
 
-    function usuarioActivo() {
-      return usuarioAutenticado()
-        && perfilUsuario().estado == "ACTIVO"
-        && accesoVigente();
-    }
-
-    function perfilTieneRol(rolBuscado) {
+function perfilTieneAlgunoDeLosRoles(
+  perfil,
+  rolesBuscados
+) {
   return (
-    perfilUsuario().keys().hasAny(["rol"])
-    && perfilUsuario().rol == rolBuscado
+    perfil.keys().hasAny(["rol"])
+    && perfil.rol in rolesBuscados
   )
   || (
-    perfilUsuario().keys().hasAny(["roles"])
-    && perfilUsuario().roles is list
-    && rolBuscado in perfilUsuario().roles
+    perfil.keys().hasAny(["roles"])
+    && perfil.roles is list
+    && perfil.roles.hasAny(rolesBuscados)
   );
 }
 
+function perfilActivo(perfil) {
+  return perfil.get("estado", "") == "ACTIVO"
+    && accesoVigentePerfil(perfil);
+}
+
+function perfilActivoTieneRoles(
+  perfil,
+  rolesBuscados
+) {
+  return perfilActivo(perfil)
+    && perfilTieneAlgunoDeLosRoles(
+      perfil,
+      rolesBuscados
+    );
+}
+
+function accesoVigente() {
+  return usuarioAutenticado()
+    && accesoVigentePerfil(perfilUsuario());
+}
+
+function usuarioActivo() {
+  return usuarioAutenticado()
+    && perfilActivo(perfilUsuario());
+}
+
+function perfilTieneRol(rolBuscado) {
+  return usuarioAutenticado()
+    && perfilTieneAlgunoDeLosRoles(
+      perfilUsuario(),
+      [rolBuscado]
+    );
+}
+
+function usuarioActivoTieneRoles(rolesBuscados) {
+  return usuarioAutenticado()
+    && perfilActivoTieneRoles(
+      perfilUsuario(),
+      rolesBuscados
+    );
+}
+
 function esSoportePorPerfil() {
-  return usuarioActivo()
-    && perfilTieneRol("SOPORTE");
+  return usuarioActivoTieneRoles([
+    "SOPORTE"
+  ]);
 }
 
 function esSoporte() {
@@ -62,28 +102,110 @@ function esSoporte() {
 }
 
 function esAlumnoPorPerfil() {
-  return usuarioActivo()
-    && perfilTieneRol("ALUMNO");
+  return usuarioActivoTieneRoles([
+    "ALUMNO"
+  ]);
+}
+
+function alumnoPuedeListarCompaneros() {
+  /*
+   * El perfil se consulta una sola vez y se conserva
+   * en una variable durante toda la evaluación.
+   */
+  let perfil = perfilUsuario();
+
+  let fechaFinAcceso =
+    perfil.get("fechaFinAcceso", null);
+
+  return usuarioAutenticado()
+
+    /*
+     * El alumno debe estar activo.
+     */
+    && perfil.get("estado", "") == "ACTIVO"
+
+    /*
+     * El acceso no debe estar vencido.
+     */
+    && (
+      fechaFinAcceso == null
+      || fechaFinAcceso == ""
+      || (
+        fechaFinAcceso is string
+
+        && fechaFinAcceso.matches(
+          "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+        )
+
+        && request.time
+          < timestamp.date(
+              int(fechaFinAcceso[0:4]),
+              int(fechaFinAcceso[5:7]),
+              int(fechaFinAcceso[8:10])
+            )
+            + duration.value(27, "h")
+      )
+    )
+
+    /*
+     * Compatibilidad con rol y roles.
+     */
+    && (
+      (
+        perfil.keys().hasAny(["rol"])
+        && perfil.rol == "ALUMNO"
+      )
+      || (
+        perfil.keys().hasAny(["roles"])
+        && perfil.roles is list
+        && "ALUMNO" in perfil.roles
+      )
+    )
+
+    /*
+     * El alumno debe tener un cursoId válido.
+     */
+    && perfil.get("cursoId", "") is string
+    && perfil.get("cursoId", "").size() > 0
+
+    /*
+     * Solo puede recibir alumnos activos
+     * de su mismo curso.
+     */
+    && resource.data.get("rol", "") == "ALUMNO"
+    && resource.data.get("estado", "") == "ACTIVO"
+
+    && resource.data.get("cursoId", "")
+      == perfil.get("cursoId", "");
 }
 
 function esDocentePorPerfil() {
-  return usuarioActivo()
-    && perfilTieneRol("DOCENTE");
+  return usuarioActivoTieneRoles([
+    "DOCENTE"
+  ]);
 }
 
 function esGestionInstitucional() {
-  return usuarioActivo()
-    && (
-      perfilTieneRol("DIRECCION")
-      || perfilTieneRol("SECRETARIA")
-      || perfilTieneRol("ASISTENTE_ADMINISTRATIVO")
-      || perfilTieneRol("PRECEPTORIA")
-    );
+  return usuarioActivoTieneRoles([
+    "DIRECCION",
+    "SECRETARIA",
+    "ASISTENTE_ADMINISTRATIVO",
+    "PRECEPTORIA"
+  ]);
 }
 
 function esDireccion() {
-  return usuarioActivo()
-    && perfilTieneRol("DIRECCION");
+  return usuarioActivoTieneRoles([
+    "DIRECCION"
+  ]);
+}
+
+function puedeAdministrarReemplazos() {
+  return usuarioActivoTieneRoles([
+    "DIRECCION",
+    "SECRETARIA",
+    "ASISTENTE_ADMINISTRATIVO"
+  ]);
 }
     function horarioCorrespondeAlDocente() {
       return esDocentePorPerfil()
@@ -97,8 +219,163 @@ function esDireccion() {
         && resource.data.cursoAnio == perfilUsuario().cursoAnio
         && resource.data.cursoDivision == perfilUsuario().cursoDivision;
     }
+    
+    function horarioExisteParaAsistencia(datosAsistencia) {
+  return datosAsistencia.horarioId is string
+    && datosAsistencia.horarioId.size() > 0
+    && exists(
+      /databases/$(database)/documents/horarios/$(datosAsistencia.horarioId)
+    );
+}
+
+function reemplazoValidoParaAsistencia(
+  datosAsistencia,
+  horario
+) {
+  let reemplazoId =
+    datosAsistencia.get("reemplazoId", "");
+
+  let reemplazo = get(
+    /databases/$(database)/documents/reemplazos_docentes/$(reemplazoId)
+  ).data;
+
+  return reemplazoId != ""
+
+    && exists(
+      /databases/$(database)/documents/reemplazos_docentes/$(reemplazoId)
+    )
+
+    && reemplazo.estado == "ACTIVO"
+
+    && reemplazo.reemplazanteCorreo
+      == request.auth.token.email
+
+    && reemplazo.titularCorreo
+      == horario.docenteCorreo
+
+    && reemplazo.tipoHorario
+      == horario.tipoHorario
+
+    && datosAsistencia.fecha
+      >= reemplazo.fechaDesde
+
+    && datosAsistencia.fecha
+      <= reemplazo.fechaHasta
+
+    && (
+      (
+        horario.get("asignacionId", "") != ""
+
+        && reemplazo.asignacionTitularId
+          == horario.get("asignacionId", "")
+      )
+
+      ||
+
+      (
+        horario.cursoId
+          == reemplazo.cursoId
+
+        && horario.espacioId
+          == reemplazo.espacioId
+      )
+    )
+
+    && datosAsistencia.docenteCorreo
+      == request.auth.token.email
+
+    && datosAsistencia.docenteTitularCorreo
+      == horario.docenteCorreo;
+}
+
+function horarioValidoParaAsistencia(datosAsistencia) {
+  let horario = get(
+    /databases/$(database)/documents/horarios/$(datosAsistencia.horarioId)
+  ).data;
+
+  return horarioExisteParaAsistencia(datosAsistencia)
+
+    && horario.estado == "ACTIVO"&& (
+  (
+    horario.docenteCorreo
+      == request.auth.token.email
+
+    && datosAsistencia.docenteCorreo
+      == request.auth.token.email
+  )
+
+  ||
+
+  reemplazoValidoParaAsistencia(
+    datosAsistencia,
+    horario
+  )
+)
+
+  && (
+  (
+    horario.docenteCorreo
+      == request.auth.token.email
+
+    && datosAsistencia.docenteCorreo
+      == request.auth.token.email
+  )
+
+  ||
+
+  reemplazoValidoParaAsistencia(
+    datosAsistencia,
+    horario
+  )
+)
+
+    && datosAsistencia.cursoId
+      == horario.cursoId
+
+    && datosAsistencia.cursoAnio
+      == horario.cursoAnio
+
+    && datosAsistencia.cursoDivision
+      == horario.cursoDivision
+
+    && datosAsistencia.cursoNombre
+      == horario.cursoNombre
+
+    && datosAsistencia.espacioId
+      == horario.espacioId
+
+    && datosAsistencia.dia
+      == horario.dia
+
+    && datosAsistencia.horaInicio
+      == horario.horaInicio
+
+    && datosAsistencia.horaFin
+      == horario.horaFin
+
+    && datosAsistencia.horarioTexto
+      == horario.horarioTexto
+
+    && datosAsistencia.tipoHorario
+      == horario.tipoHorario
+
+    && (
+      horario.tipoHorario != "TALLER"
+      || datosAsistencia.grupoTaller == horario.grupoTaller
+    );
+}
 
     match /usuarios/{correo} {
+    
+    /*
+ * Regla exclusiva para la consulta
+ * “Mis compañeros”.
+ *
+ * Se coloca antes de las demás comprobaciones
+ * para autorizar al alumno sin evaluar primero
+ * Soporte, Gestión y Docente.
+ */
+allow list: if alumnoPuedeListarCompaneros();
 
       /*
        * Lectura individual de perfiles.
@@ -108,6 +385,14 @@ function esDireccion() {
         && request.auth.token.email == correo
       )
       || esSoporte()
+      || (
+  puedeAdministrarReemplazos()
+  && resource.data.get("estado", "") == "ACTIVO"
+  && (
+    resource.data.get("rol", "") == "DOCENTE"
+    || resource.data.get("roles", []).hasAny(["DOCENTE"])
+  )
+)
       || (
         esGestionInstitucional()
         && resource.data.rol == "ALUMNO"
@@ -130,9 +415,24 @@ function esDireccion() {
        */
 allow list: if esSoporte()
 
-  /*
+   /*
+   * Administración de reemplazos puede consultar
+   * docentes activos para titular/reemplazante.
+   */
+
+|| (
+  puedeAdministrarReemplazos()
+  && resource.data.get("estado", "") == "ACTIVO"
+  && (
+    resource.data.get("rol", "") == "DOCENTE"
+    || resource.data.get("roles", []).hasAny(["DOCENTE"])
+  )
+)
+
+   /*
    * Gestión institucional puede consultar alumnos.
    */
+   
   || (
     esGestionInstitucional()
     && resource.data.rol == "ALUMNO"
@@ -167,36 +467,46 @@ allow list: if esSoporte()
     && resource.data.situacionRevista == "CURSANDO"
   )
 
-  /*
+    /*
    * Cada alumno puede consultar únicamente estudiantes
-   * activos de su mismo año y división.
+   * activos de su mismo curso.
+   *
+   * La consulta del cliente debe incluir:
+   * rol == ALUMNO
+   * estado == ACTIVO
+   * cursoId == cursoId del alumno autenticado
    */
   || (
     esAlumnoPorPerfil()
-    && resource.data.rol == "ALUMNO"
-    && resource.data.estado == "ACTIVO"
-    && resource.data.cursoAnio == perfilUsuario().cursoAnio
-    && resource.data.cursoDivision == perfilUsuario().cursoDivision
-    && resource.data.tipoVinculo == "CURSANDO"
-  )
 
-  || (
-    esAlumnoPorPerfil()
+    && perfilUsuario().get("cursoId", "") is string
+    && perfilUsuario().get("cursoId", "").size() > 0
+
     && resource.data.rol == "ALUMNO"
     && resource.data.estado == "ACTIVO"
-    && resource.data.cursoAnio == perfilUsuario().cursoAnio
-    && resource.data.cursoDivision == perfilUsuario().cursoDivision
-    && resource.data.situacionRevista == "CURSANDO"
+
+    && resource.data.cursoId
+      == perfilUsuario().get("cursoId", "")
   );
 
       /*
        * Solo Soporte administra usuarios.
        */
       /*
- * Solo Soporte puede crear o eliminar usuarios.
+ /*
+ * Solo Soporte puede crear usuarios.
  */
-allow create, delete: if esSoporte();
+allow create: if esSoporte();
 
+/*
+ * Solo Soporte puede eliminar usuarios que estén
+ * inactivos o hayan sido dados de baja.
+ */
+allow delete: if esSoporte()
+  && (
+    resource.data.get("estado", "") == "INACTIVO"
+    || resource.data.get("tipoVinculo", "") == "BAJA"
+  );
 /*
  * Soporte puede realizar cualquier actualización.
  *
@@ -244,36 +554,157 @@ allow update: if esSoporte()
   );
     }
 
-    match /asignaciones_docentes/{asignacionId} {
-      allow get, list: if esSoporte()
-        || esGestionInstitucional()
-        || (
-          esDocentePorPerfil()
-          && resource.data.docenteCorreo == request.auth.token.email
-          && (
-            resource.data.estado == "ACTIVA"
-            || resource.data.estado == "ACTIVO"
-          )
-        )
-        || (
-          esAlumnoPorPerfil()
-          && (
-            resource.data.estado == "ACTIVA"
-            || resource.data.estado == "ACTIVO"
-          )
-          && resource.data.cursoAnio == perfilUsuario().cursoAnio
-          && resource.data.cursoDivision == perfilUsuario().cursoDivision
-        );
+match /asignaciones_docentes/{asignacionId} {
+  /*
+   * Soporte y Gestión pueden consultar todas las asignaciones.
+   *
+   * Los docentes pueden consultar las asignaciones activas
+   * de la escuela para utilizar la Agenda Institucional
+   * y filtrar colegas por curso.
+   */
+  allow get, list: if esSoporte()
+    || esGestionInstitucional()
+    || (
+      esDocentePorPerfil()
+      && resource.data.get("estado", "") in [
+        "ACTIVA",
+        "ACTIVO"
+      ]
+    )
+    || (
+      esAlumnoPorPerfil()
+      && resource.data.get("estado", "") in [
+        "ACTIVA",
+        "ACTIVO"
+      ]
+      && resource.data.cursoAnio == perfilUsuario().cursoAnio
+      && resource.data.cursoDivision == perfilUsuario().cursoDivision
+    );
 
-      allow create, update, delete: if esSoporte();
-    }
+  allow create, update, delete: if esSoporte();
+}
 
-    match /cursos/{cursoId} {
-      allow get, list: if esSoporte()
-        || esGestionInstitucional();
+match /reemplazos_docentes/{reemplazoId} {
 
-      allow create, update, delete: if esSoporte();
-    }
+  /*
+   * LECTURA
+   *
+   * - SOPORTE: todos.
+   * - Gestión Institucional: todos, incluida PRECEPTORIA.
+   * - DOCENTE: solamente aquellos en los que sea
+   *   titular o reemplazante.
+   * - ALUMNO: solamente los correspondientes a su curso.
+   */
+  allow get, list: if esSoporte()
+
+    || esGestionInstitucional()
+
+    || (
+      esDocentePorPerfil()
+      && (
+        resource.data.titularCorreo
+          == request.auth.token.email
+
+        || resource.data.reemplazanteCorreo
+          == request.auth.token.email
+      )
+    )
+
+    || (
+      esAlumnoPorPerfil()
+      && resource.data.cursoId
+        == perfilUsuario().cursoId
+    );
+
+
+  /*
+   * SOPORTE conserva exactamente los permisos
+   * que ya tenía sobre esta colección.
+   *
+   * Esto evita romper la funcionalidad actual de ADMIN.
+   */
+  allow create, update, delete: if esSoporte();
+
+
+  /*
+   * REGISTRO DESDE GESTIÓN
+   *
+   * DIRECCION, SECRETARIA y ASISTENTE_ADMINISTRATIVO.
+   * PRECEPTORIA queda excluida.
+   */
+  allow create: if puedeAdministrarReemplazos()
+
+    && request.resource.data.estado == "ACTIVO"
+
+    && request.resource.data.tipoHorario in [
+      "TALLER",
+      "EDUCACION_FISICA"
+    ]
+
+    && request.resource.data.creadoPor
+      == request.auth.token.email
+
+    && request.resource.data.actualizadoPor
+      == request.auth.token.email
+
+    && request.resource.data.creadoEn
+      == request.time
+
+    && request.resource.data.actualizadoEn
+      == request.time;
+
+
+  /*
+   * FINALIZACIÓN DESDE GESTIÓN
+   *
+   * Solamente permite pasar un reemplazo
+   * de ACTIVO a INACTIVO.
+   */
+  allow update: if puedeAdministrarReemplazos()
+
+    && resource.data.estado == "ACTIVO"
+
+    && request.resource.data.estado == "INACTIVO"
+
+    && request.resource.data.actualizadoPor
+      == request.auth.token.email
+
+    && request.resource.data.finalizadoPor
+      == request.auth.token.email
+
+    && request.resource.data.actualizadoEn
+      == request.time
+
+    && request.resource.data.finalizadoEn
+      == request.time
+
+    && request.resource.data
+      .diff(resource.data)
+      .affectedKeys()
+      .hasOnly([
+        "estado",
+        "actualizadoEn",
+        "actualizadoPor",
+        "finalizadoEn",
+        "finalizadoPor"
+      ]);
+}
+
+match /cursos/{cursoId} {
+  /*
+   * Los docentes pueden consultar únicamente cursos activos.
+   * Esto permite cargar el selector completo de cursos
+   * dentro de la Agenda Institucional.
+   */
+  allow get, list: if esSoporte()
+    || esGestionInstitucional()
+    || (
+      esDocentePorPerfil()
+      && resource.data.get("estado", "") == "ACTIVO"
+    );
+
+  allow create, update, delete: if esSoporte();
+}
 
     match /espacios_curriculares/{espacioId} {
       allow get, list: if esSoporte()
@@ -282,17 +713,19 @@ allow update: if esSoporte()
       allow create, update, delete: if esSoporte();
     }
 
-    match /horarios/{horarioId} {
-      allow get, list: if esSoporte()
-        || (
-          esGestionInstitucional()
-          && resource.data.estado == "ACTIVO"
-        )
-        || horarioCorrespondeAlAlumno()
-        || horarioCorrespondeAlDocente();
+match /horarios/{horarioId} {
+  allow get, list: if esSoporte()
+    || (
+      (
+        esGestionInstitucional()
+        || esAlumnoPorPerfil()
+        || esDocentePorPerfil()
+      )
+      && resource.data.estado == "ACTIVO"
+    );
 
-      allow create, update, delete: if esSoporte();
-    }
+  allow create, update, delete: if esSoporte();
+}
 
     match /mesas_examen/{mesaId} {
       allow get, list: if esSoporte()
@@ -329,39 +762,59 @@ allow update: if esSoporte()
 
     match /asistencias_clases/{asistenciaId} {
       allow get, list: if esSoporte()
-        || esGestionInstitucional()
-        || (
-          esDocentePorPerfil()
-          && resource.data.docenteCorreo == request.auth.token.email
-        );
+  || esGestionInstitucional()
+  || (
+    esDocentePorPerfil()
+    && (
+      resource.data.docenteCorreo
+        == request.auth.token.email
 
-      allow create: if esSoporte()
-        || (
-          esDocentePorPerfil()
-          && request.resource.data.docenteCorreo
-            == request.auth.token.email
-          && request.resource.data.estado == "ACTIVA"
-          && (
-            request.resource.data.tipoHorario == "TALLER"
-            || request.resource.data.tipoHorario
-              == "EDUCACION_FISICA"
-          )
-        );
+      || resource.data.get("docenteTitularCorreo", "")
+        == request.auth.token.email
+    )
+  );
 
-      allow update: if esSoporte()
-        || (
-          esDocentePorPerfil()
-          && resource.data.docenteCorreo
-            == request.auth.token.email
-          && request.resource.data.docenteCorreo
-            == request.auth.token.email
-          && request.resource.data.estado == "ACTIVA"
-          && (
-            request.resource.data.tipoHorario == "TALLER"
-            || request.resource.data.tipoHorario
-              == "EDUCACION_FISICA"
-          )
-        );
+     allow create: if esSoporte()
+  || (
+    esDocentePorPerfil()
+
+    && request.resource.data.estado == "ACTIVA"
+
+    && (
+      request.resource.data.tipoHorario == "TALLER"
+      || request.resource.data.tipoHorario == "EDUCACION_FISICA"
+    )
+
+    && horarioValidoParaAsistencia(
+      request.resource.data
+    )
+  );
+
+     allow update: if esSoporte()
+  || (
+    esDocentePorPerfil()
+
+    && resource.data.docenteCorreo
+      == request.auth.token.email
+
+    && request.resource.data.docenteCorreo
+      == request.auth.token.email
+
+    && request.resource.data.estado == "ACTIVA"
+
+    && resource.data.horarioId
+      == request.resource.data.horarioId
+
+    && (
+      request.resource.data.tipoHorario == "TALLER"
+      || request.resource.data.tipoHorario
+        == "EDUCACION_FISICA"
+    )
+
+    && horarioValidoParaAsistencia(
+      request.resource.data
+    )
+  );
 
       allow delete: if esSoporte();
     }
@@ -454,6 +907,164 @@ allow update: if esSoporte()
       allow delete: if false;
     }
 
+    /* =====================================================
+       SOLICITUDES DE ALTA - ALUMNOS CON CURSADA COMPLETA
+    ===================================================== */
+
+    match /solicitudes_alta_alumnos/{uid} {
+
+      /*
+       * Un futuro alumno puede crear únicamente
+       * su propia solicitud.
+       *
+       * La identidad y el correo deben provenir
+       * de una autenticación válida con Google.
+       */
+      allow create: if usuarioAutenticado()
+
+        /*
+         * El documento pertenece exclusivamente
+         * al usuario autenticado.
+         */
+        && request.auth.uid == uid
+
+        /*
+         * La autenticación utilizada debe ser Google.
+         */
+        && request.auth.token.firebase.sign_in_provider == "google.com"
+
+        /*
+         * Debe existir un correo verificado.
+         */
+        && request.auth.token.email != null
+        && request.auth.token.email_verified == true
+
+        /*
+         * Si el correo ya pertenece a un usuario
+         * registrado del Portal, no necesita solicitar alta.
+         */
+        && !exists(
+          /databases/$(database)/documents/usuarios/$(request.auth.token.email)
+        )
+
+        /*
+         * Campos obligatorios.
+         */
+        && request.resource.data.keys().hasAll([
+          "uid",
+          "correo",
+          "nombreCompleto",
+          "dni",
+          "estado",
+          "fechaSolicitud"
+        ])
+
+        /*
+         * No se permite enviar ningún otro campo.
+         *
+         * El solicitante NO puede elegir:
+         * - rol
+         * - roles
+         * - tipoVinculo
+         * - estado administrativo
+         * - curso
+         * - permisos
+         */
+        && request.resource.data.keys().hasOnly([
+          "uid",
+          "correo",
+          "nombreCompleto",
+          "dni",
+          "estado",
+          "fechaSolicitud"
+        ])
+
+        /*
+         * UID y correo deben coincidir exactamente
+         * con la identidad autenticada.
+         */
+        && request.resource.data.uid == request.auth.uid
+        && request.resource.data.correo == request.auth.token.email
+
+        /*
+         * Nombre válido.
+         */
+        && request.resource.data.nombreCompleto is string
+        && request.resource.data.nombreCompleto.size() >= 5
+        && request.resource.data.nombreCompleto.size() <= 120
+
+        /*
+         * DNI argentino: 7 u 8 números, sin puntos.
+         */
+        && request.resource.data.dni is string
+        && request.resource.data.dni.matches("^[0-9]{7,8}$")
+
+        /*
+         * Toda solicitud nueva nace obligatoriamente
+         * como PENDIENTE.
+         */
+        && request.resource.data.estado == "PENDIENTE"
+
+        /*
+         * La fecha la establece Firestore.
+         */
+        && request.resource.data.fechaSolicitud == request.time;
+
+
+      /*
+       * El solicitante puede consultar únicamente
+       * su propia solicitud.
+       *
+       * Soporte puede consultar cualquier solicitud.
+       */
+      allow get: if (
+        usuarioAutenticado()
+        && request.auth.uid == uid
+      )
+      || esSoporte();
+
+
+      /*
+       * Solamente Soporte puede listar solicitudes.
+       */
+      allow list: if esSoporte();
+
+
+      /*
+       * El solicitante jamás puede modificar ni
+       * eliminar una solicitud después de enviarla.
+       *
+       * Más adelante Soporte podrá aprobarla o rechazarla.
+       */
+      allow update, delete: if esSoporte();
+    }
+    
+    /* =====================================================
+   CONFIGURACIÓN DE PERÍODOS DE ASISTENCIA
+===================================================== */
+
+match /configuracion_periodos/{cicloLectivo} {
+
+  /*
+   * Soporte administra las fechas de los trimestres.
+   */
+  allow create, update: if esSoporte();
+
+  /*
+   * Soporte, Gestión Institucional y Docentes
+   * pueden consultar la configuración.
+   */
+  allow get: if esSoporte()
+    || esGestionInstitucional()
+    || esDocentePorPerfil();
+
+  /*
+   * No necesitamos listar todos los ciclos lectivos
+   * ni eliminar configuraciones.
+   */
+  allow list, delete: if false;
+}
+
     match /accesos_recientes/{uid} {
 
   /*
@@ -481,6 +1092,8 @@ allow update: if esSoporte()
     && perfilTieneRol(request.resource.data.rol)
     && request.resource.data.nombreCompleto is string
     && request.resource.data.ultimoIngreso == request.time;
+    
+    allow delete: if esSoporte();
 }
   }
 }
