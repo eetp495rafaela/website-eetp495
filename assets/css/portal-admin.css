@@ -3032,3 +3032,100 @@ button.btn-accion.btn-eliminar-reemplazo {
 button.btn-accion.btn-eliminar-reemplazo:hover {
   background: #b02a37 !important;
 }
+/* =====================================================
+   TARJETAS INICIO ADMIN - FORMATO COMPACTO TIPO GESTIÓN
+===================================================== */
+
+/* Sólo la grilla principal de Administración del Portal */
+#inicio > .grupo:first-child > .grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+}
+
+/* Sólo las tarjetas principales del inicio */
+#inicio > .grupo:first-child > .grid > .tarjeta {
+  display: grid;
+  grid-template-columns: 58px minmax(0, 1fr);
+  grid-template-rows: auto auto;
+  column-gap: 16px;
+  row-gap: 4px;
+
+  width: 100%;
+  min-height: 135px;
+  padding: 20px;
+
+  align-items: center;
+  justify-content: initial;
+
+  text-align: left;
+}
+
+/* Ícono a la izquierda */
+#inicio > .grupo:first-child > .grid > .tarjeta > i {
+  grid-column: 1;
+  grid-row: 1 / 3;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 54px;
+  height: 54px;
+  margin: 0;
+
+  border-radius: 14px;
+
+  color: var(--azul-principal);
+  background: var(--azul-claro);
+
+  font-size: 1.8rem;
+}
+
+/* Título */
+#inicio > .grupo:first-child > .grid > .tarjeta > h3 {
+  grid-column: 2;
+  grid-row: 1;
+
+  align-self: end;
+
+  margin: 0;
+
+  color: var(--azul-oscuro);
+  font-size: 1.05rem;
+  font-weight: 800;
+  line-height: 1.25;
+}
+
+/* Descripción */
+#inicio > .grupo:first-child > .grid > .tarjeta > p {
+  grid-column: 2;
+  grid-row: 2;
+
+  align-self: start;
+
+  margin: 0;
+
+  color: var(--texto-suave);
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+/* TABLET */
+@media (max-width: 1100px) {
+  #inicio > .grupo:first-child > .grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* CELULAR */
+@media (max-width: 700px) {
+  #inicio > .grupo:first-child > .grid {
+    grid-template-columns: 1fr;
+  }
+
+  #inicio > .grupo:first-child > .grid > .tarjeta {
+    min-height: 125px;
+    padding: 18px;
+  }
+}
