@@ -1098,6 +1098,42 @@
         }
       });
     </script>
+    <script>
+      const titulosPlanEstudios = document.querySelectorAll(
+        "#plan-estudios .anio-titulo",
+      );
+
+      const dispositivoTactilPlan = window.matchMedia(
+        "(max-width: 992px), (hover: none), (pointer: coarse)",
+      );
+
+      titulosPlanEstudios.forEach((titulo) => {
+        titulo.setAttribute("role", "button");
+        titulo.setAttribute("tabindex", "0");
+        titulo.setAttribute("aria-expanded", "false");
+
+        function alternarAnio() {
+          if (!dispositivoTactilPlan.matches) return;
+
+          const tarjeta = titulo.closest(".anio");
+
+          if (!tarjeta) return;
+
+          const abierto = tarjeta.classList.toggle("abierto");
+
+          titulo.setAttribute("aria-expanded", abierto ? "true" : "false");
+        }
+
+        titulo.addEventListener("click", alternarAnio);
+
+        titulo.addEventListener("keydown", (evento) => {
+          if (evento.key === "Enter" || evento.key === " ") {
+            evento.preventDefault();
+            alternarAnio();
+          }
+        });
+      });
+    </script>
 
     <script src="assets/js/galeria.js"></script>
     <script src="assets/js/calendario-escolar.js"></script>
