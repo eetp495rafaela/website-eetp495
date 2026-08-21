@@ -3073,3 +3073,59 @@ body {
   outline: 2px solid rgba(10, 157, 125, 0.25);
   outline-offset: 2px;
 }
+/* =========================================
+   INFORMES PEDAGÓGICOS - CONTROL POR ROL
+========================================= */
+
+#informes-pedagogicos #btnCargarOpcionesInformesGestion[hidden],
+#informes-pedagogicos #formInformePedagogicoGestion[hidden] {
+  display: none !important;
+}
+/* =========================================
+   INFORMES PEDAGÓGICOS - FORMULARIO DIRECCIÓN
+========================================= */
+
+#informes-pedagogicos .filtros-informes-gestion {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  align-items: end;
+  gap: 14px;
+}
+
+#informes-pedagogicos .accion-crear-informe-gestion {
+  width: 100%;
+  margin-top: 0;
+  align-self: end;
+}
+
+#informes-pedagogicos .filtros-informes-gestion select,
+#informes-pedagogicos .accion-crear-informe-gestion .btn-gestion {
+  width: 100%;
+  min-height: 44px;
+}
+
+#informes-pedagogicos .accion-crear-informe-gestion .btn-gestion {
+  justify-content: center;
+  white-space: nowrap;
+}
+
+/* Tablet */
+@media (max-width: 900px) {
+  #informes-pedagogicos .filtros-informes-gestion {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  #informes-pedagogicos .accion-crear-informe-gestion {
+    grid-column: 1 / -1;
+  }
+}
+
+/* Celular */
+@media (max-width: 650px) {
+  #informes-pedagogicos .filtros-informes-gestion {
+    grid-template-columns: 1fr;
+  }
+
+  #informes-pedagogicos .accion-crear-informe-gestion {
+    grid-column: auto;
+  }
+}

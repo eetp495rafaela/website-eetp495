@@ -928,19 +928,15 @@
         <div class="panel-info panel-gestion-listado">
           <i class="fa-solid fa-file-lines"> </i>
           <div class="contenido-panel-gestion">
-            <h3>Creación de informes pedagógico-didácticos</h3>
-            <p>
-              Desde esta sección, Dirección o Vice Dirección, pueden crear
-              informes pedagógico-didácticos. El archivo creado quedará guardado
-              como documento
-              <strong> editable para los Directivos </strong>
-              y será visible sólo en
-              <strong> Modo Lectura </strong>
-              , para los docentes autorizados del curso.
+            <h3 id="tituloInformesGestion">Informes pedagógico-didácticos</h3>
+
+            <p id="descripcionInformesGestion">
+              Consultá los informes pedagógico-didácticos registrados.
             </p>
             <div class="acciones-gestion">
               <button
                 class="btn-gestion"
+                hidden
                 id="btnCargarOpcionesInformesGestion"
                 type="button"
               >
@@ -958,32 +954,35 @@
             </div>
             <form
               class="form-informe-gestion"
+              hidden
               id="formInformePedagogicoGestion"
             >
               <div class="filtros-gestion filtros-informes-gestion">
                 <div class="campo-filtro-gestion">
-                  <label for="cursoInformeGestion"> Curso </label>
-                  <select id="cursoInformeGestion" required="">
+                  <label for="cursoInformeGestion">Curso</label>
+                  <select id="cursoInformeGestion" required>
                     <option value="">Seleccionar curso</option>
                   </select>
                 </div>
+
                 <div class="campo-filtro-gestion">
-                  <label for="alumnoInformeGestion"> Estudiante </label>
-                  <select disabled="" id="alumnoInformeGestion" required="">
+                  <label for="alumnoInformeGestion">Estudiante</label>
+                  <select disabled id="alumnoInformeGestion" required>
                     <option value="">Seleccionar estudiante</option>
                   </select>
                 </div>
-              </div>
-              <div class="acciones-gestion">
-                <button
-                  class="btn-gestion"
-                  disabled=""
-                  id="btnCrearInformeGestion"
-                  type="submit"
-                >
-                  <i class="fa-solid fa-file-circle-plus"> </i>
-                  Crear informe
-                </button>
+
+                <div class="acciones-gestion accion-crear-informe-gestion">
+                  <button
+                    class="btn-gestion"
+                    disabled
+                    id="btnCrearInformeGestion"
+                    type="submit"
+                  >
+                    <i class="fa-solid fa-file-circle-plus"></i>
+                    Crear informe
+                  </button>
+                </div>
               </div>
             </form>
             <div class="vista-gestion" id="vistaInformesGestion">

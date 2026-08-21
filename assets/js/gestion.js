@@ -234,6 +234,12 @@ const buscarAlumnoSimeGestion = document.getElementById(
   "buscarAlumnoSimeGestion",
 );
 
+const tituloInformesGestion = document.getElementById("tituloInformesGestion");
+
+const descripcionInformesGestion = document.getElementById(
+  "descripcionInformesGestion",
+);
+
 const btnCargarOpcionesInformesGestion = document.getElementById(
   "btnCargarOpcionesInformesGestion",
 );
@@ -1487,6 +1493,55 @@ function mostrarMensajeInformesGestion(texto, tipo = "") {
   }
 }
 
+function puedeAdministrarInformesGestion() {
+  const rol = String(window.portalUsuario?.rol || "")
+    .trim()
+    .toUpperCase();
+
+  return rol === "DIRECCION";
+}
+
+function configurarAccesoInformesGestion() {
+  const puedeAdministrar = puedeAdministrarInformesGestion();
+
+  if (btnCargarOpcionesInformesGestion) {
+    btnCargarOpcionesInformesGestion.hidden = !puedeAdministrar;
+  }
+
+  if (formInformePedagogicoGestion) {
+    formInformePedagogicoGestion.hidden = !puedeAdministrar;
+  }
+
+  if (tituloInformesGestion) {
+    tituloInformesGestion.textContent = puedeAdministrar
+      ? "Creación y consulta de informes pedagógico-didácticos"
+      : "Consulta de informes pedagógico-didácticos";
+  }
+
+  if (descripcionInformesGestion) {
+    descripcionInformesGestion.innerHTML = puedeAdministrar
+      ? `
+        Desde esta sección, Dirección puede crear y consultar
+        informes pedagógico-didácticos. Los informes creados quedan
+        disponibles para los docentes autorizados correspondientes.
+      `
+      : `
+        Desde esta sección podés consultar los informes
+        pedagógico-didácticos registrados. La creación y administración
+        de informes está reservada a Dirección.
+      `;
+  }
+
+  if (!puedeAdministrar && vistaInformesGestion) {
+    vistaInformesGestion.innerHTML = `
+      <p class="mensaje-gestion">
+        Presioná “Ver informes creados” para consultar los informes
+        pedagógico-didácticos registrados.
+      </p>
+    `;
+  }
+}
+
 function cargarCursosInformesGestion() {
   if (!cursoInformeGestion) return;
 
@@ -1582,6 +1637,15 @@ function verificarFormularioInformeGestion() {
 }
 
 async function cargarOpcionesInformesGestion() {
+  if (!puedeAdministrarInformesGestion()) {
+    mostrarMensajeInformesGestion(
+      "La carga de datos para crear informes está reservada a Dirección.",
+      "error",
+    );
+
+    return;
+  }
+
   const usuario = auth.currentUser;
 
   if (!usuario) {
@@ -1693,6 +1757,15 @@ async function cargarOpcionesInformesGestion() {
 async function crearInformePedagogicoGestion(event) {
   event.preventDefault();
 
+  if (!puedeAdministrarInformesGestion()) {
+    mostrarMensajeInformesGestion(
+      "La creación de informes está reservada a Dirección.",
+      "error",
+    );
+
+    return;
+  }
+
   const usuario = auth.currentUser;
 
   if (!usuario) {
@@ -1780,22 +1853,11 @@ async function crearInformePedagogicoGestion(event) {
 
     if (vistaInformesGestion) {
       vistaInformesGestion.innerHTML = `
-        <div class="resultado-informe-gestion">
-          <p class="mensaje-gestion ok">
-            Informe pedagógico creado correctamente.
-          </p>
-
-          <a
-            class="btn-gestion"
-            href="${escaparHtmlGestion(resultado.informe.driveUrl)}"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <i class="fa-solid fa-eye"></i>
-            Ver informe
-          </a>
-        </div>
-      `;
+    <p class="mensaje-gestion ok">
+      Informe pedagógico creado correctamente.
+      Podés consultarlo y administrarlo desde “Ver informes creados”.
+    </p>
+  `;
     }
 
     mostrarMensajeInformesGestion(
@@ -1821,9 +1883,12 @@ async function crearInformePedagogicoGestion(event) {
     await Swal.fire({
       title: "Informe creado",
       html: `
-        <p>El informe pedagógico fue creado correctamente.</p>
-        <p>Podés abrirlo desde el botón <strong>Ver informe</strong>.</p>
-      `,
+    <p>El informe pedagógico fue creado correctamente.</p>
+    <p>
+      Podés consultarlo y administrarlo desde
+      <strong>“Ver informes creados”</strong>.
+    </p>
+  `,
       icon: "success",
       confirmButtonText: "Aceptar",
     });
@@ -1896,6 +1961,8 @@ function renderizarTablaInformesGestion(informes) {
     return;
   }
 
+  const puedeAdministrar = puedeAdministrarInformesGestion();
+
   vistaInformesGestion.innerHTML = `
     <div class="tabla-informes-gestion-contenedor">
       <table class="tabla-informes-gestion">
@@ -1907,10 +1974,25 @@ function renderizarTablaInformesGestion(informes) {
             <th>Estado</th>
             <th>Creado/Editado por</th>
             <th>Docentes</th>
-            <th>Actualizar docentes</th>
+
+            ${
+              puedeAdministrar
+                ? `
+                  <th>Actualizar docentes</th>
+                `
+                : ""
+            }
+
             <th>Ver</th>
-            <th>Editar</th>
-            <th>Eliminar</th>
+
+            ${
+              puedeAdministrar
+                ? `
+                  <th>Editar</th>
+                  <th>Eliminar</th>
+                `
+                : ""
+            }
           </tr>
         </thead>
 
@@ -1984,11 +2066,15 @@ function renderizarTablaInformesGestion(informes) {
                     <strong>
                       ${escaparHtmlGestion(ultimoEditor)}
                     </strong>
+
                     ${
                       mostrarAutorOriginal
-                        ? `<small>Creado por: ${escaparHtmlGestion(
-                            autorOriginal,
-                          )}</small>`
+                        ? `
+                          <small>
+                            Creado por:
+                            ${escaparHtmlGestion(autorOriginal)}
+                          </small>
+                        `
                         : ""
                     }
                   </td>
@@ -1999,28 +2085,34 @@ function renderizarTablaInformesGestion(informes) {
                     )}
                   </td>
 
-                  <td>
-                    ${
-                      alumnoCorreo && !informeArchivado
-                        ? `
-                          <button
-                            class="
-                              btn-informe-tabla-gestion
-                              btn-actualizar-docentes-informe-gestion
-                            "
-                            type="button"
-                            title="Actualizar docentes autorizados"
-                            aria-label="Actualizar docentes autorizados"
-                            data-alumno-correo="${escaparHtmlGestion(
-                              alumnoCorreo,
-                            )}"
-                          >
-                            <i class="fa-solid fa-arrows-rotate"></i>
-                          </button>
-                        `
-                        : "-"
-                    }
-                  </td>
+                  ${
+                    puedeAdministrar
+                      ? `
+                        <td>
+                          ${
+                            alumnoCorreo && !informeArchivado
+                              ? `
+                                <button
+                                  class="
+                                    btn-informe-tabla-gestion
+                                    btn-actualizar-docentes-informe-gestion
+                                  "
+                                  type="button"
+                                  title="Actualizar docentes autorizados"
+                                  aria-label="Actualizar docentes autorizados"
+                                  data-alumno-correo="${escaparHtmlGestion(
+                                    alumnoCorreo,
+                                  )}"
+                                >
+                                  <i class="fa-solid fa-arrows-rotate"></i>
+                                </button>
+                              `
+                              : "-"
+                          }
+                        </td>
+                      `
+                      : ""
+                  }
 
                   <td>
                     ${
@@ -2043,47 +2135,57 @@ function renderizarTablaInformesGestion(informes) {
                     }
                   </td>
 
-                  <td>
-                    ${
-                      idInforme && informe.puedeEditar
-                        ? `
-                          <button
-                            class="
-                              btn-informe-tabla-gestion
-                              btn-editar-informe-gestion
-                            "
-                            type="button"
-                            data-id-informe="${escaparHtmlGestion(idInforme)}"
-                            title="Editar informe en Google Docs"
-                            aria-label="Editar informe en Google Docs"
-                          >
-                            <i class="fa-solid fa-pen-to-square"></i>
-                          </button>
-                        `
-                        : "-"
-                    }
-                  </td>
+                  ${
+                    puedeAdministrar
+                      ? `
+                        <td>
+                          ${
+                            idInforme && informe.puedeEditar
+                              ? `
+                                <button
+                                  class="
+                                    btn-informe-tabla-gestion
+                                    btn-editar-informe-gestion
+                                  "
+                                  type="button"
+                                  data-id-informe="${escaparHtmlGestion(
+                                    idInforme,
+                                  )}"
+                                  title="Editar informe en Google Docs"
+                                  aria-label="Editar informe en Google Docs"
+                                >
+                                  <i class="fa-solid fa-pen-to-square"></i>
+                                </button>
+                              `
+                              : "-"
+                          }
+                        </td>
 
-                  <td>
-                    ${
-                      informeArchivado
-                        ? "-"
-                        : `
-                          <button
-                            class="
-                              btn-informe-tabla-gestion
-                              btn-eliminar-informe-gestion
-                            "
-                            type="button"
-                            title="Eliminar informe"
-                            aria-label="Eliminar informe"
-                            data-id-informe="${escaparHtmlGestion(idInforme)}"
-                          >
-                            <i class="fa-solid fa-trash-can"></i>
-                          </button>
-                        `
-                    }
-                  </td>
+                        <td>
+                          ${
+                            informeArchivado
+                              ? "-"
+                              : `
+                                <button
+                                  class="
+                                    btn-informe-tabla-gestion
+                                    btn-eliminar-informe-gestion
+                                  "
+                                  type="button"
+                                  title="Eliminar informe"
+                                  aria-label="Eliminar informe"
+                                  data-id-informe="${escaparHtmlGestion(
+                                    idInforme,
+                                  )}"
+                                >
+                                  <i class="fa-solid fa-trash-can"></i>
+                                </button>
+                              `
+                          }
+                        </td>
+                      `
+                      : ""
+                  }
                 </tr>
               `;
             })
@@ -2100,6 +2202,14 @@ function renderizarTablaInformesGestion(informes) {
 }
 
 async function editarInformePedagogicoGestion(idInforme, boton) {
+  if (!puedeAdministrarInformesGestion()) {
+    mostrarMensajeInformesGestion(
+      "La edición de informes está reservada a Dirección.",
+      "error",
+    );
+
+    return;
+  }
   const id = String(idInforme || "").trim();
 
   if (!id) {
@@ -2396,6 +2506,14 @@ async function actualizarDocentesAutorizadosInformeGestion(
   alumnoCorreo,
   boton,
 ) {
+  if (!puedeAdministrarInformesGestion()) {
+    mostrarMensajeInformesGestion(
+      "La actualización de docentes autorizados está reservada a Dirección.",
+      "error",
+    );
+
+    return;
+  }
   const correo = String(alumnoCorreo || "")
     .trim()
     .toLowerCase();
@@ -2608,6 +2726,14 @@ async function actualizarDocentesAutorizadosInformeGestion(
 }
 
 async function eliminarInformePedagogicoGestion(idInforme, boton) {
+  if (!puedeAdministrarInformesGestion()) {
+    mostrarMensajeInformesGestion(
+      "La eliminación de informes está reservada a Dirección.",
+      "error",
+    );
+
+    return;
+  }
   const id = String(idInforme || "").trim();
 
   if (!id) {
@@ -6337,6 +6463,12 @@ window.addEventListener(
   "portalUsuarioListo",
   configurarPanelMesasDireccionGestion,
 );
+
+window.addEventListener("portalUsuarioListo", configurarAccesoInformesGestion);
+
+if (window.portalUsuario) {
+  configurarAccesoInformesGestion();
+}
 
 document.addEventListener(
   "DOMContentLoaded",
