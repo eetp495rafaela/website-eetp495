@@ -3023,3 +3023,12 @@ body.modal-abierto {
     grid-template-columns: 1fr;
   }
 }
+/* Reemplazos Docentes - botón Eliminar */
+button.btn-accion.btn-eliminar-reemplazo {
+  background: #dc3545 !important;
+  color: #ffffff !important;
+}
+
+button.btn-accion.btn-eliminar-reemplazo:hover {
+  background: #b02a37 !important;
+}

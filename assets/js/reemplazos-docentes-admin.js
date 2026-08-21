@@ -12,6 +12,7 @@ import {
   doc,
   getDoc,
   getDocs,
+  deleteDoc,
   addDoc,
   updateDoc,
   serverTimestamp,
@@ -622,6 +623,54 @@ async function desactivarReemplazo(idReemplazo) {
   }
 }
 
+async function eliminarReemplazo(idReemplazo) {
+  const id = String(idReemplazo || "").trim();
+
+  if (!id) return;
+
+  const resultado = await Swal.fire({
+    icon: "warning",
+    title: "¿Eliminar reemplazo?",
+    html: `
+      <p>
+        Se eliminará definitivamente el registro del reemplazo.
+      </p>
+      <p>
+        <strong>Las asistencias registradas durante este reemplazo se conservarán.</strong>
+      </p>
+    `,
+    showCancelButton: true,
+    confirmButtonText: "Sí, eliminar",
+    cancelButtonText: "Cancelar",
+    confirmButtonColor: "#dc3545",
+  });
+
+  if (!resultado.isConfirmed) {
+    return;
+  }
+
+  try {
+    await deleteDoc(doc(db, "reemplazos_docentes", id));
+
+    await Swal.fire({
+      icon: "success",
+      title: "Reemplazo eliminado",
+      text: "El registro del reemplazo fue eliminado. Las asistencias históricas se conservaron.",
+      confirmButtonText: "Aceptar",
+    });
+
+    await cargarReemplazosRegistrados();
+  } catch (error) {
+    console.error("Error al eliminar reemplazo:", error);
+
+    await Swal.fire({
+      icon: "error",
+      title: "No se pudo eliminar",
+      text: error.message || "No se pudo eliminar el registro del reemplazo.",
+    });
+  }
+}
+
 async function cargarReemplazosRegistrados() {
   if (!cuerpoTablaReemplazos) return;
 
@@ -687,9 +736,7 @@ async function cargarReemplazosRegistrados() {
 
 <td>
   ${
-    String(reemplazo.estado || "")
-      .trim()
-      .toUpperCase() === "ACTIVO"
+    estadoVisual === "FUTURO" || estadoVisual === "VIGENTE"
       ? `
         <button
           type="button"
@@ -699,7 +746,17 @@ async function cargarReemplazosRegistrados() {
           Finalizar
         </button>
       `
-      : "-"
+      : estadoVisual === "FINALIZADO" || estadoVisual === "INACTIVO"
+        ? `
+          <button
+            type="button"
+            class="btn-accion btn-eliminar-reemplazo"
+            data-id="${reemplazo.id}"
+          >
+            Eliminar
+          </button>
+        `
+        : "-"
   }
 </td>
       `;
@@ -712,6 +769,14 @@ async function cargarReemplazosRegistrados() {
       .forEach((boton) => {
         boton.addEventListener("click", () => {
           desactivarReemplazo(boton.dataset.id);
+        });
+      });
+
+    cuerpoTablaReemplazos
+      .querySelectorAll(".btn-eliminar-reemplazo")
+      .forEach((boton) => {
+        boton.addEventListener("click", () => {
+          eliminarReemplazo(boton.dataset.id);
         });
       });
 
