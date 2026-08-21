@@ -4069,3 +4069,108 @@ body[data-rol-permitido="DOCENTE"] .btn-arriba i {
     grid-template-columns: 1fr;
   }
 }
+/* =====================================================
+   TARJETAS INICIO DOCENTE - FORMATO COMPACTO
+===================================================== */
+
+.grid-docente-principal {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+
+/* Tarjetas principales */
+.grid-docente-principal > .tarjeta {
+  display: grid;
+  grid-template-columns: 58px minmax(0, 1fr);
+  grid-template-rows: auto auto;
+  column-gap: 16px;
+  row-gap: 4px;
+
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  min-height: 135px;
+
+  padding: 20px;
+
+  align-items: center;
+  justify-content: initial;
+
+  text-align: left;
+}
+
+/* Ícono a la izquierda */
+.grid-docente-principal > .tarjeta > i {
+  grid-column: 1;
+  grid-row: 1 / 3;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 54px;
+  height: 54px;
+  margin: 0;
+
+  border-radius: 14px;
+
+  background: var(--butter-soft);
+  color: var(--bordo-acento);
+
+  font-size: 1.8rem;
+}
+
+/* Título */
+.grid-docente-principal > .tarjeta > h3 {
+  grid-column: 2;
+  grid-row: 1;
+
+  align-self: end;
+
+  margin: 0;
+
+  color: #4a241c;
+  font-size: 1.05rem;
+  font-weight: 800;
+  line-height: 1.25;
+}
+
+/* Descripción */
+.grid-docente-principal > .tarjeta > p {
+  grid-column: 2;
+  grid-row: 2;
+
+  align-self: start;
+
+  margin: 0;
+
+  color: var(--bordo-texto-suave);
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+/* Los botones se comportan visualmente igual que los enlaces */
+.grid-docente-principal > button.tarjeta {
+  font-family: inherit;
+  text-align: left;
+}
+
+/* TABLET */
+@media (max-width: 1100px) {
+  .grid-docente-principal {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* CELULAR */
+@media (max-width: 650px) {
+  .grid-docente-principal {
+    grid-template-columns: 1fr;
+  }
+
+  .grid-docente-principal > .tarjeta {
+    min-height: 125px;
+    padding: 18px;
+  }
+}
