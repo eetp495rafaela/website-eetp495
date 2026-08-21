@@ -2963,3 +2963,54 @@ body.sin-scroll {
   letter-spacing: normal;
   text-transform: none;
 }
+/* =====================================================
+   PLAN DE ESTUDIOS — DESPLIEGUE TÁCTIL
+   CELULARES Y TABLETS
+===================================================== */
+
+@media (max-width: 992px), (hover: none), (pointer: coarse) {
+  .anio-titulo {
+    position: relative;
+    cursor: pointer;
+    user-select: none;
+    padding-right: 52px;
+  }
+
+  .anio-titulo::after {
+    content: "\f078";
+    font-family: "Font Awesome 6 Free";
+    font-weight: 900;
+
+    position: absolute;
+    right: 20px;
+    top: 50%;
+
+    transform: translateY(-50%);
+    transition: transform 0.3s ease;
+  }
+
+  .anio > ul {
+    max-height: 0;
+    overflow: hidden;
+    opacity: 0;
+
+    margin: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+
+    transition:
+      max-height 0.45s ease,
+      opacity 0.25s ease,
+      padding 0.35s ease;
+  }
+
+  .anio.abierto > ul {
+    max-height: 1500px;
+    opacity: 1;
+    padding: 22px;
+  }
+
+  .anio.abierto .anio-titulo::after {
+    transform: translateY(-50%) rotate(180deg);
+  }
+}
