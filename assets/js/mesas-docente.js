@@ -4,6 +4,8 @@ import {
   getApps,
 } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-app.js";
 
+import { getAuth } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-auth.js";
+
 import {
   getFirestore,
   collection,
@@ -22,6 +24,7 @@ const firebaseConfig = {
 };
 
 const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
+const auth = getAuth(app);
 const db = getFirestore(app);
 
 // =========================
@@ -242,6 +245,127 @@ function renderizarMesasDocente(mesas) {
   );
 }
 
+function normalizarCorreoMesaDocente(correo) {
+  return String(correo || "")
+    .trim()
+    .toLowerCase();
+}
+
+function obtenerFechaActualMesaDocente() {
+  const hoy = new Date();
+
+  const anio = hoy.getFullYear();
+  const mes = String(hoy.getMonth() + 1).padStart(2, "0");
+  const dia = String(hoy.getDate()).padStart(2, "0");
+
+  return `${anio}-${mes}-${dia}`;
+}
+
+function reemplazoMesaDocenteEstaVigente(reemplazo) {
+  const estado = String(reemplazo.estado || "")
+    .trim()
+    .toUpperCase();
+
+  const tipoHorario = String(reemplazo.tipoHorario || "")
+    .trim()
+    .toUpperCase();
+
+  const fechaDesde = String(reemplazo.fechaDesde || "").trim();
+  const fechaHasta = String(reemplazo.fechaHasta || "").trim();
+
+  const hoy = obtenerFechaActualMesaDocente();
+
+  return (
+    estado === "ACTIVO" &&
+    (tipoHorario === "TALLER" || tipoHorario === "EDUCACION_FISICA") &&
+    fechaDesde &&
+    fechaHasta &&
+    hoy >= fechaDesde &&
+    hoy <= fechaHasta
+  );
+}
+
+function agregarEspacioAutorizadoMesaDocente(espaciosIds, datos) {
+  const espacioId = String(datos.espacioId || "").trim();
+
+  if (espacioId) {
+    espaciosIds.add(espacioId);
+  }
+
+  const cursoAnio = Number(datos.cursoAnio || 0);
+
+  const tipoEspacio = String(datos.espacioTipo || datos.tipoHorario || "")
+    .trim()
+    .toUpperCase();
+
+  /*
+   * Para Mesas de Examen, los tres talleres reales
+   * de 1º y 2º representan una única materia "Taller".
+   */
+  if (tipoEspacio === "TALLER" && (cursoAnio === 1 || cursoAnio === 2)) {
+    espaciosIds.add(`TALLER_EXAMEN_${cursoAnio}`);
+  }
+}
+
+async function obtenerEspaciosIdsAutorizadosMesaDocente() {
+  const usuario = auth.currentUser;
+
+  if (!usuario || !usuario.email) {
+    throw new Error("No se detectó una sesión docente activa.");
+  }
+
+  const correoDocente = normalizarCorreoMesaDocente(usuario.email);
+
+  const consultaAsignacionesActivas = query(
+    collection(db, "asignaciones_docentes"),
+    where("docenteCorreo", "==", correoDocente),
+    where("estado", "==", "ACTIVA"),
+  );
+
+  const consultaAsignacionesActivo = query(
+    collection(db, "asignaciones_docentes"),
+    where("docenteCorreo", "==", correoDocente),
+    where("estado", "==", "ACTIVO"),
+  );
+
+  const consultaReemplazos = query(
+    collection(db, "reemplazos_docentes"),
+    where("reemplazanteCorreo", "==", correoDocente),
+  );
+
+  const [
+    resultadoAsignacionesActivas,
+    resultadoAsignacionesActivo,
+    resultadoReemplazos,
+  ] = await Promise.all([
+    getDocs(consultaAsignacionesActivas),
+    getDocs(consultaAsignacionesActivo),
+    getDocs(consultaReemplazos),
+  ]);
+
+  const espaciosIds = new Set();
+
+  resultadoAsignacionesActivas.forEach((documento) => {
+    agregarEspacioAutorizadoMesaDocente(espaciosIds, documento.data());
+  });
+
+  resultadoAsignacionesActivo.forEach((documento) => {
+    agregarEspacioAutorizadoMesaDocente(espaciosIds, documento.data());
+  });
+
+  resultadoReemplazos.forEach((documento) => {
+    const reemplazo = documento.data();
+
+    if (!reemplazoMesaDocenteEstaVigente(reemplazo)) {
+      return;
+    }
+
+    agregarEspacioAutorizadoMesaDocente(espaciosIds, reemplazo);
+  });
+
+  return espaciosIds;
+}
+
 async function cargarMesasDocente() {
   if (!cuerpoTablaMesasDocente) return;
 
@@ -266,6 +390,9 @@ async function cargarMesasDocente() {
       </tr>
     `;
 
+    const espaciosIdsAutorizados =
+      await obtenerEspaciosIdsAutorizadosMesaDocente();
+
     const consulta = await getDocs(
       query(collection(db, "mesas_examen"), where("estado", "==", "PUBLICADA")),
     );
@@ -280,7 +407,9 @@ async function cargarMesasDocente() {
           .trim()
           .toUpperCase();
 
-        return estado === "PUBLICADA";
+        const espacioId = String(mesa.espacioId || "").trim();
+
+        return estado === "PUBLICADA" && espaciosIdsAutorizados.has(espacioId);
       });
 
     console.log(
