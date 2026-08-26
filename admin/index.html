@@ -2406,6 +2406,36 @@
             </p>
           </div>
 
+          <!-- Limpiar bloques horarios -->
+          <div class="panel-info">
+            <div class="encabezado-listado">
+              <div>
+                <h3>Limpiar bloques horarios</h3>
+
+                <p>
+                  Eliminá todos los bloques de Aula, Taller y Educación Física
+                  correspondientes a un ciclo lectivo anterior. No se eliminan
+                  asignaciones docentes ni registros de asistencia.
+                </p>
+              </div>
+            </div>
+
+            <div class="acciones">
+              <button
+                type="button"
+                class="btn-accion"
+                id="btnAbrirLimpiezaHorarios"
+              >
+                <i class="fa-solid fa-calendar-xmark"></i>
+                Limpiar bloques horarios
+              </button>
+            </div>
+
+            <p class="mensaje-formulario" id="mensajeLimpiezaHorarios">
+              Se eliminarán únicamente los bloques del ciclo lectivo que selecciones.
+            </p>
+          </div>
+
           <!-- Períodos de asistencia -->
           <div class="panel-info">
             <div class="encabezado-listado">
@@ -2789,6 +2819,120 @@
           Volver al inicio
         </a>
       </section>
+
+      <!-- Modal: limpieza de bloques horarios -->
+      <div
+        class="modal"
+        id="modalLimpiezaHorarios"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="tituloModalLimpiezaHorarios"
+        hidden
+      >
+        <div class="modal-contenido">
+          <button
+            type="button"
+            class="modal-cerrar"
+            id="btnCerrarModalLimpiezaHorarios"
+            aria-label="Cerrar"
+          >
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+
+          <h3 id="tituloModalLimpiezaHorarios">
+            Limpiar bloques horarios
+          </h3>
+
+          <p>
+            Indicá el ciclo lectivo cuyos bloques querés eliminar. Se revisarán
+            los registros antes de pedirte la confirmación definitiva.
+          </p>
+
+          <div class="campo-formulario">
+            <label for="cicloLimpiezaHorarios">Ciclo lectivo a eliminar</label>
+
+            <input
+              id="cicloLimpiezaHorarios"
+              type="number"
+              min="2000"
+              max="2100"
+              step="1"
+              inputmode="numeric"
+              placeholder="Ej.: 2026"
+            />
+          </div>
+
+          <div class="acciones">
+            <button
+              type="button"
+              class="btn-secundario"
+              id="btnCancelarLimpiezaHorarios"
+            >
+              Cancelar
+            </button>
+
+            <button
+              type="button"
+              class="btn-accion"
+              id="btnContinuarLimpiezaHorarios"
+            >
+              <i class="fa-solid fa-magnifying-glass"></i>
+              Revisar bloques
+            </button>
+          </div>
+
+          <p
+            class="mensaje-formulario"
+            id="mensajeModalLimpiezaHorarios"
+          ></p>
+        </div>
+      </div>
+
+      <!-- Modal: confirmación de limpieza de bloques horarios -->
+      <div
+        class="modal"
+        id="modalConfirmacionLimpiezaHorarios"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="tituloConfirmacionLimpiezaHorarios"
+        hidden
+      >
+        <div class="modal-contenido modal-confirmacion-peligro">
+          <div class="icono-confirmacion-peligro">
+            <i class="fa-solid fa-triangle-exclamation"></i>
+          </div>
+
+          <h3 id="tituloConfirmacionLimpiezaHorarios">
+            Confirmar limpieza de horarios
+          </h3>
+
+          <p id="textoConfirmacionLimpiezaHorarios"></p>
+
+          <div class="advertencia-confirmacion">
+            <i class="fa-solid fa-circle-exclamation"></i>
+            <span>Esta acción no se puede deshacer.</span>
+          </div>
+
+          <div class="acciones">
+            <button
+              type="button"
+              class="btn-secundario"
+              id="btnCancelarConfirmacionLimpiezaHorarios"
+            >
+              Cancelar
+            </button>
+
+            <button
+              type="button"
+              class="btn-peligro"
+              id="btnAceptarConfirmacionLimpiezaHorarios"
+            >
+              <i class="fa-solid fa-trash-can"></i>
+              Sí, continuar
+            </button>
+          </div>
+        </div>
+      </div>
 
       <!-- Modal: limpieza de registros de asistencia -->
       <div
@@ -3493,6 +3637,10 @@
     <script
       type="module"
       src="../assets/js/accesos-recientes-admin.js"
+    ></script>
+    <script
+      type="module"
+      src="../assets/js/limpieza-horarios-admin.js?v=20260826-1"
     ></script>
     <script
       type="module"
