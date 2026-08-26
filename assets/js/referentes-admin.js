@@ -992,7 +992,11 @@ async function abrirGestionAsignacionesReferente(registros) {
 
     showConfirmButton: false,
     showCloseButton: true,
-    width: 560,
+
+    customClass: {
+      container: "contenedor-gestion-referente-admin",
+      popup: "modal-gestion-referente-admin",
+    },
 
     didOpen: () => {
       const nombre = document.getElementById("nombreGestionReferente");

@@ -356,24 +356,58 @@ function cargarEstilosModalCierreSesion() {
   estilos.id = "estilosModalCierreSesionPortal";
 
   estilos.textContent = `
-  .swal2-popup.modal-cierre-sesion-portal {
+  /*
+   * El contenedor se convierte en flex únicamente para este SweetAlert.
+   * Así el ancho del popup depende del viewport real y no de las columnas
+   * internas de la grilla de SweetAlert2 ni del ancho del documento.
+   */
+  .swal2-container.contenedor-cierre-sesion-portal {
+    position: fixed !important;
+    inset: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 100vw !important;
+    max-width: 100vw !important;
+    height: 100vh !important;
+    height: 100dvh !important;
+    padding: 12px !important;
+    overflow-x: hidden !important;
+    box-sizing: border-box !important;
+  }
+
+  .swal2-container.contenedor-cierre-sesion-portal
+    .swal2-popup.modal-cierre-sesion-portal {
+    flex: 0 1 420px !important;
     width: min(420px, calc(100vw - 24px)) !important;
+    min-width: 0 !important;
     max-width: calc(100vw - 24px) !important;
     height: auto !important;
-    max-height: calc(100dvh - 20px) !important;
+    max-height: calc(100dvh - 24px) !important;
+    margin: 0 !important;
+    overflow-x: hidden !important;
     overflow-y: auto !important;
     box-sizing: border-box !important;
     border-radius: 16px !important;
   }
 
+  .contenedor-cierre-sesion-portal
+    .modal-cierre-sesion-portal .swal2-actions {
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
   @media (max-width: 600px) {
-    .swal2-container {
+    .swal2-container.contenedor-cierre-sesion-portal {
       padding: 10px !important;
     }
 
-    .swal2-popup.modal-cierre-sesion-portal {
-      width: 100% !important;
-      max-width: 100% !important;
+    .swal2-container.contenedor-cierre-sesion-portal
+      .swal2-popup.modal-cierre-sesion-portal {
+      flex-basis: auto !important;
+      width: calc(100vw - 20px) !important;
+      min-width: 0 !important;
+      max-width: calc(100vw - 20px) !important;
       padding: 12px 14px 14px !important;
     }
 
@@ -395,6 +429,7 @@ function cargarEstilosModalCierreSesion() {
     }
 
     .modal-cierre-sesion-portal .swal2-html-container {
+      width: 100% !important;
       margin: 7px 0 0 !important;
       padding: 0 !important;
       font-size: 0.95rem !important;
@@ -402,16 +437,24 @@ function cargarEstilosModalCierreSesion() {
     }
 
     .modal-cierre-sesion-portal .swal2-actions {
+      display: flex !important;
+      flex-direction: column !important;
+      align-items: stretch !important;
+      gap: 8px !important;
+      width: 100% !important;
       margin: 10px 0 0 !important;
       padding: 0 !important;
     }
 
     .modal-cierre-sesion-portal .swal2-actions button {
+      width: 100% !important;
+      min-width: 0 !important;
+      max-width: 100% !important;
       min-height: 40px !important;
-      margin-top: 3px !important;
-      margin-bottom: 3px !important;
+      margin: 0 !important;
       padding: 7px 13px !important;
       font-size: 0.92rem !important;
+      white-space: normal !important;
     }
   }
 `;
@@ -436,6 +479,7 @@ if (btnCerrarSesionPortal) {
       focusCancel: true,
 
       customClass: {
+        container: "contenedor-cierre-sesion-portal",
         popup: "modal-cierre-sesion-portal",
       },
     });
