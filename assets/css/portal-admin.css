@@ -3526,3 +3526,105 @@ button.btn-accion.btn-eliminar-reemplazo:hover {
     min-height: 42px !important;
   }
 }
+
+/* =====================================================
+   CIERRE DE SESIÓN ADMIN - MÓVIL REAL v5
+   Regla aislada y autosuficiente para SweetAlert2.
+   No depende del tamaño intrínseco de la grilla de SweetAlert.
+===================================================== */
+
+.swal2-container .swal2-popup.modal-cierre-sesion-portal {
+  grid-column: 1 / -1 !important;
+  place-self: center !important;
+  justify-self: center !important;
+
+  width: min(420px, calc(100vw - 24px)) !important;
+  min-width: 0 !important;
+  max-width: calc(100vw - 24px) !important;
+  height: auto !important;
+  max-height: calc(100dvh - 24px) !important;
+
+  margin: 0 auto !important;
+  padding: 18px 20px 20px !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  box-sizing: border-box !important;
+}
+
+.swal2-container .modal-cierre-sesion-portal .swal2-icon,
+.swal2-container .modal-cierre-sesion-portal .swal2-title,
+.swal2-container .modal-cierre-sesion-portal .swal2-html-container,
+.swal2-container .modal-cierre-sesion-portal .swal2-actions {
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+.swal2-container .modal-cierre-sesion-portal .swal2-actions {
+  display: flex !important;
+  flex-direction: column !important;
+  flex-wrap: nowrap !important;
+  align-items: stretch !important;
+  justify-content: center !important;
+  gap: 10px !important;
+
+  width: 100% !important;
+  margin: 16px 0 0 !important;
+  padding: 0 !important;
+}
+
+.swal2-container .modal-cierre-sesion-portal .swal2-actions button {
+  display: block !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  min-height: 44px !important;
+  margin: 0 !important;
+  padding: 10px 14px !important;
+  white-space: normal !important;
+}
+
+@media (max-width: 600px) {
+  .swal2-container:has(.modal-cierre-sesion-portal) {
+    padding: 10px !important;
+    overflow-x: hidden !important;
+  }
+
+  .swal2-container .swal2-popup.modal-cierre-sesion-portal {
+    width: calc(100vw - 20px) !important;
+    min-width: 0 !important;
+    max-width: calc(100vw - 20px) !important;
+    padding: 14px 14px 16px !important;
+    border-radius: 16px !important;
+  }
+
+  .swal2-container .modal-cierre-sesion-portal .swal2-icon {
+    width: 56px !important;
+    height: 56px !important;
+    margin: 4px auto 10px !important;
+  }
+
+  .swal2-container .modal-cierre-sesion-portal .swal2-icon-content {
+    font-size: 36px !important;
+  }
+
+  .swal2-container .modal-cierre-sesion-portal .swal2-title {
+    margin: 0 !important;
+    padding: 0 !important;
+    font-size: 1.35rem !important;
+    line-height: 1.2 !important;
+    text-align: center !important;
+  }
+
+  .swal2-container .modal-cierre-sesion-portal .swal2-html-container {
+    width: 100% !important;
+    margin: 10px 0 0 !important;
+    padding: 0 !important;
+    font-size: 1rem !important;
+    line-height: 1.35 !important;
+    text-align: center !important;
+  }
+
+  .swal2-container .modal-cierre-sesion-portal .swal2-actions {
+    margin-top: 16px !important;
+  }
+}
