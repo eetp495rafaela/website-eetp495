@@ -4,6 +4,8 @@ import {
   getApps,
 } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-app.js";
 
+import { getAuth } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-auth.js";
+
 import {
   getFirestore,
   collection,
@@ -23,6 +25,10 @@ const firebaseConfig = {
 
 const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
 const db = getFirestore(app);
+const auth = getAuth(app);
+
+const BACKEND_SIME_URL =
+  "https://script.google.com/macros/s/AKfycbwAoJxUZp7KRFneMwMUsfilojhYM7HdBl8_JVue1T9AukKD-EIacqT7UxhdokdSO6TRdQ/exec";
 
 // =========================
 // MESAS DE EXAMEN - ALUMNO
@@ -236,6 +242,61 @@ function renderizarMesasAlumno(mesas) {
   );
 }
 
+async function obtenerEspaciosIdsInscriptosAlumno() {
+  const usuario = auth.currentUser;
+
+  if (!usuario) {
+    throw new Error("No se detectó una sesión activa.");
+  }
+
+  const idToken = await usuario.getIdToken(true);
+
+  const respuesta = await fetch(BACKEND_SIME_URL, {
+    method: "POST",
+    headers: {
+      "Content-Type": "text/plain;charset=utf-8",
+    },
+    body: JSON.stringify({
+      accion: "listar_mis_inscripciones",
+      idToken,
+    }),
+  });
+
+  if (!respuesta.ok) {
+    throw new Error(
+      "No se pudo consultar la información de inscripción S.I.M.E.",
+    );
+  }
+
+  const resultado = await respuesta.json();
+
+  if (!resultado.ok) {
+    throw new Error(
+      resultado.mensaje ||
+        "No se pudieron consultar tus inscripciones S.I.M.E.",
+    );
+  }
+
+  const inscripciones = Array.isArray(resultado.inscripciones)
+    ? resultado.inscripciones
+    : [];
+
+  const espaciosIds = inscripciones
+    .filter(
+      (inscripcion) =>
+        String(inscripcion.estado || "")
+          .trim()
+          .toUpperCase() === "ACTIVA",
+    )
+    .flatMap((inscripcion) =>
+      Array.isArray(inscripcion.espaciosIds) ? inscripcion.espaciosIds : [],
+    )
+    .map((id) => String(id || "").trim())
+    .filter(Boolean);
+
+  return new Set(espaciosIds);
+}
+
 async function cargarMesasAlumno() {
   if (!cuerpoTablaMesasAlumno) return;
 
@@ -258,14 +319,42 @@ async function cargarMesasAlumno() {
       </tr>
     `;
 
+    const espaciosIdsInscriptos = await obtenerEspaciosIdsInscriptosAlumno();
+
+    if (!espaciosIdsInscriptos.size) {
+      mesasAlumnoCargadas = [];
+
+      cargarFiltrosMesasAlumno();
+
+      cuerpoTablaMesasAlumno.innerHTML = `
+    <tr>
+      <td colspan="4" class="tabla-vacia">
+        No tenés mesas de examen correspondientes a tus inscripciones.
+      </td>
+    </tr>
+  `;
+
+      mostrarMensajeMesasAlumno(
+        "No tenés mesas de examen correspondientes a tus inscripciones.",
+      );
+
+      return;
+    }
+
     const consulta = await getDocs(
       query(collection(db, "mesas_examen"), where("estado", "==", "PUBLICADA")),
     );
 
-    mesasAlumnoCargadas = consulta.docs.map((documento) => ({
-      id: documento.id,
-      ...documento.data(),
-    }));
+    mesasAlumnoCargadas = consulta.docs
+      .map((documento) => ({
+        id: documento.id,
+        ...documento.data(),
+      }))
+      .filter((mesa) => {
+        const espacioId = String(mesa.espacioId || "").trim();
+
+        return espaciosIdsInscriptos.has(espacioId);
+      });
 
     if (!mesasAlumnoCargadas.length) {
       cuerpoTablaMesasAlumno.innerHTML = `
