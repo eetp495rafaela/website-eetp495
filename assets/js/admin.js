@@ -5238,6 +5238,10 @@ function validarFilasImportacionUsuarios(filas) {
       .trim()
       .toLowerCase();
 
+    const dni = String(fila.DNI || "")
+      .replace(/\D/g, "")
+      .trim();
+
     const rol = String(fila.ROL || "")
       .trim()
       .toUpperCase();
@@ -5274,6 +5278,10 @@ function validarFilasImportacionUsuarios(filas) {
       erroresFila.push("el correo no tiene un formato válido");
     }
 
+    if (dni && (dni.length < 7 || dni.length > 8)) {
+      erroresFila.push("el DNI debe tener entre 7 y 8 números");
+    }
+
     if (!rolesValidos.includes(rol)) {
       erroresFila.push("el rol no es válido");
     }
@@ -5298,6 +5306,7 @@ function validarFilasImportacionUsuarios(filas) {
     usuariosValidos.push({
       nombreCompleto,
       correo,
+      dni: dni || null,
       rol,
       tipoVinculo: situacionRevista,
       fechaFinAcceso: fechaFinalizacion || null,
@@ -5368,6 +5377,7 @@ async function importarUsuariosNuevos(usuarios) {
       lote.set(referencia, {
         correo: usuario.correo,
         nombreCompleto: usuario.nombreCompleto,
+        dni: usuario.dni || null,
         rol: usuario.rol,
         estado: "ACTIVO",
         tipoVinculo: usuario.tipoVinculo,
