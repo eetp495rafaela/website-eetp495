@@ -1016,3 +1016,20 @@ body:has(#vistaSolicitudAlumno:not([hidden])) .login h2 {
 #vistaSolicitudAlumno .btn-volver-cuenta {
   margin-top: 8px;
 }
+
+/* =====================================================
+   AJUSTE RESPONSIVE FINAL - VIEWPORT MÓVIL
+   Revisión 2026-08-26
+===================================================== */
+
+html,
+body,
+.portal {
+  min-height: 100dvh;
+}
+
+.fondo,
+.fondo::before,
+.fondo::after {
+  max-height: 100dvh;
+}

@@ -3129,3 +3129,165 @@ button.btn-accion.btn-eliminar-reemplazo:hover {
     padding: 18px;
   }
 }
+
+/* =====================================================
+   AJUSTE RESPONSIVE FINAL - MODALES Y ALERTAS
+   Revisión 2026-08-26
+===================================================== */
+
+/* Evita desbordes por contenido largo y mejora el scroll táctil. */
+.modal-edicion {
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+.modal-edicion-contenido {
+  max-height: calc(100dvh - 40px);
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+.formulario-edicion .form-grid > *,
+.formulario-edicion input,
+.formulario-edicion select,
+.formulario-edicion textarea {
+  min-width: 0;
+  max-width: 100%;
+}
+
+/* Los demás modales propios también deben respetar la altura real del móvil. */
+#modalLimpiezaAsistencias .modal-contenido,
+#modalConfirmacionLimpiezaAsistencias .modal-contenido,
+.modal-confirmacion-contenido {
+  max-height: calc(100dvh - 32px);
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* SweetAlert: evita popups más anchos o altos que la pantalla. */
+.swal2-container {
+  box-sizing: border-box !important;
+  padding: 12px !important;
+}
+
+.swal2-popup {
+  width: min(32em, calc(100vw - 24px)) !important;
+  max-width: calc(100vw - 24px) !important;
+  max-height: calc(100dvh - 24px) !important;
+  overflow-y: auto !important;
+  box-sizing: border-box !important;
+}
+
+.swal2-input,
+.swal2-select,
+.swal2-textarea {
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+@media (max-width: 700px) {
+  .modal-edicion {
+    align-items: flex-start;
+    justify-content: center;
+    padding:
+      max(10px, env(safe-area-inset-top))
+      max(10px, env(safe-area-inset-right))
+      max(10px, env(safe-area-inset-bottom))
+      max(10px, env(safe-area-inset-left));
+  }
+
+  .modal-edicion-contenido {
+    width: 100%;
+    max-height: calc(100dvh - 20px);
+    margin: auto 0;
+    padding: 18px 14px;
+    border-radius: 16px;
+  }
+
+  .modal-edicion-cabecera {
+    gap: 12px;
+    margin-bottom: 18px;
+    padding-bottom: 14px;
+  }
+
+  .modal-edicion-cabecera h3 {
+    font-size: 1.2rem;
+    line-height: 1.25;
+  }
+
+  .modal-edicion-cabecera p {
+    font-size: 0.86rem;
+    line-height: 1.35;
+  }
+
+  .btn-cerrar-modal {
+    flex: 0 0 40px;
+    width: 40px;
+    height: 40px;
+  }
+
+  .formulario-edicion .form-grid {
+    grid-template-columns: 1fr !important;
+    gap: 14px;
+  }
+
+  .formulario-edicion .campo-doble,
+  #campoEditarRolesAdicionales {
+    grid-column: auto !important;
+  }
+
+  .acciones-modal {
+    flex-direction: column-reverse;
+    gap: 10px;
+    margin-top: 18px;
+    padding-top: 16px;
+  }
+
+  .acciones-modal .btn-accion,
+  .acciones-modal .btn-secundario,
+  .acciones-modal button {
+    width: 100%;
+  }
+
+  #modalLimpiezaAsistencias,
+  #modalConfirmacionLimpiezaAsistencias,
+  .modal-confirmacion {
+    align-items: flex-start;
+    overflow-y: auto;
+    padding:
+      max(10px, env(safe-area-inset-top))
+      max(10px, env(safe-area-inset-right))
+      max(10px, env(safe-area-inset-bottom))
+      max(10px, env(safe-area-inset-left));
+  }
+
+  #modalLimpiezaAsistencias .modal-contenido,
+  #modalConfirmacionLimpiezaAsistencias .modal-contenido,
+  .modal-confirmacion-contenido {
+    width: 100%;
+    max-width: 100%;
+    max-height: calc(100dvh - 20px);
+    margin: auto 0;
+  }
+}
+
+@media (max-width: 480px) {
+  #editarRolesAdicionalesUsuario,
+  .campo-roles-adicionales .selector-roles-admin {
+    grid-template-columns: 1fr;
+  }
+
+  .swal2-actions {
+    width: 100% !important;
+    flex-direction: column !important;
+    gap: 8px !important;
+  }
+
+  .swal2-actions button {
+    width: 100% !important;
+    margin: 0 !important;
+  }
+}

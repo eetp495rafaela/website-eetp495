@@ -3014,3 +3014,42 @@ body.sin-scroll {
     transform: translateY(-50%) rotate(180deg);
   }
 }
+
+/* =====================================================
+   AJUSTE RESPONSIVE FINAL - VISOR DE GALERÍA EN MÓVIL
+   Revisión 2026-08-26
+===================================================== */
+
+.lightbox {
+  min-height: 100dvh;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+.visor-galeria {
+  max-height: calc(100dvh - 32px);
+}
+
+.visor-imagen-contenedor {
+  max-height: 70dvh;
+}
+
+@media (max-width: 768px) {
+  .lightbox {
+    padding:
+      max(10px, env(safe-area-inset-top))
+      max(10px, env(safe-area-inset-right))
+      max(10px, env(safe-area-inset-bottom))
+      max(10px, env(safe-area-inset-left));
+  }
+
+  .visor-galeria {
+    width: 100%;
+    max-height: calc(100dvh - 20px);
+  }
+
+  .visor-imagen-contenedor {
+    max-height: 60dvh;
+  }
+}

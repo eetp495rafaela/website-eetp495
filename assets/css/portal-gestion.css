@@ -3129,3 +3129,45 @@ body {
     grid-column: auto;
   }
 }
+
+/* =====================================================
+   AJUSTE RESPONSIVE FINAL - ALERTAS Y VIEWPORT MÓVIL
+   Revisión 2026-08-26
+===================================================== */
+
+body {
+  min-height: 100dvh;
+}
+
+.swal2-container {
+  box-sizing: border-box !important;
+  padding: 12px !important;
+}
+
+.swal2-popup {
+  width: min(32em, calc(100vw - 24px)) !important;
+  max-width: calc(100vw - 24px) !important;
+  max-height: calc(100dvh - 24px) !important;
+  overflow-y: auto !important;
+  box-sizing: border-box !important;
+}
+
+.swal2-input,
+.swal2-select,
+.swal2-textarea {
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+@media (max-width: 480px) {
+  .swal2-actions {
+    width: 100% !important;
+    flex-direction: column !important;
+    gap: 8px !important;
+  }
+
+  .swal2-actions button {
+    width: 100% !important;
+    margin: 0 !important;
+  }
+}
