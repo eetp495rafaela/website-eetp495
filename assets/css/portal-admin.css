@@ -3291,3 +3291,236 @@ button.btn-accion.btn-eliminar-reemplazo:hover {
     margin: 0 !important;
   }
 }
+
+/* =====================================================
+   MODALES DE EDICIÓN ADMIN - MÓVIL PRODUCCIÓN
+   Revisión 2026-08-26 v2
+
+   En pantallas pequeñas el modal se comporta como una
+   vista de pantalla completa: cabecera y acciones quedan
+   siempre visibles y sólo se desplaza el cuerpo del formulario.
+===================================================== */
+
+@media (max-width: 700px) {
+  body.modal-abierto {
+    overflow: hidden !important;
+    overscroll-behavior: none;
+  }
+
+  .modal-edicion {
+    inset: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    height: 100dvh !important;
+    min-height: 0 !important;
+    padding: 0 !important;
+    align-items: stretch !important;
+    justify-content: stretch !important;
+    overflow: hidden !important;
+    overscroll-behavior: none;
+  }
+
+  .modal-edicion-contenido {
+    display: flex !important;
+    flex-direction: column !important;
+    width: 100% !important;
+    max-width: none !important;
+    height: 100vh !important;
+    height: 100dvh !important;
+    max-height: 100vh !important;
+    max-height: 100dvh !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    overflow: hidden !important;
+    transform: none !important;
+  }
+
+  .modal-edicion-cabecera {
+    flex: 0 0 auto;
+    position: relative;
+    z-index: 3;
+    width: 100%;
+    margin: 0 !important;
+    padding:
+      calc(14px + env(safe-area-inset-top))
+      14px
+      13px !important;
+    border-bottom: 1px solid var(--borde);
+    background: var(--blanco);
+  }
+
+  .modal-edicion-cabecera > div {
+    min-width: 0;
+  }
+
+  .modal-edicion-cabecera h3 {
+    margin: 0 0 4px !important;
+    font-size: 1.16rem !important;
+    line-height: 1.22 !important;
+  }
+
+  .modal-edicion-cabecera p {
+    margin: 0 !important;
+    font-size: 0.84rem !important;
+    line-height: 1.32 !important;
+  }
+
+  .btn-cerrar-modal {
+    flex: 0 0 42px !important;
+    width: 42px !important;
+    height: 42px !important;
+    min-width: 42px !important;
+    min-height: 42px !important;
+  }
+
+  .formulario-edicion {
+    display: flex !important;
+    flex: 1 1 auto !important;
+    flex-direction: column !important;
+    min-height: 0 !important;
+    width: 100%;
+    overflow: hidden !important;
+  }
+
+  .formulario-edicion .form-grid {
+    display: grid !important;
+    flex: 1 1 auto !important;
+    grid-template-columns: 1fr !important;
+    align-content: start;
+    min-height: 0 !important;
+    width: 100%;
+    gap: 14px !important;
+    margin: 0 !important;
+    padding: 16px 14px 18px !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    overscroll-behavior-y: contain;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-gutter: stable;
+  }
+
+  .formulario-edicion .form-grid > *,
+  .formulario-edicion .campo-formulario,
+  .formulario-edicion input,
+  .formulario-edicion select,
+  .formulario-edicion textarea {
+    min-width: 0 !important;
+    max-width: 100% !important;
+  }
+
+  .formulario-edicion .campo-doble,
+  #campoEditarRolesAdicionales {
+    grid-column: 1 / -1 !important;
+  }
+
+  /* El mensaje queda entre el cuerpo desplazable y los botones. */
+  .formulario-edicion > .mensaje-formulario {
+    flex: 0 0 auto;
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 14px;
+    background: var(--blanco);
+  }
+
+  .formulario-edicion > .mensaje-formulario:not(:empty) {
+    padding-top: 9px;
+    padding-bottom: 9px;
+    border-top: 1px solid var(--borde);
+  }
+
+  /* Pie fijo dentro del modal: Cancelar y Guardar siempre visibles. */
+  .acciones-modal {
+    display: flex !important;
+    flex: 0 0 auto !important;
+    flex-direction: column-reverse !important;
+    gap: 9px !important;
+    position: relative;
+    z-index: 4;
+    width: 100%;
+    margin: 0 !important;
+    padding:
+      11px
+      14px
+      calc(11px + env(safe-area-inset-bottom)) !important;
+    border-top: 1px solid var(--borde) !important;
+    background: var(--blanco);
+    box-shadow: 0 -8px 20px rgba(8, 61, 121, 0.08);
+  }
+
+  .acciones-modal .btn-accion,
+  .acciones-modal .btn-secundario,
+  .acciones-modal button {
+    flex: 0 0 auto;
+    width: 100% !important;
+    min-height: 46px !important;
+    margin: 0 !important;
+  }
+
+  /* Roles adicionales: legibles en teléfonos angostos. */
+  #editarRolesAdicionalesUsuario {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 8px !important;
+  }
+}
+
+@media (max-width: 420px) {
+  #editarRolesAdicionalesUsuario,
+  .campo-roles-adicionales .selector-roles-admin {
+    grid-template-columns: 1fr !important;
+  }
+
+  .modal-edicion-cabecera {
+    padding-right: 12px !important;
+    padding-left: 12px !important;
+  }
+
+  .formulario-edicion .form-grid {
+    padding-right: 12px !important;
+    padding-left: 12px !important;
+  }
+
+  .formulario-edicion > .mensaje-formulario {
+    padding-right: 12px;
+    padding-left: 12px;
+  }
+
+  .acciones-modal {
+    padding-right: 12px !important;
+    padding-left: 12px !important;
+  }
+}
+
+/* En orientación horizontal se compacta cabecera y pie para dejar más
+   espacio útil al formulario, manteniendo siempre visibles las acciones. */
+@media (max-width: 900px) and (max-height: 520px) and (orientation: landscape) {
+  .modal-edicion-cabecera {
+    padding-top: 9px !important;
+    padding-bottom: 8px !important;
+  }
+
+  .modal-edicion-cabecera p {
+    display: none;
+  }
+
+  .formulario-edicion .form-grid {
+    padding-top: 10px !important;
+    padding-bottom: 10px !important;
+  }
+
+  .acciones-modal {
+    flex-direction: row !important;
+    padding-top: 8px !important;
+    padding-bottom: calc(8px + env(safe-area-inset-bottom)) !important;
+  }
+
+  .acciones-modal .btn-accion,
+  .acciones-modal .btn-secundario,
+  .acciones-modal button {
+    width: auto !important;
+    flex: 1 1 0 !important;
+    min-height: 42px !important;
+  }
+}
