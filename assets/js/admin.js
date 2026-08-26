@@ -2198,7 +2198,7 @@ async function cargarEspaciosMesasExamenAdmin() {
   try {
     const consulta = await getDocs(collection(db, "espacios_curriculares"));
 
-    espaciosMesasExamenAdmin = consulta.docs
+    const espaciosReales = consulta.docs
       .map((documento) => ({
         id: documento.id,
         ...documento.data(),
@@ -2210,6 +2210,49 @@ async function cargarEspaciosMesasExamenAdmin() {
 
         return estado === "ACTIVO";
       });
+
+    const talleresPrimerAnio = [
+      "Taller Electricidad",
+      "Taller Informática",
+      "Taller Organización de la Empresa",
+    ];
+
+    const talleresSegundoAnio = [
+      "Taller Electrónica",
+      "Taller Informática",
+      "Taller Documentos Comerciales",
+    ];
+
+    espaciosMesasExamenAdmin = espaciosReales.filter((espacio) => {
+      const anio = Number(espacio.anio || 0);
+      const nombre = String(espacio.nombre || "").trim();
+
+      if (anio === 1 && talleresPrimerAnio.includes(nombre)) {
+        return false;
+      }
+
+      if (anio === 2 && talleresSegundoAnio.includes(nombre)) {
+        return false;
+      }
+
+      return true;
+    });
+
+    // Taller unificado para mesas de examen de 1º año
+    espaciosMesasExamenAdmin.push({
+      id: "TALLER_EXAMEN_1",
+      nombre: "Taller",
+      anio: 1,
+      tipo: "TALLER_EXAMEN",
+    });
+
+    // Taller unificado para mesas de examen de 2º año
+    espaciosMesasExamenAdmin.push({
+      id: "TALLER_EXAMEN_2",
+      nombre: "Taller",
+      anio: 2,
+      tipo: "TALLER_EXAMEN",
+    });
 
     ordenarEspaciosMesasAdmin(espaciosMesasExamenAdmin);
 
