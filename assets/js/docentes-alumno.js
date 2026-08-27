@@ -147,38 +147,98 @@ function referenteCorrespondeCursoAlumno(referente, perfilAlumno) {
   );
 }
 
+function crearTarjetaReferenteAlumno(cargo, referente) {
+  if (!referente) return "";
+
+  const nombre = String(referente.nombreCompleto || "").trim();
+  const correo = normalizarCorreoDocentesAlumno(referente.correo);
+
+  return `
+    <article class="tarjeta-referente-alumno">
+      <div class="icono-referente-alumno">
+        <i class="${iconoCargoReferenteAlumno(cargo)}"></i>
+      </div>
+
+      <div class="datos-referente-alumno">
+        <span class="cargo-referente-alumno">
+          ${escaparHtmlDocentesAlumno(textoCargoReferenteAlumno(cargo))}
+        </span>
+
+        <strong class="nombre-referente-alumno">
+          ${nombre ? escaparHtmlDocentesAlumno(nombre) : "Nombre no disponible"}
+        </strong>
+
+        ${
+          correo
+            ? `
+              <a
+                class="correo-referente-alumno"
+                href="mailto:${escaparHtmlDocentesAlumno(correo)}"
+              >
+                <i class="fa-solid fa-envelope"></i>
+                ${escaparHtmlDocentesAlumno(correo)}
+              </a>
+            `
+            : `
+              <span class="correo-referente-alumno sin-correo">
+                Correo no disponible
+              </span>
+            `
+        }
+      </div>
+    </article>
+  `;
+}
+
+function obtenerReferenteInstitucionalPorCargo(referentes, cargo) {
+  const cargoBuscado = normalizarTextoDocentesAlumno(cargo);
+
+  return referentes.find(
+    (item) => normalizarTextoDocentesAlumno(item.cargo) === cargoBuscado,
+  );
+}
+
+function renderizarFilaReferentesAlumno(referentesFila, claseAdicional = "") {
+  if (!referentesFila.length) return "";
+
+  return `
+    <div class="fila-referentes-alumno ${claseAdicional}">
+      ${referentesFila
+        .map(({ cargo, referente }) =>
+          crearTarjetaReferenteAlumno(cargo, referente),
+        )
+        .join("")}
+    </div>
+  `;
+}
+
 function renderizarReferentesAlumno(referentes, perfilAlumno) {
   if (!vistaReferentesAlumno) return;
 
   const cursoVisible = obtenerNombreCursoAlumno(perfilAlumno);
 
-  const cargosInstitucionales = ["DIRECTORA", "VICE_DIRECTORA"];
-
-  const referentesVisibles = cargosInstitucionales.map((cargo) => ({
-    cargo,
-    referente: referentes.find(
-      (item) => normalizarTextoDocentesAlumno(item.cargo) === cargo,
-    ),
-  }));
+  /*
+   * Dirección y Vicedirección se muestran sólo si existe
+   * un referente ACTIVO para cada cargo.
+   */
+  const referentesDireccion = ["DIRECTORA", "VICE_DIRECTORA"]
+    .map((cargo) => ({
+      cargo,
+      referente: obtenerReferenteInstitucionalPorCargo(referentes, cargo),
+    }))
+    .filter(({ referente }) => Boolean(referente));
 
   /*
-   * Para la referencia de Secretaría se prioriza SECRETARIO.
-   * Si no existe uno activo, se muestra el PRO_SECRETARIO.
+   * SECRETARIO y PRO_SECRETARIO son cargos independientes.
+   * Ninguno reemplaza al otro: si ambos existen, aparecen ambos.
+   * Si uno no está asignado, su tarjeta directamente no se genera.
    */
-  const referenteSecretaria =
-    referentes.find(
-      (item) => normalizarTextoDocentesAlumno(item.cargo) === "SECRETARIO",
-    ) ||
-    referentes.find(
-      (item) => normalizarTextoDocentesAlumno(item.cargo) === "PRO_SECRETARIO",
-    );
-
-  referentesVisibles.push({
-    cargo: referenteSecretaria
-      ? normalizarTextoDocentesAlumno(referenteSecretaria.cargo)
-      : "SECRETARIO",
-    referente: referenteSecretaria,
-  });
+  const referentesGestion = ["SECRETARIO", "PRO_SECRETARIO"]
+    .map((cargo) => ({
+      cargo,
+      referente: obtenerReferenteInstitucionalPorCargo(referentes, cargo),
+    }))
+    .filter(({ referente }) => Boolean(referente));
 
   const preceptorCurso = referentes.find(
     (item) =>
@@ -186,10 +246,15 @@ function renderizarReferentesAlumno(referentes, perfilAlumno) {
       referenteCorrespondeCursoAlumno(item, perfilAlumno),
   );
 
-  referentesVisibles.push({
-    cargo: "PRECEPTOR",
-    referente: preceptorCurso,
-  });
+  if (preceptorCurso) {
+    referentesGestion.push({
+      cargo: "PRECEPTOR",
+      referente: preceptorCurso,
+    });
+  }
+
+  const hayReferentes =
+    referentesDireccion.length > 0 || referentesGestion.length > 0;
 
   vistaReferentesAlumno.innerHTML = `
     <div class="cabecera-referentes-alumno">
@@ -204,51 +269,27 @@ function renderizarReferentesAlumno(referentes, perfilAlumno) {
       </div>
     </div>
 
-    <div class="grilla-referentes-alumno">
-      ${referentesVisibles
-        .map(({ cargo, referente }) => {
-          const nombre = String(referente?.nombreCompleto || "").trim();
+    ${
+      hayReferentes
+        ? `
+          <div class="grilla-referentes-alumno">
+            ${renderizarFilaReferentesAlumno(
+              referentesDireccion,
+              "fila-referentes-direccion-alumno",
+            )}
 
-          const correo = normalizarCorreoDocentesAlumno(referente?.correo);
-
-          return `
-            <article class="tarjeta-referente-alumno">
-              <div class="icono-referente-alumno">
-                <i class="${iconoCargoReferenteAlumno(cargo)}"></i>
-              </div>
-
-              <div class="datos-referente-alumno">
-                <span class="cargo-referente-alumno">
-                  ${escaparHtmlDocentesAlumno(textoCargoReferenteAlumno(cargo))}
-                </span>
-
-                <strong class="nombre-referente-alumno">
-                  ${nombre ? escaparHtmlDocentesAlumno(nombre) : "Sin asignar"}
-                </strong>
-
-                ${
-                  correo
-                    ? `
-                      <a
-                        class="correo-referente-alumno"
-                        href="mailto:${escaparHtmlDocentesAlumno(correo)}"
-                      >
-                        <i class="fa-solid fa-envelope"></i>
-                        ${escaparHtmlDocentesAlumno(correo)}
-                      </a>
-                    `
-                    : `
-                      <span class="correo-referente-alumno sin-correo">
-                        Información no disponible
-                      </span>
-                    `
-                }
-              </div>
-            </article>
-          `;
-        })
-        .join("")}
-    </div>
+            ${renderizarFilaReferentesAlumno(
+              referentesGestion,
+              "fila-referentes-gestion-alumno",
+            )}
+          </div>
+        `
+        : `
+          <p class="mensaje-formulario">
+            Todavía no hay referentes institucionales asignados.
+          </p>
+        `
+    }
   `;
 }
 

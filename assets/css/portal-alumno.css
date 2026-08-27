@@ -2042,12 +2042,6 @@ html {
   font-weight: 650;
 }
 
-@media (max-width: 1350px) {
-  .grilla-referentes-alumno {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-}
-
 @media (max-width: 600px) {
   .cabecera-referentes-alumno > div {
     align-items: flex-start;
@@ -2060,19 +2054,20 @@ html {
 }
 
 .grilla-referentes-alumno {
-  display: grid;
-  grid-template-columns: repeat(6, minmax(0, 1fr));
+  display: flex;
+  flex-direction: column;
   gap: 14px;
 }
 
-.tarjeta-referente-alumno:nth-child(1),
-.tarjeta-referente-alumno:nth-child(2) {
-  grid-column: span 3;
-}
-
-.tarjeta-referente-alumno:nth-child(3),
-.tarjeta-referente-alumno:nth-child(4) {
-  grid-column: span 3;
+/*
+ * Cada fila reparte automáticamente todo el ancho disponible
+ * entre las tarjetas que realmente existen.
+ * 1 tarjeta = 100%, 2 = 50/50, 3 = tres columnas iguales.
+ */
+.fila-referentes-alumno {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 14px;
 }
 
 .tarjeta-referente-alumno {
@@ -2104,27 +2099,9 @@ html {
   word-break: normal;
 }
 
-@media (max-width: 900px) {
-  .grilla-referentes-alumno {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .tarjeta-referente-alumno:nth-child(n) {
-    grid-column: span 1;
-  }
-
-  .tarjeta-referente-alumno:last-child {
-    grid-column: 1 / -1;
-  }
-}
-
 @media (max-width: 600px) {
-  .grilla-referentes-alumno {
+  .fila-referentes-alumno {
     grid-template-columns: 1fr;
-  }
-
-  .tarjeta-referente-alumno:nth-child(n) {
-    grid-column: span 1;
   }
 
   .tarjeta-referente-alumno {
