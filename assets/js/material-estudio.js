@@ -77,6 +77,7 @@ const campoTituloMaterialEstudio = document.getElementById(
 const tituloMaterialEstudio = document.getElementById("tituloMaterialEstudio");
 
 let opcionesDocumentacion = [];
+let asignacionesExactasDocumentacion = [];
 
 function mostrarMensajeDocumentacion(texto, tipo = "") {
   if (!mensajeDocumentacionAcademica) return;
@@ -124,46 +125,167 @@ function convertirArchivoABase64(archivo) {
   });
 }
 
-function cargarCursosDisponibles() {
-  if (!cursoDocumentoAcademico) return;
+function esMaterialEstudioSeleccionado() {
+  return (
+    String(tipoDocumentoAcademico?.value || "")
+      .trim()
+      .toUpperCase() === "MATERIAL_ESTUDIO"
+  );
+}
 
-  const cursos = [
-    ...new Map(
-      opcionesDocumentacion.map((opcion) => [
-        opcion.cursoAnio,
-        {
-          anio: opcion.cursoAnio,
-          nombre: opcion.curso,
-        },
-      ]),
-    ).values(),
-  ].sort((a, b) => a.anio - b.anio);
+function obtenerClaveCursoExacto(asignacion) {
+  const cursoId = String(asignacion?.cursoId || "").trim();
+
+  if (cursoId) {
+    return cursoId;
+  }
+
+  return [
+    Number(asignacion?.cursoAnio || 0),
+    String(asignacion?.cursoDivision || "").trim().toUpperCase(),
+    String(asignacion?.cursoNombre || "").trim().toUpperCase(),
+  ].join("|");
+}
+
+function cargarCursosDisponibles() {
+  if (!cursoDocumentoAcademico || !espacioDocumentoAcademico) return;
 
   cursoDocumentoAcademico.innerHTML =
     '<option value="">Seleccionar curso</option>';
 
-  cursos.forEach((curso) => {
-    const opcion = document.createElement("option");
+  if (esMaterialEstudioSeleccionado()) {
+    const cursosExactos = [
+      ...new Map(
+        asignacionesExactasDocumentacion.map((asignacion) => {
+          const clave = obtenerClaveCursoExacto(asignacion);
 
-    opcion.value = String(curso.anio);
-    opcion.textContent = curso.nombre;
+          return [
+            clave,
+            {
+              clave,
+              nombre:
+                String(asignacion.cursoNombre || "").trim() ||
+                `${asignacion.cursoAnio || ""}º ${
+                  asignacion.cursoDivision || ""
+                }`.trim(),
+            },
+          ];
+        }),
+      ).values(),
+    ].sort((a, b) =>
+      a.nombre.localeCompare(b.nombre, "es", {
+        numeric: true,
+        sensitivity: "base",
+      }),
+    );
 
-    cursoDocumentoAcademico.appendChild(opcion);
-  });
+    cursosExactos.forEach((curso) => {
+      if (!curso.clave || !curso.nombre) return;
 
-  cursoDocumentoAcademico.disabled = false;
+      const opcion = document.createElement("option");
+      opcion.value = curso.clave;
+      opcion.textContent = curso.nombre;
+      cursoDocumentoAcademico.appendChild(opcion);
+    });
+
+    cursoDocumentoAcademico.disabled = !cursosExactos.length;
+  } else {
+    const cursos = [
+      ...new Map(
+        opcionesDocumentacion.map((opcion) => [
+          opcion.cursoAnio,
+          {
+            anio: opcion.cursoAnio,
+            nombre: opcion.curso,
+          },
+        ]),
+      ).values(),
+    ].sort((a, b) => a.anio - b.anio);
+
+    cursos.forEach((curso) => {
+      const opcion = document.createElement("option");
+      opcion.value = String(curso.anio);
+      opcion.textContent = curso.nombre;
+      cursoDocumentoAcademico.appendChild(opcion);
+    });
+
+    cursoDocumentoAcademico.disabled = !cursos.length;
+  }
 
   espacioDocumentoAcademico.innerHTML =
     '<option value="">Primero seleccioná un curso</option>';
-
   espacioDocumentoAcademico.disabled = true;
 }
 
 function cargarEspaciosDisponibles() {
-  const anioSeleccionado = Number(cursoDocumentoAcademico.value || 0);
+  if (!cursoDocumentoAcademico || !espacioDocumentoAcademico) return;
 
   espacioDocumentoAcademico.innerHTML =
     '<option value="">Seleccionar espacio curricular</option>';
+
+  if (esMaterialEstudioSeleccionado()) {
+    const cursoSeleccionado = String(
+      cursoDocumentoAcademico.value || "",
+    ).trim();
+
+    if (!cursoSeleccionado) {
+      espacioDocumentoAcademico.disabled = true;
+      return;
+    }
+
+    const asignacionesCurso = asignacionesExactasDocumentacion
+      .filter(
+        (asignacion) =>
+          obtenerClaveCursoExacto(asignacion) === cursoSeleccionado,
+      )
+      .sort((a, b) =>
+        String(a.espacioNombre || "").localeCompare(
+          String(b.espacioNombre || ""),
+          "es",
+          { sensitivity: "base" },
+        ),
+      );
+
+    asignacionesCurso.forEach((asignacion) => {
+      const opcion = document.createElement("option");
+
+      opcion.value = String(asignacion.espacioId || "").trim();
+      opcion.textContent = String(
+        asignacion.espacioNombre || "Espacio sin nombre",
+      ).trim();
+
+      opcion.dataset.nombre = String(
+        asignacion.espacioNombre || "",
+      ).trim();
+      opcion.dataset.tipo = String(
+        asignacion.espacioTipo || "",
+      ).trim();
+      opcion.dataset.asignacionId = String(
+        asignacion.asignacionId || "",
+      ).trim();
+      opcion.dataset.cursoAnio = String(
+        asignacion.cursoAnio || "",
+      ).trim();
+      opcion.dataset.cursoId = String(
+        asignacion.cursoId || "",
+      ).trim();
+      opcion.dataset.cursoDivision = String(
+        asignacion.cursoDivision || "",
+      ).trim();
+      opcion.dataset.cursoNombre = String(
+        asignacion.cursoNombre || "",
+      ).trim();
+
+      espacioDocumentoAcademico.appendChild(opcion);
+    });
+
+    espacioDocumentoAcademico.disabled = !asignacionesCurso.length;
+    return;
+  }
+
+  const anioSeleccionado = Number(
+    cursoDocumentoAcademico.value || 0,
+  );
 
   if (!anioSeleccionado) {
     espacioDocumentoAcademico.disabled = true;
@@ -172,7 +294,9 @@ function cargarEspaciosDisponibles() {
 
   const espacios = opcionesDocumentacion
     .filter((opcion) => opcion.cursoAnio === anioSeleccionado)
-    .sort((a, b) => a.espacioNombre.localeCompare(b.espacioNombre, "es"));
+    .sort((a, b) =>
+      a.espacioNombre.localeCompare(b.espacioNombre, "es"),
+    );
 
   espacios.forEach((espacio) => {
     const opcion = document.createElement("option");
@@ -213,7 +337,16 @@ async function cargarOpcionesDocumentacion() {
     ? resultado.opciones
     : [];
 
-  if (!opcionesDocumentacion.length) {
+  asignacionesExactasDocumentacion = Array.isArray(
+    resultado.asignacionesExactas,
+  )
+    ? resultado.asignacionesExactas
+    : [];
+
+  if (
+    !opcionesDocumentacion.length &&
+    !asignacionesExactasDocumentacion.length
+  ) {
     throw new Error(
       "No tenés asignaciones docentes activas para cargar documentación.",
     );
@@ -480,10 +613,10 @@ if (btnProbarConexionDocumentacion) {
 }
 
 if (tipoDocumentoAcademico) {
-  tipoDocumentoAcademico.addEventListener(
-    "change",
-    actualizarCampoTituloMaterialEstudio,
-  );
+  tipoDocumentoAcademico.addEventListener("change", () => {
+    actualizarCampoTituloMaterialEstudio();
+    cargarCursosDisponibles();
+  });
 
   actualizarCampoTituloMaterialEstudio();
 }
@@ -504,14 +637,25 @@ if (formDocumentacionAcademica) {
 
     const tituloMaterial = String(tituloMaterialEstudio?.value || "").trim();
 
-    const cursoAnio = String(cursoDocumentoAcademico.value || "").trim();
-
-    const espacioId = String(espacioDocumentoAcademico.value || "").trim();
+    const espacioId = String(
+      espacioDocumentoAcademico.value || "",
+    ).trim();
 
     const opcionEspacio =
       espacioDocumentoAcademico.options[
         espacioDocumentoAcademico.selectedIndex
       ];
+
+    const esMaterialEstudio =
+      tipoDocumento === "MATERIAL_ESTUDIO";
+
+    const cursoAnio = esMaterialEstudio
+      ? String(opcionEspacio?.dataset.cursoAnio || "").trim()
+      : String(cursoDocumentoAcademico.value || "").trim();
+
+    const asignacionId = esMaterialEstudio
+      ? String(opcionEspacio?.dataset.asignacionId || "").trim()
+      : "";
 
     const archivo = archivoDocumentoAcademico.files[0];
 
@@ -526,6 +670,14 @@ if (formDocumentacionAcademica) {
     if (!tipoDocumento || !cursoAnio || !espacioId) {
       mostrarMensajeDocumentacion(
         "Seleccioná tipo de documento, curso y espacio curricular.",
+        "error",
+      );
+      return;
+    }
+
+    if (esMaterialEstudio && !asignacionId) {
+      mostrarMensajeDocumentacion(
+        "No se pudo identificar la asignación docente seleccionada. Volvé a elegir curso y espacio curricular.",
         "error",
       );
       return;
@@ -585,6 +737,7 @@ if (formDocumentacionAcademica) {
         cicloLectivo: cicloLectivoDocumento.value,
         cursoAnio,
         espacioId,
+        asignacionId,
         espacioNombre: opcionEspacio?.dataset.nombre || "",
         tituloMaterial,
         nombreOriginal: archivo.name,
