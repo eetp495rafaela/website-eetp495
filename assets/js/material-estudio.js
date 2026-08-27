@@ -142,8 +142,12 @@ function obtenerClaveCursoExacto(asignacion) {
 
   return [
     Number(asignacion?.cursoAnio || 0),
-    String(asignacion?.cursoDivision || "").trim().toUpperCase(),
-    String(asignacion?.cursoNombre || "").trim().toUpperCase(),
+    String(asignacion?.cursoDivision || "")
+      .trim()
+      .toUpperCase(),
+    String(asignacion?.cursoNombre || "")
+      .trim()
+      .toUpperCase(),
   ].join("|");
 }
 
@@ -254,27 +258,17 @@ function cargarEspaciosDisponibles() {
         asignacion.espacioNombre || "Espacio sin nombre",
       ).trim();
 
-      opcion.dataset.nombre = String(
-        asignacion.espacioNombre || "",
-      ).trim();
-      opcion.dataset.tipo = String(
-        asignacion.espacioTipo || "",
-      ).trim();
+      opcion.dataset.nombre = String(asignacion.espacioNombre || "").trim();
+      opcion.dataset.tipo = String(asignacion.espacioTipo || "").trim();
       opcion.dataset.asignacionId = String(
         asignacion.asignacionId || "",
       ).trim();
-      opcion.dataset.cursoAnio = String(
-        asignacion.cursoAnio || "",
-      ).trim();
-      opcion.dataset.cursoId = String(
-        asignacion.cursoId || "",
-      ).trim();
+      opcion.dataset.cursoAnio = String(asignacion.cursoAnio || "").trim();
+      opcion.dataset.cursoId = String(asignacion.cursoId || "").trim();
       opcion.dataset.cursoDivision = String(
         asignacion.cursoDivision || "",
       ).trim();
-      opcion.dataset.cursoNombre = String(
-        asignacion.cursoNombre || "",
-      ).trim();
+      opcion.dataset.cursoNombre = String(asignacion.cursoNombre || "").trim();
 
       espacioDocumentoAcademico.appendChild(opcion);
     });
@@ -283,9 +277,7 @@ function cargarEspaciosDisponibles() {
     return;
   }
 
-  const anioSeleccionado = Number(
-    cursoDocumentoAcademico.value || 0,
-  );
+  const anioSeleccionado = Number(cursoDocumentoAcademico.value || 0);
 
   if (!anioSeleccionado) {
     espacioDocumentoAcademico.disabled = true;
@@ -294,9 +286,7 @@ function cargarEspaciosDisponibles() {
 
   const espacios = opcionesDocumentacion
     .filter((opcion) => opcion.cursoAnio === anioSeleccionado)
-    .sort((a, b) =>
-      a.espacioNombre.localeCompare(b.espacioNombre, "es"),
-    );
+    .sort((a, b) => a.espacioNombre.localeCompare(b.espacioNombre, "es"));
 
   espacios.forEach((espacio) => {
     const opcion = document.createElement("option");
@@ -637,17 +627,14 @@ if (formDocumentacionAcademica) {
 
     const tituloMaterial = String(tituloMaterialEstudio?.value || "").trim();
 
-    const espacioId = String(
-      espacioDocumentoAcademico.value || "",
-    ).trim();
+    const espacioId = String(espacioDocumentoAcademico.value || "").trim();
 
     const opcionEspacio =
       espacioDocumentoAcademico.options[
         espacioDocumentoAcademico.selectedIndex
       ];
 
-    const esMaterialEstudio =
-      tipoDocumento === "MATERIAL_ESTUDIO";
+    const esMaterialEstudio = tipoDocumento === "MATERIAL_ESTUDIO";
 
     const cursoAnio = esMaterialEstudio
       ? String(opcionEspacio?.dataset.cursoAnio || "").trim()
@@ -711,7 +698,7 @@ if (formDocumentacionAcademica) {
       return;
     }
 
-    const LIMITE_ARCHIVO_MB = 10;
+    const LIMITE_ARCHIVO_MB = 25;
 
     if (archivo.size > LIMITE_ARCHIVO_MB * 1024 * 1024) {
       mostrarMensajeDocumentacion(
