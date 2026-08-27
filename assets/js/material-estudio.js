@@ -48,8 +48,20 @@ const cursoDocumentoAcademico = document.getElementById(
   "cursoDocumentoAcademico",
 );
 
+const campoCursoDocumentoAcademico = document.getElementById(
+  "campoCursoDocumentoAcademico",
+);
+
 const espacioDocumentoAcademico = document.getElementById(
   "espacioDocumentoAcademico",
+);
+
+const campoCursosMaterialEstudio = document.getElementById(
+  "campoCursosMaterialEstudio",
+);
+
+const listaCursosMaterialEstudio = document.getElementById(
+  "listaCursosMaterialEstudio",
 );
 
 const mensajeDocumentacionAcademica = document.getElementById(
@@ -133,88 +145,188 @@ function esMaterialEstudioSeleccionado() {
   );
 }
 
-function obtenerClaveCursoExacto(asignacion) {
-  const cursoId = String(asignacion?.cursoId || "").trim();
+function obtenerNombreCursoExacto(asignacion) {
+  return (
+    String(asignacion?.cursoNombre || "").trim() ||
+    `${asignacion?.cursoAnio || ""}º ${String(
+      asignacion?.cursoDivision || "",
+    ).trim()}`.trim()
+  );
+}
 
-  if (cursoId) {
-    return cursoId;
+function limpiarCursosMaterialEstudio(
+  mensaje = "Primero seleccioná un espacio curricular.",
+) {
+  if (!listaCursosMaterialEstudio) return;
+
+  listaCursosMaterialEstudio.innerHTML = `
+    <span class="ayuda-cursos-material-estudio">${mensaje}</span>
+  `;
+}
+
+function cargarEspaciosMaterialEstudio() {
+  if (!espacioDocumentoAcademico) return;
+
+  espacioDocumentoAcademico.innerHTML =
+    '<option value="">Seleccionar espacio curricular</option>';
+
+  const espacios = [
+    ...new Map(
+      asignacionesExactasDocumentacion
+        .map((asignacion) => {
+          const espacioId = String(asignacion.espacioId || "").trim();
+          const espacioNombre = String(asignacion.espacioNombre || "").trim();
+
+          if (!espacioId || !espacioNombre) return null;
+
+          return [
+            espacioId,
+            {
+              espacioId,
+              espacioNombre,
+              espacioTipo: String(asignacion.espacioTipo || "").trim(),
+            },
+          ];
+        })
+        .filter(Boolean),
+    ).values(),
+  ].sort((a, b) =>
+    a.espacioNombre.localeCompare(b.espacioNombre, "es", {
+      sensitivity: "base",
+    }),
+  );
+
+  espacios.forEach((espacio) => {
+    const opcion = document.createElement("option");
+    opcion.value = espacio.espacioId;
+    opcion.textContent = espacio.espacioNombre;
+    opcion.dataset.nombre = espacio.espacioNombre;
+    opcion.dataset.tipo = espacio.espacioTipo;
+    espacioDocumentoAcademico.appendChild(opcion);
+  });
+
+  espacioDocumentoAcademico.disabled = !espacios.length;
+  limpiarCursosMaterialEstudio();
+}
+
+function cargarCursosMaterialEstudio() {
+  if (!listaCursosMaterialEstudio || !espacioDocumentoAcademico) return;
+
+  const espacioId = String(espacioDocumentoAcademico.value || "").trim();
+
+  if (!espacioId) {
+    limpiarCursosMaterialEstudio();
+    return;
   }
 
-  return [
-    Number(asignacion?.cursoAnio || 0),
-    String(asignacion?.cursoDivision || "")
-      .trim()
-      .toUpperCase(),
-    String(asignacion?.cursoNombre || "")
-      .trim()
-      .toUpperCase(),
-  ].join("|");
+  const asignaciones = asignacionesExactasDocumentacion
+    .filter(
+      (asignacion) => String(asignacion.espacioId || "").trim() === espacioId,
+    )
+    .sort((a, b) =>
+      obtenerNombreCursoExacto(a).localeCompare(
+        obtenerNombreCursoExacto(b),
+        "es",
+        { numeric: true, sensitivity: "base" },
+      ),
+    );
+
+  if (!asignaciones.length) {
+    limpiarCursosMaterialEstudio(
+      "No se encontraron cursos asignados para este espacio curricular.",
+    );
+    return;
+  }
+
+  listaCursosMaterialEstudio.innerHTML = "";
+
+  asignaciones.forEach((asignacion) => {
+    const asignacionId = String(asignacion.asignacionId || "").trim();
+    const cursoNombre = obtenerNombreCursoExacto(asignacion);
+
+    if (!asignacionId || !cursoNombre) return;
+
+    const etiqueta = document.createElement("label");
+    etiqueta.className = "opcion-curso-material-estudio";
+
+    const checkbox = document.createElement("input");
+    checkbox.type = "checkbox";
+    checkbox.name = "asignacionesMaterialEstudio";
+    checkbox.value = asignacionId;
+    checkbox.dataset.cursoAnio = String(asignacion.cursoAnio || "").trim();
+    checkbox.dataset.cursoId = String(asignacion.cursoId || "").trim();
+    checkbox.dataset.cursoDivision = String(
+      asignacion.cursoDivision || "",
+    ).trim();
+    checkbox.dataset.cursoNombre = cursoNombre;
+
+    const texto = document.createElement("span");
+    texto.textContent = cursoNombre;
+
+    etiqueta.appendChild(checkbox);
+    etiqueta.appendChild(texto);
+    listaCursosMaterialEstudio.appendChild(etiqueta);
+  });
+}
+
+function obtenerAsignacionesMaterialEstudioSeleccionadas() {
+  if (!listaCursosMaterialEstudio) return [];
+
+  return Array.from(
+    listaCursosMaterialEstudio.querySelectorAll(
+      'input[name="asignacionesMaterialEstudio"]:checked',
+    ),
+  );
 }
 
 function cargarCursosDisponibles() {
   if (!cursoDocumentoAcademico || !espacioDocumentoAcademico) return;
 
+  const esMaterialEstudio = esMaterialEstudioSeleccionado();
+
+  if (campoCursoDocumentoAcademico) {
+    campoCursoDocumentoAcademico.hidden = esMaterialEstudio;
+  }
+
+  if (campoCursosMaterialEstudio) {
+    campoCursosMaterialEstudio.hidden = !esMaterialEstudio;
+  }
+
+  cursoDocumentoAcademico.required = !esMaterialEstudio;
+
+  if (esMaterialEstudio) {
+    cursoDocumentoAcademico.innerHTML =
+      '<option value="">No aplica en modo multicurso</option>';
+    cursoDocumentoAcademico.disabled = true;
+    cargarEspaciosMaterialEstudio();
+    return;
+  }
+
+  limpiarCursosMaterialEstudio();
+
   cursoDocumentoAcademico.innerHTML =
     '<option value="">Seleccionar curso</option>';
 
-  if (esMaterialEstudioSeleccionado()) {
-    const cursosExactos = [
-      ...new Map(
-        asignacionesExactasDocumentacion.map((asignacion) => {
-          const clave = obtenerClaveCursoExacto(asignacion);
+  const cursos = [
+    ...new Map(
+      opcionesDocumentacion.map((opcion) => [
+        opcion.cursoAnio,
+        {
+          anio: opcion.cursoAnio,
+          nombre: opcion.curso,
+        },
+      ]),
+    ).values(),
+  ].sort((a, b) => a.anio - b.anio);
 
-          return [
-            clave,
-            {
-              clave,
-              nombre:
-                String(asignacion.cursoNombre || "").trim() ||
-                `${asignacion.cursoAnio || ""}º ${
-                  asignacion.cursoDivision || ""
-                }`.trim(),
-            },
-          ];
-        }),
-      ).values(),
-    ].sort((a, b) =>
-      a.nombre.localeCompare(b.nombre, "es", {
-        numeric: true,
-        sensitivity: "base",
-      }),
-    );
+  cursos.forEach((curso) => {
+    const opcion = document.createElement("option");
+    opcion.value = String(curso.anio);
+    opcion.textContent = curso.nombre;
+    cursoDocumentoAcademico.appendChild(opcion);
+  });
 
-    cursosExactos.forEach((curso) => {
-      if (!curso.clave || !curso.nombre) return;
-
-      const opcion = document.createElement("option");
-      opcion.value = curso.clave;
-      opcion.textContent = curso.nombre;
-      cursoDocumentoAcademico.appendChild(opcion);
-    });
-
-    cursoDocumentoAcademico.disabled = !cursosExactos.length;
-  } else {
-    const cursos = [
-      ...new Map(
-        opcionesDocumentacion.map((opcion) => [
-          opcion.cursoAnio,
-          {
-            anio: opcion.cursoAnio,
-            nombre: opcion.curso,
-          },
-        ]),
-      ).values(),
-    ].sort((a, b) => a.anio - b.anio);
-
-    cursos.forEach((curso) => {
-      const opcion = document.createElement("option");
-      opcion.value = String(curso.anio);
-      opcion.textContent = curso.nombre;
-      cursoDocumentoAcademico.appendChild(opcion);
-    });
-
-    cursoDocumentoAcademico.disabled = !cursos.length;
-  }
+  cursoDocumentoAcademico.disabled = !cursos.length;
 
   espacioDocumentoAcademico.innerHTML =
     '<option value="">Primero seleccioná un curso</option>';
@@ -224,58 +336,13 @@ function cargarCursosDisponibles() {
 function cargarEspaciosDisponibles() {
   if (!cursoDocumentoAcademico || !espacioDocumentoAcademico) return;
 
-  espacioDocumentoAcademico.innerHTML =
-    '<option value="">Seleccionar espacio curricular</option>';
-
   if (esMaterialEstudioSeleccionado()) {
-    const cursoSeleccionado = String(
-      cursoDocumentoAcademico.value || "",
-    ).trim();
-
-    if (!cursoSeleccionado) {
-      espacioDocumentoAcademico.disabled = true;
-      return;
-    }
-
-    const asignacionesCurso = asignacionesExactasDocumentacion
-      .filter(
-        (asignacion) =>
-          obtenerClaveCursoExacto(asignacion) === cursoSeleccionado,
-      )
-      .sort((a, b) =>
-        String(a.espacioNombre || "").localeCompare(
-          String(b.espacioNombre || ""),
-          "es",
-          { sensitivity: "base" },
-        ),
-      );
-
-    asignacionesCurso.forEach((asignacion) => {
-      const opcion = document.createElement("option");
-
-      opcion.value = String(asignacion.espacioId || "").trim();
-      opcion.textContent = String(
-        asignacion.espacioNombre || "Espacio sin nombre",
-      ).trim();
-
-      opcion.dataset.nombre = String(asignacion.espacioNombre || "").trim();
-      opcion.dataset.tipo = String(asignacion.espacioTipo || "").trim();
-      opcion.dataset.asignacionId = String(
-        asignacion.asignacionId || "",
-      ).trim();
-      opcion.dataset.cursoAnio = String(asignacion.cursoAnio || "").trim();
-      opcion.dataset.cursoId = String(asignacion.cursoId || "").trim();
-      opcion.dataset.cursoDivision = String(
-        asignacion.cursoDivision || "",
-      ).trim();
-      opcion.dataset.cursoNombre = String(asignacion.cursoNombre || "").trim();
-
-      espacioDocumentoAcademico.appendChild(opcion);
-    });
-
-    espacioDocumentoAcademico.disabled = !asignacionesCurso.length;
+    cargarCursosMaterialEstudio();
     return;
   }
+
+  espacioDocumentoAcademico.innerHTML =
+    '<option value="">Seleccionar espacio curricular</option>';
 
   const anioSeleccionado = Number(cursoDocumentoAcademico.value || 0);
 
@@ -615,6 +682,14 @@ if (cursoDocumentoAcademico) {
   cursoDocumentoAcademico.addEventListener("change", cargarEspaciosDisponibles);
 }
 
+if (espacioDocumentoAcademico) {
+  espacioDocumentoAcademico.addEventListener("change", () => {
+    if (esMaterialEstudioSeleccionado()) {
+      cargarCursosMaterialEstudio();
+    }
+  });
+}
+
 if (formDocumentacionAcademica) {
   formDocumentacionAcademica.addEventListener("submit", async (event) => {
     event.preventDefault();
@@ -636,13 +711,19 @@ if (formDocumentacionAcademica) {
 
     const esMaterialEstudio = tipoDocumento === "MATERIAL_ESTUDIO";
 
-    const cursoAnio = esMaterialEstudio
-      ? String(opcionEspacio?.dataset.cursoAnio || "").trim()
-      : String(cursoDocumentoAcademico.value || "").trim();
+    const asignacionesSeleccionadas = esMaterialEstudio
+      ? obtenerAsignacionesMaterialEstudioSeleccionadas()
+      : [];
 
-    const asignacionId = esMaterialEstudio
-      ? String(opcionEspacio?.dataset.asignacionId || "").trim()
-      : "";
+    const asignacionIds = asignacionesSeleccionadas.map((checkbox) =>
+      String(checkbox.value || "").trim(),
+    );
+
+    const asignacionId = asignacionIds[0] || "";
+
+    const cursoAnio = esMaterialEstudio
+      ? String(asignacionesSeleccionadas[0]?.dataset.cursoAnio || "").trim()
+      : String(cursoDocumentoAcademico.value || "").trim();
 
     const archivo = archivoDocumentoAcademico.files[0];
 
@@ -654,17 +735,19 @@ if (formDocumentacionAcademica) {
       return;
     }
 
-    if (!tipoDocumento || !cursoAnio || !espacioId) {
+    if (!tipoDocumento || !espacioId || (!esMaterialEstudio && !cursoAnio)) {
       mostrarMensajeDocumentacion(
-        "Seleccioná tipo de documento, curso y espacio curricular.",
+        esMaterialEstudio
+          ? "Seleccioná el tipo de documento y el espacio curricular."
+          : "Seleccioná tipo de documento, curso y espacio curricular.",
         "error",
       );
       return;
     }
 
-    if (esMaterialEstudio && !asignacionId) {
+    if (esMaterialEstudio && !asignacionIds.length) {
       mostrarMensajeDocumentacion(
-        "No se pudo identificar la asignación docente seleccionada. Volvé a elegir curso y espacio curricular.",
+        "Seleccioná al menos un curso destinatario para el material de estudio.",
         "error",
       );
       return;
@@ -725,6 +808,7 @@ if (formDocumentacionAcademica) {
         cursoAnio,
         espacioId,
         asignacionId,
+        asignacionIds,
         espacioNombre: opcionEspacio?.dataset.nombre || "",
         tituloMaterial,
         nombreOriginal: archivo.name,
@@ -747,6 +831,13 @@ if (formDocumentacionAcademica) {
                   : "El documento fue guardado correctamente."
               }
             </p>
+            ${
+              esMaterialEstudio
+                ? `<p>Destinado a <strong>${asignacionIds.length}</strong> curso${
+                    asignacionIds.length === 1 ? "" : "s"
+                  }.</p>`
+                : ""
+            }
           `,
         icon: "success",
         confirmButtonText: "Aceptar",
@@ -755,6 +846,10 @@ if (formDocumentacionAcademica) {
       archivoDocumentoAcademico.value = "";
       if (tituloMaterialEstudio) {
         tituloMaterialEstudio.value = "";
+      }
+
+      if (esMaterialEstudio) {
+        cargarCursosMaterialEstudio();
       }
 
       await cargarDocumentosDisponibles();

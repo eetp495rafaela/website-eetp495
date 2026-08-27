@@ -718,7 +718,10 @@
                 />
               </div>
 
-              <div class="campo-documentacion">
+              <div
+                class="campo-documentacion"
+                id="campoCursoDocumentoAcademico"
+              >
                 <label for="cursoDocumentoAcademico">Curso *</label>
 
                 <select id="cursoDocumentoAcademico" required disabled>
@@ -726,7 +729,10 @@
                 </select>
               </div>
 
-              <div class="campo-documentacion">
+              <div
+                class="campo-documentacion"
+                id="campoEspacioDocumentoAcademico"
+              >
                 <label for="espacioDocumentoAcademico">
                   Espacio curricular *
                 </label>
@@ -734,6 +740,28 @@
                 <select id="espacioDocumentoAcademico" required disabled>
                   <option value="">Primero seleccioná un curso</option>
                 </select>
+              </div>
+
+              <div
+                class="campo-documentacion campo-cursos-material-estudio"
+                id="campoCursosMaterialEstudio"
+                hidden
+              >
+                <label>Cursos destinatarios *</label>
+
+                <div
+                  id="listaCursosMaterialEstudio"
+                  class="lista-cursos-material-estudio"
+                >
+                  <span class="ayuda-cursos-material-estudio">
+                    Primero seleccioná un espacio curricular.
+                  </span>
+                </div>
+
+                <small>
+                  Podés seleccionar uno o varios cursos que tengas asignados en
+                  este mismo espacio curricular.
+                </small>
               </div>
 
               <div class="fila-carga-documentacion">
@@ -1075,7 +1103,10 @@
       src="../assets/js/permisos-taller-docente.js"
     ></script>
     <script type="module" src="../assets/js/mesas-docente.js"></script>
-    <script type="module" src="../assets/js/material-estudio.js?v=20260827-1"></script>
+    <script
+      type="module"
+      src="../assets/js/material-estudio.js?v=20260827-2"
+    ></script>
     <script src="../assets/js/volver-arriba.js"></script>
     <script type="module" src="../assets/js/horarios-docente.js"></script>
     <script type="module" src="../assets/js/pizarra-horarios-admin.js"></script>

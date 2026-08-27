@@ -4216,3 +4216,68 @@ body {
     margin: 0 !important;
   }
 }
+
+/* =====================================================
+   MATERIAL DE ESTUDIO - SELECCIÓN DE VARIOS CURSOS
+===================================================== */
+
+#panelDocumentacionAcademica .campo-cursos-material-estudio {
+  grid-column: 1 / -1;
+}
+
+#panelDocumentacionAcademica .lista-cursos-material-estudio {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 10px;
+  min-height: 52px;
+  padding: 12px;
+  border: 1px solid #c9a79c;
+  border-radius: 12px;
+  background: #fffdf8;
+}
+
+#panelDocumentacionAcademica .opcion-curso-material-estudio {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 42px;
+  padding: 9px 12px;
+  border: 1px solid #d8bcb3;
+  border-radius: 10px;
+  background: #ffffff;
+  color: #3b241f;
+  font-weight: 850;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+#panelDocumentacionAcademica .opcion-curso-material-estudio:hover {
+  border-color: var(--bordo-acento);
+  background: #fff8f2;
+}
+
+#panelDocumentacionAcademica
+  .opcion-curso-material-estudio
+  input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  min-height: auto;
+  margin: 0;
+  accent-color: var(--bordo-acento);
+  cursor: pointer;
+  box-shadow: none;
+}
+
+#panelDocumentacionAcademica .ayuda-cursos-material-estudio {
+  grid-column: 1 / -1;
+  align-self: center;
+  color: #76564d;
+  font-size: 0.9rem;
+  font-weight: 750;
+}
+
+@media (max-width: 700px) {
+  #panelDocumentacionAcademica .lista-cursos-material-estudio {
+    grid-template-columns: 1fr;
+  }
+}
