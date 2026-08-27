@@ -2071,9 +2071,8 @@ html {
 }
 
 .tarjeta-referente-alumno:nth-child(3),
-.tarjeta-referente-alumno:nth-child(4),
-.tarjeta-referente-alumno:nth-child(5) {
-  grid-column: span 2;
+.tarjeta-referente-alumno:nth-child(4) {
+  grid-column: span 3;
 }
 
 .tarjeta-referente-alumno {
