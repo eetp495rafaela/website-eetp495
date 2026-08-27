@@ -103,8 +103,7 @@ function textoCargoReferenteAlumno(cargo) {
   const cargos = {
     DIRECTORA: "Director/a",
     VICE_DIRECTORA: "Vice Director/a",
-    ASISTENTE_ADMINISTRATIVO: "Asistente Administrativo",
-    PRO_SECRETARIO: "Pro Secretario/a",
+    SECRETARIO: "Secretario/a",
     PRECEPTOR: "Preceptor/a",
   };
 
@@ -115,8 +114,7 @@ function iconoCargoReferenteAlumno(cargo) {
   const iconos = {
     DIRECTORA: "fa-solid fa-user-tie",
     VICE_DIRECTORA: "fa-solid fa-user-tie",
-    ASISTENTE_ADMINISTRATIVO: "fa-solid fa-briefcase",
-    PRO_SECRETARIO: "fa-solid fa-folder-tree",
+    SECRETARIO: "fa-solid fa-folder-open",
     PRECEPTOR: "fa-solid fa-people-roof",
   };
 
@@ -152,12 +150,7 @@ function renderizarReferentesAlumno(referentes, perfilAlumno) {
 
   const cursoVisible = obtenerNombreCursoAlumno(perfilAlumno);
 
-  const cargosInstitucionales = [
-    "DIRECTORA",
-    "VICE_DIRECTORA",
-    "ASISTENTE_ADMINISTRATIVO",
-    "PRO_SECRETARIO",
-  ];
+  const cargosInstitucionales = ["DIRECTORA", "VICE_DIRECTORA", "SECRETARIO"];
 
   const referentesVisibles = cargosInstitucionales.map((cargo) => ({
     cargo,
