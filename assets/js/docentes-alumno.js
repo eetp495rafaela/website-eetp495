@@ -104,6 +104,7 @@ function textoCargoReferenteAlumno(cargo) {
     DIRECTORA: "Director/a",
     VICE_DIRECTORA: "Vice Director/a",
     SECRETARIO: "Secretario/a",
+    PRO_SECRETARIO: "Pro Secretario/a",
     PRECEPTOR: "Preceptor/a",
   };
 
@@ -115,6 +116,7 @@ function iconoCargoReferenteAlumno(cargo) {
     DIRECTORA: "fa-solid fa-user-tie",
     VICE_DIRECTORA: "fa-solid fa-user-tie",
     SECRETARIO: "fa-solid fa-folder-open",
+    PRO_SECRETARIO: "fa-solid fa-folder-open",
     PRECEPTOR: "fa-solid fa-people-roof",
   };
 
@@ -150,7 +152,7 @@ function renderizarReferentesAlumno(referentes, perfilAlumno) {
 
   const cursoVisible = obtenerNombreCursoAlumno(perfilAlumno);
 
-  const cargosInstitucionales = ["DIRECTORA", "VICE_DIRECTORA", "SECRETARIO"];
+  const cargosInstitucionales = ["DIRECTORA", "VICE_DIRECTORA"];
 
   const referentesVisibles = cargosInstitucionales.map((cargo) => ({
     cargo,
@@ -158,6 +160,25 @@ function renderizarReferentesAlumno(referentes, perfilAlumno) {
       (item) => normalizarTextoDocentesAlumno(item.cargo) === cargo,
     ),
   }));
+
+  /*
+   * Para la referencia de Secretaría se prioriza SECRETARIO.
+   * Si no existe uno activo, se muestra el PRO_SECRETARIO.
+   */
+  const referenteSecretaria =
+    referentes.find(
+      (item) => normalizarTextoDocentesAlumno(item.cargo) === "SECRETARIO",
+    ) ||
+    referentes.find(
+      (item) => normalizarTextoDocentesAlumno(item.cargo) === "PRO_SECRETARIO",
+    );
+
+  referentesVisibles.push({
+    cargo: referenteSecretaria
+      ? normalizarTextoDocentesAlumno(referenteSecretaria.cargo)
+      : "SECRETARIO",
+    referente: referenteSecretaria,
+  });
 
   const preceptorCurso = referentes.find(
     (item) =>
