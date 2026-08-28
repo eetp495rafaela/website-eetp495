@@ -8,7 +8,7 @@
 
     <title>Portal Alumnos | E.E.T.P. Nº 495</title>
 
-   <link rel="stylesheet" href="../assets/css/portal-alumno.css" />
+   <link rel="stylesheet" href="../assets/css/portal-alumno.css?v=20260828-1" />
     <link rel="icon" href="../assets/img/logo.png" />
 
     <link
@@ -489,44 +489,46 @@
             </div>
           </div>
 
-          <div class="acciones">
-            <button class="btn-accion" id="btnVerMiDocumentacion" type="button">
-              <i class="fa-solid fa-folder-open"></i>
-              Ver mi documentación
-            </button>
-          </div>
-
-          <div class="filtros-documentacion-alumno">
-            <div
-              class="campo-filtro"
-              id="contenedorFiltroTipoDocumentacionAlumno"
-            >
-              <label for="filtroTipoDocumentacionAlumno">
-                Tipo de documento
-              </label>
-
-              <select id="filtroTipoDocumentacionAlumno">
-                <option value="">Todos los documentos</option>
-                <option value="PROGRAMA_EXAMEN">Programas de Examen</option>
-                <option value="MATERIAL_ESTUDIO">Material de Estudio</option>
-              </select>
+          <div class="barra-consulta-documentacion-alumno">
+            <div class="acciones acciones-consulta-documentacion-alumno">
+              <button
+                class="btn-accion"
+                id="btnVerMiDocumentacion"
+                type="button"
+              >
+                <i class="fa-solid fa-folder-open"></i>
+                Ver mi documentación
+              </button>
             </div>
 
-            <div
-              class="campo-filtro"
-              id="contenedorFiltroEspacioDocumentacionAlumno"
-              hidden
-            >
-              <label for="filtroEspacioDocumentacionAlumno">
-                Espacio curricular
-              </label>
+            <div class="filtros-documentacion-alumno">
+              <div
+                class="campo-filtro filtro-documentacion-alumno"
+                id="contenedorFiltroTipoDocumentacionAlumno"
+              >
+                <label for="filtroTipoDocumentacionAlumno">
+                  Tipo de documentación
+                </label>
 
-              <input
-                id="filtroEspacioDocumentacionAlumno"
-                type="search"
-                placeholder="Buscar por espacio curricular"
-                autocomplete="off"
-              />
+                <select id="filtroTipoDocumentacionAlumno" disabled>
+                  <option value="">Todos los tipos</option>
+                  <option value="PROGRAMA_EXAMEN">Programa de Examen</option>
+                  <option value="MATERIAL_ESTUDIO">Material de Estudio</option>
+                </select>
+              </div>
+
+              <div
+                class="campo-filtro filtro-documentacion-alumno"
+                id="contenedorFiltroEspacioDocumentacionAlumno"
+              >
+                <label for="filtroEspacioDocumentacionAlumno">
+                  Espacio curricular
+                </label>
+
+                <select id="filtroEspacioDocumentacionAlumno" disabled>
+                  <option value="">Todos los espacios</option>
+                </select>
+              </div>
             </div>
           </div>
 
@@ -568,7 +570,7 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script type="module" src="../assets/js/proteger-portal.js"></script>
     <script type="module" src="../assets/js/mesas-alumno.js"></script>
-    <script type="module" src="../assets/js/documentacion-alumno.js"></script>
+    <script type="module" src="../assets/js/documentacion-alumno.js?v=20260828-1"></script>
     <script type="module" src="../assets/js/sime-alumno.js"></script>
     <script src="../assets/js/volver-arriba.js"></script>
     <script type="module" src="../assets/js/horarios-alumno.js"></script>

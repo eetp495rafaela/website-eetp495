@@ -2387,3 +2387,110 @@ body {
     margin: 0 !important;
   }
 }
+
+/* =====================================================
+   DOCUMENTACIÓN ACADÉMICA · BARRA DE CONSULTA Y FILTROS
+===================================================== */
+
+#documentacion-academica .barra-consulta-documentacion-alumno {
+  display: flex;
+  align-items: flex-end;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin: 18px 0 16px;
+  padding: 12px 14px;
+  border: 1px solid rgba(14, 116, 144, 0.2);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.42);
+}
+
+#documentacion-academica .acciones-consulta-documentacion-alumno {
+  display: flex;
+  align-items: flex-end;
+  margin: 0;
+}
+
+#documentacion-academica .acciones-consulta-documentacion-alumno .btn-accion {
+  min-width: 230px;
+  height: 46px;
+  min-height: 46px;
+  margin: 0;
+  white-space: nowrap;
+}
+
+#documentacion-academica .filtros-documentacion-alumno {
+  display: flex;
+  align-items: flex-end;
+  flex: 1;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin: 0;
+}
+
+#documentacion-academica .filtro-documentacion-alumno {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 210px;
+}
+
+#documentacion-academica .filtro-documentacion-alumno label,
+#documentacion-academica .filtros-documentacion-alumno label,
+#documentacion-academica .filtros-documentacion-alumno .campo-filtro label {
+  margin-left: 2px;
+  color: #0b3558;
+  font-size: 0.8rem;
+  font-weight: 900;
+  line-height: 1.1;
+}
+
+#documentacion-academica .filtro-documentacion-alumno select {
+  width: 100%;
+  height: 46px;
+  min-height: 46px;
+  min-width: 210px;
+  padding: 0 38px 0 13px;
+  border: 1px solid #9ec9da;
+  border-radius: 11px;
+  outline: none;
+  background: #ffffff;
+  color: #173a55;
+  box-shadow: 0 2px 5px rgba(23, 58, 85, 0.05);
+  font-family: inherit;
+  font-size: 0.9rem;
+  font-weight: 800;
+}
+
+#documentacion-academica #contenedorFiltroEspacioDocumentacionAlumno select {
+  min-width: 260px;
+}
+
+#documentacion-academica .filtro-documentacion-alumno select:focus {
+  border-color: #0e7490;
+  box-shadow: 0 0 0 3px rgba(14, 116, 144, 0.12);
+}
+
+#documentacion-academica .filtro-documentacion-alumno select:disabled {
+  cursor: not-allowed;
+  background: #e8eef1;
+  color: #7d8b94;
+  border-color: #c7d3d9;
+  box-shadow: none;
+}
+
+@media (max-width: 760px) {
+  #documentacion-academica .barra-consulta-documentacion-alumno,
+  #documentacion-academica .filtros-documentacion-alumno {
+    align-items: stretch;
+    flex-direction: column;
+    width: 100%;
+  }
+
+  #documentacion-academica .acciones-consulta-documentacion-alumno,
+  #documentacion-academica .acciones-consulta-documentacion-alumno .btn-accion,
+  #documentacion-academica .filtro-documentacion-alumno,
+  #documentacion-academica .filtro-documentacion-alumno select {
+    width: 100%;
+    min-width: 0;
+  }
+}
