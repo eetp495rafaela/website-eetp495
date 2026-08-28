@@ -1892,6 +1892,64 @@ body {
   border-radius: 18px;
 }
 
+/* Barra de consulta y filtros de documentos */
+#panelDocumentacionAcademica .barra-consulta-documentos-docente {
+  display: flex;
+  align-items: flex-end;
+  flex-wrap: wrap;
+  gap: 14px;
+  margin-top: 18px;
+}
+
+#panelDocumentacionAcademica .acciones-consulta-documentos-docente {
+  margin-top: 0;
+}
+
+#panelDocumentacionAcademica .filtros-documentos-docente {
+  display: flex;
+  align-items: flex-end;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+#panelDocumentacionAcademica .filtro-documentos-docente {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+#panelDocumentacionAcademica .filtro-documentos-docente label {
+  color: #ffffff;
+  font-size: 0.82rem;
+  font-weight: 900;
+}
+
+#panelDocumentacionAcademica .filtro-documentos-docente select {
+  height: 46px;
+  min-width: 190px;
+  padding: 0 36px 0 12px;
+  border: 1px solid #a7f3d0;
+  border-radius: 11px;
+  outline: none;
+  background: #f8fbfa;
+  color: #10251f;
+  font-family: inherit;
+  font-size: 0.9rem;
+  font-weight: 850;
+}
+
+#panelDocumentacionAcademica .filtro-documentos-docente select:focus {
+  border-color: #34d399;
+  box-shadow: 0 0 0 3px rgba(52, 211, 153, 0.18);
+}
+
+#panelDocumentacionAcademica .filtro-documentos-docente select:disabled {
+  cursor: not-allowed;
+  background: #dbe5ef;
+  color: #64748b;
+  border-color: #b7c7d8;
+}
+
 /* Tabla documentos */
 #panelDocumentacionAcademica .tabla-documentos-contenedor {
   margin-top: 18px;
@@ -1950,6 +2008,22 @@ body {
   #panelDocumentacionAcademica .panel-info,
   #panelDocumentacionAcademica .documentos-cargados-docente {
     padding: 20px;
+  }
+
+  #panelDocumentacionAcademica .barra-consulta-documentos-docente,
+  #panelDocumentacionAcademica .filtros-documentos-docente {
+    align-items: stretch;
+    flex-direction: column;
+    width: 100%;
+  }
+
+  #panelDocumentacionAcademica .acciones-consulta-documentos-docente,
+  #panelDocumentacionAcademica
+    .acciones-consulta-documentos-docente
+    .btn-accion,
+  #panelDocumentacionAcademica .filtro-documentos-docente,
+  #panelDocumentacionAcademica .filtro-documentos-docente select {
+    width: 100%;
   }
 
   #panelDocumentacionAcademica .tabla-documentos {

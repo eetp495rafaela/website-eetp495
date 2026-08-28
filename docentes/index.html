@@ -7,7 +7,10 @@
     <meta name="robots" content="noindex, nofollow" />
     <title>Portal Docentes | E.E.T.P. Nº495</title>
 
-    <link rel="stylesheet" href="../assets/css/portal-docente.css" />
+    <link
+      rel="stylesheet"
+      href="../assets/css/portal-docente.css?v=20260828-1"
+    />
 
     <link rel="icon" href="../assets/img/logo.png" />
 
@@ -822,15 +825,40 @@
               </div>
             </div>
 
-            <div class="acciones">
-              <button
-                class="btn-accion"
-                id="btnVerDocumentosDocente"
-                type="button"
-              >
-                <i class="fa-solid fa-folder-open"></i>
-                Ver documentación cargada
-              </button>
+            <div class="barra-consulta-documentos-docente">
+              <div class="acciones acciones-consulta-documentos-docente">
+                <button
+                  class="btn-accion"
+                  id="btnVerDocumentosDocente"
+                  type="button"
+                >
+                  <i class="fa-solid fa-folder-open"></i>
+                  Ver documentación cargada
+                </button>
+              </div>
+
+              <div class="filtros-documentos-docente">
+                <div class="filtro-documentos-docente">
+                  <label for="filtroCursoDocumentosDocente">Curso</label>
+                  <select id="filtroCursoDocumentosDocente" disabled>
+                    <option value="">Todos los cursos</option>
+                  </select>
+                </div>
+
+                <div class="filtro-documentos-docente">
+                  <label for="filtroTipoDocumentosDocente">
+                    Tipo de documentación
+                  </label>
+                  <select id="filtroTipoDocumentosDocente" disabled>
+                    <option value="">Todos los tipos</option>
+                    <option value="PLAN_ANUAL">Plan Anual</option>
+                    <option value="PROGRAMA_EXAMEN">Programa de Examen</option>
+                    <option value="MATERIAL_ESTUDIO">
+                      Material de Estudio
+                    </option>
+                  </select>
+                </div>
+              </div>
             </div>
 
             <div class="tabla-documentos-contenedor">
@@ -1105,7 +1133,7 @@
     <script type="module" src="../assets/js/mesas-docente.js"></script>
     <script
       type="module"
-      src="../assets/js/material-estudio.js?v=20260827-2"
+      src="../assets/js/material-estudio.js?v=20260828-1"
     ></script>
     <script src="../assets/js/volver-arriba.js"></script>
     <script type="module" src="../assets/js/horarios-docente.js"></script>

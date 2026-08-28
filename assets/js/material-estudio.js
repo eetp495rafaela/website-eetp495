@@ -82,6 +82,14 @@ const btnVerDocumentosDocente = document.getElementById(
   "btnVerDocumentosDocente",
 );
 
+const filtroCursoDocumentosDocente = document.getElementById(
+  "filtroCursoDocumentosDocente",
+);
+
+const filtroTipoDocumentosDocente = document.getElementById(
+  "filtroTipoDocumentosDocente",
+);
+
 const campoTituloMaterialEstudio = document.getElementById(
   "campoTituloMaterialEstudio",
 );
@@ -90,6 +98,7 @@ const tituloMaterialEstudio = document.getElementById("tituloMaterialEstudio");
 
 let opcionesDocumentacion = [];
 let asignacionesExactasDocumentacion = [];
+let documentosDisponiblesDocente = [];
 
 function mostrarMensajeDocumentacion(texto, tipo = "") {
   if (!mensajeDocumentacionAcademica) return;
@@ -445,14 +454,181 @@ function escaparHtml(texto) {
     .replace(/'/g, "&#039;");
 }
 
-function mostrarDocumentosEnTabla(documentos) {
+function normalizarCursoFiltro(texto) {
+  return String(texto || "")
+    .trim()
+    .replace(/°/g, "º")
+    .replace(/\s+/g, " ")
+    .toUpperCase();
+}
+
+function obtenerAnioCursoFiltro(texto) {
+  const coincidencia = String(texto || "").match(/(\d+)/);
+  return coincidencia ? Number(coincidencia[1]) : 0;
+}
+
+function obtenerCursosIndividualesDocumento(documento) {
+  const curso = String(documento?.curso || "").trim();
+
+  if (!curso) return [];
+
+  if (
+    String(documento?.tipoDocumento || "")
+      .trim()
+      .toUpperCase() !== "MATERIAL_ESTUDIO"
+  ) {
+    return [curso];
+  }
+
+  return curso
+    .split(/\s+-\s+/)
+    .map((valor) => valor.trim())
+    .filter(Boolean);
+}
+
+function cargarOpcionesFiltroCursoDocumentos(documentos) {
+  if (!filtroCursoDocumentosDocente) return;
+
+  const valorAnterior = filtroCursoDocumentosDocente.value;
+  const cursosPorClave = new Map();
+
+  asignacionesExactasDocumentacion.forEach((asignacion) => {
+    const nombreCurso = obtenerNombreCursoExacto(asignacion);
+    const clave = normalizarCursoFiltro(nombreCurso);
+
+    if (clave && nombreCurso) {
+      cursosPorClave.set(clave, nombreCurso);
+    }
+  });
+
+  if (!cursosPorClave.size) {
+    (Array.isArray(documentos) ? documentos : []).forEach((documento) => {
+      obtenerCursosIndividualesDocumento(documento).forEach((nombreCurso) => {
+        const clave = normalizarCursoFiltro(nombreCurso);
+        if (clave) cursosPorClave.set(clave, nombreCurso);
+      });
+    });
+  }
+
+  const cursos = [...cursosPorClave.values()].sort((a, b) =>
+    a.localeCompare(b, "es", {
+      numeric: true,
+      sensitivity: "base",
+    }),
+  );
+
+  filtroCursoDocumentosDocente.innerHTML =
+    '<option value="">Todos los cursos</option>';
+
+  cursos.forEach((curso) => {
+    const opcion = document.createElement("option");
+    opcion.value = curso;
+    opcion.textContent = curso;
+    filtroCursoDocumentosDocente.appendChild(opcion);
+  });
+
+  if (
+    valorAnterior &&
+    Array.from(filtroCursoDocumentosDocente.options).some(
+      (opcion) => opcion.value === valorAnterior,
+    )
+  ) {
+    filtroCursoDocumentosDocente.value = valorAnterior;
+  }
+
+  filtroCursoDocumentosDocente.disabled = !documentos.length;
+}
+
+function documentoCoincideConCurso(documento, cursoSeleccionado) {
+  if (!cursoSeleccionado) return true;
+
+  const anioSeleccionado = obtenerAnioCursoFiltro(cursoSeleccionado);
+  const anioDocumento = Number(documento?.cursoAnio || 0);
+  const tipoDocumento = String(documento?.tipoDocumento || "")
+    .trim()
+    .toUpperCase();
+
+  /*
+   * Plan Anual y Programa de Examen se comparten por año y espacio
+   * curricular. Por eso un Plan de 4º también debe aparecer cuando
+   * el docente filtra, por ejemplo, por 4º C.
+   */
+  if (tipoDocumento !== "MATERIAL_ESTUDIO") {
+    return Boolean(anioSeleccionado) && anioDocumento === anioSeleccionado;
+  }
+
+  const cursoBuscado = normalizarCursoFiltro(cursoSeleccionado);
+  const cursosDocumento = obtenerCursosIndividualesDocumento(documento).map(
+    normalizarCursoFiltro,
+  );
+
+  if (cursosDocumento.includes(cursoBuscado)) {
+    return true;
+  }
+
+  /* Compatibilidad con materiales antiguos guardados sólo por año. */
+  const tieneDivisionExacta = cursosDocumento.some((curso) =>
+    /\d+\s*º\s+\S+/.test(curso),
+  );
+
+  return (
+    !tieneDivisionExacta &&
+    Boolean(anioSeleccionado) &&
+    anioDocumento === anioSeleccionado
+  );
+}
+
+function aplicarFiltrosDocumentosDocente() {
+  const cursoSeleccionado = String(
+    filtroCursoDocumentosDocente?.value || "",
+  ).trim();
+
+  const tipoSeleccionado = String(filtroTipoDocumentosDocente?.value || "")
+    .trim()
+    .toUpperCase();
+
+  const filtrados = documentosDisponiblesDocente.filter((documento) => {
+    const coincideCurso = documentoCoincideConCurso(
+      documento,
+      cursoSeleccionado,
+    );
+
+    const coincideTipo =
+      !tipoSeleccionado ||
+      String(documento.tipoDocumento || "")
+        .trim()
+        .toUpperCase() === tipoSeleccionado;
+
+    return coincideCurso && coincideTipo;
+  });
+
+  mostrarDocumentosEnTabla(
+    filtrados,
+    "No hay documentos que coincidan con los filtros seleccionados.",
+  );
+}
+
+function configurarFiltrosDocumentosDocente(documentos) {
+  const hayDocumentos = Array.isArray(documentos) && documentos.length > 0;
+
+  cargarOpcionesFiltroCursoDocumentos(documentos || []);
+
+  if (filtroTipoDocumentosDocente) {
+    filtroTipoDocumentosDocente.disabled = !hayDocumentos;
+  }
+}
+
+function mostrarDocumentosEnTabla(
+  documentos,
+  mensajeVacio = "No hay documentación cargada para tus cursos y espacios curriculares asignados.",
+) {
   if (!cuerpoTablaDocumentosDocente) return;
 
   if (!Array.isArray(documentos) || !documentos.length) {
     cuerpoTablaDocumentosDocente.innerHTML = `
       <tr>
         <td colspan="6" class="tabla-documentos-vacia">
-          No hay documentación cargada para tus cursos y espacios curriculares asignados.
+          ${escaparHtml(mensajeVacio)}
         </td>
       </tr>
     `;
@@ -524,7 +700,12 @@ async function cargarDocumentosDisponibles() {
     );
   }
 
-  mostrarDocumentosEnTabla(resultado.documentos || []);
+  documentosDisponiblesDocente = Array.isArray(resultado.documentos)
+    ? resultado.documentos
+    : [];
+
+  configurarFiltrosDocumentosDocente(documentosDisponiblesDocente);
+  aplicarFiltrosDocumentosDocente();
 }
 
 function actualizarCampoTituloMaterialEstudio() {
@@ -634,6 +815,20 @@ if (btnVerDocumentosDocente) {
       btnVerDocumentosDocente.innerHTML = textoOriginal;
     }
   });
+}
+
+if (filtroCursoDocumentosDocente) {
+  filtroCursoDocumentosDocente.addEventListener(
+    "change",
+    aplicarFiltrosDocumentosDocente,
+  );
+}
+
+if (filtroTipoDocumentosDocente) {
+  filtroTipoDocumentosDocente.addEventListener(
+    "change",
+    aplicarFiltrosDocumentosDocente,
+  );
 }
 
 if (btnProbarConexionDocumentacion) {
