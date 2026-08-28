@@ -1897,17 +1897,32 @@ body {
   display: flex;
   align-items: flex-end;
   flex-wrap: wrap;
-  gap: 14px;
-  margin-top: 18px;
+  gap: 12px;
+  margin: 18px 0 16px;
+  padding: 12px 14px;
+  border: 1px solid rgba(180, 83, 9, 0.18);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.28);
 }
 
 #panelDocumentacionAcademica .acciones-consulta-documentos-docente {
-  margin-top: 0;
+  display: flex;
+  align-items: flex-end;
+  margin: 0;
+}
+
+#panelDocumentacionAcademica .acciones-consulta-documentos-docente .btn-accion {
+  min-width: 255px;
+  height: 46px;
+  min-height: 46px;
+  margin: 0;
+  white-space: nowrap;
 }
 
 #panelDocumentacionAcademica .filtros-documentos-docente {
   display: flex;
   align-items: flex-end;
+  flex: 1;
   flex-wrap: wrap;
   gap: 12px;
 }
@@ -1919,35 +1934,43 @@ body {
 }
 
 #panelDocumentacionAcademica .filtro-documentos-docente label {
-  color: #ffffff;
-  font-size: 0.82rem;
+  margin-left: 2px;
+  color: #7f1d1d;
+  font-size: 0.8rem;
   font-weight: 900;
+  line-height: 1.1;
 }
 
 #panelDocumentacionAcademica .filtro-documentos-docente select {
   height: 46px;
   min-width: 190px;
-  padding: 0 36px 0 12px;
-  border: 1px solid #a7f3d0;
+  padding: 0 38px 0 13px;
+  border: 1px solid #d9a38f;
   border-radius: 11px;
   outline: none;
-  background: #f8fbfa;
-  color: #10251f;
+  background: #fffdf4;
+  color: #4b2a21;
+  box-shadow: 0 2px 5px rgba(93, 45, 27, 0.05);
   font-family: inherit;
   font-size: 0.9rem;
   font-weight: 850;
 }
 
+#panelDocumentacionAcademica .filtro-documentos-docente:last-child select {
+  min-width: 220px;
+}
+
 #panelDocumentacionAcademica .filtro-documentos-docente select:focus {
-  border-color: #34d399;
-  box-shadow: 0 0 0 3px rgba(52, 211, 153, 0.18);
+  border-color: #b45309;
+  box-shadow: 0 0 0 3px rgba(180, 83, 9, 0.12);
 }
 
 #panelDocumentacionAcademica .filtro-documentos-docente select:disabled {
   cursor: not-allowed;
-  background: #dbe5ef;
-  color: #64748b;
-  border-color: #b7c7d8;
+  background: #e7ece8;
+  color: #7a847e;
+  border-color: #c9d1cc;
+  box-shadow: none;
 }
 
 /* Tabla documentos */
