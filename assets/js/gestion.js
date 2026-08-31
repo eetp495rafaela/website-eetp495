@@ -1494,13 +1494,35 @@ function normalizarTextoGestion(texto) {
     .replace(/[\u0300-\u036f]/g, "");
 }
 
+async function obtenerTokenAppCheckDocumentacion() {
+  const obtenerToken = window.obtenerTokenAppCheckPortal;
+
+  if (typeof obtenerToken !== "function") {
+    throw new Error(
+      "No se pudo inicializar la verificación de seguridad del portal. Recargá la página.",
+    );
+  }
+
+  return obtenerToken();
+}
+
 async function enviarAlBackendDocumentacion(datos) {
+  const appCheckToken = await obtenerTokenAppCheckDocumentacion();
+
   const respuesta = await fetch(BACKEND_DOCUMENTACION_URL, {
     method: "POST",
     headers: {
       "Content-Type": "text/plain;charset=utf-8",
     },
-    body: JSON.stringify(datos),
+    /*
+     * Apps Script recibe el token en el cuerpo para evitar una petición
+     * CORS preflight por encabezados personalizados. El backend lo reenvía
+     * a Firebase Authentication como X-Firebase-AppCheck.
+     */
+    body: JSON.stringify({
+      ...datos,
+      appCheckToken,
+    }),
   });
 
   if (!respuesta.ok) {

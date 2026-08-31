@@ -3,6 +3,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/12.15.0/fireba
 import {
   initializeAppCheck,
   ReCaptchaEnterpriseProvider,
+  getToken,
 } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-app-check.js";
 
 import {
@@ -30,12 +31,31 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 
-initializeAppCheck(app, {
+const appCheck = initializeAppCheck(app, {
   provider: new ReCaptchaEnterpriseProvider(
     "6Ld7BmwtAAAAADhZkCRmdmMaJtodHEzLsr4Ep2O8",
   ),
   isTokenAutoRefreshEnabled: true,
 });
+
+/*
+ * Los módulos que consumen backends propios (Apps Script) necesitan enviar
+ * también un token de App Check. Se expone una única función para reutilizar
+ * la misma instancia ya inicializada y evitar inicializaciones duplicadas.
+ */
+window.obtenerTokenAppCheckPortal = async function () {
+  const resultado = await getToken(appCheck, false);
+
+  const token = String(resultado?.token || "").trim();
+
+  if (!token) {
+    throw new Error(
+      "No se pudo verificar la seguridad de la aplicación. Recargá la página e intentá nuevamente.",
+    );
+  }
+
+  return token;
+};
 
 const auth = getAuth(app);
 const db = getFirestore(app);
