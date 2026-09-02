@@ -8,7 +8,7 @@
 
     <title>Panel de Soporte | E.E.T.P. Nº 495</title>
 
-    <link rel="stylesheet" href="../assets/css/portal-admin.css?v=20260827-2" />
+    <link rel="stylesheet" href="../assets/css/portal-admin.css?v=20260902-3" />
     <link rel="icon" href="../assets/img/logo.png" />
 
     <link
@@ -1377,8 +1377,8 @@
             <div>
               <h3>Inscripciones registradas</h3>
               <p>
-                Consultá las inscripciones realizadas por los estudiantes y
-                accedé a los permisos generados.
+                Consultá las inscripciones realizadas por los estudiantes,<br />accedé
+                a los permisos generados y generá listados.
               </p>
             </div>
 
@@ -1390,6 +1390,15 @@
               >
                 <i class="fa-solid fa-rotate"></i>
                 Actualizar listado
+              </button>
+
+              <button
+                class="btn-accion"
+                id="btnGenerarListadoSimePdf"
+                type="button"
+              >
+                <i class="fa-solid fa-file-pdf"></i>
+                Generar listado PDF
               </button>
 
               <button
@@ -3617,6 +3626,10 @@
       src="../assets/js/documentacion-admin.js?v=20260831-appcheck1"
     ></script>
     <script type="module" src="../assets/js/sime-admin.js"></script>
+    <script
+      type="module"
+      src="../assets/js/listado-inscriptos-sime-admin.js?v=20260902-2"
+    ></script>
     <script type="module" src="../assets/js/sira-admin.js"></script>
     <script type="module" src="../assets/js/horarios-admin.js"></script>
     <script
