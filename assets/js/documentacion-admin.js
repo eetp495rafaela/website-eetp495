@@ -94,6 +94,20 @@ async function enviarAlBackend(datos) {
   return respuesta.json();
 }
 
+function convertirBase64ABlobDocumentoPrivado(
+  base64,
+  tipoMime = "application/pdf",
+) {
+  const binario = atob(String(base64 || ""));
+  const bytes = new Uint8Array(binario.length);
+
+  for (let i = 0; i < binario.length; i += 1) {
+    bytes[i] = binario.charCodeAt(i);
+  }
+
+  return new Blob([bytes], { type: tipoMime || "application/pdf" });
+}
+
 function escaparHtml(texto) {
   return String(texto || "")
     .replace(/&/g, "&amp;")
@@ -261,7 +275,7 @@ function mostrarDocumentosEnTabla(documentos) {
   cuerpoTablaDocumentacionAdmin.innerHTML = documentosOrdenados
     .map((documento) => {
       const idDocumento = escaparHtml(documento.id);
-      const driveUrl = escaparHtml(documento.driveUrl);
+      const driveUrl = escaparHtml(documento.driveUrl || "");
       const tituloMaterial =
         documento.tipoDocumento === "MATERIAL_ESTUDIO"
           ? String(documento.tituloMaterial || "").trim()
@@ -294,15 +308,32 @@ function mostrarDocumentosEnTabla(documentos) {
           <td>${escaparHtml(formatearFechaCarga(documento.fechaCarga))}</td>
           <td>
             <div class="acciones-documentacion-admin">
-              <a
-                class="btn-documento-admin btn-ver-documento-admin"
-                href="${driveUrl}"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <i class="fa-solid fa-eye"></i>
-                Ver
-              </a>
+              ${
+                String(documento.origen || "DOCUMENTACION_ACADEMICA")
+                  .trim()
+                  .toUpperCase() === "DOCUMENTACION_ACADEMICA"
+                  ? `
+                    <button
+                      class="btn-documento-admin btn-ver-documento-admin"
+                      type="button"
+                      data-id-documento="${idDocumento}"
+                    >
+                      <i class="fa-solid fa-eye"></i>
+                      Ver
+                    </button>
+                  `
+                  : `
+                    <a
+                      class="btn-documento-admin btn-ver-documento-admin"
+                      href="${driveUrl}"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <i class="fa-solid fa-eye"></i>
+                      Ver
+                    </a>
+                  `
+              }
 
               <button
                 class="btn-documento-admin btn-eliminar-documento-admin"
@@ -499,8 +530,73 @@ if (filtroEspacioDocumentacion) {
   );
 }
 
+async function abrirDocumentoPrivadoSoporte(idDocumento, boton = null) {
+  const usuario = auth.currentUser;
+  if (!usuario)
+    throw new Error("No se detectó una sesión activa. Volvé a iniciar sesión.");
+
+  const ventana = window.open("", "_blank");
+  const textoOriginal = boton?.innerHTML || "";
+
+  if (boton) {
+    boton.disabled = true;
+    boton.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Abriendo...';
+  }
+
+  try {
+    const idToken = await usuario.getIdToken(true);
+    const resultado = await enviarAlBackend({
+      accion: "obtener_archivo_documento_soporte",
+      idToken,
+      idDocumento,
+    });
+
+    if (!resultado.ok || !resultado.archivo?.archivoBase64) {
+      throw new Error(resultado.mensaje || "No se pudo abrir el documento.");
+    }
+
+    const blob = convertirBase64ABlobDocumentoPrivado(
+      resultado.archivo.archivoBase64,
+      resultado.archivo.tipoMime,
+    );
+    const url = URL.createObjectURL(blob);
+
+    if (ventana) ventana.location.href = url;
+    else window.open(url, "_blank");
+
+    setTimeout(() => URL.revokeObjectURL(url), 120000);
+  } catch (error) {
+    if (ventana && !ventana.closed) ventana.close();
+    throw error;
+  } finally {
+    if (boton) {
+      boton.disabled = false;
+      boton.innerHTML = textoOriginal;
+    }
+  }
+}
+
 if (cuerpoTablaDocumentacionAdmin) {
   cuerpoTablaDocumentacionAdmin.addEventListener("click", async (event) => {
+    const botonVer = event.target.closest("button.btn-ver-documento-admin");
+
+    if (botonVer) {
+      const idDocumento = String(botonVer.dataset.idDocumento || "").trim();
+
+      if (idDocumento) {
+        try {
+          await abrirDocumentoPrivadoSoporte(idDocumento, botonVer);
+        } catch (error) {
+          console.error("Error al abrir documento privado:", error);
+          mostrarMensajeDocumentacionAdmin(
+            error.message || "No se pudo abrir el documento.",
+            "error",
+          );
+        }
+      }
+      return;
+    }
+
     const botonEliminar = event.target.closest(".btn-eliminar-documento-admin");
 
     if (!botonEliminar) return;

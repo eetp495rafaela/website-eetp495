@@ -144,6 +144,21 @@ async function enviarAlBackend(datos) {
 
   return respuesta.json();
 }
+
+function convertirBase64ABlobDocumentoPrivado(
+  base64,
+  tipoMime = "application/pdf",
+) {
+  const binario = atob(String(base64 || ""));
+  const bytes = new Uint8Array(binario.length);
+
+  for (let i = 0; i < binario.length; i += 1) {
+    bytes[i] = binario.charCodeAt(i);
+  }
+
+  return new Blob([bytes], { type: tipoMime || "application/pdf" });
+}
+
 function convertirArchivoABase64(archivo) {
   return new Promise((resolve, reject) => {
     const lector = new FileReader();
@@ -660,7 +675,7 @@ function mostrarDocumentosEnTabla(
 
   cuerpoTablaDocumentosDocente.innerHTML = documentos
     .map((documento) => {
-      const url = escaparHtml(documento.driveUrl);
+      const idDocumento = escaparHtml(documento.id);
       const tituloMaterial =
         documento.tipoDocumento === "MATERIAL_ESTUDIO"
           ? String(documento.tituloMaterial || "").trim()
@@ -676,21 +691,84 @@ function mostrarDocumentosEnTabla(
           <td>${escaparHtml(tituloMaterial)}</td>
           <td>${escaparHtml(formatearFechaCarga(documento.fechaCarga))}</td>
           <td>
-            <a
+            <button
               class="btn-ver-documento"
-              href="${url}"
-              target="_blank"
-              rel="noopener noreferrer"
+              type="button"
+              data-id-documento="${idDocumento}"
             >
               <i class="fa-solid fa-eye"></i>
               Ver
-            </a>
+            </button>
           </td>
         </tr>
       `;
     })
     .join("");
 }
+
+async function abrirDocumentoPrivadoDocente(idDocumento, boton = null) {
+  const usuario = auth.currentUser;
+  if (!usuario)
+    throw new Error("No se detectó una sesión activa. Volvé a iniciar sesión.");
+
+  const ventana = window.open("", "_blank");
+  const textoOriginal = boton?.innerHTML || "";
+
+  if (boton) {
+    boton.disabled = true;
+    boton.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Abriendo...';
+  }
+
+  try {
+    const idToken = await usuario.getIdToken(true);
+    const resultado = await enviarAlBackend({
+      accion: "obtener_archivo_documento_docente",
+      idToken,
+      idDocumento,
+    });
+
+    if (!resultado.ok || !resultado.archivo?.archivoBase64) {
+      throw new Error(resultado.mensaje || "No se pudo abrir el documento.");
+    }
+
+    const blob = convertirBase64ABlobDocumentoPrivado(
+      resultado.archivo.archivoBase64,
+      resultado.archivo.tipoMime,
+    );
+    const url = URL.createObjectURL(blob);
+
+    if (ventana) ventana.location.href = url;
+    else window.open(url, "_blank");
+
+    setTimeout(() => URL.revokeObjectURL(url), 120000);
+  } catch (error) {
+    if (ventana && !ventana.closed) ventana.close();
+    throw error;
+  } finally {
+    if (boton) {
+      boton.disabled = false;
+      boton.innerHTML = textoOriginal;
+    }
+  }
+}
+
+cuerpoTablaDocumentosDocente?.addEventListener("click", async (event) => {
+  const boton = event.target.closest(".btn-ver-documento");
+  if (!boton) return;
+
+  const idDocumento = String(boton.dataset.idDocumento || "").trim();
+  if (!idDocumento) return;
+
+  try {
+    await abrirDocumentoPrivadoDocente(idDocumento, boton);
+  } catch (error) {
+    console.error("Error al abrir documento privado:", error);
+    mostrarMensajeDocumentacion(
+      error.message || "No se pudo abrir el documento.",
+      "error",
+    );
+  }
+});
 
 async function cargarDocumentosDisponibles() {
   if (!cuerpoTablaDocumentosDocente) return;

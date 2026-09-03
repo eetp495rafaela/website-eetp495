@@ -5124,8 +5124,69 @@ function ordenarDocumentacionGestion(documentos) {
   });
 }
 
+function convertirBase64ABlobDocumentoPrivadoGestion(
+  base64,
+  tipoMime = "application/pdf",
+) {
+  const binario = atob(String(base64 || ""));
+  const bytes = new Uint8Array(binario.length);
+
+  for (let i = 0; i < binario.length; i += 1) {
+    bytes[i] = binario.charCodeAt(i);
+  }
+
+  return new Blob([bytes], { type: tipoMime || "application/pdf" });
+}
+
+async function abrirDocumentoPrivadoGestion(idDocumento, boton = null) {
+  const usuario = auth.currentUser;
+  if (!usuario)
+    throw new Error("No se detectó una sesión activa. Volvé a iniciar sesión.");
+
+  const ventana = window.open("", "_blank");
+  const textoOriginal = boton?.innerHTML || "";
+
+  if (boton) {
+    boton.disabled = true;
+    boton.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Abriendo...';
+  }
+
+  try {
+    const idToken = await usuario.getIdToken(true);
+    const resultado = await enviarAlBackendDocumentacion({
+      accion: "obtener_archivo_documento_gestion",
+      idToken,
+      rolActivo: obtenerRolGestionActual(),
+      idDocumento,
+    });
+
+    if (!resultado.ok || !resultado.archivo?.archivoBase64) {
+      throw new Error(resultado.mensaje || "No se pudo abrir el documento.");
+    }
+
+    const blob = convertirBase64ABlobDocumentoPrivadoGestion(
+      resultado.archivo.archivoBase64,
+      resultado.archivo.tipoMime,
+    );
+    const url = URL.createObjectURL(blob);
+
+    if (ventana) ventana.location.href = url;
+    else window.open(url, "_blank");
+
+    setTimeout(() => URL.revokeObjectURL(url), 120000);
+  } catch (error) {
+    if (ventana && !ventana.closed) ventana.close();
+    throw error;
+  } finally {
+    if (boton) {
+      boton.disabled = false;
+      boton.innerHTML = textoOriginal;
+    }
+  }
+}
+
 function renderizarTarjetaDocumentacionGestion(documento) {
-  const driveUrl = String(documento.driveUrl || "").trim();
+  const idDocumento = escaparHtmlGestion(documento.id || "");
 
   return `
     <article class="tarjeta-documentacion-gestion">
@@ -5164,21 +5225,20 @@ function renderizarTarjetaDocumentacionGestion(documento) {
 
       <div class="acciones-documentacion-gestion">
         ${
-          driveUrl
+          idDocumento
             ? `
-              <a
-                class="btn-documentacion-gestion"
-                href="${escaparHtmlGestion(driveUrl)}"
-                target="_blank"
-                rel="noopener noreferrer"
+              <button
+                class="btn-documentacion-gestion btn-ver-documento-privado-gestion"
+                type="button"
+                data-id-documento="${idDocumento}"
               >
                 <i class="fa-solid fa-eye"></i>
                 Ver
-              </a>
+              </button>
             `
             : `
               <span class="mensaje-documentacion-sin-url">
-                Sin enlace disponible
+                Sin archivo disponible
               </span>
             `
         }
@@ -5219,7 +5279,7 @@ function renderizarDocumentacionGestion(documentos) {
         <tbody>
           ${documentosOrdenados
             .map((documento) => {
-              const driveUrl = String(documento.driveUrl || "").trim();
+              const idDocumento = escaparHtmlGestion(documento.id || "");
 
               return `
                 <tr>
@@ -5249,19 +5309,18 @@ function renderizarDocumentacionGestion(documentos) {
 
                   <td>
                     ${
-                      driveUrl
+                      idDocumento
                         ? `
-                          <a
-                            class="btn-documentacion-tabla-gestion"
-                            href="${escaparHtmlGestion(driveUrl)}"
-                            target="_blank"
-                            rel="noopener noreferrer"
+                          <button
+                            class="btn-documentacion-tabla-gestion btn-ver-documento-privado-gestion"
+                            type="button"
+                            data-id-documento="${idDocumento}"
                             title="Ver documento"
                             aria-label="Ver documento"
                           >
                             <i class="fa-solid fa-eye"></i>
                             Ver
-                          </a>
+                          </button>
                         `
                         : `
                           <span class="mensaje-documentacion-sin-url">
@@ -6340,6 +6399,26 @@ if (filtroCursoHorarioGestion) {
     "change",
     aplicarFiltrosHorariosGestion,
   );
+}
+
+if (vistaDocumentacionGestion) {
+  vistaDocumentacionGestion.addEventListener("click", async (event) => {
+    const boton = event.target.closest(".btn-ver-documento-privado-gestion");
+    if (!boton) return;
+
+    const idDocumento = String(boton.dataset.idDocumento || "").trim();
+    if (!idDocumento) return;
+
+    try {
+      await abrirDocumentoPrivadoGestion(idDocumento, boton);
+    } catch (error) {
+      console.error("Error al abrir documento privado:", error);
+      mostrarMensajeDocumentacionGestion(
+        error.message || "No se pudo abrir el documento.",
+        "error",
+      );
+    }
+  });
 }
 
 if (btnVerDocumentacionGestion) {
