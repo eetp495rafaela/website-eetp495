@@ -691,14 +691,32 @@ function mostrarDocumentosEnTabla(
           <td>${escaparHtml(tituloMaterial)}</td>
           <td>${escaparHtml(formatearFechaCarga(documento.fechaCarga))}</td>
           <td>
-            <button
-              class="btn-ver-documento"
-              type="button"
-              data-id-documento="${idDocumento}"
-            >
-              <i class="fa-solid fa-eye"></i>
-              Ver
-            </button>
+            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+              <button
+                class="btn-ver-documento"
+                type="button"
+                data-id-documento="${idDocumento}"
+              >
+                <i class="fa-solid fa-eye"></i>
+                Ver
+              </button>
+
+              ${
+                documento.puedeEliminar === true
+                  ? `
+                    <button
+                      class="btn-eliminar-material-docente"
+                      type="button"
+                      data-id-documento="${idDocumento}"
+                      style="background: linear-gradient(135deg, #ef4444, #dc2626); color: #ffffff; box-shadow: 0 8px 18px rgba(220, 38, 38, 0.22);"
+                    >
+                      <i class="fa-solid fa-trash-can"></i>
+                      Eliminar
+                    </button>
+                  `
+                  : ""
+              }
+            </div>
           </td>
         </tr>
       `;
@@ -752,15 +770,142 @@ async function abrirDocumentoPrivadoDocente(idDocumento, boton = null) {
   }
 }
 
-cuerpoTablaDocumentosDocente?.addEventListener("click", async (event) => {
-  const boton = event.target.closest(".btn-ver-documento");
-  if (!boton) return;
+async function eliminarMaterialEstudioPropio(idDocumento, boton = null) {
+  const id = String(idDocumento || "").trim();
 
-  const idDocumento = String(boton.dataset.idDocumento || "").trim();
+  if (!id) {
+    throw new Error("No se recibió el identificador del material.");
+  }
+
+  const documento = documentosDisponiblesDocente.find(
+    (item) => String(item.id || "").trim() === id,
+  );
+
+  if (!documento) {
+    throw new Error("El material ya no está disponible en la lista actual.");
+  }
+
+  if (
+    String(documento.tipoDocumento || "")
+      .trim()
+      .toUpperCase() !== "MATERIAL_ESTUDIO" ||
+    documento.puedeEliminar !== true
+  ) {
+    throw new Error("No tenés permiso para eliminar este documento.");
+  }
+
+  const usuario = auth.currentUser;
+
+  if (!usuario) {
+    throw new Error("No se detectó una sesión activa. Volvé a iniciar sesión.");
+  }
+
+  const titulo = String(
+    documento.tituloMaterial || "Material de Estudio",
+  ).trim();
+  const curso = String(documento.curso || "").trim();
+  const espacio = String(documento.espacioCurricular || "").trim();
+
+  const confirmacion = await Swal.fire({
+    title: "¿Eliminar material de estudio?",
+    html: `
+      <p><strong>${escaparHtml(titulo)}</strong></p>
+      <p>${escaparHtml(espacio)}${curso ? ` · ${escaparHtml(curso)}` : ""}</p>
+      <p>El archivo dejará de estar disponible para los estudiantes.</p>
+    `,
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonText: "Sí, eliminar",
+    cancelButtonText: "Cancelar",
+    reverseButtons: true,
+  });
+
+  if (!confirmacion.isConfirmed) return;
+
+  const textoOriginal = boton?.innerHTML || "";
+
+  if (boton) {
+    boton.disabled = true;
+    boton.innerHTML =
+      '<i class="fa-solid fa-spinner fa-spin"></i> Eliminando...';
+  }
+
+  try {
+    const idToken = await usuario.getIdToken(true);
+
+    const resultado = await enviarAlBackend({
+      accion: "eliminar_material_estudio_docente",
+      idToken,
+      idDocumento: id,
+    });
+
+    if (!resultado.ok) {
+      throw new Error(resultado.mensaje || "No se pudo eliminar el material.");
+    }
+
+    documentosDisponiblesDocente = documentosDisponiblesDocente.filter(
+      (item) => String(item.id || "").trim() !== id,
+    );
+
+    configurarFiltrosDocumentosDocente(documentosDisponiblesDocente);
+    aplicarFiltrosDocumentosDocente();
+
+    mostrarMensajeDocumentacion(
+      "Material de Estudio eliminado correctamente.",
+      "ok",
+    );
+
+    await Swal.fire({
+      title: "Material eliminado",
+      text: "El material dejó de estar disponible para los estudiantes.",
+      icon: "success",
+      confirmButtonText: "Aceptar",
+    });
+  } finally {
+    if (boton && boton.isConnected) {
+      boton.disabled = false;
+      boton.innerHTML = textoOriginal;
+    }
+  }
+}
+
+cuerpoTablaDocumentosDocente?.addEventListener("click", async (event) => {
+  const botonEliminar = event.target.closest(".btn-eliminar-material-docente");
+
+  if (botonEliminar) {
+    const idDocumento = String(botonEliminar.dataset.idDocumento || "").trim();
+
+    if (!idDocumento) return;
+
+    try {
+      await eliminarMaterialEstudioPropio(idDocumento, botonEliminar);
+    } catch (error) {
+      console.error("Error al eliminar Material de Estudio:", error);
+      mostrarMensajeDocumentacion(
+        error.message || "No se pudo eliminar el material.",
+        "error",
+      );
+
+      await Swal.fire({
+        title: "No se pudo eliminar",
+        text: error.message || "No se pudo eliminar el material.",
+        icon: "error",
+        confirmButtonText: "Aceptar",
+      });
+    }
+
+    return;
+  }
+
+  const botonVer = event.target.closest(".btn-ver-documento");
+  if (!botonVer) return;
+
+  const idDocumento = String(botonVer.dataset.idDocumento || "").trim();
+
   if (!idDocumento) return;
 
   try {
-    await abrirDocumentoPrivadoDocente(idDocumento, boton);
+    await abrirDocumentoPrivadoDocente(idDocumento, botonVer);
   } catch (error) {
     console.error("Error al abrir documento privado:", error);
     mostrarMensajeDocumentacion(
