@@ -40,6 +40,25 @@ const btnVerSiraAdmin = document.getElementById("btnVerSiraAdmin");
 const vistaSiraAdmin = document.getElementById("vistaSiraAdmin");
 const mensajeSiraAdminPanel = document.getElementById("mensajeSiraAdminPanel");
 
+const tipoSituacionAsistenciaAdmin = document.getElementById(
+  "tipoSituacionAsistenciaAdmin",
+);
+const cursoSituacionAsistenciaAdmin = document.getElementById(
+  "cursoSituacionAsistenciaAdmin",
+);
+const periodoSituacionAsistenciaAdmin = document.getElementById(
+  "periodoSituacionAsistenciaAdmin",
+);
+const btnVerSituacionAsistenciaAdmin = document.getElementById(
+  "btnVerSituacionAsistenciaAdmin",
+);
+const vistaSituacionAsistenciaAdmin = document.getElementById(
+  "vistaSituacionAsistenciaAdmin",
+);
+const mensajeSituacionAsistenciaAdmin = document.getElementById(
+  "mensajeSituacionAsistenciaAdmin",
+);
+
 const cursoDetalleAsistenciaAdmin = document.getElementById(
   "cursoDetalleAsistenciaAdmin",
 );
@@ -373,6 +392,7 @@ async function cargarCursosSiraAdmin() {
     });
 
     cursosSiraAdmin = cursos;
+    renderizarCursosSituacionAsistenciaAdmin(cursos);
     renderizarCursosDetalleAsistenciaAdmin(cursos);
 
     cursoSiraAdmin.innerHTML = `
@@ -563,6 +583,395 @@ async function eliminarAsistenciaSiraAdmin(asistenciaId) {
         text: error.message || "Ocurrió un error al eliminar la asistencia.",
         confirmButtonText: "Aceptar",
       });
+    }
+  }
+}
+
+function mostrarMensajeSituacionAsistenciaAdmin(texto, tipo = "") {
+  if (!mensajeSituacionAsistenciaAdmin) return;
+
+  mensajeSituacionAsistenciaAdmin.innerHTML = texto
+    ? `
+      <span class="${tipo === "error" ? "mensaje-error" : ""}">
+        ${escaparHtmlDetalleAsistenciaAdmin(texto)}
+      </span>
+    `
+    : "";
+}
+
+function renderizarCursosSituacionAsistenciaAdmin(cursos = []) {
+  if (!cursoSituacionAsistenciaAdmin) return;
+
+  cursoSituacionAsistenciaAdmin.innerHTML = `
+    <option value="">Seleccionar curso</option>
+    ${cursos
+      .map(
+        (curso) => `
+          <option value="${escaparHtmlDetalleAsistenciaAdmin(curso.id)}">
+            ${escaparHtmlDetalleAsistenciaAdmin(
+              obtenerNombreCursoDetalleAsistenciaAdmin(curso),
+            )}
+          </option>
+        `,
+      )
+      .join("")}
+  `;
+}
+
+function calcularPorcentajeSituacionAsistenciaAdmin(
+  presentes,
+  ausentes,
+  tardanzas,
+) {
+  const totalClases = presentes + ausentes + tardanzas;
+
+  if (totalClases === 0) return 0;
+
+  const faltasEquivalentes = ausentes + tardanzas / 4;
+  const porcentaje = ((totalClases - faltasEquivalentes) / totalClases) * 100;
+
+  return Math.max(0, Math.min(100, porcentaje));
+}
+
+function formatearNumeroSituacionAsistenciaAdmin(numero) {
+  return Number(numero || 0).toLocaleString("es-AR", {
+    minimumFractionDigits: Number(numero) % 1 === 0 ? 0 : 2,
+    maximumFractionDigits: 2,
+  });
+}
+
+function formatearPorcentajeSituacionAsistenciaAdmin(numero) {
+  return Number(numero || 0).toLocaleString("es-AR", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
+}
+
+function agruparSituacionAsistenciaAdmin(asistencias = []) {
+  const estudiantes = new Map();
+
+  asistencias.forEach((asistencia) => {
+    const registros = Array.isArray(asistencia.registros)
+      ? asistencia.registros
+      : [];
+
+    registros.forEach((registro) => {
+      const nombre = obtenerNombreEstudianteDetalleAsistenciaAdmin(registro);
+
+      if (!nombre) return;
+
+      const id = obtenerIdEstudianteDetalleAsistenciaAdmin(registro);
+      const clave = id || nombre.toLocaleLowerCase("es");
+
+      if (!estudiantes.has(clave)) {
+        estudiantes.set(clave, {
+          id,
+          nombre,
+          presentes: 0,
+          ausentes: 0,
+          tardanzas: 0,
+        });
+      }
+
+      const estudiante = estudiantes.get(clave);
+      const estado = normalizarEstadoDetalleAsistenciaAdmin(registro.estado);
+
+      if (estado === "PRESENTE") estudiante.presentes += 1;
+      if (estado === "AUSENTE") estudiante.ausentes += 1;
+      if (estado === "TARDE") estudiante.tardanzas += 1;
+    });
+  });
+
+  return Array.from(estudiantes.values())
+    .map((estudiante) => {
+      const faltasEquivalentes = estudiante.ausentes + estudiante.tardanzas / 4;
+      const porcentaje = calcularPorcentajeSituacionAsistenciaAdmin(
+        estudiante.presentes,
+        estudiante.ausentes,
+        estudiante.tardanzas,
+      );
+
+      return {
+        ...estudiante,
+        faltasEquivalentes,
+        porcentaje,
+      };
+    })
+    .sort((a, b) =>
+      a.nombre.localeCompare(b.nombre, "es", {
+        sensitivity: "base",
+      }),
+    );
+}
+
+function obtenerEstadoSituacionAsistenciaAdmin(porcentaje) {
+  if (porcentaje >= 95) {
+    return {
+      texto: "Excelente",
+      clase: "estado-asistencia-admin-excelente",
+    };
+  }
+
+  if (porcentaje >= 90) {
+    return {
+      texto: "Muy buena",
+      clase: "estado-asistencia-admin-muy-buena",
+    };
+  }
+
+  if (porcentaje >= 80) {
+    return {
+      texto: "Seguimiento",
+      clase: "estado-asistencia-admin-seguimiento",
+    };
+  }
+
+  return {
+    texto: "Riesgo",
+    clase: "estado-asistencia-admin-riesgo",
+  };
+}
+
+function renderizarTablaSituacionAsistenciaAdmin(
+  estudiantes,
+  cursoNombre,
+  tipoSeleccionado,
+) {
+  if (!vistaSituacionAsistenciaAdmin) return;
+
+  if (!estudiantes.length) {
+    vistaSituacionAsistenciaAdmin.innerHTML = `
+      <p class="mensaje-formulario">
+        No hay registros de asistencia para el curso, tipo y período seleccionados.
+      </p>
+    `;
+    return;
+  }
+
+  const promedioCurso =
+    estudiantes.reduce((suma, estudiante) => suma + estudiante.porcentaje, 0) /
+    estudiantes.length;
+
+  const cantidadRiesgo = estudiantes.filter(
+    (estudiante) => estudiante.porcentaje < 80,
+  ).length;
+
+  const cantidadExcelente = estudiantes.filter(
+    (estudiante) => estudiante.porcentaje >= 95,
+  ).length;
+
+  vistaSituacionAsistenciaAdmin.innerHTML = `
+    <div class="encabezado-situacion-asistencia-admin">
+      <h3>
+        Situación de asistencia -
+        ${escaparHtmlDetalleAsistenciaAdmin(cursoNombre || "Curso")}
+      </h3>
+      <p>${escaparHtmlDetalleAsistenciaAdmin(
+        obtenerEtiquetaTipoSiraAdmin(tipoSeleccionado),
+      )}</p>
+    </div>
+
+    <div class="resumen-situacion-asistencia-admin">
+      <div class="tarjeta-resumen-asistencia-admin">
+        <span>Estudiantes</span>
+        <strong>${estudiantes.length}</strong>
+      </div>
+
+      <div class="tarjeta-resumen-asistencia-admin">
+        <span>Promedio del curso</span>
+        <strong>${formatearPorcentajeSituacionAsistenciaAdmin(
+          promedioCurso,
+        )} %</strong>
+      </div>
+
+      <div class="tarjeta-resumen-asistencia-admin riesgo">
+        <span>En riesgo</span>
+        <strong>${cantidadRiesgo}</strong>
+      </div>
+
+      <div class="tarjeta-resumen-asistencia-admin excelente">
+        <span>Asistencia destacada</span>
+        <strong>${cantidadExcelente}</strong>
+      </div>
+    </div>
+
+    <p class="criterio-asistencia-admin">
+      4 tardanzas equivalen a 1 falta.
+    </p>
+
+    <div class="tabla-situacion-asistencia-admin-contenedor">
+      <table class="tabla-situacion-asistencia-admin">
+        <thead>
+          <tr>
+            <th>Estudiante</th>
+            <th>P</th>
+            <th>A</th>
+            <th>T</th>
+            <th>Faltas equivalentes</th>
+            <th>% Asistencia</th>
+            <th>Estado</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${estudiantes
+            .map((estudiante) => {
+              const estado = obtenerEstadoSituacionAsistenciaAdmin(
+                estudiante.porcentaje,
+              );
+
+              return `
+                <tr>
+                  <td>
+                    <strong>${escaparHtmlDetalleAsistenciaAdmin(
+                      estudiante.nombre,
+                    )}</strong>
+                  </td>
+                  <td>${estudiante.presentes}</td>
+                  <td>${estudiante.ausentes}</td>
+                  <td>${estudiante.tardanzas}</td>
+                  <td>
+                    ${formatearNumeroSituacionAsistenciaAdmin(
+                      estudiante.faltasEquivalentes,
+                    )}
+                  </td>
+                  <td>
+                    <strong>
+                      ${formatearPorcentajeSituacionAsistenciaAdmin(
+                        estudiante.porcentaje,
+                      )} %
+                    </strong>
+                  </td>
+                  <td>
+                    <span class="estado-asistencia-admin ${estado.clase}">
+                      ${estado.texto}
+                    </span>
+                  </td>
+                </tr>
+              `;
+            })
+            .join("")}
+        </tbody>
+      </table>
+    </div>
+  `;
+}
+
+async function consultarSituacionAsistenciaAdmin() {
+  const tipo = String(tipoSituacionAsistenciaAdmin?.value || "").trim();
+  const cursoId = String(cursoSituacionAsistenciaAdmin?.value || "").trim();
+  const periodoSeleccionado = String(
+    periodoSituacionAsistenciaAdmin?.value || "ANUAL",
+  ).trim();
+
+  if (!tipo || !cursoId) {
+    mostrarMensajeSituacionAsistenciaAdmin(
+      "Seleccioná el tipo de asistencia y el curso.",
+      "error",
+    );
+    return;
+  }
+
+  const cursoSeleccionado = cursosSiraAdmin.find(
+    (curso) => String(curso.id || "").trim() === cursoId,
+  );
+
+  if (!cursoSeleccionado) {
+    mostrarMensajeSituacionAsistenciaAdmin(
+      "No se pudo identificar el curso seleccionado.",
+      "error",
+    );
+    return;
+  }
+
+  mostrarMensajeSituacionAsistenciaAdmin("");
+
+  if (vistaSituacionAsistenciaAdmin) {
+    vistaSituacionAsistenciaAdmin.innerHTML = `
+      <p class="mensaje-formulario">Consultando situación de asistencia...</p>
+    `;
+  }
+
+  if (btnVerSituacionAsistenciaAdmin) {
+    btnVerSituacionAsistenciaAdmin.disabled = true;
+    btnVerSituacionAsistenciaAdmin.innerHTML = `
+      <i class="fa-solid fa-spinner fa-spin"></i>
+      Consultando...
+    `;
+  }
+
+  try {
+    const cicloLectivo = new Date().getFullYear();
+    const periodos = await obtenerPeriodosDetalleAsistenciaAdmin(cicloLectivo);
+
+    if (!periodos) {
+      throw new Error(
+        `No hay períodos de asistencia configurados para el ciclo lectivo ${cicloLectivo}.`,
+      );
+    }
+
+    const rangoPeriodo = obtenerRangoPeriodoDetalleAsistenciaAdmin(
+      periodoSeleccionado,
+      periodos,
+    );
+
+    if (!rangoPeriodo?.desde || !rangoPeriodo?.hasta) {
+      throw new Error(
+        "El período seleccionado no tiene fechas configuradas correctamente.",
+      );
+    }
+
+    const consultaAsistencias = query(
+      collection(db, "asistencias_clases"),
+      where("estado", "==", "ACTIVA"),
+      where("tipoHorario", "==", tipo),
+    );
+
+    const resultado = await getDocs(consultaAsistencias);
+    const asistencias = [];
+
+    resultado.forEach((documento) => {
+      const datos = documento.data();
+
+      if (String(datos.cursoId || "").trim() !== cursoId) return;
+
+      const fecha = String(datos.fecha || "").trim();
+      if (fecha < rangoPeriodo.desde || fecha > rangoPeriodo.hasta) return;
+
+      asistencias.push({
+        id: documento.id,
+        ...datos,
+      });
+    });
+
+    const estudiantes = agruparSituacionAsistenciaAdmin(asistencias);
+
+    renderizarTablaSituacionAsistenciaAdmin(
+      estudiantes,
+      obtenerNombreCursoDetalleAsistenciaAdmin(cursoSeleccionado) || "Curso",
+      tipo,
+    );
+  } catch (error) {
+    console.error("Error al consultar situación de asistencia Admin:", error);
+
+    if (vistaSituacionAsistenciaAdmin) {
+      vistaSituacionAsistenciaAdmin.innerHTML = `
+        <p class="mensaje-formulario mensaje-error">
+          No se pudo consultar la situación de asistencia.
+        </p>
+      `;
+    }
+
+    mostrarMensajeSituacionAsistenciaAdmin(
+      error.message || "No se pudo consultar la situación de asistencia.",
+      "error",
+    );
+  } finally {
+    if (btnVerSituacionAsistenciaAdmin) {
+      btnVerSituacionAsistenciaAdmin.disabled = false;
+      btnVerSituacionAsistenciaAdmin.innerHTML = `
+        <i class="fa-solid fa-magnifying-glass-chart"></i>
+        Consultar situación
+      `;
     }
   }
 }
@@ -1069,6 +1478,13 @@ async function consultarDetalleAsistenciaAdmin() {
       `;
     }
   }
+}
+
+if (btnVerSituacionAsistenciaAdmin) {
+  btnVerSituacionAsistenciaAdmin.addEventListener(
+    "click",
+    consultarSituacionAsistenciaAdmin,
+  );
 }
 
 if (cursoDetalleAsistenciaAdmin) {
