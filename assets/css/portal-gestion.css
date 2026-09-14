@@ -3181,24 +3181,32 @@ body {
 
 .filtros-detalle-asistencia-gestion {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns:
+    minmax(130px, 1fr)
+    minmax(240px, 1.7fr)
+    minmax(130px, 1fr)
+    minmax(130px, 1fr)
+    minmax(130px, 1fr);
   gap: 14px;
   align-items: end;
 }
 
-.filtros-detalle-asistencia-gestion .campo-filtro-gestion {
+.filtros-detalle-asistencia-gestion .campo-filtro-gestion,
+.accion-detalle-asistencia-gestion {
   width: 100%;
   min-width: 0;
 }
 
-.filtros-detalle-asistencia-gestion select {
+.filtros-detalle-asistencia-gestion select,
+.accion-detalle-asistencia-gestion .btn-gestion {
   width: 100%;
   min-height: 46px;
   box-sizing: border-box;
 }
 
-.acciones-detalle-asistencia-gestion {
-  margin-top: 14px;
+.accion-detalle-asistencia-gestion .btn-gestion {
+  justify-content: center;
+  white-space: nowrap;
 }
 
 .encabezado-detalle-asistencia-gestion {
@@ -3268,14 +3276,22 @@ body {
   margin-top: 1rem;
 }
 
-@media (max-width: 900px) {
+@media (max-width: 1100px) {
   .filtros-detalle-asistencia-gestion {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .filtros-detalle-asistencia-gestion .campo-filtro-gestion:nth-child(2) {
+    grid-column: span 2;
   }
 }
 
 @media (max-width: 600px) {
   .filtros-detalle-asistencia-gestion {
     grid-template-columns: 1fr;
+  }
+
+  .filtros-detalle-asistencia-gestion .campo-filtro-gestion:nth-child(2) {
+    grid-column: auto;
   }
 }
