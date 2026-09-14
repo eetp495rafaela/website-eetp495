@@ -1739,6 +1739,73 @@
           <p id="mensajeSiraAdminPanel" class="mensaje-formulario"></p>
         </div>
 
+        <div class="panel-info panel-detalle-asistencia-admin">
+          <div class="encabezado-listado">
+            <div>
+              <h3>Detalle de asistencias del estudiante</h3>
+              <p>
+                Consultá el estado registrado para un estudiante en cada fecha
+                de Taller o Educación Física.
+              </p>
+            </div>
+          </div>
+
+          <div class="filtros-detalle-asistencia-admin">
+            <div class="campo-filtro">
+              <label for="cursoDetalleAsistenciaAdmin">Curso</label>
+              <select id="cursoDetalleAsistenciaAdmin">
+                <option value="">Seleccionar curso</option>
+              </select>
+            </div>
+
+            <div class="campo-filtro">
+              <label for="estudianteDetalleAsistenciaAdmin">Estudiante</label>
+              <select id="estudianteDetalleAsistenciaAdmin" disabled>
+                <option value="">Primero seleccioná un curso</option>
+              </select>
+            </div>
+
+            <div class="campo-filtro">
+              <label for="tipoDetalleAsistenciaAdmin">Tipo de asistencia</label>
+              <select id="tipoDetalleAsistenciaAdmin">
+                <option value="">Seleccionar tipo</option>
+                <option value="TALLER">Taller</option>
+                <option value="EDUCACION_FISICA">Educación Física</option>
+              </select>
+            </div>
+
+            <div class="campo-filtro">
+              <label for="periodoDetalleAsistenciaAdmin">Período</label>
+              <select id="periodoDetalleAsistenciaAdmin">
+                <option value="ANUAL">Anual</option>
+                <option value="TRIMESTRE_1">1° Trimestre</option>
+                <option value="TRIMESTRE_2">2° Trimestre</option>
+                <option value="TRIMESTRE_3">3° Trimestre</option>
+              </select>
+            </div>
+
+            <div class="accion-detalle-asistencia-admin">
+              <button
+                class="btn-accion"
+                id="btnVerDetalleAsistenciaAdmin"
+                type="button"
+              >
+                <i class="fa-solid fa-list-check"></i>
+                Consultar detalle
+              </button>
+            </div>
+          </div>
+
+          <div id="vistaDetalleAsistenciaAdmin">
+            <p class="mensaje-formulario">
+              Seleccioná un curso, un estudiante y el tipo de asistencia para
+              consultar el detalle.
+            </p>
+          </div>
+
+          <p id="mensajeDetalleAsistenciaAdmin" class="mensaje-formulario"></p>
+        </div>
+
         <a class="btn-volver" href="#inicio">
           <i class="fa-solid fa-arrow-up"></i>
           Volver al inicio

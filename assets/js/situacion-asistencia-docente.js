@@ -52,7 +52,32 @@ const mensajeSituacionAsistenciaDocente = document.getElementById(
   "mensajeSituacionAsistenciaDocente",
 );
 
+const cursoDetalleAsistenciaDocente = document.getElementById(
+  "cursoDetalleAsistenciaDocente",
+);
+const estudianteDetalleAsistenciaDocente = document.getElementById(
+  "estudianteDetalleAsistenciaDocente",
+);
+const tipoDetalleAsistenciaDocente = document.getElementById(
+  "tipoDetalleAsistenciaDocente",
+);
+const periodoDetalleAsistenciaDocente = document.getElementById(
+  "periodoDetalleAsistenciaDocente",
+);
+const btnVerDetalleAsistenciaDocente = document.getElementById(
+  "btnVerDetalleAsistenciaDocente",
+);
+const vistaDetalleAsistenciaDocente = document.getElementById(
+  "vistaDetalleAsistenciaDocente",
+);
+const mensajeDetalleAsistenciaDocente = document.getElementById(
+  "mensajeDetalleAsistenciaDocente",
+);
+
 let cursosSituacionAsistenciaDocente = [];
+let estudiantesDetalleAsistenciaDocente = [];
+let registrosDetalleAsistenciaDocente = [];
+let filtroEstadoDetalleAsistenciaDocente = "TODOS";
 
 function normalizarCorreo(correo) {
   return String(correo || "")
@@ -275,6 +300,8 @@ function prepararCursos(asignaciones) {
 }
 
 function renderizarCursos(cursos) {
+  renderizarCursosDetalleAsistenciaDocente(cursos);
+
   if (!cursoSituacionAsistenciaDocente) return;
 
   if (!cursos.length) {
@@ -448,6 +475,516 @@ function validarSeleccionSituacionAsistencia() {
 
   console.log("Curso seleccionado:", cursoSeleccionado);
   console.log("Tipo asociado:", cursoSeleccionado.tipos);
+}
+
+function mostrarMensajeDetalleAsistenciaDocente(texto, tipo = "") {
+  if (!mensajeDetalleAsistenciaDocente) return;
+
+  mensajeDetalleAsistenciaDocente.innerHTML = texto
+    ? `
+      <span class="${tipo === "error" ? "mensaje-error" : ""}">
+        ${escaparHtml(texto)}
+      </span>
+    `
+    : "";
+}
+
+function renderizarCursosDetalleAsistenciaDocente(cursos = []) {
+  if (!cursoDetalleAsistenciaDocente) return;
+
+  estudiantesDetalleAsistenciaDocente = [];
+  registrosDetalleAsistenciaDocente = [];
+  filtroEstadoDetalleAsistenciaDocente = "TODOS";
+
+  if (!cursos.length) {
+    cursoDetalleAsistenciaDocente.innerHTML = `
+      <option value="">No tenés cursos asignados</option>
+    `;
+    cursoDetalleAsistenciaDocente.disabled = true;
+    return;
+  }
+
+  cursoDetalleAsistenciaDocente.innerHTML = `
+    <option value="">Seleccionar curso</option>
+    ${cursos
+      .map(
+        (curso, index) => `
+          <option value="${index}">
+            ${escaparHtml(curso.cursoNombre)}
+          </option>
+        `,
+      )
+      .join("")}
+  `;
+
+  cursoDetalleAsistenciaDocente.disabled = false;
+}
+
+function obtenerCursoDetalleAsistenciaDocenteSeleccionado() {
+  const valor = String(cursoDetalleAsistenciaDocente?.value || "").trim();
+  const indice = Number(valor);
+
+  if (!valor || !Number.isInteger(indice)) return null;
+  return cursosSituacionAsistenciaDocente[indice] || null;
+}
+
+function renderizarTiposDetalleAsistenciaDocente(curso) {
+  if (!tipoDetalleAsistenciaDocente) return;
+
+  const tipos = Array.isArray(curso?.tipos) ? curso.tipos : [];
+
+  if (!tipos.length) {
+    tipoDetalleAsistenciaDocente.innerHTML = `
+      <option value="">Sin tipos de asistencia disponibles</option>
+    `;
+    tipoDetalleAsistenciaDocente.disabled = true;
+    return;
+  }
+
+  const opciones = tipos
+    .map(
+      (tipo) => `
+        <option value="${escaparHtml(tipo)}">
+          ${escaparHtml(obtenerEtiquetaTipo(tipo))}
+        </option>
+      `,
+    )
+    .join("");
+
+  tipoDetalleAsistenciaDocente.innerHTML =
+    tipos.length > 1
+      ? `<option value="">Seleccionar tipo</option>${opciones}`
+      : opciones;
+
+  tipoDetalleAsistenciaDocente.disabled = false;
+}
+
+async function cargarEstudiantesDetalleAsistenciaDocente() {
+  const curso = obtenerCursoDetalleAsistenciaDocenteSeleccionado();
+
+  estudiantesDetalleAsistenciaDocente = [];
+  registrosDetalleAsistenciaDocente = [];
+  filtroEstadoDetalleAsistenciaDocente = "TODOS";
+
+  if (!estudianteDetalleAsistenciaDocente || !tipoDetalleAsistenciaDocente) {
+    return;
+  }
+
+  if (!curso?.cursoId) {
+    estudianteDetalleAsistenciaDocente.disabled = true;
+    estudianteDetalleAsistenciaDocente.innerHTML = `
+      <option value="">Primero seleccioná un curso</option>
+    `;
+
+    tipoDetalleAsistenciaDocente.disabled = true;
+    tipoDetalleAsistenciaDocente.innerHTML = `
+      <option value="">Primero seleccioná un curso</option>
+    `;
+
+    if (vistaDetalleAsistenciaDocente) {
+      vistaDetalleAsistenciaDocente.innerHTML = `
+        <p class="mensaje-formulario">
+          Seleccioná un curso, un estudiante y el tipo de asistencia para
+          consultar el detalle.
+        </p>
+      `;
+    }
+
+    return;
+  }
+
+  renderizarTiposDetalleAsistenciaDocente(curso);
+
+  estudianteDetalleAsistenciaDocente.disabled = true;
+  estudianteDetalleAsistenciaDocente.innerHTML = `
+    <option value="">Cargando estudiantes...</option>
+  `;
+  mostrarMensajeDetalleAsistenciaDocente("");
+
+  try {
+    const consultaEstudiantes = query(
+      collection(db, "usuarios"),
+      where("rol", "==", "ALUMNO"),
+      where("estado", "==", "ACTIVO"),
+      where("tipoVinculo", "==", "CURSANDO"),
+      where("cursoId", "==", curso.cursoId),
+    );
+
+    const resultado = await getDocs(consultaEstudiantes);
+    const estudiantes = [];
+
+    resultado.forEach((documento) => {
+      estudiantes.push({
+        id: documento.id,
+        ...documento.data(),
+      });
+    });
+
+    estudiantes.sort((a, b) =>
+      String(a.nombreCompleto || "").localeCompare(
+        String(b.nombreCompleto || ""),
+        "es",
+        { sensitivity: "base" },
+      ),
+    );
+
+    estudiantesDetalleAsistenciaDocente = estudiantes;
+
+    if (!estudiantes.length) {
+      estudianteDetalleAsistenciaDocente.innerHTML = `
+        <option value="">No hay estudiantes activos</option>
+      `;
+      estudianteDetalleAsistenciaDocente.disabled = true;
+      return;
+    }
+
+    estudianteDetalleAsistenciaDocente.innerHTML = `
+      <option value="">Seleccionar estudiante</option>
+      ${estudiantes
+        .map(
+          (estudiante) => `
+            <option value="${escaparHtml(estudiante.id)}">
+              ${escaparHtml(
+                estudiante.nombreCompleto || "Estudiante sin nombre",
+              )}
+            </option>
+          `,
+        )
+        .join("")}
+    `;
+
+    estudianteDetalleAsistenciaDocente.disabled = false;
+  } catch (error) {
+    console.error("Error al cargar estudiantes para detalle Docente:", error);
+
+    estudianteDetalleAsistenciaDocente.innerHTML = `
+      <option value="">No se pudieron cargar estudiantes</option>
+    `;
+    estudianteDetalleAsistenciaDocente.disabled = true;
+
+    mostrarMensajeDetalleAsistenciaDocente(
+      error.message || "No se pudieron cargar los estudiantes del curso.",
+      "error",
+    );
+  }
+}
+
+function formatearFechaDetalleAsistenciaDocente(fechaTexto) {
+  const fecha = String(fechaTexto || "").trim();
+
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(fecha)) {
+    return fecha || "-";
+  }
+
+  const [anio, mes, dia] = fecha.split("-");
+  return `${dia}/${mes}/${anio}`;
+}
+
+function etiquetaEstadoDetalleAsistenciaDocente(estado) {
+  const valor = normalizarEstado(estado);
+
+  if (valor === "PRESENTE") return "Presente";
+  if (valor === "AUSENTE") return "Ausente";
+  if (valor === "TARDE") return "Tarde";
+
+  return valor || "-";
+}
+
+function renderizarDetalleAsistenciaDocente() {
+  if (!vistaDetalleAsistenciaDocente) return;
+
+  const estudianteId = String(
+    estudianteDetalleAsistenciaDocente?.value || "",
+  ).trim();
+
+  const estudiante = estudiantesDetalleAsistenciaDocente.find(
+    (item) => String(item.id || "").trim() === estudianteId,
+  );
+
+  const nombreEstudiante =
+    String(estudiante?.nombreCompleto || "").trim() || "Estudiante";
+
+  const presentes = registrosDetalleAsistenciaDocente.filter(
+    (item) => item.estado === "PRESENTE",
+  ).length;
+  const ausentes = registrosDetalleAsistenciaDocente.filter(
+    (item) => item.estado === "AUSENTE",
+  ).length;
+  const tardanzas = registrosDetalleAsistenciaDocente.filter(
+    (item) => item.estado === "TARDE",
+  ).length;
+
+  const registrosFiltrados =
+    filtroEstadoDetalleAsistenciaDocente === "TODOS"
+      ? registrosDetalleAsistenciaDocente
+      : registrosDetalleAsistenciaDocente.filter(
+          (item) => item.estado === filtroEstadoDetalleAsistenciaDocente,
+        );
+
+  const botonFiltro = (estado, texto) => `
+    <button
+      type="button"
+      class="btn-filtro-detalle-asistencia-docente ${
+        filtroEstadoDetalleAsistenciaDocente === estado ? "activo" : ""
+      }"
+      data-estado-detalle-docente="${estado}"
+    >
+      ${texto}
+    </button>
+  `;
+
+  vistaDetalleAsistenciaDocente.innerHTML = `
+    <div class="encabezado-detalle-asistencia-docente">
+      <h3>${escaparHtml(nombreEstudiante)}</h3>
+    </div>
+
+    <div
+      class="filtros-estado-detalle-asistencia-docente"
+      role="group"
+      aria-label="Filtrar detalle por estado"
+    >
+      ${botonFiltro("TODOS", "Todos")}
+      ${botonFiltro("PRESENTE", `Presentes ${presentes}`)}
+      ${botonFiltro("AUSENTE", `Ausentes ${ausentes}`)}
+      ${botonFiltro("TARDE", `Tardanzas ${tardanzas}`)}
+    </div>
+
+    ${
+      registrosFiltrados.length
+        ? `
+          <div class="tabla-responsive tabla-detalle-asistencia-docente-contenedor">
+            <table class="tabla-detalle-asistencia-docente">
+              <thead>
+                <tr>
+                  <th>Fecha</th>
+                  <th>Estado</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${registrosFiltrados
+                  .map(
+                    (registro) => `
+                      <tr>
+                        <td>${escaparHtml(
+                          formatearFechaDetalleAsistenciaDocente(
+                            registro.fecha,
+                          ),
+                        )}</td>
+                        <td>${escaparHtml(
+                          etiquetaEstadoDetalleAsistenciaDocente(
+                            registro.estado,
+                          ),
+                        )}</td>
+                      </tr>
+                    `,
+                  )
+                  .join("")}
+              </tbody>
+            </table>
+          </div>
+        `
+        : `
+          <p class="mensaje-gestion mensaje-detalle-sin-registros-docente">
+            No hay registros para el filtro seleccionado.
+          </p>
+        `
+    }
+  `;
+
+  vistaDetalleAsistenciaDocente
+    .querySelectorAll("[data-estado-detalle-docente]")
+    .forEach((boton) => {
+      boton.addEventListener("click", () => {
+        filtroEstadoDetalleAsistenciaDocente =
+          boton.dataset.estadoDetalleDocente || "TODOS";
+        renderizarDetalleAsistenciaDocente();
+      });
+    });
+}
+
+async function consultarDetalleAsistenciaDocente() {
+  const curso = obtenerCursoDetalleAsistenciaDocenteSeleccionado();
+  const estudianteId = String(
+    estudianteDetalleAsistenciaDocente?.value || "",
+  ).trim();
+  const tipo = String(tipoDetalleAsistenciaDocente?.value || "").trim();
+  const periodoSeleccionado = String(
+    periodoDetalleAsistenciaDocente?.value || "ANUAL",
+  ).trim();
+
+  if (!curso?.cursoId || !estudianteId || !tipo) {
+    mostrarMensajeDetalleAsistenciaDocente(
+      "Seleccioná el curso, el estudiante y el tipo de asistencia.",
+      "error",
+    );
+    return;
+  }
+
+  const estudiante = estudiantesDetalleAsistenciaDocente.find(
+    (item) => String(item.id || "").trim() === estudianteId,
+  );
+
+  if (!estudiante) {
+    mostrarMensajeDetalleAsistenciaDocente(
+      "No se pudo identificar al estudiante seleccionado.",
+      "error",
+    );
+    return;
+  }
+
+  mostrarMensajeDetalleAsistenciaDocente("");
+  registrosDetalleAsistenciaDocente = [];
+  filtroEstadoDetalleAsistenciaDocente = "TODOS";
+
+  if (vistaDetalleAsistenciaDocente) {
+    vistaDetalleAsistenciaDocente.innerHTML = `
+      <p class="mensaje-gestion">Consultando detalle de asistencia...</p>
+    `;
+  }
+
+  if (btnVerDetalleAsistenciaDocente) {
+    btnVerDetalleAsistenciaDocente.disabled = true;
+    btnVerDetalleAsistenciaDocente.innerHTML = `
+      <i class="fa-solid fa-spinner fa-spin"></i>
+      Consultando...
+    `;
+  }
+
+  try {
+    const cicloLectivo = new Date().getFullYear();
+    const periodos = await obtenerPeriodosAsistencia(cicloLectivo);
+
+    if (!periodos) {
+      throw new Error(
+        `No hay períodos de asistencia configurados para el ciclo lectivo ${cicloLectivo}.`,
+      );
+    }
+
+    const rangoPeriodo = obtenerRangoPeriodo(periodoSeleccionado, periodos);
+
+    if (!rangoPeriodo?.desde || !rangoPeriodo?.hasta) {
+      throw new Error(
+        "El período seleccionado no tiene fechas configuradas correctamente.",
+      );
+    }
+
+    const correoDocente = normalizarCorreo(usuarioDocenteActual?.email);
+
+    const consultasAsistencias = [
+      query(
+        collection(db, "asistencias_clases"),
+        where("estado", "==", "ACTIVA"),
+        where("tipoHorario", "==", tipo),
+        where("docenteCorreo", "==", correoDocente),
+      ),
+      query(
+        collection(db, "asistencias_clases"),
+        where("estado", "==", "ACTIVA"),
+        where("tipoHorario", "==", tipo),
+        where("docenteTitularCorreo", "==", correoDocente),
+      ),
+    ];
+
+    const resultados = await Promise.all(
+      consultasAsistencias.map((consulta) => getDocs(consulta)),
+    );
+
+    const asistenciasPorId = new Map();
+
+    resultados.forEach((resultado) => {
+      resultado.forEach((documento) => {
+        const asistencia = documento.data();
+
+        if (String(asistencia.cursoId || "").trim() !== curso.cursoId) return;
+
+        const fecha = String(asistencia.fecha || "").trim();
+        if (fecha < rangoPeriodo.desde || fecha > rangoPeriodo.hasta) return;
+
+        asistenciasPorId.set(documento.id, {
+          id: documento.id,
+          ...asistencia,
+        });
+      });
+    });
+
+    const registros = [];
+    const nombreEstudiante = String(estudiante.nombreCompleto || "")
+      .trim()
+      .toLocaleLowerCase("es");
+
+    asistenciasPorId.forEach((asistencia, asistenciaId) => {
+      const registrosAsistencia = Array.isArray(asistencia.registros)
+        ? asistencia.registros
+        : [];
+
+      const registroAlumno = registrosAsistencia.find((registro) => {
+        const idRegistro = obtenerIdEstudiante(registro);
+        if (idRegistro && idRegistro === estudianteId) return true;
+
+        const nombreRegistro =
+          obtenerNombreEstudiante(registro).toLocaleLowerCase("es");
+
+        return Boolean(nombreEstudiante) && nombreRegistro === nombreEstudiante;
+      });
+
+      if (!registroAlumno) return;
+
+      const estado = normalizarEstado(registroAlumno.estado);
+      if (!["PRESENTE", "AUSENTE", "TARDE"].includes(estado)) return;
+
+      registros.push({
+        asistenciaId,
+        fecha: String(asistencia.fecha || "").trim(),
+        estado,
+      });
+    });
+
+    registros.sort((a, b) => {
+      const comparacionFecha = a.fecha.localeCompare(b.fecha);
+      if (comparacionFecha !== 0) return comparacionFecha;
+      return a.asistenciaId.localeCompare(b.asistenciaId);
+    });
+
+    registrosDetalleAsistenciaDocente = registros;
+    renderizarDetalleAsistenciaDocente();
+  } catch (error) {
+    console.error("Error al consultar detalle de asistencia Docente:", error);
+
+    if (vistaDetalleAsistenciaDocente) {
+      vistaDetalleAsistenciaDocente.innerHTML = `
+        <p class="mensaje-gestion mensaje-error">
+          No se pudo consultar el detalle de asistencia.
+        </p>
+      `;
+    }
+
+    mostrarMensajeDetalleAsistenciaDocente(
+      error.message || "No se pudo consultar el detalle de asistencia.",
+      "error",
+    );
+  } finally {
+    if (btnVerDetalleAsistenciaDocente) {
+      btnVerDetalleAsistenciaDocente.disabled = false;
+      btnVerDetalleAsistenciaDocente.innerHTML = `
+        <i class="fa-solid fa-list-check"></i>
+        Consultar detalle
+      `;
+    }
+  }
+}
+
+if (cursoDetalleAsistenciaDocente) {
+  cursoDetalleAsistenciaDocente.addEventListener(
+    "change",
+    cargarEstudiantesDetalleAsistenciaDocente,
+  );
+}
+
+if (btnVerDetalleAsistenciaDocente) {
+  btnVerDetalleAsistenciaDocente.addEventListener(
+    "click",
+    consultarDetalleAsistenciaDocente,
+  );
 }
 
 if (btnVerSituacionAsistenciaDocente) {

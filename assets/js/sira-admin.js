@@ -16,6 +16,7 @@ import {
   query,
   where,
   doc,
+  getDoc,
   deleteDoc,
 } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
 
@@ -39,10 +40,36 @@ const btnVerSiraAdmin = document.getElementById("btnVerSiraAdmin");
 const vistaSiraAdmin = document.getElementById("vistaSiraAdmin");
 const mensajeSiraAdminPanel = document.getElementById("mensajeSiraAdminPanel");
 
+const cursoDetalleAsistenciaAdmin = document.getElementById(
+  "cursoDetalleAsistenciaAdmin",
+);
+const estudianteDetalleAsistenciaAdmin = document.getElementById(
+  "estudianteDetalleAsistenciaAdmin",
+);
+const tipoDetalleAsistenciaAdmin = document.getElementById(
+  "tipoDetalleAsistenciaAdmin",
+);
+const periodoDetalleAsistenciaAdmin = document.getElementById(
+  "periodoDetalleAsistenciaAdmin",
+);
+const btnVerDetalleAsistenciaAdmin = document.getElementById(
+  "btnVerDetalleAsistenciaAdmin",
+);
+const vistaDetalleAsistenciaAdmin = document.getElementById(
+  "vistaDetalleAsistenciaAdmin",
+);
+const mensajeDetalleAsistenciaAdmin = document.getElementById(
+  "mensajeDetalleAsistenciaAdmin",
+);
+
 let usuarioSiraAdminActual = null;
 let cursosSiraAdmin = [];
 let asistenciasSiraAdminActuales = [];
 let fechasSiraAdminActuales = [];
+
+let estudiantesDetalleAsistenciaAdmin = [];
+let registrosDetalleAsistenciaAdmin = [];
+let filtroEstadoDetalleAsistenciaAdmin = "TODOS";
 
 const DIAS_SEMANA_SIRA = [
   "DOMINGO",
@@ -346,6 +373,7 @@ async function cargarCursosSiraAdmin() {
     });
 
     cursosSiraAdmin = cursos;
+    renderizarCursosDetalleAsistenciaAdmin(cursos);
 
     cursoSiraAdmin.innerHTML = `
       <option value="">Seleccionar curso</option>
@@ -537,6 +565,524 @@ async function eliminarAsistenciaSiraAdmin(asistenciaId) {
       });
     }
   }
+}
+
+function escaparHtmlDetalleAsistenciaAdmin(valor) {
+  return String(valor ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
+function normalizarEstadoDetalleAsistenciaAdmin(estado) {
+  return String(estado || "")
+    .trim()
+    .toUpperCase();
+}
+
+function obtenerNombreEstudianteDetalleAsistenciaAdmin(registro) {
+  return String(
+    registro.alumnoNombre ||
+      registro.estudianteNombre ||
+      registro.nombreAlumno ||
+      registro.nombre ||
+      "",
+  ).trim();
+}
+
+function obtenerIdEstudianteDetalleAsistenciaAdmin(registro) {
+  return String(
+    registro.alumnoId ||
+      registro.estudianteId ||
+      registro.idAlumno ||
+      registro.dni ||
+      obtenerNombreEstudianteDetalleAsistenciaAdmin(registro),
+  ).trim();
+}
+
+function formatearFechaDetalleAsistenciaAdmin(fechaTexto) {
+  const fecha = String(fechaTexto || "").trim();
+
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(fecha)) {
+    return fecha || "-";
+  }
+
+  const [anio, mes, dia] = fecha.split("-");
+  return `${dia}/${mes}/${anio}`;
+}
+
+function etiquetaEstadoDetalleAsistenciaAdmin(estado) {
+  const valor = normalizarEstadoDetalleAsistenciaAdmin(estado);
+
+  if (valor === "PRESENTE") return "Presente";
+  if (valor === "AUSENTE") return "Ausente";
+  if (valor === "TARDE") return "Tarde";
+
+  return valor || "-";
+}
+
+function mostrarMensajeDetalleAsistenciaAdmin(texto, tipo = "") {
+  if (!mensajeDetalleAsistenciaAdmin) return;
+
+  mensajeDetalleAsistenciaAdmin.innerHTML = texto
+    ? `
+      <span class="${tipo === "error" ? "mensaje-error" : ""}">
+        ${escaparHtmlDetalleAsistenciaAdmin(texto)}
+      </span>
+    `
+    : "";
+}
+
+function obtenerNombreCursoDetalleAsistenciaAdmin(curso) {
+  return String(
+    curso?.nombre ||
+      curso?.cursoNombre ||
+      `${curso?.anio || curso?.cursoAnio || ""}º ${
+        curso?.division || curso?.cursoDivision || ""
+      }`,
+  ).trim();
+}
+
+function renderizarCursosDetalleAsistenciaAdmin(cursos = []) {
+  if (!cursoDetalleAsistenciaAdmin) return;
+
+  cursoDetalleAsistenciaAdmin.innerHTML = `
+    <option value="">Seleccionar curso</option>
+    ${cursos
+      .map(
+        (curso) => `
+          <option value="${escaparHtmlDetalleAsistenciaAdmin(curso.id)}">
+            ${escaparHtmlDetalleAsistenciaAdmin(
+              obtenerNombreCursoDetalleAsistenciaAdmin(curso),
+            )}
+          </option>
+        `,
+      )
+      .join("")}
+  `;
+}
+
+async function obtenerPeriodosDetalleAsistenciaAdmin(cicloLectivo) {
+  const referencia = doc(db, "configuracion_periodos", String(cicloLectivo));
+  const documento = await getDoc(referencia);
+
+  if (!documento.exists()) return null;
+  return documento.data();
+}
+
+function obtenerRangoPeriodoDetalleAsistenciaAdmin(
+  periodoSeleccionado,
+  periodos,
+) {
+  if (!periodos) return null;
+
+  switch (periodoSeleccionado) {
+    case "TRIMESTRE_1":
+      return {
+        desde: periodos.trimestre1Inicio || "",
+        hasta: periodos.trimestre1Fin || "",
+      };
+
+    case "TRIMESTRE_2":
+      return {
+        desde: periodos.trimestre2Inicio || "",
+        hasta: periodos.trimestre2Fin || "",
+      };
+
+    case "TRIMESTRE_3":
+      return {
+        desde: periodos.trimestre3Inicio || "",
+        hasta: periodos.trimestre3Fin || "",
+      };
+
+    case "ANUAL":
+      return {
+        desde: periodos.trimestre1Inicio || "",
+        hasta: periodos.trimestre3Fin || "",
+      };
+
+    default:
+      return null;
+  }
+}
+
+async function cargarEstudiantesDetalleAsistenciaAdmin() {
+  const cursoId = String(cursoDetalleAsistenciaAdmin?.value || "").trim();
+
+  estudiantesDetalleAsistenciaAdmin = [];
+  registrosDetalleAsistenciaAdmin = [];
+  filtroEstadoDetalleAsistenciaAdmin = "TODOS";
+
+  if (!estudianteDetalleAsistenciaAdmin) return;
+
+  if (!cursoId) {
+    estudianteDetalleAsistenciaAdmin.disabled = true;
+    estudianteDetalleAsistenciaAdmin.innerHTML = `
+      <option value="">Primero seleccioná un curso</option>
+    `;
+
+    if (vistaDetalleAsistenciaAdmin) {
+      vistaDetalleAsistenciaAdmin.innerHTML = `
+        <p class="mensaje-formulario">
+          Seleccioná un curso, un estudiante y el tipo de asistencia para
+          consultar el detalle.
+        </p>
+      `;
+    }
+
+    return;
+  }
+
+  estudianteDetalleAsistenciaAdmin.disabled = true;
+  estudianteDetalleAsistenciaAdmin.innerHTML = `
+    <option value="">Cargando estudiantes...</option>
+  `;
+  mostrarMensajeDetalleAsistenciaAdmin("");
+
+  try {
+    const consultaEstudiantes = query(
+      collection(db, "usuarios"),
+      where("rol", "==", "ALUMNO"),
+      where("estado", "==", "ACTIVO"),
+      where("tipoVinculo", "==", "CURSANDO"),
+      where("cursoId", "==", cursoId),
+    );
+
+    const resultado = await getDocs(consultaEstudiantes);
+    const estudiantes = [];
+
+    resultado.forEach((documento) => {
+      estudiantes.push({
+        id: documento.id,
+        ...documento.data(),
+      });
+    });
+
+    estudiantes.sort((a, b) =>
+      String(a.nombreCompleto || "").localeCompare(
+        String(b.nombreCompleto || ""),
+        "es",
+        { sensitivity: "base" },
+      ),
+    );
+
+    estudiantesDetalleAsistenciaAdmin = estudiantes;
+
+    if (!estudiantes.length) {
+      estudianteDetalleAsistenciaAdmin.innerHTML = `
+        <option value="">No hay estudiantes activos</option>
+      `;
+      estudianteDetalleAsistenciaAdmin.disabled = true;
+      return;
+    }
+
+    estudianteDetalleAsistenciaAdmin.innerHTML = `
+      <option value="">Seleccionar estudiante</option>
+      ${estudiantes
+        .map(
+          (estudiante) => `
+            <option value="${escaparHtmlDetalleAsistenciaAdmin(estudiante.id)}">
+              ${escaparHtmlDetalleAsistenciaAdmin(
+                estudiante.nombreCompleto || "Estudiante sin nombre",
+              )}
+            </option>
+          `,
+        )
+        .join("")}
+    `;
+
+    estudianteDetalleAsistenciaAdmin.disabled = false;
+  } catch (error) {
+    console.error("Error al cargar estudiantes para detalle Admin:", error);
+
+    estudianteDetalleAsistenciaAdmin.innerHTML = `
+      <option value="">No se pudieron cargar estudiantes</option>
+    `;
+    estudianteDetalleAsistenciaAdmin.disabled = true;
+
+    mostrarMensajeDetalleAsistenciaAdmin(
+      error.message || "No se pudieron cargar los estudiantes del curso.",
+      "error",
+    );
+  }
+}
+
+function renderizarDetalleAsistenciaAdmin() {
+  if (!vistaDetalleAsistenciaAdmin) return;
+
+  const estudianteId = String(
+    estudianteDetalleAsistenciaAdmin?.value || "",
+  ).trim();
+
+  const estudiante = estudiantesDetalleAsistenciaAdmin.find(
+    (item) => String(item.id || "").trim() === estudianteId,
+  );
+
+  const nombreEstudiante =
+    String(estudiante?.nombreCompleto || "").trim() || "Estudiante";
+
+  const presentes = registrosDetalleAsistenciaAdmin.filter(
+    (item) => item.estado === "PRESENTE",
+  ).length;
+  const ausentes = registrosDetalleAsistenciaAdmin.filter(
+    (item) => item.estado === "AUSENTE",
+  ).length;
+  const tardanzas = registrosDetalleAsistenciaAdmin.filter(
+    (item) => item.estado === "TARDE",
+  ).length;
+
+  const registrosFiltrados =
+    filtroEstadoDetalleAsistenciaAdmin === "TODOS"
+      ? registrosDetalleAsistenciaAdmin
+      : registrosDetalleAsistenciaAdmin.filter(
+          (item) => item.estado === filtroEstadoDetalleAsistenciaAdmin,
+        );
+
+  const botonFiltro = (estado, texto) => `
+    <button
+      type="button"
+      class="btn-filtro-detalle-asistencia-admin ${
+        filtroEstadoDetalleAsistenciaAdmin === estado ? "activo" : ""
+      }"
+      data-estado-detalle-admin="${estado}"
+    >
+      ${texto}
+    </button>
+  `;
+
+  vistaDetalleAsistenciaAdmin.innerHTML = `
+    <div class="encabezado-detalle-asistencia-admin">
+      <h3>${escaparHtmlDetalleAsistenciaAdmin(nombreEstudiante)}</h3>
+    </div>
+
+    <div
+      class="filtros-estado-detalle-asistencia-admin"
+      role="group"
+      aria-label="Filtrar detalle por estado"
+    >
+      ${botonFiltro("TODOS", "Todos")}
+      ${botonFiltro("PRESENTE", `Presentes ${presentes}`)}
+      ${botonFiltro("AUSENTE", `Ausentes ${ausentes}`)}
+      ${botonFiltro("TARDE", `Tardanzas ${tardanzas}`)}
+    </div>
+
+    ${
+      registrosFiltrados.length
+        ? `
+          <div class="tabla-detalle-asistencia-admin-contenedor">
+            <table class="tabla-detalle-asistencia-admin">
+              <thead>
+                <tr>
+                  <th>Fecha</th>
+                  <th>Estado</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${registrosFiltrados
+                  .map(
+                    (registro) => `
+                      <tr>
+                        <td>${escaparHtmlDetalleAsistenciaAdmin(
+                          formatearFechaDetalleAsistenciaAdmin(registro.fecha),
+                        )}</td>
+                        <td>${escaparHtmlDetalleAsistenciaAdmin(
+                          etiquetaEstadoDetalleAsistenciaAdmin(registro.estado),
+                        )}</td>
+                      </tr>
+                    `,
+                  )
+                  .join("")}
+              </tbody>
+            </table>
+          </div>
+        `
+        : `
+          <p class="mensaje-formulario mensaje-detalle-sin-registros-admin">
+            No hay registros para el filtro seleccionado.
+          </p>
+        `
+    }
+  `;
+
+  vistaDetalleAsistenciaAdmin
+    .querySelectorAll("[data-estado-detalle-admin]")
+    .forEach((boton) => {
+      boton.addEventListener("click", () => {
+        filtroEstadoDetalleAsistenciaAdmin =
+          boton.dataset.estadoDetalleAdmin || "TODOS";
+        renderizarDetalleAsistenciaAdmin();
+      });
+    });
+}
+
+async function consultarDetalleAsistenciaAdmin() {
+  const cursoId = String(cursoDetalleAsistenciaAdmin?.value || "").trim();
+  const estudianteId = String(
+    estudianteDetalleAsistenciaAdmin?.value || "",
+  ).trim();
+  const tipo = String(tipoDetalleAsistenciaAdmin?.value || "").trim();
+  const periodoSeleccionado = String(
+    periodoDetalleAsistenciaAdmin?.value || "ANUAL",
+  ).trim();
+
+  if (!cursoId || !estudianteId || !tipo) {
+    mostrarMensajeDetalleAsistenciaAdmin(
+      "Seleccioná el curso, el estudiante y el tipo de asistencia.",
+      "error",
+    );
+    return;
+  }
+
+  const estudiante = estudiantesDetalleAsistenciaAdmin.find(
+    (item) => String(item.id || "").trim() === estudianteId,
+  );
+
+  if (!estudiante) {
+    mostrarMensajeDetalleAsistenciaAdmin(
+      "No se pudo identificar al estudiante seleccionado.",
+      "error",
+    );
+    return;
+  }
+
+  mostrarMensajeDetalleAsistenciaAdmin("");
+  registrosDetalleAsistenciaAdmin = [];
+  filtroEstadoDetalleAsistenciaAdmin = "TODOS";
+
+  if (vistaDetalleAsistenciaAdmin) {
+    vistaDetalleAsistenciaAdmin.innerHTML = `
+      <p class="mensaje-formulario">Consultando detalle de asistencia...</p>
+    `;
+  }
+
+  if (btnVerDetalleAsistenciaAdmin) {
+    btnVerDetalleAsistenciaAdmin.disabled = true;
+    btnVerDetalleAsistenciaAdmin.innerHTML = `
+      <i class="fa-solid fa-spinner fa-spin"></i>
+      Consultando...
+    `;
+  }
+
+  try {
+    const cicloLectivo = new Date().getFullYear();
+    const periodos = await obtenerPeriodosDetalleAsistenciaAdmin(cicloLectivo);
+
+    if (!periodos) {
+      throw new Error(
+        `No hay períodos de asistencia configurados para el ciclo lectivo ${cicloLectivo}.`,
+      );
+    }
+
+    const rangoPeriodo = obtenerRangoPeriodoDetalleAsistenciaAdmin(
+      periodoSeleccionado,
+      periodos,
+    );
+
+    if (!rangoPeriodo?.desde || !rangoPeriodo?.hasta) {
+      throw new Error(
+        "El período seleccionado no tiene fechas configuradas correctamente.",
+      );
+    }
+
+    const consultaAsistencias = query(
+      collection(db, "asistencias_clases"),
+      where("estado", "==", "ACTIVA"),
+      where("tipoHorario", "==", tipo),
+    );
+
+    const resultado = await getDocs(consultaAsistencias);
+    const registros = [];
+    const nombreEstudiante = String(estudiante.nombreCompleto || "")
+      .trim()
+      .toLocaleLowerCase("es");
+
+    resultado.forEach((documento) => {
+      const asistencia = documento.data();
+
+      if (String(asistencia.cursoId || "").trim() !== cursoId) return;
+
+      const fecha = String(asistencia.fecha || "").trim();
+      if (fecha < rangoPeriodo.desde || fecha > rangoPeriodo.hasta) return;
+
+      const registrosAsistencia = Array.isArray(asistencia.registros)
+        ? asistencia.registros
+        : [];
+
+      const registroAlumno = registrosAsistencia.find((registro) => {
+        const idRegistro = obtenerIdEstudianteDetalleAsistenciaAdmin(registro);
+        if (idRegistro && idRegistro === estudianteId) return true;
+
+        const nombreRegistro =
+          obtenerNombreEstudianteDetalleAsistenciaAdmin(
+            registro,
+          ).toLocaleLowerCase("es");
+
+        return Boolean(nombreEstudiante) && nombreRegistro === nombreEstudiante;
+      });
+
+      if (!registroAlumno) return;
+
+      const estado = normalizarEstadoDetalleAsistenciaAdmin(
+        registroAlumno.estado,
+      );
+
+      if (!["PRESENTE", "AUSENTE", "TARDE"].includes(estado)) return;
+
+      registros.push({
+        asistenciaId: documento.id,
+        fecha,
+        estado,
+      });
+    });
+
+    registros.sort((a, b) => {
+      const comparacionFecha = a.fecha.localeCompare(b.fecha);
+      if (comparacionFecha !== 0) return comparacionFecha;
+      return a.asistenciaId.localeCompare(b.asistenciaId);
+    });
+
+    registrosDetalleAsistenciaAdmin = registros;
+    renderizarDetalleAsistenciaAdmin();
+  } catch (error) {
+    console.error("Error al consultar detalle de asistencia Admin:", error);
+
+    if (vistaDetalleAsistenciaAdmin) {
+      vistaDetalleAsistenciaAdmin.innerHTML = `
+        <p class="mensaje-formulario mensaje-error">
+          No se pudo consultar el detalle de asistencia.
+        </p>
+      `;
+    }
+
+    mostrarMensajeDetalleAsistenciaAdmin(
+      error.message || "No se pudo consultar el detalle de asistencia.",
+      "error",
+    );
+  } finally {
+    if (btnVerDetalleAsistenciaAdmin) {
+      btnVerDetalleAsistenciaAdmin.disabled = false;
+      btnVerDetalleAsistenciaAdmin.innerHTML = `
+        <i class="fa-solid fa-list-check"></i>
+        Consultar detalle
+      `;
+    }
+  }
+}
+
+if (cursoDetalleAsistenciaAdmin) {
+  cursoDetalleAsistenciaAdmin.addEventListener(
+    "change",
+    cargarEstudiantesDetalleAsistenciaAdmin,
+  );
+}
+
+if (btnVerDetalleAsistenciaAdmin) {
+  btnVerDetalleAsistenciaAdmin.addEventListener(
+    "click",
+    consultarDetalleAsistenciaAdmin,
+  );
 }
 
 function inicializarFechaSiraAdmin() {
