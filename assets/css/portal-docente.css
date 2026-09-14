@@ -4385,6 +4385,7 @@ body {
 
 /* =====================================================
    DETALLE INDIVIDUAL DE ASISTENCIA - PORTAL DOCENTE
+   Ajustado a la paleta visual del Portal Docente
 ===================================================== */
 .panel-detalle-asistencia-docente {
   margin-top: 22px;
@@ -4426,7 +4427,7 @@ body {
 
 .encabezado-detalle-asistencia-docente h3 {
   margin: 0;
-  color: #ffffff;
+  color: #4a241c;
 }
 
 .filtros-estado-detalle-asistencia-docente {
@@ -4447,10 +4448,10 @@ body {
   min-width: 110px;
   min-height: 48px;
   padding: 10px 12px;
-  border: 1px solid rgba(52, 211, 153, 0.38);
+  border: 1px solid rgba(185, 135, 120, 0.6);
   border-radius: 12px;
-  color: #f2fffb;
-  background: rgba(255, 255, 255, 0.08);
+  color: #4a241c;
+  background: #fffdf8;
   font: inherit;
   font-weight: 800;
   white-space: nowrap;
@@ -4459,16 +4460,17 @@ body {
 }
 
 .btn-filtro-detalle-asistencia-docente:hover {
-  border-color: #34d399;
-  background: rgba(52, 211, 153, 0.12);
+  border-color: var(--bordo-acento);
+  background: #fff1a6;
+  color: #3b241f;
   transform: translateY(-1px);
 }
 
 .btn-filtro-detalle-asistencia-docente.activo {
   color: #ffffff;
-  border-color: #087f68;
-  background: #087f68;
-  box-shadow: 0 4px 12px rgba(8, 127, 104, 0.28);
+  border-color: #6b352a;
+  background: linear-gradient(135deg, #8a4a3c, #9a5a4b);
+  box-shadow: 0 4px 12px rgba(107, 53, 42, 0.22);
 }
 
 .tabla-detalle-asistencia-docente-contenedor {
@@ -4479,19 +4481,19 @@ body {
   width: 100%;
   min-width: 460px;
   border-collapse: collapse;
-  background: rgba(255, 255, 255, 0.04);
+  background: #fffdf8;
 }
 
 #situacion-asistencia-docente .tabla-detalle-asistencia-docente th,
 #situacion-asistencia-docente .tabla-detalle-asistencia-docente td {
   width: 50%;
   padding: 0.85rem 0.8rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.14);
+  border-bottom: 1px solid #eee1db;
 }
 
 #situacion-asistencia-docente .tabla-detalle-asistencia-docente th {
   color: #ffffff;
-  background: #087f68;
+  background: #6b352a;
   font-size: 0.92rem;
   font-weight: 800;
   text-align: left;
@@ -4503,16 +4505,17 @@ body {
 }
 
 #situacion-asistencia-docente .tabla-detalle-asistencia-docente td {
-  color: #f2fffb;
+  color: #3b241f;
   font-weight: 750;
 }
 
 #situacion-asistencia-docente .tabla-detalle-asistencia-docente tbody tr:hover {
-  background: rgba(0, 224, 155, 0.1);
+  background: rgba(107, 53, 42, 0.08);
 }
 
 .mensaje-detalle-sin-registros-docente {
   margin-top: 1rem;
+  color: #725a54;
 }
 
 @media (max-width: 1100px) {
