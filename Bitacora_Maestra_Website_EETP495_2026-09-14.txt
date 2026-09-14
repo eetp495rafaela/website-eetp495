@@ -1,0 +1,2828 @@
+BITÁCORA MAESTRA – PORTAL INSTITUCIONAL E.E.T.P. N.º 495
+========================================================
+
+Referencia: EETP495-BITACORA-MAESTRA-2026-09-14
+Fecha de consolidación: 14/09/2026
+Institución: E.E.T.P. N.º 495 “Malvinas Argentinas” – Rafaela, Santa Fe
+Modalidad: Técnico en Informática Profesional y Personal
+Dominio: https://eetp495rafaela.edu.ar
+Firebase project: portal-institucional-eet-fa5c7
+Repositorio: git@github-eetp495:eetp495rafaela/website-eetp495.git
+Rama principal: main
+
+PROPÓSITO
+---------
+Esta es la referencia maestra técnico-funcional del sitio público y del Portal
+Institucional completo. Debe permitir retomar el proyecto en un chat nuevo sin
+tener que volver a enviar el ZIP completo, salvo cuando una modificación sea
+transversal o no esté claro qué archivos intervienen.
+
+FUENTES UTILIZADAS PARA ESTA CONSOLIDACIÓN
+------------------------------------------
+1. Último ZIP completo recibido:
+   Website-EETP495(20260914-182007).zip
+
+2. Estado Git contenido en ese ZIP:
+   commit completo:
+   ffadd6800d8a2acd3deeb8786e705bf2541619fe
+   commit corto: ffadd68
+   fecha: 2026-09-08 10:53:37 -0300
+   mensaje: "Boorar Doc Academ Docentes"
+   rama: main
+   sin cambios sin confirmar dentro de ese ZIP.
+
+3. Sobre esa base se incorporó lógicamente la mejora posterior ya probada y
+   cerrada el 14/09/2026:
+   “Detalle de asistencias del estudiante” en Gestión, Admin y Docente.
+
+4. También se consolidaron los backends Apps Script conocidos y utilizados por
+   el frontend actual:
+   - Documentación Académica
+   - S.I.M.E.
+   - Informes Pedagógico-Didácticos
+   - Calendario Escolar
+   - Galería Institucional + backup Firestore actual
+   - Baja Global de Usuarios
+
+REGLA DE PRECEDENCIA
+--------------------
+Si existe una diferencia entre esta bitácora y un archivo actual que el usuario
+entrega posteriormente, SIEMPRE manda el archivo actual.
+
+Orden de confianza:
+1. Archivo/código actual entregado en el momento de trabajar.
+2. Bitácora Maestra.
+3. ZIP histórico.
+4. Versiones anteriores / archivos viejos / memoria de conversaciones.
+
+Nunca modificar un backend externo basándose únicamente en esta bitácora si el
+usuario informa que fue cambiado después de la fecha de consolidación.
+
+======================================================================
+1. ARQUITECTURA GENERAL
+======================================================================
+
+El sistema está formado por varias capas:
+
+A. SITIO WEB ESTÁTICO / FRONTEND
+- HTML, CSS y JavaScript.
+- Publicado con GitHub Pages y dominio propio.
+- Dominio institucional: eetp495rafaela.edu.ar.
+- CNAME incluido en el repositorio.
+- El sitio público y los cuatro portales forman parte del mismo repositorio.
+
+B. FIREBASE
+- Firebase Authentication: inicio de sesión con Google.
+- Cloud Firestore: principal base de datos institucional.
+- Firebase App Check: reCAPTCHA Enterprise en los flujos protegidos que lo
+  tienen integrado.
+- Firestore Security Rules: archivo firestore.rules del repositorio.
+
+C. GOOGLE APPS SCRIPT
+Se utilizan Web Apps separados para funciones que necesitan operar con:
+- Google Sheets.
+- Google Drive.
+- creación/lectura de PDFs o Google Docs privados;
+- operaciones administrativas que no conviene resolver directamente desde el
+  navegador;
+- sincronizaciones y copias de seguridad.
+
+D. GOOGLE DRIVE / GOOGLE SHEETS
+Drive almacena, entre otros:
+- Documentación Académica.
+- Informes Pedagógico-Didácticos.
+- Permisos PDF de S.I.M.E.
+- Galería Institucional.
+- backups actuales de Firestore.
+- carpetas institucionales enlazadas desde Portal Docente.
+
+Sheets almacena o complementa:
+- S.I.M.E.
+- Calendario Escolar.
+- planillas externas enlazadas, como calificaciones e inventario.
+
+E. SERVICIOS EXTERNOS
+- GitHub / GitHub Pages.
+- Cloudflare para dominio/DNS.
+- Google Analytics.
+- Google Maps.
+- Servicios educativos de Provincia de Santa Fe.
+- CDN para SweetAlert2, SheetJS, Font Awesome, Bootstrap Icons y fuentes.
+
+======================================================================
+2. IDENTIDAD, DOMINIO, SEO Y PUBLICACIÓN
+======================================================================
+
+Archivos raíz relevantes:
+- CNAME
+- robots.txt
+- sitemap.xml
+- README.md
+- .firebaserc
+- firebase.json
+- firestore.rules
+
+CNAME:
+eetp495rafaela.edu.ar
+
+README:
+“Sitio web oficial de la EETP N.º 495”.
+
+Firebase:
+.firebaserc define como proyecto por defecto:
+portal-institucional-eet-fa5c7
+
+firebase.json vincula:
+firestore.rules
+
+robots.txt:
+- permite rastreo general.
+- referencia https://eetp495rafaela.edu.ar/sitemap.xml
+
+sitemap.xml:
+- actualmente contiene solamente la página principal pública:
+  https://eetp495rafaela.edu.ar/
+
+SEARCH CONSOLE
+--------------
+Se revisó el aviso “Página con redirección”.
+La única URL detectada fue:
+http://eetp495rafaela.edu.ar/
+
+Es normal: redirige a:
+https://eetp495rafaela.edu.ar/
+
+Estado: CERRADO. No requiere corrección.
+
+GOOGLE ANALYTICS
+----------------
+ID detectado en el sitio:
+G-57ZS2C1RQM
+
+======================================================================
+3. SITIO PÚBLICO
+======================================================================
+
+Archivo principal:
+index.html
+
+CSS:
+assets/css/sitio-publico.css
+
+JavaScript:
+assets/js/galeria.js
+assets/js/calendario-escolar.js
+
+SECCIONES ACTIVAS
+-----------------
+1. Portada / Hero
+   - Escuela de Educación Técnico Profesional N.º 495.
+   - “Malvinas Argentinas”.
+   - CTA para conocer la institución.
+   - Acceso al Portal Institucional mediante login.html.
+
+2. “Descubrí Nuestra Escuela”
+   Tarjetas:
+   - La Escuela
+   - Oferta Académica
+   - Plan de Estudios
+   - Calendario Escolar
+   - Galería Institucional
+   - Contacto y Cómo llegar
+
+   Existe código comentado para “Centro de Estudiantes”.
+   NO es actualmente una sección activa.
+
+3. La Escuela / Historia institucional
+   Datos institucionales históricos incluidos en el sitio:
+   - Fundación como anexo de E.E.T. N.º 460: 2 de mayo de 2005.
+   - Identidad como E.E.T.P. N.º 495 “Malvinas Argentinas”:
+     10 de agosto de 2008.
+   - Inauguración del edificio actual: 12 de marzo de 2013.
+
+4. Oferta Académica
+   Tecnicatura:
+   “Técnico en Informática Profesional y Personal”.
+
+   Perfil / áreas:
+   - Hardware
+   - Redes
+   - Programación
+   - Soporte Técnico
+   - Seguridad
+   - Asesoramiento
+
+5. Plan de Estudios
+   Duración: 6 años.
+
+   PRIMER AÑO
+   - Biología
+   - Dibujo Técnico
+   - Música
+   - Educación Física
+   - Tecnología
+   - Formación Ética
+   - Geografía
+   - Inglés
+   - Lengua
+   - Matemática
+   - Ruedas de Convivencia
+   - Taller de Electricidad
+   - Taller de Informática
+   - Taller de Organización de la Empresa
+
+   SEGUNDO AÑO
+   - Dibujo Técnico
+   - Artes Visuales
+   - Educación Física
+   - Tecnología
+   - Físico-Química
+   - Formación Ética
+   - Historia
+   - Inglés
+   - Lengua
+   - Matemática
+   - Ruedas de Convivencia
+   - Taller de Electrónica
+   - Taller de Informática
+   - Taller de Documentos Comerciales
+
+   TERCER AÑO
+   - Educación Física
+   - Física
+   - Formación Ética
+   - Hardware I
+   - Historia
+   - Inglés
+   - Lengua
+   - Matemática
+   - Materiales y Procesos
+   - Software I
+   - TIC
+   - Taller de Informática
+
+   CUARTO AÑO
+   - Automatización y Control
+   - Educación Física
+   - Economía
+   - Formación Ética
+   - Fundamentos de Gestión
+   - Geografía
+   - Hardware II
+   - Inglés
+   - Lengua
+   - Matemática
+   - Software II
+   - Taller de Informática
+
+   QUINTO AÑO
+   - Educación Física
+   - Formación Ética
+   - Hardware III
+   - Inglés
+   - Lengua
+   - Marco Jurídico
+   - Matemática
+   - Organización y Gestión
+   - Procesos Productivos
+   - Programación I
+   - Software III
+   - Taller de Informática
+
+   SEXTO AÑO
+   - Formación Ética Profesional
+   - Hardware IV
+   - Inglés Técnico
+   - Lengua
+   - Matemática Aplicada
+   - Organización y Gestión Comercial
+   - Prácticas Profesionalizantes
+   - Programación II
+   - Proyecto Tecnológico
+   - Redes
+   - Software IV
+
+6. Galería Institucional
+   La portada muestra seis categorías:
+   - Historia y Edificio
+   - Talleres
+   - Aulas
+   - Exposiciones, Ferias y Concursos
+   - Actos Escolares
+   - Actividades Varias
+
+   La galería real se obtiene desde backend Apps Script.
+   Incluye lightbox, navegación anterior/siguiente y contador.
+
+7. Calendario Escolar
+   - Vista pública.
+   - Año dinámico / visible.
+   - Carrusel de meses.
+   - Eventos provienen del backend de Calendario Escolar.
+   - Diseño responsive.
+
+8. Contacto y Cómo llegar
+   Dirección:
+   Mensajero José Donna 342, Rafaela, Santa Fe.
+
+   Teléfono:
+   +54 3492 712717
+
+   Correos:
+   - direccion.tec495@gmail.com
+   - vicedireccion.tec495@gmail.com
+
+   Horario indicado:
+   lunes a viernes, 7:15 a 18:30.
+
+   Ubicación:
+   aproximadamente 500 m al sur de la Terminal de Ómnibus.
+
+   Transporte:
+   líneas urbanas 1 a 5; se indica especialmente la Línea 3.
+
+   Incluye mapa Google Maps embebido.
+
+9. Redes
+   Instagram:
+   https://www.instagram.com/malvinas.argentinas.495/
+
+10. Portal Institucional
+    Enlaces desde encabezado/footer a:
+    login.html
+
+======================================================================
+4. LOGIN, AUTENTICACIÓN, APP CHECK Y SESIONES
+======================================================================
+
+Archivos:
+login.html
+assets/css/portal-login.css
+assets/js/login-fondo.js
+assets/js/firebase-auth.js
+assets/js/proteger-portal.js
+
+LOGIN
+-----
+- Inicio con Google mediante Firebase Authentication.
+- Si un usuario tiene más de un rol, puede elegir el rol activo.
+- El rol activo se conserva en sessionStorage:
+  rolActivoPortal
+
+MAPEO DE ROLES A PORTALES
+-------------------------
+ALUMNO
+-> alumnos/index.html
+
+DOCENTE
+-> docentes/index.html
+
+SOPORTE
+-> admin/index.html
+
+PRECEPTORIA
+SECRETARIA
+ASISTENTE_ADMINISTRATIVO
+DIRECCION
+-> gestion/index.html
+
+VALIDACIÓN DE CUENTA
+--------------------
+Para acceder:
+- el usuario debe autenticarse;
+- debe existir perfil autorizado en Firestore;
+- estado debe ser ACTIVO;
+- el rol solicitado debe pertenecer a su perfil;
+- si hay fechaFinAcceso, no debe estar vencida.
+
+El rol ALUMNO es tratado como rol exclusivo respecto de combinaciones
+institucionales.
+
+SOLICITUD DE ALTA DE ESTUDIANTE
+-------------------------------
+Desde login:
+- usuario se autentica con Google;
+- puede solicitar acceso como estudiante;
+- se registra solicitud en:
+  solicitudes_alta_alumnos/{uid}
+- estado inicial: PENDIENTE;
+- se guardan datos como nombre, correo y DNI;
+- luego Soporte revisa/aprueba desde Portal Admin.
+
+PROTECCIÓN DE PORTALES
+----------------------
+Cada portal declara roles permitidos:
+- Admin: SOPORTE
+- Gestión: PRECEPTORIA, SECRETARIA, ASISTENTE_ADMINISTRATIVO, DIRECCION
+- Docente: DOCENTE
+- Alumno: ALUMNO
+
+proteger-portal.js:
+- valida sesión;
+- valida perfil;
+- valida estado;
+- valida rol activo;
+- valida fecha de finalización;
+- expone información de usuario para otros módulos;
+- registra acceso reciente;
+- controla inactividad.
+
+INACTIVIDAD
+-----------
+Cierre por inactividad:
+15 minutos.
+
+APP CHECK
+---------
+Se utiliza Firebase App Check con reCAPTCHA Enterprise.
+
+Site key detectada:
+6Ld7BmwtAAAAADhZkCRmdmMaJtodHEzLsr4Ep2O8
+
+proteger-portal.js expone:
+window.obtenerTokenAppCheckPortal()
+
+Esto es utilizado por módulos que envían App Check a sus backends.
+
+NOTA DE SEGURIDAD / TRABAJO FUTURO
+----------------------------------
+El flujo de debug/local App Check fue analizado en conversaciones anteriores,
+pero quedó PAUSADO. No modificarlo sin una tarea específica.
+
+Para un backup total, la configuración de App Check del Firebase Console debe
+documentarse/exportarse por separado porque no está completamente representada
+por los archivos del repositorio.
+
+ACCESOS RECIENTES
+-----------------
+Colección:
+accesos_recientes
+
+Cada usuario activo puede registrar/actualizar su propio acceso actual.
+Soporte puede consultar y limpiar la colección desde Admin.
+
+CURSADA COMPLETA
+----------------
+Para ALUMNO con vínculo/situación CURSADA_COMPLETA:
+el protector oculta herramientas de cursado regular como:
+- Horarios
+- Mis docentes
+- Mis compañeros
+
+Se mantienen las herramientas que correspondan a egresados/cursada completa,
+como Programas de Examen / S.I.M.E. según la lógica específica.
+
+======================================================================
+5. FIRESTORE – MODELO PRINCIPAL Y REGLAS
+======================================================================
+
+Archivo de reglas:
+firestore.rules
+
+Longitud de referencia del archivo actual:
+aprox. 1099 líneas.
+
+COLECCIONES CLIENTE / REGLADAS
+------------------------------
+1. usuarios
+2. asignaciones_docentes
+3. reemplazos_docentes
+4. cursos
+5. espacios_curriculares
+6. horarios
+7. mesas_examen
+8. asistencias_clases
+9. referentes_institucionales
+10. solicitudes_alta_alumnos
+11. configuracion_periodos
+12. accesos_recientes
+
+COLECCIONES PRINCIPALMENTE MANEJADAS POR BACKENDS REST
+------------------------------------------------------
+13. documentacion_academica
+14. informes_pedagogicos
+15. galeria_institucional
+
+PRINCIPIOS GENERALES DE REGLAS
+------------------------------
+- El usuario debe estar autenticado.
+- El perfil debe estar activo.
+- La vigencia/fecha de acceso se respeta.
+- Los permisos dependen del rol principal, roles adicionales y rol activo.
+- Los datos académicos de alumnos se limitan por curso/división.
+- Las escrituras sensibles quedan reservadas a Soporte o roles de Gestión
+  específicos.
+
+ROLES DE GESTIÓN
+----------------
+Conjunto institucional:
+- DIRECCION
+- SECRETARIA
+- ASISTENTE_ADMINISTRATIVO
+- PRECEPTORIA
+
+REEMPLAZOS
+----------
+Administración operativa de reemplazos:
+- SOPORTE
+- DIRECCION
+- SECRETARIA
+- ASISTENTE_ADMINISTRATIVO
+
+PRECEPTORIA:
+- puede consultar;
+- NO administra altas/finalizaciones de reemplazos.
+
+ASIGNACIONES DOCENTES
+---------------------
+- Soporte y Gestión pueden consultar.
+- Docentes activos pueden consultar asignaciones activas necesarias para agenda
+  y funciones autorizadas.
+- Alumnos sólo reciben las asignaciones que correspondan a su curso/división.
+
+REEMPLAZOS DOCENTES
+-------------------
+- Soporte: acceso administrativo.
+- Gestión: lectura.
+- Gestión autorizada excepto PRECEPTORIA: creación/finalización.
+- Docente: ve reemplazos donde es titular o reemplazante.
+- Alumno: sólo reemplazos vinculados a su curso.
+
+CURSOS / ESPACIOS
+-----------------
+- Soporte / Gestión según módulo.
+- Docente recibe lo necesario para funciones autorizadas.
+- Espacios curriculares se administran institucionalmente.
+
+HORARIOS
+--------
+- Escritura principal: SOPORTE.
+- Lectura filtrada para Gestión, Docente y Alumno según autorización.
+- Alimentan vistas personales y pizarra.
+
+MESAS DE EXAMEN
+---------------
+- Soporte / Gestión: consulta general.
+- Docente / Alumno: sólo PUBLICADA según autorización.
+- DIRECCION puede crear/modificar estados permitidos.
+- Eliminación física reservada a Soporte.
+
+ASISTENCIAS_CLASES
+------------------
+- Soporte y Gestión: lectura.
+- Docente: sólo registros que le corresponden.
+- Escritura docente validada contra horario/asignación/reemplazo.
+- Sólo Taller y Educación Física.
+- Eliminación: Soporte.
+
+REFERENTES INSTITUCIONALES
+--------------------------
+- Lectura por usuarios activos autorizados.
+- Administración principal: Soporte.
+- Se trabaja con estado activo/inactivo; no depender de borrado físico.
+
+SOLICITUDES DE ALTA
+-------------------
+- Usuario Google autenticado puede crear su propia solicitud PENDIENTE.
+- Soporte consulta, aprueba/rechaza/gestiona.
+
+CONFIGURACION_PERIODOS
+----------------------
+- Soporte configura períodos/trimestres.
+- Gestión y Docente consultan para Situación de Asistencia.
+
+ACCESOS_RECIENTES
+-----------------
+- Usuario registra su propio acceso.
+- Soporte administra/limpia.
+
+======================================================================
+6. PORTAL ADMIN / SOPORTE
+======================================================================
+
+Archivo:
+admin/index.html
+
+Rol:
+SOPORTE
+
+CSS:
+assets/css/portal-admin.css
+
+MÓDULOS JS PRINCIPALES
+----------------------
+assets/js/admin.js
+assets/js/referentes-admin.js
+assets/js/documentacion-admin.js
+assets/js/sime-admin.js
+assets/js/listado-inscriptos-sime-admin.js
+assets/js/sira-admin.js
+assets/js/horarios-admin.js
+assets/js/reemplazos-docentes-admin.js
+assets/js/backup-admin.js
+assets/js/galeria-admin.js
+assets/js/pizarra-horarios-admin.js
+assets/js/accesos-recientes-admin.js
+assets/js/limpieza-horarios-admin.js
+assets/js/limpieza-asistencias-admin.js
+assets/js/solicitudes-alta-admin.js
+assets/js/usuarios-inactivos-admin.js
+assets/js/calendario-escolar-admin.js
+
+También:
+assets/js/proteger-portal.js
+
+Librerías externas:
+- SweetAlert2
+- SheetJS
+
+SECCIONES Y FUNCIONES
+---------------------
+
+6.1 USUARIOS
+- Alta de usuarios.
+- Nombre / correo / DNI.
+- Rol principal.
+- Roles adicionales.
+- Situación/vínculo.
+- Fecha de finalización del acceso.
+- Listado.
+- Filtros.
+- Edición.
+- Cambio de estado.
+- Soporte para perfiles multirrol.
+- Importación por planilla usando SheetJS.
+
+Regla relevante:
+ALUMNO no debe mezclarse indebidamente con roles institucionales.
+
+6.2 ESPACIOS CURRICULARES
+- Importar Plan de Estudios desde planilla.
+- Crear / listar / revisar espacios.
+- Base para asignaciones, horarios y mesas.
+
+6.3 CURSOS
+- Alta de curso/división.
+- Nombre.
+- Estado.
+- Listado.
+- Edición.
+- Activación/desactivación.
+
+6.4 ASIGNACIONES DOCENTES
+- Docente.
+- Curso.
+- Espacio curricular.
+- Ciclo lectivo.
+- Estado.
+- Alta/listado/filtros/edición/activación/desactivación.
+
+6.5 REEMPLAZOS DOCENTES
+Integrado junto a asignaciones.
+Aplicado a:
+- Taller.
+- Educación Física.
+
+Permite:
+- registrar reemplazo temporal;
+- consultar reemplazos;
+- finalizar reemplazo;
+- validar titular/reemplazante/fechas.
+
+6.6 REFERENTES INSTITUCIONALES
+Cargos soportados:
+- DIRECTORA
+- VICE_DIRECTORA
+- SECRETARIO
+- PRO_SECRETARIO
+- ASISTENTE_ADMINISTRATIVO
+- PRECEPTOR
+
+Ámbito:
+- institucional;
+- o por curso, según cargo.
+
+Se usa estado activo/inactivo.
+
+6.7 ESTUDIANTES
+- Listado.
+- Filtros por curso/estado.
+- Asignación de curso.
+- Grupo.
+- Importación / actualización desde planilla según herramienta vigente.
+- Desactivación.
+
+6.8 DOCUMENTACIÓN ACADÉMICA
+Admin/Soporte puede:
+- consultar documentación;
+- filtrar por curso / tipo / espacio;
+- abrir PDFs privados;
+- eliminar documentos según funciones administrativas;
+- ver también Informes Pedagógicos en el feed de soporte cuando corresponde.
+
+El PDF privado se obtiene a través del backend; no se expone un enlace Drive
+público.
+
+6.9 S.I.M.E.
+- Configuración del ciclo lectivo.
+- Turno/período de examen.
+- Fecha/hora de apertura y cierre.
+- Estado de inscripciones.
+- Correo de contacto.
+- Listado de inscripciones.
+- Filtros por curso / año cursado / estado / estudiante.
+- Abrir permiso PDF.
+- Eliminar inscripción individual.
+- Limpiar inscripciones.
+- Abrir planilla Google Sheets de S.I.M.E.
+- Generar listado institucional PDF de inscriptos.
+
+Listado PDF:
+- 6 páginas A4 apaisadas;
+- una por año;
+- espacios ordenados;
+- estudiantes ordenados;
+- páginas presentes aun sin inscriptos.
+
+6.10 MESAS DE EXAMEN
+- Nueva mesa.
+- Fecha.
+- Hora.
+- Espacio/materia.
+- Uno o varios cursos/divisiones.
+- Período.
+- Estado.
+- Editar.
+- Publicar / ocultar.
+- Eliminar.
+- Limpiar según período cuando corresponde.
+
+6.11 Si.R.A.
+- Consulta/administración de asistencias.
+- Tipo: Taller / Educación Física.
+- Curso.
+- Fecha inicial para parte semanal.
+- Visualización de registros.
+- Soporte puede eliminar registros de asistencia.
+
+NUEVA FUNCIÓN CERRADA 14/09/2026:
+“Detalle de asistencias del estudiante”.
+
+Ubicación:
+dentro de Si.R.A.
+
+Controles:
+- Curso
+- Estudiante (más ancho)
+- Tipo de asistencia
+- Período
+- Consultar detalle
+
+En escritorio van en una sola fila.
+
+Resultado:
+- nombre del estudiante;
+- cuatro botones iguales:
+  [Todos] [Presentes N] [Ausentes N] [Tardanzas N]
+- tabla sólo con:
+  Fecha | Estado
+
+Los cuatro filtros tienen el mismo ancho.
+Todos es el filtro inicial.
+No modifica registros.
+
+6.12 HORARIO DE AULA
+- Ciclo lectivo.
+- Turno.
+- Curso.
+- Día.
+- Espacio.
+- Docente.
+- Bloques horarios.
+- Ubicación.
+- Alta / edición / eliminación / listado.
+- Puede seleccionar varios bloques cuando la materia se repite.
+
+6.13 HORARIO DE TALLER
+- Ciclo.
+- Turno.
+- Curso.
+- Grupo.
+- Día.
+- Espacio de Taller.
+- Docente.
+- Franja horaria.
+- Ubicación.
+- Alta / edición / eliminación / listado.
+
+6.14 HORARIO DE EDUCACIÓN FÍSICA
+- Ciclo.
+- Turno.
+- Curso.
+- Día.
+- Docente.
+- Hora de inicio.
+- Hora de finalización calculada.
+- Ubicación.
+- Duración configurada de referencia: 60 minutos.
+- Alta / edición / eliminación / listado.
+
+6.15 GALERÍA INSTITUCIONAL
+- Revisa fotografías nuevas en carpetas Drive.
+- Sincroniza/publica nuevas fotos.
+- Trabaja con seis subgalerías.
+- Backend compartido con backup Firestore actual.
+
+6.16 CONFIGURACIÓN DEL PORTAL
+Herramientas:
+- Backup del sistema (ACTUALMENTE sólo Firestore JSON).
+- Generar pizarra de horarios.
+- Limpiar asistencias.
+- Limpiar horarios.
+- Configurar períodos de asistencia.
+- Revisar solicitudes de alta de estudiantes.
+- Administrar Calendario Escolar.
+- Administrar usuarios inactivos / Baja Global.
+
+6.17 PERÍODOS DE ASISTENCIA
+- 1.er trimestre.
+- 2.º trimestre.
+- 3.er trimestre.
+- Se guardan en configuracion_periodos.
+- Son utilizados por Situación de Asistencia.
+
+6.18 CALENDARIO ESCOLAR
+Desde Admin:
+- crear;
+- editar;
+- eliminar;
+- actualizar listado.
+
+Persistencia:
+Google Sheets + Apps Script, no Firestore.
+
+6.19 USUARIOS INACTIVOS / BAJA GLOBAL
+- Revisión de usuarios candidatos.
+- Prevalidación.
+- Plan de baja.
+- Confirmación.
+- Baja transversal mediante backend especializado.
+- Ver sección específica “Baja Global” de esta bitácora.
+
+6.20 ACCESOS RECIENTES
+- Ver actividad.
+- Nombre.
+- Correo.
+- Rol.
+- Fecha/hora.
+- Limpiar accesos.
+
+======================================================================
+7. PORTAL GESTIÓN
+======================================================================
+
+Archivo:
+gestion/index.html
+
+Roles:
+- PRECEPTORIA
+- SECRETARIA
+- ASISTENTE_ADMINISTRATIVO
+- DIRECCION
+
+CSS:
+assets/css/portal-gestion.css
+
+JS:
+assets/js/gestion.js
+assets/js/listado-inscriptos-sime-gestion.js
+assets/js/sira-gestion.js
+assets/js/reemplazos-docentes-gestion.js
+assets/js/pizarra-horarios-admin.js
+assets/js/situacion-asistencia-gestion.js
+assets/js/proteger-portal.js
+
+SweetAlert2 disponible.
+
+SECCIONES
+---------
+
+7.1 ESTUDIANTES
+- Consulta institucional.
+- Filtros por curso / estado.
+- Información de curso/grupo.
+
+Desactivación de estudiante:
+permitida según lógica vigente a:
+- PRECEPTORIA
+- SECRETARIA
+- DIRECCION
+
+ASISTENTE_ADMINISTRATIVO:
+no tiene esa acción específica.
+
+7.2 DOCENTES
+- Consulta de docentes.
+- Filtros por:
+  curso,
+  espacio,
+  turno.
+- Presentación de asignaciones.
+
+7.3 REEMPLAZOS DOCENTES
+Todos los roles Gestión:
+- pueden consultar.
+
+Pueden registrar/finalizar:
+- DIRECCION
+- SECRETARIA
+- ASISTENTE_ADMINISTRATIVO
+
+PRECEPTORIA:
+- consulta, pero no administra reemplazos.
+
+7.4 ORGANIZACIÓN INSTITUCIONAL
+Incluye:
+- ver horarios;
+- filtros por tipo/turno/día/espacio/curso;
+- pizarra imprimible;
+- docentes libres de Taller;
+- Calendario Escolar.
+
+“Docentes libres de Taller”:
+- por día y turno;
+- puede indicar si el docente tiene aula/clase en ese horario;
+- muestra referencia de espacio/curso/horario cuando corresponde.
+
+7.5 CALENDARIO ESCOLAR DESDE GESTIÓN
+Los cuatro roles de Gestión pueden administrarlo, siempre validando:
+- sesión;
+- perfil;
+- rol activo.
+
+Acciones:
+- guardar;
+- editar;
+- eliminar;
+- actualizar eventos.
+
+7.6 Si.R.A. – PARTE
+- Consulta semanal.
+- Taller / Educación Física.
+- Curso.
+- Fecha.
+- Sólo consulta.
+
+7.7 SITUACIÓN DE ASISTENCIA
+Parte existente:
+- resumen acumulado por estudiante;
+- filtros de tipo, curso y período;
+- conserva la lógica ya probada.
+
+NUEVA FUNCIÓN CERRADA:
+“Detalle de asistencias del estudiante”.
+
+Controles:
+- Curso
+- Estudiante (más ancho)
+- Tipo
+- Período
+- Consultar detalle
+
+En una sola fila de escritorio.
+
+Botones:
+[Todos] [Presentes N] [Ausentes N] [Tardanzas N]
+
+Mismo ancho.
+Filtran tabla.
+Tabla:
+Fecha | Estado
+
+No edita asistencias.
+No agrega observaciones/porcentajes/riesgo.
+
+7.8 DOCUMENTACIÓN ACADÉMICA
+- Consulta de Planes.
+- Programas.
+- Material de Estudio según permisos.
+- Filtros.
+- Descarga/visualización por backend privado.
+
+7.9 S.I.M.E.
+- Listado de inscripciones.
+- Filtros.
+- Consulta de permisos.
+- Generación del listado PDF.
+- Disponible para todos los roles de Gestión según la implementación cerrada.
+
+7.10 INFORMES PEDAGÓGICO-DIDÁCTICOS
+Todos Gestión:
+- pueden consultar según el frontend/backend.
+
+DIRECCION:
+- puede crear;
+- editar;
+- eliminar;
+- actualizar docentes autorizados.
+
+Otros roles:
+- lectura/consulta según permisos.
+
+7.11 MESAS DE EXAMEN
+Todos Gestión:
+- consulta.
+
+DIRECCION:
+- dispone del panel de creación/edición;
+- puede administrar PUBLICADA/OCULTA de acuerdo con reglas.
+
+======================================================================
+8. PORTAL DOCENTE
+======================================================================
+
+Archivo:
+docentes/index.html
+
+Rol:
+DOCENTE
+
+CSS:
+assets/css/portal-docente.css
+
+JS:
+assets/js/permisos-taller-docente.js
+assets/js/mesas-docente.js
+assets/js/material-estudio.js
+assets/js/horarios-docente.js
+assets/js/listas-estudiantes-docente.js
+assets/js/agenda-docente.js
+assets/js/informes-docente.js
+assets/js/sira-docente.js
+assets/js/parte-sira-docente.js
+assets/js/situacion-asistencia-docente.js
+assets/js/pizarra-horarios-admin.js
+assets/js/volver-arriba.js
+assets/js/proteger-portal.js
+
+SECCIONES
+---------
+
+8.1 MIS HORARIOS
+- Aula.
+- Taller.
+- Educación Física.
+- Tiene en cuenta asignaciones y reemplazos vigentes.
+
+8.2 VER HORARIO COMPLETO
+- Vista institucional/pizarra en modo consulta/imprimible según integración.
+
+8.3 Si.R.A.
+Sistema de Registro de Asistencia.
+
+Sólo:
+- TALLER
+- EDUCACION_FISICA
+
+Flujo:
+1. seleccionar fecha;
+2. determinar clase/horario habilitado;
+3. cargar estudiantes del curso/grupo;
+4. marcar:
+   - Presente
+   - Ausente
+   - Tarde
+5. guardar registro.
+
+Colección:
+asistencias_clases
+
+La seguridad cruza:
+- docente;
+- horario;
+- curso;
+- tipo;
+- reemplazo activo cuando corresponde.
+
+Educación Física contempla lógica especial existente como “Día de lluvia”.
+
+8.4 PARTE DE ASISTENCIA
+- Consulta semanal.
+- Tipo.
+- Curso.
+- Fecha de inicio.
+- No modificar: está funcionando y fue definido como parte operativo.
+
+8.5 SITUACIÓN DE ASISTENCIA
+Tarjeta existente:
+“Situación general por curso”.
+
+- Resumen acumulado.
+- Períodos configurados.
+- Regla de equivalencia:
+  4 tardanzas = 1 falta.
+
+NO cambiar esa lógica sin pedido explícito.
+
+NUEVA FUNCIÓN CERRADA:
+“Detalle de asistencias del estudiante”.
+
+Aparece debajo de la situación general.
+
+Controles:
+- Curso
+- Estudiante más ancho
+- Tipo
+- Período
+- Consultar detalle
+
+Resultado:
+[Todos] [Presentes N] [Ausentes N] [Tardanzas N]
+
+Mismo tamaño.
+Tabla:
+Fecha | Estado
+
+Sólo los cursos/asistencias autorizados al docente.
+El CSS fue corregido para integrarse con la paleta bordó/clara del Portal Docente.
+
+8.6 LISTAS DE ESTUDIANTES
+- Estudiantes activos de los cursos asignados al docente.
+- Filtro/selección por curso.
+- Posibilidad de copiar listado.
+- Información asociada, incluyendo preceptoría cuando corresponde.
+
+8.7 AGENDA INSTITUCIONAL
+- Contactos de la comunidad educativa.
+- Docentes.
+- Referentes/autoridades.
+- Estudiantes propios según permisos.
+- Filtros por categoría/curso/nombre.
+
+8.8 REGISTRO DE CALIFICACIONES
+Enlace externo a Google Sheets:
+https://docs.google.com/spreadsheets/d/1hD0g7Nz9YcIDhNYOPUeTdj1YfhOL30qvQwk8xgBto1U/edit?usp=sharing
+
+8.9 DOCUMENTACIÓN ACADÉMICA
+Permite cargar:
+- PLAN_ANUAL
+- PROGRAMA_EXAMEN
+- MATERIAL_ESTUDIO
+
+Reglas detalladas en sección específica de esta bitácora.
+
+El docente puede:
+- subir PDFs;
+- seleccionar cursos exactos para Material de Estudio;
+- consultar documentos;
+- eliminar únicamente MATERIAL_ESTUDIO propio.
+
+8.10 INFORMES PEDAGÓGICO-DIDÁCTICOS
+- Docente ve informes para los cuales figura autorizado.
+- No administra permisos globales.
+- Los documentos son Google Docs privados.
+
+8.11 MESAS DE EXAMEN
+- Consulta de mesas PUBLICADAS.
+- Se filtran según espacios/autorizaciones docentes.
+- La lógica contempla reemplazos vigentes cuando corresponde.
+
+8.12 GESTIONES DOCENTES
+Carpeta Drive:
+https://drive.google.com/drive/folders/1NoVpghNJCUUHBSTrvQVYmSbqrCXgT4Dy
+
+8.13 NORMATIVA VIGENTE
+Carpeta Drive:
+https://drive.google.com/drive/folders/12uzImxU1baMY8YFNFPLPRPbyljqSlJtI?usp=sharing
+
+8.14 INVENTARIO ESCOLAR
+Google Sheet:
+https://docs.google.com/spreadsheets/d/1DOCCY-1cXT2BWGwQdeYaRG3r4FasH5ICI-MXOsqyGuQ/edit?gid=1149931630#gid=1149931630
+
+8.15 ENLACES INSTITUCIONALES
+Incluye:
+- Mi Legajo
+- Mi Escuela
+- Campus Educativo
+- Plataforma Educativa
+- Portal Ciudadano
+- SGF
+- Atención Virtual
+- Trámites Santa Fe
+
+======================================================================
+9. PORTAL ALUMNO
+======================================================================
+
+Archivo:
+alumnos/index.html
+
+Rol:
+ALUMNO
+
+CSS:
+assets/css/portal-alumno.css
+
+JS:
+assets/js/proteger-portal.js
+assets/js/mesas-alumno.js
+assets/js/documentacion-alumno.js
+assets/js/sime-alumno.js
+assets/js/volver-arriba.js
+assets/js/horarios-alumno.js
+assets/js/docentes-alumno.js
+assets/js/mis-companeros-alumno.js
+
+SECCIONES
+---------
+
+9.1 HORARIOS
+- Mi horario.
+- Sólo curso propio.
+- Aula/Taller/Educación Física según datos.
+- Reemplazos visibles cuando corresponden.
+
+9.2 VER HORARIO COMPLETO
+- Vista de horario correspondiente a la experiencia del portal.
+
+9.3 MIS DOCENTES Y REFERENTES
+- Docentes asignados exactamente al curso.
+- Autoridades/referentes institucionales.
+- Diseño dinámico para:
+  Dirección/Vicedirección,
+  Secretaría/Prosecretaría,
+  Preceptoría.
+
+Se corrigió previamente para:
+- no mostrar cargos sin asignar;
+- mantener Prosecretaría aunque no exista Secretaría;
+- adaptar la grilla a los cargos realmente presentes.
+
+9.4 MIS COMPAÑEROS
+- Sólo estudiantes activos del mismo curso.
+- Seguridad reforzada por Firestore Rules.
+
+9.5 INSCRIPCIÓN A EXÁMENES – S.I.M.E.
+- Nueva inscripción.
+- Año cursado.
+- Curso de origen.
+- Materias adeudadas.
+- Una inscripción lógica agrupa materias del mismo año cursado.
+- Genera permiso PDF.
+- “Mis inscripciones”.
+- Abrir permiso.
+
+9.6 MESAS DE EXAMEN
+- Sólo PUBLICADAS.
+- Búsqueda/consulta según materias autorizadas.
+
+Corrección cerrada:
+para reconstruir espacios/materias correctos del alumno, el backend de S.I.M.E.
+usa MATERIAS + cursoOrigen + normalización de nombres, evitando que aparezcan
+mesas que no corresponden.
+
+9.7 DOCUMENTACIÓN ACADÉMICA
+Alumno regular:
+- Programa de Examen de su año según lógica vigente.
+- Material de Estudio sólo para su curso/división exactos.
+
+CURSADA_COMPLETA:
+- conserva consulta de Programas de Examen.
+- no recibe Material de Estudio de cursado regular.
+
+9.8 DESBLOQUEO DE NETBOOKS
+https://desbloqueo.dgp.educ.ar
+
+9.9 PORTAL CIUDADANO / MI ESCUELA
+Enlaces externos provinciales según interfaz.
+
+IMPORTANTE:
+La nueva función “Detalle de asistencias del estudiante” NO está disponible para
+Alumno por decisión explícita.
+
+======================================================================
+10. Si.R.A. – MAPA FUNCIONAL COMPLETO
+======================================================================
+
+Nombre:
+Sistema de Registro de Asistencia.
+
+Persistencia principal:
+Firestore / asistencias_clases
+
+Tipos:
+- TALLER
+- EDUCACION_FISICA
+
+ESTADOS POR ALUMNO
+------------------
+- Presente
+- Ausente
+- Tarde
+
+REGLA DE SITUACIÓN
+------------------
+4 tardanzas equivalen a 1 falta.
+
+DOCENTE
+-------
+Registra asistencia.
+Debe tener autorización real por horario/asignación/reemplazo.
+No puede cargar arbitrariamente sobre cualquier curso.
+
+GESTIÓN
+-------
+Consulta:
+- Parte semanal.
+- Situación acumulada.
+- Detalle individual.
+
+ADMIN/SOPORTE
+-------------
+Consulta y puede ejecutar acciones de administración/limpieza.
+
+PARTE DE ASISTENCIA
+-------------------
+Objetivo:
+ver lo ocurrido por semana/curso/tipo.
+
+SITUACIÓN DE ASISTENCIA
+-----------------------
+Objetivo:
+resumen acumulado por estudiante y período.
+
+DETALLE INDIVIDUAL
+------------------
+Objetivo:
+corroborar exactamente qué se registró cada día para un estudiante.
+
+No reemplaza Parte ni Situación.
+No recalcula otra estadística.
+Sólo muestra:
+Fecha | Estado
+
+Filtros:
+Todos / Presentes / Ausentes / Tardanzas.
+
+EDUCACIÓN FÍSICA
+----------------
+Conserva particularidades ya implementadas, por ejemplo Día de lluvia.
+
+REEMPLAZOS
+----------
+Las reglas y frontend deben respetar reemplazos temporales para determinar quién
+puede registrar/consultar clases.
+
+======================================================================
+11. S.I.M.E. – SISTEMA DE INSCRIPCIÓN A MESAS DE EXÁMENES
+======================================================================
+
+Frontend:
+assets/js/sime-admin.js
+assets/js/sime-alumno.js
+assets/js/listado-inscriptos-sime-admin.js
+assets/js/listado-inscriptos-sime-gestion.js
+y funciones integradas en Gestión.
+
+BACKEND
+-------
+Deployment actual referenciado:
+https://script.google.com/macros/s/AKfycbwAoJxUZp7KRFneMwMUsfilojhYM7HdBl8_JVue1T9AukKD-EIacqT7UxhdokdSO6TRdQ/exec
+
+Última fuente conocida de referencia:
+backend-sime-mesas-alumno-corregido.txt
+(versión que incorporó la corrección de mesas para Alumno y fue probada).
+
+Google Sheet:
+ID:
+1cRWNbH6fz66NWrM_rpXxINbFlj0uJ0VUCMBCVw-OYCM
+
+Hojas conocidas:
+- CONFIGURACION
+- INSCRIPCIONES
+- MATERIAS
+- PLANTILLA_PERMISO
+
+Carpeta Drive raíz conocida:
+1x17ny2ntUpX-oigc8V5D3dpCwylqpemW
+
+ACCIONES BACKEND CONOCIDAS
+--------------------------
+- eliminar_inscripcion_admin
+- guardar_configuracion_admin
+- limpiar_inscripciones_admin
+- listar_inscripciones_admin
+- listar_mis_inscripciones
+- obtener_configuracion_admin
+- obtener_configuracion_alumno
+- obtener_datos_listado_pdf_gestion
+- obtener_materias_por_curso
+- obtener_permiso_inscripcion
+- obtener_permiso_inscripcion_admin
+- registrar_inscripcion
+- ping
+
+MODELO DE INSCRIPCIÓN
+---------------------
+Una inscripción contiene, entre otros:
+- ID
+- fecha/hora
+- ciclo
+- turno
+- correo alumno
+- nombre
+- DNI
+- vínculo
+- curso de origen
+- año cursado
+- materias
+- estado
+- ID del PDF de permiso en Drive
+
+Estado normal actual:
+ACTIVA
+
+Una persona puede realizar más de una inscripción en el mismo turno si adeuda
+materias de diferentes años. Cada año cursado queda en una inscripción separada.
+
+PERMISO PDF
+-----------
+Se genera usando PLANTILLA_PERMISO.
+Se almacena en Drive.
+Se referencia por ID desde INSCRIPCIONES.
+
+LISTADOS PDF
+------------
+Admin y Gestión:
+- funcionando.
+- 6 páginas A4 apaisadas.
+- una por año.
+- orden por espacios y estudiantes.
+- incluso año sin inscriptos conserva su página.
+
+CORRECCIÓN MESAS ALUMNO
+-----------------------
+Estado: CERRADA / PROBADA.
+El backend reconstruye IDs canónicos de materias usando:
+- cursoOrigen;
+- hoja MATERIAS;
+- nombres normalizados.
+
+Esto evita mostrar mesas incorrectas.
+
+PENDIENTE: QR EN PERMISO
+------------------------
+Estado:
+PENDIENTE / NO IMPLEMENTADO.
+
+Decisión acordada:
+- mantener permiso en papel;
+- agregar un QR por INSCRIPCIÓN;
+- no un QR global por alumno;
+- efectivamente:
+  alumno + turno + año cursado / idInscripcion;
+- si una inscripción contiene varias materias del mismo año, el QR representa
+  esa inscripción completa.
+
+La verificación:
+- debe ser pública;
+- sin login;
+- apta para cámara normal de celular;
+- alumno puede mostrar papel o captura;
+- debe indicar la inscripción real almacenada;
+- si se copia QR de otro alumno, mostrar los datos reales del dueño;
+- si es QR de otro turno, mostrar el turno real;
+- si token no existe, indicar inválido.
+
+Seguridad:
+- token aleatorio e impredecible;
+- no usar DNI;
+- no usar ID secuencial;
+- exponer sólo datos mínimos necesarios;
+- endpoint sólo lectura.
+
+Arquitectura preferida:
+Apps Script + Google Sheet S.I.M.E.
+Evitar Firestore para esta verificación.
+Puede utilizar CacheService para reducir lecturas de hoja.
+
+FUTURO, NO IMPLEMENTAR AÚN
+--------------------------
+Inscripción fuera de término.
+Estados conceptuales discutidos:
+- ACTIVA
+- FUERA_DE_TERMINO
+- APROBADA_EXCEPCION
+- RECHAZADA
+- ANULADA
+
+No implementar hasta decisión explícita.
+
+======================================================================
+12. DOCUMENTACIÓN ACADÉMICA
+======================================================================
+
+Colección Firestore:
+documentacion_academica
+
+Frontend:
+- assets/js/material-estudio.js
+- assets/js/documentacion-alumno.js
+- assets/js/documentacion-admin.js
+- funciones de Gestión en gestion.js
+
+BACKEND
+-------
+Deployment:
+https://script.google.com/macros/s/AKfycbyJA5XiNV_JqALCztCcSctp4eVpW25jxJaKPYvGD8qVm7mbM6oJWx99Op4vqX7pk2Eqzw/exec
+
+Carpeta raíz Drive:
+1FCpZkSGpVA2shP8p9BIQtVIguvHq94ga
+
+Tipos:
+- PLAN_ANUAL
+- PROGRAMA_EXAMEN
+- MATERIAL_ESTUDIO
+
+ACCIONES BACKEND ACTUALES
+-------------------------
+- obtener_opciones_documentacion
+- obtener_documentos_docente
+- obtener_documentos_admin
+- obtener_documentos_soporte
+- obtener_documentos_alumno
+- obtener_archivo_documento_docente
+- obtener_archivo_documento_alumno
+- obtener_archivo_documento_gestion
+- obtener_archivo_documento_soporte
+- eliminar_documento_admin
+- eliminar_informe_pedagogico_admin
+- eliminar_material_estudio_docente
+- subir_documento
+
+SEGURIDAD PDF
+-------------
+Estado: CERRADO / FUNCIONANDO.
+
+Los PDFs:
+- son privados en Google Drive;
+- NO quedan con “cualquiera con el enlace”;
+- frontend no recibe el enlace permanente real como mecanismo de acceso;
+- se solicita al backend;
+- backend valida:
+  Firebase Authentication,
+  App Check,
+  rol,
+  permisos específicos;
+- backend lee el archivo;
+- devuelve Base64;
+- frontend crea blob URL temporal.
+
+El backend de Documentación integra App Check.
+
+MATERIAL DE ESTUDIO – REGLA EXACTA
+----------------------------------
+Docente:
+- sólo ve su propio material.
+- puede cargar uno o varios cursos exactos del mismo espacio.
+- se almacenan arrays:
+  asignacionIds
+  cursoIds
+  cursoNombres
+  cursoDivisiones
+- también se conservan campos singulares de compatibilidad.
+
+Alumno:
+- sólo ve Material de Estudio destinado a su curso/división exacto.
+- el criterio principal es cursoId exacto.
+- existen fallbacks compatibles con datos antiguos.
+
+Plan / Programa:
+- conservan lógica compartida por año/espacio de acuerdo con el modelo existente.
+
+MULTICURSO
+----------
+Un PDF puede corresponder a:
+4.º A + 4.º B + 4.º C, por ejemplo.
+
+Físicamente:
+un único archivo.
+
+ELIMINACIÓN POR DOCENTE
+-----------------------
+Estado: CERRADO / PROBADO.
+
+Sólo:
+MATERIAL_ESTUDIO propio.
+
+Backend valida:
+- sesión;
+- App Check;
+- rol DOCENTE;
+- tipo MATERIAL_ESTUDIO;
+- subidoPorCorreo = correo autenticado.
+
+Al eliminar:
+- archivo va a Papelera de Drive;
+- registro se elimina de Firestore;
+- desaparece para todos los cursos destinatarios.
+
+No se guarda:
+- motivo;
+- auditoría adicional.
+
+Responsabilidad de recarga:
+del docente.
+
+Plan Anual / Programa:
+NO se eliminan por esta acción.
+
+POLÍTICA INSTITUCIONAL ACORDADA
+-------------------------------
+Documentación Académica:
+- apuntes;
+- cuadernillos;
+- bibliografía;
+- guías generales;
+- material de consulta/descarga de uso sostenido.
+
+Classroom:
+- actividades diarias;
+- consignas;
+- trabajos prácticos;
+- entregas;
+- material temporal.
+
+======================================================================
+13. INFORMES PEDAGÓGICO-DIDÁCTICOS
+======================================================================
+
+Colección:
+informes_pedagogicos
+
+Backend:
+https://script.google.com/macros/s/AKfycbwiPaqdCFtfChD_b0xUDOF4zqhbOs_WJ45aVBHW9kn6hnbRTGEp93A4mp2W0r0v7pXt4w/exec
+
+Fuente conocida:
+Codigo_Informes_Pedagogicos_FINAL_Editar_Direccion.gs
+
+Carpeta raíz:
+1INQbaNP3ekVp2sQg4lsClus8mMcmeD9i
+
+Plantilla:
+1mvF-Oa0E7y8LSXn_41yAor_rRX0KQx93BE_1Yty96lg
+
+ACCIONES BACKEND
+----------------
+- actualizar_docentes_informes_estudiante
+- crear_informe_pedagogico
+- eliminar_informe_pedagogico
+- listar_informes_docente
+- listar_informes_gestion
+- obtener_enlace_edicion_informe
+- obtener_informe_gestion
+- obtener_opciones_creacion_informe
+- probar_sesion
+- ping
+
+TIPO DE ARCHIVO
+---------------
+Google Docs.
+NO PDF.
+
+SEGURIDAD
+---------
+No se comparte como “cualquiera con el enlace”.
+
+Permisos:
+- creador / Dirección: escritura cuando corresponde;
+- docentes autorizados: lectura.
+
+Autorización docente:
+- usuario DOCENTE activo;
+- asignación ACTIVA;
+- curso/división exactos del alumno.
+
+No se otorga lectura general a cualquier cuenta institucional.
+
+DECISIÓN
+--------
+Estado: CERRADO.
+No modificar mientras no haya un nuevo requerimiento.
+
+======================================================================
+14. HORARIOS, ASIGNACIONES, REEMPLAZOS Y PIZARRA
+======================================================================
+
+Colecciones:
+- asignaciones_docentes
+- horarios
+- reemplazos_docentes
+
+TIPOS DE HORARIO
+----------------
+- AULA
+- TALLER
+- EDUCACION_FISICA
+
+ADMIN
+-----
+Crea/administra los horarios.
+
+DOCENTE
+-------
+Consulta sus horarios.
+La visualización considera reemplazos.
+
+ALUMNO
+------
+Consulta su curso.
+
+GESTIÓN
+-------
+Consulta organización institucional y horarios.
+
+PIZARRA
+-------
+Archivo:
+assets/js/pizarra-horarios-admin.js
+
+CSS:
+assets/css/pizarra-horarios-admin.css
+
+Genera una vista imprimible en ventana nueva.
+Incluye:
+- toolbar;
+- imprimir;
+- guardar PDF mediante window.print().
+
+REEMPLAZOS
+----------
+Colección:
+reemplazos_docentes
+
+Pensados para:
+- Taller
+- Educación Física
+
+Permiten reemplazo temporal por licencia/situación.
+
+Gestión:
+- DIRECCION / SECRETARIA / ASISTENTE_ADMINISTRATIVO administran.
+- PRECEPTORIA consulta.
+
+PENDIENTES / REVISIÓN FUTURA
+-----------------------------
+Se han identificado necesidades arquitectónicas previas:
+- soportar varios docentes por curso/espacio cuando realmente corresponda;
+- elección precisa de docente al crear bloques;
+- garantizar que un reemplazo temporal no deje una asignación permanente
+  residual;
+- asegurar acceso temporal del reemplazante al curso/espacio del titular.
+
+Importante:
+la administración de reemplazos en Gestión YA existe en la versión actual.
+Antes de modificar este módulo se debe revisar el código actual y no basarse en
+pendientes antiguos como si siguieran sin implementar.
+
+======================================================================
+15. CALENDARIO ESCOLAR
+======================================================================
+
+Frontend público:
+assets/js/calendario-escolar.js
+
+Admin:
+assets/js/calendario-escolar-admin.js
+
+Gestión:
+funciones integradas en assets/js/gestion.js
+
+Backend:
+https://script.google.com/macros/s/AKfycbzRqnjl70VJosj9WHL-JGBn0hQ5COZtYQKNiYrJFfyfrdMQ_xDSJxNt0B7RUUbgW2z4iw/exec
+
+Última fuente conocida:
+Se ha pegado el código(20260814-235943).js
+
+Persistencia:
+Google Sheets.
+
+Hoja:
+CALENDARIO_ESCOLAR
+
+Modelo conocido:
+- ID
+- Fecha inicio
+- Fecha fin
+- Etiqueta
+- Título
+- Descripción
+
+GET
+---
+Consulta pública de eventos.
+
+POST
+----
+Acciones:
+- guardar_evento_calendario
+- editar_evento_calendario
+- eliminar_evento_calendario
+
+PERMISOS
+--------
+Admin:
+SOPORTE activo.
+
+Gestión:
+- DIRECCION
+- SECRETARIA
+- ASISTENTE_ADMINISTRATIVO
+- PRECEPTORIA
+
+El backend valida que el rol activo solicitado exista realmente en el perfil.
+
+Estado:
+CERRADO / FUNCIONANDO.
+
+Nota:
+este backend conocido valida Firebase ID token mediante Identity Toolkit.
+No modificar su seguridad/App Check sin una tarea específica.
+
+======================================================================
+16. GALERÍA INSTITUCIONAL
+======================================================================
+
+Frontend público:
+assets/js/galeria.js
+
+Admin:
+assets/js/galeria-admin.js
+
+Backend compartido con backup Firestore actual:
+https://script.google.com/macros/s/AKfycbwgqaaYJLlGZl7CcxcYRwy-qqPrlqKoL2L1qDxk0nqsPCbVZqmmbTS5KaCsdDNxVpq-/exec
+
+Fuente conocida:
+Se ha pegado el código(20260810-004943).js
+
+Colección:
+galeria_institucional
+
+Carpeta Drive de publicaciones:
+1jfVtXPRpYzT7xj7Ac2vjWoAp1JdlheR8
+
+CATEGORÍAS Y CARPETAS
+---------------------
+01-HISTORIA-EDIFICIO
+Drive:
+1tleg4fg7iwoKyKL5defTLp4wgnRT1Q-P
+
+02-TALLERES
+Drive:
+1WeVALHkAf2-OInBWojFmPkmNCfWoyCqr
+
+03-AULAS
+Drive:
+1wJpNlv7PogsewPWXZ9LbFlzCwew8kUdA
+
+04-EXPOS-FERIAS-CONCURSOS
+Drive:
+1hSVSXDnT1_HPKg7itNhCuFAsTIfqaCkd
+
+05-ACTOS-ESCOLARES
+Drive:
+1J2Yg_kcsAGxsLQQnSWTey7IBU24a9pBf
+
+06-ACTIVIDADES-VARIAS
+Drive:
+13MPViGXebaMYSMjYfwLzIEbu5eeCQ5WR
+
+GET PÚBLICO
+-----------
+accion=obtener_galeria
+
+POST ADMIN
+----------
+sincronizar_galeria
+
+La sincronización:
+- requiere autenticación de Soporte;
+- detecta imágenes nuevas;
+- publica/sincroniza;
+- actualiza la colección de galería.
+
+======================================================================
+17. BACKUP ACTUAL DE FIRESTORE
+======================================================================
+
+IMPORTANTE:
+EL BACKUP ACTUAL NO ES UN BACKUP TOTAL DEL PORTAL.
+
+Backend:
+el mismo de Galería:
+https://script.google.com/macros/s/AKfycbwgqaaYJLlGZl7CcxcYRwy-qqPrlqKoL2L1qDxk0nqsPCbVZqmmbTS5KaCsdDNxVpq-/exec
+
+Configuración conocida:
+PROJECT_ID:
+portal-institucional-eet-fa5c7
+
+DATABASE_ID:
+(default)
+
+Carpeta Drive:
+1CcLk_ql821vI2smEfCVXX21sCfpVZYDD
+
+Nombre del sistema:
+Portal_EETP495
+
+Acción manual:
+generar_backup_firestore
+
+Función programada:
+generarBackupProgramado()
+
+La interfaz informa ejecución automática:
+sábados.
+
+FUNCIONAMIENTO
+--------------
+1. lista los IDs de colecciones de Firestore;
+2. recorre las colecciones;
+3. obtiene documentos;
+4. genera JSON;
+5. guarda archivo en Drive.
+
+Nombre aproximado:
+Portal_EETP495_backup_firestore_[manual|automatico]_FECHA.json
+
+ESTO CUBRE
+----------
+Datos de Firestore accesibles por ese mecanismo.
+
+NO CUBRE POR SÍ SOLO
+--------------------
+- Firebase Authentication;
+- reglas Firestore;
+- configuración Firebase/App Check;
+- código fuente GitHub;
+- Apps Script;
+- propiedades de Apps Script;
+- Google Sheets;
+- archivos Google Drive;
+- DNS/Cloudflare;
+- permisos de Drive;
+- configuraciones externas;
+- procedimiento probado de restauración.
+
+Por lo tanto:
+el botón “Backup del sistema” actual debe interpretarse como:
+BACKUP DE FIRESTORE,
+no como recuperación total ante desastre.
+
+======================================================================
+18. BACKUP TOTAL – PENDIENTE PRIORITARIO
+======================================================================
+
+ESTADO:
+PENDIENTE / NO IMPLEMENTADO COMO SISTEMA TOTAL.
+
+OBJETIVO
+--------
+Poder recuperar el Portal Institucional completo ante:
+- corrupción de datos;
+- eliminación accidental;
+- pérdida de una cuenta/servicio;
+- cambios de infraestructura;
+- necesidad de migración.
+
+ALCANCE QUE DEBE CONTENER
+-------------------------
+
+18.1 CÓDIGO FUENTE
+- repositorio GitHub completo;
+- rama main;
+- historial Git;
+- CNAME;
+- HTML/CSS/JS;
+- firestore.rules;
+- firebase.json;
+- configuración básica de proyecto documentada.
+
+18.2 FIRESTORE
+- todas las colecciones;
+- documentos;
+- arrays/mapas/timestamps;
+- metadatos necesarios para restaurar.
+
+El JSON actual puede formar parte de esta capa, pero se debe definir y probar un
+mecanismo de restauración.
+
+18.3 FIREBASE AUTHENTICATION
+Respaldar/exportar:
+- UID;
+- correo;
+- proveedor;
+- estado;
+- metadata recuperable;
+- datos necesarios según las posibilidades oficiales de exportación.
+
+La restauración debe respetar que las cuentas Google/Firebase Authentication y
+los perfiles `usuarios` son capas diferentes.
+
+18.4 FIRESTORE RULES
+Guardar:
+- firestore.rules;
+- versión utilizada;
+- fecha/hash;
+- procedimiento para desplegar nuevamente.
+
+18.5 FIREBASE / APP CHECK / CONFIGURACIÓN
+Documentar/exportar cuando sea posible:
+- Project ID;
+- Web App config;
+- dominios autorizados;
+- proveedor App Check;
+- site key pública;
+- parámetros que no estén en Git;
+- configuración del Firebase Console.
+
+No guardar secretos sensibles en una bitácora pública.
+
+18.6 GOOGLE APPS SCRIPT
+Respaldar CADA proyecto:
+- código fuente;
+- nombre del proyecto;
+- Script ID si se incorpora al inventario seguro;
+- Web App deployment URL;
+- versión desplegada;
+- “Ejecutar como” / acceso;
+- triggers;
+- Script Properties necesarias;
+- servicios/API avanzados;
+- IDs de Sheets/Drive utilizados.
+
+Backends actuales a incluir:
+1. Documentación Académica.
+2. S.I.M.E.
+3. Informes Pedagógico-Didácticos.
+4. Calendario Escolar.
+5. Galería + backup Firestore.
+6. Baja Global de Usuarios.
+
+18.7 GOOGLE SHEETS
+Respaldar al menos las planillas estructurales del sistema:
+- S.I.M.E.
+- Calendario Escolar.
+
+También decidir institucionalmente si el backup total debe incorporar planillas
+externas enlazadas:
+- Registro de Calificaciones.
+- Inventario Escolar.
+- otras planillas operativas.
+
+Debe conservarse:
+- datos;
+- estructura;
+- hojas;
+- fórmulas;
+- validaciones importantes;
+- permisos cuando sea posible/documentable.
+
+18.8 GOOGLE DRIVE
+Respaldar/copiar o inventariar:
+- Documentación Académica;
+- Informes Pedagógicos;
+- Permisos S.I.M.E.;
+- Galería Institucional;
+- carpetas raíz y estructura;
+- archivos institucionales críticos.
+
+Se debe definir qué carpetas forman parte del “sistema” y cuáles son sólo
+enlaces externos de consulta.
+
+18.9 DNS / DOMINIO / CLOUDFLARE
+Guardar:
+- dominio;
+- registros DNS;
+- configuración relevante de Cloudflare;
+- relación con GitHub Pages;
+- HTTPS;
+- redirecciones esperadas;
+- CNAME.
+
+18.10 GITHUB PAGES
+Documentar:
+- repositorio;
+- rama publicada;
+- dominio custom;
+- configuración necesaria para volver a publicar.
+
+18.11 INVENTARIO DE IDs / ENDPOINTS
+Debe existir un manifiesto seguro con:
+- IDs de Sheets;
+- IDs de carpetas Drive;
+- URLs Apps Script;
+- Firebase Project ID;
+- nombres de colecciones;
+- dependencias externas.
+
+Esta bitácora ya contiene gran parte del inventario técnico no secreto.
+
+18.12 RESTAURACIÓN
+No declarar “backup total terminado” hasta haber probado:
+- restauración de datos;
+- restauración de código;
+- restauración/reconexión de Apps Script;
+- recuperación de permisos/archivos;
+- reconstrucción de login y reglas;
+- recuperación de S.I.M.E.;
+- recuperación de documentación.
+
+18.13 RETENCIÓN RECOMENDADA A DEFINIR
+Debe acordarse:
+- frecuencia;
+- cantidad de copias;
+- rotación;
+- copias fuera de la cuenta principal;
+- verificación periódica.
+
+NO se ha cerrado aún esta política.
+
+CONCLUSIÓN DEL BACKUP TOTAL
+---------------------------
+El backup total sigue siendo un pendiente real y debe considerarse una tarea
+de infraestructura separada. El backup Firestore actual es útil, pero no es
+suficiente para recuperación integral.
+
+======================================================================
+19. BAJA GLOBAL DE USUARIOS
+======================================================================
+
+Frontend:
+assets/js/usuarios-inactivos-admin.js
+
+Backend:
+https://script.google.com/macros/s/AKfycbyuzJxYe0Hiauj3wTKlcA-3yom9NVjZFzEsEj7LGG6bef_YYjkPQtInIXviIsSluXXSVg/exec
+
+Fuente conocida de producción:
+Codigo_Baja_Global_EETP495_PRODUCCION_V5_LIMPIO.gs
+
+Versión declarada:
+2026-08-09-PRODUCCION-5
+
+SEGURIDAD
+---------
+Sólo SOPORTE activo puede consultar/ejecutar.
+
+Acciones:
+- prevalidar_baja_global
+- ejecutar_baja_global
+
+La ejecución exige confirmación del correo objetivo.
+
+CUENTAS PROTEGIDAS
+------------------
+- soportetecnico.tec495@gmail.com
+- enviotrabajos495@gmail.com
+
+ALCANCE DE PREVALIDACIÓN / BAJA
+-------------------------------
+La lógica rastrea y/o actúa sobre:
+- Firebase Authentication.
+- perfil `usuarios`.
+- accesos_recientes.
+- registros embebidos de alumno en asistencias.
+- S.I.M.E. INSCRIPCIONES.
+- permisos PDF de S.I.M.E.
+- asignaciones docentes.
+- referencias de horarios.
+- Informes Pedagógicos.
+- permisos Drive de informes.
+- referentes institucionales.
+- referencias técnicas/auditoría que deban anonimizarse.
+
+PRINCIPIOS
+----------
+Alumno:
+- se quitan sus registros donde corresponda.
+- inscripciones S.I.M.E. / PDFs pueden eliminarse.
+- Informes Pedagógicos institucionales se conservan/archivan según diseño.
+
+Docente:
+- se eliminan asignaciones que deban desaparecer;
+- se preserva historia de asistencias según reglas;
+- se quita su autorización en informes;
+- se retiran permisos Drive directos personales cuando corresponde.
+
+Institucional:
+- se preserva historia institucional importante;
+- referencias técnicas pueden anonimizarse;
+- autoría histórica de Informes Pedagógicos se conserva según backend.
+
+Estado:
+función crítica. No modificar sin revisar backend actual completo y hacer pruebas.
+
+======================================================================
+20. REGISTRO DE BACKENDS APPS SCRIPT
+======================================================================
+
+A. DOCUMENTACIÓN ACADÉMICA
+URL:
+https://script.google.com/macros/s/AKfycbyJA5XiNV_JqALCztCcSctp4eVpW25jxJaKPYvGD8qVm7mbM6oJWx99Op4vqX7pk2Eqzw/exec
+
+Datos:
+Firestore + Drive.
+
+Seguridad:
+Authentication + App Check + rol/permisos.
+
+Estado:
+activo / probado.
+
+B. S.I.M.E.
+URL:
+https://script.google.com/macros/s/AKfycbwAoJxUZp7KRFneMwMUsfilojhYM7HdBl8_JVue1T9AukKD-EIacqT7UxhdokdSO6TRdQ/exec
+
+Datos:
+Google Sheets + Drive + Firestore para validaciones.
+
+Estado:
+activo / probado.
+QR pendiente.
+
+C. INFORMES PEDAGÓGICOS
+URL:
+https://script.google.com/macros/s/AKfycbwiPaqdCFtfChD_b0xUDOF4zqhbOs_WJ45aVBHW9kn6hnbRTGEp93A4mp2W0r0v7pXt4w/exec
+
+Datos:
+Firestore + Drive/Docs.
+
+Estado:
+activo / no tocar.
+
+D. CALENDARIO ESCOLAR
+URL:
+https://script.google.com/macros/s/AKfycbzRqnjl70VJosj9WHL-JGBn0hQ5COZtYQKNiYrJFfyfrdMQ_xDSJxNt0B7RUUbgW2z4iw/exec
+
+Datos:
+Google Sheet CALENDARIO_ESCOLAR.
+
+GET:
+público.
+
+POST:
+autenticado.
+
+Estado:
+activo.
+
+E. GALERÍA + BACKUP FIRESTORE
+URL:
+https://script.google.com/macros/s/AKfycbwgqaaYJLlGZl7CcxcYRwy-qqPrlqKoL2L1qDxk0nqsPCbVZqmmbTS5KaCsdDNxVpq-/exec
+
+Datos:
+Firestore + Drive.
+
+GET:
+galería pública.
+
+POST:
+sincronización de galería y backup manual.
+
+Trigger:
+backup Firestore programado.
+
+Estado:
+activo.
+Backup total NO cubierto.
+
+F. BAJA GLOBAL
+URL:
+https://script.google.com/macros/s/AKfycbyuzJxYe0Hiauj3wTKlcA-3yom9NVjZFzEsEj7LGG6bef_YYjkPQtInIXviIsSluXXSVg/exec
+
+Datos:
+Firebase Auth + Firestore + SIME Sheet + Drive.
+
+Estado:
+producción V5 conocida.
+
+REGLA PARA FUTURAS EDICIONES
+----------------------------
+Antes de modificar cualquiera de estos backends:
+pedir la versión ACTUAL del Apps Script si existe la posibilidad de que se haya
+cambiado fuera del repositorio después de esta bitácora.
+
+======================================================================
+21. RECURSOS GOOGLE / EXTERNOS INVENTARIADOS
+======================================================================
+
+S.I.M.E. Sheet:
+1cRWNbH6fz66NWrM_rpXxINbFlj0uJ0VUCMBCVw-OYCM
+
+Registro de Calificaciones:
+1hD0g7Nz9YcIDhNYOPUeTdj1YfhOL30qvQwk8xgBto1U
+
+Inventario Escolar:
+1DOCCY-1cXT2BWGwQdeYaRG3r4FasH5ICI-MXOsqyGuQ
+
+Gestiones Docentes Drive:
+1NoVpghNJCUUHBSTrvQVYmSbqrCXgT4Dy
+
+Normativa Drive:
+12uzImxU1baMY8YFNFPLPRPbyljqSlJtI
+
+Documentación Académica – raíz:
+1FCpZkSGpVA2shP8p9BIQtVIguvHq94ga
+
+Informes Pedagógicos – raíz:
+1INQbaNP3ekVp2sQg4lsClus8mMcmeD9i
+
+Plantilla Informe:
+1mvF-Oa0E7y8LSXn_41yAor_rRX0KQx93BE_1Yty96lg
+
+S.I.M.E. Drive raíz:
+1x17ny2ntUpX-oigc8V5D3dpCwylqpemW
+
+Backup Firestore Drive:
+1CcLk_ql821vI2smEfCVXX21sCfpVZYDD
+
+Galería publicada:
+1jfVtXPRpYzT7xj7Ac2vjWoAp1JdlheR8
+
+Servicios provinciales/enlaces:
+- https://campuseducativo.santafe.edu.ar
+- https://plataformaeducativa.santafe.edu.ar/moodle/
+- https://www.santafe.gov.ar/milegajo/#/inicio
+- https://www.santafe.gob.ar/miescuela/#/app/main
+- https://www.santafe.gob.ar/portalciudadano/
+- https://www.santafe.gob.ar/sgf/app
+- https://atencionvirtual.santafe.gob.ar/procedures
+- https://tramites.santafe.gob.ar/
+- https://desbloqueo.dgp.educ.ar
+
+======================================================================
+22. DEPENDENCIAS FRONTEND EXTERNAS
+======================================================================
+
+Firebase JS SDK:
+12.15.0 en módulos actuales principales.
+
+App Check:
+firebase-app-check.js 12.15.0.
+
+SweetAlert2:
+cdn.jsdelivr.net/npm/sweetalert2@11
+
+SheetJS:
+cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js
+
+Bootstrap Icons:
+1.11.3
+
+Font Awesome:
+se detectan referencias 6.5.2 / 6.7.2 según página/estilo.
+
+Fuente:
+Nunito Sans mediante Google Fonts.
+
+======================================================================
+23. ARCHIVOS DEL REPOSITORIO – INVENTARIO COMPLETO
+======================================================================
+
+TOTAL EN SNAPSHOT BASE:
+93 archivos fuera de .git.
+
+RAÍZ
+----
+.firebaserc
+.gitignore
+CNAME
+README.md
+firebase.json
+firestore.rules
+index.html
+login.html
+robots.txt
+sitemap.xml
+
+PORTALES
+--------
+admin/index.html
+gestion/index.html
+docentes/index.html
+alumnos/index.html
+
+CSS
+---
+assets/css/pizarra-horarios-admin.css
+assets/css/portal-admin.css
+assets/css/portal-alumno.css
+assets/css/portal-docente.css
+assets/css/portal-gestion.css
+assets/css/portal-login.css
+assets/css/sitio-publico.css
+
+JS
+--
+assets/js/accesos-recientes-admin.js
+assets/js/admin.js
+assets/js/agenda-docente.js
+assets/js/backup-admin.js
+assets/js/calendario-escolar-admin.js
+assets/js/calendario-escolar.js
+assets/js/docentes-alumno.js
+assets/js/documentacion-admin.js
+assets/js/documentacion-alumno.js
+assets/js/firebase-auth.js
+assets/js/galeria-admin.js
+assets/js/galeria.js
+assets/js/gestion.js
+assets/js/horarios-admin.js
+assets/js/horarios-alumno.js
+assets/js/horarios-docente.js
+assets/js/informes-docente.js
+assets/js/limpieza-asistencias-admin.js
+assets/js/limpieza-horarios-admin.js
+assets/js/listado-inscriptos-sime-admin.js
+assets/js/listado-inscriptos-sime-gestion.js
+assets/js/listas-estudiantes-docente.js
+assets/js/login-fondo.js
+assets/js/material-estudio.js
+assets/js/mesas-alumno.js
+assets/js/mesas-docente.js
+assets/js/mis-companeros-alumno.js
+assets/js/parte-sira-docente.js
+assets/js/permisos-taller-docente.js
+assets/js/pizarra-horarios-admin.js
+assets/js/proteger-portal.js
+assets/js/reemplazos-docentes-admin.js
+assets/js/reemplazos-docentes-gestion.js
+assets/js/referentes-admin.js
+assets/js/sime-admin.js
+assets/js/sime-alumno.js
+assets/js/sira-admin.js
+assets/js/sira-docente.js
+assets/js/sira-gestion.js
+assets/js/situacion-asistencia-docente.js
+assets/js/situacion-asistencia-gestion.js
+assets/js/solicitudes-alta-admin.js
+assets/js/usuarios-inactivos-admin.js
+assets/js/volver-arriba.js
+
+IMÁGENES GENERALES
+------------------
+assets/img/Frente1.png
+assets/img/Frente2.png
+assets/img/IMGFrenteCorregido.png
+assets/img/IMGFrenteCorregido2.png
+assets/img/actos.jpg
+assets/img/aula.jpg
+assets/img/escuela.jpg
+assets/img/frente-detalle.jpeg
+assets/img/laboratorio.jpg
+assets/img/logo.png
+assets/img/patio.jpg
+assets/img/talleres.jpg
+
+FONDOS LOGIN
+------------
+assets/img/login-fondos/fondo-01.jpg
+assets/img/login-fondos/fondo-02.jpg
+assets/img/login-fondos/fondo-03.jpg
+assets/img/login-fondos/fondo-04.jpg
+assets/img/login-fondos/fondo-05.jpg
+assets/img/login-fondos/fondo-06.jpg
+assets/img/login-fondos/fondo-07.jpg
+assets/img/login-fondos/fondo-08.jpg
+assets/img/login-fondos/fondo-09.jpg
+assets/img/login-fondos/fondo-10.jpg
+assets/img/login-fondos/fondo-11.jpg
+assets/img/login-fondos/fondo-12.jpg
+assets/img/login-fondos/fondo-13.jpg
+assets/img/login-fondos/fondo-14.jpg
+assets/img/login-fondos/fondo-15.jpg
+assets/img/login-fondos/fondo-16.jpg
+
+======================================================================
+24. CAMBIOS POSTERIORES AL ZIP BASE – 14/09/2026
+======================================================================
+
+El ZIP completo del 14/09 fue la base de análisis, pero la mejora de Detalle de
+Asistencias se realizó después.
+
+ARCHIVOS MODIFICADOS EN GESTIÓN
+--------------------------------
+gestion/index.html
+assets/js/situacion-asistencia-gestion.js
+assets/css/portal-gestion.css
+
+ARCHIVOS MODIFICADOS EN ADMIN
+------------------------------
+admin/index.html
+assets/js/sira-admin.js
+assets/css/portal-admin.css
+
+ARCHIVOS MODIFICADOS EN DOCENTE
+--------------------------------
+docentes/index.html
+assets/js/situacion-asistencia-docente.js
+assets/css/portal-docente.css
+
+El CSS de Docente tuvo un ajuste final para coincidir con la estética bordó.
+
+Estado:
+PROBADO POR EL USUARIO Y FUNCIONANDO PERFECTAMENTE.
+
+======================================================================
+25. FUNCIONES CERRADAS / NO TOCAR SIN MOTIVO
+======================================================================
+
+- Seguridad de PDFs de Documentación Académica.
+- Material de Estudio exacto por curso.
+- Multicurso.
+- Eliminación de Material de Estudio propio por Docente.
+- Informes Pedagógicos y sus permisos.
+- S.I.M.E. listado PDF Admin.
+- S.I.M.E. listado PDF Gestión.
+- Corrección de Mesas publicadas para Alumno.
+- Calendario Escolar.
+- Search Console redirección HTTP -> HTTPS.
+- Detalle individual de asistencia en Gestión/Admin/Docente.
+- Parte de Asistencia actual.
+- Situación de Asistencia actual.
+
+Principio:
+si funciona, no reescribir por “mejora técnica” sin un beneficio concreto y una
+prueba controlada.
+
+======================================================================
+26. PENDIENTES Y HOJA DE RUTA
+======================================================================
+
+PRIORIDAD INFRAESTRUCTURA
+-------------------------
+1. BACKUP TOTAL.
+   Sigue pendiente y debe incluir restauración probada.
+
+PRIORIDAD S.I.M.E.
+------------------
+2. QR en permiso.
+3. Página pública de validación.
+4. Futuro: inscripción fuera de término, sólo después de decisión institucional.
+
+ARQUITECTURA / HORARIOS / REEMPLAZOS
+------------------------------------
+5. Revisar múltiples docentes por curso/espacio en casos necesarios.
+6. Revisar selección de docente en bloques.
+7. Revisar coherencia temporal de reemplazos y ausencia de asignación residual.
+
+SEGURIDAD
+---------
+8. App Check/local/debug quedó pausado.
+9. Si se retoma, revisar qué backends aún hacen Identity Toolkit sin App Check.
+
+======================================================================
+27. CÓMO RETOMAR EL PROYECTO EN UN CHAT NUEVO
+======================================================================
+
+PASO 1
+------
+Adjuntar esta bitácora.
+
+PASO 2
+------
+Escribir:
+“Continuamos Website-EETP495 desde la Bitácora Maestra.”
+
+PASO 3
+------
+Explicar la mejora/corrección.
+
+PASO 4
+------
+Enviar SOLAMENTE los archivos actuales del módulo a tocar.
+
+EJEMPLOS
+--------
+
+DETALLE DE ASISTENCIA – GESTIÓN
+- gestion/index.html
+- assets/js/situacion-asistencia-gestion.js
+- assets/css/portal-gestion.css
+
+DETALLE / SITUACIÓN – DOCENTE
+- docentes/index.html
+- assets/js/situacion-asistencia-docente.js
+- assets/css/portal-docente.css
+
+Si.R.A. ADMIN
+- admin/index.html
+- assets/js/sira-admin.js
+- assets/css/portal-admin.css
+
+DOCUMENTACIÓN ACADÉMICA DOCENTE
+- assets/js/material-estudio.js
+- backend actual de Documentación Académica
+- sólo si cambia interfaz:
+  docentes/index.html / portal-docente.css
+
+S.I.M.E. QR
+- backend ACTUAL de S.I.M.E.
+- assets/js/sime-alumno.js
+- alumnos/index.html si cambia UI
+- cualquier archivo actual que genere/renderice el permiso si se separó
+
+CALENDARIO
+- frontend afectado
+- backend Calendario actual si hay cambios de persistencia/permisos
+
+INFORMES
+- frontend afectado
+- backend actual Informes
+
+BAJA GLOBAL
+- usuarios-inactivos-admin.js
+- backend actual Baja Global
+
+BACKUP TOTAL
+- backend actual Galería/Backup
+- inventario actualizado de los Apps Script
+- acceso/configuración a definir para Firebase/Auth/Drive/Cloudflare.
+
+CUÁNDO VOLVER A PASAR EL ZIP COMPLETO
+-------------------------------------
+Sólo si:
+- no sabemos qué módulo interviene;
+- el cambio atraviesa muchos portales;
+- hay dependencias desconocidas;
+- se hizo una reestructuración grande del repositorio;
+- queremos regenerar/revalidar esta Bitácora Maestra completa.
+
+======================================================================
+28. CRITERIOS DE TRABAJO PERMANENTES
+======================================================================
+
+- Paso a paso.
+- Cambios mínimos.
+- No romper lo que funciona.
+- Probar antes de avanzar.
+- Seguridad en backend/reglas, no sólo interfaz.
+- Evitar Firestore público innecesario.
+- No asumir una versión vieja como actual.
+- Entregar código como .txt para reemplazo.
+- Indicar siempre el archivo real de destino.
+- Analizar críticamente; no dar la razón automáticamente.
+- Ante una diferencia, pedir el archivo actual.
+- Mantener esta Bitácora Maestra actualizada después de cambios importantes.
+
+======================================================================
+29. ESTADO GENERAL AL CIERRE DE ESTA BITÁCORA
+======================================================================
+
+SITIO PÚBLICO:
+OPERATIVO.
+
+LOGIN / ROLES:
+OPERATIVO.
+
+PORTAL ADMIN:
+OPERATIVO.
+
+PORTAL GESTIÓN:
+OPERATIVO.
+
+PORTAL DOCENTE:
+OPERATIVO.
+
+PORTAL ALUMNO:
+OPERATIVO.
+
+Si.R.A.:
+OPERATIVO.
+Detalle individual nuevo: OPERATIVO.
+
+S.I.M.E.:
+OPERATIVO.
+QR: PENDIENTE.
+
+DOCUMENTACIÓN ACADÉMICA:
+OPERATIVA.
+PDF privado: OPERATIVO.
+Eliminación de material propio por Docente: OPERATIVA.
+
+INFORMES PEDAGÓGICOS:
+OPERATIVOS.
+
+CALENDARIO:
+OPERATIVO.
+
+GALERÍA:
+OPERATIVA.
+
+BACKUP FIRESTORE:
+OPERATIVO.
+
+BACKUP TOTAL:
+PENDIENTE.
+
+BAJA GLOBAL:
+IMPLEMENTADA / FUNCIÓN CRÍTICA.
+
+SEARCH CONSOLE:
+REDIRECCIÓN REVISADA, SIN ACCIÓN.
+
+======================================================================
+FIN – BITÁCORA MAESTRA
+======================================================================
+
+Esta Bitácora Maestra debe evolucionar junto con el sistema.
+Después de cada modificación estructural importante conviene regenerarla o
+incorporar una nueva sección “Cambios desde la última Bitácora”.
+
+======================================================================
+30. ACTUALIZACIÓN – 14/09/2026 – SITUACIÓN DE ASISTENCIA EN ADMIN
+======================================================================
+
+ESTADO:
+IMPLEMENTADO / PROBADO PENDIENTE DE CONFIRMACIÓN FINAL DEL USUARIO.
+
+Se incorporó al Portal Admin la función “Situación de Asistencia”, equivalente
+a la que ya existía y funcionaba en Portal Gestión y Portal Docente.
+
+UBICACIÓN
+---------
+Portal Admin → Si.R.A.
+
+El orden funcional de la sección queda:
+
+1. Consulta y administración de asistencias / Parte semanal.
+2. Situación general por curso.
+3. Detalle de asistencias del estudiante.
+
+FUNCIONAMIENTO
+--------------
+La nueva “Situación general por curso” permite seleccionar:
+
+- Tipo de asistencia:
+  - Taller
+  - Educación Física
+- Curso
+- Período:
+  - Anual
+  - 1° Trimestre
+  - 2° Trimestre
+  - 3° Trimestre
+
+Luego de presionar “Consultar situación” muestra:
+
+Indicadores:
+- Estudiantes
+- Promedio del curso
+- En riesgo
+- Asistencia destacada
+
+Tabla:
+- Estudiante
+- P
+- A
+- T
+- Faltas equivalentes
+- % Asistencia
+- Estado
+
+REGLA
+-----
+4 tardanzas equivalen a 1 falta.
+
+ESTADOS
+-------
+- Excelente: 95 % o más
+- Muy buena: 90 % a menos de 95 %
+- Seguimiento: 80 % a menos de 90 %
+- Riesgo: menos de 80 %
+
+IMPLEMENTACIÓN
+--------------
+Se reutilizó la misma lógica ya probada en Gestión/Docente.
+
+No fue necesario modificar:
+- Apps Script
+- backend externo
+- firestore.rules
+
+Archivos modificados:
+
+- admin/index.html
+- assets/js/sira-admin.js
+- assets/css/portal-admin.css
+
+Se reutiliza:
+- configuracion_periodos
+- asistencias_clases
+- cursos
+
+La función existente “Detalle de asistencias del estudiante” permanece intacta.
+
+======================================================================
+FIN ACTUALIZACIÓN 14/09/2026
+======================================================================
