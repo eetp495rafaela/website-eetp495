@@ -4415,3 +4415,157 @@ body.swal2-shown {
     grid-template-columns: 1fr;
   }
 }
+
+/* =====================================================
+   CAMBIO DE CICLO LECTIVO - ESTUDIANTES
+===================================================== */
+
+.panel-cambio-ciclo-admin {
+  margin-top: 24px;
+}
+
+.filtros-cambio-ciclo-admin {
+  display: grid;
+  grid-template-columns: minmax(240px, 1fr) minmax(220px, 0.55fr);
+  gap: 16px;
+  align-items: end;
+  margin-top: 22px;
+}
+
+.acciones-cambio-ciclo-admin {
+  display: flex;
+  align-items: end;
+}
+
+.acciones-cambio-ciclo-admin .btn-accion {
+  width: 100%;
+  min-width: 0;
+}
+
+.herramientas-cambio-ciclo-admin {
+  display: grid;
+  grid-template-columns: minmax(260px, 1fr) minmax(220px, 0.7fr) minmax(
+      220px,
+      0.7fr
+    );
+  gap: 14px;
+  align-items: end;
+  margin-top: 18px;
+  padding: 16px;
+  border: 1px solid var(--borde);
+  border-radius: 12px;
+  background: #f8fbff;
+}
+
+.herramientas-cambio-ciclo-admin[hidden] {
+  display: none !important;
+}
+
+.herramientas-cambio-ciclo-admin .btn-accion {
+  width: 100%;
+  min-width: 0;
+}
+
+.btn-cambio-ciclo-confirmar,
+.btn-egresar-estudiantes {
+  background: #16794d;
+}
+
+.btn-cambio-ciclo-confirmar:hover,
+.btn-egresar-estudiantes:hover {
+  background: #0f603d;
+}
+
+.tabla-cambio-ciclo-admin,
+.tabla-egresados-admin {
+  margin-top: 18px;
+}
+
+.tabla-cambio-ciclo-estudiantes {
+  min-width: 920px;
+}
+
+.tabla-cambio-ciclo-estudiantes .col-check-cambio-ciclo,
+.tabla-egresados-admin .col-check-cambio-ciclo {
+  width: 56px;
+  text-align: center;
+}
+
+.tabla-cambio-ciclo-estudiantes td:first-child,
+.tabla-cambio-ciclo-estudiantes th:first-child,
+.tabla-egresados-admin td:first-child,
+.tabla-egresados-admin th:first-child {
+  text-align: center;
+}
+
+.tabla-cambio-ciclo-estudiantes select {
+  width: 100%;
+  min-width: 190px;
+  min-height: 38px;
+  padding: 7px 10px;
+  border: 1px solid var(--borde);
+  border-radius: 8px;
+  color: var(--texto);
+  background: #fff;
+  font: inherit;
+}
+
+.movimiento-cambio-ciclo {
+  display: inline-flex;
+  min-width: 112px;
+  min-height: 30px;
+  padding: 5px 10px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 900;
+  white-space: nowrap;
+}
+
+.movimiento-cambio-ciclo.promocion {
+  color: #0d6b3b;
+  background: #dcf7e8;
+}
+
+.movimiento-cambio-ciclo.repitencia {
+  color: #8a5a00;
+  background: #fff2cc;
+}
+
+.movimiento-cambio-ciclo.cursada-completa {
+  color: #0b4f9c;
+  background: #eaf3ff;
+}
+
+.separador-cambio-ciclo-admin {
+  height: 1px;
+  margin: 34px 0 26px;
+  background: var(--borde);
+}
+
+.acciones-egresados-admin {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 16px;
+}
+
+.acciones-egresados-admin .btn-accion {
+  min-width: 310px;
+}
+
+@media (max-width: 900px) {
+  .filtros-cambio-ciclo-admin,
+  .herramientas-cambio-ciclo-admin {
+    grid-template-columns: 1fr;
+  }
+
+  .acciones-egresados-admin {
+    justify-content: stretch;
+  }
+
+  .acciones-egresados-admin .btn-accion {
+    width: 100%;
+    min-width: 0;
+  }
+}

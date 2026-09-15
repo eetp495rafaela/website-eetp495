@@ -4381,6 +4381,7 @@ async function guardarEdicionUsuario(event) {
     "REEMPLAZANTE",
     "CURSANDO",
     "CURSADA_COMPLETA",
+    "EGRESADO",
   ];
 
   if (!situacionesRevistaValidas.includes(tipoVinculo)) {

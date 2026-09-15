@@ -192,6 +192,10 @@ function crearCeldaAccion(usuario) {
 function obtenerCondicionUsuario(usuario) {
   const tipoVinculo = normalizarMayusculas(usuario.tipoVinculo);
 
+  if (tipoVinculo === "EGRESADO") {
+    return "EGRESADO";
+  }
+
   if (tipoVinculo === "BAJA") {
     return "BAJA";
   }
@@ -1128,7 +1132,7 @@ function mostrarUsuariosInactivos(usuarios) {
 
   if (!usuarios.length) {
     mostrarFilaInformativa(
-      "No se encontraron usuarios inactivos ni dados de baja.",
+      "No se encontraron usuarios inactivos, egresados ni dados de baja.",
     );
 
     return;
@@ -1169,7 +1173,9 @@ async function cargarUsuariosInactivos() {
 
   mostrarMensaje("");
 
-  mostrarFilaInformativa("Consultando usuarios inactivos y dados de baja...");
+  mostrarFilaInformativa(
+    "Consultando usuarios inactivos, egresados y dados de baja...",
+  );
 
   try {
     const usuarios = await consultarUsuariosInactivos();
