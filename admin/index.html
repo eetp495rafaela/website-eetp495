@@ -1194,15 +1194,6 @@
                 COMPLETA.
               </p>
             </div>
-
-            <button
-              class="btn-accion"
-              id="btnPrepararCambioCicloAdmin"
-              type="button"
-            >
-              <i class="fa-solid fa-arrows-rotate"></i>
-              Preparar cambio de ciclo
-            </button>
           </div>
 
           <div class="filtros-cambio-ciclo-admin">
@@ -1211,6 +1202,17 @@
               <select id="cursoOrigenCambioCicloAdmin" disabled>
                 <option value="">Primero prepará el cambio de ciclo</option>
               </select>
+            </div>
+
+            <div class="acciones-cambio-ciclo-admin">
+              <button
+                class="btn-accion"
+                id="btnPrepararCambioCicloAdmin"
+                type="button"
+              >
+                <i class="fa-solid fa-arrows-rotate"></i>
+                Preparar cambio de ciclo
+              </button>
             </div>
 
             <div class="acciones-cambio-ciclo-admin">
@@ -1293,8 +1295,8 @@
 
           <div class="separador-cambio-ciclo-admin"></div>
 
-          <div class="encabezado-listado">
-            <div>
+          <div class="encabezado-listado encabezado-finalizacion-ciclo-admin">
+            <div class="descripcion-finalizacion-ciclo-admin">
               <h3>Finalización de estudiantes con Cursada Completa</h3>
               <p>
                 Cuando un estudiante con CURSADA COMPLETA haya aprobado todas
@@ -1304,14 +1306,26 @@
               </p>
             </div>
 
-            <button
-              class="btn-accion"
-              id="btnVerCursadaCompletaAdmin"
-              type="button"
-            >
-              <i class="fa-solid fa-graduation-cap"></i>
-              Ver Cursada Completa
-            </button>
+            <div class="acciones-finalizacion-ciclo-admin">
+              <button
+                class="btn-accion btn-ver-cursada-completa-admin"
+                id="btnVerCursadaCompletaAdmin"
+                type="button"
+              >
+                <i class="fa-solid fa-graduation-cap"></i>
+                Ver Cursada Completa
+              </button>
+
+              <button
+                class="btn-accion btn-egresar-estudiantes"
+                id="btnMarcarEgresadosAdmin"
+                type="button"
+                disabled
+              >
+                <i class="fa-solid fa-user-graduate"></i>
+                Marcar seleccionados como EGRESADOS
+              </button>
+            </div>
           </div>
 
           <div class="tabla-contenedor tabla-egresados-admin">
@@ -1340,18 +1354,6 @@
                 </tr>
               </tbody>
             </table>
-          </div>
-
-          <div class="acciones-egresados-admin">
-            <button
-              class="btn-accion btn-egresar-estudiantes"
-              id="btnMarcarEgresadosAdmin"
-              type="button"
-              disabled
-            >
-              <i class="fa-solid fa-user-graduate"></i>
-              Marcar seleccionados como EGRESADOS
-            </button>
           </div>
 
           <p id="mensajeCursadaCompletaAdmin" class="mensaje-formulario"></p>
