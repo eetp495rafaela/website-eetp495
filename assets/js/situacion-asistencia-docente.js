@@ -148,7 +148,7 @@ function mostrarMensaje(texto, tipo = "") {
     : "";
 }
 
-async function obtenerAsignacionesDocente(correoDocente) {
+async function obtenerAsignacionesDocente(correoDocente, cicloLectivo) {
   const asignacionesPorId = new Map();
 
   const consultas = [
@@ -170,9 +170,15 @@ async function obtenerAsignacionesDocente(correoDocente) {
     resultado.forEach((documento) => {
       if (asignacionesPorId.has(documento.id)) return;
 
+      const datos = documento.data();
+
+      if (Number(datos.cicloLectivo || 0) !== Number(cicloLectivo || 0)) {
+        return;
+      }
+
       asignacionesPorId.set(documento.id, {
         id: documento.id,
-        ...documento.data(),
+        ...datos,
       });
     });
   }
@@ -210,6 +216,7 @@ async function obtenerAsignacionesDocente(correoDocente) {
     const vigente =
       estado === "ACTIVO" &&
       (tipoHorario === "TALLER" || tipoHorario === "EDUCACION_FISICA") &&
+      Number(reemplazo.cicloLectivo || 0) === Number(cicloLectivo || 0) &&
       fechaDesde &&
       fechaHasta &&
       fechaHoy >= fechaDesde &&
@@ -312,7 +319,7 @@ function renderizarCursos(cursos) {
     cursoSituacionAsistenciaDocente.disabled = true;
 
     mostrarMensaje(
-      "No se encontraron cursos activos de Taller o Educación Física para tu usuario.",
+      `No se encontraron cursos activos de Taller o Educación Física para el ciclo lectivo ${new Date().getFullYear()}.`,
       "error",
     );
 
@@ -349,8 +356,12 @@ async function cargarCursosAsignados(usuario) {
 
   try {
     const correoDocente = normalizarCorreo(usuario.email);
+    const cicloLectivo = new Date().getFullYear();
 
-    const asignaciones = await obtenerAsignacionesDocente(correoDocente);
+    const asignaciones = await obtenerAsignacionesDocente(
+      correoDocente,
+      cicloLectivo,
+    );
 
     cursosSituacionAsistenciaDocente = prepararCursos(asignaciones);
 
