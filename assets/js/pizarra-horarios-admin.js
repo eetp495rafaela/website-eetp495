@@ -1203,6 +1203,40 @@ function obtenerFechaGeneracion() {
   });
 }
 
+function obtenerCicloLectivoPizarra(bloques) {
+  const ciclos = Array.from(
+    new Set(
+      bloques
+        .map((bloque) => Number(bloque.cicloLectivo))
+        .filter(
+          (ciclo) => Number.isInteger(ciclo) && ciclo >= 2020 && ciclo <= 2100,
+        ),
+    ),
+  ).sort((a, b) => a - b);
+
+  if (!ciclos.length) {
+    throw new Error(
+      "Los horarios activos no tienen un ciclo lectivo válido. Revisá los bloques cargados.",
+    );
+  }
+
+  const anioActual = new Date().getFullYear();
+
+  if (ciclos.includes(anioActual)) {
+    return anioActual;
+  }
+
+  if (ciclos.length === 1) {
+    return ciclos[0];
+  }
+
+  throw new Error(
+    `Hay horarios activos de más de un ciclo lectivo (${ciclos.join(
+      ", ",
+    )}) y ninguno corresponde al año actual. Revisá los bloques antes de generar la pizarra.`,
+  );
+}
+
 function obtenerRutaCssPizarra() {
   const baseUrl = new URL(
     "../assets/css/pizarra-horarios-admin.css",
@@ -1216,7 +1250,7 @@ function obtenerRutaLogo() {
   return baseUrl.href;
 }
 
-function construirHtmlPizarra(bloques) {
+function construirHtmlPizarra(bloques, cicloLectivo) {
   const bloquesOrdenados = ordenarBloquesPizarra([...bloques]);
 
   prepararColoresDocentes(bloquesOrdenados);
@@ -1264,7 +1298,7 @@ function construirHtmlPizarra(bloques) {
               <h1>E.E.T.P. Nº 495 “Malvinas Argentinas”</h1>
 
               <p>
-                Pizarra general de horarios institucionales · Generada el ${obtenerFechaGeneracion()}
+                Pizarra general de horarios institucionales · Ciclo lectivo ${cicloLectivo} · Generada el ${obtenerFechaGeneracion()}
               </p>
             </div>
           </header>
@@ -1276,7 +1310,7 @@ function construirHtmlPizarra(bloques) {
   `;
 }
 
-function abrirPizarraImprimible(bloques) {
+function abrirPizarraImprimible(bloques, cicloLectivo) {
   const ventana = window.open("", "_blank");
 
   if (!ventana) {
@@ -1286,7 +1320,7 @@ function abrirPizarraImprimible(bloques) {
   }
 
   ventana.document.open();
-  ventana.document.write(construirHtmlPizarra(bloques));
+  ventana.document.write(construirHtmlPizarra(bloques, cicloLectivo));
   ventana.document.close();
 }
 
@@ -1320,7 +1354,7 @@ async function generarPizarraHorarios() {
 
     const resultado = await getDocs(consultaHorarios);
 
-    const bloques = [];
+    const bloquesActivos = [];
 
     resultado.forEach((documento) => {
       const datos = documento.data();
@@ -1333,23 +1367,35 @@ async function generarPizarraHorarios() {
         return;
       }
 
-      bloques.push({
+      bloquesActivos.push({
         id: documento.id,
         ...datos,
         tipoHorario,
       });
     });
 
-    if (!bloques.length) {
+    if (!bloquesActivos.length) {
       throw new Error(
         "No hay horarios activos cargados para generar la pizarra.",
       );
     }
 
-    abrirPizarraImprimible(bloques);
+    const cicloLectivo = obtenerCicloLectivoPizarra(bloquesActivos);
+
+    const bloques = bloquesActivos.filter(
+      (bloque) => Number(bloque.cicloLectivo) === cicloLectivo,
+    );
+
+    if (!bloques.length) {
+      throw new Error(
+        `No hay horarios activos cargados para el ciclo lectivo ${cicloLectivo}.`,
+      );
+    }
+
+    abrirPizarraImprimible(bloques, cicloLectivo);
 
     mostrarMensajePizarra(
-      `Pizarra generada correctamente con ${bloques.length} bloques activos.`,
+      `Pizarra del ciclo lectivo ${cicloLectivo} generada correctamente con ${bloques.length} bloques activos.`,
       "ok",
     );
   } catch (error) {
