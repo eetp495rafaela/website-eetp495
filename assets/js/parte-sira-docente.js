@@ -145,6 +145,14 @@ function obtenerDiaDesdeFechaParteSira(fechaTexto) {
   return DIAS_SEMANA_PARTE_SIRA[fecha.getDay()] || "";
 }
 
+function obtenerCicloLectivoParteSiraDesdeFecha(fechaTexto) {
+  if (!fechaTexto) return 0;
+
+  const anio = Number(String(fechaTexto).split("-")[0] || 0);
+
+  return Number.isInteger(anio) && anio >= 2020 && anio <= 2100 ? anio : 0;
+}
+
 function obtenerFechasHabilesParteSira(fechaInicioTexto) {
   if (!fechaInicioTexto) return [];
 
@@ -261,6 +269,9 @@ function cargarCursosEnSelectorParteSira() {
   limpiarVistaParteSiraDocente();
 
   const tipoSeleccionado = normalizarTipoParteSira(tipoParteSiraDocente.value);
+  const cicloLectivo = obtenerCicloLectivoParteSiraDesdeFecha(
+    fechaParteSiraDocente?.value || "",
+  );
 
   if (!tipoSeleccionado) {
     limpiarSelectorCursosParteSira("Primero seleccioná un tipo");
@@ -269,11 +280,22 @@ function cargarCursosEnSelectorParteSira() {
     return;
   }
 
+  if (!cicloLectivo) {
+    limpiarSelectorCursosParteSira("Seleccioná una fecha válida");
+    mostrarMensajeParteSiraDocente(
+      "La fecha seleccionada no permite determinar el ciclo lectivo.",
+      "error",
+    );
+    return;
+  }
+
   const cursosPorClave = new Map();
 
   asignacionesParteSiraDocente
-    .filter((asignacion) =>
-      asignacionCoincideConTipo(asignacion, tipoSeleccionado),
+    .filter(
+      (asignacion) =>
+        asignacionCoincideConTipo(asignacion, tipoSeleccionado) &&
+        Number(asignacion.cicloLectivo || 0) === cicloLectivo,
     )
     .forEach((asignacion) => {
       const claveCurso = obtenerClaveCursoParteSira(asignacion);
@@ -304,7 +326,7 @@ function cargarCursosEnSelectorParteSira() {
     limpiarSelectorCursosParteSira("No tenés cursos asignados para este tipo");
 
     mostrarMensajeParteSiraDocente(
-      "No se encontraron asignaciones activas para el tipo seleccionado.",
+      `No se encontraron asignaciones activas para ${cicloLectivo} y el tipo seleccionado.`,
       "error",
     );
 
@@ -665,6 +687,7 @@ async function consultarParteSemanalParteSiraDocente() {
   const cursoId = String(cursoParteSiraDocente?.value || "").trim();
 
   const fechaInicio = String(fechaParteSiraDocente?.value || "").trim();
+  const cicloLectivo = obtenerCicloLectivoParteSiraDesdeFecha(fechaInicio);
 
   const opcionCurso =
     cursoParteSiraDocente?.options[cursoParteSiraDocente.selectedIndex];
@@ -688,6 +711,14 @@ async function consultarParteSemanalParteSiraDocente() {
   if (!fechaInicio) {
     mostrarMensajeParteSiraDocente("Seleccioná una fecha.", "error");
 
+    return;
+  }
+
+  if (!cicloLectivo) {
+    mostrarMensajeParteSiraDocente(
+      "La fecha seleccionada no permite determinar el ciclo lectivo.",
+      "error",
+    );
     return;
   }
 
@@ -753,6 +784,15 @@ async function consultarParteSemanalParteSiraDocente() {
           return;
         }
 
+        const cicloAsistencia = Number(
+          datos.cicloLectivo ||
+            obtenerCicloLectivoParteSiraDesdeFecha(datos.fecha),
+        );
+
+        if (cicloAsistencia !== cicloLectivo) {
+          return;
+        }
+
         asistenciasPorId.set(documento.id, {
           id: documento.id,
           ...datos,
@@ -809,10 +849,10 @@ if (cursoParteSiraDocente) {
 }
 
 if (fechaParteSiraDocente) {
-  fechaParteSiraDocente.addEventListener(
-    "change",
-    limpiarVistaParteSiraDocente,
-  );
+  fechaParteSiraDocente.addEventListener("change", () => {
+    limpiarVistaParteSiraDocente();
+    cargarCursosEnSelectorParteSira();
+  });
 }
 
 if (btnVerParteSiraDocente) {

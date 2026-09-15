@@ -84,6 +84,14 @@ function obtenerDiaSiraDesdeFecha(fechaTexto) {
   return DIAS_SIRA[fecha.getDay()] || "";
 }
 
+function obtenerCicloLectivoSiraDesdeFecha(fechaTexto) {
+  if (!fechaTexto) return 0;
+
+  const anio = Number(String(fechaTexto).split("-")[0] || 0);
+
+  return Number.isInteger(anio) && anio >= 2020 && anio <= 2100 ? anio : 0;
+}
+
 function mostrarMensajeSira(texto, tipo = "") {
   if (!mensajeSiraDocente) return;
 
@@ -238,7 +246,11 @@ function bloqueSiraPerteneceAReemplazo(bloque, reemplazo) {
   );
 }
 
-async function obtenerReemplazosSiraDocente(correoDocente, fechaSeleccionada) {
+async function obtenerReemplazosSiraDocente(
+  correoDocente,
+  fechaSeleccionada,
+  cicloLectivo,
+) {
   const consultaTitular = query(
     collection(db, "reemplazos_docentes"),
     where("titularCorreo", "==", correoDocente),
@@ -263,7 +275,15 @@ async function obtenerReemplazosSiraDocente(correoDocente, fechaSeleccionada) {
       ...documento.data(),
     };
 
-    if (reemplazoSiraEstaVigenteEnFecha(reemplazo, fechaSeleccionada)) {
+    const cicloReemplazo = Number(
+      reemplazo.cicloLectivo ||
+        obtenerCicloLectivoSiraDesdeFecha(reemplazo.fechaDesde),
+    );
+
+    if (
+      cicloReemplazo === cicloLectivo &&
+      reemplazoSiraEstaVigenteEnFecha(reemplazo, fechaSeleccionada)
+    ) {
       comoTitular.push(reemplazo);
     }
   });
@@ -274,7 +294,15 @@ async function obtenerReemplazosSiraDocente(correoDocente, fechaSeleccionada) {
       ...documento.data(),
     };
 
-    if (reemplazoSiraEstaVigenteEnFecha(reemplazo, fechaSeleccionada)) {
+    const cicloReemplazo = Number(
+      reemplazo.cicloLectivo ||
+        obtenerCicloLectivoSiraDesdeFecha(reemplazo.fechaDesde),
+    );
+
+    if (
+      cicloReemplazo === cicloLectivo &&
+      reemplazoSiraEstaVigenteEnFecha(reemplazo, fechaSeleccionada)
+    ) {
       comoReemplazante.push(reemplazo);
     }
   });
@@ -308,6 +336,15 @@ async function cargarClasesSiraPorFecha() {
   }
 
   const diaSeleccionado = obtenerDiaSiraDesdeFecha(fechaSeleccionada);
+  const cicloLectivo = obtenerCicloLectivoSiraDesdeFecha(fechaSeleccionada);
+
+  if (!cicloLectivo) {
+    mostrarMensajeSira(
+      "La fecha seleccionada no permite determinar el ciclo lectivo.",
+      "error",
+    );
+    return;
+  }
 
   const correoDocente = normalizarCorreoSira(usuarioSiraActual.email);
 
@@ -327,7 +364,11 @@ async function cargarClasesSiraPorFecha() {
     const [resultadoPropios, reemplazos] = await Promise.all([
       getDocs(consultaHorariosPropios),
 
-      obtenerReemplazosSiraDocente(correoDocente, fechaSeleccionada),
+      obtenerReemplazosSiraDocente(
+        correoDocente,
+        fechaSeleccionada,
+        cicloLectivo,
+      ),
     ]);
 
     const clasesPropias = [];
@@ -346,8 +387,11 @@ async function cargarClasesSiraPorFecha() {
       const esSira =
         tipoHorario === "TALLER" || tipoHorario === "EDUCACION_FISICA";
 
+      const cicloHorario = Number(datos.cicloLectivo || 0);
+
       if (!esSira) return;
       if (diaHorario !== diaSeleccionado) return;
+      if (cicloHorario !== cicloLectivo) return;
 
       clasesPropias.push({
         id: documento.id,
@@ -398,6 +442,10 @@ async function cargarClasesSiraPorFecha() {
         }
 
         if (diaHorario !== diaSeleccionado) {
+          return;
+        }
+
+        if (Number(datos.cicloLectivo || 0) !== cicloLectivo) {
           return;
         }
 
@@ -876,6 +924,10 @@ async function guardarAsistenciaSira() {
   const datosAsistencia = {
     fecha,
     dia: obtenerDiaSiraDesdeFecha(fecha),
+    cicloLectivo: Number(
+      claseSiraSeleccionada.cicloLectivo ||
+        obtenerCicloLectivoSiraDesdeFecha(fecha),
+    ),
 
     tipoHorario: tipo,
     espacioCurricular: claseSiraSeleccionada.espacioCurricular || "",
