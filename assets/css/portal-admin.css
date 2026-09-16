@@ -1727,7 +1727,7 @@ body.modal-abierto {
 /* Ajuste ancho de filtros Si.R.A. Admin */
 #sira-admin .filtros-sira-admin {
   display: grid;
-  grid-template-columns: repeat(3, minmax(220px, 240px));
+  grid-template-columns: repeat(4, minmax(220px, 240px));
   gap: 16px;
   align-items: end;
   justify-content: start;
@@ -1740,6 +1740,23 @@ body.modal-abierto {
 #sira-admin .filtros-sira-admin input[type="date"],
 #sira-admin .filtros-sira-admin select {
   width: 100%;
+}
+
+#sira-admin .campo-filtro-accion-sira-admin {
+  display: flex;
+  align-items: flex-end;
+}
+
+#sira-admin .campo-filtro-accion-sira-admin .btn-accion {
+  width: 100%;
+  margin: 0;
+  white-space: nowrap;
+}
+
+@media (max-width: 1100px) {
+  #sira-admin .filtros-sira-admin {
+    grid-template-columns: repeat(2, minmax(220px, 240px));
+  }
 }
 
 @media (max-width: 850px) {
