@@ -97,6 +97,15 @@
             </p>
           </a>
 
+          <a class="tarjeta tarjeta-enlace" href="#calificaciones-taller-admin">
+            <i class="fa-solid fa-clipboard-list"></i>
+            <h3>Calificaciones de Taller</h3>
+            <p>
+              Inicialización y administración del registro de calificaciones de
+              1º y 2º año.
+            </p>
+          </a>
+
           <a class="tarjeta tarjeta-enlace" href="#referentes-institucionales">
             <i class="fa-solid fa-people-roof"></i>
             <h3>Referentes Institucionales</h3>
@@ -889,6 +898,71 @@
 
           <p id="mensajeReemplazos" class="mensaje-formulario"></p>
         </div>
+        <a class="btn-volver" href="#inicio">
+          <i class="fa-solid fa-arrow-up"></i>
+          Volver al inicio
+        </a>
+      </section>
+
+      <section class="grupo seccion-destino" id="calificaciones-taller-admin">
+        <h2>Calificaciones de Taller</h2>
+
+        <div class="panel-info">
+          <div class="encabezado-listado">
+            <div>
+              <h3>Inicializar registro de calificaciones</h3>
+              <p>
+                Crea el registro institucional de Taller para un curso de 1º o
+                2º año. Se toman automáticamente las tres asignaciones de
+                Taller, los estudiantes activos y sus grupos.
+              </p>
+            </div>
+          </div>
+
+          <form
+            id="formInicializarCalificacionesTaller"
+            class="formulario-usuario"
+            autocomplete="off"
+          >
+            <div class="form-grid">
+              <div class="campo-formulario">
+                <label for="cicloCalificacionesTaller">Ciclo lectivo *</label>
+                <input
+                  id="cicloCalificacionesTaller"
+                  name="cicloLectivo"
+                  type="number"
+                  min="2020"
+                  max="2100"
+                  required
+                />
+              </div>
+
+              <div class="campo-formulario campo-doble">
+                <label for="cursoCalificacionesTaller">Curso *</label>
+                <select id="cursoCalificacionesTaller" required>
+                  <option value="">Cargando cursos...</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="acciones">
+              <button
+                class="btn-accion"
+                id="btnInicializarCalificacionesTaller"
+                type="submit"
+              >
+                <i class="fa-solid fa-file-circle-plus"></i>
+                Inicializar registro
+              </button>
+            </div>
+
+            <p
+              id="mensajeCalificacionesTallerAdmin"
+              class="mensaje-formulario"
+            ></p>
+          </form>
+        </div>
+
         <a class="btn-volver" href="#inicio">
           <i class="fa-solid fa-arrow-up"></i>
           Volver al inicio
@@ -3927,6 +4001,10 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
     <script type="module" src="../assets/js/admin.js"></script>
+    <script
+      type="module"
+      src="../assets/js/calificaciones-taller-admin.js?v=20260917-1"
+    ></script>
     <script
       type="module"
       src="../assets/js/cambio-ciclo-estudiantes-admin.js?v=20260915-1"
