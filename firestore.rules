@@ -210,7 +210,7 @@ function puedeAdministrarReemplazos() {
 
 /* =====================================================
    REGISTRO DE CALIFICACIONES DE TALLER
-   Funciones auxiliares de acceso
+   Funciones auxiliares de acceso, períodos y validación
 ===================================================== */
 
 function inicioDiaArgentina(fechaTexto) {
@@ -229,8 +229,48 @@ function finDiaArgentinaExclusivo(fechaTexto) {
   ) + duration.value(27, "h");
 }
 
+function inicioFechaArgentina(anio, mes, dia) {
+  return timestamp.date(anio, mes, dia)
+    + duration.value(3, "h");
+}
+
+function fechaISOCalificacionesValida(fechaTexto) {
+  return fechaTexto is string
+    && fechaTexto.matches("^[0-9]{4}-[0-9]{2}-[0-9]{2}$");
+}
+
+function asignacionTallerActiva(
+  asignacionId,
+  cursoId,
+  espacioId,
+  cicloLectivo,
+  docenteCorreo
+) {
+  let rutaAsignacion =
+    /databases/$(database)/documents/asignaciones_docentes/$(asignacionId);
+
+  return asignacionId is string
+    && asignacionId.size() > 0
+    && exists(rutaAsignacion)
+    && get(rutaAsignacion).data.get("estado", "") in [
+      "ACTIVA",
+      "ACTIVO"
+    ]
+    && get(rutaAsignacion).data.get("docenteCorreo", "")
+      == docenteCorreo
+    && get(rutaAsignacion).data.get("cursoId", "")
+      == cursoId
+    && get(rutaAsignacion).data.get("espacioId", "")
+      == espacioId
+    && get(rutaAsignacion).data.get("espacioTipo", "")
+      == "TALLER"
+    && get(rutaAsignacion).data.get("cicloLectivo", 0)
+      == cicloLectivo;
+}
+
 function reemplazoCalificacionesVigente(
   reemplazoId,
+  asignacionId,
   cursoId,
   espacioId,
   cicloLectivo
@@ -241,76 +281,1266 @@ function reemplazoCalificacionesVigente(
   return reemplazoId is string
     && reemplazoId.size() > 0
     && exists(rutaReemplazo)
-
     && get(rutaReemplazo).data.get("estado", "") == "ACTIVO"
     && get(rutaReemplazo).data.get("tipoHorario", "") == "TALLER"
-
     && get(rutaReemplazo).data.get("reemplazanteCorreo", "")
       == request.auth.token.email
-
+    && get(rutaReemplazo).data.get("asignacionTitularId", "")
+      == asignacionId
     && get(rutaReemplazo).data.get("cursoId", "") == cursoId
     && get(rutaReemplazo).data.get("espacioId", "") == espacioId
-
-    && get(rutaReemplazo).data.get("cicloLectivo", 0) == cicloLectivo
-
-    && get(rutaReemplazo).data.get("fechaDesde", "") is string
-    && get(rutaReemplazo).data.get("fechaHasta", "") is string
-
-    && get(rutaReemplazo).data.get("fechaDesde", "").matches(
-      "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+    && get(rutaReemplazo).data.get("cicloLectivo", 0)
+      == cicloLectivo
+    && fechaISOCalificacionesValida(
+      get(rutaReemplazo).data.get("fechaDesde", "")
     )
-
-    && get(rutaReemplazo).data.get("fechaHasta", "").matches(
-      "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+    && fechaISOCalificacionesValida(
+      get(rutaReemplazo).data.get("fechaHasta", "")
     )
-
     && request.time >= inicioDiaArgentina(
       get(rutaReemplazo).data.get("fechaDesde", "")
     )
-
     && request.time < finDiaArgentinaExclusivo(
       get(rutaReemplazo).data.get("fechaHasta", "")
+    )
+    && asignacionTallerActiva(
+      asignacionId,
+      cursoId,
+      espacioId,
+      cicloLectivo,
+      get(rutaReemplazo).data.get("titularCorreo", "")
     );
 }
 
-function docentePuedeLeerCalificacionesTaller(datos) {
-  let correo = request.auth.token.email;
-
-  let reemplazoEspacio1 =
-    datos.reemplazosEspacio1.get(correo, "");
-
-  let reemplazoEspacio2 =
-    datos.reemplazosEspacio2.get(correo, "");
-
-  let reemplazoEspacio3 =
-    datos.reemplazosEspacio3.get(correo, "");
-
+function docentePuedeEditarEspacio1(datos, reemplazoId) {
   return esDocentePorPerfil()
     && (
-      datos.get("espacio1DocenteCorreo", "") == correo
-      || datos.get("espacio2DocenteCorreo", "") == correo
-      || datos.get("espacio3DocenteCorreo", "") == correo
-
+      asignacionTallerActiva(
+        datos.get("espacio1AsignacionId", ""),
+        datos.get("cursoId", ""),
+        datos.get("espacio1Id", ""),
+        datos.get("cicloLectivo", 0),
+        request.auth.token.email
+      )
       || reemplazoCalificacionesVigente(
-        reemplazoEspacio1,
+        reemplazoId,
+        datos.get("espacio1AsignacionId", ""),
         datos.get("cursoId", ""),
         datos.get("espacio1Id", ""),
         datos.get("cicloLectivo", 0)
       )
+    );
+}
 
+function docentePuedeEditarEspacio2(datos, reemplazoId) {
+  return esDocentePorPerfil()
+    && (
+      asignacionTallerActiva(
+        datos.get("espacio2AsignacionId", ""),
+        datos.get("cursoId", ""),
+        datos.get("espacio2Id", ""),
+        datos.get("cicloLectivo", 0),
+        request.auth.token.email
+      )
       || reemplazoCalificacionesVigente(
-        reemplazoEspacio2,
+        reemplazoId,
+        datos.get("espacio2AsignacionId", ""),
         datos.get("cursoId", ""),
         datos.get("espacio2Id", ""),
         datos.get("cicloLectivo", 0)
       )
+    );
+}
 
+function docentePuedeEditarEspacio3(datos, reemplazoId) {
+  return esDocentePorPerfil()
+    && (
+      asignacionTallerActiva(
+        datos.get("espacio3AsignacionId", ""),
+        datos.get("cursoId", ""),
+        datos.get("espacio3Id", ""),
+        datos.get("cicloLectivo", 0),
+        request.auth.token.email
+      )
       || reemplazoCalificacionesVigente(
-        reemplazoEspacio3,
+        reemplazoId,
+        datos.get("espacio3AsignacionId", ""),
         datos.get("cursoId", ""),
         datos.get("espacio3Id", ""),
         datos.get("cicloLectivo", 0)
       )
+    );
+}
+
+function docentePuedeEditarCompartido(datos, reemplazoId) {
+  return docentePuedeEditarEspacio1(datos, reemplazoId)
+    || docentePuedeEditarEspacio2(datos, reemplazoId)
+    || docentePuedeEditarEspacio3(datos, reemplazoId);
+}
+
+function docentePuedeLeerCalificacionesTaller(datos) {
+  let correo = request.auth.token.email;
+  let reemplazoEspacio1 = datos.reemplazosEspacio1.get(correo, "");
+  let reemplazoEspacio2 = datos.reemplazosEspacio2.get(correo, "");
+  let reemplazoEspacio3 = datos.reemplazosEspacio3.get(correo, "");
+
+  return esDocentePorPerfil()
+    && (
+      asignacionTallerActiva(
+        datos.get("espacio1AsignacionId", ""),
+        datos.get("cursoId", ""),
+        datos.get("espacio1Id", ""),
+        datos.get("cicloLectivo", 0),
+        correo
+      )
+      || asignacionTallerActiva(
+        datos.get("espacio2AsignacionId", ""),
+        datos.get("cursoId", ""),
+        datos.get("espacio2Id", ""),
+        datos.get("cicloLectivo", 0),
+        correo
+      )
+      || asignacionTallerActiva(
+        datos.get("espacio3AsignacionId", ""),
+        datos.get("cursoId", ""),
+        datos.get("espacio3Id", ""),
+        datos.get("cicloLectivo", 0),
+        correo
+      )
+      || reemplazoCalificacionesVigente(
+        reemplazoEspacio1,
+        datos.get("espacio1AsignacionId", ""),
+        datos.get("cursoId", ""),
+        datos.get("espacio1Id", ""),
+        datos.get("cicloLectivo", 0)
+      )
+      || reemplazoCalificacionesVigente(
+        reemplazoEspacio2,
+        datos.get("espacio2AsignacionId", ""),
+        datos.get("cursoId", ""),
+        datos.get("espacio2Id", ""),
+        datos.get("cicloLectivo", 0)
+      )
+      || reemplazoCalificacionesVigente(
+        reemplazoEspacio3,
+        datos.get("espacio3AsignacionId", ""),
+        datos.get("cursoId", ""),
+        datos.get("espacio3Id", ""),
+        datos.get("cicloLectivo", 0)
+      )
+    );
+}
+
+function configuracionPeriodosCalificacionesValida(datos) {
+  let cicloId = datos.get("cicloLectivoDocId", "");
+  let rutaPeriodos =
+    /databases/$(database)/documents/configuracion_periodos/$(cicloId);
+
+  return exists(rutaPeriodos)
+    && get(rutaPeriodos).data.get("cicloLectivo", 0)
+      == datos.get("cicloLectivo", 0)
+    && fechaISOCalificacionesValida(
+      get(rutaPeriodos).data.get("trimestre1Inicio", "")
+    )
+    && fechaISOCalificacionesValida(
+      get(rutaPeriodos).data.get("trimestre1Fin", "")
+    )
+    && fechaISOCalificacionesValida(
+      get(rutaPeriodos).data.get("trimestre2Inicio", "")
+    )
+    && fechaISOCalificacionesValida(
+      get(rutaPeriodos).data.get("trimestre2Fin", "")
+    )
+    && fechaISOCalificacionesValida(
+      get(rutaPeriodos).data.get("trimestre3Inicio", "")
+    )
+    && fechaISOCalificacionesValida(
+      get(rutaPeriodos).data.get("trimestre3Fin", "")
+    );
+}
+
+function trimestre1CalificacionesAbierto(datos) {
+  let cicloId = datos.get("cicloLectivoDocId", "");
+  let rutaPeriodos =
+    /databases/$(database)/documents/configuracion_periodos/$(cicloId);
+
+  return configuracionPeriodosCalificacionesValida(datos)
+    && request.time >= inicioDiaArgentina(
+      get(rutaPeriodos).data.get("trimestre1Inicio", "")
+    )
+    && request.time < finDiaArgentinaExclusivo(
+      get(rutaPeriodos).data.get("trimestre1Fin", "")
+    );
+}
+
+function trimestre2CalificacionesAbierto(datos) {
+  let cicloId = datos.get("cicloLectivoDocId", "");
+  let rutaPeriodos =
+    /databases/$(database)/documents/configuracion_periodos/$(cicloId);
+
+  return configuracionPeriodosCalificacionesValida(datos)
+    && request.time >= inicioDiaArgentina(
+      get(rutaPeriodos).data.get("trimestre2Inicio", "")
+    )
+    && request.time < finDiaArgentinaExclusivo(
+      get(rutaPeriodos).data.get("trimestre2Fin", "")
+    );
+}
+
+function trimestre3CalificacionesAbierto(datos) {
+  let cicloId = datos.get("cicloLectivoDocId", "");
+  let rutaPeriodos =
+    /databases/$(database)/documents/configuracion_periodos/$(cicloId);
+
+  return configuracionPeriodosCalificacionesValida(datos)
+    && request.time >= inicioDiaArgentina(
+      get(rutaPeriodos).data.get("trimestre3Inicio", "")
+    )
+    && request.time < finDiaArgentinaExclusivo(
+      get(rutaPeriodos).data.get("trimestre3Fin", "")
+    );
+}
+
+function calificacionFinalAbierta(datos) {
+  return trimestre3CalificacionesAbierto(datos);
+}
+
+function diciembreCalificacionesAbierto(datos) {
+  let cicloId = datos.get("cicloLectivoDocId", "");
+  let rutaPeriodos =
+    /databases/$(database)/documents/configuracion_periodos/$(cicloId);
+
+  return configuracionPeriodosCalificacionesValida(datos)
+    && request.time >= finDiaArgentinaExclusivo(
+      get(rutaPeriodos).data.get("trimestre3Fin", "")
+    )
+    && request.time < inicioFechaArgentina(
+      datos.get("cicloLectivo", 0),
+      12,
+      31
+    );
+}
+
+function febreroCalificacionesAbierto(datos) {
+  return datos.get("cicloLectivo", 0) is int
+    && request.time >= inicioFechaArgentina(
+      datos.get("cicloLectivo", 0) + 1,
+      2,
+      1
+    )
+    && request.time < inicioFechaArgentina(
+      datos.get("cicloLectivo", 0) + 1,
+      3,
+      1
+    );
+}
+
+function entradaNotaNumericaValida(entrada) {
+  return entrada is map
+    && entrada.keys().hasOnly([
+      "valor",
+      "por",
+      "en"
+    ])
+    && entrada.get("valor", 0) is int
+    && entrada.get("valor", 0) >= 1
+    && entrada.get("valor", 0) <= 10
+    && entrada.get("por", "") == request.auth.token.email
+    && entrada.get("en", null) == request.time;
+}
+
+function entradaNotaEspecialValida(entrada) {
+  return entrada is map
+    && entrada.keys().hasOnly([
+      "valor",
+      "por",
+      "en"
+    ])
+    && (
+      (
+        entrada.get("valor", null) is int
+        && entrada.get("valor", 0) >= 1
+        && entrada.get("valor", 0) <= 10
+      )
+      || entrada.get("valor", null) == "AUSENTE"
+    )
+    && entrada.get("por", "") == request.auth.token.email
+    && entrada.get("en", null) == request.time;
+}
+
+function entradaTrimManualValida(entrada) {
+  return entrada is map
+    && entrada.keys().hasOnly([
+      "valor",
+      "modo",
+      "por",
+      "en"
+    ])
+    && entrada.get("valor", 0) is int
+    && entrada.get("valor", 0) >= 1
+    && entrada.get("valor", 0) <= 10
+    && entrada.get("modo", "") == "MANUAL"
+    && entrada.get("por", "") == request.auth.token.email
+    && entrada.get("en", null) == request.time;
+}
+
+function entradaTrimAutoValida(entrada, valorEsperado) {
+  return entrada is map
+    && entrada.keys().hasOnly([
+      "valor",
+      "modo",
+      "por",
+      "en"
+    ])
+    && entrada.get("valor", 0) is int
+    && entrada.get("valor", 0) == valorEsperado
+    && entrada.get("modo", "") == "AUTO"
+    && entrada.get("por", "") == request.auth.token.email
+    && entrada.get("en", null) == request.time;
+}
+
+function notaCargada(mapaNotas, alumnoId) {
+  let entrada = mapaNotas.get(alumnoId, null);
+
+  return entrada is map
+    && entrada.get("valor", 0) is int
+    && entrada.get("valor", 0) >= 1
+    && entrada.get("valor", 0) <= 10;
+}
+
+function valorNota(mapaNotas, alumnoId) {
+  return mapaNotas.get(alumnoId, {}).get("valor", 0);
+}
+
+function tresNotasCargadas(mapa1, mapa2, mapa3, alumnoId) {
+  return notaCargada(mapa1, alumnoId)
+    && notaCargada(mapa2, alumnoId)
+    && notaCargada(mapa3, alumnoId);
+}
+
+function menorDeTres(a, b, c) {
+  return a <= b && a <= c
+    ? a
+    : (
+      b <= c
+        ? b
+        : c
+    );
+}
+
+function redondeoInstitucional(promedio) {
+  return promedio - math.floor(promedio) > 0.5
+    ? math.ceil(promedio)
+    : math.floor(promedio);
+}
+
+function resultadoAutomatico(mapa1, mapa2, mapa3, alumnoId) {
+  let a = valorNota(mapa1, alumnoId);
+  let b = valorNota(mapa2, alumnoId);
+  let c = valorNota(mapa3, alumnoId);
+
+  return a < 6 || b < 6 || c < 6
+    ? menorDeTres(a, b, c)
+    : redondeoInstitucional((a + b + c) / 3.0);
+}
+
+function soloCambiaAlumno(mapaNuevo, mapaAnterior, alumnoId) {
+  let claves = mapaNuevo.diff(mapaAnterior).affectedKeys();
+
+  return claves.hasOnly([alumnoId]);
+}
+
+function cambiaExactamenteAlumno(mapaNuevo, mapaAnterior, alumnoId) {
+  let claves = mapaNuevo.diff(mapaAnterior).affectedKeys();
+
+  return claves.hasOnly([alumnoId])
+    && claves.hasAll([alumnoId]);
+}
+
+function operacionCalificacionesValida(
+  datos,
+  tipo,
+  trimestre,
+  espacioId
+) {
+  let operacion = datos.get("ultimaOperacion", {});
+
+  return operacion is map
+    && operacion.keys().hasOnly([
+      "tipo",
+      "alumnoId",
+      "trimestre",
+      "espacioId",
+      "reemplazoId",
+      "por",
+      "en"
+    ])
+    && operacion.get("tipo", "") == tipo
+    && operacion.get("alumnoId", "") is string
+    && operacion.get("alumnoId", "").size() > 0
+    && operacion.get("trimestre", -1) == trimestre
+    && operacion.get("espacioId", "") == espacioId
+    && operacion.get("reemplazoId", "") is string
+    && operacion.get("por", "") == request.auth.token.email
+    && operacion.get("en", null) == request.time
+    && datos.get("actualizadoPor", "") == request.auth.token.email
+    && datos.get("actualizadoEn", null) == request.time;
+}
+
+function alumnoOperacionExiste(datos) {
+  let alumnoId = datos.get(["ultimaOperacion", "alumnoId"], "");
+
+  return alumnoId is string
+    && alumnoId.size() > 0
+    && alumnoId in datos.alumnos;
+}
+
+function resultadoTrim1Consistente(nuevo, anterior, alumnoId) {
+  let entradaAntes = anterior.trim1Resultado.get(alumnoId, null);
+  let entradaNueva = nuevo.trim1Resultado.get(alumnoId, null);
+  let notasCompletas = tresNotasCargadas(
+    nuevo.trim1Espacio1,
+    nuevo.trim1Espacio2,
+    nuevo.trim1Espacio3,
+    alumnoId
+  );
+  let eraManual = entradaAntes is map
+    && entradaAntes.get("modo", "") == "MANUAL";
+
+  return soloCambiaAlumno(
+      nuevo.trim1Resultado,
+      anterior.trim1Resultado,
+      alumnoId
+    )
+    && (
+      (
+        !notasCompletas
+        && entradaNueva == null
+      )
+      || (
+        notasCompletas
+        && eraManual
+        && entradaNueva == entradaAntes
+      )
+      || (
+        notasCompletas
+        && !eraManual
+        && entradaTrimAutoValida(
+          entradaNueva,
+          resultadoAutomatico(
+            nuevo.trim1Espacio1,
+            nuevo.trim1Espacio2,
+            nuevo.trim1Espacio3,
+            alumnoId
+          )
+        )
+      )
+    );
+}
+
+function resultadoTrim2Consistente(nuevo, anterior, alumnoId) {
+  let entradaAntes = anterior.trim2Resultado.get(alumnoId, null);
+  let entradaNueva = nuevo.trim2Resultado.get(alumnoId, null);
+  let notasCompletas = tresNotasCargadas(
+    nuevo.trim2Espacio1,
+    nuevo.trim2Espacio2,
+    nuevo.trim2Espacio3,
+    alumnoId
+  );
+  let eraManual = entradaAntes is map
+    && entradaAntes.get("modo", "") == "MANUAL";
+
+  return soloCambiaAlumno(
+      nuevo.trim2Resultado,
+      anterior.trim2Resultado,
+      alumnoId
+    )
+    && (
+      (
+        !notasCompletas
+        && entradaNueva == null
+      )
+      || (
+        notasCompletas
+        && eraManual
+        && entradaNueva == entradaAntes
+      )
+      || (
+        notasCompletas
+        && !eraManual
+        && entradaTrimAutoValida(
+          entradaNueva,
+          resultadoAutomatico(
+            nuevo.trim2Espacio1,
+            nuevo.trim2Espacio2,
+            nuevo.trim2Espacio3,
+            alumnoId
+          )
+        )
+      )
+    );
+}
+
+function resultadoTrim3Consistente(nuevo, anterior, alumnoId) {
+  let entradaAntes = anterior.trim3Resultado.get(alumnoId, null);
+  let entradaNueva = nuevo.trim3Resultado.get(alumnoId, null);
+  let notasCompletas = tresNotasCargadas(
+    nuevo.trim3Espacio1,
+    nuevo.trim3Espacio2,
+    nuevo.trim3Espacio3,
+    alumnoId
+  );
+  let eraManual = entradaAntes is map
+    && entradaAntes.get("modo", "") == "MANUAL";
+
+  return soloCambiaAlumno(
+      nuevo.trim3Resultado,
+      anterior.trim3Resultado,
+      alumnoId
+    )
+    && (
+      (
+        !notasCompletas
+        && entradaNueva == null
+      )
+      || (
+        notasCompletas
+        && eraManual
+        && entradaNueva == entradaAntes
+      )
+      || (
+        notasCompletas
+        && !eraManual
+        && entradaTrimAutoValida(
+          entradaNueva,
+          resultadoAutomatico(
+            nuevo.trim3Espacio1,
+            nuevo.trim3Espacio2,
+            nuevo.trim3Espacio3,
+            alumnoId
+          )
+        )
+      )
+    );
+}
+
+function estructuraRegistroCalificacionesValida(datos) {
+  return datos.get("cicloLectivo", 0) is int
+    && datos.get("cicloLectivo", 0) >= 2020
+    && datos.get("cicloLectivo", 0) <= 2100
+    && datos.get("cicloLectivoDocId", "") is string
+    && datos.get("cicloLectivoDocId", "").matches("^[0-9]{4}$")
+    && int(datos.get("cicloLectivoDocId", "0"))
+      == datos.get("cicloLectivo", 0)
+    && datos.get("cursoId", "") is string
+    && datos.get("cursoId", "").size() > 0
+    && datos.get("cursoNombre", "") is string
+    && datos.get("cursoAnio", 0) in [1, 2]
+    && datos.get("cursoDivision", "") is string
+    && datos.get("espacio1Id", "") is string
+    && datos.get("espacio1Id", "").size() > 0
+    && datos.get("espacio2Id", "") is string
+    && datos.get("espacio2Id", "").size() > 0
+    && datos.get("espacio3Id", "") is string
+    && datos.get("espacio3Id", "").size() > 0
+    && datos.get("espacio1Id", "") != datos.get("espacio2Id", "")
+    && datos.get("espacio1Id", "") != datos.get("espacio3Id", "")
+    && datos.get("espacio2Id", "") != datos.get("espacio3Id", "")
+    && datos.get("espacio1Nombre", "") is string
+    && datos.get("espacio2Nombre", "") is string
+    && datos.get("espacio3Nombre", "") is string
+    && datos.get("espacio1DocenteCorreo", "") is string
+    && datos.get("espacio2DocenteCorreo", "") is string
+    && datos.get("espacio3DocenteCorreo", "") is string
+    && datos.get("espacio1AsignacionId", "") is string
+    && datos.get("espacio2AsignacionId", "") is string
+    && datos.get("espacio3AsignacionId", "") is string
+    && datos.get("reemplazosEspacio1", {}) is map
+    && datos.get("reemplazosEspacio2", {}) is map
+    && datos.get("reemplazosEspacio3", {}) is map
+    && datos.get("alumnos", {}) is map
+    && datos.get("trim1Espacio1", {}) is map
+    && datos.get("trim1Espacio2", {}) is map
+    && datos.get("trim1Espacio3", {}) is map
+    && datos.get("trim1Resultado", {}) is map
+    && datos.get("trim2Espacio1", {}) is map
+    && datos.get("trim2Espacio2", {}) is map
+    && datos.get("trim2Espacio3", {}) is map
+    && datos.get("trim2Resultado", {}) is map
+    && datos.get("trim3Espacio1", {}) is map
+    && datos.get("trim3Espacio2", {}) is map
+    && datos.get("trim3Espacio3", {}) is map
+    && datos.get("trim3Resultado", {}) is map
+    && datos.get("calificacionFinal", {}) is map
+    && datos.get("diciembre", {}) is map
+    && datos.get("febrero", {}) is map
+    && datos.get("ultimaOperacion", {}) is map;
+}
+
+function registroCalificacionesNuevoSinNotas(datos) {
+  return datos.trim1Espacio1.size() == 0
+    && datos.trim1Espacio2.size() == 0
+    && datos.trim1Espacio3.size() == 0
+    && datos.trim1Resultado.size() == 0
+    && datos.trim2Espacio1.size() == 0
+    && datos.trim2Espacio2.size() == 0
+    && datos.trim2Espacio3.size() == 0
+    && datos.trim2Resultado.size() == 0
+    && datos.trim3Espacio1.size() == 0
+    && datos.trim3Espacio2.size() == 0
+    && datos.trim3Espacio3.size() == 0
+    && datos.trim3Resultado.size() == 0
+    && datos.calificacionFinal.size() == 0
+    && datos.diciembre.size() == 0
+    && datos.febrero.size() == 0
+    && datos.ultimaOperacion.size() == 0;
+}
+
+function soportePuedeCrearRegistroCalificaciones(datos) {
+  return esSoporte()
+    && estructuraRegistroCalificacionesValida(datos)
+    && registroCalificacionesNuevoSinNotas(datos)
+    && asignacionTallerActiva(
+      datos.espacio1AsignacionId,
+      datos.cursoId,
+      datos.espacio1Id,
+      datos.cicloLectivo,
+      datos.espacio1DocenteCorreo
+    )
+    && asignacionTallerActiva(
+      datos.espacio2AsignacionId,
+      datos.cursoId,
+      datos.espacio2Id,
+      datos.cicloLectivo,
+      datos.espacio2DocenteCorreo
+    )
+    && asignacionTallerActiva(
+      datos.espacio3AsignacionId,
+      datos.cursoId,
+      datos.espacio3Id,
+      datos.cicloLectivo,
+      datos.espacio3DocenteCorreo
+    )
+    && datos.get("creadoPor", "") == request.auth.token.email
+    && datos.get("actualizadoPor", "") == request.auth.token.email
+    && datos.get("creadoEn", null) == request.time
+    && datos.get("actualizadoEn", null) == request.time;
+}
+
+function soportePuedeSincronizarRegistroCalificaciones(nuevo, anterior) {
+  let claves = nuevo.diff(anterior).affectedKeys();
+
+  return esSoporte()
+    && claves.hasOnly([
+      "cursoNombre",
+      "cursoAnio",
+      "cursoDivision",
+      "espacio1Id",
+      "espacio1Nombre",
+      "espacio1DocenteCorreo",
+      "espacio1AsignacionId",
+      "espacio2Id",
+      "espacio2Nombre",
+      "espacio2DocenteCorreo",
+      "espacio2AsignacionId",
+      "espacio3Id",
+      "espacio3Nombre",
+      "espacio3DocenteCorreo",
+      "espacio3AsignacionId",
+      "reemplazosEspacio1",
+      "reemplazosEspacio2",
+      "reemplazosEspacio3",
+      "alumnos",
+      "actualizadoEn",
+      "actualizadoPor"
+    ])
+    && estructuraRegistroCalificacionesValida(nuevo)
+    && asignacionTallerActiva(
+      nuevo.espacio1AsignacionId,
+      nuevo.cursoId,
+      nuevo.espacio1Id,
+      nuevo.cicloLectivo,
+      nuevo.espacio1DocenteCorreo
+    )
+    && asignacionTallerActiva(
+      nuevo.espacio2AsignacionId,
+      nuevo.cursoId,
+      nuevo.espacio2Id,
+      nuevo.cicloLectivo,
+      nuevo.espacio2DocenteCorreo
+    )
+    && asignacionTallerActiva(
+      nuevo.espacio3AsignacionId,
+      nuevo.cursoId,
+      nuevo.espacio3Id,
+      nuevo.cicloLectivo,
+      nuevo.espacio3DocenteCorreo
+    )
+    && nuevo.get("actualizadoPor", "") == request.auth.token.email
+    && nuevo.get("actualizadoEn", null) == request.time;
+}
+
+function cambioNotaTrim1Espacio1Valido(nuevo, anterior) {
+  let alumnoId = nuevo.get(["ultimaOperacion", "alumnoId"], "");
+  let reemplazoId = nuevo.get(["ultimaOperacion", "reemplazoId"], "");
+  let entrada = nuevo.trim1Espacio1.get(alumnoId, null);
+  let claves = nuevo.diff(anterior).affectedKeys();
+
+  return claves.hasOnly([
+      "trim1Espacio1",
+      "trim1Resultado",
+      "ultimaOperacion",
+      "actualizadoEn",
+      "actualizadoPor"
+    ])
+    && claves.hasAll(["trim1Espacio1"])
+    && operacionCalificacionesValida(
+      nuevo,
+      "NOTA_ESPACIO",
+      1,
+      nuevo.espacio1Id
+    )
+    && alumnoOperacionExiste(nuevo)
+    && docentePuedeEditarEspacio1(anterior, reemplazoId)
+    && trimestre1CalificacionesAbierto(anterior)
+    && cambiaExactamenteAlumno(
+      nuevo.trim1Espacio1,
+      anterior.trim1Espacio1,
+      alumnoId
+    )
+    && (
+      entrada == null
+      || entradaNotaNumericaValida(entrada)
+    )
+    && resultadoTrim1Consistente(nuevo, anterior, alumnoId);
+}
+
+function cambioNotaTrim1Espacio2Valido(nuevo, anterior) {
+  let alumnoId = nuevo.get(["ultimaOperacion", "alumnoId"], "");
+  let reemplazoId = nuevo.get(["ultimaOperacion", "reemplazoId"], "");
+  let entrada = nuevo.trim1Espacio2.get(alumnoId, null);
+  let claves = nuevo.diff(anterior).affectedKeys();
+
+  return claves.hasOnly([
+      "trim1Espacio2",
+      "trim1Resultado",
+      "ultimaOperacion",
+      "actualizadoEn",
+      "actualizadoPor"
+    ])
+    && claves.hasAll(["trim1Espacio2"])
+    && operacionCalificacionesValida(
+      nuevo,
+      "NOTA_ESPACIO",
+      1,
+      nuevo.espacio2Id
+    )
+    && alumnoOperacionExiste(nuevo)
+    && docentePuedeEditarEspacio2(anterior, reemplazoId)
+    && trimestre1CalificacionesAbierto(anterior)
+    && cambiaExactamenteAlumno(
+      nuevo.trim1Espacio2,
+      anterior.trim1Espacio2,
+      alumnoId
+    )
+    && (
+      entrada == null
+      || entradaNotaNumericaValida(entrada)
+    )
+    && resultadoTrim1Consistente(nuevo, anterior, alumnoId);
+}
+
+function cambioNotaTrim1Espacio3Valido(nuevo, anterior) {
+  let alumnoId = nuevo.get(["ultimaOperacion", "alumnoId"], "");
+  let reemplazoId = nuevo.get(["ultimaOperacion", "reemplazoId"], "");
+  let entrada = nuevo.trim1Espacio3.get(alumnoId, null);
+  let claves = nuevo.diff(anterior).affectedKeys();
+
+  return claves.hasOnly([
+      "trim1Espacio3",
+      "trim1Resultado",
+      "ultimaOperacion",
+      "actualizadoEn",
+      "actualizadoPor"
+    ])
+    && claves.hasAll(["trim1Espacio3"])
+    && operacionCalificacionesValida(
+      nuevo,
+      "NOTA_ESPACIO",
+      1,
+      nuevo.espacio3Id
+    )
+    && alumnoOperacionExiste(nuevo)
+    && docentePuedeEditarEspacio3(anterior, reemplazoId)
+    && trimestre1CalificacionesAbierto(anterior)
+    && cambiaExactamenteAlumno(
+      nuevo.trim1Espacio3,
+      anterior.trim1Espacio3,
+      alumnoId
+    )
+    && (
+      entrada == null
+      || entradaNotaNumericaValida(entrada)
+    )
+    && resultadoTrim1Consistente(nuevo, anterior, alumnoId);
+}
+
+function cambioNotaTrim2Espacio1Valido(nuevo, anterior) {
+  let alumnoId = nuevo.get(["ultimaOperacion", "alumnoId"], "");
+  let reemplazoId = nuevo.get(["ultimaOperacion", "reemplazoId"], "");
+  let entrada = nuevo.trim2Espacio1.get(alumnoId, null);
+  let claves = nuevo.diff(anterior).affectedKeys();
+
+  return claves.hasOnly([
+      "trim2Espacio1",
+      "trim2Resultado",
+      "ultimaOperacion",
+      "actualizadoEn",
+      "actualizadoPor"
+    ])
+    && claves.hasAll(["trim2Espacio1"])
+    && operacionCalificacionesValida(
+      nuevo,
+      "NOTA_ESPACIO",
+      2,
+      nuevo.espacio1Id
+    )
+    && alumnoOperacionExiste(nuevo)
+    && docentePuedeEditarEspacio1(anterior, reemplazoId)
+    && trimestre2CalificacionesAbierto(anterior)
+    && cambiaExactamenteAlumno(
+      nuevo.trim2Espacio1,
+      anterior.trim2Espacio1,
+      alumnoId
+    )
+    && (
+      entrada == null
+      || entradaNotaNumericaValida(entrada)
+    )
+    && resultadoTrim2Consistente(nuevo, anterior, alumnoId);
+}
+
+function cambioNotaTrim2Espacio2Valido(nuevo, anterior) {
+  let alumnoId = nuevo.get(["ultimaOperacion", "alumnoId"], "");
+  let reemplazoId = nuevo.get(["ultimaOperacion", "reemplazoId"], "");
+  let entrada = nuevo.trim2Espacio2.get(alumnoId, null);
+  let claves = nuevo.diff(anterior).affectedKeys();
+
+  return claves.hasOnly([
+      "trim2Espacio2",
+      "trim2Resultado",
+      "ultimaOperacion",
+      "actualizadoEn",
+      "actualizadoPor"
+    ])
+    && claves.hasAll(["trim2Espacio2"])
+    && operacionCalificacionesValida(
+      nuevo,
+      "NOTA_ESPACIO",
+      2,
+      nuevo.espacio2Id
+    )
+    && alumnoOperacionExiste(nuevo)
+    && docentePuedeEditarEspacio2(anterior, reemplazoId)
+    && trimestre2CalificacionesAbierto(anterior)
+    && cambiaExactamenteAlumno(
+      nuevo.trim2Espacio2,
+      anterior.trim2Espacio2,
+      alumnoId
+    )
+    && (
+      entrada == null
+      || entradaNotaNumericaValida(entrada)
+    )
+    && resultadoTrim2Consistente(nuevo, anterior, alumnoId);
+}
+
+function cambioNotaTrim2Espacio3Valido(nuevo, anterior) {
+  let alumnoId = nuevo.get(["ultimaOperacion", "alumnoId"], "");
+  let reemplazoId = nuevo.get(["ultimaOperacion", "reemplazoId"], "");
+  let entrada = nuevo.trim2Espacio3.get(alumnoId, null);
+  let claves = nuevo.diff(anterior).affectedKeys();
+
+  return claves.hasOnly([
+      "trim2Espacio3",
+      "trim2Resultado",
+      "ultimaOperacion",
+      "actualizadoEn",
+      "actualizadoPor"
+    ])
+    && claves.hasAll(["trim2Espacio3"])
+    && operacionCalificacionesValida(
+      nuevo,
+      "NOTA_ESPACIO",
+      2,
+      nuevo.espacio3Id
+    )
+    && alumnoOperacionExiste(nuevo)
+    && docentePuedeEditarEspacio3(anterior, reemplazoId)
+    && trimestre2CalificacionesAbierto(anterior)
+    && cambiaExactamenteAlumno(
+      nuevo.trim2Espacio3,
+      anterior.trim2Espacio3,
+      alumnoId
+    )
+    && (
+      entrada == null
+      || entradaNotaNumericaValida(entrada)
+    )
+    && resultadoTrim2Consistente(nuevo, anterior, alumnoId);
+}
+
+function cambioNotaTrim3Espacio1Valido(nuevo, anterior) {
+  let alumnoId = nuevo.get(["ultimaOperacion", "alumnoId"], "");
+  let reemplazoId = nuevo.get(["ultimaOperacion", "reemplazoId"], "");
+  let entrada = nuevo.trim3Espacio1.get(alumnoId, null);
+  let claves = nuevo.diff(anterior).affectedKeys();
+
+  return claves.hasOnly([
+      "trim3Espacio1",
+      "trim3Resultado",
+      "ultimaOperacion",
+      "actualizadoEn",
+      "actualizadoPor"
+    ])
+    && claves.hasAll(["trim3Espacio1"])
+    && operacionCalificacionesValida(
+      nuevo,
+      "NOTA_ESPACIO",
+      3,
+      nuevo.espacio1Id
+    )
+    && alumnoOperacionExiste(nuevo)
+    && docentePuedeEditarEspacio1(anterior, reemplazoId)
+    && trimestre3CalificacionesAbierto(anterior)
+    && cambiaExactamenteAlumno(
+      nuevo.trim3Espacio1,
+      anterior.trim3Espacio1,
+      alumnoId
+    )
+    && (
+      entrada == null
+      || entradaNotaNumericaValida(entrada)
+    )
+    && resultadoTrim3Consistente(nuevo, anterior, alumnoId);
+}
+
+function cambioNotaTrim3Espacio2Valido(nuevo, anterior) {
+  let alumnoId = nuevo.get(["ultimaOperacion", "alumnoId"], "");
+  let reemplazoId = nuevo.get(["ultimaOperacion", "reemplazoId"], "");
+  let entrada = nuevo.trim3Espacio2.get(alumnoId, null);
+  let claves = nuevo.diff(anterior).affectedKeys();
+
+  return claves.hasOnly([
+      "trim3Espacio2",
+      "trim3Resultado",
+      "ultimaOperacion",
+      "actualizadoEn",
+      "actualizadoPor"
+    ])
+    && claves.hasAll(["trim3Espacio2"])
+    && operacionCalificacionesValida(
+      nuevo,
+      "NOTA_ESPACIO",
+      3,
+      nuevo.espacio2Id
+    )
+    && alumnoOperacionExiste(nuevo)
+    && docentePuedeEditarEspacio2(anterior, reemplazoId)
+    && trimestre3CalificacionesAbierto(anterior)
+    && cambiaExactamenteAlumno(
+      nuevo.trim3Espacio2,
+      anterior.trim3Espacio2,
+      alumnoId
+    )
+    && (
+      entrada == null
+      || entradaNotaNumericaValida(entrada)
+    )
+    && resultadoTrim3Consistente(nuevo, anterior, alumnoId);
+}
+
+function cambioNotaTrim3Espacio3Valido(nuevo, anterior) {
+  let alumnoId = nuevo.get(["ultimaOperacion", "alumnoId"], "");
+  let reemplazoId = nuevo.get(["ultimaOperacion", "reemplazoId"], "");
+  let entrada = nuevo.trim3Espacio3.get(alumnoId, null);
+  let claves = nuevo.diff(anterior).affectedKeys();
+
+  return claves.hasOnly([
+      "trim3Espacio3",
+      "trim3Resultado",
+      "ultimaOperacion",
+      "actualizadoEn",
+      "actualizadoPor"
+    ])
+    && claves.hasAll(["trim3Espacio3"])
+    && operacionCalificacionesValida(
+      nuevo,
+      "NOTA_ESPACIO",
+      3,
+      nuevo.espacio3Id
+    )
+    && alumnoOperacionExiste(nuevo)
+    && docentePuedeEditarEspacio3(anterior, reemplazoId)
+    && trimestre3CalificacionesAbierto(anterior)
+    && cambiaExactamenteAlumno(
+      nuevo.trim3Espacio3,
+      anterior.trim3Espacio3,
+      alumnoId
+    )
+    && (
+      entrada == null
+      || entradaNotaNumericaValida(entrada)
+    )
+    && resultadoTrim3Consistente(nuevo, anterior, alumnoId);
+}
+
+function cambioTrim1Valido(nuevo, anterior) {
+  let alumnoId = nuevo.get(["ultimaOperacion", "alumnoId"], "");
+  let reemplazoId = nuevo.get(["ultimaOperacion", "reemplazoId"], "");
+  let entrada = nuevo.trim1Resultado.get(alumnoId, null);
+  let claves = nuevo.diff(anterior).affectedKeys();
+
+  return claves.hasOnly([
+      "trim1Resultado",
+      "ultimaOperacion",
+      "actualizadoEn",
+      "actualizadoPor"
+    ])
+    && claves.hasAll(["trim1Resultado"])
+    && operacionCalificacionesValida(nuevo, "TRIM", 1, "")
+    && alumnoOperacionExiste(nuevo)
+    && docentePuedeEditarCompartido(anterior, reemplazoId)
+    && trimestre1CalificacionesAbierto(anterior)
+    && cambiaExactamenteAlumno(
+      nuevo.trim1Resultado,
+      anterior.trim1Resultado,
+      alumnoId
+    )
+    && tresNotasCargadas(
+      nuevo.trim1Espacio1,
+      nuevo.trim1Espacio2,
+      nuevo.trim1Espacio3,
+      alumnoId
+    )
+    && (
+      entradaTrimManualValida(entrada)
+      || entradaTrimAutoValida(
+        entrada,
+        resultadoAutomatico(
+          nuevo.trim1Espacio1,
+          nuevo.trim1Espacio2,
+          nuevo.trim1Espacio3,
+          alumnoId
+        )
+      )
+    );
+}
+
+function cambioTrim2Valido(nuevo, anterior) {
+  let alumnoId = nuevo.get(["ultimaOperacion", "alumnoId"], "");
+  let reemplazoId = nuevo.get(["ultimaOperacion", "reemplazoId"], "");
+  let entrada = nuevo.trim2Resultado.get(alumnoId, null);
+  let claves = nuevo.diff(anterior).affectedKeys();
+
+  return claves.hasOnly([
+      "trim2Resultado",
+      "ultimaOperacion",
+      "actualizadoEn",
+      "actualizadoPor"
+    ])
+    && claves.hasAll(["trim2Resultado"])
+    && operacionCalificacionesValida(nuevo, "TRIM", 2, "")
+    && alumnoOperacionExiste(nuevo)
+    && docentePuedeEditarCompartido(anterior, reemplazoId)
+    && trimestre2CalificacionesAbierto(anterior)
+    && cambiaExactamenteAlumno(
+      nuevo.trim2Resultado,
+      anterior.trim2Resultado,
+      alumnoId
+    )
+    && tresNotasCargadas(
+      nuevo.trim2Espacio1,
+      nuevo.trim2Espacio2,
+      nuevo.trim2Espacio3,
+      alumnoId
+    )
+    && (
+      entradaTrimManualValida(entrada)
+      || entradaTrimAutoValida(
+        entrada,
+        resultadoAutomatico(
+          nuevo.trim2Espacio1,
+          nuevo.trim2Espacio2,
+          nuevo.trim2Espacio3,
+          alumnoId
+        )
+      )
+    );
+}
+
+function cambioTrim3Valido(nuevo, anterior) {
+  let alumnoId = nuevo.get(["ultimaOperacion", "alumnoId"], "");
+  let reemplazoId = nuevo.get(["ultimaOperacion", "reemplazoId"], "");
+  let entrada = nuevo.trim3Resultado.get(alumnoId, null);
+  let claves = nuevo.diff(anterior).affectedKeys();
+
+  return claves.hasOnly([
+      "trim3Resultado",
+      "ultimaOperacion",
+      "actualizadoEn",
+      "actualizadoPor"
+    ])
+    && claves.hasAll(["trim3Resultado"])
+    && operacionCalificacionesValida(nuevo, "TRIM", 3, "")
+    && alumnoOperacionExiste(nuevo)
+    && docentePuedeEditarCompartido(anterior, reemplazoId)
+    && trimestre3CalificacionesAbierto(anterior)
+    && cambiaExactamenteAlumno(
+      nuevo.trim3Resultado,
+      anterior.trim3Resultado,
+      alumnoId
+    )
+    && tresNotasCargadas(
+      nuevo.trim3Espacio1,
+      nuevo.trim3Espacio2,
+      nuevo.trim3Espacio3,
+      alumnoId
+    )
+    && (
+      entradaTrimManualValida(entrada)
+      || entradaTrimAutoValida(
+        entrada,
+        resultadoAutomatico(
+          nuevo.trim3Espacio1,
+          nuevo.trim3Espacio2,
+          nuevo.trim3Espacio3,
+          alumnoId
+        )
+      )
+    );
+}
+
+function cambioCalificacionFinalValido(nuevo, anterior) {
+  let alumnoId = nuevo.get(["ultimaOperacion", "alumnoId"], "");
+  let reemplazoId = nuevo.get(["ultimaOperacion", "reemplazoId"], "");
+  let entrada = nuevo.calificacionFinal.get(alumnoId, null);
+  let claves = nuevo.diff(anterior).affectedKeys();
+
+  return claves.hasOnly([
+      "calificacionFinal",
+      "ultimaOperacion",
+      "actualizadoEn",
+      "actualizadoPor"
+    ])
+    && claves.hasAll(["calificacionFinal"])
+    && operacionCalificacionesValida(nuevo, "FINAL", 0, "")
+    && alumnoOperacionExiste(nuevo)
+    && docentePuedeEditarCompartido(anterior, reemplazoId)
+    && calificacionFinalAbierta(anterior)
+    && cambiaExactamenteAlumno(
+      nuevo.calificacionFinal,
+      anterior.calificacionFinal,
+      alumnoId
+    )
+    && (
+      entrada == null
+      || entradaNotaNumericaValida(entrada)
+    );
+}
+
+function cambioDiciembreValido(nuevo, anterior) {
+  let alumnoId = nuevo.get(["ultimaOperacion", "alumnoId"], "");
+  let reemplazoId = nuevo.get(["ultimaOperacion", "reemplazoId"], "");
+  let entrada = nuevo.diciembre.get(alumnoId, null);
+  let finalValor = nuevo.calificacionFinal.get(alumnoId, {}).get("valor", 0);
+  let claves = nuevo.diff(anterior).affectedKeys();
+
+  return claves.hasOnly([
+      "diciembre",
+      "ultimaOperacion",
+      "actualizadoEn",
+      "actualizadoPor"
+    ])
+    && claves.hasAll(["diciembre"])
+    && operacionCalificacionesValida(nuevo, "DICIEMBRE", 0, "")
+    && alumnoOperacionExiste(nuevo)
+    && docentePuedeEditarCompartido(anterior, reemplazoId)
+    && diciembreCalificacionesAbierto(anterior)
+    && finalValor is int
+    && finalValor >= 1
+    && finalValor <= 5
+    && cambiaExactamenteAlumno(
+      nuevo.diciembre,
+      anterior.diciembre,
+      alumnoId
+    )
+    && (
+      entrada == null
+      || entradaNotaEspecialValida(entrada)
+    );
+}
+
+function cambioFebreroValido(nuevo, anterior) {
+  let alumnoId = nuevo.get(["ultimaOperacion", "alumnoId"], "");
+  let reemplazoId = nuevo.get(["ultimaOperacion", "reemplazoId"], "");
+  let entrada = nuevo.febrero.get(alumnoId, null);
+  let finalValor = nuevo.calificacionFinal.get(alumnoId, {}).get("valor", 0);
+  let diciembreValor = nuevo.diciembre.get(alumnoId, {}).get("valor", null);
+  let claves = nuevo.diff(anterior).affectedKeys();
+
+  return claves.hasOnly([
+      "febrero",
+      "ultimaOperacion",
+      "actualizadoEn",
+      "actualizadoPor"
+    ])
+    && claves.hasAll(["febrero"])
+    && operacionCalificacionesValida(nuevo, "FEBRERO", 0, "")
+    && alumnoOperacionExiste(nuevo)
+    && docentePuedeEditarCompartido(anterior, reemplazoId)
+    && febreroCalificacionesAbierto(anterior)
+    && finalValor is int
+    && finalValor >= 1
+    && finalValor <= 5
+    && (
+      diciembreValor == "AUSENTE"
+      || (
+        diciembreValor is int
+        && diciembreValor >= 1
+        && diciembreValor <= 5
+      )
+    )
+    && cambiaExactamenteAlumno(
+      nuevo.febrero,
+      anterior.febrero,
+      alumnoId
+    )
+    && (
+      entrada == null
+      || entradaNotaEspecialValida(entrada)
+    );
+}
+
+function docentePuedeActualizarCalificaciones(nuevo, anterior) {
+  return esDocentePorPerfil()
+    && estructuraRegistroCalificacionesValida(nuevo)
+    && (
+      cambioNotaTrim1Espacio1Valido(nuevo, anterior)
+      || cambioNotaTrim1Espacio2Valido(nuevo, anterior)
+      || cambioNotaTrim1Espacio3Valido(nuevo, anterior)
+      || cambioNotaTrim2Espacio1Valido(nuevo, anterior)
+      || cambioNotaTrim2Espacio2Valido(nuevo, anterior)
+      || cambioNotaTrim2Espacio3Valido(nuevo, anterior)
+      || cambioNotaTrim3Espacio1Valido(nuevo, anterior)
+      || cambioNotaTrim3Espacio2Valido(nuevo, anterior)
+      || cambioNotaTrim3Espacio3Valido(nuevo, anterior)
+      || cambioTrim1Valido(nuevo, anterior)
+      || cambioTrim2Valido(nuevo, anterior)
+      || cambioTrim3Valido(nuevo, anterior)
+      || cambioCalificacionFinalValido(nuevo, anterior)
+      || cambioDiciembreValido(nuevo, anterior)
+      || cambioFebreroValido(nuevo, anterior)
     );
 }
     function horarioCorrespondeAlDocente() {
@@ -1146,19 +2376,22 @@ match /horarios/{horarioId} {
     }
     
     /* =====================================================
-       REGISTRO DE CALIFICACIONES DE TALLER - FASE 1
+       REGISTRO DE CALIFICACIONES DE TALLER - FASE 2
 
-       En esta primera etapa se habilita únicamente:
-       - creación y eliminación por SOPORTE;
-       - lectura global por SOPORTE;
-       - lectura individual por docentes titulares de los
-         tres espacios de Taller del curso;
-       - lectura por reemplazantes solamente mientras el
-         reemplazo correspondiente se encuentre vigente.
+       Modelo: un documento por curso + ciclo lectivo.
 
-       Las actualizaciones de calificaciones permanecen
-       bloqueadas hasta incorporar en la siguiente fase las
-       validaciones por columna, alumno y período.
+       Seguridad:
+       - SOPORTE crea, consulta, sincroniza metadatos y elimina.
+       - SOPORTE no puede modificar calificaciones ya creadas.
+       - DOCENTE titular edita solamente su espacio de Taller.
+       - DOCENTE reemplazante edita el mismo espacio únicamente
+         mientras el reemplazo se encuentre vigente.
+       - Titular y reemplazante pueden trabajar durante la misma
+         vigencia sin bloquearse mutuamente.
+       - TRIM / Final / Diciembre / Febrero son campos compartidos
+         entre los docentes de Taller autorizados del curso.
+       - Las ventanas temporales se validan con request.time.
+       - Cada escritura docente modifica solamente un alumno.
     ===================================================== */
 
 match /calificaciones_taller/{registroId} {
@@ -1166,26 +2399,36 @@ match /calificaciones_taller/{registroId} {
     || docentePuedeLeerCalificacionesTaller(resource.data);
 
   /*
-   * Los docentes conocerán el ID exacto del documento
-   * (cicloLectivo + cursoId), por lo que no necesitan
-   * listar la colección completa.
+   * Los docentes acceden por el ID exacto del documento.
+   * No pueden listar toda la colección.
    */
   allow list: if esSoporte();
 
   /*
-   * SOPORTE inicializa el registro de cada curso/ciclo.
+   * SOPORTE inicializa el registro sin calificaciones.
    */
-  allow create: if esSoporte();
+  allow create: if soportePuedeCrearRegistroCalificaciones(
+    request.resource.data
+  );
 
   /*
-   * Fase 1: nadie actualiza todavía las calificaciones.
-   * Esto evita habilitar escrituras antes de cerrar las
-   * reglas finas por espacio, alumno y ventana temporal.
+   * SOPORTE puede sincronizar solamente estructura, alumnos,
+   * docentes y reemplazos. No puede tocar mapas de notas.
+   *
+   * Los docentes realizan las escrituras de calificaciones
+   * bajo las validaciones por espacio, alumno y período.
    */
-  allow update: if false;
+  allow update: if soportePuedeSincronizarRegistroCalificaciones(
+      request.resource.data,
+      resource.data
+    )
+    || docentePuedeActualizarCalificaciones(
+      request.resource.data,
+      resource.data
+    );
 
   /*
-   * Eliminación anual controlada, únicamente por SOPORTE.
+   * Eliminación anual controlada únicamente por SOPORTE.
    */
   allow delete: if esSoporte();
 }
