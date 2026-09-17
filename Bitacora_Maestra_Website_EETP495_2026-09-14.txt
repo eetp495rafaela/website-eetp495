@@ -3113,3 +3113,460 @@ el cambio.
 ======================================================================
 FIN ACTUALIZACIÓN 15/09/2026
 ======================================================================
+
+
+======================================================================
+34. ACTUALIZACIÓN – 17/09/2026 – INICIO DEL MÓDULO REGISTRO DE CALIFICACIONES DE TALLER
+======================================================================
+
+ESTADO
+------
+ETAPA DE DISEÑO FUNCIONAL Y TÉCNICO.
+
+La implementación todavía NO comenzó.
+
+El objetivo de esta actualización es dejar documentadas las decisiones ya
+acordadas para poder retomar el trabajo desde un chat nuevo sin redefinir la
+lógica del módulo.
+
+ARCHIVOS ACTUALES RECIBIDOS / REVISADOS EL 17/09/2026
+------------------------------------------------------
+- docentes/index.html
+- assets/js/permisos-taller-docente.js
+- assets/js/sira-docente.js
+- assets/js/listas-estudiantes-docente.js
+- firestore.rules
+
+Estos archivos son la referencia actual para comenzar la implementación.
+
+SITUACIÓN ACTUAL EN PORTAL DOCENTE
+----------------------------------
+En docentes/index.html ya existe la tarjeta:
+
+Registro de Calificaciones
+
+Actualmente:
+- abre una Google Sheet institucional externa;
+- usa data-solo-docente-taller;
+- se oculta/muestra mediante la lógica genérica de herramientas de Taller.
+
+La nueva implementación reemplazará progresivamente ese acceso externo por un
+módulo propio dentro del Portal Docente.
+
+IMPORTANTE SOBRE EL PERMISO ACTUAL
+----------------------------------
+assets/js/permisos-taller-docente.js permite actualmente herramientas marcadas
+con data-solo-docente-taller cuando el docente posee una asignación activa de:
+- TALLER;
+- EDUCACION_FISICA;
+
+o un reemplazo vigente relacionado con esas áreas.
+
+Esa lógica genérica NO es suficiente como autorización del nuevo Registro de
+Calificaciones, porque este módulo será exclusivo de Taller de 1º y 2º año.
+
+Debe diseñarse un permiso específico para Registro de Calificaciones.
+
+ALCANCE DEL NUEVO MÓDULO
+------------------------
+Uso exclusivamente interno para docentes de Taller de 1º y 2º año.
+
+Acceso previsto:
+- DOCENTE DE TALLER DE 1º / 2º: consulta y edición según su asignación.
+- SOPORTE / ADMIN: consulta de todos los cursos, SIN editar calificaciones.
+- GESTIÓN: sin acceso.
+- ALUMNO: sin acceso.
+
+Admin podrá consultar todos los cursos y generar el PDF resumen.
+No podrá modificar notas.
+
+El módulo NO reemplaza el registro personal/parcial de cada docente.
+Cada profesor continúa llevando sus calificaciones parciales por su cuenta.
+Aquí se registra únicamente la calificación de cierre de cada área de Taller
+para cada trimestre y el resumen anual institucional interno.
+
+PERMISO DEL DOCENTE
+-------------------
+La autorización de edición se determina por la combinación:
+
+CICLO LECTIVO + CURSO + ESPACIO CURRICULAR DE TALLER + DOCENTE
+
+No depende del día de la semana ni del horario de la clase.
+El docente puede cargar calificaciones cualquier día.
+
+Regla:
+- un docente puede tener el mismo Taller en varios cursos;
+- no se contempla el caso de un docente con dos Talleres diferentes dentro del
+  mismo curso;
+- en cada curso sólo podrá editar la columna correspondiente al Taller que
+  tiene asignado;
+- podrá ver las calificaciones cargadas por los otros dos Talleres del curso,
+  pero esas columnas serán sólo lectura para él.
+
+Ejemplo conceptual:
+si un docente está asignado a Taller: Documentos Comerciales de 2º A,
+solamente puede editar Documentos Comerciales de 2º A.
+No puede editar Informática ni Electrónica de ese curso.
+
+La validación debe existir en la interfaz Y en Firestore Rules.
+No alcanza con deshabilitar campos visualmente.
+
+CURSOS Y GRUPOS
+---------------
+El módulo trabaja solamente con 1º y 2º año.
+
+Cada curso contiene estudiantes pertenecientes a:
+- G1;
+- G2.
+
+El docente podrá visualizar:
+- Grupo 1;
+- Grupo 2;
+- Todos.
+
+La selección de grupo sirve únicamente para filtrar la vista.
+Las calificaciones del curso pertenecen al mismo registro de Firestore.
+No se crearán documentos separados para G1 y G2.
+
+Se reutiliza conceptualmente la lógica ya existente de Si.R.A., donde el
+estudiante posee grupoTaller y las consultas de Taller pueden discriminar por
+ese campo.
+
+PANTALLA DE CALIFICACIONES TRIMESTRALES
+---------------------------------------
+Selección prevista:
+- Curso.
+- Grupo: G1 / G2 / Todos.
+- Trimestre.
+
+Tabla conceptual:
+
+Estudiante | Taller 1 | Taller 2 | Taller 3 | TRIM
+
+Los nombres reales de las tres columnas dependen de los espacios curriculares
+de Taller asignados al curso.
+
+Cada docente:
+- ve las tres columnas;
+- edita solamente su espacio curricular;
+- puede editar TRIM, al igual que cualquiera de los otros dos docentes de
+  Taller del mismo curso.
+
+ESCALA DE CALIFICACIONES
+------------------------
+Notas de áreas de Taller:
+- solamente valores de 1 a 10.
+
+Calificación Final:
+- carga manual;
+- solamente valores de 1 a 10.
+
+Diciembre y Febrero:
+- carga manual mediante selector/desplegable;
+- opciones 1 a 10;
+- opción AUSENTE;
+- se evita texto libre para impedir errores de tipeo.
+
+TRIM – CÁLCULO AUTOMÁTICO
+-------------------------
+Cada trimestre posee tres calificaciones, una por cada área de Taller.
+
+Regla acordada:
+1. Si las tres calificaciones son 6 o superiores:
+   TRIM = promedio de las tres.
+
+2. Si una o más calificaciones son menores a 6:
+   TRIM = la calificación más baja entre las desaprobadas.
+
+3. Mientras falte alguna de las tres notas:
+   no debe darse por cerrado/calculado el TRIM.
+
+TRIM – CORRECCIÓN MANUAL
+------------------------
+Cualquiera de los tres docentes de Taller del curso puede modificar manualmente
+TRIM.
+
+Se eligió la lógica A:
+- mientras TRIM no haya sido corregido manualmente, los cambios de las tres
+  áreas pueden recalcular el valor automático;
+- cuando TRIM fue corregido manualmente, esa corrección queda preservada;
+- posteriores modificaciones de las notas de área NO deben sobrescribir el
+  TRIM manual.
+
+Debe existir una marca interna que permita distinguir:
+- TRIM automático;
+- TRIM corregido manualmente.
+
+CARGA PARCIAL / GUARDADO INCREMENTAL
+------------------------------------
+NO será obligatorio completar todo el curso para guardar.
+
+Ejemplo:
+- el docente carga notas de 2 o 3 estudiantes;
+- guarda;
+- sale del módulo;
+- vuelve más tarde;
+- las notas existentes se recuperan;
+- continúa cargando únicamente los estudiantes pendientes.
+
+El sistema debe conservar celdas vacías para calificaciones todavía no cargadas.
+
+Al guardar, la implementación debe actualizar solamente los datos modificados,
+no reemplazar innecesariamente todo el documento del curso.
+
+PERÍODOS / BLOQUEO TEMPORAL
+---------------------------
+Se reutilizará como fuente la configuración anual existente:
+
+configuracion_periodos/{cicloLectivo}
+
+Los docentes ya tienen permiso de lectura sobre esta configuración.
+
+Lógica temporal acordada:
+
+1. 1er trimestre:
+   editable solamente mientras el 1er trimestre está vigente.
+
+2. 2do trimestre:
+   editable solamente mientras el 2do trimestre está vigente.
+
+3. 3er trimestre:
+   editable solamente mientras el 3er trimestre está vigente.
+
+4. Calificación Final:
+   se habilita el mismo día que comienza el 3er trimestre.
+
+5. Al finalizar el 3er trimestre:
+   se bloquean el 3er trimestre y Calificación Final.
+
+6. Diciembre:
+   se habilita desde el día siguiente al cierre del 3er trimestre;
+   permanece editable hasta el 30 de diciembre del ciclo lectivo inclusive.
+
+7. Desde el 31 de diciembre hasta el 31 de enero:
+   todo queda bloqueado.
+
+8. Febrero:
+   se habilita a partir del 1 de febrero del año siguiente.
+
+IMPORTANTE:
+Febrero del año siguiente pertenece al CICLO LECTIVO ANTERIOR.
+
+Ejemplo:
+Febrero 2027 correspondiente al cierre del ciclo 2026 debe almacenarse dentro
+del registro del ciclo lectivo 2026, sin mezclarse con las calificaciones 2027.
+
+El cierre exacto de la ventana de Febrero todavía debe definirse antes de
+finalizar la implementación.
+
+REGLAS DE DICIEMBRE Y FEBRERO POR ESTUDIANTE
+---------------------------------------------
+- Si Calificación Final >= 6:
+  Diciembre y Febrero NO se habilitan nunca para ese estudiante.
+
+- Si Calificación Final < 6:
+  Diciembre puede habilitarse dentro de su ventana temporal.
+
+- Si el estudiante aprueba en Diciembre con una calificación >= 6:
+  Febrero queda bloqueado para ese estudiante.
+
+- Si en Diciembre obtiene menos de 6 o figura AUSENTE:
+  podrá utilizar Febrero cuando se abra su ventana temporal.
+
+RESUMEN ANUAL
+-------------
+Debe existir una vista de resumen anual por curso.
+
+Columnas acordadas:
+
+N° | DNI | Estudiante | 1° TRIM | 2° TRIM | 3° TRIM |
+Calif. Final | Diciembre | Febrero
+
+Los estudiantes se ordenan alfabéticamente por nombre/apellido según el criterio
+que adopte la implementación definitiva.
+
+1° TRIM, 2° TRIM y 3° TRIM se toman de los TRIM registrados en las hojas/vistas
+trimestrales del mismo estudiante.
+
+Calif. Final, Diciembre y Febrero son datos manuales según las reglas anteriores.
+
+PDF IMPRIMIBLE / DESCARGABLE
+----------------------------
+Debe poder generarse un PDF imprimible del Resumen Anual.
+
+El PDF contendrá solamente:
+
+N° | DNI | Estudiante | 1° TRIM | 2° TRIM | 3° TRIM |
+Calif. Final | Diciembre | Febrero
+
+Condiciones:
+- estudiantes ordenados alfabéticamente;
+- un PDF por curso / ciclo lectivo;
+- disponible para docentes autorizados del curso;
+- disponible para Admin en modo consulta;
+- no debe incluir las tres notas individuales de cada área por trimestre.
+
+ARQUITECTURA FIRESTORE ACORDADA
+-------------------------------
+Colección prevista:
+
+calificaciones_taller
+
+Criterio principal:
+UN SOLO DOCUMENTO POR CURSO Y CICLO LECTIVO.
+
+Ejemplos conceptuales de ID:
+- 2026_1A
+- 2026_1B
+- 2026_2C
+
+Dentro del documento se almacenarán:
+- cicloLectivo;
+- cursoId;
+- cursoNombre / año / división necesarios;
+- estudiantes del curso;
+- grupoTaller de cada estudiante;
+- calificaciones de los tres Talleres por trimestre;
+- TRIM de cada trimestre y marca automático/manual;
+- Calificación Final;
+- Diciembre;
+- Febrero;
+- datos mínimos de auditoría de modificaciones.
+
+NO se crearán:
+- un documento por alumno;
+- un documento por grupo G1/G2;
+- un documento por nota.
+
+Objetivos:
+- mantener muy baja la cantidad de documentos;
+- reducir lecturas al cargar un curso;
+- facilitar la generación del resumen/PDF;
+- conservar el modelo liviano, similar al criterio utilizado en Si.R.A.
+
+IMPORTANTE DE SEGURIDAD / ESTRUCTURA INTERNA
+--------------------------------------------
+La estructura interna exacta del documento todavía debe cerrarse ANTES de
+programar las reglas de escritura.
+
+Motivo:
+al usar un único documento por curso, Firestore Rules debe poder comprobar que
+un docente modifica únicamente:
+- la calificación de SU espacio curricular;
+- TRIM;
+- Calificación Final / Diciembre / Febrero cuando tenga autorización;
+
+sin permitirle alterar las notas de los otros dos Talleres.
+
+Por lo tanto, la forma definitiva de organizar las tres áreas dentro del
+documento debe diseñarse junto con firestore.rules, no sólo desde comodidad del
+frontend.
+
+No implementar una escritura amplia del documento hasta tener resuelta esta
+validación.
+
+FIRESTORE RULES – ESTADO ACTUAL
+-------------------------------
+El archivo actual permite a docentes consultar asignaciones activas y permite a
+Docentes consultar configuracion_periodos del ciclo correspondiente.
+
+La colección calificaciones_taller todavía no forma parte de las reglas actuales.
+Debe incorporarse una sección específica cuando se implemente el módulo.
+
+La seguridad deberá validar como mínimo:
+- usuario autenticado y ACTIVO;
+- rol DOCENTE o SOPORTE según operación;
+- curso;
+- ciclo lectivo;
+- asignación activa del docente;
+- que la asignación corresponda a TALLER;
+- 1º o 2º año;
+- espacio curricular autorizado;
+- escala 1 a 10 cuando corresponda;
+- AUSENTE solamente donde esté permitido;
+- ventanas temporales del trimestre / final / diciembre / febrero;
+- campos que el docente tiene permitido modificar.
+
+Admin / SOPORTE tendrá lectura global del módulo, pero las calificaciones no se
+editarán desde Admin.
+
+APROVECHAMIENTO DE LÓGICA EXISTENTE
+-----------------------------------
+Si.R.A. ya aporta conceptos reutilizables:
+- selección por curso/grupo;
+- grupoTaller en el perfil del estudiante;
+- consulta de estudiantes activos CURSANDO;
+- ciclo lectivo separado;
+- asignaciones/horarios de Taller;
+- persistencia institucional en Firestore.
+
+listas-estudiantes-docente.js también aporta:
+- obtención de cursos asignados;
+- lectura de estudiantes activos CURSANDO;
+- ordenamiento de estudiantes por curso.
+
+El nuevo módulo NO debe copiar ciegamente esas funciones.
+Debe adaptarlas a:
+- sólo Taller;
+- sólo 1º y 2º;
+- ciclo lectivo correspondiente;
+- permisos por curso + espacio curricular.
+
+RETENCIÓN / LIMPIEZA ANUAL
+--------------------------
+Estas calificaciones no forman parte del historial académico oficial permanente.
+
+Intención actual:
+- al finalizar completamente el ciclo, incluida la instancia de Febrero;
+- generar / descargar / imprimir los PDF necesarios;
+- luego podrá realizarse una limpieza anual de los documentos de
+  calificaciones_taller para evitar acumulación innecesaria en Firestore.
+
+La eliminación NO debe ser automática.
+
+Antes de implementar la limpieza deberá definirse:
+- responsable autorizado;
+- confirmación de seguridad;
+- ciclo a eliminar;
+- verificación previa de que los PDF fueron archivados.
+
+DECISIONES TODAVÍA PENDIENTES ANTES DE CODIFICAR
+-------------------------------------------------
+1. Definir la estructura interna exacta del documento Firestore para permitir
+   reglas seguras de edición por espacio curricular.
+
+2. Definir la regla de redondeo / cantidad de decimales del promedio automático
+   de TRIM cuando las tres notas sean >= 6.
+
+3. Definir la fecha de cierre de la ventana de Febrero.
+
+4. Definir qué acceso tendrá un REEMPLAZANTE temporal de Taller al Registro de
+   Calificaciones. No asumir que debe heredar automáticamente este permiso.
+
+5. Definir cómo sincronizar el listado del documento si durante el ciclo:
+   - ingresa un estudiante nuevo;
+   - un estudiante cambia de grupo;
+   - un estudiante cambia de curso o se da de baja.
+
+PRÓXIMO PASO TÉCNICO
+--------------------
+Antes de modificar la interfaz:
+
+1. Diseñar el documento calificaciones_taller por curso/ciclo.
+2. Diseñar simultáneamente las reglas de Firestore para edición por Taller.
+3. Resolver las decisiones pendientes indicadas arriba.
+4. Recién después crear el módulo visual del Portal Docente.
+5. Luego agregar la vista Admin de sólo lectura y la generación del PDF.
+
+PRINCIPIO DE IMPLEMENTACIÓN
+---------------------------
+- Cambios mínimos y probados.
+- No romper Si.R.A., asignaciones, horarios ni listas existentes.
+- Seguridad real en Firestore Rules, no sólo en la interfaz.
+- Guardado incremental.
+- Separación estricta por ciclo lectivo.
+- No aumentar documentos innecesariamente.
+
+======================================================================
+FIN ACTUALIZACIÓN 17/09/2026
+======================================================================

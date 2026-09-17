@@ -207,6 +207,112 @@ function puedeAdministrarReemplazos() {
     "ASISTENTE_ADMINISTRATIVO"
   ]);
 }
+
+/* =====================================================
+   REGISTRO DE CALIFICACIONES DE TALLER
+   Funciones auxiliares de acceso
+===================================================== */
+
+function inicioDiaArgentina(fechaTexto) {
+  return timestamp.date(
+    int(fechaTexto[0:4]),
+    int(fechaTexto[5:7]),
+    int(fechaTexto[8:10])
+  ) + duration.value(3, "h");
+}
+
+function finDiaArgentinaExclusivo(fechaTexto) {
+  return timestamp.date(
+    int(fechaTexto[0:4]),
+    int(fechaTexto[5:7]),
+    int(fechaTexto[8:10])
+  ) + duration.value(27, "h");
+}
+
+function reemplazoCalificacionesVigente(
+  reemplazoId,
+  cursoId,
+  espacioId,
+  cicloLectivo
+) {
+  let rutaReemplazo =
+    /databases/$(database)/documents/reemplazos_docentes/$(reemplazoId);
+
+  return reemplazoId is string
+    && reemplazoId.size() > 0
+    && exists(rutaReemplazo)
+
+    && get(rutaReemplazo).data.get("estado", "") == "ACTIVO"
+    && get(rutaReemplazo).data.get("tipoHorario", "") == "TALLER"
+
+    && get(rutaReemplazo).data.get("reemplazanteCorreo", "")
+      == request.auth.token.email
+
+    && get(rutaReemplazo).data.get("cursoId", "") == cursoId
+    && get(rutaReemplazo).data.get("espacioId", "") == espacioId
+
+    && get(rutaReemplazo).data.get("cicloLectivo", 0) == cicloLectivo
+
+    && get(rutaReemplazo).data.get("fechaDesde", "") is string
+    && get(rutaReemplazo).data.get("fechaHasta", "") is string
+
+    && get(rutaReemplazo).data.get("fechaDesde", "").matches(
+      "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+    )
+
+    && get(rutaReemplazo).data.get("fechaHasta", "").matches(
+      "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+    )
+
+    && request.time >= inicioDiaArgentina(
+      get(rutaReemplazo).data.get("fechaDesde", "")
+    )
+
+    && request.time < finDiaArgentinaExclusivo(
+      get(rutaReemplazo).data.get("fechaHasta", "")
+    );
+}
+
+function docentePuedeLeerCalificacionesTaller(datos) {
+  let correo = request.auth.token.email;
+
+  let reemplazoEspacio1 =
+    datos.reemplazosEspacio1.get(correo, "");
+
+  let reemplazoEspacio2 =
+    datos.reemplazosEspacio2.get(correo, "");
+
+  let reemplazoEspacio3 =
+    datos.reemplazosEspacio3.get(correo, "");
+
+  return esDocentePorPerfil()
+    && (
+      datos.get("espacio1DocenteCorreo", "") == correo
+      || datos.get("espacio2DocenteCorreo", "") == correo
+      || datos.get("espacio3DocenteCorreo", "") == correo
+
+      || reemplazoCalificacionesVigente(
+        reemplazoEspacio1,
+        datos.get("cursoId", ""),
+        datos.get("espacio1Id", ""),
+        datos.get("cicloLectivo", 0)
+      )
+
+      || reemplazoCalificacionesVigente(
+        reemplazoEspacio2,
+        datos.get("cursoId", ""),
+        datos.get("espacio2Id", ""),
+        datos.get("cicloLectivo", 0)
+      )
+
+      || reemplazoCalificacionesVigente(
+        reemplazoEspacio3,
+        datos.get("cursoId", ""),
+        datos.get("espacio3Id", ""),
+        datos.get("cicloLectivo", 0)
+      )
+    );
+}
     function horarioCorrespondeAlDocente() {
       return esDocentePorPerfil()
         && resource.data.estado == "ACTIVO"
@@ -1039,6 +1145,51 @@ match /horarios/{horarioId} {
       allow update, delete: if esSoporte();
     }
     
+    /* =====================================================
+       REGISTRO DE CALIFICACIONES DE TALLER - FASE 1
+
+       En esta primera etapa se habilita únicamente:
+       - creación y eliminación por SOPORTE;
+       - lectura global por SOPORTE;
+       - lectura individual por docentes titulares de los
+         tres espacios de Taller del curso;
+       - lectura por reemplazantes solamente mientras el
+         reemplazo correspondiente se encuentre vigente.
+
+       Las actualizaciones de calificaciones permanecen
+       bloqueadas hasta incorporar en la siguiente fase las
+       validaciones por columna, alumno y período.
+    ===================================================== */
+
+match /calificaciones_taller/{registroId} {
+  allow get: if esSoporte()
+    || docentePuedeLeerCalificacionesTaller(resource.data);
+
+  /*
+   * Los docentes conocerán el ID exacto del documento
+   * (cicloLectivo + cursoId), por lo que no necesitan
+   * listar la colección completa.
+   */
+  allow list: if esSoporte();
+
+  /*
+   * SOPORTE inicializa el registro de cada curso/ciclo.
+   */
+  allow create: if esSoporte();
+
+  /*
+   * Fase 1: nadie actualiza todavía las calificaciones.
+   * Esto evita habilitar escrituras antes de cerrar las
+   * reglas finas por espacio, alumno y ventana temporal.
+   */
+  allow update: if false;
+
+  /*
+   * Eliminación anual controlada, únicamente por SOPORTE.
+   */
+  allow delete: if esSoporte();
+}
+
     /* =====================================================
    CONFIGURACIÓN DE PERÍODOS DE ASISTENCIA
 ===================================================== */
