@@ -482,6 +482,28 @@ function renderizarResumen(registro, cantidadVisible) {
   resumenCalificacionesTallerDocente.hidden = false;
 }
 
+function abreviarNombreTaller(nombre) {
+  const original = String(nombre || "").trim();
+
+  if (!original) return "—";
+
+  const normalizado = original
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toUpperCase()
+    .replace(/[^A-Z0-9]+/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+
+  if (normalizado.includes("DOCUMENTOS COMERCIALES")) return "DOC";
+  if (normalizado.includes("ORGANIZACION DE LA EMPRESA")) return "ORG";
+  if (normalizado.includes("ELECTRONICA")) return "ELK";
+  if (normalizado.includes("ELECTRICIDAD")) return "ELE";
+  if (normalizado.includes("INFORMATICA")) return "INF";
+
+  return original.toUpperCase();
+}
+
 function renderizarTabla(registro) {
   if (!vistaCalificacionesTallerDocente) return;
 
@@ -494,9 +516,17 @@ function renderizarTabla(registro) {
     return;
   }
 
-  const e1 = escaparHtml(registro.espacio1Nombre || "Taller 1");
-  const e2 = escaparHtml(registro.espacio2Nombre || "Taller 2");
-  const e3 = escaparHtml(registro.espacio3Nombre || "Taller 3");
+  const e1Completo = registro.espacio1Nombre || "Taller 1";
+  const e2Completo = registro.espacio2Nombre || "Taller 2";
+  const e3Completo = registro.espacio3Nombre || "Taller 3";
+
+  const e1 = escaparHtml(abreviarNombreTaller(e1Completo));
+  const e2 = escaparHtml(abreviarNombreTaller(e2Completo));
+  const e3 = escaparHtml(abreviarNombreTaller(e3Completo));
+
+  const e1Titulo = escaparHtml(e1Completo);
+  const e2Titulo = escaparHtml(e2Completo);
+  const e3Titulo = escaparHtml(e3Completo);
 
   const filas = alumnos
     .map((alumno, indice) => {
@@ -563,19 +593,19 @@ function renderizarTabla(registro) {
             <th rowspan="2">Febrero</th>
           </tr>
           <tr>
-            <th class="encabezado-taller">${e1}</th>
-            <th class="encabezado-taller">${e2}</th>
-            <th class="encabezado-taller">${e3}</th>
+            <th class="encabezado-taller" title="${e1Titulo}">${e1}</th>
+            <th class="encabezado-taller" title="${e2Titulo}">${e2}</th>
+            <th class="encabezado-taller" title="${e3Titulo}">${e3}</th>
             <th>TRIM</th>
 
-            <th class="encabezado-taller">${e1}</th>
-            <th class="encabezado-taller">${e2}</th>
-            <th class="encabezado-taller">${e3}</th>
+            <th class="encabezado-taller" title="${e1Titulo}">${e1}</th>
+            <th class="encabezado-taller" title="${e2Titulo}">${e2}</th>
+            <th class="encabezado-taller" title="${e3Titulo}">${e3}</th>
             <th>TRIM</th>
 
-            <th class="encabezado-taller">${e1}</th>
-            <th class="encabezado-taller">${e2}</th>
-            <th class="encabezado-taller">${e3}</th>
+            <th class="encabezado-taller" title="${e1Titulo}">${e1}</th>
+            <th class="encabezado-taller" title="${e2Titulo}">${e2}</th>
+            <th class="encabezado-taller" title="${e3Titulo}">${e3}</th>
             <th>TRIM</th>
           </tr>
         </thead>

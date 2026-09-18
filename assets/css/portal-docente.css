@@ -4661,7 +4661,7 @@ body {
 
 .tabla-calificaciones-taller-docente {
   width: 100%;
-  min-width: 1440px;
+  min-width: 1260px;
   border-collapse: collapse;
   background: #f8fbfa;
 }
@@ -4699,15 +4699,18 @@ body {
 }
 
 .tabla-calificaciones-taller-docente thead .encabezado-taller {
-  width: 112px;
-  min-width: 92px;
-  max-width: 112px;
-  white-space: normal;
-  overflow-wrap: anywhere;
-  word-break: normal;
-  line-height: 1.18;
-  padding-left: 7px;
-  padding-right: 7px;
+  width: 64px;
+  min-width: 58px;
+  max-width: 68px;
+  padding-left: 6px;
+  padding-right: 6px;
+  white-space: nowrap;
+  color: #10251f;
+  font-size: 0.98rem;
+  font-weight: 950;
+  line-height: 1;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
 }
 
 .tabla-calificaciones-taller-docente tbody td {
