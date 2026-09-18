@@ -1027,9 +1027,7 @@ async function guardarCambiosPendientes() {
         typeof resultadoExistente === "object" &&
         resultadoExistente.modo === "MANUAL";
 
-      const marcaTiempoNota = serverTimestamp();
-      const marcaTiempoOperacion = serverTimestamp();
-      const marcaTiempoActualizacion = serverTimestamp();
+      const marcaTiempo = serverTimestamp();
 
       const entradaNota =
         valor === ""
@@ -1037,7 +1035,7 @@ async function guardarCambiosPendientes() {
           : {
               valor,
               por: correo,
-              en: marcaTiempoNota,
+              en: marcaTiempo,
             };
 
       const operacion = {
@@ -1052,7 +1050,7 @@ async function guardarCambiosPendientes() {
               )
             : "",
         por: correo,
-        en: marcaTiempoOperacion,
+        en: marcaTiempo,
       };
 
       const argumentos = [
@@ -1061,28 +1059,30 @@ async function guardarCambiosPendientes() {
         entradaNota,
       ];
 
+      /*
+       * TRIM sólo se modifica cuando realmente corresponde:
+       * - si ya están las tres notas, se guarda el AUTO;
+       * - si se quitó una nota y existía un AUTO, se limpia;
+       * - si todavía faltan notas y TRIM estaba vacío, no se toca.
+       */
       if (!conservarManual) {
-        const entradaResultado =
-          resultadoAutomatico === null
-            ? null
-            : {
-                valor: resultadoAutomatico,
-                modo: "AUTO",
-                por: correo,
-                en: serverTimestamp(),
-              };
-
-        argumentos.push(
-          new FieldPath(campoResultado, alumnoId),
-          entradaResultado,
-        );
+        if (resultadoAutomatico !== null) {
+          argumentos.push(new FieldPath(campoResultado, alumnoId), {
+            valor: resultadoAutomatico,
+            modo: "AUTO",
+            por: correo,
+            en: marcaTiempo,
+          });
+        } else if (resultadoExistente !== null) {
+          argumentos.push(new FieldPath(campoResultado, alumnoId), null);
+        }
       }
 
       argumentos.push(
         "ultimaOperacion",
         operacion,
         "actualizadoEn",
-        marcaTiempoActualizacion,
+        marcaTiempo,
         "actualizadoPor",
         correo,
       );
