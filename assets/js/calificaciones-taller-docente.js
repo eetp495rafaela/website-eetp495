@@ -1087,59 +1087,6 @@ async function guardarCambiosPendientes() {
         correo,
       );
 
-      const perfilDebug = await getDoc(doc(db, "usuarios", correo));
-
-      const tokenDebug =
-        await usuarioCalificacionesTallerDocente.getIdTokenResult();
-
-      console.log("DEBUG CALIFICACIONES TALLER", {
-        authEmail: tokenDebug.claims.email,
-        correoUsado: correo,
-
-        rolesPerfil: perfilDebug.exists()
-          ? {
-              rol: perfilDebug.data().rol,
-              roles: perfilDebug.data().roles,
-              estado: perfilDebug.data().estado,
-              fechaFinAcceso: perfilDebug.data().fechaFinAcceso,
-            }
-          : "PERFIL NO ENCONTRADO",
-
-        registroId: registroCalificacionesTallerDocente.id,
-        cursoId: registroCalificacionesTallerDocente.cursoId,
-
-        alumnoId,
-        alumnoExisteEnRegistro: Object.prototype.hasOwnProperty.call(
-          registroCalificacionesTallerDocente.alumnos || {},
-          alumnoId,
-        ),
-
-        trimestre,
-        espacioNumero,
-        espacioId,
-
-        asignacionRegistro:
-          registroCalificacionesTallerDocente[
-            `espacio${espacioNumero}AsignacionId`
-          ],
-
-        asignacionAcceso:
-          accesoEditableCalificacionesTallerDocente.asignacionId,
-
-        origenAcceso: accesoEditableCalificacionesTallerDocente.origen,
-
-        reemplazoId:
-          accesoEditableCalificacionesTallerDocente.reemplazoId || "",
-
-        campoNota,
-        valor,
-        valorEsEntero: Number.isInteger(valor),
-
-        resultadoAutomatico,
-        resultadoExistente,
-        conservarManual,
-      });
-
       await updateDoc(...argumentos);
 
       actualizarRegistroLocalDespuesDeGuardar(

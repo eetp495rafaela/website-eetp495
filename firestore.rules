@@ -1522,27 +1522,106 @@ function cambioFebreroValido(nuevo, anterior) {
     );
 }
 
-function docentePuedeActualizarCalificaciones(nuevo, anterior) {
-  return esDocentePorPerfil()
-    && estructuraRegistroCalificacionesValida(nuevo)
-    && (
-      cambioNotaTrim1Espacio1Valido(nuevo, anterior)
-      || cambioNotaTrim1Espacio2Valido(nuevo, anterior)
-      || cambioNotaTrim1Espacio3Valido(nuevo, anterior)
-      || cambioNotaTrim2Espacio1Valido(nuevo, anterior)
-      || cambioNotaTrim2Espacio2Valido(nuevo, anterior)
-      || cambioNotaTrim2Espacio3Valido(nuevo, anterior)
-      || cambioNotaTrim3Espacio1Valido(nuevo, anterior)
-      || cambioNotaTrim3Espacio2Valido(nuevo, anterior)
-      || cambioNotaTrim3Espacio3Valido(nuevo, anterior)
-      || cambioTrim1Valido(nuevo, anterior)
-      || cambioTrim2Valido(nuevo, anterior)
-      || cambioTrim3Valido(nuevo, anterior)
-      || cambioCalificacionFinalValido(nuevo, anterior)
-      || cambioDiciembreValido(nuevo, anterior)
-      || cambioFebreroValido(nuevo, anterior)
-    );
+function actualizacionTocaCalificaciones(nuevo, anterior) {
+  let claves = nuevo.diff(anterior).affectedKeys();
+
+  return claves.hasAny([
+    "trim1Espacio1",
+    "trim1Espacio2",
+    "trim1Espacio3",
+    "trim1Resultado",
+    "trim2Espacio1",
+    "trim2Espacio2",
+    "trim2Espacio3",
+    "trim2Resultado",
+    "trim3Espacio1",
+    "trim3Espacio2",
+    "trim3Espacio3",
+    "trim3Resultado",
+    "calificacionFinal",
+    "diciembre",
+    "febrero"
+  ]);
 }
+
+function docentePuedeActualizarCalificaciones(nuevo, anterior) {
+  let tipo =
+    nuevo.get(["ultimaOperacion", "tipo"], "");
+
+  let trimestre =
+    nuevo.get(["ultimaOperacion", "trimestre"], -1);
+
+  let espacioId =
+    nuevo.get(["ultimaOperacion", "espacioId"], "");
+
+  /*
+   * No se vuelve a validar toda la estructura del registro aquí.
+   * Los cambios docentes sólo pueden tocar el mapa de la calificación
+   * correspondiente, ultimaOperacion y los campos de auditoría.
+   * Cada validador específico controla esos campos y vuelve a validar
+   * el rol DOCENTE mediante docentePuedeEditarEspacio*().
+   *
+   * Evitar las comprobaciones globales redundantes es necesario para
+   * no superar el límite de 1000 expresiones de Firestore Rules.
+   */
+  return tipo == "NOTA_ESPACIO"
+    ? (
+        trimestre == 1
+          ? (
+              espacioId == nuevo.get("espacio1Id", "")
+                ? cambioNotaTrim1Espacio1Valido(nuevo, anterior)
+                : espacioId == nuevo.get("espacio2Id", "")
+                  ? cambioNotaTrim1Espacio2Valido(nuevo, anterior)
+                  : espacioId == nuevo.get("espacio3Id", "")
+                    ? cambioNotaTrim1Espacio3Valido(nuevo, anterior)
+                    : false
+            )
+          : trimestre == 2
+            ? (
+                espacioId == nuevo.get("espacio1Id", "")
+                  ? cambioNotaTrim2Espacio1Valido(nuevo, anterior)
+                  : espacioId == nuevo.get("espacio2Id", "")
+                    ? cambioNotaTrim2Espacio2Valido(nuevo, anterior)
+                    : espacioId == nuevo.get("espacio3Id", "")
+                      ? cambioNotaTrim2Espacio3Valido(nuevo, anterior)
+                      : false
+              )
+            : trimestre == 3
+              ? (
+                  espacioId == nuevo.get("espacio1Id", "")
+                    ? cambioNotaTrim3Espacio1Valido(nuevo, anterior)
+                    : espacioId == nuevo.get("espacio2Id", "")
+                      ? cambioNotaTrim3Espacio2Valido(nuevo, anterior)
+                      : espacioId == nuevo.get("espacio3Id", "")
+                        ? cambioNotaTrim3Espacio3Valido(nuevo, anterior)
+                        : false
+                )
+              : false
+      )
+
+    : tipo == "TRIM"
+      ? (
+          trimestre == 1
+            ? cambioTrim1Valido(nuevo, anterior)
+            : trimestre == 2
+              ? cambioTrim2Valido(nuevo, anterior)
+              : trimestre == 3
+                ? cambioTrim3Valido(nuevo, anterior)
+                : false
+        )
+
+      : tipo == "FINAL"
+        ? cambioCalificacionFinalValido(nuevo, anterior)
+
+        : tipo == "DICIEMBRE"
+          ? cambioDiciembreValido(nuevo, anterior)
+
+          : tipo == "FEBRERO"
+            ? cambioFebreroValido(nuevo, anterior)
+
+            : false;
+}
+
     function horarioCorrespondeAlDocente() {
       return esDocentePorPerfil()
         && resource.data.estado == "ACTIVO"
@@ -2415,17 +2494,22 @@ match /calificaciones_taller/{registroId} {
    * SOPORTE puede sincronizar solamente estructura, alumnos,
    * docentes y reemplazos. No puede tocar mapas de notas.
    *
-   * Los docentes realizan las escrituras de calificaciones
-   * bajo las validaciones por espacio, alumno y período.
+   * Si la escritura toca algún mapa de calificaciones, se evalúa
+   * únicamente la rama DOCENTE. Así se evita consumir expresiones
+   * evaluando primero la rama de SOPORTE.
    */
-  allow update: if soportePuedeSincronizarRegistroCalificaciones(
+  allow update: if actualizacionTocaCalificaciones(
       request.resource.data,
       resource.data
     )
-    || docentePuedeActualizarCalificaciones(
-      request.resource.data,
-      resource.data
-    );
+    ? docentePuedeActualizarCalificaciones(
+        request.resource.data,
+        resource.data
+      )
+    : soportePuedeSincronizarRegistroCalificaciones(
+        request.resource.data,
+        resource.data
+      );
 
   /*
    * Eliminación anual controlada únicamente por SOPORTE.
