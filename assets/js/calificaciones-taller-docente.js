@@ -551,7 +551,7 @@ function renderizarTabla(registro) {
       <table class="tabla-calificaciones-taller-docente">
         <thead>
           <tr>
-            <th rowspan="2">N.º</th>
+            <th rowspan="2">N°</th>
             <th rowspan="2">DNI</th>
             <th rowspan="2">Estudiante</th>
             <th rowspan="2">Grupo</th>
@@ -563,19 +563,19 @@ function renderizarTabla(registro) {
             <th rowspan="2">Febrero</th>
           </tr>
           <tr>
-            <th>${e1}</th>
-            <th>${e2}</th>
-            <th>${e3}</th>
+            <th class="encabezado-taller">${e1}</th>
+            <th class="encabezado-taller">${e2}</th>
+            <th class="encabezado-taller">${e3}</th>
             <th>TRIM</th>
 
-            <th>${e1}</th>
-            <th>${e2}</th>
-            <th>${e3}</th>
+            <th class="encabezado-taller">${e1}</th>
+            <th class="encabezado-taller">${e2}</th>
+            <th class="encabezado-taller">${e3}</th>
             <th>TRIM</th>
 
-            <th>${e1}</th>
-            <th>${e2}</th>
-            <th>${e3}</th>
+            <th class="encabezado-taller">${e1}</th>
+            <th class="encabezado-taller">${e2}</th>
+            <th class="encabezado-taller">${e3}</th>
             <th>TRIM</th>
           </tr>
         </thead>

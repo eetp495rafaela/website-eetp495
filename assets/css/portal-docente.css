@@ -4590,7 +4590,7 @@ body {
 }
 
 .campo-calificaciones-taller-docente label {
-  color: #ffffff;
+  color: #5a241f;
   font-size: 0.9rem;
   font-weight: 900;
 }
@@ -4633,16 +4633,16 @@ body {
   gap: 6px;
   min-height: 32px;
   padding: 6px 10px;
-  border: 1px solid rgba(167, 243, 208, 0.24);
+  border: 1px solid #d7e9df;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.08);
-  color: #e8f7f0;
+  background: #f8fbfa;
+  color: #25483f;
   font-size: 0.8rem;
   font-weight: 800;
 }
 
 .chip-calificaciones-taller-docente strong {
-  color: var(--docente-dorado);
+  color: #5a241f;
 }
 
 .vista-calificaciones-taller-docente {
@@ -4661,7 +4661,7 @@ body {
 
 .tabla-calificaciones-taller-docente {
   width: 100%;
-  min-width: 1660px;
+  min-width: 1440px;
   border-collapse: collapse;
   background: #f8fbfa;
 }
@@ -4696,6 +4696,18 @@ body {
   font-size: 0.78rem;
   font-weight: 900;
   line-height: 1.25;
+}
+
+.tabla-calificaciones-taller-docente thead .encabezado-taller {
+  width: 112px;
+  min-width: 92px;
+  max-width: 112px;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: normal;
+  line-height: 1.18;
+  padding-left: 7px;
+  padding-right: 7px;
 }
 
 .tabla-calificaciones-taller-docente tbody td {
