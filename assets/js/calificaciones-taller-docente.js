@@ -75,6 +75,7 @@ let trimestreEditableCalificacionesTallerDocente = 0;
 let accesoEditableCalificacionesTallerDocente = null;
 let espacioEditableNumeroCalificacionesTallerDocente = 0;
 let cambiosPendientesCalificacionesTallerDocente = new Map();
+let cambiosPendientesTrimCalificacionesTallerDocente = new Map();
 let guardandoCalificacionesTallerDocente = false;
 
 function normalizarCorreo(correo) {
@@ -347,6 +348,7 @@ function cargarCursosDisponibles() {
   accesoEditableCalificacionesTallerDocente = null;
   espacioEditableNumeroCalificacionesTallerDocente = 0;
   cambiosPendientesCalificacionesTallerDocente.clear();
+  cambiosPendientesTrimCalificacionesTallerDocente.clear();
   resumenCalificacionesTallerDocente.hidden = true;
   resumenCalificacionesTallerDocente.innerHTML = "";
   grupoCalificacionesTallerDocente.value = "TODOS";
@@ -615,6 +617,7 @@ async function prepararEdicionRegistro(registro) {
   accesoEditableCalificacionesTallerDocente = null;
   espacioEditableNumeroCalificacionesTallerDocente = 0;
   cambiosPendientesCalificacionesTallerDocente.clear();
+  cambiosPendientesTrimCalificacionesTallerDocente.clear();
 
   const cicloId = String(
     registro.cicloLectivoDocId || registro.cicloLectivo || "",
@@ -792,6 +795,13 @@ function claseEncabezadoTaller(trimestre, espacioNumero) {
     : "encabezado-taller";
 }
 
+function cantidadCambiosPendientes() {
+  return (
+    cambiosPendientesCalificacionesTallerDocente.size +
+    cambiosPendientesTrimCalificacionesTallerDocente.size
+  );
+}
+
 function actualizarBotonGuardar() {
   const boton = document.getElementById(
     "btnGuardarCalificacionesTallerDocente",
@@ -799,7 +809,7 @@ function actualizarBotonGuardar() {
 
   if (!boton) return;
 
-  const cantidad = cambiosPendientesCalificacionesTallerDocente.size;
+  const cantidad = cantidadCambiosPendientes();
 
   boton.disabled = guardandoCalificacionesTallerDocente || cantidad === 0;
   boton.innerHTML = guardandoCalificacionesTallerDocente
@@ -842,19 +852,99 @@ function registrarCambioNota(evento) {
     cambiosPendientesCalificacionesTallerDocente.has(alumnoId),
   );
 
+  actualizarCeldaTrimAlumno(alumnoId);
   actualizarBotonGuardar();
 }
 
-function conectarControlesEdicion() {
-  document.querySelectorAll(".select-nota-taller-docente").forEach((select) => {
-    select.addEventListener("change", registrarCambioNota);
+function registrarCambioTrim(evento) {
+  const select = evento.currentTarget;
+  const alumnoId = String(select.dataset.alumnoId || "");
+  const trimestre = Number(select.dataset.trimestre || 0);
 
-    const alumnoId = String(select.dataset.alumnoId || "");
-    select.classList.toggle(
-      "nota-modificada",
-      cambiosPendientesCalificacionesTallerDocente.has(alumnoId),
+  if (
+    !alumnoId ||
+    !registroCalificacionesTallerDocente ||
+    trimestre !== trimestreEditableCalificacionesTallerDocente
+  ) {
+    return;
+  }
+
+  const entradaOriginal = entradaResultadoExistente(
+    registroCalificacionesTallerDocente,
+    trimestre,
+    alumnoId,
+  );
+
+  const modoOriginal =
+    entradaOriginal &&
+    typeof entradaOriginal === "object" &&
+    entradaOriginal.modo === "MANUAL"
+      ? "MANUAL"
+      : "AUTO";
+
+  const valorOriginal = Number(
+    obtenerValorMapa(
+      registroCalificacionesTallerDocente[campoResultadoTrimestre(trimestre)],
+      alumnoId,
+    ),
+  );
+
+  const nuevo = String(select.value || "AUTO");
+  const vuelveAuto = nuevo === "AUTO";
+
+  const sinCambio = vuelveAuto
+    ? modoOriginal === "AUTO"
+    : modoOriginal === "MANUAL" &&
+      Number.isInteger(valorOriginal) &&
+      Number(nuevo) === valorOriginal;
+
+  if (sinCambio) {
+    cambiosPendientesTrimCalificacionesTallerDocente.delete(alumnoId);
+  } else {
+    cambiosPendientesTrimCalificacionesTallerDocente.set(
+      alumnoId,
+      vuelveAuto ? "AUTO" : Number(nuevo),
     );
-  });
+  }
+
+  select.classList.toggle(
+    "nota-modificada",
+    cambiosPendientesTrimCalificacionesTallerDocente.has(alumnoId),
+  );
+
+  actualizarBotonGuardar();
+}
+
+function conectarSelectTrim(select) {
+  if (!select) return;
+
+  select.addEventListener("change", registrarCambioTrim);
+
+  const alumnoId = String(select.dataset.alumnoId || "");
+  select.classList.toggle(
+    "nota-modificada",
+    cambiosPendientesTrimCalificacionesTallerDocente.has(alumnoId),
+  );
+}
+
+function conectarControlesEdicion() {
+  document
+    .querySelectorAll(
+      ".select-nota-taller-docente:not(.select-trim-taller-docente)",
+    )
+    .forEach((select) => {
+      select.addEventListener("change", registrarCambioNota);
+
+      const alumnoId = String(select.dataset.alumnoId || "");
+      select.classList.toggle(
+        "nota-modificada",
+        cambiosPendientesCalificacionesTallerDocente.has(alumnoId),
+      );
+    });
+
+  document
+    .querySelectorAll(".select-trim-taller-docente")
+    .forEach(conectarSelectTrim);
 
   const boton = document.getElementById(
     "btnGuardarCalificacionesTallerDocente",
@@ -893,6 +983,165 @@ function calcularResultadoAutomatico(valores) {
   const parteDecimal = promedio - Math.floor(promedio);
 
   return parteDecimal > 0.5 ? Math.ceil(promedio) : Math.floor(promedio);
+}
+
+function notaNumericaEfectiva(registro, trimestre, espacioNumero, alumnoId) {
+  const esNotaPropiaEditable =
+    trimestre === trimestreEditableCalificacionesTallerDocente &&
+    espacioNumero === espacioEditableNumeroCalificacionesTallerDocente &&
+    cambiosPendientesCalificacionesTallerDocente.has(alumnoId);
+
+  if (esNotaPropiaEditable) {
+    const pendiente =
+      cambiosPendientesCalificacionesTallerDocente.get(alumnoId);
+
+    if (pendiente === "") return null;
+
+    const numero = Number(pendiente);
+
+    return Number.isInteger(numero) && numero >= 1 && numero <= 10
+      ? numero
+      : null;
+  }
+
+  return notaNumericaDesdeRegistro(
+    registro,
+    trimestre,
+    espacioNumero,
+    alumnoId,
+  );
+}
+
+function resultadoAutomaticoEfectivo(registro, trimestre, alumnoId) {
+  const valores = [1, 2, 3].map((espacioNumero) =>
+    notaNumericaEfectiva(registro, trimestre, espacioNumero, alumnoId),
+  );
+
+  return calcularResultadoAutomatico(valores);
+}
+
+function opcionTrimSeleccionada(registro, trimestre, alumnoId) {
+  if (cambiosPendientesTrimCalificacionesTallerDocente.has(alumnoId)) {
+    return String(
+      cambiosPendientesTrimCalificacionesTallerDocente.get(alumnoId),
+    );
+  }
+
+  const entrada = entradaResultadoExistente(registro, trimestre, alumnoId);
+
+  if (entrada && typeof entrada === "object" && entrada.modo === "MANUAL") {
+    return String(
+      obtenerValorMapa(registro[campoResultadoTrimestre(trimestre)], alumnoId),
+    );
+  }
+
+  return "AUTO";
+}
+
+function opcionesTrim(valorSeleccionado, resultadoAutomatico) {
+  const valor = String(valorSeleccionado ?? "AUTO");
+
+  const opcionesManuales = Array.from({ length: 10 }, (_, indice) =>
+    String(indice + 1),
+  )
+    .map(
+      (opcion) => `
+        <option value="${opcion}" ${opcion === valor ? "selected" : ""}>
+          ${opcion}
+        </option>
+      `,
+    )
+    .join("");
+
+  return `
+    <option value="AUTO" ${valor === "AUTO" ? "selected" : ""}>
+      AUTO (${resultadoAutomatico})
+    </option>
+    ${opcionesManuales}
+  `;
+}
+
+function contenidoCeldaTrim(registro, trimestre, alumnoId) {
+  const valorGuardado = obtenerValorMapa(
+    registro[campoResultadoTrimestre(trimestre)],
+    alumnoId,
+  );
+
+  const editable =
+    trimestre === trimestreEditableCalificacionesTallerDocente &&
+    accesoEditableCalificacionesTallerDocente;
+
+  if (!editable) {
+    return formatearNota(valorGuardado);
+  }
+
+  const resultadoAutomatico = resultadoAutomaticoEfectivo(
+    registro,
+    trimestre,
+    alumnoId,
+  );
+
+  if (resultadoAutomatico === null) {
+    cambiosPendientesTrimCalificacionesTallerDocente.delete(alumnoId);
+    return '<span class="nota-sin-cargar">—</span>';
+  }
+
+  const valorSeleccionado = opcionTrimSeleccionada(
+    registro,
+    trimestre,
+    alumnoId,
+  );
+
+  return `
+    <select
+      class="select-nota-taller-docente select-trim-taller-docente"
+      data-alumno-id="${escaparHtml(alumnoId)}"
+      data-trimestre="${trimestre}"
+      aria-label="Resultado del trimestre"
+    >
+      ${opcionesTrim(valorSeleccionado, resultadoAutomatico)}
+    </select>
+  `;
+}
+
+function celdaTrim(registro, trimestre, alumnoId) {
+  return `
+    <td
+      class="nota-trim"
+      data-trim-alumno-id="${escaparHtml(alumnoId)}"
+      data-trimestre="${trimestre}"
+    >
+      ${contenidoCeldaTrim(registro, trimestre, alumnoId)}
+    </td>
+  `;
+}
+
+function actualizarCeldaTrimAlumno(alumnoId) {
+  if (
+    !registroCalificacionesTallerDocente ||
+    !trimestreEditableCalificacionesTallerDocente
+  ) {
+    return;
+  }
+
+  const celda = Array.from(
+    document.querySelectorAll("[data-trim-alumno-id]"),
+  ).find(
+    (elemento) =>
+      String(elemento.dataset.trimAlumnoId || "") === alumnoId &&
+      Number(elemento.dataset.trimestre || 0) ===
+        trimestreEditableCalificacionesTallerDocente,
+  );
+
+  if (!celda) return;
+
+  celda.innerHTML = contenidoCeldaTrim(
+    registroCalificacionesTallerDocente,
+    trimestreEditableCalificacionesTallerDocente,
+    alumnoId,
+  );
+
+  conectarSelectTrim(celda.querySelector(".select-trim-taller-docente"));
 }
 
 function entradaResultadoExistente(registro, trimestre, alumnoId) {
@@ -941,6 +1190,26 @@ function actualizarRegistroLocalDespuesDeGuardar(
   }
 }
 
+function actualizarRegistroLocalTrimDespuesDeGuardar(
+  registro,
+  alumnoId,
+  valor,
+  modo,
+  correo,
+) {
+  const campoResultado = campoResultadoTrimestre(
+    trimestreEditableCalificacionesTallerDocente,
+  );
+
+  registro[campoResultado] ||= {};
+  registro[campoResultado][alumnoId] = {
+    valor,
+    modo,
+    por: correo,
+    en: new Date(),
+  };
+}
+
 async function guardarCambiosPendientes() {
   if (
     guardandoCalificacionesTallerDocente ||
@@ -949,7 +1218,7 @@ async function guardarCambiosPendientes() {
     !accesoEditableCalificacionesTallerDocente ||
     !trimestreEditableCalificacionesTallerDocente ||
     !espacioEditableNumeroCalificacionesTallerDocente ||
-    cambiosPendientesCalificacionesTallerDocente.size === 0
+    cantidadCambiosPendientes() === 0
   ) {
     return;
   }
@@ -965,7 +1234,8 @@ async function guardarCambiosPendientes() {
     registroCalificacionesTallerDocente.id,
   );
 
-  let guardadas = 0;
+  let notasGuardadas = 0;
+  let trimGuardados = 0;
 
   try {
     const documentoActual = await getDoc(referencia);
@@ -979,11 +1249,16 @@ async function guardarCambiosPendientes() {
       ...documentoActual.data(),
     };
 
-    const pendientes = Array.from(
+    /*
+     * Primero se guardan las notas del Taller propio.
+     * Esto permite que, si una nota completa las tres áreas del alumno,
+     * el TRIM pueda guardarse después sobre el estado ya actualizado.
+     */
+    const notasPendientes = Array.from(
       cambiosPendientesCalificacionesTallerDocente.entries(),
     );
 
-    for (const [alumnoId, valorPendiente] of pendientes) {
+    for (const [alumnoId, valorPendiente] of notasPendientes) {
       const trimestre = trimestreEditableCalificacionesTallerDocente;
       const espacioNumero = espacioEditableNumeroCalificacionesTallerDocente;
       const campoNota = campoNotaTrimestre(trimestre, espacioNumero);
@@ -1062,8 +1337,8 @@ async function guardarCambiosPendientes() {
       /*
        * TRIM sólo se modifica cuando realmente corresponde:
        * - si ya están las tres notas, se guarda el AUTO;
-       * - si se quitó una nota y existía un AUTO, se limpia;
-       * - si todavía faltan notas y TRIM estaba vacío, no se toca.
+       * - si se quitó una nota y existía un AUTO o MANUAL, se limpia;
+       * - si existe MANUAL y las tres notas siguen completas, se conserva.
        */
       if (!conservarManual) {
         if (resultadoAutomatico !== null) {
@@ -1099,33 +1374,130 @@ async function guardarCambiosPendientes() {
       );
 
       cambiosPendientesCalificacionesTallerDocente.delete(alumnoId);
-      guardadas += 1;
+      notasGuardadas += 1;
+    }
+
+    /*
+     * Después de las notas se guardan los cambios explícitos de TRIM.
+     * AUTO recalcula el resultado institucional con las tres notas ya
+     * persistidas. Un valor 1..10 se guarda como MANUAL.
+     */
+    const trimPendientes = Array.from(
+      cambiosPendientesTrimCalificacionesTallerDocente.entries(),
+    );
+
+    for (const [alumnoId, valorPendiente] of trimPendientes) {
+      const trimestre = trimestreEditableCalificacionesTallerDocente;
+      const campoResultado = campoResultadoTrimestre(trimestre);
+      const resultadoAutomatico = resultadoAutomaticoEfectivo(
+        registroCalificacionesTallerDocente,
+        trimestre,
+        alumnoId,
+      );
+
+      if (resultadoAutomatico === null) {
+        cambiosPendientesTrimCalificacionesTallerDocente.delete(alumnoId);
+        continue;
+      }
+
+      const vuelveAuto = valorPendiente === "AUTO";
+      const valor = vuelveAuto ? resultadoAutomatico : Number(valorPendiente);
+
+      if (!Number.isInteger(valor) || valor < 1 || valor > 10) {
+        throw new Error(
+          "Se encontró un resultado TRIM fuera del rango 1 a 10.",
+        );
+      }
+
+      const modo = vuelveAuto ? "AUTO" : "MANUAL";
+      const marcaTiempo = serverTimestamp();
+
+      const operacion = {
+        tipo: "TRIM",
+        alumnoId,
+        trimestre,
+        espacioId: "",
+        reemplazoId:
+          accesoEditableCalificacionesTallerDocente.origen === "REEMPLAZO"
+            ? String(
+                accesoEditableCalificacionesTallerDocente.reemplazoId || "",
+              )
+            : "",
+        por: correo,
+        en: marcaTiempo,
+      };
+
+      await updateDoc(
+        referencia,
+        new FieldPath(campoResultado, alumnoId),
+        {
+          valor,
+          modo,
+          por: correo,
+          en: marcaTiempo,
+        },
+        "ultimaOperacion",
+        operacion,
+        "actualizadoEn",
+        marcaTiempo,
+        "actualizadoPor",
+        correo,
+      );
+
+      actualizarRegistroLocalTrimDespuesDeGuardar(
+        registroCalificacionesTallerDocente,
+        alumnoId,
+        valor,
+        modo,
+        correo,
+      );
+
+      cambiosPendientesTrimCalificacionesTallerDocente.delete(alumnoId);
+      trimGuardados += 1;
     }
 
     renderizarTabla(registroCalificacionesTallerDocente);
 
-    mostrarMensaje(
-      `${guardadas} calificación${guardadas === 1 ? "" : "es"} guardada${
-        guardadas === 1 ? "" : "s"
-      } correctamente.`,
-      "ok",
-    );
+    const totalGuardados = notasGuardadas + trimGuardados;
+
+    if (notasGuardadas > 0 && trimGuardados === 0) {
+      mostrarMensaje(
+        `${notasGuardadas} calificación${
+          notasGuardadas === 1 ? "" : "es"
+        } guardada${notasGuardadas === 1 ? "" : "s"} correctamente.`,
+        "ok",
+      );
+    } else if (trimGuardados > 0 && notasGuardadas === 0) {
+      mostrarMensaje(
+        `${trimGuardados} resultado${
+          trimGuardados === 1 ? "" : "s"
+        } TRIM guardado${trimGuardados === 1 ? "" : "s"} correctamente.`,
+        "ok",
+      );
+    } else {
+      mostrarMensaje(
+        `${totalGuardados} cambios guardados correctamente.`,
+        "ok",
+      );
+    }
   } catch (error) {
     console.error("Error al guardar calificaciones de Taller:", error);
 
     renderizarTabla(registroCalificacionesTallerDocente);
 
+    const totalGuardados = notasGuardadas + trimGuardados;
+
     if (error?.code === "permission-denied") {
       mostrarMensaje(
-        guardadas
-          ? `Se guardaron ${guardadas} calificaciones antes de que Firebase rechazara la siguiente operación. Revisá el período o la autorización del docente.`
-          : "Firebase rechazó la escritura. Revisá que el período esté vigente y que el docente tenga asignado ese Taller.",
+        totalGuardados
+          ? `Se guardaron ${totalGuardados} cambios antes de que Firebase rechazara la siguiente operación. Revisá el período o la autorización del docente.`
+          : "Firebase rechazó la escritura. Revisá que el período esté vigente y que el docente tenga autorización sobre el registro.",
         "error",
       );
     } else {
       mostrarMensaje(
-        guardadas
-          ? `Se guardaron ${guardadas} calificaciones antes de producirse un error. Las restantes quedaron pendientes.`
+        totalGuardados
+          ? `Se guardaron ${totalGuardados} cambios antes de producirse un error. Los restantes quedaron pendientes.`
           : error?.message || "No se pudieron guardar las calificaciones.",
         "error",
       );
@@ -1176,23 +1548,17 @@ function renderizarTabla(registro) {
           ${celdaNota(registro, 1, 1, id)}
           ${celdaNota(registro, 1, 2, id)}
           ${celdaNota(registro, 1, 3, id)}
-          <td class="nota-trim">${formatearNota(
-            obtenerValorMapa(registro.trim1Resultado, id),
-          )}</td>
+          ${celdaTrim(registro, 1, id)}
 
           ${celdaNota(registro, 2, 1, id)}
           ${celdaNota(registro, 2, 2, id)}
           ${celdaNota(registro, 2, 3, id)}
-          <td class="nota-trim">${formatearNota(
-            obtenerValorMapa(registro.trim2Resultado, id),
-          )}</td>
+          ${celdaTrim(registro, 2, id)}
 
           ${celdaNota(registro, 3, 1, id)}
           ${celdaNota(registro, 3, 2, id)}
           ${celdaNota(registro, 3, 3, id)}
-          <td class="nota-trim">${formatearNota(
-            obtenerValorMapa(registro.trim3Resultado, id),
-          )}</td>
+          ${celdaTrim(registro, 3, id)}
 
           <td class="nota-anual">${formatearNota(
             obtenerValorMapa(registro.calificacionFinal, id),
@@ -1259,7 +1625,7 @@ function renderizarTabla(registro) {
           <div class="acciones-calificaciones-taller-docente">
             <div class="ayuda-edicion-calificaciones-taller">
               <i class="fa-solid fa-circle-info"></i>
-              Sólo se guarda la columna de tu Taller en el trimestre vigente.
+              Podés cargar tu Taller. TRIM se habilita al completar las tres notas: AUTO usa el cálculo institucional y 1–10 fija un valor manual.
             </div>
 
             <button
@@ -1298,6 +1664,7 @@ async function cargarRegistroSeleccionado() {
   accesoEditableCalificacionesTallerDocente = null;
   espacioEditableNumeroCalificacionesTallerDocente = 0;
   cambiosPendientesCalificacionesTallerDocente.clear();
+  cambiosPendientesTrimCalificacionesTallerDocente.clear();
   resumenCalificacionesTallerDocente.hidden = true;
   resumenCalificacionesTallerDocente.innerHTML = "";
   grupoCalificacionesTallerDocente.value = "TODOS";
