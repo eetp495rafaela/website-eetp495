@@ -585,9 +585,9 @@ function renderizarTabla(registro) {
             <th rowspan="2">DNI</th>
             <th rowspan="2">Estudiante</th>
             <th rowspan="2">Grupo</th>
-            <th colspan="4">1.er Trimestre</th>
-            <th colspan="4">2.º Trimestre</th>
-            <th colspan="4">3.er Trimestre</th>
+            <th colspan="4">1er Trimestre</th>
+            <th colspan="4">2do Trimestre</th>
+            <th colspan="4">3er Trimestre</th>
             <th rowspan="2">Calif. Final</th>
             <th rowspan="2">Diciembre</th>
             <th rowspan="2">Febrero</th>
