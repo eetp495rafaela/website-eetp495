@@ -559,9 +559,9 @@ function obtenerAccesoEditableRegistro(registro) {
 }
 
 function nombreTrimestre(trimestre) {
-  if (trimestre === 1) return "1.er trimestre";
-  if (trimestre === 2) return "2.º trimestre";
-  if (trimestre === 3) return "3.er trimestre";
+  if (trimestre === 1) return "1ER TRIMESTRE";
+  if (trimestre === 2) return "2DO TRIMESTRE";
+  if (trimestre === 3) return "3ER TRIMESTRE";
   return "";
 }
 
@@ -1222,9 +1222,9 @@ function renderizarTabla(registro) {
             <th rowspan="2">DNI</th>
             <th rowspan="2">Estudiante</th>
             <th rowspan="2">Grupo</th>
-            <th colspan="4">1.er Trimestre</th>
-            <th colspan="4">2.º Trimestre</th>
-            <th colspan="4">3.er Trimestre</th>
+            <th colspan="4">1ER TRIMESTRE</th>
+            <th colspan="4">2DO TRIMESTRE</th>
+            <th colspan="4">3ER TRIMESTRE</th>
             <th rowspan="2">Calif. Final</th>
             <th rowspan="2">Diciembre</th>
             <th rowspan="2">Febrero</th>
