@@ -1599,17 +1599,17 @@ function renderizarTabla(registro) {
             <th class="${claseEncabezadoTaller(1, 1)}" title="${e1Titulo}">${e1}</th>
             <th class="${claseEncabezadoTaller(1, 2)}" title="${e2Titulo}">${e2}</th>
             <th class="${claseEncabezadoTaller(1, 3)}" title="${e3Titulo}">${e3}</th>
-            <th>TRIM</th>
+            <th>1°TRIM</th>
 
-            <th class="${claseEncabezadoTaller(2, 1)}" title="${e1Titulo}">${e1}</th>
-            <th class="${claseEncabezadoTaller(2, 2)}" title="${e2Titulo}">${e2}</th>
-            <th class="${claseEncabezadoTaller(2, 3)}" title="${e3Titulo}">${e3}</th>
-            <th>TRIM</th>
+<th class="${claseEncabezadoTaller(2, 1)}" title="${e1Titulo}">${e1}</th>
+<th class="${claseEncabezadoTaller(2, 2)}" title="${e2Titulo}">${e2}</th>
+<th class="${claseEncabezadoTaller(2, 3)}" title="${e3Titulo}">${e3}</th>
+<th>2°TRIM</th>
 
-            <th class="${claseEncabezadoTaller(3, 1)}" title="${e1Titulo}">${e1}</th>
-            <th class="${claseEncabezadoTaller(3, 2)}" title="${e2Titulo}">${e2}</th>
-            <th class="${claseEncabezadoTaller(3, 3)}" title="${e3Titulo}">${e3}</th>
-            <th>TRIM</th>
+<th class="${claseEncabezadoTaller(3, 1)}" title="${e1Titulo}">${e1}</th>
+<th class="${claseEncabezadoTaller(3, 2)}" title="${e2Titulo}">${e2}</th>
+<th class="${claseEncabezadoTaller(3, 3)}" title="${e3Titulo}">${e3}</th>
+<th>3°TRIM</th>
           </tr>
         </thead>
 
