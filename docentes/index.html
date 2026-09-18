@@ -9,7 +9,7 @@
 
     <link
       rel="stylesheet"
-      href="../assets/css/portal-docente.css?v=20260828-2"
+      href="../assets/css/portal-docente.css?v=20260917-1"
     />
 
     <link rel="icon" href="../assets/img/logo.png" />
@@ -170,17 +170,15 @@
 
           <a
             class="tarjeta tarjeta-enlace"
-            href="https://docs.google.com/spreadsheets/d/1hD0g7Nz9YcIDhNYOPUeTdj1YfhOL30qvQwk8xgBto1U/edit?usp=sharing"
-            target="_blank"
-            rel="noopener noreferrer"
-            data-solo-docente-taller
+            href="#calificaciones-taller-docente"
+            id="tarjetaCalificacionesTallerDocente"
             hidden
           >
             <i class="fa-solid fa-chart-column"></i>
             <h3>Registro de Calificaciones</h3>
             <p>
-              Acceso a la planilla institucional para registrar y consultar
-              calificaciones (Sólo para Taller de Primer Ciclo).
+              Consultá el Registro Institucional de Calificaciones de Taller
+              para 1.º y 2.º año.
             </p>
           </a>
 
@@ -748,6 +746,84 @@
 
       <section
         class="grupo seccion-destino"
+        id="calificaciones-taller-docente"
+        hidden
+      >
+        <h2>Registro de Calificaciones de Taller</h2>
+
+        <div class="panel-info panel-calificaciones-taller-docente">
+          <div class="encabezado-listado">
+            <div>
+              <h3>Calificaciones de 1.º y 2.º año</h3>
+              <p>
+                Consultá las calificaciones de los cursos de Taller que tenés
+                asignados. En esta etapa la información se muestra sólo en modo
+                lectura.
+              </p>
+            </div>
+
+            <span class="estado-calificaciones-solo-lectura">
+              <i class="fa-solid fa-eye"></i>
+              Sólo lectura
+            </span>
+          </div>
+
+          <div class="filtros-calificaciones-taller-docente">
+            <div class="campo-calificaciones-taller-docente">
+              <label for="cicloCalificacionesTallerDocente"
+                >Ciclo lectivo</label
+              >
+              <select id="cicloCalificacionesTallerDocente" disabled>
+                <option value="">Cargando...</option>
+              </select>
+            </div>
+
+            <div class="campo-calificaciones-taller-docente">
+              <label for="cursoCalificacionesTallerDocente">Curso</label>
+              <select id="cursoCalificacionesTallerDocente" disabled>
+                <option value="">Seleccioná primero un ciclo</option>
+              </select>
+            </div>
+
+            <div class="campo-calificaciones-taller-docente">
+              <label for="grupoCalificacionesTallerDocente">Grupo</label>
+              <select id="grupoCalificacionesTallerDocente" disabled>
+                <option value="TODOS">Todos</option>
+                <option value="G1">G1</option>
+                <option value="G2">G2</option>
+              </select>
+            </div>
+          </div>
+
+          <div
+            id="resumenCalificacionesTallerDocente"
+            class="resumen-calificaciones-taller-docente"
+            hidden
+          ></div>
+
+          <div
+            id="vistaCalificacionesTallerDocente"
+            class="vista-calificaciones-taller-docente"
+          >
+            <p class="mensaje-formulario">
+              Seleccioná un ciclo lectivo y un curso para consultar el registro.
+            </p>
+          </div>
+
+          <p
+            id="mensajeCalificacionesTallerDocente"
+            class="mensaje-formulario"
+          ></p>
+        </div>
+
+        <a class="btn-volver" href="#inicio">
+          <i class="fa-solid fa-arrow-up"></i>
+          Volver al inicio
+        </a>
+      </section>
+
+      <section
+        class="grupo seccion-destino"
         id="panelDocumentacionAcademica"
         hidden
       >
@@ -1222,6 +1298,10 @@
     <script
       type="module"
       src="../assets/js/situacion-asistencia-docente.js"
+    ></script>
+    <script
+      type="module"
+      src="../assets/js/calificaciones-taller-docente.js?v=20260917-1"
     ></script>
   </body>
 </html>

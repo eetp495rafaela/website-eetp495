@@ -4537,3 +4537,247 @@ body {
     grid-column: auto;
   }
 }
+
+/* =====================================================
+   REGISTRO DE CALIFICACIONES DE TALLER - DOCENTE
+   Etapa inicial: consulta / solo lectura
+===================================================== */
+
+#calificaciones-taller-docente {
+  scroll-margin-top: 110px;
+}
+
+#calificaciones-taller-docente .panel-calificaciones-taller-docente {
+  width: 100%;
+  max-width: none;
+}
+
+#calificaciones-taller-docente .encabezado-listado {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+}
+
+.estado-calificaciones-solo-lectura {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  flex: 0 0 auto;
+  padding: 8px 12px;
+  border: 1px solid rgba(250, 204, 21, 0.45);
+  border-radius: 999px;
+  background: rgba(250, 204, 21, 0.12);
+  color: var(--docente-dorado);
+  font-size: 0.82rem;
+  font-weight: 900;
+}
+
+.filtros-calificaciones-taller-docente {
+  display: grid;
+  grid-template-columns: minmax(160px, 0.7fr) minmax(220px, 1.1fr) minmax(
+      140px,
+      0.6fr
+    );
+  gap: 16px;
+  margin: 22px 0 18px;
+}
+
+.campo-calificaciones-taller-docente {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.campo-calificaciones-taller-docente label {
+  color: #ffffff;
+  font-size: 0.9rem;
+  font-weight: 900;
+}
+
+.campo-calificaciones-taller-docente select {
+  width: 100%;
+  min-height: 44px;
+  padding: 0 12px;
+  border: 1px solid #b7d8cb;
+  border-radius: 11px;
+  outline: none;
+  background: #f8fbfa;
+  color: #18352d;
+  font: inherit;
+  font-size: 0.9rem;
+  font-weight: 800;
+}
+
+.campo-calificaciones-taller-docente select:focus {
+  border-color: #34d399;
+  box-shadow: 0 0 0 3px rgba(52, 211, 153, 0.18);
+}
+
+.campo-calificaciones-taller-docente select:disabled {
+  cursor: not-allowed;
+  background: #dbe5ef;
+  color: #64748b;
+}
+
+.resumen-calificaciones-taller-docente {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 0 0 16px;
+}
+
+.chip-calificaciones-taller-docente {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 32px;
+  padding: 6px 10px;
+  border: 1px solid rgba(167, 243, 208, 0.24);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  color: #e8f7f0;
+  font-size: 0.8rem;
+  font-weight: 800;
+}
+
+.chip-calificaciones-taller-docente strong {
+  color: var(--docente-dorado);
+}
+
+.vista-calificaciones-taller-docente {
+  width: 100%;
+  margin-top: 14px;
+}
+
+.tabla-calificaciones-taller-contenedor {
+  width: 100%;
+  overflow-x: auto;
+  border: 1px solid #b7d8cb;
+  border-radius: 15px;
+  background: #f8fbfa;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.14);
+}
+
+.tabla-calificaciones-taller-docente {
+  width: 100%;
+  min-width: 1660px;
+  border-collapse: collapse;
+  background: #f8fbfa;
+}
+
+.tabla-calificaciones-taller-docente th,
+.tabla-calificaciones-taller-docente td {
+  padding: 10px 9px;
+  border-right: 1px solid #d8e8e1;
+  border-bottom: 1px solid #d8e8e1;
+  text-align: center;
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+.tabla-calificaciones-taller-docente th:last-child,
+.tabla-calificaciones-taller-docente td:last-child {
+  border-right: 0;
+}
+
+.tabla-calificaciones-taller-docente thead tr:first-child th {
+  background: #b7e3d1;
+  color: #10251f;
+  font-size: 0.82rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.tabla-calificaciones-taller-docente thead tr:nth-child(2) th {
+  background: #d9fbe8;
+  color: #18352d;
+  font-size: 0.78rem;
+  font-weight: 900;
+  line-height: 1.25;
+}
+
+.tabla-calificaciones-taller-docente tbody td {
+  color: #243b34;
+  font-size: 0.86rem;
+  font-weight: 750;
+}
+
+.tabla-calificaciones-taller-docente tbody tr:hover {
+  background: #eef9f4;
+}
+
+.tabla-calificaciones-taller-docente .col-estudiante {
+  min-width: 220px;
+  text-align: left;
+  white-space: normal;
+}
+
+.tabla-calificaciones-taller-docente .col-dni {
+  min-width: 92px;
+}
+
+.tabla-calificaciones-taller-docente .col-grupo {
+  min-width: 64px;
+}
+
+.tabla-calificaciones-taller-docente .nota-sin-cargar {
+  color: #94a3b8;
+  font-weight: 800;
+}
+
+.tabla-calificaciones-taller-docente .nota-trim {
+  background: rgba(15, 118, 110, 0.08);
+  color: #0f766e;
+  font-weight: 900;
+}
+
+.tabla-calificaciones-taller-docente .nota-anual {
+  background: rgba(250, 204, 21, 0.08);
+  color: #7c5c00;
+  font-weight: 900;
+}
+
+#mensajeCalificacionesTallerDocente {
+  min-height: 22px;
+  margin-top: 14px;
+  font-weight: 800;
+}
+
+#mensajeCalificacionesTallerDocente.ok {
+  color: #86efac;
+}
+
+#mensajeCalificacionesTallerDocente.error {
+  color: #fecaca;
+}
+
+@media (max-width: 900px) {
+  #calificaciones-taller-docente .encabezado-listado {
+    flex-direction: column;
+  }
+
+  .filtros-calificaciones-taller-docente {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .campo-calificaciones-taller-docente:last-child {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 600px) {
+  .filtros-calificaciones-taller-docente {
+    grid-template-columns: 1fr;
+  }
+
+  .campo-calificaciones-taller-docente:last-child {
+    grid-column: auto;
+  }
+
+  .estado-calificaciones-solo-lectura {
+    width: 100%;
+    justify-content: center;
+  }
+}

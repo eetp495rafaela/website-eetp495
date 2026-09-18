@@ -3570,3 +3570,525 @@ PRINCIPIO DE IMPLEMENTACIÓN
 ======================================================================
 FIN ACTUALIZACIÓN 17/09/2026
 ======================================================================
+
+======================================================================
+35. ACTUALIZACIÓN – 18/09/2026 – REGISTRO DE CALIFICACIONES DE TALLER
+======================================================================
+
+ESTADO GENERAL
+--------------
+El módulo “Registro de Calificaciones de Taller” avanzó desde la etapa de diseño
+hacia una primera implementación real en Firestore y Portal Institucional.
+
+La implementación sigue siendo incremental y controlada. Se mantiene el criterio:
+- no romper funciones existentes;
+- probar una etapa antes de habilitar la siguiente;
+- seguridad real en Firestore Rules;
+- un solo documento por curso/ciclo lectivo;
+- escritura docente por alumno/campo, no reemplazos masivos del documento.
+
+IMPORTANTE – ESTA ACTUALIZACIÓN CORRIGE Y SUPERA PUNTOS PENDIENTES DE LA SECCIÓN 34
+---------------------------------------------------------------------------------
+La sección 34 dejó algunas decisiones como pendientes. Al 18/09/2026 ya quedaron
+resueltas e implementadas en las reglas Fase 2.
+
+Quedan reemplazadas por las reglas definitivas indicadas en esta sección las
+referencias anteriores a:
+- cierre de Febrero “pendiente”;
+- colección calificaciones_taller todavía sin reglas;
+- acceso del reemplazante todavía por definir;
+- estructura Firestore todavía sin cerrar;
+- regla de redondeo todavía sin cerrar.
+
+REGLAS FUNCIONALES DEFINITIVAS DE TRIM
+--------------------------------------
+Cada trimestre contiene tres calificaciones individuales de Taller, una por cada
+espacio curricular del curso.
+
+Escala de cada Taller:
+- entero de 1 a 10.
+
+Cálculo de TRIM:
+1. Si falta cualquiera de las tres notas:
+   - TRIM queda VACÍO;
+   - la nota faltante sigue editable durante la ventana habilitada;
+   - no se calcula resultado parcial.
+
+2. Si las tres notas son >= 6:
+   - TRIM se calcula con el promedio de las tres;
+   - el resultado final de TRIM es entero;
+   - redondeo especial acordado:
+     * parte decimal > 0,5  -> entero superior;
+     * parte decimal <= 0,5 -> entero inferior.
+
+   Ejemplos:
+   - 7,7  -> 8
+   - 7,66 -> 8
+   - 7,5  -> 7
+   - 7,49 -> 7
+
+3. Si una o más notas son < 6:
+   - TRIM toma la MENOR calificación desaprobada (<6), no un promedio.
+
+TRIM MANUAL
+-----------
+TRIM se calcula automáticamente cuando corresponde, pero puede ser modificado
+manualmente por un docente autorizado del curso.
+
+Cuando TRIM queda en modo MANUAL:
+- cambios posteriores en las tres notas individuales NO deben sobrescribirlo.
+
+Para volver a modo AUTO:
+- se borra/limpia el valor manual de TRIM y se guarda;
+- el sistema vuelve a calcularlo a partir de las tres notas cuando estén completas.
+
+CALIFICACIÓN FINAL / DICIEMBRE / FEBRERO
+----------------------------------------
+Calificación Final:
+- manual;
+- entero de 1 a 10;
+- no utiliza AUSENTE.
+
+Diciembre y Febrero:
+- admiten entero 1 a 10;
+- admiten AUSENTE;
+- pueden permanecer vacíos cuando todavía no corresponda carga.
+
+Reglas por estudiante:
+- Final >= 6:
+  Diciembre y Febrero permanecen bloqueados.
+
+- Final < 6:
+  Diciembre puede cargarse dentro de su ventana temporal.
+
+- Diciembre VACÍO:
+  Febrero permanece BLOQUEADO.
+
+- Diciembre = AUSENTE:
+  Febrero se habilita durante su ventana.
+
+- Diciembre = 1 a 5:
+  Febrero se habilita durante su ventana.
+
+- Diciembre = 6 a 10:
+  Febrero permanece bloqueado porque el estudiante ya aprobó.
+
+VENTANAS TEMPORALES DEFINITIVAS
+-------------------------------
+Las ventanas se validan también en Firestore Rules mediante request.time.
+
+1er Trimestre:
+- desde trimestre1Inicio hasta trimestre1Fin inclusive.
+
+2do Trimestre:
+- desde trimestre2Inicio hasta trimestre2Fin inclusive.
+
+3er Trimestre:
+- desde trimestre3Inicio hasta trimestre3Fin inclusive.
+
+Calificación Final:
+- se habilita junto con el inicio del 3er Trimestre;
+- se cierra al finalizar el 3er Trimestre.
+
+Diciembre:
+- comienza el día siguiente al cierre del 3er Trimestre;
+- permanece habilitado hasta el 30/12 inclusive;
+- el 31/12 ya está bloqueado.
+
+Período totalmente bloqueado:
+- 31/12 hasta 31/01 inclusive.
+
+Febrero:
+- comienza el 01/02 del año siguiente;
+- termina el último día de Febrero inclusive;
+- técnicamente se valida con límite exclusivo 01/03.
+
+Ejemplo:
+Febrero 2027 correspondiente al cierre 2026 se guarda dentro del documento del
+cicloLectivo 2026.
+
+REEMPLAZANTES – REGLA DEFINITIVA
+--------------------------------
+Un reemplazante de Taller puede acceder/cargar calificaciones mientras su
+reemplazo esté ACTIVO y dentro de fecha.
+
+El docente titular NO pierde permiso durante un reemplazo.
+Titular y reemplazante pueden operar simultáneamente mientras el reemplazo esté
+vigente.
+
+Al finalizar/vencer el reemplazo:
+- el reemplazante pierde automáticamente autorización por reglas;
+- el titular continúa habilitado.
+
+La autorización del reemplazante se valida contra:
+- reemplazoId;
+- asignacionTitularId;
+- cursoId;
+- espacioId;
+- cicloLectivo;
+- tipoHorario TALLER;
+- fechaDesde / fechaHasta;
+- estado ACTIVO;
+- correo autenticado.
+
+FIRESTORE RULES – FASE 2 PUBLICADA
+----------------------------------
+Archivo real:
+firestore.rules
+
+Proyecto Firebase confirmado mediante CLI:
+portal-institucional-eet-fa5c7
+
+Firebase CLI utilizada:
+15.24.0
+
+Prueba local realizada:
+firebase emulators:exec --only firestore "echo REGLAS_OK"
+
+Resultado:
+- Firestore Emulator inició correctamente;
+- reglas compilaron;
+- REGLAS_OK;
+- emulador cerró correctamente.
+
+Publicación realizada desde terminal:
+firebase deploy --only firestore:rules
+
+Resultado:
+- rules file compiled successfully;
+- reglas liberadas a cloud.firestore;
+- Deploy complete.
+
+Advertencias del compilador observadas:
+- accesoVigente sin uso;
+- horarioCorrespondeAlDocente sin uso;
+- horarioCorrespondeAlAlumno sin uso;
+- advertencias “Invalid variable name: resource/request” en funciones históricas.
+
+Estas advertencias NO impidieron la compilación ni el despliegue y no
+corresponden al nuevo módulo de Calificaciones.
+
+Commit confirmado de Fase 2:
+548373d – “Agrega reglas de escritura para calificaciones de Taller”
+
+Push confirmado a origin/main.
+
+Backup local temporal de reglas:
+firestore.rules.backup-calificaciones-20260917
+
+Estado actual conocido:
+- permanece sin seguimiento (untracked);
+- NO debe agregarse a Git;
+- conservar hasta terminar las pruebas del módulo.
+
+SEGURIDAD IMPLEMENTADA EN FASE 2
+--------------------------------
+Colección:
+calificaciones_taller
+
+Lectura:
+- SOPORTE: acceso global;
+- DOCENTE: sólo get del documento exacto si posee asignación válida de Taller o
+  reemplazo vigente;
+- DOCENTE no puede listar toda la colección;
+- Gestión y Alumnos no tienen acceso.
+
+Creación:
+- SOPORTE inicializa el registro vacío con esquema validado.
+
+Actualización:
+- SOPORTE puede sincronizar únicamente estructura autorizada (alumnos,
+  docentes/reemplazos y metadatos estructurales permitidos);
+- SOPORTE NO puede modificar mapas de calificaciones;
+- DOCENTE puede modificar calificaciones sólo bajo validación por espacio,
+  alumno, operación y período.
+
+Eliminación:
+- SOPORTE puede eliminar el documento de forma controlada.
+
+Cada escritura docente está diseñada para modificar UN alumno por operación.
+Se utiliza ultimaOperacion para identificar y validar el alumno/operación de la
+escritura.
+
+ARQUITECTURA FIRESTORE – ESTRUCTURA REAL
+----------------------------------------
+Documento:
+calificaciones_taller/{cicloLectivo}__{cursoId}
+
+Ejemplo real de patrón:
+2026__<cursoId>
+
+Metadatos principales:
+- cicloLectivo
+- cicloLectivoDocId
+- cursoId
+- cursoNombre
+- cursoAnio
+- cursoDivision
+
+Tres espacios de Taller:
+- espacio1Id
+- espacio1Nombre
+- espacio1DocenteCorreo
+- espacio1AsignacionId
+- espacio2Id / espacio2Nombre / espacio2DocenteCorreo / espacio2AsignacionId
+- espacio3Id / espacio3Nombre / espacio3DocenteCorreo / espacio3AsignacionId
+
+Reemplazos:
+- reemplazosEspacio1
+- reemplazosEspacio2
+- reemplazosEspacio3
+
+Alumnos:
+- mapa alumnos
+- clave: id/correo institucional del estudiante según documento usuario
+- datos guardados por estudiante:
+  * id
+  * correo
+  * dni
+  * nombre
+  * grupoTaller (G1/G2)
+
+Mapas de notas:
+- trim1Espacio1
+- trim1Espacio2
+- trim1Espacio3
+- trim1Resultado
+- trim2Espacio1
+- trim2Espacio2
+- trim2Espacio3
+- trim2Resultado
+- trim3Espacio1
+- trim3Espacio2
+- trim3Espacio3
+- trim3Resultado
+- calificacionFinal
+- diciembre
+- febrero
+
+Auditoría / operación:
+- ultimaOperacion
+- creadoEn
+- creadoPor
+- actualizadoEn
+- actualizadoPor
+
+INICIALIZACIÓN DESDE PORTAL ADMIN / SOPORTE
+-------------------------------------------
+Se implementó una sección propia “Calificaciones de Taller” en Portal Admin.
+
+Archivos involucrados:
+- admin/index.html
+- assets/js/calificaciones-taller-admin.js
+
+Se decidió NO seguir agrandando admin.js con este módulo.
+
+El inicializador permite seleccionar:
+- ciclo lectivo;
+- curso de 1º o 2º año.
+
+Validaciones previas a crear el registro:
+- curso ACTIVO;
+- sólo 1º o 2º año;
+- configuración de períodos existente y completa;
+- exactamente 3 espacios TALLER activos para curso/ciclo;
+- cada Taller debe tener espacioId, nombre y docente;
+- NO puede existir más de una asignación activa para el mismo espacio de Taller;
+- estudiantes del curso deben estar ACTIVO + ALUMNO + CURSANDO;
+- todos los estudiantes deben tener grupoTaller G1 o G2;
+- si el documento ya existe, NO se sobrescribe.
+
+Antes de confirmar, SweetAlert muestra:
+- curso;
+- ciclo;
+- cantidad total de estudiantes;
+- cantidad G1 / G2;
+- los 3 Talleres;
+- docente asignado a cada Taller.
+
+El registro se crea SIN calificaciones.
+
+PRUEBAS REALES DE INICIALIZACIÓN
+--------------------------------
+1º A / 2026:
+- inicialmente se detectó correctamente una duplicación de asignación activa en
+  “Taller Organización de la Empresa”;
+- el inicializador bloqueó la creación y mostró el error;
+- se corrigió la asignación duplicada;
+- luego se inicializó correctamente;
+- cantidad informada: 23 estudiantes.
+
+1º B / 2026:
+- inicialización correcta;
+- 21 estudiantes;
+- G1: 11;
+- G2: 10;
+- confirmación previa mostró los tres Talleres con sus docentes;
+- ejemplo observado:
+  * Taller Electricidad — MAGARIO Juan Pablo
+  * Taller Informática — CORDOBA Martín
+  * Taller Organización de la Empresa — FERRARI Graciela
+
+Se verificó visualmente en Firestore que el documento contiene:
+- alumnos;
+- curso;
+- tres espacios/docentes/asignaciones;
+- mapas de reemplazos;
+- mapas trim1/trim2/trim3;
+- calificacionFinal;
+- diciembre;
+- febrero.
+
+DATOS DE PRUEBA / IMPORTACIÓN DEFINITIVA
+----------------------------------------
+En los documentos de prueba se observó que algunos estudiantes tienen dni vacío.
+Esto NO es un problema del módulo: refleja los datos actuales de usuarios.
+
+Decisión del usuario:
+- al finalizar el desarrollo del sistema, se realizará la importación completa
+  con el archivo definitivo que ya posee;
+- luego se eliminarán los documentos de prueba de calificaciones_taller;
+- se volverán a inicializar los cursos desde Admin;
+- recién esos documentos recreados con datos completos serán los definitivos.
+
+Condición:
+- esta eliminación/recreación debe hacerse ANTES de que existan calificaciones
+  reales que deban conservarse.
+
+PORTAL DOCENTE – REEMPLAZO DE GOOGLE SHEETS
+-------------------------------------------
+La planilla externa de Google Sheets estaba enlazada únicamente desde el Portal
+Docente.
+
+Se decidió reemplazar ese enlace sólo allí.
+No se modifica Gestión ni Alumno por este motivo.
+
+Archivo fuente revisado:
+docentes/index.html
+
+La tarjeta anterior:
+“Registro de Calificaciones”
+abría la planilla externa de Google Sheets en otra pestaña.
+
+PRIMERA ETAPA DOCENTE – SÓLO LECTURA
+------------------------------------
+Se preparó una primera integración interna SIN ESCRITURA DE NOTAS.
+
+Archivos locales actualmente modificados/creados:
+- docentes/index.html
+- assets/css/portal-docente.css
+- assets/js/calificaciones-taller-docente.js  (nuevo)
+
+Objetivo de esta etapa:
+- reemplazar la tarjeta externa por acceso interno al módulo;
+- mostrar solamente cursos autorizados de Taller de 1º/2º;
+- permitir seleccionar ciclo;
+- permitir seleccionar curso;
+- permitir filtro de grupo:
+  * Todos
+  * G1
+  * G2
+- leer por ID exacto el documento calificaciones_taller;
+- mostrar tabla completa en modo consulta;
+- NO guardar ni editar ningún valor todavía.
+
+Acceso Docente preparado:
+- titular con asignación activa de Taller de 1º/2º;
+- reemplazante con reemplazo ACTIVO y vigente;
+- la tarjeta/sección queda oculta para docentes sin acceso aplicable.
+
+Tabla de consulta preparada:
+N.º | DNI | Estudiante | Grupo |
+1er trimestre: Taller 1 | Taller 2 | Taller 3 | TRIM |
+2do trimestre: Taller 1 | Taller 2 | Taller 3 | TRIM |
+3er trimestre: Taller 1 | Taller 2 | Taller 3 | TRIM |
+Calif. Final | Diciembre | Febrero
+
+Los nombres de los tres Talleres se toman del documento Firestore.
+NO están hardcodeados.
+
+El módulo diferencia registros inexistentes y errores permission-denied.
+
+ESTÉTICA DOCENTE
+----------------
+Se revisó el assets/css/portal-docente.css actual.
+La interfaz nueva se preparó integrada con la paleta vigente verde/dorada del
+Portal Docente, sin reescribir las secciones existentes.
+
+ESTADO LOCAL EXACTO AL CERRAR ESTE CHAT
+---------------------------------------
+Pruebas ejecutadas:
+node --check assets/js/calificaciones-taller-docente.js
+git diff --check
+git status --short
+
+Resultado:
+- node --check: sin errores;
+- git diff --check: sin errores.
+
+Estado Git informado por el usuario:
+ M assets/css/portal-docente.css
+ M docentes/index.html
+?? assets/js/calificaciones-taller-docente.js
+?? firestore.rules.backup-calificaciones-20260917
+
+MUY IMPORTANTE:
+Los tres cambios del Portal Docente TODAVÍA NO fueron confirmados mediante commit
+ni push en este punto de la conversación.
+
+Tampoco se realizó todavía la prueba visual/funcional de esta nueva pantalla de
+consulta del Portal Docente.
+
+NO hacer commit/push de esos tres archivos hasta probar la etapa de lectura.
+
+PRÓXIMO PASO EXACTO PARA RETOMAR EN CHAT NUEVO
+----------------------------------------------
+1. Partir de este estado local sin descartar cambios.
+2. Abrir Portal Docente con un usuario que tenga Taller de 1º/2º.
+3. Verificar que aparezca la tarjeta “Registro de Calificaciones”.
+4. Entrar a la nueva sección interna.
+5. Verificar ciclo 2026 y cursos autorizados.
+6. Probar primero con un curso ya inicializado (1º A o 1º B).
+7. Verificar filtro Todos / G1 / G2.
+8. Verificar nombres de Talleres, estudiantes y columnas.
+9. Confirmar que NO exista ningún control de edición/guardado en esta etapa.
+10. Revisar consola del navegador ante cualquier error.
+11. Si la prueba es correcta:
+    - git add docentes/index.html assets/css/portal-docente.css assets/js/calificaciones-taller-docente.js
+    - commit descriptivo;
+    - push origin main.
+12. Recién después iniciar la fase de carga/escritura de calificaciones.
+
+SIGUIENTE FASE DESPUÉS DE LA LECTURA
+------------------------------------
+Implementar la edición incremental de notas con las reglas Fase 2 ya desplegadas.
+
+Criterios que deben respetarse:
+- docente edita sólo SU Taller;
+- otros Talleres visibles sólo lectura;
+- TRIM/Final/Diciembre/Febrero compartidos según autorización definida;
+- un alumno por escritura Firestore;
+- ventanas temporales reales;
+- TRIM vacío si falta una nota;
+- cálculo automático + modo MANUAL;
+- borrado del TRIM manual vuelve a AUTO;
+- Diciembre vacío bloquea Febrero;
+- AUSENTE / 1..5 en Diciembre habilita Febrero;
+- 6..10 en Diciembre bloquea Febrero;
+- Final >=6 bloquea Diciembre/Febrero;
+- guardado incremental: no exigir completar el curso completo.
+
+PENDIENTES POSTERIORES DEL MÓDULO
+---------------------------------
+- sincronización controlada del roster si entra/cambia/se retira un estudiante;
+- sincronización automática de mapas de reemplazos al crear/finalizar reemplazos;
+- definir/terminar interfaz Admin de consulta global (sin edición de notas);
+- generar PDF anual por curso/ciclo;
+- prueba de reemplazante real;
+- prueba de bloqueos por fecha;
+- limpieza anual controlada luego del archivo de PDFs;
+- actualizar la Bitácora cuando cada etapa quede probada.
+
+======================================================================
+FIN ACTUALIZACIÓN 18/09/2026
+======================================================================
