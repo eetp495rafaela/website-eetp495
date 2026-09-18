@@ -4540,7 +4540,7 @@ body {
 
 /* =====================================================
    REGISTRO DE CALIFICACIONES DE TALLER - DOCENTE
-   Etapa inicial: consulta / solo lectura
+   Consulta + carga incremental del trimestre vigente
 ===================================================== */
 
 #calificaciones-taller-docente {
@@ -4794,5 +4794,133 @@ body {
   .estado-calificaciones-solo-lectura {
     width: 100%;
     justify-content: center;
+  }
+}
+
+/* =========================
+   EDICIÓN INCREMENTAL DE CALIFICACIONES
+========================= */
+
+.estado-calificaciones-solo-lectura.edicion-habilitada {
+  border-color: rgba(139, 63, 47, 0.45);
+  background: rgba(139, 63, 47, 0.09);
+  color: #7a3127;
+}
+
+.chip-calificaciones-taller-docente.chip-edicion-calificaciones-taller {
+  border-color: rgba(139, 63, 47, 0.28);
+  background: #fff8ee;
+  color: #5a241f;
+}
+
+.tabla-calificaciones-taller-docente thead .encabezado-taller-editable {
+  background: #f3d8ca;
+  color: #64291f;
+  box-shadow: inset 0 -3px 0 #8b3f2f;
+}
+
+.tabla-calificaciones-taller-docente .celda-nota-editable-taller {
+  background: #fffaf3;
+  padding: 6px;
+}
+
+.select-nota-taller-docente {
+  width: 54px;
+  min-width: 54px;
+  height: 34px;
+  padding: 0 4px;
+  border: 1px solid #c99687;
+  border-radius: 8px;
+  outline: none;
+  background: #ffffff;
+  color: #5a241f;
+  font: inherit;
+  font-size: 0.9rem;
+  font-weight: 900;
+  text-align: center;
+  cursor: pointer;
+}
+
+.select-nota-taller-docente:focus {
+  border-color: #8b3f2f;
+  box-shadow: 0 0 0 3px rgba(139, 63, 47, 0.14);
+}
+
+.select-nota-taller-docente.nota-modificada {
+  border-color: #8b3f2f;
+  background: #fbe9df;
+  color: #5a241f;
+}
+
+.select-nota-taller-docente:disabled {
+  cursor: wait;
+  opacity: 0.72;
+}
+
+.acciones-calificaciones-taller-docente {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: 16px;
+  padding: 14px 16px;
+  border: 1px solid #e0b9ab;
+  border-radius: 12px;
+  background: #fff8ee;
+}
+
+.ayuda-edicion-calificaciones-taller {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #6f4137;
+  font-size: 0.86rem;
+  font-weight: 800;
+}
+
+.ayuda-edicion-calificaciones-taller i {
+  color: #8b3f2f;
+}
+
+.btn-guardar-calificaciones-taller-docente {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 42px;
+  padding: 9px 18px;
+  border: 1px solid #6f2d24;
+  border-radius: 10px;
+  background: #7f382d;
+  color: #fff8ee;
+  font: inherit;
+  font-size: 0.88rem;
+  font-weight: 900;
+  cursor: pointer;
+  transition:
+    background 0.18s ease,
+    transform 0.18s ease,
+    opacity 0.18s ease;
+}
+
+.btn-guardar-calificaciones-taller-docente:hover:not(:disabled) {
+  background: #64291f;
+  transform: translateY(-1px);
+}
+
+.btn-guardar-calificaciones-taller-docente:disabled {
+  cursor: not-allowed;
+  opacity: 0.48;
+  transform: none;
+}
+
+@media (max-width: 700px) {
+  .acciones-calificaciones-taller-docente {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .btn-guardar-calificaciones-taller-docente {
+    width: 100%;
   }
 }
