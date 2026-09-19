@@ -1,8 +1,8 @@
 BITÁCORA MAESTRA – PORTAL INSTITUCIONAL E.E.T.P. N.º 495
 ========================================================
 
-Referencia: EETP495-BITACORA-MAESTRA-2026-09-14
-Fecha de consolidación: 14/09/2026
+Referencia: EETP495-BITACORA-MAESTRA-2026-09-18
+Fecha de consolidación: 18/09/2026
 Institución: E.E.T.P. N.º 495 “Malvinas Argentinas” – Rafaela, Santa Fe
 Modalidad: Técnico en Informática Profesional y Personal
 Dominio: https://eetp495rafaela.edu.ar
@@ -4091,4 +4091,601 @@ PENDIENTES POSTERIORES DEL MÓDULO
 
 ======================================================================
 FIN ACTUALIZACIÓN 18/09/2026
+======================================================================
+
+
+
+======================================================================
+36. ACTUALIZACIÓN – 18/09/2026 – ESCRITURA REAL DE CALIFICACIONES DE TALLER
+======================================================================
+
+ESTADO GENERAL
+--------------
+IMPLEMENTADO / PROBADO EN EMULADOR / DESPLEGADO EN FIREBASE / PROBADO EN
+PRODUCCIÓN / CONFIRMADO POR EL USUARIO.
+
+Se completó la primera etapa real de escritura del módulo
+“Registro de Calificaciones de Taller” en Portal Docente.
+
+La lectura ya estaba operativa. En esta actualización quedó habilitada y
+verificada la carga incremental de la calificación correspondiente al Taller
+propio del docente, respetando curso, ciclo lectivo, trimestre, asignación,
+docente y ventana temporal.
+
+ARCHIVOS PRINCIPALES AFECTADOS
+------------------------------
+- assets/js/calificaciones-taller-docente.js
+- firestore.rules
+
+También siguen formando parte funcional del módulo:
+- docentes/index.html
+- assets/css/portal-docente.css
+- assets/js/calificaciones-taller-admin.js
+- admin/index.html
+
+ESTADO GIT AL CIERRE
+--------------------
+Repositorio:
+git@github-eetp495:eetp495rafaela/website-eetp495.git
+
+Rama:
+main
+
+Push confirmado:
+6d41565..319c2fb  main -> main
+
+Commit actual publicado:
+319c2fb
+
+Verificación final:
+git status --short
+
+Resultado:
+SIN SALIDA.
+Repositorio local limpio.
+
+FIRESTORE.RULES EN EL REPOSITORIO
+---------------------------------
+Decisión confirmada:
+firestore.rules debe permanecer dentro del proyecto y versionado en GitHub.
+
+Motivos:
+- forma parte de la lógica de seguridad real del sistema;
+- permite auditar cambios;
+- permite volver a una versión anterior;
+- mantiene sincronizadas aplicación y reglas;
+- firebase deploy --only firestore:rules utiliza ese archivo local.
+
+No deben subirse credenciales privadas, claves de cuentas de servicio ni
+secretos. firestore.rules no se considera un secreto.
+
+ETAPA 1 DE ESCRITURA DOCENTE
+----------------------------
+Funcionamiento verificado:
+
+- el docente ve todas las notas del curso;
+- sólo puede editar la columna correspondiente a SU Taller;
+- sólo puede editar durante la ventana temporal habilitada;
+- otros Talleres permanecen en modo lectura;
+- TRIM / Final / Diciembre / Febrero todavía no se editan manualmente desde la
+  interfaz;
+- puede modificar una o más notas antes de guardar;
+- el botón indica la cantidad de cambios pendientes;
+- el guardado se realiza de forma incremental, un alumno por escritura
+  Firestore;
+- no es necesario completar el curso entero;
+- las notas admitidas son enteros de 1 a 10;
+- borrar una nota se representa con valor vacío / null según la lógica actual.
+
+Prueba real en producción:
+- se cargaron notas de prueba;
+- una de las pruebas fue valor 1 para la estudiante de prueba Villarreal Ciara;
+- luego de Ctrl + Shift + R la nota continuó visible;
+- se confirmó persistencia real en Firestore;
+- el mensaje mostrado fue:
+  “1 calificación guardada correctamente.”
+
+Todos los alumnos y calificaciones actualmente utilizados en esta etapa son
+DATOS DE PRUEBA.
+
+NO es necesario limpiarlos ahora.
+
+DEPURACIÓN FIRESTORE RULES – PROBLEMA ENCONTRADO
+------------------------------------------------
+Durante la primera prueba de escritura, Firestore devolvía:
+
+Missing or insufficient permissions.
+
+La investigación confirmó que:
+- el correo autenticado era correcto;
+- el perfil tenía rol DOCENTE y estado ACTIVO;
+- el alumno existía en el registro;
+- trimestre = 2;
+- espacio = Taller Electricidad / espacio1;
+- asignacionRegistro y asignacionAcceso coincidían;
+- origen = TITULAR;
+- reemplazoId vacío;
+- la nota era entero válido;
+- el período configurado era válido;
+- la asignación activa era correcta.
+
+Se incorporó temporalmente un bloque:
+DEBUG CALIFICACIONES TALLER
+
+Ese bloque permitió verificar todos los datos anteriores.
+
+Luego se reprodujo la escritura con Firestore Emulator y
+@firebase/rules-unit-testing.
+
+Diagnóstico exacto del emulador:
+
+Unable to evaluate the expression as the maximum of 1000 expressions
+to evaluate has been reached.
+
+Por lo tanto, la causa NO era un permiso incorrecto sino el límite de
+evaluación de Firestore Security Rules.
+
+CAUSA TÉCNICA
+-------------
+docentePuedeActualizarCalificaciones() evaluaba una cadena amplia de
+validadores posibles mediante OR:
+
+- trim1 espacio1/2/3;
+- trim2 espacio1/2/3;
+- trim3 espacio1/2/3;
+- TRIM 1/2/3;
+- Final;
+- Diciembre;
+- Febrero.
+
+Aunque la operación real correspondiera, por ejemplo, a:
+2DO TRIMESTRE + espacio1,
+
+la evaluación acumulada podía superar las 1000 expresiones permitidas por
+Firestore Rules antes de completar la autorización.
+
+PRUEBA DE AISLAMIENTO
+---------------------
+Se modificó temporalmente en emulador:
+
+allow update: if cambioNotaTrim2Espacio1Valido(
+  request.resource.data,
+  resource.data
+);
+
+Resultado:
+
+ESCRITURA ACEPTADA POR LAS REGLAS.
+
+Esto confirmó que el validador específico funcionaba correctamente y que el
+problema estaba en el recorrido general de reglas.
+
+SOLUCIÓN DEFINITIVA DE FIRESTORE RULES
+--------------------------------------
+Se incorporó:
+
+actualizacionTocaCalificaciones(nuevo, anterior)
+
+Esta función detecta si la escritura toca alguno de los mapas de calificaciones.
+
+El allow update de calificaciones_taller quedó conceptualmente separado:
+
+- si la actualización toca calificaciones:
+  se evalúa únicamente docentePuedeActualizarCalificaciones();
+
+- si NO toca calificaciones:
+  se evalúa únicamente soportePuedeSincronizarRegistroCalificaciones().
+
+Además, docentePuedeActualizarCalificaciones() ya no recorre todos los
+validadores posibles.
+
+Primero obtiene:
+- ultimaOperacion.tipo;
+- ultimaOperacion.trimestre;
+- ultimaOperacion.espacioId.
+
+Luego deriva directamente al ÚNICO validador específico correspondiente.
+
+Ejemplos:
+- NOTA_ESPACIO + trimestre 2 + espacio1
+  -> cambioNotaTrim2Espacio1Valido();
+
+- TRIM + trimestre 2
+  -> cambioTrim2Valido();
+
+- FINAL
+  -> cambioCalificacionFinalValido();
+
+- DICIEMBRE
+  -> cambioDiciembreValido();
+
+- FEBRERO
+  -> cambioFebreroValido().
+
+IMPORTANTE:
+No se eliminó la seguridad específica de cada operación.
+
+Cada validador continúa controlando según corresponda:
+- alumno;
+- campos que pueden cambiar;
+- tipo de operación;
+- correo autenticado;
+- timestamp;
+- espacio;
+- asignación activa;
+- titular o reemplazante;
+- período habilitado;
+- nota válida;
+- consistencia de TRIM;
+- auditoría.
+
+La optimización evita validaciones globales redundantes que hacían superar el
+límite de 1000 expresiones.
+
+PRUEBA DEFINITIVA EN EMULADOR
+-----------------------------
+Entorno temporal utilizado:
+/tmp/prueba-reglas-eetp495
+
+Dependencias:
+- firebase
+- @firebase/rules-unit-testing
+
+Prueba:
+node prueba-calificaciones.mjs
+
+Resultado final:
+ESCRITURA ACEPTADA POR LAS REGLAS.
+
+La prueba simuló:
+- usuario DOCENTE;
+- asignación activa;
+- 1º año;
+- Taller Electricidad;
+- 2DO TRIMESTRE;
+- alumno existente;
+- escritura de una nota;
+- request.time;
+- ultimaOperacion;
+- actualizadoPor;
+- actualizadoEn.
+
+DESPLIEGUE A FIREBASE
+---------------------
+Comando utilizado:
+
+firebase deploy --only firestore:rules
+
+Resultado:
+- rules file compiled successfully;
+- firestore.rules publicado correctamente;
+- Deploy complete.
+
+Las advertencias históricas observadas sobre funciones sin uso y variables
+resource/request no impidieron la compilación ni el despliegue.
+
+PRUEBA REAL EN PRODUCCIÓN
+-------------------------
+Después del deploy se repitió la carga desde Portal Docente.
+
+Resultado:
+- escritura aceptada;
+- sin PERMISSION_DENIED;
+- mensaje de guardado correcto;
+- persistencia confirmada después de recargar la página.
+
+Por lo tanto:
+LA ESCRITURA DE NOTAS DEL TALLER PROPIO ESTÁ OPERATIVA EN PRODUCCIÓN.
+
+LIMPIEZA DEL DEBUG
+------------------
+Una vez confirmada la escritura:
+
+- se eliminó completamente el bloque
+  DEBUG CALIFICACIONES TALLER;
+- se ejecutó:
+  node --check assets/js/calificaciones-taller-docente.js
+- resultado:
+  sin errores.
+
+Después del push:
+- la consola del navegador ya no muestra DEBUG CALIFICACIONES TALLER;
+- permanece solamente la información normal de acceso autorizado.
+
+NOMENCLATURA VISUAL DEFINIDA
+----------------------------
+Abreviaturas de Taller usadas en la tabla:
+
+Taller Electricidad:
+ELE
+
+Taller Informática:
+INF
+
+Taller Organización de la Empresa:
+ORG
+
+Taller Electrónica:
+ELK
+
+Taller Documentos Comerciales:
+DOC
+
+Se muestran en mayúsculas, compactas y con mayor peso visual que el texto común
+del encabezado.
+
+Nomenclatura de trimestres acordada para el módulo:
+
+1ER TRIMESTRE
+2DO TRIMESTRE
+3ER TRIMESTRE
+
+Cuando el diseño requiera mayúscula/minúscula convencional puede usarse:
+
+1er. Trimestre
+2do. Trimestre
+3er. Trimestre
+
+Evitar variantes:
+1.er Trimestre
+2.º Trimestre
+1° Trimestre
+
+PERÍODOS 2026 CONFIRMADOS
+-------------------------
+Documento:
+configuracion_periodos/2026
+
+Valores utilizados en pruebas:
+
+cicloLectivo: 2026
+
+trimestre1Inicio:
+2026-03-02
+
+trimestre1Fin:
+2026-05-29
+
+trimestre2Inicio:
+2026-06-01
+
+trimestre2Fin:
+2026-09-18
+
+trimestre3Inicio:
+2026-09-21
+
+trimestre3Fin:
+2026-12-11
+
+La prueba de escritura de esta etapa se realizó el 18/09/2026, último día
+habilitado del 2DO TRIMESTRE.
+
+CÁLCULO AUTOMÁTICO DE TRIM – LÓGICA YA EXISTENTE
+------------------------------------------------
+En assets/js/calificaciones-taller-docente.js ya existe:
+
+calcularResultadoAutomatico(valores)
+
+Reglas actuales:
+
+1. Si falta cualquiera de las tres notas:
+   devuelve null.
+
+2. Si existe alguna nota menor que 6:
+   TRIM toma la menor nota desaprobada.
+
+3. Si las tres notas son 6 o mayores:
+   calcula el promedio.
+
+Redondeo institucional implementado:
+- decimal > 0.5:
+  redondea hacia arriba;
+- decimal <= 0.5:
+  redondea hacia abajo.
+
+La escritura actual de una nota individual ya contempla parcialmente TRIM:
+
+- si quedan las tres notas completas:
+  guarda automáticamente trimXResultado con:
+  modo: "AUTO";
+
+- si se quita una nota y existía un AUTO:
+  limpia el resultado;
+
+- si existe un resultado:
+  modo: "MANUAL"
+  y las tres notas siguen completas:
+  lo conserva.
+
+La interfaz todavía muestra TRIM en modo lectura.
+
+Por lo tanto, parte de la ETAPA 2 ya está preparada internamente.
+
+ETAPA 2 – PRÓXIMO PASO
+----------------------
+PENDIENTE DE IMPLEMENTAR EN LA INTERFAZ DOCENTE:
+
+1. Permitir edición manual de TRIM cuando corresponda.
+
+2. TRIM sólo puede operarse si las tres notas de Taller están cargadas.
+
+3. Permitir valor manual de 1 a 10.
+
+4. Guardar la intervención manual como:
+   modo: "MANUAL".
+
+5. Si se borra el TRIM manual:
+   volver al cálculo automático correspondiente.
+
+6. Mantener:
+   modo: "AUTO"
+   cuando el resultado provenga del cálculo institucional.
+
+7. Respetar la ventana temporal del trimestre.
+
+8. Mantener el guardado incremental por alumno.
+
+9. No habilitar todavía Final / Diciembre / Febrero hasta terminar y probar
+   TRIM.
+
+MULTIANUALIDAD – 2027 Y AÑOS SIGUIENTES
+---------------------------------------
+Se verificó expresamente que el módulo NO tiene 2026 hardcodeado en la lógica de
+Calificaciones de Taller ni en firestore.rules.
+
+Portal Admin:
+assets/js/calificaciones-taller-admin.js utiliza:
+
+new Date().getFullYear()
+
+Por lo tanto:
+- durante 2027 propondrá automáticamente 2027;
+- durante 2028 propondrá automáticamente 2028;
+- etc.
+
+Portal Docente:
+cargarCiclosDisponibles() arma la lista a partir de:
+
+accesosCalificacionesTallerDocente
+  -> acceso.cicloLectivo
+
+Los ciclos se:
+- deduplican;
+- ordenan de mayor a menor.
+
+Por lo tanto, si el docente posee asignaciones 2027, el selector mostrará 2027.
+
+Ejemplo posible si conserva accesos en ambos ciclos:
+
+Seleccionar ciclo
+2027
+2026
+
+Si existe un único ciclo disponible, se selecciona automáticamente.
+
+ESTRUCTURA MULTIANUAL
+---------------------
+Configuración:
+
+configuracion_periodos/2026
+configuracion_periodos/2027
+configuracion_periodos/2028
+...
+
+Registros:
+
+calificaciones_taller/2026__{cursoId}
+calificaciones_taller/2027__{cursoId}
+calificaciones_taller/2028__{cursoId}
+...
+
+No es necesario modificar el código cada año.
+
+Para comenzar 2027 se deberá:
+
+1. crear/configurar configuracion_periodos/2027;
+2. contar con asignaciones activas de Taller para cicloLectivo 2027;
+3. tener los usuarios/alumnos definitivos del nuevo ciclo;
+4. inicializar desde Portal Admin los registros 2027;
+5. los docentes verán 2027 automáticamente si poseen acceso correspondiente.
+
+FEBRERO Y CICLO LECTIVO
+-----------------------
+La instancia de Febrero pertenece al cierre del ciclo lectivo anterior.
+
+Ejemplo:
+- cicloLectivo del registro: 2026;
+- instancia Febrero: febrero de 2027;
+- los datos siguen almacenados dentro del documento:
+  calificaciones_taller/2026__{cursoId}.
+
+La regla utiliza cicloLectivo + 1 para calcular la ventana de Febrero.
+
+DATOS DE PRUEBA 2026
+--------------------
+Decisión confirmada por el usuario:
+
+- alumnos actuales: prueba;
+- notas actuales: prueba;
+- documentos actuales de calificaciones: prueba.
+
+No limpiar ahora.
+
+Durante el desarrollo 2026 se conservarán para seguir realizando pruebas.
+
+Al finalizar el ciclo lectivo 2026 se realizará una limpieza controlada de los
+documentos de prueba que ya no sirvan y se preparará la carga real del ciclo
+2027.
+
+IMPORTANTE:
+No realizar una eliminación indiscriminada de Firestore.
+
+La limpieza deberá distinguir:
+- datos transitorios/de prueba;
+- configuraciones que deban conservarse;
+- estructura institucional;
+- usuarios definitivos;
+- históricos o documentos que sí deban preservarse.
+
+La limpieza de calificaciones_taller debe realizarse antes de empezar a cargar
+notas reales que deban conservarse.
+
+ESTADO FUNCIONAL EXACTO PARA CONTINUAR EN OTRO CHAT
+---------------------------------------------------
+Al abrir un nuevo chat, asumir:
+
+1. Registro de Calificaciones de Taller ya está integrado en Portal Docente.
+
+2. Lectura:
+   OPERATIVA.
+
+3. Filtro de cursos/ciclos/grupos:
+   OPERATIVO.
+
+4. Edición de la nota del Taller propio:
+   OPERATIVA EN PRODUCCIÓN.
+
+5. Guardado incremental:
+   OPERATIVO.
+
+6. Firestore Rules:
+   OPTIMIZADAS, DESPLEGADAS Y PROBADAS.
+
+7. Error de límite de 1000 expresiones:
+   RESUELTO.
+
+8. Debug temporal:
+   ELIMINADO.
+
+9. Git:
+   main limpio y push confirmado en commit 319c2fb.
+
+10. Datos visibles actuales:
+    DE PRUEBA.
+
+11. Multianualidad:
+    CONFIRMADA.
+    2027 aparecerá automáticamente cuando existan accesos/asignaciones del ciclo
+    2027 y se inicialicen sus registros.
+
+12. Próxima etapa:
+    ETAPA 2 – habilitar y probar edición MANUAL de TRIM y retorno a AUTO.
+
+13. NO avanzar todavía con:
+    - Calificación Final;
+    - Diciembre;
+    - Febrero;
+    hasta terminar y probar TRIM.
+
+14. Mantener permanentemente:
+    - cambios pequeños;
+    - probar antes de avanzar;
+    - no romper lo que funciona;
+    - seguridad real en Firestore Rules;
+    - un alumno por escritura;
+    - separación estricta por ciclo lectivo.
+
+======================================================================
+FIN ACTUALIZACIÓN 18/09/2026 – ESCRITURA DE CALIFICACIONES
 ======================================================================
