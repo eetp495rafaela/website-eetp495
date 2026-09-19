@@ -501,6 +501,48 @@ function trimestre3CalificacionesAbierto(datos) {
     );
 }
 
+
+/*
+ * Un trimestre confirmado queda bloqueado para las notas de Taller y TRIM.
+ * Los documentos anteriores a esta mejora no tienen cierresTrimestres;
+ * en ese caso se consideran abiertos.
+ */
+function trimestre1Cerrado(datos) {
+  return datos.get(
+    ["cierresTrimestres", "1", "estado"],
+    "ABIERTO"
+  ) == "CERRADO";
+}
+
+function trimestre2Cerrado(datos) {
+  return datos.get(
+    ["cierresTrimestres", "2", "estado"],
+    "ABIERTO"
+  ) == "CERRADO";
+}
+
+function trimestre3Cerrado(datos) {
+  return datos.get(
+    ["cierresTrimestres", "3", "estado"],
+    "ABIERTO"
+  ) == "CERRADO";
+}
+
+function trimestre1EditableCalificaciones(datos) {
+  return trimestre1CalificacionesAbierto(datos)
+    && !trimestre1Cerrado(datos);
+}
+
+function trimestre2EditableCalificaciones(datos) {
+  return trimestre2CalificacionesAbierto(datos)
+    && !trimestre2Cerrado(datos);
+}
+
+function trimestre3EditableCalificaciones(datos) {
+  return trimestre3CalificacionesAbierto(datos)
+    && !trimestre3Cerrado(datos);
+}
+
 function calificacionFinalAbierta(datos) {
   return trimestre3CalificacionesAbierto(datos);
 }
@@ -874,7 +916,8 @@ function estructuraRegistroCalificacionesValida(datos) {
     && datos.get("calificacionFinal", {}) is map
     && datos.get("diciembre", {}) is map
     && datos.get("febrero", {}) is map
-    && datos.get("ultimaOperacion", {}) is map;
+    && datos.get("ultimaOperacion", {}) is map
+    && datos.get("cierresTrimestres", {}) is map;
 }
 
 function registroCalificacionesNuevoSinNotas(datos) {
@@ -1002,7 +1045,7 @@ function cambioNotaTrim1Espacio1Valido(nuevo, anterior) {
     )
     && alumnoOperacionExiste(nuevo)
     && docentePuedeEditarEspacio1(anterior, reemplazoId)
-    && trimestre1CalificacionesAbierto(anterior)
+    && trimestre1EditableCalificaciones(anterior)
     && cambiaExactamenteAlumno(
       nuevo.trim1Espacio1,
       anterior.trim1Espacio1,
@@ -1037,7 +1080,7 @@ function cambioNotaTrim1Espacio2Valido(nuevo, anterior) {
     )
     && alumnoOperacionExiste(nuevo)
     && docentePuedeEditarEspacio2(anterior, reemplazoId)
-    && trimestre1CalificacionesAbierto(anterior)
+    && trimestre1EditableCalificaciones(anterior)
     && cambiaExactamenteAlumno(
       nuevo.trim1Espacio2,
       anterior.trim1Espacio2,
@@ -1072,7 +1115,7 @@ function cambioNotaTrim1Espacio3Valido(nuevo, anterior) {
     )
     && alumnoOperacionExiste(nuevo)
     && docentePuedeEditarEspacio3(anterior, reemplazoId)
-    && trimestre1CalificacionesAbierto(anterior)
+    && trimestre1EditableCalificaciones(anterior)
     && cambiaExactamenteAlumno(
       nuevo.trim1Espacio3,
       anterior.trim1Espacio3,
@@ -1107,7 +1150,7 @@ function cambioNotaTrim2Espacio1Valido(nuevo, anterior) {
     )
     && alumnoOperacionExiste(nuevo)
     && docentePuedeEditarEspacio1(anterior, reemplazoId)
-    && trimestre2CalificacionesAbierto(anterior)
+    && trimestre2EditableCalificaciones(anterior)
     && cambiaExactamenteAlumno(
       nuevo.trim2Espacio1,
       anterior.trim2Espacio1,
@@ -1142,7 +1185,7 @@ function cambioNotaTrim2Espacio2Valido(nuevo, anterior) {
     )
     && alumnoOperacionExiste(nuevo)
     && docentePuedeEditarEspacio2(anterior, reemplazoId)
-    && trimestre2CalificacionesAbierto(anterior)
+    && trimestre2EditableCalificaciones(anterior)
     && cambiaExactamenteAlumno(
       nuevo.trim2Espacio2,
       anterior.trim2Espacio2,
@@ -1177,7 +1220,7 @@ function cambioNotaTrim2Espacio3Valido(nuevo, anterior) {
     )
     && alumnoOperacionExiste(nuevo)
     && docentePuedeEditarEspacio3(anterior, reemplazoId)
-    && trimestre2CalificacionesAbierto(anterior)
+    && trimestre2EditableCalificaciones(anterior)
     && cambiaExactamenteAlumno(
       nuevo.trim2Espacio3,
       anterior.trim2Espacio3,
@@ -1212,7 +1255,7 @@ function cambioNotaTrim3Espacio1Valido(nuevo, anterior) {
     )
     && alumnoOperacionExiste(nuevo)
     && docentePuedeEditarEspacio1(anterior, reemplazoId)
-    && trimestre3CalificacionesAbierto(anterior)
+    && trimestre3EditableCalificaciones(anterior)
     && cambiaExactamenteAlumno(
       nuevo.trim3Espacio1,
       anterior.trim3Espacio1,
@@ -1247,7 +1290,7 @@ function cambioNotaTrim3Espacio2Valido(nuevo, anterior) {
     )
     && alumnoOperacionExiste(nuevo)
     && docentePuedeEditarEspacio2(anterior, reemplazoId)
-    && trimestre3CalificacionesAbierto(anterior)
+    && trimestre3EditableCalificaciones(anterior)
     && cambiaExactamenteAlumno(
       nuevo.trim3Espacio2,
       anterior.trim3Espacio2,
@@ -1282,7 +1325,7 @@ function cambioNotaTrim3Espacio3Valido(nuevo, anterior) {
     )
     && alumnoOperacionExiste(nuevo)
     && docentePuedeEditarEspacio3(anterior, reemplazoId)
-    && trimestre3CalificacionesAbierto(anterior)
+    && trimestre3EditableCalificaciones(anterior)
     && cambiaExactamenteAlumno(
       nuevo.trim3Espacio3,
       anterior.trim3Espacio3,
@@ -1311,7 +1354,7 @@ function cambioTrim1Valido(nuevo, anterior) {
     && operacionCalificacionesValida(nuevo, "TRIM", 1, "")
     && alumnoOperacionExiste(nuevo)
     && docentePuedeEditarCompartido(anterior, reemplazoId)
-    && trimestre1CalificacionesAbierto(anterior)
+    && trimestre1EditableCalificaciones(anterior)
     && cambiaExactamenteAlumno(
       nuevo.trim1Resultado,
       anterior.trim1Resultado,
@@ -1353,7 +1396,7 @@ function cambioTrim2Valido(nuevo, anterior) {
     && operacionCalificacionesValida(nuevo, "TRIM", 2, "")
     && alumnoOperacionExiste(nuevo)
     && docentePuedeEditarCompartido(anterior, reemplazoId)
-    && trimestre2CalificacionesAbierto(anterior)
+    && trimestre2EditableCalificaciones(anterior)
     && cambiaExactamenteAlumno(
       nuevo.trim2Resultado,
       anterior.trim2Resultado,
@@ -1395,7 +1438,7 @@ function cambioTrim3Valido(nuevo, anterior) {
     && operacionCalificacionesValida(nuevo, "TRIM", 3, "")
     && alumnoOperacionExiste(nuevo)
     && docentePuedeEditarCompartido(anterior, reemplazoId)
-    && trimestre3CalificacionesAbierto(anterior)
+    && trimestre3EditableCalificaciones(anterior)
     && cambiaExactamenteAlumno(
       nuevo.trim3Resultado,
       anterior.trim3Resultado,
@@ -1520,6 +1563,276 @@ function cambioFebreroValido(nuevo, anterior) {
       entrada == null
       || entradaNotaEspecialValida(entrada)
     );
+}
+
+
+/* =====================================================
+   CIERRE / REAPERTURA DE TRIMESTRES
+===================================================== */
+
+function cambiaExactamenteCierreTrimestre(
+  nuevo,
+  anterior,
+  trimestreClave
+) {
+  let mapaNuevo = nuevo.get("cierresTrimestres", {});
+  let mapaAnterior = anterior.get("cierresTrimestres", {});
+  let claves = mapaNuevo.diff(mapaAnterior).affectedKeys();
+
+  return mapaNuevo is map
+    && mapaAnterior is map
+    && claves.hasOnly([trimestreClave])
+    && claves.hasAll([trimestreClave]);
+}
+
+function entradaCierreTrimestreValida(entrada, pendientes) {
+  return entrada is map
+    && entrada.keys().hasOnly([
+      "estado",
+      "cerradoPor",
+      "cerradoEn",
+      "pendientesAlCerrar",
+      "reabiertoPor",
+      "reabiertoEn"
+    ])
+    && entrada.get("estado", "") == "CERRADO"
+    && entrada.get("cerradoPor", "") == request.auth.token.email
+    && entrada.get("cerradoEn", null) == request.time
+    && entrada.get("pendientesAlCerrar", -1) is int
+    && entrada.get("pendientesAlCerrar", -1) == pendientes
+    && pendientes >= 0
+    && entrada.get("reabiertoPor", "") == ""
+    && entrada.get("reabiertoEn", null) == null;
+}
+
+function operacionCierreTrimestreValida(
+  datos,
+  trimestre
+) {
+  let operacion = datos.get("ultimaOperacion", {});
+
+  return operacion is map
+    && operacion.keys().hasOnly([
+      "tipo",
+      "trimestre",
+      "reemplazoId",
+      "pendientes",
+      "por",
+      "en"
+    ])
+    && operacion.get("tipo", "") == "CERRAR_TRIMESTRE"
+    && operacion.get("trimestre", -1) == trimestre
+    && operacion.get("reemplazoId", "") is string
+    && operacion.get("pendientes", -1) is int
+    && operacion.get("pendientes", -1) >= 0
+    && operacion.get("por", "") == request.auth.token.email
+    && operacion.get("en", null) == request.time
+    && datos.get("actualizadoPor", "") == request.auth.token.email
+    && datos.get("actualizadoEn", null) == request.time;
+}
+
+function cierreTrimestre1DocenteValido(nuevo, anterior) {
+  let reemplazoId =
+    nuevo.get(["ultimaOperacion", "reemplazoId"], "");
+  let pendientes =
+    nuevo.get(["ultimaOperacion", "pendientes"], -1);
+  let entrada =
+    nuevo.get(["cierresTrimestres", "1"], {});
+  let claves = nuevo.diff(anterior).affectedKeys();
+
+  return claves.hasOnly([
+      "cierresTrimestres",
+      "ultimaOperacion",
+      "actualizadoEn",
+      "actualizadoPor"
+    ])
+    && claves.hasAll(["cierresTrimestres"])
+    && operacionCierreTrimestreValida(nuevo, 1)
+    && docentePuedeEditarCompartido(anterior, reemplazoId)
+    && trimestre1CalificacionesAbierto(anterior)
+    && !trimestre1Cerrado(anterior)
+    && cambiaExactamenteCierreTrimestre(nuevo, anterior, "1")
+    && entradaCierreTrimestreValida(entrada, pendientes);
+}
+
+function cierreTrimestre2DocenteValido(nuevo, anterior) {
+  let reemplazoId =
+    nuevo.get(["ultimaOperacion", "reemplazoId"], "");
+  let pendientes =
+    nuevo.get(["ultimaOperacion", "pendientes"], -1);
+  let entrada =
+    nuevo.get(["cierresTrimestres", "2"], {});
+  let claves = nuevo.diff(anterior).affectedKeys();
+
+  return claves.hasOnly([
+      "cierresTrimestres",
+      "ultimaOperacion",
+      "actualizadoEn",
+      "actualizadoPor"
+    ])
+    && claves.hasAll(["cierresTrimestres"])
+    && operacionCierreTrimestreValida(nuevo, 2)
+    && docentePuedeEditarCompartido(anterior, reemplazoId)
+    && trimestre2CalificacionesAbierto(anterior)
+    && !trimestre2Cerrado(anterior)
+    && cambiaExactamenteCierreTrimestre(nuevo, anterior, "2")
+    && entradaCierreTrimestreValida(entrada, pendientes);
+}
+
+function cierreTrimestre3DocenteValido(nuevo, anterior) {
+  let reemplazoId =
+    nuevo.get(["ultimaOperacion", "reemplazoId"], "");
+  let pendientes =
+    nuevo.get(["ultimaOperacion", "pendientes"], -1);
+  let entrada =
+    nuevo.get(["cierresTrimestres", "3"], {});
+  let claves = nuevo.diff(anterior).affectedKeys();
+
+  return claves.hasOnly([
+      "cierresTrimestres",
+      "ultimaOperacion",
+      "actualizadoEn",
+      "actualizadoPor"
+    ])
+    && claves.hasAll(["cierresTrimestres"])
+    && operacionCierreTrimestreValida(nuevo, 3)
+    && docentePuedeEditarCompartido(anterior, reemplazoId)
+    && trimestre3CalificacionesAbierto(anterior)
+    && !trimestre3Cerrado(anterior)
+    && cambiaExactamenteCierreTrimestre(nuevo, anterior, "3")
+    && entradaCierreTrimestreValida(entrada, pendientes);
+}
+
+function docentePuedeCerrarTrimestre(nuevo, anterior) {
+  let trimestre =
+    nuevo.get(["ultimaOperacion", "trimestre"], -1);
+
+  return trimestre == 1
+    ? cierreTrimestre1DocenteValido(nuevo, anterior)
+    : trimestre == 2
+      ? cierreTrimestre2DocenteValido(nuevo, anterior)
+      : trimestre == 3
+        ? cierreTrimestre3DocenteValido(nuevo, anterior)
+        : false;
+}
+
+function operacionReaperturaTrimestreValida(datos, trimestre) {
+  let operacion = datos.get("ultimaOperacion", {});
+
+  return operacion is map
+    && operacion.keys().hasOnly([
+      "tipo",
+      "trimestre",
+      "por",
+      "en"
+    ])
+    && operacion.get("tipo", "") == "REABRIR_TRIMESTRE"
+    && operacion.get("trimestre", -1) == trimestre
+    && operacion.get("por", "") == request.auth.token.email
+    && operacion.get("en", null) == request.time
+    && datos.get("actualizadoPor", "") == request.auth.token.email
+    && datos.get("actualizadoEn", null) == request.time;
+}
+
+function entradaReaperturaTrimestreValida(nueva, anterior) {
+  return nueva is map
+    && anterior is map
+    && anterior.get("estado", "") == "CERRADO"
+    && nueva.keys().hasOnly([
+      "estado",
+      "cerradoPor",
+      "cerradoEn",
+      "pendientesAlCerrar",
+      "reabiertoPor",
+      "reabiertoEn"
+    ])
+    && nueva.get("estado", "") == "ABIERTO"
+    && nueva.get("cerradoPor", "")
+      == anterior.get("cerradoPor", "")
+    && nueva.get("cerradoEn", null)
+      == anterior.get("cerradoEn", null)
+    && nueva.get("pendientesAlCerrar", -1)
+      == anterior.get("pendientesAlCerrar", -1)
+    && nueva.get("reabiertoPor", "")
+      == request.auth.token.email
+    && nueva.get("reabiertoEn", null) == request.time;
+}
+
+function soportePuedeReabrirTrimestreEspecifico(
+  nuevo,
+  anterior,
+  trimestre,
+  trimestreClave
+) {
+  let mapaNuevo = nuevo.get("cierresTrimestres", {});
+  let mapaAnterior = anterior.get("cierresTrimestres", {});
+  let entradaNueva = mapaNuevo.get(trimestreClave, {});
+  let entradaAnterior = mapaAnterior.get(trimestreClave, {});
+  let claves = nuevo.diff(anterior).affectedKeys();
+
+  return esSoporte()
+    && claves.hasOnly([
+      "cierresTrimestres",
+      "ultimaOperacion",
+      "actualizadoEn",
+      "actualizadoPor"
+    ])
+    && claves.hasAll(["cierresTrimestres"])
+    && operacionReaperturaTrimestreValida(nuevo, trimestre)
+    && cambiaExactamenteCierreTrimestre(
+      nuevo,
+      anterior,
+      trimestreClave
+    )
+    && entradaReaperturaTrimestreValida(
+      entradaNueva,
+      entradaAnterior
+    );
+}
+
+function soportePuedeReabrirTrimestre(nuevo, anterior) {
+  let trimestre =
+    nuevo.get(["ultimaOperacion", "trimestre"], -1);
+
+  return trimestre == 1
+    ? soportePuedeReabrirTrimestreEspecifico(
+        nuevo,
+        anterior,
+        1,
+        "1"
+      )
+    : trimestre == 2
+      ? soportePuedeReabrirTrimestreEspecifico(
+          nuevo,
+          anterior,
+          2,
+          "2"
+        )
+      : trimestre == 3
+        ? soportePuedeReabrirTrimestreEspecifico(
+            nuevo,
+            anterior,
+            3,
+            "3"
+          )
+        : false;
+}
+
+function actualizacionTocaCierreTrimestre(nuevo, anterior) {
+  let claves = nuevo.diff(anterior).affectedKeys();
+
+  return claves.hasAny(["cierresTrimestres"]);
+}
+
+function actualizacionCierreTrimestreValida(nuevo, anterior) {
+  let tipo =
+    nuevo.get(["ultimaOperacion", "tipo"], "");
+
+  return tipo == "CERRAR_TRIMESTRE"
+    ? docentePuedeCerrarTrimestre(nuevo, anterior)
+    : tipo == "REABRIR_TRIMESTRE"
+      ? soportePuedeReabrirTrimestre(nuevo, anterior)
+      : false;
 }
 
 function actualizacionTocaCalificaciones(nuevo, anterior) {
@@ -2506,10 +2819,18 @@ match /calificaciones_taller/{registroId} {
         request.resource.data,
         resource.data
       )
-    : soportePuedeSincronizarRegistroCalificaciones(
+    : actualizacionTocaCierreTrimestre(
         request.resource.data,
         resource.data
-      );
+      )
+      ? actualizacionCierreTrimestreValida(
+          request.resource.data,
+          resource.data
+        )
+      : soportePuedeSincronizarRegistroCalificaciones(
+          request.resource.data,
+          resource.data
+        );
 
   /*
    * Eliminación anual controlada únicamente por SOPORTE.
