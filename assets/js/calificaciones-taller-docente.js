@@ -1054,9 +1054,9 @@ function opcionesTrim(valorSeleccionado, resultadoAutomatico) {
     .join("");
 
   return `
-    <option value="AUTO" ${valor === "AUTO" ? "selected" : ""}>
-      AUTO (${resultadoAutomatico})
-    </option>
+   <option value="AUTO" ${valor === "AUTO" ? "selected" : ""}>
+  ${resultadoAutomatico}
+</option>
     ${opcionesManuales}
   `;
 }
