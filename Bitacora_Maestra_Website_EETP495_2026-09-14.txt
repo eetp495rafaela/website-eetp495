@@ -4689,3 +4689,228 @@ Al abrir un nuevo chat, asumir:
 ======================================================================
 FIN ACTUALIZACIÓN 18/09/2026 – ESCRITURA DE CALIFICACIONES
 ======================================================================
+
+
+
+======================================================================
+37. ACTUALIZACIÓN – 18/09/2026 – ETAPA 2A TRIM: PRIMERA PRUEBA FUNCIONAL
+======================================================================
+
+ESTADO
+------
+IMPLEMENTACIÓN EN CURSO / PRIMERA PRUEBA VISUAL REALIZADA / EXISTE UN PENDIENTE
+DE ESCRITURA QUE DEBE INVESTIGARSE ANTES DE CONTINUAR.
+
+Se incorporó al Portal Docente la primera versión de edición de TRIM.
+
+COMMIT / PUBLICACIÓN
+--------------------
+Commit confirmado:
+
+cab83f5 – “Habilita edición de TRIM en calificaciones de Taller”
+
+Push confirmado:
+
+319c2fb..cab83f5  main -> main
+
+Posteriormente se realizó un cambio visual adicional para identificar las tres
+columnas TRIM como:
+
+1°TRIM
+2°TRIM
+3°TRIM
+
+El usuario confirmó que la visualización quedó correcta y realizó commit/push
+de ese ajuste.
+
+FUNCIONAMIENTO VISUAL CONFIRMADO
+--------------------------------
+La columna TRIM permanece vacía mientras falta cualquiera de las tres notas de
+Taller.
+
+Para poder probar el cálculo real sin modificar permisos docentes, se utilizaron
+datos de prueba agregados manualmente desde Firebase Console para una única
+estudiante de prueba:
+
+Estudiante:
+Villarreal Ciara
+
+Identificador:
+ciaravillarreal.tec495@gmail.com
+
+2DO TRIMESTRE:
+
+trim2Espacio1:
+valor = 1
+
+trim2Espacio2:
+valor = 8
+
+trim2Espacio3:
+valor = 7
+
+Los valores de Espacio 2 y Espacio 3 se agregaron manualmente en Firebase
+Console únicamente con fines de prueba.
+
+Cada entrada se cargó con la estructura:
+
+- valor: int64
+- por: string
+- en: timestamp
+
+RESULTADO AUTOMÁTICO CONFIRMADO
+-------------------------------
+Al quedar cargadas las tres notas:
+
+1, 8, 7
+
+el sistema calculó correctamente:
+
+2°TRIM = 1
+
+Esto confirma que la regla institucional implementada funciona:
+
+- si existe alguna nota menor que 6;
+- TRIM toma la menor nota desaprobada.
+
+En esta prueba:
+menor desaprobada = 1.
+
+AJUSTE VISUAL PENDIENTE
+-----------------------
+Actualmente el selector muestra:
+
+AUTO (1)
+
+Decisión tomada:
+el docente debe ver solamente:
+
+1
+
+La palabra AUTO es información interna y no debe mostrarse en la celda.
+
+Cambio previsto en:
+assets/js/calificaciones-taller-docente.js
+
+Dentro de opcionesTrim(), reemplazar la etiqueta visible:
+
+AUTO (${resultadoAutomatico})
+
+por:
+
+${resultadoAutomatico}
+
+El value interno debe continuar siendo:
+
+AUTO
+
+para conservar la lógica de retorno MANUAL -> AUTO.
+
+Este cambio todavía debe verificarse/confirmarse en el código al retomar.
+
+PENDIENTE CRÍTICO DETECTADO – FIREBASE RECHAZA ESCRITURA
+---------------------------------------------------------
+Durante esta prueba, después de completar manualmente las otras dos notas, el
+usuario intentó modificar desde Portal Docente la nota de SU propia columna
+(la que actualmente tenía valor 1).
+
+Al presionar Guardar cambios, apareció:
+
+“Firebase rechazó la escritura. Revisá que el período esté vigente y que el
+docente tenga autorización sobre el registro.”
+
+IMPORTANTE:
+antes de completar las otras dos notas, la escritura de la columna propia ya
+había sido probada y funcionaba correctamente en producción.
+
+Por lo tanto, el nuevo fallo aparece específicamente en el escenario donde:
+
+- las tres notas del trimestre ya están completas;
+- existe un resultado TRIM automático calculable;
+- el docente cambia la nota de su propio Taller;
+- la misma operación NOTA_ESPACIO puede necesitar actualizar también
+  trim2Resultado en modo AUTO.
+
+HIPÓTESIS A INVESTIGAR
+----------------------
+NO asumir todavía la causa.
+
+El próximo análisis debe verificar con el archivo actual y Firestore Emulator
+si el rechazo proviene de:
+
+1. la validación de cambioNotaTrim2Espacio1Valido() cuando una misma operación
+   modifica simultáneamente:
+   - trim2Espacio1;
+   - trim2Resultado;
+
+2. resultadoTrim2Consistente() o función equivalente;
+
+3. la forma exacta en que la nueva versión de
+   assets/js/calificaciones-taller-docente.js construye el updateDoc cuando ya
+   existen las tres notas;
+
+4. alguna interacción entre el nuevo flujo TRIM y las reglas optimizadas que
+   anteriormente resolvieron el límite de 1000 expresiones.
+
+NO modificar reglas directamente en producción sin reproducir antes el caso en
+Firestore Emulator.
+
+ESTADO DE LA ETAPA 2A AL PAUSAR
+-------------------------------
+CONFIRMADO:
+
+- columnas 1°TRIM / 2°TRIM / 3°TRIM: correctas;
+- TRIM vacío con notas incompletas: correcto;
+- al completar las tres notas aparece control de TRIM: correcto;
+- cálculo automático 1,8,7 -> 1: correcto;
+- datos de prueba manuales en Espacio 2 y Espacio 3: cargados;
+- el docente sigue viendo sólo editable su propia columna de Taller.
+
+PENDIENTE:
+
+- mostrar “1” en vez de “AUTO (1)”;
+- investigar por qué Firebase rechaza cambiar la nota propia cuando las tres
+  notas ya están completas;
+- probar la escritura automática de TRIM;
+- después probar cambio AUTO -> MANUAL;
+- después probar retorno MANUAL -> AUTO;
+- recién una vez resuelto lo anterior continuar con Final / Diciembre /
+  Febrero.
+
+PRÓXIMO PASO EXACTO AL RETOMAR
+------------------------------
+1. No seguir agregando cambios visuales ni reglas.
+
+2. Confirmar el estado actual del JS con:
+   git status --short
+   git log -3 --oneline
+
+3. Verificar si el cambio visual AUTO(1) -> 1 quedó guardado o todavía está
+   pendiente.
+
+4. Reproducir en Firestore Emulator el caso exacto:
+   - trim2Espacio1 = 1;
+   - trim2Espacio2 = 8;
+   - trim2Espacio3 = 7;
+   - trim2Resultado inicialmente vacío o AUTO según el estado real;
+   - docente autorizado cambia trim2Espacio1 a otro entero válido;
+   - operación tipo NOTA_ESPACIO;
+   - comprobar si la misma escritura puede actualizar trim2Resultado AUTO.
+
+5. Obtener el error exacto del Emulator antes de modificar firestore.rules.
+
+6. Aplicar el cambio mínimo necesario.
+
+REGLA DE TRABAJO
+----------------
+No romper la escritura que ya funcionaba para notas individuales.
+
+No abrir permisos adicionales.
+
+No permitir que un docente escriba las columnas de otros Talleres.
+
+No tocar Final / Diciembre / Febrero hasta cerrar completamente TRIM.
+
+======================================================================
+FIN ACTUALIZACIÓN 18/09/2026 – ETAPA 2A TRIM
+======================================================================
