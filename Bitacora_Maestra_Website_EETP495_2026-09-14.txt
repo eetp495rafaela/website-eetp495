@@ -4914,3 +4914,79 @@ No tocar Final / Diciembre / Febrero hasta cerrar completamente TRIM.
 ======================================================================
 FIN ACTUALIZACIÓN 18/09/2026 – ETAPA 2A TRIM
 ======================================================================
+
+
+
+======================================================================
+38. ACTUALIZACIÓN – 18/09/2026 – AJUSTE VISUAL PENDIENTE EN TRIM
+======================================================================
+
+PENDIENTE VISUAL DETECTADO
+--------------------------
+En la columna TRIM, cuando existe un resultado automático calculado, actualmente
+pueden llegar a verse dos valores iguales “1” asociados al mismo resultado.
+
+Esto NO es el comportamiento deseado.
+
+COMPORTAMIENTO CORRECTO
+-----------------------
+TRIM debe mostrarse mediante UN SOLO control desplegable.
+
+Si el cálculo automático da:
+
+1
+
+el desplegable debe mostrar:
+
+1
+
+como opción seleccionada correspondiente internamente a:
+
+value = "AUTO"
+
+No debe existir otro “1” visible fuera del desplegable ni una segunda opción
+visual duplicada que represente el mismo resultado automático.
+
+La nota automática calculada debe ser PARTE DEL MISMO SELECT que luego permite
+al docente elegir, si fuera necesario, un valor manual de 1 a 10.
+
+Ejemplo esperado:
+
+- cálculo automático = 1;
+- TRIM muestra un único desplegable;
+- valor visible inicial = 1;
+- internamente ese valor corresponde al modo AUTO;
+- si el docente elige otro valor (por ejemplo 6), se guarda MANUAL;
+- si luego vuelve a la opción automática, el mismo desplegable vuelve a mostrar
+  el resultado calculado, sin duplicados.
+
+OBJETIVO DEL AJUSTE
+-------------------
+Evitar que cada vez que TRIM se calcule automáticamente aparezcan dos notas
+iguales en la misma columna.
+
+Este ajuste debe resolverse junto con la revisión de:
+- opcionesTrim();
+- contenidoCeldaTrim();
+- celdaTrim();
+- valor seleccionado del <select>;
+- representación visible de AUTO.
+
+No modificar todavía Final / Diciembre / Febrero.
+
+PRIORIDAD AL RETOMAR
+--------------------
+Al continuar el desarrollo:
+
+1. Resolver primero el rechazo de escritura de Firebase detectado al cambiar la
+   nota propia cuando ya existen las tres notas.
+
+2. Corregir la visualización de TRIM para que exista UN SOLO valor visible
+   dentro del desplegable.
+
+3. Verificar:
+   AUTO -> MANUAL -> AUTO.
+
+======================================================================
+FIN ACTUALIZACIÓN 18/09/2026 – AJUSTE VISUAL TRIM
+======================================================================
