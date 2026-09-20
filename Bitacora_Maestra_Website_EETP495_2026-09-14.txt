@@ -1,8 +1,8 @@
 BITÁCORA MAESTRA – PORTAL INSTITUCIONAL E.E.T.P. N.º 495
 ========================================================
 
-Referencia: EETP495-BITACORA-MAESTRA-2026-09-19
-Fecha de consolidación: 19/09/2026
+Referencia: EETP495-BITACORA-MAESTRA-2026-09-20
+Fecha de consolidación: 20/09/2026
 Institución: E.E.T.P. N.º 495 “Malvinas Argentinas” – Rafaela, Santa Fe
 Modalidad: Técnico en Informática Profesional y Personal
 Dominio: https://eetp495rafaela.edu.ar
@@ -6136,4 +6136,486 @@ No versionar scripts de prueba temporales salvo decisión explícita.
 
 ======================================================================
 FIN ACTUALIZACIÓN 19/09/2026 – FRONTEND CIERRE / REAPERTURA
+======================================================================
+
+======================================================================
+41. ACTUALIZACIÓN – 20/09/2026 – TRIM AUTO, LÍMITE DE 1000 EXPRESIONES
+======================================================================
+
+ALCANCE
+-------
+Se resolvió el error que impedía guardar una nota de Taller cuando las tres
+notas del trimestre ya estaban completas y la misma operación debía crear o
+recalcular el resultado TRIM automático.
+
+También quedó validado el nuevo selector TRIM sin valores visibles duplicados.
+
+Estado final:
+- Corregido en Firestore Rules.
+- Probado en emulador para 1°, 2° y 3° trimestre.
+- Rules desplegadas en producción.
+- Probado desde Portal Docente con datos reales de prueba.
+- Funcionamiento confirmado.
+- Archivos temporales y backup local de trabajo eliminados luego de validar.
+
+----------------------------------------------------------------------
+41.1 SÍNTOMA ORIGINAL
+----------------------------------------------------------------------
+
+Caso reproducido en Portal Docente:
+
+- trimestre reabierto;
+- docente modifica una nota de su propio Taller;
+- las otras dos notas del alumno ya están cargadas;
+- el sistema debe recalcular el TRIM AUTO;
+- al presionar “Guardar cambios” aparecía:
+
+Missing or insufficient permissions.
+
+Un cambio de nota que no obligaba a recorrer toda la validación de TRIM podía
+guardarse correctamente.
+
+El fallo aparecía específicamente cuando una misma escritura incluía:
+
+1. modificación de NOTA_ESPACIO;
+2. creación o actualización de trimXResultado en modo AUTO.
+
+Caso concreto usado durante la investigación:
+
+ELE: 6 -> 7
+INF: 8
+ORG: 7
+TRIM AUTO esperado: 7
+
+----------------------------------------------------------------------
+41.2 HIPÓTESIS DESCARTADAS
+----------------------------------------------------------------------
+
+Durante el diagnóstico se comprobaron y descartaron:
+
+- Error por notas de prueba cargadas en columnas de otros Talleres.
+- Notas guardadas como números simples en lugar de mapas.
+- Diferencia entre el cálculo AUTO del navegador y el de Firestore Rules.
+- Error en la reapertura del trimestre.
+- Trimestre fuera de fecha.
+- Conversión incorrecta de la fecha de fin.
+- Estructura incorrecta de ultimaOperacion.
+- Falta de actualización del objeto TRIM AUTO.
+
+Se verificó que las notas de prueba estaban correctamente almacenadas como:
+
+{
+  valor: <1..10>,
+  por: <correo>,
+  en: <timestamp>
+}
+
+También se comprobó que trim2Resultado estaba inicialmente vacío en el caso
+de prueba, mientras el Portal mostraba el resultado calculado localmente.
+
+----------------------------------------------------------------------
+41.3 CAUSA REAL CONFIRMADA POR EMULADOR
+----------------------------------------------------------------------
+
+Se creó un test específico:
+
+/tmp/eetp495-rules-test/trim-auto-nota.test.cjs
+
+El test reprodujo exactamente:
+
+- ELE 6 -> 7
+- INF 8
+- ORG 7
+- creación simultánea de TRIM AUTO 7
+
+Resultado inicial del emulador:
+
+PERMISSION_DENIED
+Unable to evaluate the expression as the maximum of 1000 expressions
+to evaluate has been reached.
+
+Conclusión definitiva:
+
+El rechazo NO era un problema de permisos conceptuales.
+
+La ruta de validación de NOTA_ESPACIO + TRIM AUTO superaba el límite de
+1000 expresiones de Firestore Security Rules.
+
+----------------------------------------------------------------------
+41.4 PRIMERA OPTIMIZACIÓN – RESULTADO TRIM
+----------------------------------------------------------------------
+
+Se optimizaron temporalmente en /tmp las funciones:
+
+- resultadoTrim1Consistente(...)
+- resultadoTrim2Consistente(...)
+- resultadoTrim3Consistente(...)
+
+La lógica previa utilizaba varias ramas OR que repetían comprobaciones de:
+
+notasCompletas
+eraManual
+
+Se reemplazó por una decisión ternaria equivalente:
+
+- si NO hay tres notas completas:
+  entradaNueva debe ser null;
+
+- si hay tres notas y el resultado anterior era MANUAL:
+  se conserva exactamente entradaAntes;
+
+- si hay tres notas y no era MANUAL:
+  entradaNueva debe cumplir entradaTrimAutoValida(...)
+  con resultadoAutomatico(...).
+
+Ejemplo conceptual:
+
+!notasCompletas
+  ? entradaNueva == null
+  : eraManual
+    ? entradaNueva == entradaAntes
+    : entradaTrimAutoValida(...)
+
+Esta modificación conserva la misma política de seguridad.
+
+Por sí sola, la optimización de resultadoTrim2Consistente() todavía no fue
+suficiente para quedar por debajo del límite de 1000 expresiones.
+
+----------------------------------------------------------------------
+41.5 OPTIMIZACIÓN DECISIVA – VALIDACIÓN DE PERÍODOS
+----------------------------------------------------------------------
+
+Se identificó que:
+
+trimestre1CalificacionesAbierto(...)
+trimestre2CalificacionesAbierto(...)
+trimestre3CalificacionesAbierto(...)
+
+llamaban a:
+
+configuracionPeriodosCalificacionesValida(datos)
+
+Esta función valida las seis fechas:
+
+- trimestre1Inicio
+- trimestre1Fin
+- trimestre2Inicio
+- trimestre2Fin
+- trimestre3Inicio
+- trimestre3Fin
+
+Por lo tanto, al guardar una nota de un trimestre concreto se validaban también
+las fechas de los otros dos trimestres, consumiendo expresiones innecesarias.
+
+La solución fue hacer que cada función de período valide únicamente lo necesario
+para SU trimestre:
+
+1. que exista configuracion_periodos/<ciclo>;
+2. que cicloLectivo coincida;
+3. que la fecha de inicio del trimestre sea ISO válida;
+4. que la fecha de fin del trimestre sea ISO válida;
+5. que request.time sea >= inicio;
+6. que request.time sea < fin exclusivo.
+
+Se aplicó simétricamente a:
+
+- trimestre1CalificacionesAbierto(datos)
+- trimestre2CalificacionesAbierto(datos)
+- trimestre3CalificacionesAbierto(datos)
+
+IMPORTANTE:
+No se eliminó el control de fechas ni de ciclo.
+No se amplió el acceso docente.
+No se debilitó la validación de permisos.
+Simplemente se dejó de validar información de otros trimestres que no interviene
+en la operación actual.
+
+----------------------------------------------------------------------
+41.6 TEST DE 2° TRIMESTRE DESPUÉS DE OPTIMIZAR
+----------------------------------------------------------------------
+
+Con las Rules temporales optimizadas se ejecutó nuevamente:
+
+trim-auto-nota.test.cjs
+
+Resultado:
+
+PRUEBA: ELE 6 -> 7 + creación simultánea de TRIM AUTO 7
+Nota ELE: 7
+TRIM: 7 AUTO
+
+PRUEBA NOTA + TRIM AUTO: OK
+
+Esta prueba confirmó que la reducción de expresiones era suficiente.
+
+----------------------------------------------------------------------
+41.7 EXTENSIÓN PREVENTIVA A 1°, 2° Y 3°
+----------------------------------------------------------------------
+
+No se dejó la corrección limitada a 2° trimestre.
+
+Se aplicó la misma optimización a:
+- períodos de 1°, 2° y 3°;
+- resultado TRIM consistente de 1°, 2° y 3°.
+
+Se creó:
+
+/tmp/eetp495-rules-test/trim-auto-tres-trimestres.test.cjs
+
+El test reprodujo en cada trimestre:
+
+nota propia: 6 -> 7
+segunda nota: 8
+tercera nota: 7
+TRIM AUTO esperado: 7
+
+Resultado:
+
+PRUEBA T1: nota 6 -> 7 + TRIM AUTO 7
+Nota T1: 7
+TRIM T1: 7 AUTO
+T1: OK
+
+PRUEBA T2: nota 6 -> 7 + TRIM AUTO 7
+Nota T2: 7
+TRIM T2: 7 AUTO
+T2: OK
+
+PRUEBA T3: nota 6 -> 7 + TRIM AUTO 7
+Nota T3: 7
+TRIM T3: 7 AUTO
+T3: OK
+
+PRUEBA 1° + 2° + 3° TRIMESTRE: OK
+
+----------------------------------------------------------------------
+41.8 TRASLADO AL FIRESTORE.RULES REAL
+----------------------------------------------------------------------
+
+Antes de modificar el archivo real se comprobó con diff que la copia temporal
+sólo contenía las seis optimizaciones previstas:
+
+- trimestre1CalificacionesAbierto
+- trimestre2CalificacionesAbierto
+- trimestre3CalificacionesAbierto
+- resultadoTrim1Consistente
+- resultadoTrim2Consistente
+- resultadoTrim3Consistente
+
+Se creó temporalmente:
+
+firestore.rules.backup-20260920
+
+y luego se trasladó la versión probada al:
+
+firestore.rules
+
+Después se volvió a copiar el firestore.rules REAL al entorno de test y se
+ejecutó nuevamente el test de los tres trimestres.
+
+Resultado del archivo real:
+
+T1: OK
+T2: OK
+T3: OK
+PRUEBA 1° + 2° + 3° TRIMESTRE: OK
+
+----------------------------------------------------------------------
+41.9 DEPLOY DE FIRESTORE RULES
+----------------------------------------------------------------------
+
+Primer intento:
+
+firebase deploy --only firestore:rules
+
+Resultado:
+- compilación correcta;
+- warnings históricos ya conocidos;
+- error HTTP 503 al intentar subir el ruleset:
+
+The service is currently unavailable.
+
+Este 503 fue un problema transitorio del servicio de Firebase, no del código.
+
+Segundo intento con el mismo comando:
+
+firebase deploy --only firestore:rules
+
+Resultado:
+
+cloud.firestore: rules file firestore.rules compiled successfully
+firestore: released rules firestore.rules to cloud.firestore
+Deploy complete!
+
+Por lo tanto, las Rules optimizadas quedaron desplegadas correctamente.
+
+Warnings observados y ya existentes:
+- Unused function: accesoVigente.
+- Unused function: horarioCorrespondeAlDocente.
+- Invalid variable name: resource/request en reglas históricas.
+- Unused function: horarioCorrespondeAlAlumno.
+
+Estos warnings no impidieron compilación ni deploy y NO forman parte de esta
+corrección.
+
+----------------------------------------------------------------------
+41.10 PRUEBA FINAL EN PRODUCCIÓN
+----------------------------------------------------------------------
+
+Después del deploy se realizó la prueba desde Portal Docente.
+
+Condición:
+- alumno con tres notas cargadas;
+- cambio de nota del Taller autorizado;
+- TRIM AUTO debía recalcularse en la misma escritura.
+
+Resultado informado por el usuario:
+
+“Funciona perfecto!”
+
+Se confirma en producción:
+- modificación de nota -> OK;
+- recalculo automático de TRIM -> OK;
+- guardado simultáneo -> OK;
+- sin error de permisos.
+
+El bug por límite de 1000 expresiones queda RESUELTO.
+
+----------------------------------------------------------------------
+41.11 SELECT TRIM SIN VALORES DUPLICADOS
+----------------------------------------------------------------------
+
+También quedó aplicada la corrección de:
+
+opcionesTrim(valorSeleccionado, resultadoAutomatico)
+
+Comportamiento final:
+
+- El desplegable muestra visualmente una sola secuencia:
+  1, 2, 3, 4, 5, 6, 7, 8, 9, 10.
+
+- Si el resultado automático es, por ejemplo, 7:
+  el único “7” visible utiliza internamente:
+  value="AUTO"
+
+- Los demás números utilizan su valor numérico y representan selección MANUAL.
+
+- Si existiera un valor seleccionado numérico igual al automático, se normaliza
+  visualmente a AUTO para evitar duplicados.
+
+Se probó:
+- visualización sin duplicados;
+- selección de TRIM;
+- guardado posterior.
+
+Resultado informado:
+“Guarda todo correctamente.”
+
+Por lo tanto, este pendiente también queda CERRADO.
+
+----------------------------------------------------------------------
+41.12 LIMPIEZA DE ARCHIVOS TEMPORALES
+----------------------------------------------------------------------
+
+Después de confirmar:
+- tests de emulador;
+- deploy;
+- prueba real en producción;
+
+se realizó limpieza.
+
+Eliminado:
+- firestore.rules.backup-20260920
+- /tmp/eetp495-rules-test
+- firestore-debug.log
+- firebase-debug.log
+
+El backup local ya no era necesario porque Git conserva la versión anterior.
+
+Los scripts temporales de prueba NO se incorporan al repositorio.
+
+Se conservan únicamente las versiones actuales y funcionales del proyecto.
+
+----------------------------------------------------------------------
+41.13 ESTADO GIT ANTES DEL PRÓXIMO COMMIT
+----------------------------------------------------------------------
+
+Commit anterior confirmado:
+
+7b651d4
+“Bitácora v5 + Cierre y Reapertura de Trimestres en Admin y Docente”
+
+Después de la limpieza, antes de reemplazar esta Bitácora por v6, el cambio
+funcional pendiente de commit era:
+
+- firestore.rules
+
+Al incorporar esta Bitácora Maestra actualizada al proyecto deberán quedar
+como mínimo:
+
+- firestore.rules
+- Bitacora_Maestra_Website_EETP495_2026-09-14.txt
+
+No agregar:
+- backups temporales;
+- contenido de /tmp;
+- logs de emulador;
+- node_modules de pruebas.
+
+----------------------------------------------------------------------
+41.14 ESTADO FUNCIONAL DEL MÓDULO AL 20/09/2026
+----------------------------------------------------------------------
+
+PORTAL DOCENTE
+--------------
+OK - Lectura del Registro de Calificaciones de Taller.
+OK - Edición exclusiva del Taller autorizado.
+OK - Guardar cambios.
+OK - Resultado TRIM automático.
+OK - TRIM manual.
+OK - Selector TRIM sin duplicados visibles.
+OK - Cambio de nota con recalculo AUTO simultáneo.
+OK - Cerrar trimestre.
+OK - Advertencia por cambios sin guardar.
+OK - Advertencia por notas pendientes.
+OK - Bloqueo después del cierre.
+OK - Retorno visual al inicio de la sección después de cerrar.
+
+PORTAL ADMIN / SOPORTE
+----------------------
+OK - Inicialización del registro.
+OK - Consulta de trimestres cerrados.
+OK - Reapertura exclusiva por SOPORTE.
+OK - Botones “Reabrir 1° / 2° / 3° trimestre”.
+OK - Reapertura restaura edición sólo si el período sigue vigente.
+
+FIRESTORE RULES
+---------------
+OK - NOTA_ESPACIO.
+OK - NOTA_ESPACIO + TRIM AUTO.
+OK - TRIM MANUAL.
+OK - control de fechas por trimestre.
+OK - cierre docente autorizado.
+OK - bloqueo de trimestre cerrado.
+OK - reapertura por SOPORTE.
+OK - pruebas 1° / 2° / 3° sin superar 1000 expresiones.
+OK - deploy a producción.
+
+----------------------------------------------------------------------
+41.15 PRÓXIMO PASO
+----------------------------------------------------------------------
+
+1. Reemplazar la Bitácora Maestra del proyecto por esta versión v6.
+2. Ejecutar:
+   git status
+3. Confirmar que no existan backups, logs o archivos de /tmp versionables.
+4. Realizar commit/push de:
+   - firestore.rules
+   - Bitácora Maestra actualizada
+   - cualquier cambio funcional pendiente que Git muestre legítimamente.
+5. Con el módulo de TRIM estabilizado, continuar con el siguiente tema del
+   proyecto.
+
+======================================================================
+FIN ACTUALIZACIÓN 20/09/2026 – TRIM AUTO / RULES / LIMPIEZA
 ======================================================================

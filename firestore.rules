@@ -464,10 +464,22 @@ function trimestre1CalificacionesAbierto(datos) {
   let rutaPeriodos =
     /databases/$(database)/documents/configuracion_periodos/$(cicloId);
 
-  return configuracionPeriodosCalificacionesValida(datos)
+  return exists(rutaPeriodos)
+    && get(rutaPeriodos).data.get("cicloLectivo", 0)
+      == datos.get("cicloLectivo", 0)
+
+    && fechaISOCalificacionesValida(
+      get(rutaPeriodos).data.get("trimestre1Inicio", "")
+    )
+
+    && fechaISOCalificacionesValida(
+      get(rutaPeriodos).data.get("trimestre1Fin", "")
+    )
+
     && request.time >= inicioDiaArgentina(
       get(rutaPeriodos).data.get("trimestre1Inicio", "")
     )
+
     && request.time < finDiaArgentinaExclusivo(
       get(rutaPeriodos).data.get("trimestre1Fin", "")
     );
@@ -478,10 +490,22 @@ function trimestre2CalificacionesAbierto(datos) {
   let rutaPeriodos =
     /databases/$(database)/documents/configuracion_periodos/$(cicloId);
 
-  return configuracionPeriodosCalificacionesValida(datos)
+  return exists(rutaPeriodos)
+    && get(rutaPeriodos).data.get("cicloLectivo", 0)
+      == datos.get("cicloLectivo", 0)
+
+    && fechaISOCalificacionesValida(
+      get(rutaPeriodos).data.get("trimestre2Inicio", "")
+    )
+
+    && fechaISOCalificacionesValida(
+      get(rutaPeriodos).data.get("trimestre2Fin", "")
+    )
+
     && request.time >= inicioDiaArgentina(
       get(rutaPeriodos).data.get("trimestre2Inicio", "")
     )
+
     && request.time < finDiaArgentinaExclusivo(
       get(rutaPeriodos).data.get("trimestre2Fin", "")
     );
@@ -492,10 +516,22 @@ function trimestre3CalificacionesAbierto(datos) {
   let rutaPeriodos =
     /databases/$(database)/documents/configuracion_periodos/$(cicloId);
 
-  return configuracionPeriodosCalificacionesValida(datos)
+  return exists(rutaPeriodos)
+    && get(rutaPeriodos).data.get("cicloLectivo", 0)
+      == datos.get("cicloLectivo", 0)
+
+    && fechaISOCalificacionesValida(
+      get(rutaPeriodos).data.get("trimestre3Inicio", "")
+    )
+
+    && fechaISOCalificacionesValida(
+      get(rutaPeriodos).data.get("trimestre3Fin", "")
+    )
+
     && request.time >= inicioDiaArgentina(
       get(rutaPeriodos).data.get("trimestre3Inicio", "")
     )
+
     && request.time < finDiaArgentinaExclusivo(
       get(rutaPeriodos).data.get("trimestre3Fin", "")
     );
@@ -740,12 +776,14 @@ function alumnoOperacionExiste(datos) {
 function resultadoTrim1Consistente(nuevo, anterior, alumnoId) {
   let entradaAntes = anterior.trim1Resultado.get(alumnoId, null);
   let entradaNueva = nuevo.trim1Resultado.get(alumnoId, null);
+
   let notasCompletas = tresNotasCargadas(
     nuevo.trim1Espacio1,
     nuevo.trim1Espacio2,
     nuevo.trim1Espacio3,
     alumnoId
   );
+
   let eraManual = entradaAntes is map
     && entradaAntes.get("modo", "") == "MANUAL";
 
@@ -755,40 +793,33 @@ function resultadoTrim1Consistente(nuevo, anterior, alumnoId) {
       alumnoId
     )
     && (
-      (
-        !notasCompletas
-        && entradaNueva == null
-      )
-      || (
-        notasCompletas
-        && eraManual
-        && entradaNueva == entradaAntes
-      )
-      || (
-        notasCompletas
-        && !eraManual
-        && entradaTrimAutoValida(
-          entradaNueva,
-          resultadoAutomatico(
-            nuevo.trim1Espacio1,
-            nuevo.trim1Espacio2,
-            nuevo.trim1Espacio3,
-            alumnoId
-          )
-        )
-      )
+      !notasCompletas
+        ? entradaNueva == null
+        : eraManual
+          ? entradaNueva == entradaAntes
+          : entradaTrimAutoValida(
+              entradaNueva,
+              resultadoAutomatico(
+                nuevo.trim1Espacio1,
+                nuevo.trim1Espacio2,
+                nuevo.trim1Espacio3,
+                alumnoId
+              )
+            )
     );
 }
 
 function resultadoTrim2Consistente(nuevo, anterior, alumnoId) {
   let entradaAntes = anterior.trim2Resultado.get(alumnoId, null);
   let entradaNueva = nuevo.trim2Resultado.get(alumnoId, null);
+
   let notasCompletas = tresNotasCargadas(
     nuevo.trim2Espacio1,
     nuevo.trim2Espacio2,
     nuevo.trim2Espacio3,
     alumnoId
   );
+
   let eraManual = entradaAntes is map
     && entradaAntes.get("modo", "") == "MANUAL";
 
@@ -798,40 +829,33 @@ function resultadoTrim2Consistente(nuevo, anterior, alumnoId) {
       alumnoId
     )
     && (
-      (
-        !notasCompletas
-        && entradaNueva == null
-      )
-      || (
-        notasCompletas
-        && eraManual
-        && entradaNueva == entradaAntes
-      )
-      || (
-        notasCompletas
-        && !eraManual
-        && entradaTrimAutoValida(
-          entradaNueva,
-          resultadoAutomatico(
-            nuevo.trim2Espacio1,
-            nuevo.trim2Espacio2,
-            nuevo.trim2Espacio3,
-            alumnoId
-          )
-        )
-      )
+      !notasCompletas
+        ? entradaNueva == null
+        : eraManual
+          ? entradaNueva == entradaAntes
+          : entradaTrimAutoValida(
+              entradaNueva,
+              resultadoAutomatico(
+                nuevo.trim2Espacio1,
+                nuevo.trim2Espacio2,
+                nuevo.trim2Espacio3,
+                alumnoId
+              )
+            )
     );
 }
 
 function resultadoTrim3Consistente(nuevo, anterior, alumnoId) {
   let entradaAntes = anterior.trim3Resultado.get(alumnoId, null);
   let entradaNueva = nuevo.trim3Resultado.get(alumnoId, null);
+
   let notasCompletas = tresNotasCargadas(
     nuevo.trim3Espacio1,
     nuevo.trim3Espacio2,
     nuevo.trim3Espacio3,
     alumnoId
   );
+
   let eraManual = entradaAntes is map
     && entradaAntes.get("modo", "") == "MANUAL";
 
@@ -841,28 +865,19 @@ function resultadoTrim3Consistente(nuevo, anterior, alumnoId) {
       alumnoId
     )
     && (
-      (
-        !notasCompletas
-        && entradaNueva == null
-      )
-      || (
-        notasCompletas
-        && eraManual
-        && entradaNueva == entradaAntes
-      )
-      || (
-        notasCompletas
-        && !eraManual
-        && entradaTrimAutoValida(
-          entradaNueva,
-          resultadoAutomatico(
-            nuevo.trim3Espacio1,
-            nuevo.trim3Espacio2,
-            nuevo.trim3Espacio3,
-            alumnoId
-          )
-        )
-      )
+      !notasCompletas
+        ? entradaNueva == null
+        : eraManual
+          ? entradaNueva == entradaAntes
+          : entradaTrimAutoValida(
+              entradaNueva,
+              resultadoAutomatico(
+                nuevo.trim3Espacio1,
+                nuevo.trim3Espacio2,
+                nuevo.trim3Espacio3,
+                alumnoId
+              )
+            )
     );
 }
 
