@@ -1,8 +1,8 @@
 BITÁCORA MAESTRA – PORTAL INSTITUCIONAL E.E.T.P. N.º 495
 ========================================================
 
-Referencia: EETP495-BITACORA-MAESTRA-2026-09-18
-Fecha de consolidación: 18/09/2026
+Referencia: EETP495-BITACORA-MAESTRA-2026-09-19
+Fecha de consolidación: 19/09/2026
 Institución: E.E.T.P. N.º 495 “Malvinas Argentinas” – Rafaela, Santa Fe
 Modalidad: Técnico en Informática Profesional y Personal
 Dominio: https://eetp495rafaela.edu.ar
@@ -4989,4 +4989,662 @@ Al continuar el desarrollo:
 
 ======================================================================
 FIN ACTUALIZACIÓN 18/09/2026 – AJUSTE VISUAL TRIM
+======================================================================
+
+======================================================================
+39. ACTUALIZACIÓN – 19/09/2026 – CIERRE / REAPERTURA DE TRIMESTRES
+======================================================================
+
+ALCANCE DE ESTA ACTUALIZACIÓN
+-----------------------------
+Esta sección continúa y actualiza específicamente el desarrollo del módulo:
+
+“Registro de Calificaciones de Taller – Ciclo Básico (1.º y 2.º año)”
+
+del Portal Docente.
+
+Cuando exista una diferencia entre esta sección 39 y estados/pedidos históricos
+de las secciones 36, 37 o 38, para este módulo debe tomarse como vigente esta
+sección 39, salvo que un archivo actual del proyecto demuestre lo contrario.
+
+----------------------------------------------------------------------
+39.1 ESTADO GENERAL AL CIERRE DE LA JORNADA
+----------------------------------------------------------------------
+
+Estado confirmado:
+
+- La carga normal de notas de Taller funciona en producción.
+- La habilitación de cada trimestre por fecha funciona.
+- Se diseñó e implementó en Firestore Rules la arquitectura de:
+  - cerrar trimestre;
+  - bloquear posteriores modificaciones docentes;
+  - reabrir trimestre exclusivamente por SOPORTE.
+- Las reglas fueron probadas con Emulator.
+- Las reglas fueron desplegadas correctamente a producción.
+- Después del deploy se realizó una carga real de nota desde Portal Docente y
+  persistió correctamente luego de recargar.
+- Se realizó commit + push de firestore.rules.
+- El hash exacto de ese commit no quedó registrado en la conversación.
+- Todavía NO se implementó en el frontend el botón “Cerrar trimestre”.
+- Todavía NO se implementó el modal de confirmación/advertencia.
+- Todavía sigue pendiente el ajuste visual del select TRIM para evitar duplicar
+  el valor automático.
+
+----------------------------------------------------------------------
+39.2 PRUEBA DE FECHAS ENTRE 2.º Y 3.º TRIMESTRE
+----------------------------------------------------------------------
+
+Durante la prueba se configuró inicialmente:
+
+- fin 2.º trimestre: 19/09/2026;
+- inicio 3.º trimestre: 19/09/2026.
+
+Resultado:
+el Portal Docente continuó considerando activo el 2.º trimestre y no habilitó
+el 3.º.
+
+Interpretación confirmada:
+la lógica actual busca el trimestre vigente en orden y, si dos períodos
+comparten el mismo día, encuentra primero el anterior.
+
+Prueba posterior:
+
+- fin 2.º trimestre: 18/09/2026;
+- inicio 3.º trimestre: 19/09/2026.
+
+Resultado:
+el 3.º trimestre se habilitó correctamente.
+
+DECISIÓN
+--------
+No deben superponerse fechas de trimestres.
+
+A futuro conviene agregar validación en ADMIN para impedir que el día de cierre
+de un trimestre sea simultáneamente el día de inicio del siguiente.
+
+----------------------------------------------------------------------
+39.3 ARQUITECTURA FUNCIONAL ACORDADA PARA EL CIERRE
+----------------------------------------------------------------------
+
+Se mantienen dos acciones diferentes:
+
+A. “Guardar cambios”
+- Guarda notas de forma incremental.
+- No cierra el trimestre.
+- Permite seguir trabajando normalmente mientras el período esté vigente y el
+  trimestre no haya sido cerrado.
+
+B. “Cerrar trimestre”
+- Cierra definitivamente el trimestre en curso para ese curso.
+- El cierre es compartido para los tres espacios de Taller.
+- Cualquiera de los docentes de Taller autorizados para ese curso puede
+  ejecutarlo.
+- Se supone que la decisión fue acordada entre los docentes involucrados.
+- Una vez cerrado, los docentes ya no pueden modificar:
+  - las notas de sus Talleres de ese trimestre;
+  - el TRIM compartido de ese trimestre.
+- Cambiar luego las fechas desde ADMIN NO debe reabrir el trimestre.
+- Sólo SOPORTE puede reabrirlo.
+- Si SOPORTE lo reabre y la fecha del período todavía está vigente, vuelve a
+  permitirse la edición docente.
+- El cierre de un trimestre NO adelanta la apertura del trimestre siguiente.
+- El siguiente trimestre se habilita únicamente cuando llega su fecha de inicio
+  configurada.
+- El cierre del 3.º trimestre NO debe bloquear Calificación Final.
+- Final / Diciembre / Febrero no se modifican todavía como parte de esta etapa.
+
+Texto elegido para el botón:
+“Cerrar trimestre”
+
+Título previsto para el modal:
+“Confirmar cierre del trimestre”
+
+----------------------------------------------------------------------
+39.4 CIERRE CON NOTAS PENDIENTES
+----------------------------------------------------------------------
+
+DECISIÓN FUNCIONAL IMPORTANTE
+-----------------------------
+
+NO se impedirá cerrar un trimestre por tener notas faltantes.
+
+Si todavía faltan calificaciones:
+- el sistema debe mostrar un modal de advertencia;
+- el docente puede cancelar;
+- o puede confirmar el cierre de todos modos.
+
+Texto conceptual acordado:
+
+“Hay calificaciones pendientes.
+
+Este trimestre todavía tiene alumnos con notas de Taller sin cargar.
+Si confirmás, el trimestre quedará cerrado para todos los docentes del curso
+y ya no podrá modificarse desde el Portal Docente.”
+
+Acciones:
+- Cancelar
+- Confirmar cierre
+
+Si no hay pendientes:
+se mostrará igualmente una confirmación, pero sin la advertencia por faltantes.
+
+Se debe registrar cuántos pendientes existían al momento del cierre.
+
+----------------------------------------------------------------------
+39.5 MODELO DE DATOS PARA CIERRES
+----------------------------------------------------------------------
+
+Se incorporó una estructura compacta en el documento de:
+
+calificaciones_taller/{ciclo}__{cursoId}
+
+Campo:
+
+cierresTrimestres
+
+Estructura conceptual:
+
+cierresTrimestres
+  1
+    estado: "CERRADO" / "ABIERTO"
+    cerradoPor
+    cerradoEn
+    pendientesAlCerrar
+    reabiertoPor
+    reabiertoEn
+
+  2
+    ...
+
+  3
+    ...
+
+Los documentos anteriores que todavía no poseen cierresTrimestres deben seguir
+siendo compatibles.
+
+AUDITORÍA
+---------
+También se utiliza ultimaOperacion para identificar operaciones específicas:
+
+- CERRAR_TRIMESTRE
+- REABRIR_TRIMESTRE
+
+Esto permite diferenciar claramente:
+- una escritura de nota;
+- un cambio manual de TRIM;
+- un cierre;
+- una reapertura.
+
+----------------------------------------------------------------------
+39.6 PERMISOS CONFIRMADOS
+----------------------------------------------------------------------
+
+En firestore.rules se verificó:
+
+function esDocentePorPerfil()
+-> reconoce rol DOCENTE.
+
+function esSoporte()
+-> delega en esSoportePorPerfil()
+-> reconoce exclusivamente rol SOPORTE.
+
+No existe una función esAdmin() independiente para este caso.
+
+Portal Admin:
+el acceso administrativo relevante se realiza con rol SOPORTE.
+
+DOCENTE
+-------
+Puede cerrar un trimestre únicamente si está realmente autorizado sobre alguno
+de los tres espacios de Taller del curso.
+
+Se reutiliza la lógica ya existente:
+
+docentePuedeEditarCompartido(datos, reemplazoId)
+
+que delega en:
+- docentePuedeEditarEspacio1(...)
+- docentePuedeEditarEspacio2(...)
+- docentePuedeEditarEspacio3(...)
+
+SOPORTE
+-------
+Puede reabrir un trimestre cerrado.
+
+----------------------------------------------------------------------
+39.7 COMPATIBILIDAD CON LAS VENTANAS DE FECHA
+----------------------------------------------------------------------
+
+Las funciones existentes continúan controlando las fechas:
+
+- trimestre1CalificacionesAbierto(...)
+- trimestre2CalificacionesAbierto(...)
+- trimestre3CalificacionesAbierto(...)
+
+El cierre se agrega como una condición adicional de bloqueo.
+
+No se modificó trimestre3CalificacionesAbierto() para representar el cierre,
+porque:
+
+calificacionFinalAbierta(datos)
+
+depende de:
+
+trimestre3CalificacionesAbierto(datos)
+
+y no se desea bloquear Calificación Final por cerrar el 3.º TRIM.
+
+Regla arquitectónica:
+fecha vigente y trimestre no cerrado son condiciones separadas.
+
+----------------------------------------------------------------------
+39.8 PRECAUCIÓN POR LÍMITE DE FIRESTORE RULES
+----------------------------------------------------------------------
+
+Antecedente importante:
+durante el desarrollo del guardado de notas se alcanzó el límite de 1000
+expresiones de Firestore Rules.
+
+Por ese motivo NO se deben reintroducir validaciones globales redundantes dentro
+de docentePuedeActualizarCalificaciones().
+
+La estrategia vigente es:
+- detectar el tipo exacto de operación;
+- enrutar directamente al validador específico;
+- evitar evaluar ramas de SOPORTE cuando la escritura es docente;
+- evitar evaluar validadores de todos los trimestres/espacios si ya se conoce
+  exactamente cuál corresponde.
+
+Esta misma filosofía se mantuvo para CERRAR_TRIMESTRE / REABRIR_TRIMESTRE.
+
+----------------------------------------------------------------------
+39.9 PRUEBAS LOCALES DE REGLAS
+----------------------------------------------------------------------
+
+Primero se comprobó compilación simple con Emulator:
+
+firebase emulators:exec --only firestore "echo REGLAS_OK"
+
+Resultado:
+
+REGLAS_OK
+
+Luego se creó un entorno temporal fuera del repositorio:
+
+/tmp/eetp495-rules-test
+
+Dependencias instaladas allí:
+- @firebase/rules-unit-testing
+- firebase
+
+IMPORTANTE:
+esta carpeta es temporal y puede desaparecer al reiniciar Linux.
+No forma parte del repositorio.
+
+PRUEBA 1 – CIERRE
+-----------------
+
+Se verificó:
+
+1. El docente autorizado puede cargar una nota antes del cierre.
+2. El docente autorizado puede cerrar el trimestre aun declarando pendientes.
+3. Después del cierre, Firestore rechaza una nueva modificación de nota.
+
+Resultado:
+
+OK 1 - Nota permitida antes del cierre.
+OK 2 - Cierre de trimestre permitido.
+OK 3 - Nota rechazada después del cierre.
+
+PRUEBA CIERRE DE TRIMESTRE: OK
+
+El PERMISSION_DENIED que aparece durante esta prueba es intencional y correcto:
+corresponde al punto 3, donde la escritura debía ser rechazada.
+
+PRUEBA 2 – CIERRE + REAPERTURA
+------------------------------
+
+Se verificó:
+
+1. Nota permitida antes del cierre.
+2. Cierre permitido.
+3. Nota rechazada después del cierre.
+4. SOPORTE puede reabrir.
+5. Si el período sigue vigente, el docente puede volver a editar.
+
+Resultado:
+
+OK 1 - Nota permitida antes del cierre.
+OK 2 - Cierre de trimestre permitido.
+OK 3 - Nota rechazada después del cierre.
+OK 4 - SOPORTE puede reabrir el trimestre.
+OK 5 - Nota permitida nuevamente después de reabrir.
+
+PRUEBA CIERRE + REAPERTURA DE TRIMESTRE: OK
+
+----------------------------------------------------------------------
+39.10 DETALLE DE UN ERROR DE PRUEBA YA RESUELTO
+----------------------------------------------------------------------
+
+En la primera ejecución del test apareció:
+
+Property email is undefined on object
+
+Causa:
+authenticatedContext() no estaba cargando el claim email requerido por las
+reglas, que utilizan:
+
+request.auth.token.email
+
+Corrección aplicada en la prueba:
+
+testEnv.authenticatedContext(docente, { email: docente })
+
+Luego la prueba funcionó correctamente.
+
+Este error pertenecía al script de test y NO a las reglas de producción.
+
+----------------------------------------------------------------------
+39.11 DEPLOY DE FIRESTORE RULES
+----------------------------------------------------------------------
+
+Comando ejecutado:
+
+firebase deploy --only firestore:rules
+
+Resultado:
+
+- firestore.rules compiló correctamente;
+- se subieron las reglas;
+- se liberaron correctamente en cloud.firestore;
+- “Deploy complete!”.
+
+Advertencias mostradas:
+
+- Unused function: accesoVigente.
+- Unused function: horarioCorrespondeAlDocente.
+- Unused function: horarioCorrespondeAlAlumno.
+- advertencias históricas sobre nombres resource/request.
+
+No bloquearon el deploy.
+
+No corregirlas dentro de esta tarea porque no están relacionadas con el cierre
+de trimestre y se mantiene la regla de no tocar funcionalidades ajenas.
+
+----------------------------------------------------------------------
+39.12 PRUEBA REAL EN PRODUCCIÓN DESPUÉS DEL DEPLOY
+----------------------------------------------------------------------
+
+Después de publicar las reglas:
+
+1. Se ingresó al Portal Docente.
+2. Se utilizó el 3.º trimestre habilitado.
+3. Se cargó/modificó una nota de ELE.
+4. Se presionó “Guardar cambios”.
+5. Se recargó el portal.
+6. La nota continuó guardada.
+
+Resultado informado:
+“Todo perfecto”.
+
+Conclusión:
+las nuevas reglas de cierre no rompieron el guardado normal de notas.
+
+----------------------------------------------------------------------
+39.13 GIT
+----------------------------------------------------------------------
+
+Después de validar producción se indicó versionar:
+
+git add firestore.rules
+git commit -m "Agrega cierre y reapertura de trimestres de Taller"
+git push origin main
+
+El usuario confirmó:
+“Todo perfecto”.
+
+Por lo tanto:
+- el cambio fue committeado;
+- fue enviado a origin/main.
+
+El hash exacto de este nuevo commit NO quedó copiado en la conversación.
+No inventarlo.
+
+Último log anterior conocido antes de este commit:
+
+0297192 bitácora v3
+a1143f5 actualizamos bitácora
+2d1a41b Corregimos AUTO en TRIM
+
+----------------------------------------------------------------------
+39.14 FRONTEND – UBICACIÓN ACTUAL DEL BOTÓN GUARDAR
+----------------------------------------------------------------------
+
+Archivo:
+
+assets/js/calificaciones-taller-docente.js
+
+Función:
+
+cantidadCambiosPendientes()
+
+Suma:
+- cambiosPendientesCalificacionesTallerDocente.size
+- cambiosPendientesTrimCalificacionesTallerDocente.size
+
+Función:
+
+actualizarBotonGuardar()
+
+ID del botón:
+
+btnGuardarCalificacionesTallerDocente
+
+Comportamiento:
+- disabled si se está guardando;
+- disabled si no hay cambios;
+- muestra spinner durante guardado;
+- muestra cantidad de cambios pendientes.
+
+Render del bloque de acciones localizado aproximadamente alrededor de las líneas
+1625–1642 del archivo actual:
+
+<div class="acciones-calificaciones-taller-docente">
+
+Dentro se muestra:
+- ayuda de edición;
+- botón Guardar cambios.
+
+Botón actual:
+
+id="btnGuardarCalificacionesTallerDocente"
+class="btn-guardar-calificaciones-taller-docente"
+
+SIGUIENTE CAMBIO
+----------------
+Agregar a su lado un segundo botón:
+
+“Cerrar trimestre”
+
+Todavía sin conectar la lógica Firestore en el primer paso visual.
+
+----------------------------------------------------------------------
+39.15 CSS ACTUAL DEL BLOQUE DE ACCIONES
+----------------------------------------------------------------------
+
+Archivo:
+
+assets/css/portal-docente.css
+
+Ubicación actual aproximada:
+líneas 4850–4940.
+
+Bloque principal:
+
+.acciones-calificaciones-taller-docente
+
+Configuración actual:
+- display: flex;
+- align-items: center;
+- justify-content: space-between;
+- gap: 16px;
+- margin-top: 16px;
+- padding: 14px 16px;
+- border: 1px solid #e0b9ab;
+- border-radius: 12px;
+- background: #fff8ee.
+
+Ayuda:
+
+.ayuda-edicion-calificaciones-taller
+
+- display flex;
+- color #6f4137;
+- font-size 0.86rem;
+- font-weight 800.
+
+Botón Guardar:
+
+.btn-guardar-calificaciones-taller-docente
+
+- inline-flex;
+- min-height 42px;
+- padding 9px 18px;
+- border #6f2d24;
+- border-radius 10px;
+- background #7f382d;
+- color #fff8ee;
+- font-size 0.88rem;
+- font-weight 900.
+
+Hover:
+background #64291f.
+
+Disabled:
+opacity 0.48;
+cursor not-allowed.
+
+Responsive actual @media (max-width: 700px):
+- acciones cambia a flex-direction: column;
+- align-items: stretch;
+- Guardar ocupa width: 100%.
+
+Al agregar “Cerrar trimestre” se debe conservar esta estética y mantener un
+comportamiento responsive coherente.
+
+----------------------------------------------------------------------
+39.16 TRIM – AJUSTE VISUAL TODAVÍA PENDIENTE
+----------------------------------------------------------------------
+
+El problema detectado en la sección 38 sigue pendiente.
+
+Ejemplo:
+si el cálculo automático es 7, no debe aparecer:
+
+7   <- AUTO visible
+...
+7   <- MANUAL visible
+
+Debe existir UN SOLO 7 visible dentro del select.
+
+Diseño acordado:
+
+- opciones visibles únicas 1–10;
+- si AUTO = 7, la opción visible “7” representa internamente AUTO;
+- se omite una segunda opción manual 7;
+- elegir otro número guarda MANUAL;
+- volver a seleccionar el valor automático devuelve el modo AUTO.
+
+Esto permite:
+
+AUTO -> MANUAL -> AUTO
+
+sin duplicar visualmente la nota.
+
+No resolver este punto antes de terminar el flujo de “Cerrar trimestre”, salvo
+que sea necesario para una prueba concreta.
+
+----------------------------------------------------------------------
+39.17 CASO DE ESCRITURA CON TRES NOTAS COMPLETAS
+----------------------------------------------------------------------
+
+Históricamente se detectó un rechazo al intentar modificar la nota propia cuando
+ya existían las tres notas del trimestre y el TRIM AUTO debía recalcularse en la
+misma escritura.
+
+Después del nuevo deploy se comprobó una escritura real correcta del 3.º
+trimestre.
+
+Sin embargo, para dar por cerrado específicamente aquel bug histórico, conviene
+hacer más adelante una prueba explícita:
+
+- alumno con las tres notas de Taller cargadas;
+- modificar la nota del docente actual;
+- TRIM AUTO debe cambiar;
+- Guardar cambios;
+- recargar;
+- verificar tanto la nota como TRIM.
+
+Si vuelve a fallar:
+NO modificar reglas a ciegas.
+Primero reproducir el caso en Emulator y revisar exactamente el validador de
+NOTA_ESPACIO + resultadoTrimXConsistente().
+
+----------------------------------------------------------------------
+39.18 PRÓXIMO PASO EXACTO AL RETOMAR
+----------------------------------------------------------------------
+
+El punto exacto donde quedó el trabajo es:
+
+1. Ya se leyó el CSS actual de:
+   .acciones-calificaciones-taller-docente
+   .btn-guardar-calificaciones-taller-docente
+
+2. Siguiente paso:
+   agregar visualmente “Cerrar trimestre” junto a “Guardar cambios”.
+
+3. Primer cambio:
+   sólo HTML generado + CSS.
+   NO conectar todavía escritura Firestore.
+
+4. Luego:
+   - detectar si el trimestre ya está cerrado;
+   - mostrar estado visual;
+   - contar pendientes;
+   - modal normal o modal con advertencia;
+   - escribir CERRAR_TRIMESTRE;
+   - refrescar registro;
+   - bloquear inmediatamente controles del trimestre.
+
+5. Después:
+   implementar interfaz de reapertura desde SOPORTE/Portal Admin.
+
+6. Luego:
+   corregir el select TRIM sin duplicados.
+
+7. Más adelante:
+   - Calificación Final;
+   - Diciembre;
+   - Febrero.
+
+----------------------------------------------------------------------
+39.19 REGLAS DE TRABAJO QUE DEBEN RESPETARSE
+----------------------------------------------------------------------
+
+- Avanzar paso a paso.
+- No tocar módulos que no sean necesarios.
+- No romper lo que ya funciona.
+- Un cambio importante por vez.
+- Probar antes de deploy.
+- No hacer deploy de frontend/reglas sin prueba previa cuando el cambio sea
+  sensible.
+- No volver a agregar validaciones globales redundantes a Firestore Rules.
+- Si aparece PERMISSION_DENIED, reproducir primero en Emulator.
+- Los cambios grandes de código se prefieren como archivo .txt completo.
+- Los cambios pequeños pueden darse como búsqueda/reemplazo exacto.
+- Mantener esta bitácora actualizada antes de cambiar de chat.
+- Archivo/código actual siempre prevalece sobre esta bitácora.
+
+======================================================================
+FIN ACTUALIZACIÓN 19/09/2026 – CIERRE / REAPERTURA DE TRIMESTRES
 ======================================================================

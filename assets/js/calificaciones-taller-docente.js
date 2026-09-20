@@ -1628,15 +1628,27 @@ function renderizarTabla(registro) {
               Podés cargar tu Taller. TRIM se habilita al completar las tres notas: AUTO usa el cálculo institucional y 1–10 fija un valor manual.
             </div>
 
-            <button
-              id="btnGuardarCalificacionesTallerDocente"
-              class="btn-guardar-calificaciones-taller-docente"
-              type="button"
-              disabled
-            >
-              <i class="fa-solid fa-floppy-disk"></i>
-              Guardar cambios
-            </button>
+            <div class="botones-acciones-calificaciones-taller-docente">
+  <button
+    id="btnGuardarCalificacionesTallerDocente"
+    class="btn-guardar-calificaciones-taller-docente"
+    type="button"
+    disabled
+  >
+    <i class="fa-solid fa-floppy-disk"></i>
+    Guardar cambios
+  </button>
+
+  <button
+    id="btnCerrarTrimestreCalificacionesTallerDocente"
+    class="btn-cerrar-trimestre-calificaciones-taller-docente"
+    type="button"
+    disabled
+  >
+    <i class="fa-solid fa-lock"></i>
+    Cerrar trimestre
+  </button>
+</div>
           </div>
         `
         : ""
