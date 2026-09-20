@@ -579,6 +579,291 @@ function campoResultadoTrimestre(trimestre) {
   return `trim${trimestre}Resultado`;
 }
 
+function trimestreCerradoCalificacionesTaller(registro, trimestre) {
+  if (!registro || ![1, 2, 3].includes(trimestre)) return false;
+
+  const cierre =
+    registro.cierresTrimestres?.[String(trimestre)] ||
+    registro.cierresTrimestres?.[trimestre] ||
+    null;
+
+  return String(cierre?.estado || "").toUpperCase() === "CERRADO";
+}
+
+function actualizarBotonCerrarTrimestre() {
+  const boton = document.getElementById(
+    "btnCerrarTrimestreCalificacionesTallerDocente",
+  );
+
+  if (!boton) return;
+
+  const trimestre = trimestreEditableCalificacionesTallerDocente;
+
+  const puedeCerrar =
+    trimestre > 0 &&
+    accesoEditableCalificacionesTallerDocente &&
+    espacioEditableNumeroCalificacionesTallerDocente > 0 &&
+    registroCalificacionesTallerDocente &&
+    !trimestreCerradoCalificacionesTaller(
+      registroCalificacionesTallerDocente,
+      trimestre,
+    );
+
+  boton.disabled = !puedeCerrar;
+
+  boton.title = puedeCerrar
+    ? `Cerrar ${nombreTrimestre(trimestre)}`
+    : "No hay un trimestre habilitado para cerrar.";
+}
+
+async function solicitarCierreTrimestre() {
+  if (
+    !registroCalificacionesTallerDocente ||
+    !usuarioCalificacionesTallerDocente ||
+    !accesoEditableCalificacionesTallerDocente
+  ) {
+    return;
+  }
+
+  const trimestre = trimestreEditableCalificacionesTallerDocente;
+
+  if (![1, 2, 3].includes(trimestre)) return;
+
+  /*
+   * No cerramos mientras existan cambios locales sin guardar.
+   */
+  if (cantidadCambiosPendientes() > 0) {
+    if (window.Swal) {
+      await Swal.fire({
+        icon: "info",
+        title: "Hay cambios sin guardar",
+        text: "Guardá primero las calificaciones pendientes y luego cerrá el trimestre.",
+        confirmButtonText: "Aceptar",
+        returnFocus: false,
+      });
+    }
+
+    return;
+  }
+
+  const correo = normalizarCorreo(usuarioCalificacionesTallerDocente.email);
+
+  const referencia = doc(
+    db,
+    "calificaciones_taller",
+    registroCalificacionesTallerDocente.id,
+  );
+
+  try {
+    /*
+     * Volvemos a leer Firestore para trabajar sobre el estado real
+     * más reciente, ya que cualquiera de los docentes puede cerrar.
+     */
+    const documentoActual = await getDoc(referencia);
+
+    if (!documentoActual.exists()) {
+      throw new Error("El registro ya no existe.");
+    }
+
+    const registroActual = {
+      id: documentoActual.id,
+      ...documentoActual.data(),
+    };
+
+    if (trimestreCerradoCalificacionesTaller(registroActual, trimestre)) {
+      await Swal.fire({
+        icon: "info",
+        title: "Trimestre ya cerrado",
+        text: `${nombreTrimestre(trimestre)} ya fue cerrado por otro docente.`,
+        confirmButtonText: "Aceptar",
+        returnFocus: false,
+      });
+
+      await cargarRegistroSeleccionado();
+
+      if (seccionCalificacionesTallerDocente) {
+        seccionCalificacionesTallerDocente.scrollIntoView({
+          behavior: "smooth",
+          block: "start",
+        });
+      }
+      return;
+    }
+
+    /*
+     * Se cuentan todas las calificaciones individuales faltantes:
+     * alumnos × tres Talleres.
+     */
+    let pendientes = 0;
+
+    const alumnosIds = Object.keys(registroActual.alumnos || {});
+
+    alumnosIds.forEach((alumnoId) => {
+      [1, 2, 3].forEach((espacioNumero) => {
+        if (
+          notaNumericaDesdeRegistro(
+            registroActual,
+            trimestre,
+            espacioNumero,
+            alumnoId,
+          ) === null
+        ) {
+          pendientes += 1;
+        }
+      });
+    });
+
+    const cursoNombre = escaparHtml(registroActual.cursoNombre || "este curso");
+
+    const textoPendientes =
+      pendientes === 1
+        ? "Queda 1 calificación de Taller sin cargar."
+        : `Quedan ${pendientes} calificaciones de Taller sin cargar.`;
+
+    const resultado = await Swal.fire({
+      icon: pendientes > 0 ? "warning" : "question",
+      title: "Confirmar cierre del trimestre",
+      html:
+        pendientes > 0
+          ? `
+              <p>
+                Vas a cerrar el
+                <strong>${nombreTrimestre(trimestre)}</strong>
+                de <strong>${cursoNombre}</strong>.
+              </p>
+
+              <p>
+                <strong>${textoPendientes}</strong>
+              </p>
+
+              <p>
+                Podés cerrar igualmente, pero una vez confirmado
+                ningún docente de Taller podrá modificar las
+                calificaciones de este trimestre.
+              </p>
+            `
+          : `
+              <p>
+                Vas a cerrar el
+                <strong>${nombreTrimestre(trimestre)}</strong>
+                de <strong>${cursoNombre}</strong>.
+              </p>
+
+              <p>
+                Todas las calificaciones de Taller están cargadas.
+              </p>
+
+              <p>
+                Una vez cerrado, ningún docente de Taller podrá
+                modificar las calificaciones de este trimestre.
+              </p>
+            `,
+      showCancelButton: true,
+      confirmButtonText: "Cerrar trimestre",
+      cancelButtonText: "Cancelar",
+      confirmButtonColor: "#7f382d",
+      reverseButtons: true,
+      focusCancel: true,
+      returnFocus: false,
+    });
+
+    if (!resultado.isConfirmed) return;
+
+    const boton = document.getElementById(
+      "btnCerrarTrimestreCalificacionesTallerDocente",
+    );
+
+    if (boton) {
+      boton.disabled = true;
+      boton.innerHTML =
+        '<i class="fa-solid fa-spinner fa-spin"></i> Cerrando...';
+    }
+
+    const marcaTiempo = serverTimestamp();
+
+    const cierre = {
+      estado: "CERRADO",
+      cerradoPor: correo,
+      cerradoEn: marcaTiempo,
+      pendientesAlCerrar: pendientes,
+      reabiertoPor: "",
+      reabiertoEn: null,
+    };
+
+    const operacion = {
+      tipo: "CERRAR_TRIMESTRE",
+      trimestre,
+      reemplazoId:
+        accesoEditableCalificacionesTallerDocente.origen === "REEMPLAZO"
+          ? String(accesoEditableCalificacionesTallerDocente.reemplazoId || "")
+          : "",
+      pendientes,
+      por: correo,
+      en: marcaTiempo,
+    };
+
+    await updateDoc(
+      referencia,
+      new FieldPath("cierresTrimestres", String(trimestre)),
+      cierre,
+      "ultimaOperacion",
+      operacion,
+      "actualizadoEn",
+      marcaTiempo,
+      "actualizadoPor",
+      correo,
+    );
+
+    await Swal.fire({
+      icon: "success",
+      title: "Trimestre cerrado",
+      text: `${nombreTrimestre(trimestre)} fue cerrado correctamente.`,
+      confirmButtonText: "Aceptar",
+      returnFocus: false,
+    });
+
+    /*
+     * Recargamos desde Firestore.
+     * prepararEdicionRegistro() detectará ahora el cierre y dejará
+     * el trimestre en modo consulta.
+     */
+    await cargarRegistroSeleccionado();
+
+    requestAnimationFrame(() => {
+      const destino = document.getElementById("calificaciones-taller-docente");
+
+      if (!destino) return;
+
+      const encabezadoFijo = 110; // Ajustar según la altura del encabezado fijo en píxeles
+
+      const posicion =
+        destino.getBoundingClientRect().top + window.scrollY - encabezadoFijo;
+
+      window.scrollTo({
+        top: posicion,
+        behavior: "smooth",
+      });
+    });
+  } catch (error) {
+    console.error("No se pudo cerrar el trimestre:", error);
+
+    if (window.Swal) {
+      await Swal.fire({
+        icon: "error",
+        title: "No se pudo cerrar el trimestre",
+        text:
+          error?.code === "permission-denied"
+            ? "Firebase rechazó el cierre. El trimestre pudo haber sido cerrado por otro docente o el período ya no está habilitado."
+            : "Ocurrió un error al intentar cerrar el trimestre.",
+        confirmButtonText: "Aceptar",
+        returnFocus: false,
+      });
+    }
+
+    await cargarRegistroSeleccionado();
+  }
+}
+
 function actualizarEstadoVisualEdicion() {
   if (!seccionCalificacionesTallerDocente) return;
 
@@ -637,10 +922,14 @@ async function prepararEdicionRegistro(registro) {
       configuracionPeriodosCalificacionesTallerDocente =
         documentoPeriodos.data();
 
+      const trimestreVigente = determinarTrimestreEditable(
+        configuracionPeriodosCalificacionesTallerDocente,
+      );
+
       trimestreEditableCalificacionesTallerDocente =
-        determinarTrimestreEditable(
-          configuracionPeriodosCalificacionesTallerDocente,
-        );
+        trimestreCerradoCalificacionesTaller(registro, trimestreVigente)
+          ? 0
+          : trimestreVigente;
     }
   } catch (error) {
     console.error(
@@ -954,7 +1243,16 @@ function conectarControlesEdicion() {
     boton.addEventListener("click", guardarCambiosPendientes);
   }
 
+  const botonCerrarTrimestre = document.getElementById(
+    "btnCerrarTrimestreCalificacionesTallerDocente",
+  );
+
+  if (botonCerrarTrimestre) {
+    botonCerrarTrimestre.addEventListener("click", solicitarCierreTrimestre);
+  }
+
   actualizarBotonGuardar();
+  actualizarBotonCerrarTrimestre();
 }
 
 function notaNumericaDesdeRegistro(

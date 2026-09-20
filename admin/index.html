@@ -943,17 +943,17 @@
                   <option value="">Cargando cursos...</option>
                 </select>
               </div>
-            </div>
 
-            <div class="acciones">
-              <button
-                class="btn-accion"
-                id="btnInicializarCalificacionesTaller"
-                type="submit"
-              >
-                <i class="fa-solid fa-file-circle-plus"></i>
-                Inicializar registro
-              </button>
+              <div class="acciones" style="align-self: end; margin: 0">
+                <button
+                  class="btn-accion"
+                  id="btnInicializarCalificacionesTaller"
+                  type="submit"
+                >
+                  <i class="fa-solid fa-file-circle-plus"></i>
+                  Inicializar registro
+                </button>
+              </div>
             </div>
 
             <p
@@ -961,6 +961,32 @@
               class="mensaje-formulario"
             ></p>
           </form>
+          <div class="encabezado-listado" style="margin-top: 24px">
+            <div>
+              <h3>Administrar cierre de trimestres</h3>
+              <p>
+                Consultá el estado de los trimestres del registro seleccionado.
+                Los trimestres cerrados podrán ser reabiertos únicamente por
+                SOPORTE.
+              </p>
+            </div>
+          </div>
+
+          <div class="acciones">
+            <button
+              class="btn-accion"
+              id="btnConsultarCierresCalificacionesTaller"
+              type="button"
+            >
+              <i class="fa-solid fa-lock-open"></i>
+              Consultar cierres
+            </button>
+          </div>
+
+          <div
+            id="estadoCierresCalificacionesTaller"
+            class="mensaje-formulario"
+          ></div>
         </div>
 
         <a class="btn-volver" href="#inicio">

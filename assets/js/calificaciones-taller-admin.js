@@ -16,6 +16,8 @@ import {
   getDoc,
   getDocs,
   setDoc,
+  updateDoc,
+  FieldPath,
   query,
   where,
   serverTimestamp,
@@ -48,6 +50,13 @@ const btnInicializar = document.getElementById(
 );
 const mensajeCalificaciones = document.getElementById(
   "mensajeCalificacionesTallerAdmin",
+);
+const btnConsultarCierresCalificaciones = document.getElementById(
+  "btnConsultarCierresCalificacionesTaller",
+);
+
+const estadoCierresCalificaciones = document.getElementById(
+  "estadoCierresCalificacionesTaller",
 );
 
 let usuarioSoporteCalificaciones = null;
@@ -737,8 +746,266 @@ async function inicializarRegistroCalificaciones(evento) {
   }
 }
 
+function nombreTrimestreAdmin(trimestre) {
+  if (trimestre === 1) return "1° trimestre";
+  if (trimestre === 2) return "2° trimestre";
+  if (trimestre === 3) return "3° trimestre";
+  return "";
+}
+
+async function reabrirTrimestreCalificacionesTaller(trimestre) {
+  if (
+    !usuarioSoporteCalificaciones ||
+    !cicloCalificaciones ||
+    !cursoCalificaciones ||
+    ![1, 2, 3].includes(trimestre)
+  ) {
+    return;
+  }
+
+  const cicloLectivo = Number(cicloCalificaciones.value || 0);
+  const cursoId = String(cursoCalificaciones.value || "").trim();
+
+  if (!Number.isInteger(cicloLectivo) || !cursoId) return;
+
+  const registroId = `${cicloLectivo}__${cursoId}`;
+  const referencia = doc(db, "calificaciones_taller", registroId);
+
+  try {
+    const documento = await getDoc(referencia);
+
+    if (!documento.exists()) {
+      throw new Error("El registro ya no existe.");
+    }
+
+    const registro = documento.data();
+
+    const cierre =
+      registro.cierresTrimestres?.[String(trimestre)] ||
+      registro.cierresTrimestres?.[trimestre] ||
+      null;
+
+    if (!cierre || String(cierre.estado || "").toUpperCase() !== "CERRADO") {
+      await Swal.fire({
+        icon: "info",
+        title: "Trimestre ya abierto",
+        text: `${nombreTrimestreAdmin(trimestre)} no se encuentra cerrado.`,
+        confirmButtonText: "Aceptar",
+      });
+
+      await consultarCierresCalificacionesTaller();
+      return;
+    }
+
+    const confirmacion = await Swal.fire({
+      icon: "warning",
+      title: "Reabrir trimestre",
+      html: `
+        <p>
+          Vas a reabrir el
+          <strong>${nombreTrimestreAdmin(trimestre)}</strong>.
+        </p>
+        <p>
+          Si su período todavía está vigente, los docentes volverán
+          a poder modificar las calificaciones.
+        </p>
+      `,
+      showCancelButton: true,
+      confirmButtonText: "Sí, reabrir",
+      cancelButtonText: "Cancelar",
+      reverseButtons: true,
+      focusCancel: true,
+    });
+
+    if (!confirmacion.isConfirmed) return;
+
+    const correo = normalizarCorreo(usuarioSoporteCalificaciones.email);
+
+    const marcaTiempo = serverTimestamp();
+
+    const cierreReabierto = {
+      estado: "ABIERTO",
+      cerradoPor: cierre.cerradoPor || "",
+      cerradoEn: cierre.cerradoEn || null,
+      pendientesAlCerrar: Number(cierre.pendientesAlCerrar || 0),
+      reabiertoPor: correo,
+      reabiertoEn: marcaTiempo,
+    };
+
+    const operacion = {
+      tipo: "REABRIR_TRIMESTRE",
+      trimestre,
+      por: correo,
+      en: marcaTiempo,
+    };
+
+    await updateDoc(
+      referencia,
+      new FieldPath("cierresTrimestres", String(trimestre)),
+      cierreReabierto,
+      "ultimaOperacion",
+      operacion,
+      "actualizadoEn",
+      marcaTiempo,
+      "actualizadoPor",
+      correo,
+    );
+
+    await Swal.fire({
+      icon: "success",
+      title: "Trimestre reabierto",
+      text: `${nombreTrimestreAdmin(trimestre)} fue reabierto correctamente.`,
+      confirmButtonText: "Aceptar",
+    });
+
+    await consultarCierresCalificacionesTaller();
+  } catch (error) {
+    console.error("Error al reabrir trimestre de Taller:", error);
+
+    await Swal.fire({
+      icon: "error",
+      title: "No se pudo reabrir",
+      text:
+        error?.code === "permission-denied"
+          ? "Firebase rechazó la reapertura. Verificá los permisos de SOPORTE."
+          : "Ocurrió un error al intentar reabrir el trimestre.",
+      confirmButtonText: "Aceptar",
+    });
+  }
+}
+
+async function consultarCierresCalificacionesTaller() {
+  if (
+    !usuarioSoporteCalificaciones ||
+    !cicloCalificaciones ||
+    !cursoCalificaciones ||
+    !estadoCierresCalificaciones
+  ) {
+    return;
+  }
+
+  const cicloLectivo = Number(cicloCalificaciones.value || 0);
+  const cursoId = String(cursoCalificaciones.value || "").trim();
+
+  if (!Number.isInteger(cicloLectivo) || !cursoId) {
+    estadoCierresCalificaciones.textContent =
+      "Seleccioná un ciclo lectivo y un curso.";
+    estadoCierresCalificaciones.className = "mensaje-formulario error";
+    return;
+  }
+
+  const registroId = `${cicloLectivo}__${cursoId}`;
+
+  const referencia = doc(db, "calificaciones_taller", registroId);
+
+  if (btnConsultarCierresCalificaciones) {
+    btnConsultarCierresCalificaciones.disabled = true;
+    btnConsultarCierresCalificaciones.innerHTML = `
+      <i class="fa-solid fa-spinner fa-spin"></i>
+      Consultando...
+    `;
+  }
+
+  estadoCierresCalificaciones.textContent =
+    "Consultando estado de los trimestres...";
+  estadoCierresCalificaciones.className = "mensaje-formulario";
+
+  try {
+    const documento = await getDoc(referencia);
+
+    if (!documento.exists()) {
+      estadoCierresCalificaciones.textContent =
+        "El curso seleccionado todavía no tiene inicializado su Registro de Calificaciones.";
+      estadoCierresCalificaciones.className = "mensaje-formulario error";
+      return;
+    }
+
+    const registro = documento.data();
+    const cierres = registro.cierresTrimestres || {};
+
+    const cerrados = [1, 2, 3].filter((trimestre) => {
+      const cierre = cierres[String(trimestre)] || cierres[trimestre] || null;
+
+      return String(cierre?.estado || "").toUpperCase() === "CERRADO";
+    });
+
+    if (!cerrados.length) {
+      estadoCierresCalificaciones.innerHTML =
+        "<strong>No hay trimestres cerrados.</strong>";
+      estadoCierresCalificaciones.className = "mensaje-formulario ok";
+      return;
+    }
+
+    const botones = cerrados
+      .map(
+        (trimestre) => `
+      <button
+        type="button"
+        class="btn-accion btn-reabrir-trimestre-calificaciones"
+        data-trimestre="${trimestre}"
+      >
+        <i class="fa-solid fa-lock-open"></i>
+        Reabrir ${nombreTrimestreAdmin(trimestre)}
+      </button>
+    `,
+      )
+      .join("");
+
+    estadoCierresCalificaciones.innerHTML = `
+  <div>
+    <strong>Trimestres cerrados:</strong>
+    ${cerrados.map((trimestre) => nombreTrimestreAdmin(trimestre)).join(" · ")}
+  </div>
+
+  <div
+    class="acciones"
+    style="margin-top: 12px"
+  >
+    ${botones}
+  </div>
+`;
+
+    estadoCierresCalificaciones.className = "mensaje-formulario ok";
+
+    estadoCierresCalificaciones
+      .querySelectorAll(".btn-reabrir-trimestre-calificaciones")
+      .forEach((boton) => {
+        boton.addEventListener("click", () => {
+          reabrirTrimestreCalificacionesTaller(
+            Number(boton.dataset.trimestre || 0),
+          );
+        });
+      });
+  } catch (error) {
+    console.error(
+      "Error al consultar cierres de Calificaciones de Taller:",
+      error,
+    );
+
+    estadoCierresCalificaciones.textContent =
+      "No se pudo consultar el estado de los trimestres.";
+
+    estadoCierresCalificaciones.className = "mensaje-formulario error";
+  } finally {
+    if (btnConsultarCierresCalificaciones) {
+      btnConsultarCierresCalificaciones.disabled = false;
+      btnConsultarCierresCalificaciones.innerHTML = `
+        <i class="fa-solid fa-lock-open"></i>
+        Consultar cierres
+      `;
+    }
+  }
+}
+
 if (formInicializar) {
   formInicializar.addEventListener("submit", inicializarRegistroCalificaciones);
+}
+
+if (btnConsultarCierresCalificaciones) {
+  btnConsultarCierresCalificaciones.addEventListener(
+    "click",
+    consultarCierresCalificacionesTaller,
+  );
 }
 
 onAuthStateChanged(auth, async (usuario) => {

@@ -5648,3 +5648,492 @@ El punto exacto donde quedó el trabajo es:
 ======================================================================
 FIN ACTUALIZACIÓN 19/09/2026 – CIERRE / REAPERTURA DE TRIMESTRES
 ======================================================================
+
+======================================================================
+40. ACTUALIZACIÓN – 19/09/2026 – FRONTEND DE CIERRE Y REAPERTURA
+======================================================================
+
+ALCANCE
+-------
+Esta sección actualiza el estado documentado en la sección 39.
+
+Desde la última consolidación se completó y probó el flujo visual y operativo de:
+- Cerrar trimestre desde Portal Docente.
+- Advertir cambios sin guardar antes de cerrar.
+- Advertir notas pendientes, permitiendo cerrar igualmente.
+- Recargar el registro después del cierre.
+- Volver automáticamente al inicio de la sección de Calificaciones.
+- Consultar cierres desde Portal Admin/SOPORTE.
+- Reabrir trimestres cerrados desde Portal Admin/SOPORTE.
+- Verificar que, luego de reabrir, el docente pueda volver a cargar y guardar notas.
+- Corregir la nomenclatura visual de los trimestres en Admin.
+
+----------------------------------------------------------------------
+40.1 BOTÓN “CERRAR TRIMESTRE” – PORTAL DOCENTE
+----------------------------------------------------------------------
+
+Archivo:
+assets/js/calificaciones-taller-docente.js
+
+Se agregó junto a “Guardar cambios” el botón:
+
+Cerrar trimestre
+
+ID:
+btnCerrarTrimestreCalificacionesTallerDocente
+
+Clase:
+btn-cerrar-trimestre-calificaciones-taller-docente
+
+El botón:
+- se muestra junto a “Guardar cambios”;
+- mantiene la estética del Portal Docente;
+- se adapta a vista móvil;
+- se habilita sólo si:
+  - existe un trimestre vigente;
+  - el docente tiene acceso editable;
+  - el espacio de Taller del docente es válido;
+  - el trimestre vigente NO figura como cerrado.
+
+Se agregó:
+
+trimestreCerradoCalificacionesTaller(registro, trimestre)
+
+y:
+
+actualizarBotonCerrarTrimestre()
+
+----------------------------------------------------------------------
+40.2 CSS DEL BOTÓN Y BLOQUE DE ACCIONES
+----------------------------------------------------------------------
+
+Archivo:
+assets/css/portal-docente.css
+
+Se agregó:
+
+.botones-acciones-calificaciones-taller-docente
+
+para agrupar:
+- Guardar cambios
+- Cerrar trimestre
+
+Ambos botones comparten:
+- altura;
+- tipografía;
+- espaciado;
+- comportamiento hover/disabled;
+- adaptación responsive.
+
+En móvil:
+- se apilan verticalmente;
+- ocupan 100% del ancho disponible.
+
+Resultado visual:
+PROBADO / CORRECTO.
+
+----------------------------------------------------------------------
+40.3 MODAL DE CIERRE
+----------------------------------------------------------------------
+
+SweetAlert2 ya estaba cargado en docentes/index.html.
+
+No se agregó ninguna librería externa nueva.
+
+Se implementó:
+
+solicitarCierreTrimestre()
+
+Flujo:
+
+1. Verifica que exista:
+   - registro;
+   - usuario;
+   - acceso editable;
+   - trimestre válido.
+
+2. Si hay cambios locales sin guardar:
+   muestra modal:
+
+   “Hay cambios sin guardar”
+
+   y obliga a guardar primero.
+
+3. Vuelve a leer el documento real desde Firestore antes de cerrar.
+
+4. Si otro docente ya cerró el trimestre:
+   muestra:
+   “Trimestre ya cerrado”
+   y recarga el registro.
+
+5. Cuenta calificaciones faltantes considerando:
+   alumnos × 3 Talleres.
+
+6. Si faltan notas:
+   muestra advertencia explícita,
+   pero permite “Cerrar trimestre” igualmente.
+
+7. Si no faltan notas:
+   muestra confirmación normal.
+
+8. Al confirmar:
+   escribe en Firestore:
+   - cierresTrimestres.<trimestre>
+   - ultimaOperacion
+   - actualizadoEn
+   - actualizadoPor
+
+9. Muestra modal de éxito:
+   “Trimestre cerrado”
+
+10. Recarga el registro.
+
+Resultado:
+PROBADO / FUNCIONANDO.
+
+----------------------------------------------------------------------
+40.4 BLOQUEO DEL TRIMESTRE CERRADO EN DOCENTE
+----------------------------------------------------------------------
+
+En prepararEdicionRegistro(registro) se modificó la resolución del trimestre editable.
+
+Antes:
+se tomaba directamente determinarTrimestreEditable(configuracion).
+
+Ahora:
+- primero se obtiene el trimestre vigente por fecha;
+- luego se consulta si ese trimestre está cerrado;
+- si está cerrado:
+  trimestreEditableCalificacionesTallerDocente = 0;
+- si está abierto:
+  se mantiene editable.
+
+Esto garantiza que:
+- cambiar fechas desde ADMIN no reabra un trimestre cerrado;
+- un trimestre cerrado vuelva en modo consulta después de recargar.
+
+Resultado:
+PROBADO / FUNCIONANDO.
+
+----------------------------------------------------------------------
+40.5 POSICIONAMIENTO DESPUÉS DEL CIERRE
+----------------------------------------------------------------------
+
+Problema detectado:
+después de cerrar el trimestre y recargar el registro, la pantalla quedaba
+posicionada en la parte inferior de la tabla, cerca del botón de cierre.
+
+Comportamiento requerido:
+después de aceptar el modal “Trimestre cerrado”, la vista debe volver al inicio
+de la sección:
+
+Registro de Calificaciones de Taller
+
+Se corrigió utilizando, después de:
+
+await cargarRegistroSeleccionado();
+
+un requestAnimationFrame() que calcula la posición de:
+
+#calificaciones-taller-docente
+
+y ejecuta:
+
+window.scrollTo({
+  top: posicion,
+  behavior: "smooth"
+});
+
+Se utiliza actualmente:
+
+const encabezadoFijo = 90;
+
+Ese valor representa la compensación en píxeles por el encabezado fijo del portal.
+
+Si se desea ajustar visualmente en el futuro:
+- aumentar 90 -> deja más espacio por encima de la sección;
+- disminuir 90 -> acerca más la sección al borde superior.
+
+Resultado:
+PROBADO / FUNCIONA COMO SE ESPERABA.
+
+----------------------------------------------------------------------
+40.6 PANEL DE CIERRES EN PORTAL ADMIN / SOPORTE
+----------------------------------------------------------------------
+
+Archivos:
+- admin/index.html
+- assets/js/calificaciones-taller-admin.js
+
+Dentro de:
+Calificaciones de Taller
+
+se agregó un bloque:
+
+Administrar cierre de trimestres
+
+Primera función incorporada:
+
+consultarCierresCalificacionesTaller()
+
+Permite:
+- elegir ciclo;
+- elegir curso;
+- consultar el documento calificaciones_taller correspondiente;
+- detectar cierresTrimestres;
+- informar cuáles están cerrados.
+
+Prueba realizada:
+el sistema detectó correctamente que estaban cerrados:
+- 2° trimestre
+- 3° trimestre
+
+Resultado:
+PROBADO / CORRECTO.
+
+----------------------------------------------------------------------
+40.7 REORDENAMIENTO VISUAL DEL PANEL ADMIN
+----------------------------------------------------------------------
+
+Se modificó el formulario de inicialización para que:
+
+Ciclo lectivo | Curso | Inicializar registro
+
+queden en la misma fila.
+
+Antes:
+el botón “Inicializar registro” aparecía debajo.
+
+Resultado:
+el usuario confirmó que visualmente quedó mejor ordenado.
+
+----------------------------------------------------------------------
+40.8 REAPERTURA REAL DESDE SOPORTE
+----------------------------------------------------------------------
+
+En assets/js/calificaciones-taller-admin.js se agregaron/importaron:
+
+- updateDoc
+- FieldPath
+
+Se implementó:
+
+nombreTrimestreAdmin(trimestre)
+
+y:
+
+reabrirTrimestreCalificacionesTaller(trimestre)
+
+Flujo de reapertura:
+
+1. Lee el registro actual.
+2. Verifica que el trimestre esté realmente CERRADO.
+3. Muestra modal de confirmación:
+   “Reabrir trimestre”.
+4. Al confirmar:
+   escribe:
+   - estado: "ABIERTO"
+   - conserva:
+     - cerradoPor
+     - cerradoEn
+     - pendientesAlCerrar
+   - agrega:
+     - reabiertoPor
+     - reabiertoEn
+   - ultimaOperacion.tipo = "REABRIR_TRIMESTRE"
+   - trimestre
+   - por
+   - en
+   - actualizadoPor
+   - actualizadoEn
+
+5. Muestra modal:
+   “Trimestre reabierto”.
+
+6. Refresca la consulta de cierres.
+
+Los botones se generan sólo para trimestres cerrados.
+
+Ejemplos:
+- Reabrir 1° trimestre
+- Reabrir 2° trimestre
+- Reabrir 3° trimestre
+
+Resultado:
+PROBADO / FUNCIONANDO.
+
+----------------------------------------------------------------------
+40.9 PRUEBA COMPLETA DE REAPERTURA
+----------------------------------------------------------------------
+
+Prueba realizada:
+
+1. Se reabrió un trimestre desde Admin/SOPORTE.
+2. Se volvió al Portal Docente.
+3. Se cargó una nueva nota.
+4. Se presionó “Guardar cambios”.
+5. La nota se guardó correctamente.
+
+Conclusión:
+- la reapertura de SOPORTE funciona;
+- el docente recupera edición si la fecha continúa vigente;
+- la escritura normal posterior a reapertura funciona.
+
+Resultado informado:
+“Funcionó todo”.
+
+----------------------------------------------------------------------
+40.10 NOMENCLATURA DE TRIMESTRES – REGLA VISUAL
+----------------------------------------------------------------------
+
+Corrección solicitada:
+
+NO usar:
+- 1.er trimestre
+- 2.º trimestre
+- 3.er trimestre
+
+en este módulo.
+
+Convención elegida para Admin:
+
+- 1° trimestre
+- 2° trimestre
+- 3° trimestre
+
+Motivo:
+evitar puntos después del número y mantener una notación simple y uniforme.
+
+La función quedó conceptualmente:
+
+function nombreTrimestreAdmin(trimestre) {
+  if (trimestre === 1) return "1° trimestre";
+  if (trimestre === 2) return "2° trimestre";
+  if (trimestre === 3) return "3° trimestre";
+  return "";
+}
+
+Esta regla debe respetarse en futuras ampliaciones visuales del módulo.
+
+----------------------------------------------------------------------
+40.11 ESTADO DEL FLUJO CIERRE / REAPERTURA
+----------------------------------------------------------------------
+
+A esta altura se considera funcionalmente validado:
+
+PORTAL DOCENTE
+--------------
+- Guardar cambios.
+- Detectar cambios sin guardar.
+- Cerrar trimestre.
+- Cerrar aun con pendientes.
+- Auditoría del cierre.
+- Bloqueo posterior.
+- Recarga en modo consulta.
+- Posicionamiento automático al inicio de la sección.
+
+PORTAL ADMIN / SOPORTE
+----------------------
+- Consultar cierres.
+- Detectar correctamente trimestres cerrados.
+- Mostrar botones de reapertura sólo cuando corresponde.
+- Reabrir trimestre.
+- Auditoría de reapertura.
+- Refrescar estado luego de reabrir.
+
+FIRESTORE RULES
+---------------
+- Cierre docente autorizado.
+- Bloqueo de nuevas notas después del cierre.
+- Reapertura exclusiva por SOPORTE.
+- Edición docente nuevamente permitida si:
+  - el trimestre está reabierto;
+  - la fecha sigue vigente.
+
+Todo este flujo fue probado.
+
+----------------------------------------------------------------------
+40.12 PENDIENTE INMEDIATO – SELECT TRIM SIN DUPLICADOS
+----------------------------------------------------------------------
+
+El siguiente trabajo lógico es corregir el select de TRIM.
+
+Problema actual:
+
+Si el cálculo automático da, por ejemplo:
+
+7
+
+el desplegable puede mostrar dos veces el mismo valor:
+- 7 correspondiente a AUTO;
+- 7 correspondiente a MANUAL.
+
+Comportamiento definitivo acordado:
+
+- Mostrar valores visibles únicos 1–10.
+- Si AUTO = 7:
+  - debe existir un solo 7 visible;
+  - ese 7 representa internamente AUTO.
+- El resto de las opciones representan MANUAL.
+- Elegir un valor distinto al automático:
+  -> MANUAL.
+- Volver a elegir el valor automático:
+  -> AUTO.
+
+No es necesario permitir “MANUAL 7” cuando AUTO ya es 7, porque no existe
+diferencia funcional visible y generaría la duplicación que se desea evitar.
+
+Funciones actuales relacionadas:
+
+opcionTrimSeleccionada(...)
+opcionesTrim(...)
+contenidoCeldaTrim(...)
+registrarCambioTrim(...)
+guardarCambiosPendientes(...)
+
+IMPORTANTE:
+No modificar todavía otras etapas:
+- Calificación Final
+- Diciembre
+- Febrero
+
+hasta cerrar correctamente este ajuste.
+
+----------------------------------------------------------------------
+40.13 GIT – ESTADO ANTES DEL PRÓXIMO COMMIT
+----------------------------------------------------------------------
+
+El usuario indicó explícitamente que todavía NO realizó commit/push de los
+últimos cambios de frontend ni de esta actualización de bitácora.
+
+El commit/push anterior sí contenía las Firestore Rules de cierre/reapertura.
+
+Antes del próximo commit conviene incluir, según git status:
+- assets/js/calificaciones-taller-docente.js
+- assets/css/portal-docente.css
+- assets/js/calificaciones-taller-admin.js
+- admin/index.html
+- Bitácora Maestra actualizada
+- cualquier otro archivo realmente modificado durante estas tareas
+
+No agregar archivos temporales de:
+/tmp/eetp495-rules-test
+
+No versionar scripts de prueba temporales salvo decisión explícita.
+
+----------------------------------------------------------------------
+40.14 PRÓXIMO PASO EXACTO
+----------------------------------------------------------------------
+
+1. Guardar esta Bitácora Maestra actualizada dentro del proyecto.
+2. Ejecutar:
+   git status --short
+3. Revisar exactamente los archivos modificados.
+4. Hacer commit/push del bloque funcional:
+   cierre + reapertura + interfaz + bitácora.
+5. Luego trabajar en:
+   TRIM AUTO/MANUAL sin valores duplicados.
+
+======================================================================
+FIN ACTUALIZACIÓN 19/09/2026 – FRONTEND CIERRE / REAPERTURA
+======================================================================
