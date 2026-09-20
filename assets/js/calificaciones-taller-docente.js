@@ -1337,26 +1337,37 @@ function opcionTrimSeleccionada(registro, trimestre, alumnoId) {
 }
 
 function opcionesTrim(valorSeleccionado, resultadoAutomatico) {
-  const valor = String(valorSeleccionado ?? "AUTO");
+  const resultadoAuto = String(resultadoAutomatico);
+  const valorOriginal = String(valorSeleccionado ?? "AUTO");
 
-  const opcionesManuales = Array.from({ length: 10 }, (_, indice) =>
-    String(indice + 1),
-  )
-    .map(
-      (opcion) => `
-        <option value="${opcion}" ${opcion === valor ? "selected" : ""}>
+  // Si existiera un MANUAL igual al resultado automático,
+  // lo tratamos visualmente como AUTO para evitar duplicados.
+  const valorSeleccionadoNormalizado =
+    valorOriginal === resultadoAuto ? "AUTO" : valorOriginal;
+
+  return Array.from({ length: 10 }, (_, indice) => String(indice + 1))
+    .map((opcion) => {
+      if (opcion === resultadoAuto) {
+        return `
+          <option
+            value="AUTO"
+            ${valorSeleccionadoNormalizado === "AUTO" ? "selected" : ""}
+          >
+            ${opcion}
+          </option>
+        `;
+      }
+
+      return `
+        <option
+          value="${opcion}"
+          ${opcion === valorSeleccionadoNormalizado ? "selected" : ""}
+        >
           ${opcion}
         </option>
-      `,
-    )
+      `;
+    })
     .join("");
-
-  return `
-   <option value="AUTO" ${valor === "AUTO" ? "selected" : ""}>
-  ${resultadoAutomatico}
-</option>
-    ${opcionesManuales}
-  `;
 }
 
 function contenidoCeldaTrim(registro, trimestre, alumnoId) {
