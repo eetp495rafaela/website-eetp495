@@ -2038,24 +2038,8 @@ function horarioValidoParaAsistencia(datosAsistencia) {
 
   return horarioExisteParaAsistencia(datosAsistencia)
 
-    && horario.estado == "ACTIVO"&& (
-  (
-    horario.docenteCorreo
-      == request.auth.token.email
-
-    && datosAsistencia.docenteCorreo
-      == request.auth.token.email
-  )
-
-  ||
-
-  reemplazoValidoParaAsistencia(
-    datosAsistencia,
-    horario
-  )
-)
-
-  && (
+    && horario.estado == "ACTIVO"
+&& (
   (
     horario.docenteCorreo
       == request.auth.token.email
@@ -2096,8 +2080,7 @@ function horarioValidoParaAsistencia(datosAsistencia) {
     && datosAsistencia.horaFin
       == horario.horaFin
 
-    && datosAsistencia.horarioTexto
-      == horario.horarioTexto
+   
 
     && datosAsistencia.tipoHorario
       == horario.tipoHorario
