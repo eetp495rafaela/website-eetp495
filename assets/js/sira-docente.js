@@ -992,7 +992,12 @@ async function guardarAsistenciaSira() {
       Guardando...
     `;
   }
+  console.group("DEBUG Si.R.A. - ASISTENCIA");
 
+  console.log("CLASE SELECCIONADA:", claseSiraSeleccionada);
+  console.log("DATOS ASISTENCIA:", datosAsistencia);
+
+  console.groupEnd();
   try {
     await setDoc(referencia, datosAsistencia, { merge: true });
 
