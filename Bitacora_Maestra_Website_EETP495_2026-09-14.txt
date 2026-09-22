@@ -1,8 +1,8 @@
 BITÁCORA MAESTRA – PORTAL INSTITUCIONAL E.E.T.P. N.º 495
 ========================================================
 
-Referencia: EETP495-BITACORA-MAESTRA-2026-09-20
-Fecha de consolidación: 20/09/2026
+Referencia: EETP495-BITACORA-MAESTRA-2026-09-22
+Fecha de consolidación: 22/09/2026
 Institución: E.E.T.P. N.º 495 “Malvinas Argentinas” – Rafaela, Santa Fe
 Modalidad: Técnico en Informática Profesional y Personal
 Dominio: https://eetp495rafaela.edu.ar
@@ -19,30 +19,39 @@ transversal o no esté claro qué archivos intervienen.
 
 FUENTES UTILIZADAS PARA ESTA CONSOLIDACIÓN
 ------------------------------------------
-1. Último ZIP completo recibido:
-   Website-EETP495(20260914-182007).zip
+1. Último ZIP completo recibido y revisado:
+   Website-EETP495(20260922-203915).zip
 
 2. Estado Git contenido en ese ZIP:
    commit completo:
-   ffadd6800d8a2acd3deeb8786e705bf2541619fe
-   commit corto: ffadd68
-   fecha: 2026-09-08 10:53:37 -0300
-   mensaje: "Boorar Doc Academ Docentes"
+   9a4234e2e086ee54bf970c3b56243037b079faaf
+   commit corto: 9a4234e
+   fecha: 2026-09-22 17:36:51 -0300
+   mensaje: "Reglas actualizadas y SiRA docente modificado para reemplazos de EF"
    rama: main
-   sin cambios sin confirmar dentro de ese ZIP.
+   origin/main: mismo commit
+   estado del working tree: LIMPIO, sin cambios sin confirmar.
 
-3. Sobre esa base se incorporó lógicamente la mejora posterior ya probada y
-   cerrada el 14/09/2026:
-   “Detalle de asistencias del estudiante” en Gestión, Admin y Docente.
+3. La Bitácora Maestra incluida dentro del ZIP era la versión consolidada al
+   20/09/2026, referencia EETP495-BITACORA-MAESTRA-2026-09-20. Esta versión v7
+   conserva íntegramente ese historial y agrega los cambios, pruebas, decisiones
+   y pendientes confirmados hasta el 22/09/2026.
 
-4. También se consolidaron los backends Apps Script conocidos y utilizados por
-   el frontend actual:
-   - Documentación Académica
-   - S.I.M.E.
-   - Informes Pedagógico-Didácticos
-   - Calendario Escolar
-   - Galería Institucional + backup Firestore actual
-   - Baja Global de Usuarios
+4. Se revisaron específicamente los archivos actuales involucrados en los
+   últimos trabajos:
+   - firestore.rules
+   - assets/js/sira-docente.js
+   - assets/js/reemplazos-docentes-admin.js
+   - assets/js/calificaciones-taller-docente.js
+   - assets/js/calificaciones-taller-admin.js
+   - admin/index.html
+   - docentes/index.html
+   - assets/css/portal-docente.css
+
+5. También se conserva como contexto histórico todo lo ya consolidado en las
+   versiones anteriores de esta Bitácora: arquitectura general, portales,
+   Documentación Académica, S.I.M.E., Si.R.A., Calendario Escolar, Galería,
+   reemplazos, horarios, calificaciones de Taller y Firestore Security Rules.
 
 REGLA DE PRECEDENCIA
 --------------------
@@ -6618,4 +6627,477 @@ OK - deploy a producción.
 
 ======================================================================
 FIN ACTUALIZACIÓN 20/09/2026 – TRIM AUTO / RULES / LIMPIEZA
+======================================================================
+
+======================================================================
+42. ACTUALIZACIÓN – 22/09/2026 – SI.R.A. Y REEMPLAZOS DE EDUCACIÓN FÍSICA
+======================================================================
+
+ESTADO GENERAL
+--------------
+RESUELTO / COMPILADO / DESPLEGADO / PROBADO EN PRODUCCIÓN / CONFIRMADO.
+
+Se investigó un problema real con un usuario DOCENTE configurado como
+reemplazante temporal de Educación Física.
+
+SÍNTOMA
+-------
+El docente reemplazante:
+- NO tenía una asignación docente directa propia, lo cual es correcto;
+- sí tenía un reemplazo ACTIVO en reemplazos_docentes;
+- podía ingresar a Portal Docente;
+- Si.R.A. reconocía la clase del titular;
+- podía seleccionar la fecha y la clase;
+- se cargaban correctamente los estudiantes del curso;
+- pero al registrar asistencia Firestore respondía:
+
+  Missing or insufficient permissions
+
+DECISIÓN DE ARQUITECTURA CONFIRMADA
+-----------------------------------
+NO se debe crear una asignación permanente para el reemplazante.
+
+El reemplazo temporal debe funcionar mediante el documento de
+reemplazos_docentes vinculado a la asignación del titular. Al finalizar o vencer
+el reemplazo no debe quedar una asignación residual para el reemplazante.
+
+FRONTEND – COMPORTAMIENTO CONFIRMADO
+------------------------------------
+assets/js/sira-docente.js ya contempla reemplazos temporales.
+
+reemplazoSiraEstaVigenteEnFecha(...) valida:
+- estado ACTIVO;
+- tipo TALLER o EDUCACION_FISICA;
+- fechaDesde / fechaHasta;
+- fecha seleccionada dentro del rango.
+
+bloqueSiraPerteneceAReemplazo(...) intenta primero vincular por:
+- bloque.asignacionId == reemplazo.asignacionTitularId.
+
+Si esa identificación no está disponible, utiliza como respaldo:
+- correo del titular;
+- cursoId;
+- espacioId.
+
+Cuando el bloque corresponde a un reemplazo, la clase se conserva con:
+- esReemplazoTemporal: true;
+- reemplazoId;
+- docenteTitularCorreo / docenteTitularNombre;
+- reemplazanteCorreo / reemplazanteNombre.
+
+Al guardar asistencia, datosAsistencia contiene entre otros:
+- docenteCorreo = correo autenticado del reemplazante;
+- docenteTitularCorreo = correo del titular;
+- reemplazoId;
+- asignacionId del bloque;
+- horarioId;
+- curso / espacio;
+- horaInicio / horaFin;
+- tipoHorario;
+- registros de estudiantes.
+
+Por lo tanto, el frontend SÍ estaba enviando la identidad del reemplazo.
+
+DIAGNÓSTICO DE FIRESTORE RULES
+------------------------------
+La función relevante es:
+
+reemplazoValidoParaAsistencia(datosAsistencia, horario)
+
+Esta comprueba correctamente:
+- reemplazoId no vacío y existente;
+- estado ACTIVO;
+- reemplazanteCorreo == usuario autenticado;
+- titularCorreo == docenteCorreo del horario;
+- tipoHorario coincidente;
+- fecha dentro del reemplazo;
+- asignacionTitularId contra asignacionId del horario, o respaldo cursoId +
+  espacioId;
+- docenteCorreo del registro == reemplazante autenticado;
+- docenteTitularCorreo == titular del horario.
+
+La causa concreta del rechazo estaba en horarioValidoParaAsistencia(...).
+
+Se exigía además:
+
+  datosAsistencia.horarioTexto == horario.horarioTexto
+
+En el horario real de Educación Física probado existían:
+- horaInicio
+- horaFin
+
+pero no necesariamente existía horarioTexto.
+
+El frontend, en cambio, genera un texto de respaldo:
+
+  "10:00 a 11:00"
+
+cuando horarioTexto no viene en el bloque.
+
+Por lo tanto Firestore comparaba un valor generado por el frontend contra un
+campo inexistente del documento horario y rechazaba la escritura.
+
+CORRECCIÓN APLICADA
+-------------------
+Se eliminó de horarioValidoParaAsistencia(...) la comparación:
+
+  datosAsistencia.horarioTexto == horario.horarioTexto
+
+No se redujo la validación esencial del horario porque siguen comparándose:
+- cursoId;
+- cursoAnio;
+- cursoDivision;
+- cursoNombre;
+- espacioId;
+- día;
+- horaInicio;
+- horaFin;
+- tipoHorario;
+- grupoTaller cuando corresponde.
+
+Además se detectó que la autorización:
+
+  titular directo OR reemplazoValidoParaAsistencia(...)
+
+estaba duplicada dos veces consecutivas dentro de horarioValidoParaAsistencia.
+Se eliminó la segunda copia.
+
+La lógica final conserva una sola evaluación de titular/reemplazante y reduce
+expresiones innecesarias.
+
+DEBUG TEMPORAL
+--------------
+Durante el diagnóstico se agregó temporalmente a sira-docente.js:
+
+  console.group("DEBUG Si.R.A. - ASISTENCIA")
+  console.log("CLASE SELECCIONADA:", ...)
+  console.log("DATOS ASISTENCIA:", ...)
+
+Esto permitió comprobar los datos reales enviados.
+
+Después de resolver el problema, TODO el debug temporal fue eliminado.
+
+PRUEBAS Y DEPLOY
+-----------------
+Se compiló localmente con:
+
+  firebase emulators:exec --only firestore "echo REGLAS_OK"
+
+Resultado:
+- Firestore Emulator inició correctamente;
+- apareció REGLAS_OK;
+- cierre correcto del emulador.
+
+Durante los primeros intentos de publicación aparecieron errores transitorios
+del servicio Firebase:
+- HTTP 503: service unavailable;
+- HTTP 409: Requested entity already exists.
+
+No correspondían a un error de sintaxis de las Rules.
+
+Posteriormente el deploy final fue exitoso:
+- rules file compiled successfully;
+- rules uploaded;
+- released to cloud.firestore;
+- Deploy complete.
+
+Luego de la limpieza del bloque duplicado se volvió a:
+- compilar;
+- desplegar;
+- probar en producción.
+
+Resultado final informado por el usuario:
+
+  “Funcionó”
+
+Se confirma:
+- reemplazante de Educación Física puede acceder a la clase;
+- puede ver alumnos;
+- puede registrar asistencia;
+- Firestore acepta la escritura;
+- no se necesita asignación directa para el reemplazante.
+
+LIMPIEZA
+--------
+Se eliminó:
+- debug temporal de sira-docente.js;
+- firestore-debug.log generado por el emulador.
+
+El ZIP actual no contiene:
+- firestore-debug.log;
+- firebase-debug.log;
+- backups firestore.rules.*.
+
+Sólo permanece:
+- firestore.rules
+
+COMMIT FINAL DE ESTE BLOQUE
+---------------------------
+Commit actual del ZIP:
+
+9a4234e
+“Reglas actualizadas y SiRA docente modificado para reemplazos de EF”
+
+Archivos incluidos en el commit:
+- assets/js/sira-docente.js
+- firestore.rules
+
+Working tree del ZIP:
+LIMPIO.
+
+======================================================================
+FIN ACTUALIZACIÓN 22/09/2026 – SI.R.A. REEMPLAZOS EDUCACIÓN FÍSICA
+======================================================================
+
+
+======================================================================
+43. ACTUALIZACIÓN – 22/09/2026 – CALIFICACIONES DE TALLER: NUEVO RECHAZO AL COMPLETAR TRIM
+======================================================================
+
+ESTADO GENERAL
+--------------
+PENDIENTE DE INVESTIGACIÓN.
+
+NO aplicar una corrección todavía sin reproducir y aislar el caso.
+
+SÍNTOMA CONFIRMADO
+------------------
+Durante nuevas pruebas reales del Registro de Calificaciones de Taller se
+detectó el siguiente patrón:
+
+Ejemplo informado:
+- Juan carga la nota de ELE -> guarda correctamente.
+- Graciela carga la nota de ORG -> guarda correctamente.
+- Martín carga la nota de INF como tercera nota del alumno.
+- En ese momento quedan completas las tres notas.
+- El sistema calcula y habilita el TRIM correspondiente.
+- Al intentar guardar, Firebase rechaza la operación por permisos.
+
+El mismo comportamiento fue reproducido en otro curso con otros docentes.
+
+PRUEBA DE AISLAMIENTO YA REALIZADA
+----------------------------------
+Se probó al mismo docente Martín cargando su nota cuando era la PRIMERA nota del
+alumno.
+
+Resultado:
+- guardó correctamente.
+
+Conclusión segura hasta aquí:
+- NO es un problema general de autorización del docente;
+- NO es un problema de que Martín no tenga acceso a su Taller;
+- el rechazo aparece asociado al momento en que la nota cargada completa las
+  tres áreas y entra en juego el TRIM automático.
+
+IMPORTANTE SOBRE EL HISTORIAL
+-----------------------------
+El 20/09/2026 ya se había resuelto y probado un problema relacionado con
+NOTA_ESPACIO + TRIM AUTO y el límite de 1000 expresiones de Firestore Rules.
+Esa solución sigue presente en el archivo actual.
+
+Sin embargo, estas nuevas pruebas del 22/09 vuelven a producir un rechazo al
+completar las tres notas. No asumir que la causa es idéntica al problema del
+20/09. Debe investigarse con el código actual y, preferentemente, reproducirse
+en emulador antes de modificar seguridad en producción.
+
+FRONTEND ACTUAL – PUNTO CLAVE OBSERVADO
+---------------------------------------
+Archivo:
+assets/js/calificaciones-taller-docente.js
+
+Función:
+guardarCambiosPendientes()
+
+El comentario del código indica conceptualmente:
+
+  “Primero se guardan las notas del Taller propio. Esto permite que, si una
+   nota completa las tres áreas del alumno, el TRIM pueda guardarse después
+   sobre el estado ya actualizado.”
+
+Pero el flujo actual de guardado de una nota hace lo siguiente:
+
+1. calcula las tres notas considerando el nuevo valor;
+2. obtiene resultadoAutomatico;
+3. prepara la entrada de la nota;
+4. si resultadoAutomatico != null y no hay MANUAL para conservar, agrega al
+   MISMO arreglo de argumentos también:
+   trimXResultado[alumnoId] = { valor, modo: "AUTO", por, en };
+5. agrega ultimaOperacion tipo NOTA_ESPACIO y auditoría;
+6. ejecuta un único updateDoc(...argumentos).
+
+Por lo tanto, cuando un docente carga la tercera nota, la escritura real puede
+modificar simultáneamente:
+- trimXEspacioY del docente;
+- trimXResultado del alumno;
+- ultimaOperacion;
+- actualizadoEn;
+- actualizadoPor.
+
+Las Rules actuales contemplan conceptualmente esta operación conjunta mediante:
+- cambioNotaTrimXEspacioYValido(...);
+- resultadoTrimXConsistente(...);
+- entradaTrimAutoValida(...);
+- docentePuedeActualizarCalificaciones(...).
+
+AÚN NO SE DETERMINÓ qué condición exacta está fallando en la prueba actual.
+
+OTRO FLUJO EXISTENTE
+--------------------
+La misma función guardarCambiosPendientes() posee después un segundo bucle para
+cambios explícitos de TRIM:
+
+  cambiosPendientesTrimCalificacionesTallerDocente
+
+Ese flujo guarda operaciones tipo:
+
+  TRIM
+
+con AUTO o MANUAL.
+
+La investigación se pausó justo antes de verificar si, al completarse la tercera
+nota, el mismo alumno puede estar quedando también dentro de
+cambiosPendientesTrimCalificacionesTallerDocente, provocando una interacción
+entre ambos caminos de guardado.
+
+PRÓXIMO PASO TÉCNICO EXACTO
+---------------------------
+En el nuevo chat, retomar desde aquí.
+
+1. Revisar en assets/js/calificaciones-taller-docente.js todas las llamadas a:
+
+   cambiosPendientesTrimCalificacionesTallerDocente.set(...)
+
+2. Confirmar si completar la tercera nota registra automáticamente un pendiente
+   adicional de TRIM o si sólo existe el updateDoc conjunto NOTA + TRIM AUTO.
+
+3. Capturar/reproducir exactamente una escritura fallida con:
+   - dos notas ya persistidas;
+   - tercera nota nueva;
+   - TRIM inexistente antes de guardar;
+   - docente titular autorizado;
+   - trimestre vigente y abierto.
+
+4. Reproducir el mismo caso en Firestore Emulator con las Rules ACTUALES del
+   ZIP 22/09.
+
+5. Si el emulador informa límite de expresiones, optimizar la ruta exacta.
+   Si informa PERMISSION_DENIED sin límite, aislar la condición que devuelve
+   false.
+
+6. NO flexibilizar reglas a ciegas y NO crear permisos generales para resolver
+   el síntoma.
+
+7. Probar también los tres posibles espacios (1/2/3) y más de un curso, porque
+   la falla ya fue observada con distintos docentes/cursos.
+
+MENSAJE VISUAL AJUSTADO EL 22/09
+--------------------------------
+Commit 2504f57:
+“Ajuste mensaje calif taller docentes”
+
+En la ayuda de edición se simplificó el texto a:
+
+  “Podés cargar tu Taller. La columna TRIM se habilita al completar las tres
+   notas.”
+
+No es una corrección funcional; sólo un ajuste de interfaz/mensaje.
+
+ESTADO DEL MÓDULO PARA EL PRÓXIMO CHAT
+--------------------------------------
+CONFIRMADO:
+- los docentes acceden a su Taller;
+- la primera nota se guarda;
+- la segunda nota se guarda;
+- un docente que falla como tercero puede guardar si actúa primero;
+- el cálculo visual del TRIM se produce al completar las tres notas;
+- el rechazo aparece al guardar la operación que completa las tres notas;
+- se reprodujo en más de un curso.
+
+PENDIENTE:
+- identificar causa exacta;
+- corregir;
+- probar en emulador;
+- desplegar;
+- validar en producción;
+- actualizar esta Bitácora después del cierre.
+
+======================================================================
+FIN ACTUALIZACIÓN 22/09/2026 – CALIFICACIONES / TERCERA NOTA + TRIM AUTO
+======================================================================
+
+
+======================================================================
+44. ESTADO DE ENTREGA PARA CONTINUAR EN CHAT NUEVO – 22/09/2026
+======================================================================
+
+FUENTE DE VERDAD ACTUAL
+-----------------------
+ZIP:
+Website-EETP495(20260922-203915).zip
+
+Repositorio:
+git@github-eetp495:eetp495rafaela/website-eetp495.git
+
+Rama:
+main
+
+HEAD / origin-main:
+9a4234e2e086ee54bf970c3b56243037b079faaf
+
+Commit corto:
+9a4234e
+
+Estado Git dentro del ZIP:
+LIMPIO.
+
+ÚLTIMOS COMMITS RELEVANTES
+--------------------------
+9a4234e - Reglas actualizadas y SiRA docente modificado para reemplazos de EF
+8f02ed7 - Intento arreglo carga asistencia reemplazos EF
+2504f57 - Ajuste mensaje calif taller docentes
+7b5322c - Optimiza reglas de calificaciones y actualiza bitácora
+6366c23 - Arreglo en js calif taller docente
+7b651d4 - Bitácora v5 + Cierre y Reapertura de Trimestres en Admin y Docente
+
+SI.R.A. / REEMPLAZOS
+--------------------
+CERRADO:
+- reemplazante de Educación Física puede registrar asistencia.
+- no requiere asignación directa propia.
+- validación se apoya en reemplazos_docentes y asignación del titular.
+- comparación problemática horarioTexto eliminada.
+- bloque redundante titular/reemplazante eliminado.
+- Rules compiladas, desplegadas y probadas.
+- debug y logs temporales eliminados.
+
+CALIFICACIONES DE TALLER
+------------------------
+ABIERTO / PRIORIDAD PARA EL NUEVO CHAT:
+- investigar rechazo cuando el tercer docente completa las tres notas y se
+  genera TRIM AUTO.
+- no confundir con permiso individual del docente: ya se comprobó que el mismo
+  docente puede guardar cuando su nota es la primera.
+- no asumir todavía si es límite de 1000 expresiones, doble flujo de TRIM u otra
+  validación.
+
+OTROS PENDIENTES YA CONOCIDOS
+-----------------------------
+Mantener además los pendientes históricos documentados en secciones anteriores,
+entre ellos:
+- varios docentes por curso/espacio para casos especiales de Taller/Educación
+  Física;
+- reemplazos temporales sin asignaciones residuales;
+- completar y validar etapas posteriores de calificaciones (Final, Diciembre,
+  Febrero) cuando corresponda;
+- validación administrativa de períodos para evitar superposiciones de fechas;
+- sincronizaciones y mejoras ya listadas en módulos anteriores.
+
+INDICACIÓN PARA EL PRÓXIMO CHAT
+-------------------------------
+Usar esta Bitácora como contexto maestro y el ZIP 22/09 como fuente de código.
+Empezar por el problema funcional que el usuario describa, sin volver a abrir
+varios frentes en paralelo.
+
+======================================================================
+FIN ESTADO DE ENTREGA 22/09/2026
 ======================================================================
