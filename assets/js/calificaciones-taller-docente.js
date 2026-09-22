@@ -1934,7 +1934,7 @@ function renderizarTabla(registro) {
           <div class="acciones-calificaciones-taller-docente">
             <div class="ayuda-edicion-calificaciones-taller">
               <i class="fa-solid fa-circle-info"></i>
-              Podés cargar tu Taller. TRIM se habilita al completar las tres notas: AUTO usa el cálculo institucional y 1–10 fija un valor manual.
+              Podés cargar tu Taller. La columna TRIM se habilita al completar las tres notas.
             </div>
 
             <div class="botones-acciones-calificaciones-taller-docente">
