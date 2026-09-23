@@ -173,6 +173,57 @@ async function sincronizarReemplazoTallerConCalificaciones({
   }
 }
 
+async function sincronizarReemplazoTallerConAsistencias({
+  reemplazoId,
+  asignacionTitularId,
+  fechaDesde,
+  fechaHasta,
+}) {
+  const idReemplazo = String(reemplazoId || "").trim();
+  const idAsignacion = String(asignacionTitularId || "").trim();
+  const desde = String(fechaDesde || "").trim();
+  const hasta = String(fechaHasta || "").trim();
+
+  if (!idReemplazo || !idAsignacion || !desde || !hasta) {
+    throw new Error(
+      "No se pudo preparar la vinculación del reemplazo con las asistencias.",
+    );
+  }
+
+  /*
+   * Si el titular ya había registrado asistencia dentro del período que
+   * ahora será cubierto por el reemplazante, vinculamos esos registros con
+   * el reemplazo. No modificamos presentes/ausentes ni quién los cargó.
+   */
+  const consultaAsistencias = query(
+    collection(db, "asistencias_clases"),
+    where("asignacionId", "==", idAsignacion),
+  );
+
+  const resultadoAsistencias = await getDocs(consultaAsistencias);
+  const actualizaciones = [];
+
+  resultadoAsistencias.forEach((documento) => {
+    const asistencia = documento.data();
+    const tipo = String(asistencia.tipoHorario || "")
+      .trim()
+      .toUpperCase();
+    const fecha = String(asistencia.fecha || "").trim();
+
+    if (tipo !== "TALLER" || !fecha || fecha < desde || fecha > hasta) {
+      return;
+    }
+
+    actualizaciones.push(
+      updateDoc(doc(db, "asistencias_clases", documento.id), {
+        reemplazoId: idReemplazo,
+      }),
+    );
+  });
+
+  await Promise.all(actualizaciones);
+}
+
 function mostrarMensajeReemplazo(texto = "", tipo = "") {
   if (!mensajeReemplazoDocente) return;
 
@@ -624,6 +675,13 @@ async function registrarReemplazoDocente(evento) {
           cicloLectivo: Number(asignacion.cicloLectivo || 0),
           reemplazanteCorreo,
           actualizadoPor: usuarioActual.email,
+        });
+
+        await sincronizarReemplazoTallerConAsistencias({
+          reemplazoId: referenciaReemplazo.id,
+          asignacionTitularId,
+          fechaDesde,
+          fechaHasta,
         });
       } catch (errorSincronizacion) {
         /*

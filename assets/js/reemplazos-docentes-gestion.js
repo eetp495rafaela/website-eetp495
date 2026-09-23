@@ -402,6 +402,52 @@ async function cargarAsignacionesTitularGestion() {
   }
 }
 
+async function sincronizarReemplazoTallerConAsistenciasGestion({
+  reemplazoId,
+  asignacionTitularId,
+  fechaDesde,
+  fechaHasta,
+}) {
+  const idReemplazo = String(reemplazoId || "").trim();
+  const idAsignacion = String(asignacionTitularId || "").trim();
+  const desde = String(fechaDesde || "").trim();
+  const hasta = String(fechaHasta || "").trim();
+
+  if (!idReemplazo || !idAsignacion || !desde || !hasta) {
+    throw new Error(
+      "No se pudo preparar la vinculación del reemplazo con las asistencias.",
+    );
+  }
+
+  const consultaAsistencias = query(
+    collection(db, "asistencias_clases"),
+    where("asignacionId", "==", idAsignacion),
+  );
+
+  const resultadoAsistencias = await getDocs(consultaAsistencias);
+  const actualizaciones = [];
+
+  resultadoAsistencias.forEach((documento) => {
+    const asistencia = documento.data();
+    const tipo = String(asistencia.tipoHorario || "")
+      .trim()
+      .toUpperCase();
+    const fecha = String(asistencia.fecha || "").trim();
+
+    if (tipo !== "TALLER" || !fecha || fecha < desde || fecha > hasta) {
+      return;
+    }
+
+    actualizaciones.push(
+      updateDoc(doc(db, "asistencias_clases", documento.id), {
+        reemplazoId: idReemplazo,
+      }),
+    );
+  });
+
+  await Promise.all(actualizaciones);
+}
+
 function mostrarMensajeReemplazoGestion(texto = "", tipo = "") {
   if (!mensajeReemplazoDocenteGestion) return;
 
@@ -628,7 +674,31 @@ async function registrarReemplazoDocenteGestion(evento) {
       actualizadoPor: normalizarCorreoGestion(usuarioActual.email),
     };
 
-    await addDoc(collection(db, "reemplazos_docentes"), datosReemplazo);
+    const referenciaReemplazo = await addDoc(
+      collection(db, "reemplazos_docentes"),
+      datosReemplazo,
+    );
+
+    if (tipoHorario === "TALLER") {
+      try {
+        await sincronizarReemplazoTallerConAsistenciasGestion({
+          reemplazoId: referenciaReemplazo.id,
+          asignacionTitularId,
+          fechaDesde,
+          fechaHasta,
+        });
+      } catch (errorSincronizacion) {
+        await updateDoc(referenciaReemplazo, {
+          estado: "INACTIVO",
+          actualizadoEn: serverTimestamp(),
+          actualizadoPor: normalizarCorreoGestion(usuarioActual.email),
+          finalizadoEn: serverTimestamp(),
+          finalizadoPor: normalizarCorreoGestion(usuarioActual.email),
+        });
+
+        throw errorSincronizacion;
+      }
+    }
 
     mostrarMensajeReemplazoGestion("Reemplazo registrado correctamente.", "ok");
 

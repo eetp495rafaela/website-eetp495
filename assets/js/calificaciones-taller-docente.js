@@ -326,11 +326,6 @@ function cargarCiclosDisponibles() {
   `;
 
   cicloCalificacionesTallerDocente.disabled = ciclos.length === 0;
-
-  if (ciclos.length === 1) {
-    cicloCalificacionesTallerDocente.value = String(ciclos[0]);
-    cargarCursosDisponibles();
-  }
 }
 
 function cargarCursosDisponibles() {
@@ -351,7 +346,7 @@ function cargarCursosDisponibles() {
   cambiosPendientesTrimCalificacionesTallerDocente.clear();
   resumenCalificacionesTallerDocente.hidden = true;
   resumenCalificacionesTallerDocente.innerHTML = "";
-  grupoCalificacionesTallerDocente.value = "TODOS";
+  grupoCalificacionesTallerDocente.value = "";
   grupoCalificacionesTallerDocente.disabled = true;
   actualizarEstadoVisualEdicion();
 
@@ -402,11 +397,46 @@ function cargarCursosDisponibles() {
   );
 
   mostrarMensaje("");
+}
 
-  if (cursos.length === 1) {
-    cursoCalificacionesTallerDocente.value = cursos[0].cursoId;
-    cargarRegistroSeleccionado();
+function prepararSeleccionGrupo() {
+  if (
+    !cicloCalificacionesTallerDocente ||
+    !cursoCalificacionesTallerDocente ||
+    !grupoCalificacionesTallerDocente
+  ) {
+    return;
   }
+
+  registroCalificacionesTallerDocente = null;
+  configuracionPeriodosCalificacionesTallerDocente = null;
+  trimestreEditableCalificacionesTallerDocente = 0;
+  accesoEditableCalificacionesTallerDocente = null;
+  espacioEditableNumeroCalificacionesTallerDocente = 0;
+  cambiosPendientesCalificacionesTallerDocente.clear();
+  cambiosPendientesTrimCalificacionesTallerDocente.clear();
+  resumenCalificacionesTallerDocente.hidden = true;
+  resumenCalificacionesTallerDocente.innerHTML = "";
+  grupoCalificacionesTallerDocente.value = "";
+  actualizarEstadoVisualEdicion();
+
+  const ciclo = Number(cicloCalificacionesTallerDocente.value || 0);
+  const cursoId = String(cursoCalificacionesTallerDocente.value || "").trim();
+
+  if (!ciclo || !cursoId) {
+    grupoCalificacionesTallerDocente.disabled = true;
+    mostrarVistaInformativa(
+      "Seleccioná un ciclo lectivo y un curso para consultar el registro.",
+    );
+    mostrarMensaje("");
+    return;
+  }
+
+  grupoCalificacionesTallerDocente.disabled = false;
+  mostrarVistaInformativa(
+    "Seleccioná G1, G2 o Todos para consultar el Registro de Calificaciones.",
+  );
+  mostrarMensaje("");
 }
 
 function obtenerValorMapa(mapa, alumnoId) {
@@ -598,10 +628,13 @@ function actualizarBotonCerrarTrimestre() {
   if (!boton) return;
 
   const trimestre = trimestreEditableCalificacionesTallerDocente;
+  const esAsignacionDirecta =
+    accesoEditableCalificacionesTallerDocente?.origen !== "REEMPLAZO";
 
   const puedeCerrar =
     trimestre > 0 &&
     accesoEditableCalificacionesTallerDocente &&
+    esAsignacionDirecta &&
     espacioEditableNumeroCalificacionesTallerDocente > 0 &&
     registroCalificacionesTallerDocente &&
     !trimestreCerradoCalificacionesTaller(
@@ -620,7 +653,8 @@ async function solicitarCierreTrimestre() {
   if (
     !registroCalificacionesTallerDocente ||
     !usuarioCalificacionesTallerDocente ||
-    !accesoEditableCalificacionesTallerDocente
+    !accesoEditableCalificacionesTallerDocente ||
+    accesoEditableCalificacionesTallerDocente.origen === "REEMPLAZO"
   ) {
     return;
   }
@@ -793,10 +827,7 @@ async function solicitarCierreTrimestre() {
     const operacion = {
       tipo: "CERRAR_TRIMESTRE",
       trimestre,
-      reemplazoId:
-        accesoEditableCalificacionesTallerDocente.origen === "REEMPLAZO"
-          ? String(accesoEditableCalificacionesTallerDocente.reemplazoId || "")
-          : "",
+      reemplazoId: "",
       pendientes,
       por: correo,
       en: marcaTiempo,
@@ -1888,6 +1919,10 @@ function renderizarTabla(registro) {
     accesoEditableCalificacionesTallerDocente &&
     espacioEditableNumeroCalificacionesTallerDocente > 0;
 
+  const puedeCerrarTrimestre =
+    puedeEditar &&
+    accesoEditableCalificacionesTallerDocente.origen !== "REEMPLAZO";
+
   vistaCalificacionesTallerDocente.innerHTML = `
     <div class="tabla-calificaciones-taller-contenedor">
       <table class="tabla-calificaciones-taller-docente">
@@ -1948,15 +1983,21 @@ function renderizarTabla(registro) {
     Guardar cambios
   </button>
 
-  <button
-    id="btnCerrarTrimestreCalificacionesTallerDocente"
-    class="btn-cerrar-trimestre-calificaciones-taller-docente"
-    type="button"
-    disabled
-  >
-    <i class="fa-solid fa-lock"></i>
-    Cerrar trimestre
-  </button>
+  ${
+    puedeCerrarTrimestre
+      ? `
+        <button
+          id="btnCerrarTrimestreCalificacionesTallerDocente"
+          class="btn-cerrar-trimestre-calificaciones-taller-docente"
+          type="button"
+          disabled
+        >
+          <i class="fa-solid fa-lock"></i>
+          Cerrar trimestre
+        </button>
+      `
+      : ""
+  }
 </div>
           </div>
         `
@@ -1978,6 +2019,9 @@ async function cargarRegistroSeleccionado() {
 
   const ciclo = Number(cicloCalificacionesTallerDocente.value || 0);
   const cursoId = String(cursoCalificacionesTallerDocente.value || "").trim();
+  const grupo = String(grupoCalificacionesTallerDocente.value || "")
+    .trim()
+    .toUpperCase();
 
   registroCalificacionesTallerDocente = null;
   configuracionPeriodosCalificacionesTallerDocente = null;
@@ -1988,13 +2032,22 @@ async function cargarRegistroSeleccionado() {
   cambiosPendientesTrimCalificacionesTallerDocente.clear();
   resumenCalificacionesTallerDocente.hidden = true;
   resumenCalificacionesTallerDocente.innerHTML = "";
-  grupoCalificacionesTallerDocente.value = "TODOS";
-  grupoCalificacionesTallerDocente.disabled = true;
   actualizarEstadoVisualEdicion();
 
   if (!ciclo || !cursoId) {
+    grupoCalificacionesTallerDocente.disabled = true;
     mostrarVistaInformativa(
       "Seleccioná un ciclo lectivo y un curso para consultar el registro.",
+    );
+    mostrarMensaje("");
+    return;
+  }
+
+  grupoCalificacionesTallerDocente.disabled = false;
+
+  if (!grupo) {
+    mostrarVistaInformativa(
+      "Seleccioná G1, G2 o Todos para consultar el Registro de Calificaciones.",
     );
     mostrarMensaje("");
     return;
@@ -2123,15 +2176,30 @@ if (cicloCalificacionesTallerDocente) {
 if (cursoCalificacionesTallerDocente) {
   cursoCalificacionesTallerDocente.addEventListener(
     "change",
-    cargarRegistroSeleccionado,
+    prepararSeleccionGrupo,
   );
 }
 
 if (grupoCalificacionesTallerDocente) {
-  grupoCalificacionesTallerDocente.addEventListener("change", () => {
-    if (!registroCalificacionesTallerDocente) return;
+  grupoCalificacionesTallerDocente.addEventListener("change", async () => {
+    const grupo = String(grupoCalificacionesTallerDocente.value || "")
+      .trim()
+      .toUpperCase();
 
-    renderizarTabla(registroCalificacionesTallerDocente);
+    if (!grupo) {
+      mostrarVistaInformativa(
+        "Seleccioná G1, G2 o Todos para consultar el Registro de Calificaciones.",
+      );
+      mostrarMensaje("");
+      return;
+    }
+
+    if (registroCalificacionesTallerDocente) {
+      renderizarTabla(registroCalificacionesTallerDocente);
+      return;
+    }
+
+    await cargarRegistroSeleccionado();
   });
 }
 

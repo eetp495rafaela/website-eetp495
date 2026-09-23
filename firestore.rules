@@ -312,6 +312,52 @@ function reemplazoCalificacionesVigente(
     );
 }
 
+/*
+ * Variante optimizada para ESCRITURA. Mantiene las mismas comprobaciones
+ * de reemplazo y de asignación titular, pero evita reevaluar get() y la
+ * rama de titular que necesariamente falla para un reemplazante.
+ */
+function reemplazoCalificacionesVigenteEscritura(
+  reemplazoId,
+  asignacionId,
+  cursoId,
+  espacioId,
+  cicloLectivo
+) {
+  let rutaReemplazo =
+    /databases/$(database)/documents/reemplazos_docentes/$(reemplazoId);
+  let reemplazo = get(rutaReemplazo).data;
+  let rutaAsignacion =
+    /databases/$(database)/documents/asignaciones_docentes/$(asignacionId);
+  let asignacion = get(rutaAsignacion).data;
+
+  return reemplazoId is string
+    && reemplazoId.size() > 0
+    && exists(rutaReemplazo)
+    && reemplazo.get("estado", "") == "ACTIVO"
+    && reemplazo.get("tipoHorario", "") == "TALLER"
+    && reemplazo.get("reemplazanteCorreo", "")
+      == request.auth.token.email
+    && reemplazo.get("asignacionTitularId", "") == asignacionId
+    && reemplazo.get("cursoId", "") == cursoId
+    && reemplazo.get("espacioId", "") == espacioId
+    && reemplazo.get("cicloLectivo", 0) == cicloLectivo
+    && fechaISOCalificacionesValida(reemplazo.get("fechaDesde", ""))
+    && fechaISOCalificacionesValida(reemplazo.get("fechaHasta", ""))
+    && request.time >= inicioDiaArgentina(reemplazo.get("fechaDesde", ""))
+    && request.time < finDiaArgentinaExclusivo(
+      reemplazo.get("fechaHasta", "")
+    )
+    && exists(rutaAsignacion)
+    && asignacion.get("estado", "") in ["ACTIVA", "ACTIVO"]
+    && asignacion.get("docenteCorreo", "")
+      == reemplazo.get("titularCorreo", "")
+    && asignacion.get("cursoId", "") == cursoId
+    && asignacion.get("espacioId", "") == espacioId
+    && asignacion.get("espacioTipo", "") == "TALLER"
+    && asignacion.get("cicloLectivo", 0) == cicloLectivo;
+}
+
 function docentePuedeEditarEspacio1(datos, reemplazoId) {
   let correo = request.auth.token.email;
   let reemplazoVinculado = datos
@@ -320,23 +366,25 @@ function docentePuedeEditarEspacio1(datos, reemplazoId) {
 
   return esDocentePorPerfil()
     && (
-      asignacionTallerActiva(
-        datos.get("espacio1AsignacionId", ""),
-        datos.get("cursoId", ""),
-        datos.get("espacio1Id", ""),
-        datos.get("cicloLectivo", 0),
-        correo
-      )
-      || (
-        reemplazoId == reemplazoVinculado
-        && reemplazoCalificacionesVigente(
-        reemplazoVinculado,
-        datos.get("espacio1AsignacionId", ""),
-        datos.get("cursoId", ""),
-        datos.get("espacio1Id", ""),
-        datos.get("cicloLectivo", 0)
-        )
-      )
+      reemplazoId is string
+      && reemplazoId.size() > 0
+        ? (
+            reemplazoId == reemplazoVinculado
+            && reemplazoCalificacionesVigenteEscritura(
+              reemplazoId,
+              datos.get("espacio1AsignacionId", ""),
+              datos.get("cursoId", ""),
+              datos.get("espacio1Id", ""),
+              datos.get("cicloLectivo", 0)
+            )
+          )
+        : asignacionTallerActiva(
+            datos.get("espacio1AsignacionId", ""),
+            datos.get("cursoId", ""),
+            datos.get("espacio1Id", ""),
+            datos.get("cicloLectivo", 0),
+            correo
+          )
     );
 }
 
@@ -348,23 +396,25 @@ function docentePuedeEditarEspacio2(datos, reemplazoId) {
 
   return esDocentePorPerfil()
     && (
-      asignacionTallerActiva(
-        datos.get("espacio2AsignacionId", ""),
-        datos.get("cursoId", ""),
-        datos.get("espacio2Id", ""),
-        datos.get("cicloLectivo", 0),
-        correo
-      )
-      || (
-        reemplazoId == reemplazoVinculado
-        && reemplazoCalificacionesVigente(
-        reemplazoVinculado,
-        datos.get("espacio2AsignacionId", ""),
-        datos.get("cursoId", ""),
-        datos.get("espacio2Id", ""),
-        datos.get("cicloLectivo", 0)
-        )
-      )
+      reemplazoId is string
+      && reemplazoId.size() > 0
+        ? (
+            reemplazoId == reemplazoVinculado
+            && reemplazoCalificacionesVigenteEscritura(
+              reemplazoId,
+              datos.get("espacio2AsignacionId", ""),
+              datos.get("cursoId", ""),
+              datos.get("espacio2Id", ""),
+              datos.get("cicloLectivo", 0)
+            )
+          )
+        : asignacionTallerActiva(
+            datos.get("espacio2AsignacionId", ""),
+            datos.get("cursoId", ""),
+            datos.get("espacio2Id", ""),
+            datos.get("cicloLectivo", 0),
+            correo
+          )
     );
 }
 
@@ -376,23 +426,25 @@ function docentePuedeEditarEspacio3(datos, reemplazoId) {
 
   return esDocentePorPerfil()
     && (
-      asignacionTallerActiva(
-        datos.get("espacio3AsignacionId", ""),
-        datos.get("cursoId", ""),
-        datos.get("espacio3Id", ""),
-        datos.get("cicloLectivo", 0),
-        correo
-      )
-      || (
-        reemplazoId == reemplazoVinculado
-        && reemplazoCalificacionesVigente(
-        reemplazoVinculado,
-        datos.get("espacio3AsignacionId", ""),
-        datos.get("cursoId", ""),
-        datos.get("espacio3Id", ""),
-        datos.get("cicloLectivo", 0)
-        )
-      )
+      reemplazoId is string
+      && reemplazoId.size() > 0
+        ? (
+            reemplazoId == reemplazoVinculado
+            && reemplazoCalificacionesVigenteEscritura(
+              reemplazoId,
+              datos.get("espacio3AsignacionId", ""),
+              datos.get("cursoId", ""),
+              datos.get("espacio3Id", ""),
+              datos.get("cicloLectivo", 0)
+            )
+          )
+        : asignacionTallerActiva(
+            datos.get("espacio3AsignacionId", ""),
+            datos.get("cursoId", ""),
+            datos.get("espacio3Id", ""),
+            datos.get("cicloLectivo", 0),
+            correo
+          )
     );
 }
 
@@ -1662,6 +1714,7 @@ function operacionCierreTrimestreValida(
     && operacion.get("tipo", "") == "CERRAR_TRIMESTRE"
     && operacion.get("trimestre", -1) == trimestre
     && operacion.get("reemplazoId", "") is string
+    && operacion.get("reemplazoId", "") == ""
     && operacion.get("pendientes", -1) is int
     && operacion.get("pendientes", -1) >= 0
     && operacion.get("por", "") == request.auth.token.email
@@ -1670,9 +1723,17 @@ function operacionCierreTrimestreValida(
     && datos.get("actualizadoEn", null) == request.time;
 }
 
+function docenteAsignadoPuedeCerrarTrimestre(datos) {
+  /*
+   * Cerrar el trimestre es una atribución de quien tiene una
+   * asignación directa y activa en alguno de los tres Talleres.
+   * Un reemplazo temporal de reemplazos_docentes puede cargar y
+   * editar notas, pero no cerrar el trimestre.
+   */
+  return docentePuedeEditarCompartido(datos, "");
+}
+
 function cierreTrimestre1DocenteValido(nuevo, anterior) {
-  let reemplazoId =
-    nuevo.get(["ultimaOperacion", "reemplazoId"], "");
   let pendientes =
     nuevo.get(["ultimaOperacion", "pendientes"], -1);
   let entrada =
@@ -1687,7 +1748,7 @@ function cierreTrimestre1DocenteValido(nuevo, anterior) {
     ])
     && claves.hasAll(["cierresTrimestres"])
     && operacionCierreTrimestreValida(nuevo, 1)
-    && docentePuedeEditarCompartido(anterior, reemplazoId)
+    && docenteAsignadoPuedeCerrarTrimestre(anterior)
     && trimestre1CalificacionesAbierto(anterior)
     && !trimestre1Cerrado(anterior)
     && cambiaExactamenteCierreTrimestre(nuevo, anterior, "1")
@@ -1695,8 +1756,6 @@ function cierreTrimestre1DocenteValido(nuevo, anterior) {
 }
 
 function cierreTrimestre2DocenteValido(nuevo, anterior) {
-  let reemplazoId =
-    nuevo.get(["ultimaOperacion", "reemplazoId"], "");
   let pendientes =
     nuevo.get(["ultimaOperacion", "pendientes"], -1);
   let entrada =
@@ -1711,7 +1770,7 @@ function cierreTrimestre2DocenteValido(nuevo, anterior) {
     ])
     && claves.hasAll(["cierresTrimestres"])
     && operacionCierreTrimestreValida(nuevo, 2)
-    && docentePuedeEditarCompartido(anterior, reemplazoId)
+    && docenteAsignadoPuedeCerrarTrimestre(anterior)
     && trimestre2CalificacionesAbierto(anterior)
     && !trimestre2Cerrado(anterior)
     && cambiaExactamenteCierreTrimestre(nuevo, anterior, "2")
@@ -1719,8 +1778,6 @@ function cierreTrimestre2DocenteValido(nuevo, anterior) {
 }
 
 function cierreTrimestre3DocenteValido(nuevo, anterior) {
-  let reemplazoId =
-    nuevo.get(["ultimaOperacion", "reemplazoId"], "");
   let pendientes =
     nuevo.get(["ultimaOperacion", "pendientes"], -1);
   let entrada =
@@ -1735,7 +1792,7 @@ function cierreTrimestre3DocenteValido(nuevo, anterior) {
     ])
     && claves.hasAll(["cierresTrimestres"])
     && operacionCierreTrimestreValida(nuevo, 3)
-    && docentePuedeEditarCompartido(anterior, reemplazoId)
+    && docenteAsignadoPuedeCerrarTrimestre(anterior)
     && trimestre3CalificacionesAbierto(anterior)
     && !trimestre3Cerrado(anterior)
     && cambiaExactamenteCierreTrimestre(nuevo, anterior, "3")
@@ -1995,6 +2052,44 @@ function docentePuedeActualizarCalificaciones(nuevo, anterior) {
     );
 }
 
+function reemplazoCorrespondeAAsistencia(
+  datosAsistencia,
+  horario
+) {
+  let reemplazoId =
+    datosAsistencia.get("reemplazoId", "");
+
+  let rutaReemplazo =
+    /databases/$(database)/documents/reemplazos_docentes/$(reemplazoId);
+
+  return reemplazoId is string
+    && reemplazoId.size() > 0
+    && exists(rutaReemplazo)
+    && get(rutaReemplazo).data.estado == "ACTIVO"
+    && get(rutaReemplazo).data.titularCorreo
+      == horario.docenteCorreo
+    && get(rutaReemplazo).data.tipoHorario
+      == horario.tipoHorario
+    && datosAsistencia.fecha
+      >= get(rutaReemplazo).data.fechaDesde
+    && datosAsistencia.fecha
+      <= get(rutaReemplazo).data.fechaHasta
+    && (
+      (
+        horario.get("asignacionId", "") != ""
+        && get(rutaReemplazo).data.asignacionTitularId
+          == horario.get("asignacionId", "")
+      )
+      ||
+      (
+        horario.cursoId
+          == get(rutaReemplazo).data.cursoId
+        && horario.espacioId
+          == get(rutaReemplazo).data.espacioId
+      )
+    );
+}
+
 function reemplazoValidoParaAsistencia(
   datosAsistencia,
   horario
@@ -2002,57 +2097,65 @@ function reemplazoValidoParaAsistencia(
   let reemplazoId =
     datosAsistencia.get("reemplazoId", "");
 
-  let reemplazo = get(
-    /databases/$(database)/documents/reemplazos_docentes/$(reemplazoId)
-  ).data;
+  let rutaReemplazo =
+    /databases/$(database)/documents/reemplazos_docentes/$(reemplazoId);
 
-  return reemplazoId != ""
-
-    && exists(
-      /databases/$(database)/documents/reemplazos_docentes/$(reemplazoId)
+  return reemplazoCorrespondeAAsistencia(
+      datosAsistencia,
+      horario
     )
-
-    && reemplazo.estado == "ACTIVO"
-
-    && reemplazo.reemplazanteCorreo
+    && get(rutaReemplazo).data.reemplazanteCorreo
       == request.auth.token.email
-
-    && reemplazo.titularCorreo
-      == horario.docenteCorreo
-
-    && reemplazo.tipoHorario
-      == horario.tipoHorario
-
-    && datosAsistencia.fecha
-      >= reemplazo.fechaDesde
-
-    && datosAsistencia.fecha
-      <= reemplazo.fechaHasta
-
-    && (
-      (
-        horario.get("asignacionId", "") != ""
-
-        && reemplazo.asignacionTitularId
-          == horario.get("asignacionId", "")
-      )
-
-      ||
-
-      (
-        horario.cursoId
-          == reemplazo.cursoId
-
-        && horario.espacioId
-          == reemplazo.espacioId
-      )
-    )
-
     && datosAsistencia.docenteCorreo
       == request.auth.token.email
-
     && datosAsistencia.docenteTitularCorreo
       == horario.docenteCorreo;
+}
+
+function reemplazoPuedeLeerAsistenciaTaller(datosAsistencia) {
+  let horarioId = datosAsistencia.get("horarioId", "");
+  let rutaHorario =
+    /databases/$(database)/documents/horarios/$(horarioId);
+
+  let reemplazoId = datosAsistencia.get("reemplazoId", "");
+  let rutaReemplazo =
+    /databases/$(database)/documents/reemplazos_docentes/$(reemplazoId);
+
+  return esDocentePorPerfil()
+    && datosAsistencia.get("tipoHorario", "") == "TALLER"
+    && horarioId is string
+    && horarioId.size() > 0
+    && exists(rutaHorario)
+    && get(rutaHorario).data.estado == "ACTIVO"
+    && reemplazoCorrespondeAAsistencia(
+      datosAsistencia,
+      get(rutaHorario).data
+    )
+    && get(rutaReemplazo).data.reemplazanteCorreo
+      == request.auth.token.email;
+}
+
+function gestionPuedeVincularReemplazoAsistenciaTaller(
+  datosNuevos,
+  datosAnteriores
+) {
+  let horarioId = datosAnteriores.get("horarioId", "");
+  let rutaHorario =
+    /databases/$(database)/documents/horarios/$(horarioId);
+
+  return puedeAdministrarReemplazos()
+    && datosAnteriores.get("tipoHorario", "") == "TALLER"
+    && datosNuevos.get("tipoHorario", "") == "TALLER"
+    && datosNuevos.diff(datosAnteriores).affectedKeys().hasOnly([
+      "reemplazoId"
+    ])
+    && horarioId is string
+    && horarioId.size() > 0
+    && exists(rutaHorario)
+    && reemplazoCorrespondeAAsistencia(
+      datosNuevos,
+      get(rutaHorario).data
+    );
 }
 
 function horarioValidoParaAsistencia(datosAsistencia) {
@@ -2512,59 +2615,55 @@ match /horarios/{horarioId} {
 
     match /asistencias_clases/{asistenciaId} {
       allow get, list: if esSoporte()
-  || esGestionInstitucional()
-  || (
-    esDocentePorPerfil()
-    && (
-      resource.data.docenteCorreo
-        == request.auth.token.email
+        || esGestionInstitucional()
+        || (
+          esDocentePorPerfil()
+          && (
+            resource.data.docenteCorreo
+              == request.auth.token.email
 
-      || resource.data.get("docenteTitularCorreo", "")
-        == request.auth.token.email
-    )
-  );
+            || resource.data.get("docenteTitularCorreo", "")
+              == request.auth.token.email
 
-     allow create: if esSoporte()
-  || (
-    esDocentePorPerfil()
+            || reemplazoPuedeLeerAsistenciaTaller(resource.data)
+          )
+        );
 
-    && request.resource.data.estado == "ACTIVA"
+      allow create: if esSoporte()
+        || (
+          esDocentePorPerfil()
+          && request.resource.data.estado == "ACTIVA"
+          && (
+            request.resource.data.tipoHorario == "TALLER"
+            || request.resource.data.tipoHorario == "EDUCACION_FISICA"
+          )
+          && horarioValidoParaAsistencia(
+            request.resource.data
+          )
+        );
 
-    && (
-      request.resource.data.tipoHorario == "TALLER"
-      || request.resource.data.tipoHorario == "EDUCACION_FISICA"
-    )
-
-    && horarioValidoParaAsistencia(
-      request.resource.data
-    )
-  );
-
-     allow update: if esSoporte()
-  || (
-    esDocentePorPerfil()
-
-    && resource.data.docenteCorreo
-      == request.auth.token.email
-
-    && request.resource.data.docenteCorreo
-      == request.auth.token.email
-
-    && request.resource.data.estado == "ACTIVA"
-
-    && resource.data.horarioId
-      == request.resource.data.horarioId
-
-    && (
-      request.resource.data.tipoHorario == "TALLER"
-      || request.resource.data.tipoHorario
-        == "EDUCACION_FISICA"
-    )
-
-    && horarioValidoParaAsistencia(
-      request.resource.data
-    )
-  );
+      allow update: if esSoporte()
+        || gestionPuedeVincularReemplazoAsistenciaTaller(
+          request.resource.data,
+          resource.data
+        )
+        || (
+          esDocentePorPerfil()
+          && request.resource.data.docenteCorreo
+            == request.auth.token.email
+          && request.resource.data.estado == "ACTIVA"
+          && resource.data.horarioId
+            == request.resource.data.horarioId
+          && resource.data.fecha
+            == request.resource.data.fecha
+          && (
+            request.resource.data.tipoHorario == "TALLER"
+            || request.resource.data.tipoHorario == "EDUCACION_FISICA"
+          )
+          && horarioValidoParaAsistencia(
+            request.resource.data
+          )
+        );
 
       allow delete: if esSoporte();
     }
@@ -2802,6 +2901,8 @@ match /horarios/{horarioId} {
          mientras el reemplazo se encuentre vigente.
        - Titular y reemplazante pueden trabajar durante la misma
          vigencia sin bloquearse mutuamente.
+       - Sólo un docente con asignación directa y activa en el curso
+         puede cerrar el trimestre; un reemplazo temporal no puede.
        - TRIM / Final / Diciembre / Febrero son campos compartidos
          entre los docentes de Taller autorizados del curso.
        - Las ventanas temporales se validan con request.time.

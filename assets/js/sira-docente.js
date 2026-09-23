@@ -393,23 +393,60 @@ async function cargarClasesSiraPorFecha() {
       if (diaHorario !== diaSeleccionado) return;
       if (cicloHorario !== cicloLectivo) return;
 
-      clasesPropias.push({
+      const bloquePropio = {
         id: documento.id,
         ...datos,
+      };
+
+      /*
+       * En Taller conservamos, además, el ID del reemplazo vigente de la
+       * asignación. De esta manera, si el titular registra o edita una
+       * asistencia durante el reemplazo, el documento queda vinculado al
+       * mismo reemplazo y ambos docentes pueden trabajar sobre el mismo
+       * registro.
+       */
+      const reemplazoTallerVigente =
+        tipoHorario === "TALLER"
+          ? reemplazos.comoTitular.find((reemplazo) =>
+              bloqueSiraPerteneceAReemplazo(bloquePropio, reemplazo),
+            )
+          : null;
+
+      clasesPropias.push({
+        ...bloquePropio,
+        ...(reemplazoTallerVigente
+          ? {
+              reemplazoId: reemplazoTallerVigente.id,
+              reemplazanteCorreo:
+                reemplazoTallerVigente.reemplazanteCorreo || "",
+              reemplazanteNombre:
+                reemplazoTallerVigente.reemplazanteNombre || "",
+            }
+          : {}),
       });
     });
 
     /*
-     * Si el docente es titular de una asignación
-     * reemplazada en esa fecha, esa clase deja
-     * de estar disponible para él.
+     * En TALLER el titular conserva siempre su clase aunque exista
+     * un reemplazo vigente. Así titular y reemplazante pueden trabajar
+     * sobre el mismo curso durante el período del reemplazo.
+     *
+     * Educación Física mantiene el comportamiento existente: cuando
+     * hay un reemplazo vigente, la clase deja de mostrarse al titular.
      */
-    const clases = clasesPropias.filter(
-      (clase) =>
-        !reemplazos.comoTitular.some((reemplazo) =>
-          bloqueSiraPerteneceAReemplazo(clase, reemplazo),
-        ),
-    );
+    const clases = clasesPropias.filter((clase) => {
+      const tipoClase = String(clase.tipoHorario || "")
+        .trim()
+        .toUpperCase();
+
+      if (tipoClase === "TALLER") {
+        return true;
+      }
+
+      return !reemplazos.comoTitular.some((reemplazo) =>
+        bloqueSiraPerteneceAReemplazo(clase, reemplazo),
+      );
+    });
 
     /*
      * Agregamos las clases que el docente está
@@ -833,12 +870,51 @@ async function obtenerAsistenciaExistenteSira(clase) {
     return null;
   }
 
-  const consulta = query(
-    collection(db, "asistencias_clases"),
-    where("docenteCorreo", "==", normalizarCorreoSira(usuario.email)),
-    where("fecha", "==", fecha),
-    where("horarioId", "==", clase.id),
-  );
+  const correoDocente = normalizarCorreoSira(usuario.email);
+  const tipo = String(clase.tipoHorario || "")
+    .trim()
+    .toUpperCase();
+
+  /*
+   * Taller tiene un único registro de asistencia por clase + fecha.
+   * El titular lo busca por docenteTitularCorreo y el reemplazante por el
+   * reemplazoId vigente. Así ambos abren exactamente el mismo documento,
+   * sin depender de quién lo creó o lo editó por última vez.
+   *
+   * Educación Física conserva la búsqueda anterior para no modificar el
+   * comportamiento que ya está funcionando.
+   */
+  let consulta = null;
+
+  if (tipo === "TALLER" && clase.esReemplazoTemporal) {
+    const reemplazoId = String(clase.reemplazoId || "").trim();
+
+    if (!reemplazoId) {
+      return null;
+    }
+
+    consulta = query(
+      collection(db, "asistencias_clases"),
+      where("reemplazoId", "==", reemplazoId),
+      where("tipoHorario", "==", "TALLER"),
+      where("fecha", "==", fecha),
+      where("horarioId", "==", clase.id),
+    );
+  } else if (tipo === "TALLER") {
+    consulta = query(
+      collection(db, "asistencias_clases"),
+      where("docenteTitularCorreo", "==", correoDocente),
+      where("fecha", "==", fecha),
+      where("horarioId", "==", clase.id),
+    );
+  } else {
+    consulta = query(
+      collection(db, "asistencias_clases"),
+      where("docenteCorreo", "==", correoDocente),
+      where("fecha", "==", fecha),
+      where("horarioId", "==", clase.id),
+    );
+  }
 
   const resultado = await getDocs(consulta);
 
@@ -968,9 +1044,7 @@ async function guardarAsistenciaSira() {
         usuarioSiraActual.displayName ||
         "",
 
-    reemplazoId: claseSiraSeleccionada.esReemplazoTemporal
-      ? claseSiraSeleccionada.reemplazoId || ""
-      : "",
+    reemplazoId: claseSiraSeleccionada.reemplazoId || "",
 
     asignacionId: claseSiraSeleccionada.asignacionId || "",
 
