@@ -4288,6 +4288,86 @@ const DIAS_HORARIO_GESTION = [
   { valor: "VIERNES", etiqueta: "Viernes" },
 ];
 
+function obtenerFechaActualHorariosGestion() {
+  const hoy = new Date();
+  const anio = hoy.getFullYear();
+  const mes = String(hoy.getMonth() + 1).padStart(2, "0");
+  const dia = String(hoy.getDate()).padStart(2, "0");
+
+  return `${anio}-${mes}-${dia}`;
+}
+
+function reemplazoTallerGestionEstaVigente(reemplazo, fechaActual) {
+  const tipoHorario = String(reemplazo.tipoHorario || "")
+    .trim()
+    .toUpperCase();
+
+  const fechaDesde = String(reemplazo.fechaDesde || "").trim();
+  const fechaHasta = String(reemplazo.fechaHasta || "").trim();
+
+  return (
+    tipoHorario === "TALLER" &&
+    fechaDesde &&
+    fechaHasta &&
+    fechaActual >= fechaDesde &&
+    fechaActual <= fechaHasta
+  );
+}
+
+function bloqueTallerGestionPerteneceAReemplazo(horario, reemplazo) {
+  const asignacionHorario = String(horario.asignacionId || "").trim();
+  const asignacionReemplazo = String(
+    reemplazo.asignacionTitularId || "",
+  ).trim();
+
+  if (asignacionHorario && asignacionReemplazo) {
+    return asignacionHorario === asignacionReemplazo;
+  }
+
+  return (
+    normalizarTextoGestion(horario.docenteCorreo) ===
+      normalizarTextoGestion(reemplazo.titularCorreo) &&
+    String(horario.cursoId || "").trim() ===
+      String(reemplazo.cursoId || "").trim() &&
+    String(horario.espacioId || "").trim() ===
+      String(reemplazo.espacioId || "").trim()
+  );
+}
+
+function asociarReemplazosVigentesHorariosGestion(horarios, reemplazos) {
+  const fechaActual = obtenerFechaActualHorariosGestion();
+
+  const reemplazosVigentes = reemplazos.filter((reemplazo) =>
+    reemplazoTallerGestionEstaVigente(reemplazo, fechaActual),
+  );
+
+  return horarios.map((horario) => {
+    const tipoHorario = String(horario.tipoHorario || "")
+      .trim()
+      .toUpperCase();
+
+    if (tipoHorario !== "TALLER") {
+      return horario;
+    }
+
+    const reemplazo = reemplazosVigentes.find((item) =>
+      bloqueTallerGestionPerteneceAReemplazo(horario, item),
+    );
+
+    if (!reemplazo) {
+      return horario;
+    }
+
+    return {
+      ...horario,
+      reemplazoVigenteId: reemplazo.id,
+      reemplazanteNombreVigente:
+        reemplazo.reemplazanteNombre || reemplazo.reemplazanteCorreo || "",
+      reemplazanteCorreoVigente: reemplazo.reemplazanteCorreo || "",
+    };
+  });
+}
+
 function renderizarTarjetaHorarioGestion(horario) {
   const extra = obtenerExtraHorarioGestion(horario);
 
@@ -4299,9 +4379,17 @@ function renderizarTarjetaHorarioGestion(horario) {
     obtenerEspacioHorarioGestion(horario),
   );
 
-  const docenteVisible = escaparHtmlGestion(
+  const docenteNombre = escaparHtmlGestion(
     horario.docenteNombre || "Docente sin cargar",
   );
+
+  const reemplazanteNombre = escaparHtmlGestion(
+    horario.reemplazanteNombreVigente || "",
+  );
+
+  const docenteVisible = reemplazanteNombre
+    ? `Titular: ${docenteNombre}<br>Reemplazo: ${reemplazanteNombre}`
+    : docenteNombre;
 
   const cursoVisible = escaparHtmlGestion(obtenerCursoHorarioGestion(horario));
 
@@ -4581,13 +4669,32 @@ async function cargarHorariosGestion() {
       where("estado", "==", "ACTIVO"),
     );
 
-    const consulta = await getDocs(consultaHorariosActivos);
+    const consultaReemplazosActivos = query(
+      collection(db, "reemplazos_docentes"),
+      where("estado", "==", "ACTIVO"),
+    );
+
+    const [consulta, consultaReemplazos] = await Promise.all([
+      getDocs(consultaHorariosActivos),
+      getDocs(consultaReemplazosActivos),
+    ]);
+
     horariosGestionConsultados = true;
 
-    horariosGestionCargados = consulta.docs.map((documento) => ({
+    const horarios = consulta.docs.map((documento) => ({
       id: documento.id,
       ...documento.data(),
     }));
+
+    const reemplazos = consultaReemplazos.docs.map((documento) => ({
+      id: documento.id,
+      ...documento.data(),
+    }));
+
+    horariosGestionCargados = asociarReemplazosVigentesHorariosGestion(
+      horarios,
+      reemplazos,
+    );
 
     if (!horariosGestionCargados.length) {
       vistaHorariosGestion.innerHTML = `

@@ -626,12 +626,13 @@ async function cargarHorarioTallerDocente(usuario) {
       });
     });
 
-    const bloques = bloquesPropios.filter(
-      (bloque) =>
-        !reemplazos.comoTitular.some((reemplazo) =>
-          bloquePerteneceAReemplazo(bloque, reemplazo),
-        ),
-    );
+    /*
+     * En Taller el docente de la asignación directa conserva siempre
+     * su horario aunque exista un reemplazo temporal vigente.
+     * El reemplazante verá ese mismo bloque únicamente mientras
+     * su reemplazo esté vigente.
+     */
+    const bloques = [...bloquesPropios];
 
     for (const reemplazo of reemplazos.comoReemplazante) {
       const titularCorreo = normalizarCorreoDocente(reemplazo.titularCorreo);

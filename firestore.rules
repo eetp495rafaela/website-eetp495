@@ -313,9 +313,17 @@ function reemplazoCalificacionesVigente(
 }
 
 /*
- * Variante optimizada para ESCRITURA. Mantiene las mismas comprobaciones
- * de reemplazo y de asignación titular, pero evita reevaluar get() y la
- * rama de titular que necesariamente falla para un reemplazante.
+ * Variante liviana para ESCRITURA de un reemplazante de Taller.
+ *
+ * El reemplazo ya debe estar vinculado al espacio del registro mediante
+ * reemplazosEspacioN[correo] == reemplazoId (lo valida docentePuedeEditarEspacioN).
+ * Ese vínculo sólo puede ser sincronizado por los flujos administrativos.
+ *
+ * Para no volver a superar el límite de 1000 expresiones cuando una tercera
+ * nota genera TRIM AUTO en la misma escritura, aquí se valida únicamente el
+ * documento de reemplazo vigente. No se vuelve a leer la asignación titular:
+ * asignacionId, curso, espacio y ciclo ya deben coincidir entre el reemplazo
+ * vinculado y el Registro de Calificaciones.
  */
 function reemplazoCalificacionesVigenteEscritura(
   reemplazoId,
@@ -327,9 +335,8 @@ function reemplazoCalificacionesVigenteEscritura(
   let rutaReemplazo =
     /databases/$(database)/documents/reemplazos_docentes/$(reemplazoId);
   let reemplazo = get(rutaReemplazo).data;
-  let rutaAsignacion =
-    /databases/$(database)/documents/asignaciones_docentes/$(asignacionId);
-  let asignacion = get(rutaAsignacion).data;
+  let fechaDesde = reemplazo.get("fechaDesde", "");
+  let fechaHasta = reemplazo.get("fechaHasta", "");
 
   return reemplazoId is string
     && reemplazoId.size() > 0
@@ -342,20 +349,12 @@ function reemplazoCalificacionesVigenteEscritura(
     && reemplazo.get("cursoId", "") == cursoId
     && reemplazo.get("espacioId", "") == espacioId
     && reemplazo.get("cicloLectivo", 0) == cicloLectivo
-    && fechaISOCalificacionesValida(reemplazo.get("fechaDesde", ""))
-    && fechaISOCalificacionesValida(reemplazo.get("fechaHasta", ""))
-    && request.time >= inicioDiaArgentina(reemplazo.get("fechaDesde", ""))
-    && request.time < finDiaArgentinaExclusivo(
-      reemplazo.get("fechaHasta", "")
-    )
-    && exists(rutaAsignacion)
-    && asignacion.get("estado", "") in ["ACTIVA", "ACTIVO"]
-    && asignacion.get("docenteCorreo", "")
-      == reemplazo.get("titularCorreo", "")
-    && asignacion.get("cursoId", "") == cursoId
-    && asignacion.get("espacioId", "") == espacioId
-    && asignacion.get("espacioTipo", "") == "TALLER"
-    && asignacion.get("cicloLectivo", 0) == cicloLectivo;
+    && fechaDesde is string
+    && fechaDesde.size() == 10
+    && fechaHasta is string
+    && fechaHasta.size() == 10
+    && request.time >= inicioDiaArgentina(fechaDesde)
+    && request.time < finDiaArgentinaExclusivo(fechaHasta);
 }
 
 function docentePuedeEditarEspacio1(datos, reemplazoId) {
@@ -448,10 +447,85 @@ function docentePuedeEditarEspacio3(datos, reemplazoId) {
     );
 }
 
+/*
+ * Permiso para campos compartidos de Taller (TRIM, Final, Diciembre y Febrero).
+ *
+ * Para una asignación directa conserva la lógica histórica: alcanza con que el
+ * docente tenga activa cualquiera de las tres asignaciones del curso.
+ *
+ * Para un reemplazo temporal se evita encadenar las tres funciones
+ * docentePuedeEditarEspacioN(), porque cada una vuelve a evaluar el perfil y
+ * puede hacer crecer innecesariamente el costo de la regla. Primero se ubica
+ * en cuál de los tres espacios está vinculado el reemplazo y luego se valida
+ * exactamente ese único reemplazo.
+ */
 function docentePuedeEditarCompartido(datos, reemplazoId) {
-  return docentePuedeEditarEspacio1(datos, reemplazoId)
-    || docentePuedeEditarEspacio2(datos, reemplazoId)
-    || docentePuedeEditarEspacio3(datos, reemplazoId);
+  let correo = request.auth.token.email;
+  let reemplazoEspacio1 = datos
+    .get("reemplazosEspacio1", {})
+    .get(correo, "");
+  let reemplazoEspacio2 = datos
+    .get("reemplazosEspacio2", {})
+    .get(correo, "");
+  let reemplazoEspacio3 = datos
+    .get("reemplazosEspacio3", {})
+    .get(correo, "");
+
+  return esDocentePorPerfil()
+    && (
+      reemplazoId is string
+      && reemplazoId.size() > 0
+        ? (
+            reemplazoId == reemplazoEspacio1
+              ? reemplazoCalificacionesVigenteEscritura(
+                  reemplazoId,
+                  datos.get("espacio1AsignacionId", ""),
+                  datos.get("cursoId", ""),
+                  datos.get("espacio1Id", ""),
+                  datos.get("cicloLectivo", 0)
+                )
+              : reemplazoId == reemplazoEspacio2
+                ? reemplazoCalificacionesVigenteEscritura(
+                    reemplazoId,
+                    datos.get("espacio2AsignacionId", ""),
+                    datos.get("cursoId", ""),
+                    datos.get("espacio2Id", ""),
+                    datos.get("cicloLectivo", 0)
+                  )
+                : reemplazoId == reemplazoEspacio3
+                  ? reemplazoCalificacionesVigenteEscritura(
+                      reemplazoId,
+                      datos.get("espacio3AsignacionId", ""),
+                      datos.get("cursoId", ""),
+                      datos.get("espacio3Id", ""),
+                      datos.get("cicloLectivo", 0)
+                    )
+                  : false
+          )
+        : (
+            asignacionTallerActiva(
+              datos.get("espacio1AsignacionId", ""),
+              datos.get("cursoId", ""),
+              datos.get("espacio1Id", ""),
+              datos.get("cicloLectivo", 0),
+              correo
+            )
+            || asignacionTallerActiva(
+              datos.get("espacio2AsignacionId", ""),
+              datos.get("cursoId", ""),
+              datos.get("espacio2Id", ""),
+              datos.get("cicloLectivo", 0),
+              correo
+            )
+            || asignacionTallerActiva(
+              datos.get("espacio3AsignacionId", ""),
+              datos.get("cursoId", ""),
+              datos.get("espacio3Id", ""),
+              datos.get("cicloLectivo", 0),
+              correo
+            )
+          )
+    );
 }
 
 function docentePuedeLeerCalificacionesTaller(datos) {
@@ -539,78 +613,48 @@ function trimestre1CalificacionesAbierto(datos) {
   let cicloId = datos.get("cicloLectivoDocId", "");
   let rutaPeriodos =
     /databases/$(database)/documents/configuracion_periodos/$(cicloId);
+  let periodos = get(rutaPeriodos).data;
+  let inicio = periodos.get("trimestre1Inicio", "");
+  let fin = periodos.get("trimestre1Fin", "");
 
   return exists(rutaPeriodos)
-    && get(rutaPeriodos).data.get("cicloLectivo", 0)
-      == datos.get("cicloLectivo", 0)
-
-    && fechaISOCalificacionesValida(
-      get(rutaPeriodos).data.get("trimestre1Inicio", "")
-    )
-
-    && fechaISOCalificacionesValida(
-      get(rutaPeriodos).data.get("trimestre1Fin", "")
-    )
-
-    && request.time >= inicioDiaArgentina(
-      get(rutaPeriodos).data.get("trimestre1Inicio", "")
-    )
-
-    && request.time < finDiaArgentinaExclusivo(
-      get(rutaPeriodos).data.get("trimestre1Fin", "")
-    );
+    && periodos.get("cicloLectivo", 0) == datos.get("cicloLectivo", 0)
+    && fechaISOCalificacionesValida(inicio)
+    && fechaISOCalificacionesValida(fin)
+    && request.time >= inicioDiaArgentina(inicio)
+    && request.time < finDiaArgentinaExclusivo(fin);
 }
 
 function trimestre2CalificacionesAbierto(datos) {
   let cicloId = datos.get("cicloLectivoDocId", "");
   let rutaPeriodos =
     /databases/$(database)/documents/configuracion_periodos/$(cicloId);
+  let periodos = get(rutaPeriodos).data;
+  let inicio = periodos.get("trimestre2Inicio", "");
+  let fin = periodos.get("trimestre2Fin", "");
 
   return exists(rutaPeriodos)
-    && get(rutaPeriodos).data.get("cicloLectivo", 0)
-      == datos.get("cicloLectivo", 0)
-
-    && fechaISOCalificacionesValida(
-      get(rutaPeriodos).data.get("trimestre2Inicio", "")
-    )
-
-    && fechaISOCalificacionesValida(
-      get(rutaPeriodos).data.get("trimestre2Fin", "")
-    )
-
-    && request.time >= inicioDiaArgentina(
-      get(rutaPeriodos).data.get("trimestre2Inicio", "")
-    )
-
-    && request.time < finDiaArgentinaExclusivo(
-      get(rutaPeriodos).data.get("trimestre2Fin", "")
-    );
+    && periodos.get("cicloLectivo", 0) == datos.get("cicloLectivo", 0)
+    && fechaISOCalificacionesValida(inicio)
+    && fechaISOCalificacionesValida(fin)
+    && request.time >= inicioDiaArgentina(inicio)
+    && request.time < finDiaArgentinaExclusivo(fin);
 }
 
 function trimestre3CalificacionesAbierto(datos) {
   let cicloId = datos.get("cicloLectivoDocId", "");
   let rutaPeriodos =
     /databases/$(database)/documents/configuracion_periodos/$(cicloId);
+  let periodos = get(rutaPeriodos).data;
+  let inicio = periodos.get("trimestre3Inicio", "");
+  let fin = periodos.get("trimestre3Fin", "");
 
   return exists(rutaPeriodos)
-    && get(rutaPeriodos).data.get("cicloLectivo", 0)
-      == datos.get("cicloLectivo", 0)
-
-    && fechaISOCalificacionesValida(
-      get(rutaPeriodos).data.get("trimestre3Inicio", "")
-    )
-
-    && fechaISOCalificacionesValida(
-      get(rutaPeriodos).data.get("trimestre3Fin", "")
-    )
-
-    && request.time >= inicioDiaArgentina(
-      get(rutaPeriodos).data.get("trimestre3Inicio", "")
-    )
-
-    && request.time < finDiaArgentinaExclusivo(
-      get(rutaPeriodos).data.get("trimestre3Fin", "")
-    );
+    && periodos.get("cicloLectivo", 0) == datos.get("cicloLectivo", 0)
+    && fechaISOCalificacionesValida(inicio)
+    && fechaISOCalificacionesValida(fin)
+    && request.time >= inicioDiaArgentina(inicio)
+    && request.time < finDiaArgentinaExclusivo(fin);
 }
 
 
@@ -1122,7 +1166,6 @@ function cambioNotaTrim1Espacio1Valido(nuevo, anterior) {
 
   return claves.hasOnly([
       "trim1Espacio1",
-      "trim1Resultado",
       "ultimaOperacion",
       "actualizadoEn",
       "actualizadoPor"
@@ -1145,8 +1188,7 @@ function cambioNotaTrim1Espacio1Valido(nuevo, anterior) {
     && (
       entrada == null
       || entradaNotaNumericaValida(entrada)
-    )
-    && resultadoTrim1Consistente(nuevo, anterior, alumnoId);
+    );
 }
 
 function cambioNotaTrim1Espacio2Valido(nuevo, anterior) {
@@ -1157,7 +1199,6 @@ function cambioNotaTrim1Espacio2Valido(nuevo, anterior) {
 
   return claves.hasOnly([
       "trim1Espacio2",
-      "trim1Resultado",
       "ultimaOperacion",
       "actualizadoEn",
       "actualizadoPor"
@@ -1180,8 +1221,7 @@ function cambioNotaTrim1Espacio2Valido(nuevo, anterior) {
     && (
       entrada == null
       || entradaNotaNumericaValida(entrada)
-    )
-    && resultadoTrim1Consistente(nuevo, anterior, alumnoId);
+    );
 }
 
 function cambioNotaTrim1Espacio3Valido(nuevo, anterior) {
@@ -1192,7 +1232,6 @@ function cambioNotaTrim1Espacio3Valido(nuevo, anterior) {
 
   return claves.hasOnly([
       "trim1Espacio3",
-      "trim1Resultado",
       "ultimaOperacion",
       "actualizadoEn",
       "actualizadoPor"
@@ -1215,8 +1254,7 @@ function cambioNotaTrim1Espacio3Valido(nuevo, anterior) {
     && (
       entrada == null
       || entradaNotaNumericaValida(entrada)
-    )
-    && resultadoTrim1Consistente(nuevo, anterior, alumnoId);
+    );
 }
 
 function cambioNotaTrim2Espacio1Valido(nuevo, anterior) {
@@ -1227,7 +1265,6 @@ function cambioNotaTrim2Espacio1Valido(nuevo, anterior) {
 
   return claves.hasOnly([
       "trim2Espacio1",
-      "trim2Resultado",
       "ultimaOperacion",
       "actualizadoEn",
       "actualizadoPor"
@@ -1250,8 +1287,7 @@ function cambioNotaTrim2Espacio1Valido(nuevo, anterior) {
     && (
       entrada == null
       || entradaNotaNumericaValida(entrada)
-    )
-    && resultadoTrim2Consistente(nuevo, anterior, alumnoId);
+    );
 }
 
 function cambioNotaTrim2Espacio2Valido(nuevo, anterior) {
@@ -1262,7 +1298,6 @@ function cambioNotaTrim2Espacio2Valido(nuevo, anterior) {
 
   return claves.hasOnly([
       "trim2Espacio2",
-      "trim2Resultado",
       "ultimaOperacion",
       "actualizadoEn",
       "actualizadoPor"
@@ -1285,8 +1320,7 @@ function cambioNotaTrim2Espacio2Valido(nuevo, anterior) {
     && (
       entrada == null
       || entradaNotaNumericaValida(entrada)
-    )
-    && resultadoTrim2Consistente(nuevo, anterior, alumnoId);
+    );
 }
 
 function cambioNotaTrim2Espacio3Valido(nuevo, anterior) {
@@ -1297,7 +1331,6 @@ function cambioNotaTrim2Espacio3Valido(nuevo, anterior) {
 
   return claves.hasOnly([
       "trim2Espacio3",
-      "trim2Resultado",
       "ultimaOperacion",
       "actualizadoEn",
       "actualizadoPor"
@@ -1320,8 +1353,7 @@ function cambioNotaTrim2Espacio3Valido(nuevo, anterior) {
     && (
       entrada == null
       || entradaNotaNumericaValida(entrada)
-    )
-    && resultadoTrim2Consistente(nuevo, anterior, alumnoId);
+    );
 }
 
 function cambioNotaTrim3Espacio1Valido(nuevo, anterior) {
@@ -1332,7 +1364,6 @@ function cambioNotaTrim3Espacio1Valido(nuevo, anterior) {
 
   return claves.hasOnly([
       "trim3Espacio1",
-      "trim3Resultado",
       "ultimaOperacion",
       "actualizadoEn",
       "actualizadoPor"
@@ -1355,8 +1386,7 @@ function cambioNotaTrim3Espacio1Valido(nuevo, anterior) {
     && (
       entrada == null
       || entradaNotaNumericaValida(entrada)
-    )
-    && resultadoTrim3Consistente(nuevo, anterior, alumnoId);
+    );
 }
 
 function cambioNotaTrim3Espacio2Valido(nuevo, anterior) {
@@ -1367,7 +1397,6 @@ function cambioNotaTrim3Espacio2Valido(nuevo, anterior) {
 
   return claves.hasOnly([
       "trim3Espacio2",
-      "trim3Resultado",
       "ultimaOperacion",
       "actualizadoEn",
       "actualizadoPor"
@@ -1390,8 +1419,7 @@ function cambioNotaTrim3Espacio2Valido(nuevo, anterior) {
     && (
       entrada == null
       || entradaNotaNumericaValida(entrada)
-    )
-    && resultadoTrim3Consistente(nuevo, anterior, alumnoId);
+    );
 }
 
 function cambioNotaTrim3Espacio3Valido(nuevo, anterior) {
@@ -1402,7 +1430,6 @@ function cambioNotaTrim3Espacio3Valido(nuevo, anterior) {
 
   return claves.hasOnly([
       "trim3Espacio3",
-      "trim3Resultado",
       "ultimaOperacion",
       "actualizadoEn",
       "actualizadoPor"
@@ -1425,8 +1452,7 @@ function cambioNotaTrim3Espacio3Valido(nuevo, anterior) {
     && (
       entrada == null
       || entradaNotaNumericaValida(entrada)
-    )
-    && resultadoTrim3Consistente(nuevo, anterior, alumnoId);
+    );
 }
 
 function cambioTrim1Valido(nuevo, anterior) {
@@ -1434,6 +1460,12 @@ function cambioTrim1Valido(nuevo, anterior) {
   let reemplazoId = nuevo.get(["ultimaOperacion", "reemplazoId"], "");
   let entrada = nuevo.trim1Resultado.get(alumnoId, null);
   let claves = nuevo.diff(anterior).affectedKeys();
+  let notasCompletas = tresNotasCargadas(
+    nuevo.trim1Espacio1,
+    nuevo.trim1Espacio2,
+    nuevo.trim1Espacio3,
+    alumnoId
+  );
 
   return claves.hasOnly([
       "trim1Resultado",
@@ -1451,23 +1483,21 @@ function cambioTrim1Valido(nuevo, anterior) {
       anterior.trim1Resultado,
       alumnoId
     )
-    && tresNotasCargadas(
-      nuevo.trim1Espacio1,
-      nuevo.trim1Espacio2,
-      nuevo.trim1Espacio3,
-      alumnoId
-    )
     && (
-      entradaTrimManualValida(entrada)
-      || entradaTrimAutoValida(
-        entrada,
-        resultadoAutomatico(
-          nuevo.trim1Espacio1,
-          nuevo.trim1Espacio2,
-          nuevo.trim1Espacio3,
-          alumnoId
-        )
-      )
+      notasCompletas
+        ? (
+            entradaTrimManualValida(entrada)
+            || entradaTrimAutoValida(
+              entrada,
+              resultadoAutomatico(
+                nuevo.trim1Espacio1,
+                nuevo.trim1Espacio2,
+                nuevo.trim1Espacio3,
+                alumnoId
+              )
+            )
+          )
+        : entrada == null
     );
 }
 
@@ -1476,6 +1506,12 @@ function cambioTrim2Valido(nuevo, anterior) {
   let reemplazoId = nuevo.get(["ultimaOperacion", "reemplazoId"], "");
   let entrada = nuevo.trim2Resultado.get(alumnoId, null);
   let claves = nuevo.diff(anterior).affectedKeys();
+  let notasCompletas = tresNotasCargadas(
+    nuevo.trim2Espacio1,
+    nuevo.trim2Espacio2,
+    nuevo.trim2Espacio3,
+    alumnoId
+  );
 
   return claves.hasOnly([
       "trim2Resultado",
@@ -1493,23 +1529,21 @@ function cambioTrim2Valido(nuevo, anterior) {
       anterior.trim2Resultado,
       alumnoId
     )
-    && tresNotasCargadas(
-      nuevo.trim2Espacio1,
-      nuevo.trim2Espacio2,
-      nuevo.trim2Espacio3,
-      alumnoId
-    )
     && (
-      entradaTrimManualValida(entrada)
-      || entradaTrimAutoValida(
-        entrada,
-        resultadoAutomatico(
-          nuevo.trim2Espacio1,
-          nuevo.trim2Espacio2,
-          nuevo.trim2Espacio3,
-          alumnoId
-        )
-      )
+      notasCompletas
+        ? (
+            entradaTrimManualValida(entrada)
+            || entradaTrimAutoValida(
+              entrada,
+              resultadoAutomatico(
+                nuevo.trim2Espacio1,
+                nuevo.trim2Espacio2,
+                nuevo.trim2Espacio3,
+                alumnoId
+              )
+            )
+          )
+        : entrada == null
     );
 }
 
@@ -1518,6 +1552,12 @@ function cambioTrim3Valido(nuevo, anterior) {
   let reemplazoId = nuevo.get(["ultimaOperacion", "reemplazoId"], "");
   let entrada = nuevo.trim3Resultado.get(alumnoId, null);
   let claves = nuevo.diff(anterior).affectedKeys();
+  let notasCompletas = tresNotasCargadas(
+    nuevo.trim3Espacio1,
+    nuevo.trim3Espacio2,
+    nuevo.trim3Espacio3,
+    alumnoId
+  );
 
   return claves.hasOnly([
       "trim3Resultado",
@@ -1535,23 +1575,21 @@ function cambioTrim3Valido(nuevo, anterior) {
       anterior.trim3Resultado,
       alumnoId
     )
-    && tresNotasCargadas(
-      nuevo.trim3Espacio1,
-      nuevo.trim3Espacio2,
-      nuevo.trim3Espacio3,
-      alumnoId
-    )
     && (
-      entradaTrimManualValida(entrada)
-      || entradaTrimAutoValida(
-        entrada,
-        resultadoAutomatico(
-          nuevo.trim3Espacio1,
-          nuevo.trim3Espacio2,
-          nuevo.trim3Espacio3,
-          alumnoId
-        )
-      )
+      notasCompletas
+        ? (
+            entradaTrimManualValida(entrada)
+            || entradaTrimAutoValida(
+              entrada,
+              resultadoAutomatico(
+                nuevo.trim3Espacio1,
+                nuevo.trim3Espacio2,
+                nuevo.trim3Espacio3,
+                alumnoId
+              )
+            )
+          )
+        : entrada == null
     );
 }
 
@@ -2112,6 +2150,26 @@ function reemplazoValidoParaAsistencia(
       == horario.docenteCorreo;
 }
 
+function docenteAsignadoActualPuedeLeerAsistenciaTaller(datosAsistencia) {
+  let horarioId = datosAsistencia.get("horarioId", "");
+  let rutaHorario =
+    /databases/$(database)/documents/horarios/$(horarioId);
+
+  return esDocentePorPerfil()
+    && datosAsistencia.get("tipoHorario", "") == "TALLER"
+    && horarioId is string
+    && horarioId.size() > 0
+    && exists(rutaHorario)
+    && get(rutaHorario).data.estado == "ACTIVO"
+    && get(rutaHorario).data.tipoHorario == "TALLER"
+    && get(rutaHorario).data.docenteCorreo
+      == request.auth.token.email
+    && datosAsistencia.get("cursoId", "")
+      == get(rutaHorario).data.get("cursoId", "")
+    && datosAsistencia.get("espacioId", "")
+      == get(rutaHorario).data.get("espacioId", "");
+}
+
 function reemplazoPuedeLeerAsistenciaTaller(datosAsistencia) {
   let horarioId = datosAsistencia.get("horarioId", "");
   let rutaHorario =
@@ -2624,6 +2682,8 @@ match /horarios/{horarioId} {
 
             || resource.data.get("docenteTitularCorreo", "")
               == request.auth.token.email
+
+            || docenteAsignadoActualPuedeLeerAsistenciaTaller(resource.data)
 
             || reemplazoPuedeLeerAsistenciaTaller(resource.data)
           )

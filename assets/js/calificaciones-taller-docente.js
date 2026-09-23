@@ -1172,7 +1172,12 @@ function registrarCambioNota(evento) {
     cambiosPendientesCalificacionesTallerDocente.has(alumnoId),
   );
 
-  actualizarCeldaTrimAlumno(alumnoId);
+  /*
+   * El TRIM no se recalcula en pantalla mientras la nota está pendiente.
+   * Primero se guarda la calificación y recién entonces se sincroniza el
+   * resultado automático. Así cada escritura de Firestore queda simple y
+   * el TRIM que ve el docente siempre corresponde a notas ya persistidas.
+   */
   actualizarBotonGuardar();
 }
 
@@ -1314,36 +1319,14 @@ function calcularResultadoAutomatico(valores) {
   return parteDecimal > 0.5 ? Math.ceil(promedio) : Math.floor(promedio);
 }
 
-function notaNumericaEfectiva(registro, trimestre, espacioNumero, alumnoId) {
-  const esNotaPropiaEditable =
-    trimestre === trimestreEditableCalificacionesTallerDocente &&
-    espacioNumero === espacioEditableNumeroCalificacionesTallerDocente &&
-    cambiosPendientesCalificacionesTallerDocente.has(alumnoId);
-
-  if (esNotaPropiaEditable) {
-    const pendiente =
-      cambiosPendientesCalificacionesTallerDocente.get(alumnoId);
-
-    if (pendiente === "") return null;
-
-    const numero = Number(pendiente);
-
-    return Number.isInteger(numero) && numero >= 1 && numero <= 10
-      ? numero
-      : null;
-  }
-
-  return notaNumericaDesdeRegistro(
-    registro,
-    trimestre,
-    espacioNumero,
-    alumnoId,
-  );
-}
-
-function resultadoAutomaticoEfectivo(registro, trimestre, alumnoId) {
+function resultadoAutomaticoGuardado(registro, trimestre, alumnoId) {
   const valores = [1, 2, 3].map((espacioNumero) =>
-    notaNumericaEfectiva(registro, trimestre, espacioNumero, alumnoId),
+    notaNumericaDesdeRegistro(
+      registro,
+      trimestre,
+      espacioNumero,
+      alumnoId,
+    ),
   );
 
   return calcularResultadoAutomatico(valores);
@@ -1415,7 +1398,7 @@ function contenidoCeldaTrim(registro, trimestre, alumnoId) {
     return formatearNota(valorGuardado);
   }
 
-  const resultadoAutomatico = resultadoAutomaticoEfectivo(
+  const resultadoAutomatico = resultadoAutomaticoGuardado(
     registro,
     trimestre,
     alumnoId,
@@ -1490,12 +1473,10 @@ function entradaResultadoExistente(registro, trimestre, alumnoId) {
   return mapa[alumnoId] ?? null;
 }
 
-function actualizarRegistroLocalDespuesDeGuardar(
+function actualizarRegistroLocalNotaDespuesDeGuardar(
   registro,
   alumnoId,
   valor,
-  resultado,
-  conservarManual,
   correo,
 ) {
   const trimestre = trimestreEditableCalificacionesTallerDocente;
@@ -1503,11 +1484,8 @@ function actualizarRegistroLocalDespuesDeGuardar(
     trimestre,
     espacioEditableNumeroCalificacionesTallerDocente,
   );
-  const campoResultado = campoResultadoTrimestre(trimestre);
 
   registro[campoNota] ||= {};
-  registro[campoResultado] ||= {};
-
   registro[campoNota][alumnoId] =
     valor === ""
       ? null
@@ -1516,18 +1494,6 @@ function actualizarRegistroLocalDespuesDeGuardar(
           por: correo,
           en: new Date(),
         };
-
-  if (!conservarManual) {
-    registro[campoResultado][alumnoId] =
-      resultado === null
-        ? null
-        : {
-            valor: resultado,
-            modo: "AUTO",
-            por: correo,
-            en: new Date(),
-          };
-  }
 }
 
 function actualizarRegistroLocalTrimDespuesDeGuardar(
@@ -1542,12 +1508,15 @@ function actualizarRegistroLocalTrimDespuesDeGuardar(
   );
 
   registro[campoResultado] ||= {};
-  registro[campoResultado][alumnoId] = {
-    valor,
-    modo,
-    por: correo,
-    en: new Date(),
-  };
+  registro[campoResultado][alumnoId] =
+    valor === null
+      ? null
+      : {
+          valor,
+          modo,
+          por: correo,
+          en: new Date(),
+        };
 }
 
 async function guardarCambiosPendientes() {
@@ -1590,9 +1559,11 @@ async function guardarCambiosPendientes() {
     };
 
     /*
-     * Primero se guardan las notas del Taller propio.
-     * Esto permite que, si una nota completa las tres áreas del alumno,
-     * el TRIM pueda guardarse después sobre el estado ya actualizado.
+     * Primero se guarda cada nota del Taller propio, sin tocar TRIM en esa
+     * misma escritura. Si la nota completa las tres áreas, inmediatamente
+     * después se sincroniza TRIM en una segunda escritura independiente.
+     * Esto evita mezclar NOTA_ESPACIO + TRIM en una única evaluación de
+     * Firestore Rules y mantiene el resultado editable hasta el cierre.
      */
     const notasPendientes = Array.from(
       cambiosPendientesCalificacionesTallerDocente.entries(),
@@ -1602,7 +1573,6 @@ async function guardarCambiosPendientes() {
       const trimestre = trimestreEditableCalificacionesTallerDocente;
       const espacioNumero = espacioEditableNumeroCalificacionesTallerDocente;
       const campoNota = campoNotaTrimestre(trimestre, espacioNumero);
-      const campoResultado = campoResultadoTrimestre(trimestre);
       const espacioId = String(
         registroCalificacionesTallerDocente[`espacio${espacioNumero}Id`] || "",
       ).trim();
@@ -1616,33 +1586,11 @@ async function guardarCambiosPendientes() {
         throw new Error("Se encontró una calificación fuera del rango 1 a 10.");
       }
 
-      const valores = [1, 2, 3].map((numeroEspacio) => {
-        if (numeroEspacio === espacioNumero) {
-          return valor === "" ? null : valor;
-        }
-
-        return notaNumericaDesdeRegistro(
-          registroCalificacionesTallerDocente,
-          trimestre,
-          numeroEspacio,
-          alumnoId,
-        );
-      });
-
-      const resultadoAutomatico = calcularResultadoAutomatico(valores);
-      const resultadoExistente = entradaResultadoExistente(
-        registroCalificacionesTallerDocente,
-        trimestre,
-        alumnoId,
-      );
-
-      const conservarManual =
-        resultadoAutomatico !== null &&
-        resultadoExistente &&
-        typeof resultadoExistente === "object" &&
-        resultadoExistente.modo === "MANUAL";
-
       const marcaTiempo = serverTimestamp();
+      const reemplazoId =
+        accesoEditableCalificacionesTallerDocente.origen === "REEMPLAZO"
+          ? String(accesoEditableCalificacionesTallerDocente.reemplazoId || "")
+          : "";
 
       const entradaNota =
         valor === ""
@@ -1653,68 +1601,117 @@ async function guardarCambiosPendientes() {
               en: marcaTiempo,
             };
 
-      const operacion = {
-        tipo: "NOTA_ESPACIO",
-        alumnoId,
-        trimestre,
-        espacioId,
-        reemplazoId:
-          accesoEditableCalificacionesTallerDocente.origen === "REEMPLAZO"
-            ? String(
-                accesoEditableCalificacionesTallerDocente.reemplazoId || "",
-              )
-            : "",
-        por: correo,
-        en: marcaTiempo,
-      };
-
-      const argumentos = [
+      await updateDoc(
         referencia,
         new FieldPath(campoNota, alumnoId),
         entradaNota,
-      ];
-
-      /*
-       * TRIM sólo se modifica cuando realmente corresponde:
-       * - si ya están las tres notas, se guarda el AUTO;
-       * - si se quitó una nota y existía un AUTO o MANUAL, se limpia;
-       * - si existe MANUAL y las tres notas siguen completas, se conserva.
-       */
-      if (!conservarManual) {
-        if (resultadoAutomatico !== null) {
-          argumentos.push(new FieldPath(campoResultado, alumnoId), {
-            valor: resultadoAutomatico,
-            modo: "AUTO",
-            por: correo,
-            en: marcaTiempo,
-          });
-        } else if (resultadoExistente !== null) {
-          argumentos.push(new FieldPath(campoResultado, alumnoId), null);
-        }
-      }
-
-      argumentos.push(
         "ultimaOperacion",
-        operacion,
+        {
+          tipo: "NOTA_ESPACIO",
+          alumnoId,
+          trimestre,
+          espacioId,
+          reemplazoId,
+          por: correo,
+          en: marcaTiempo,
+        },
         "actualizadoEn",
         marcaTiempo,
         "actualizadoPor",
         correo,
       );
 
-      await updateDoc(...argumentos);
-
-      actualizarRegistroLocalDespuesDeGuardar(
+      actualizarRegistroLocalNotaDespuesDeGuardar(
         registroCalificacionesTallerDocente,
         alumnoId,
         valor,
-        resultadoAutomatico,
-        conservarManual,
         correo,
       );
 
-      cambiosPendientesCalificacionesTallerDocente.delete(alumnoId);
       notasGuardadas += 1;
+
+      const resultadoAutomatico = resultadoAutomaticoGuardado(
+        registroCalificacionesTallerDocente,
+        trimestre,
+        alumnoId,
+      );
+      const resultadoExistente = entradaResultadoExistente(
+        registroCalificacionesTallerDocente,
+        trimestre,
+        alumnoId,
+      );
+      const tieneTrimPendiente =
+        cambiosPendientesTrimCalificacionesTallerDocente.has(alumnoId);
+      const resultadoEraManual =
+        resultadoExistente &&
+        typeof resultadoExistente === "object" &&
+        resultadoExistente.modo === "MANUAL";
+      const resultadoEraAuto =
+        resultadoExistente &&
+        typeof resultadoExistente === "object" &&
+        resultadoExistente.modo === "AUTO";
+      const valorAutoExistente = Number(resultadoExistente?.valor);
+
+      /*
+       * Si se quitó una de las tres notas, TRIM deja de existir aunque antes
+       * hubiera sido manual. Si las tres siguen completas, un MANUAL se
+       * conserva y un cambio explícito del docente se procesa más abajo.
+       */
+      const debeLimpiarTrim =
+        resultadoAutomatico === null && resultadoExistente !== null;
+      const debeGuardarTrimAuto =
+        resultadoAutomatico !== null &&
+        !tieneTrimPendiente &&
+        !resultadoEraManual &&
+        (!resultadoEraAuto || valorAutoExistente !== resultadoAutomatico);
+
+      if (debeLimpiarTrim || debeGuardarTrimAuto) {
+        const marcaTiempoTrim = serverTimestamp();
+        const valorTrim = debeLimpiarTrim ? null : resultadoAutomatico;
+
+        await updateDoc(
+          referencia,
+          new FieldPath(campoResultadoTrimestre(trimestre), alumnoId),
+          valorTrim === null
+            ? null
+            : {
+                valor: valorTrim,
+                modo: "AUTO",
+                por: correo,
+                en: marcaTiempoTrim,
+              },
+          "ultimaOperacion",
+          {
+            tipo: "TRIM",
+            alumnoId,
+            trimestre,
+            espacioId: "",
+            reemplazoId,
+            por: correo,
+            en: marcaTiempoTrim,
+          },
+          "actualizadoEn",
+          marcaTiempoTrim,
+          "actualizadoPor",
+          correo,
+        );
+
+        actualizarRegistroLocalTrimDespuesDeGuardar(
+          registroCalificacionesTallerDocente,
+          alumnoId,
+          valorTrim,
+          "AUTO",
+          correo,
+        );
+
+        trimGuardados += 1;
+      }
+
+      if (resultadoAutomatico === null) {
+        cambiosPendientesTrimCalificacionesTallerDocente.delete(alumnoId);
+      }
+
+      cambiosPendientesCalificacionesTallerDocente.delete(alumnoId);
     }
 
     /*
@@ -1729,7 +1726,7 @@ async function guardarCambiosPendientes() {
     for (const [alumnoId, valorPendiente] of trimPendientes) {
       const trimestre = trimestreEditableCalificacionesTallerDocente;
       const campoResultado = campoResultadoTrimestre(trimestre);
-      const resultadoAutomatico = resultadoAutomaticoEfectivo(
+      const resultadoAutomatico = resultadoAutomaticoGuardado(
         registroCalificacionesTallerDocente,
         trimestre,
         alumnoId,
@@ -1969,7 +1966,7 @@ function renderizarTabla(registro) {
           <div class="acciones-calificaciones-taller-docente">
             <div class="ayuda-edicion-calificaciones-taller">
               <i class="fa-solid fa-circle-info"></i>
-              Podés cargar tu Taller. La columna TRIM se habilita al completar las tres notas.
+              Podés cargar tu Taller. La columna TRIM se habilita después de guardar las tres notas.
             </div>
 
             <div class="botones-acciones-calificaciones-taller-docente">

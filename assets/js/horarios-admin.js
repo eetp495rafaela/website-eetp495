@@ -12,10 +12,14 @@ import {
   getFirestore,
   collection,
   getDocs,
+  getDoc,
   addDoc,
   updateDoc,
   deleteDoc,
   doc,
+  writeBatch,
+  query,
+  where,
   serverTimestamp,
 } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
 
@@ -1503,7 +1507,11 @@ function renderizarHorarioTallerCargado(bloques) {
                       </div>
 
                       <div class="bloque-horario-docente">
-                        ${bloque.docenteNombre || "Docente sin cargar"}
+                        ${
+                          bloque.reemplazanteNombreVigente
+                            ? `Titular: ${bloque.docenteNombre || "Docente sin asignar"}<br>Reemplazo: ${bloque.reemplazanteNombreVigente}`
+                            : bloque.docenteNombre || "Docente sin asignar"
+                        }
                       </div>
 
                       <div class="bloque-horario-ubicacion">
@@ -1699,6 +1707,78 @@ async function cargarHorarioAulaRegistrado() {
   }
 }
 
+function obtenerFechaActualHorarioTallerAdmin() {
+  const hoy = new Date();
+  const anio = hoy.getFullYear();
+  const mes = String(hoy.getMonth() + 1).padStart(2, "0");
+  const dia = String(hoy.getDate()).padStart(2, "0");
+
+  return `${anio}-${mes}-${dia}`;
+}
+
+function reemplazoTallerAdminEstaVigente(reemplazo, fechaActual) {
+  const tipoHorario = String(reemplazo.tipoHorario || "")
+    .trim()
+    .toUpperCase();
+
+  const fechaDesde = String(reemplazo.fechaDesde || "").trim();
+  const fechaHasta = String(reemplazo.fechaHasta || "").trim();
+
+  return (
+    tipoHorario === "TALLER" &&
+    fechaDesde &&
+    fechaHasta &&
+    fechaActual >= fechaDesde &&
+    fechaActual <= fechaHasta
+  );
+}
+
+function bloqueTallerAdminPerteneceAReemplazo(bloque, reemplazo) {
+  const asignacionBloque = String(bloque.asignacionId || "").trim();
+  const asignacionReemplazo = String(
+    reemplazo.asignacionTitularId || "",
+  ).trim();
+
+  if (asignacionBloque && asignacionReemplazo) {
+    return asignacionBloque === asignacionReemplazo;
+  }
+
+  return (
+    normalizarTextoHorario(bloque.docenteCorreo) ===
+      normalizarTextoHorario(reemplazo.titularCorreo) &&
+    String(bloque.cursoId || "").trim() ===
+      String(reemplazo.cursoId || "").trim() &&
+    String(bloque.espacioId || "").trim() ===
+      String(reemplazo.espacioId || "").trim()
+  );
+}
+
+function asociarReemplazosVigentesHorarioTallerAdmin(bloques, reemplazos) {
+  const fechaActual = obtenerFechaActualHorarioTallerAdmin();
+
+  const reemplazosVigentes = reemplazos.filter((reemplazo) =>
+    reemplazoTallerAdminEstaVigente(reemplazo, fechaActual),
+  );
+
+  return bloques.map((bloque) => {
+    const reemplazo = reemplazosVigentes.find((item) =>
+      bloqueTallerAdminPerteneceAReemplazo(bloque, item),
+    );
+
+    if (!reemplazo) {
+      return bloque;
+    }
+
+    return {
+      ...bloque,
+      reemplazoVigenteId: reemplazo.id,
+      reemplazanteNombreVigente:
+        reemplazo.reemplazanteNombre || reemplazo.reemplazanteCorreo || "",
+      reemplazanteCorreoVigente: reemplazo.reemplazanteCorreo || "",
+    };
+  });
+}
+
 async function cargarHorarioTallerRegistrado() {
   if (!vistaHorarioTaller) return;
 
@@ -1723,7 +1803,16 @@ async function cargarHorarioTallerRegistrado() {
   `;
 
   try {
-    const consulta = await getDocs(collection(db, "horarios"));
+    const consultaReemplazosActivos = query(
+      collection(db, "reemplazos_docentes"),
+      where("estado", "==", "ACTIVO"),
+    );
+
+    const [consulta, consultaReemplazos] = await Promise.all([
+      getDocs(collection(db, "horarios")),
+      getDocs(consultaReemplazosActivos),
+    ]);
+
     const bloques = [];
 
     consulta.forEach((documento) => {
@@ -1761,7 +1850,17 @@ async function cargarHorarioTallerRegistrado() {
       });
     });
 
-    bloques.sort((a, b) => {
+    const reemplazos = consultaReemplazos.docs.map((documento) => ({
+      id: documento.id,
+      ...documento.data(),
+    }));
+
+    const bloquesConReemplazo = asociarReemplazosVigentesHorarioTallerAdmin(
+      bloques,
+      reemplazos,
+    );
+
+    bloquesConReemplazo.sort((a, b) => {
       const diaA = DIAS_HORARIO_TALLER.findIndex((dia) => dia.valor === a.dia);
       const diaB = DIAS_HORARIO_TALLER.findIndex((dia) => dia.valor === b.dia);
 
@@ -1772,8 +1871,8 @@ async function cargarHorarioTallerRegistrado() {
       );
     });
 
-    horariosTallerCargados = bloques;
-    renderizarHorarioTallerCargado(bloques);
+    horariosTallerCargados = bloquesConReemplazo;
+    renderizarHorarioTallerCargado(bloquesConReemplazo);
   } catch (error) {
     console.error("Error al cargar horario de taller registrado:", error);
 
@@ -2189,13 +2288,25 @@ async function iniciarEdicionHorarioTaller(idHorario) {
     docenteAsignadoHorarioTaller =
       docentesAsignadosHorarioTaller[indiceDocenteBloque];
   } else {
-    docenteAsignadoHorarioTaller = {
-      asignacionId: bloque.asignacionId || "",
-      espacioId: bloque.espacioId || "",
-      espacioCurricular: bloque.espacioCurricular || "",
-      docenteNombre: bloque.docenteNombre || "",
-      docenteCorreo: bloque.docenteCorreo || "",
-    };
+    /*
+     * Si el docente anterior fue eliminado, el bloque queda sin asignación.
+     * En ese caso conservamos la selección automática cuando existe una sola
+     * asignación activa nueva. Si hay varias, obligamos a elegir una.
+     *
+     * Nunca reutilizamos los datos históricos del docente eliminado, porque
+     * eso podría volver a guardar una asignación que ya no existe.
+     */
+    const bloqueSinDocente =
+      !String(bloque.asignacionId || "").trim() &&
+      !String(bloque.docenteCorreo || "").trim();
+
+    if (bloqueSinDocente && docentesAsignadosHorarioTaller.length === 1) {
+      horarioTallerDocente.value = "0";
+      docenteAsignadoHorarioTaller = docentesAsignadosHorarioTaller[0];
+    } else {
+      horarioTallerDocente.value = "";
+      docenteAsignadoHorarioTaller = null;
+    }
   }
 
   activarModoEdicionHorarioTaller(idHorario);
@@ -2499,6 +2610,56 @@ async function registrarHorarioAula(event) {
   }
 }
 
+async function prepararSincronizacionCalificacionesTaller(
+  datosHorarioTaller,
+  correoSoporte,
+) {
+  const anio = Number(datosHorarioTaller.cursoAnio || 0);
+
+  if (anio !== 1 && anio !== 2) {
+    return null;
+  }
+
+  const registroId = `${datosHorarioTaller.cicloLectivo}__${datosHorarioTaller.cursoId}`;
+  const referencia = doc(db, "calificaciones_taller", registroId);
+  const documento = await getDoc(referencia);
+
+  if (!documento.exists()) {
+    return null;
+  }
+
+  const datos = documento.data();
+  const espacioId = String(datosHorarioTaller.espacioId || "").trim();
+
+  let numeroEspacio = 0;
+
+  if (String(datos.espacio1Id || "").trim() === espacioId) {
+    numeroEspacio = 1;
+  } else if (String(datos.espacio2Id || "").trim() === espacioId) {
+    numeroEspacio = 2;
+  } else if (String(datos.espacio3Id || "").trim() === espacioId) {
+    numeroEspacio = 3;
+  }
+
+  if (!numeroEspacio) {
+    return null;
+  }
+
+  return {
+    referencia,
+    cambios: {
+      [`espacio${numeroEspacio}Nombre`]:
+        datosHorarioTaller.espacioCurricular || "",
+      [`espacio${numeroEspacio}DocenteCorreo`]:
+        datosHorarioTaller.docenteCorreo || "",
+      [`espacio${numeroEspacio}AsignacionId`]:
+        datosHorarioTaller.asignacionId || "",
+      actualizadoEn: serverTimestamp(),
+      actualizadoPor: correoSoporte || "",
+    },
+  };
+}
+
 async function registrarHorarioTaller(event) {
   event.preventDefault();
 
@@ -2568,20 +2729,6 @@ async function registrarHorarioTaller(event) {
     return;
   }
 
-  if (horarioTallerDocente) {
-    horarioTallerDocente.addEventListener("change", () => {
-      const indiceSeleccionado = horarioTallerDocente.value;
-
-      if (indiceSeleccionado === "") {
-        docenteAsignadoHorarioTaller = null;
-        return;
-      }
-
-      docenteAsignadoHorarioTaller =
-        docentesAsignadosHorarioTaller[Number(indiceSeleccionado)] || null;
-    });
-  }
-
   if (!horarioFijo.inicio || !horarioFijo.fin) {
     mostrarMensajeHorarioTaller(
       "No se pudo determinar el horario del turno.",
@@ -2643,11 +2790,32 @@ async function registrarHorarioTaller(event) {
     }
 
     if (idHorarioTallerEditando) {
-      await updateDoc(doc(db, "horarios", idHorarioTallerEditando), {
+      const correoSoporte = String(usuario.email || "")
+        .trim()
+        .toLowerCase();
+
+      const sincronizacionCalificaciones =
+        await prepararSincronizacionCalificacionesTaller(
+          datosHorarioTaller,
+          correoSoporte,
+        );
+
+      const lote = writeBatch(db);
+
+      lote.update(doc(db, "horarios", idHorarioTallerEditando), {
         ...datosHorarioTaller,
         actualizadoEn: serverTimestamp(),
-        actualizadoPor: usuario.email || "",
+        actualizadoPor: correoSoporte,
       });
+
+      if (sincronizacionCalificaciones) {
+        lote.update(
+          sincronizacionCalificaciones.referencia,
+          sincronizacionCalificaciones.cambios,
+        );
+      }
+
+      await lote.commit();
 
       await Swal.fire({
         title: "Horario de taller actualizado",
@@ -3068,6 +3236,20 @@ if (horarioTallerCurso) {
   horarioTallerCurso.addEventListener("change", async () => {
     await cargarMateriasHorarioTaller();
     await cargarDocenteAsignadoHorarioTaller();
+  });
+}
+
+if (horarioTallerDocente) {
+  horarioTallerDocente.addEventListener("change", () => {
+    const indiceSeleccionado = horarioTallerDocente.value;
+
+    if (indiceSeleccionado === "") {
+      docenteAsignadoHorarioTaller = null;
+      return;
+    }
+
+    docenteAsignadoHorarioTaller =
+      docentesAsignadosHorarioTaller[Number(indiceSeleccionado)] || null;
   });
 }
 

@@ -877,9 +877,11 @@ async function obtenerAsistenciaExistenteSira(clase) {
 
   /*
    * Taller tiene un único registro de asistencia por clase + fecha.
-   * El titular lo busca por docenteTitularCorreo y el reemplazante por el
-   * reemplazoId vigente. Así ambos abren exactamente el mismo documento,
-   * sin depender de quién lo creó o lo editó por última vez.
+   *
+   * El reemplazante conserva la búsqueda por reemplazoId que ya está probada.
+   * El docente con asignación directa busca por clase + fecha, sin depender
+   * del correo histórico guardado en la asistencia. Así una reasignación
+   * permanente conserva todo el historial para el nuevo docente.
    *
    * Educación Física conserva la búsqueda anterior para no modificar el
    * comportamiento que ya está funcionando.
@@ -903,7 +905,7 @@ async function obtenerAsistenciaExistenteSira(clase) {
   } else if (tipo === "TALLER") {
     consulta = query(
       collection(db, "asistencias_clases"),
-      where("docenteTitularCorreo", "==", correoDocente),
+      where("tipoHorario", "==", "TALLER"),
       where("fecha", "==", fecha),
       where("horarioId", "==", clase.id),
     );
