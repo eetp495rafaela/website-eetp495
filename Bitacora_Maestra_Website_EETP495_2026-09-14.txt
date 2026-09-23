@@ -1,8 +1,8 @@
 BITÁCORA MAESTRA – PORTAL INSTITUCIONAL E.E.T.P. N.º 495
 ========================================================
 
-Referencia: EETP495-BITACORA-MAESTRA-2026-09-22
-Fecha de consolidación: 22/09/2026
+Referencia: EETP495-BITACORA-MAESTRA-2026-09-23
+Fecha de consolidación: 23/09/2026
 Institución: E.E.T.P. N.º 495 “Malvinas Argentinas” – Rafaela, Santa Fe
 Modalidad: Técnico en Informática Profesional y Personal
 Dominio: https://eetp495rafaela.edu.ar
@@ -20,7 +20,7 @@ transversal o no esté claro qué archivos intervienen.
 FUENTES UTILIZADAS PARA ESTA CONSOLIDACIÓN
 ------------------------------------------
 1. Último ZIP completo recibido y revisado:
-   Website-EETP495(20260922-203915).zip
+   Website-EETP495(20260922-204850).zip
 
 2. Estado Git contenido en ese ZIP:
    commit completo:
@@ -30,12 +30,14 @@ FUENTES UTILIZADAS PARA ESTA CONSOLIDACIÓN
    mensaje: "Reglas actualizadas y SiRA docente modificado para reemplazos de EF"
    rama: main
    origin/main: mismo commit
-   estado del working tree: LIMPIO, sin cambios sin confirmar.
+   estado del working tree del ZIP: la Bitácora Maestra ya contenía cambios
+   posteriores al HEAD y figuraba modificada; el código funcional restante
+   correspondía al commit 9a4234e.
 
-3. La Bitácora Maestra incluida dentro del ZIP era la versión consolidada al
-   20/09/2026, referencia EETP495-BITACORA-MAESTRA-2026-09-20. Esta versión v7
+3. La Bitácora Maestra incluida dentro del ZIP ya estaba consolidada al
+   22/09/2026 aunque ese cambio todavía no formaba parte del HEAD. Esta versión
    conserva íntegramente ese historial y agrega los cambios, pruebas, decisiones
-   y pendientes confirmados hasta el 22/09/2026.
+   y pendientes confirmados hasta el 23/09/2026.
 
 4. Se revisaron específicamente los archivos actuales involucrados en los
    últimos trabajos:
@@ -52,6 +54,13 @@ FUENTES UTILIZADAS PARA ESTA CONSOLIDACIÓN
    versiones anteriores de esta Bitácora: arquitectura general, portales,
    Documentación Académica, S.I.M.E., Si.R.A., Calendario Escolar, Galería,
    reemplazos, horarios, calificaciones de Taller y Firestore Security Rules.
+
+6. La actualización del 23/09/2026 se realizó sobre el proyecto local del usuario
+   en Linux Mint / VS Code, partiendo del ZIP anterior y aplicando cambios que
+   todavía NO fueron consolidados en un commit/push al momento de cerrar esta
+   Bitácora. El HEAD de referencia sigue siendo 9a4234e hasta realizar ese
+   commit. Las pruebas funcionales del 23/09 se hicieron contra Firebase con las
+   Rules desplegadas cuando correspondía.
 
 REGLA DE PRECEDENCIA
 --------------------
@@ -7100,4 +7109,445 @@ varios frentes en paralelo.
 
 ======================================================================
 FIN ESTADO DE ENTREGA 22/09/2026
+======================================================================
+
+======================================================================
+45. ACTUALIZACIÓN – 23/09/2026 – TALLER 1.º/2.º AÑO: REEMPLAZOS, SI.R.A., HORARIOS, CALIFICACIONES Y TRIM
+======================================================================
+
+ESTADO GENERAL
+--------------
+BLOQUE FUNCIONAL PRINCIPAL RESUELTO / PROBADO.
+
+Durante la jornada se revisó de forma específica el funcionamiento de los
+espacios de Taller de 1.º y 2.º año, sin modificar la lógica funcional ya
+cerrada de otras áreas.
+
+ESPACIOS DE TALLER INVOLUCRADOS
+-------------------------------
+PRIMER AÑO
+- Taller Electricidad (ELE)
+- Taller Organización de la Empresa (ORG)
+- Taller Informática (INF)
+
+SEGUNDO AÑO
+- Taller Electrónica
+- Taller Documentos Comerciales
+- Taller Informática
+
+REGLA FUNCIONAL BASE CONFIRMADA
+-------------------------------
+Una asignación directa de Taller puede corresponder a un docente con situación
+de revista Titular, Interino u otra situación admitida por el sistema. La
+situación de revista NO debe utilizarse para excluirlo del acceso si posee una
+asignación activa válida.
+
+Un reemplazante temporal NO recibe una asignación permanente residual. Su acceso
+se deriva de reemplazos_docentes y sólo existe mientras el reemplazo está
+vigente.
+
+45.1 INCIDENTE OPERATIVO – COLECCIÓN usuarios
+---------------------------------------------
+El 22/09/2026 se eliminó accidentalmente la colección usuarios de Firestore.
+
+Para recuperar el acceso administrativo se recreó manualmente desde Firebase
+Console el usuario con rol:
+
+  SOPORTE
+
+IMPORTANTE:
+- El rol administrativo vigente del proyecto es SOPORTE, no ADMIN.
+- Una vez recreado el usuario SOPORTE se recuperó el acceso al portal
+  administrativo.
+- Luego se comenzaron a reconstruir usuarios/asignaciones desde el sistema.
+- Este incidente no requirió modificar código.
+
+45.2 CALIFICACIONES – ACCESO DEL REEMPLAZANTE TEMPORAL
+------------------------------------------------------
+Se implementó y probó que un reemplazante temporal de Taller pueda acceder al
+Registro de Calificaciones correspondiente.
+
+Comportamiento confirmado:
+- ve el registro completo del curso;
+- ve las notas ya cargadas por los demás Talleres en modo lectura;
+- sólo puede editar la columna del espacio que está reemplazando;
+- puede cargar una nota nueva;
+- puede modificar una nota existente;
+- las modificaciones quedan visibles para el docente con asignación directa;
+- las modificaciones del docente con asignación directa quedan visibles para el
+  reemplazante;
+- ambos trabajan sobre el MISMO registro de calificaciones del curso.
+
+La autorización del reemplazante se apoya en:
+- reemplazos_docentes;
+- reemplazo vigente;
+- curso;
+- espacio;
+- ciclo lectivo;
+- correo del reemplazante;
+- vínculo del reemplazo dentro de calificaciones_taller.
+
+Se trabajó especialmente en firestore.rules para evitar rutas de validación
+innecesariamente costosas para reemplazantes y mantener la validación de vigencia
+sin crear permisos generales.
+
+45.3 SINCRONIZACIÓN DE REEMPLAZOS CON calificaciones_taller
+-----------------------------------------------------------
+assets/js/reemplazos-docentes-admin.js sincroniza los reemplazos de Taller con
+el Registro de Calificaciones.
+
+Se agregó reconciliación para que, al crear/finalizar/eliminar reemplazos, no
+queden referencias viejas acumuladas en:
+- reemplazosEspacio1
+- reemplazosEspacio2
+- reemplazosEspacio3
+
+La reconciliación identifica cada espacio por el espacioId real guardado en el
+registro, evitando depender solamente del orden de las asignaciones.
+
+Objetivo confirmado:
+- reemplazo vigente -> referencia vigente en el espacio correcto;
+- reemplazo finalizado/eliminado -> se elimina la referencia residual;
+- nuevo reemplazo posterior -> puede volver a leer/escribir el registro sin
+  quedar bloqueado por referencias anteriores.
+
+45.4 SI.R.A. – ASISTENCIA COMPARTIDA TITULAR / REEMPLAZANTE DE TALLER
+---------------------------------------------------------------------
+Se corrigió el modelo práctico de asistencia de Taller.
+
+Problema anterior:
+- si el titular había cargado asistencia, el reemplazante no encontraba ese
+  registro como existente;
+- si el reemplazante había cargado asistencia, el titular tampoco reconocía el
+  registro existente;
+- ambos podían terminar viendo estudiantes, pero no trabajar sobre la misma
+  asistencia.
+
+Regla funcional definitiva:
+La asistencia de Taller pertenece a la CLASE + FECHA, no al docente que la
+creó.
+
+Comportamiento probado:
+- titular carga asistencia -> reemplazante vigente ve la misma asistencia;
+- reemplazante puede editarla y guardar;
+- reemplazante carga asistencia -> titular ve la misma asistencia;
+- titular puede editarla y guardar;
+- no se generan dos registros independientes para la misma clase/fecha;
+- el aviso de edición de una asistencia ya registrada se conserva;
+- las asistencias existentes dentro del período se vinculan cuando se crea el
+  reemplazo correspondiente.
+
+Se actualizaron frontend y Rules para sostener este comportamiento.
+
+45.5 HORARIOS – TITULAR Y REEMPLAZANTE TEMPORAL
+-----------------------------------------------
+Se fijó la siguiente regla para Taller:
+
+PORTAL DEL DOCENTE CON ASIGNACIÓN DIRECTA
+- Sigue viendo siempre su horario de Taller aunque exista un reemplazo vigente.
+- No es necesario mostrarle una leyenda especial informando el reemplazo.
+
+PORTAL DEL REEMPLAZANTE TEMPORAL
+- Ve el mismo bloque horario mientras el reemplazo está vigente.
+- Al finalizar/vencer el reemplazo deja de ver ese horario automáticamente.
+
+ADMIN / SOPORTE Y GESTIÓN
+- El bloque conserva al docente de la asignación directa.
+- Cuando existe reemplazo vigente, la consulta de horarios muestra además el
+  reemplazante, conceptualmente:
+
+    Titular: Docente X
+    Reemplazo: Docente Y
+
+- Al finalizar el reemplazo desaparece la línea de reemplazo y queda el docente
+  de la asignación directa.
+
+Educación Física conserva su comportamiento previo; estos cambios se realizaron
+para el caso específico de Taller cuando correspondía.
+
+45.6 REASIGNACIÓN DEFINITIVA DE UN BLOQUE DE TALLER
+---------------------------------------------------
+Flujo probado y confirmado:
+
+1. El docente anterior deja la institución/asignación y se elimina su usuario o
+   asignación según corresponda.
+2. El bloque horario NO debe borrarse.
+3. El bloque queda visible como "Docente sin asignar".
+4. Se crea/habilita la asignación directa del nuevo docente.
+5. Se edita el mismo bloque horario.
+6. Se selecciona el nuevo docente.
+7. Al guardar, el bloque queda vinculado al nuevo docente.
+8. El nuevo docente accede al historial que pertenece al curso/espacio, sin
+   perder las asistencias ni calificaciones ya existentes.
+
+La regla conceptual consolidada es:
+Los datos históricos pertenecen al curso + espacio + período/clase, no al
+usuario que originalmente los creó.
+
+45.7 REGISTRO DE CALIFICACIONES – CARGA BAJO DEMANDA
+----------------------------------------------------
+Se eliminó la carga automática del listado de estudiantes al ingresar a
+Registro de Calificaciones.
+
+Nuevo flujo para asignación directa y reemplazante:
+1. Seleccionar Ciclo lectivo.
+2. Seleccionar Curso.
+3. Seleccionar Grupo:
+   - G1
+   - G2
+   - Todos
+4. Recién entonces se carga el registro.
+
+Objetivo:
+- evitar lecturas innecesarias de Firestore;
+- mantener el mismo comportamiento visual para titular/interino/reemplazante;
+- no listar estudiantes si el docente sólo abrió la sección sin querer
+  consultar un curso.
+
+Después de cargar el registro, el cambio entre G1/G2/Todos reutiliza los datos
+ya disponibles cuando corresponde, evitando lecturas repetidas innecesarias.
+
+45.8 CIERRE DE TRIMESTRE – REGLA DE AUTORIZACIÓN
+------------------------------------------------
+Regla definitiva:
+
+DOCENTE CON ASIGNACIÓN DIRECTA
+- puede cargar/editar su espacio;
+- puede editar TRIM durante el período habilitado;
+- puede cerrar el trimestre.
+
+REEMPLAZANTE TEMPORAL CARGADO DESDE “REEMPLAZOS DOCENTES”
+- puede cargar/editar su espacio durante la vigencia;
+- puede editar TRIM durante la vigencia;
+- NO puede cerrar el trimestre.
+
+La restricción se implementó en dos niveles:
+- interfaz: el reemplazante temporal no dispone del cierre;
+- Firestore Rules: una operación CERRAR_TRIMESTRE exige reemplazoId vacío y
+  autorización por asignación directa.
+
+45.9 TRIM – CAMBIO DE ARQUITECTURA DEFINITIVO
+---------------------------------------------
+Durante las pruebas con reemplazantes se confirmó un patrón:
+- una nota individual de ELE/ORG/INF se guardaba correctamente;
+- cuando esa nota era la tercera del alumno y el frontend intentaba persistir
+  inmediatamente NOTA + TRIM AUTO, Firestore podía rechazar la segunda parte de
+  la operación;
+- el reemplazante sí podía guardar TRIM MANUAL por separado;
+- el docente con asignación directa también podía guardar TRIM manual.
+
+Se decidió NO seguir forzando el guardado automático de TRIM al ingresar la
+tercera nota.
+
+ARQUITECTURA FINAL ACORDADA
+---------------------------
+Durante el trimestre:
+- se guarda la nota individual del Taller;
+- si con esa nota quedan las tres áreas completas, el sistema calcula/muestra el
+  TRIM en pantalla;
+- ese cálculo NO se persiste automáticamente sólo por haber ingresado la tercera
+  nota;
+- TRIM continúa editable durante el trimestre;
+- un TRIM cambiado manualmente puede guardarse normalmente.
+
+Al CERRAR TRIMESTRE:
+- sólo puede ejecutar el cierre un docente con asignación directa;
+- antes de marcar el trimestre como CERRADO, el sistema consolida el TRIM de
+  cada estudiante;
+- si existe una corrección manual pendiente, tiene prioridad;
+- si ya existe un TRIM MANUAL guardado, se conserva;
+- en caso contrario se guarda el TRIM calculado automáticamente con las tres
+  notas persistidas;
+- si faltan notas, no se genera un TRIM automático válido;
+- el cierre sólo se marca como CERRADO después de completar correctamente las
+  escrituras de TRIM necesarias.
+
+REGLA CLAVE SOLICITADA POR EL USUARIO
+-------------------------------------
+La nota que debe quedar guardada al cerrar es EXACTAMENTE la que corresponde en
+TRIM:
+- la calculada automáticamente si nunca fue corregida;
+- la nota manual si fue modificada por un docente autorizado.
+
+PRUEBAS CONFIRMADAS DURANTE LA JORNADA
+--------------------------------------
+Se confirmó, entre otros casos:
+- reemplazante guarda nota nueva -> OK;
+- reemplazante modifica nota existente -> OK;
+- titular ve cambios del reemplazante -> OK;
+- reemplazante ve cambios del titular -> OK;
+- reemplazante guarda TRIM manual -> OK;
+- titular guarda TRIM manual -> OK;
+- asistencia nueva del reemplazante -> OK;
+- asistencia del titular editable por reemplazante -> OK;
+- asistencia del reemplazante editable por titular -> OK;
+- titular conserva horario durante reemplazo -> OK;
+- reemplazante ve horario sólo durante vigencia -> OK;
+- Admin/SOPORTE y Gestión muestran titular + reemplazo vigente -> OK;
+- reasignación definitiva de bloque a un nuevo docente -> OK;
+- carga de Calificaciones bajo demanda por ciclo/curso/grupo -> OK;
+- flujo final de TRIM hasta el cierre de la jornada -> sin errores reportados.
+
+45.10 ARCHIVOS MODIFICADOS EN EL BLOQUE 23/09
+---------------------------------------------
+Cambios locales acumulados sobre el HEAD 9a4234e:
+- admin/index.html
+- docentes/index.html
+- gestion/index.html
+- assets/js/calificaciones-taller-docente.js
+- assets/js/gestion.js
+- assets/js/horarios-admin.js
+- assets/js/horarios-docente.js
+- assets/js/reemplazos-docentes-admin.js
+- assets/js/reemplazos-docentes-gestion.js
+- assets/js/sira-docente.js
+- firestore.rules
+- Bitácora Maestra
+
+IMPORTANTE:
+Durante la jornada se desplegaron varias revisiones de firestore.rules para
+realizar pruebas. El código local final debe tratarse como la fuente a consolidar
+en el próximo commit.
+
+45.11 ESTADO GIT AL CIERRE DE ESTA BITÁCORA
+-------------------------------------------
+NO se realizó todavía el commit/push final del bloque 23/09.
+
+HEAD de referencia previo a estos cambios:
+9a4234e
+“Reglas actualizadas y SiRA docente modificado para reemplazos de EF”
+
+Antes del próximo commit:
+1. ejecutar git diff --check;
+2. revisar git status;
+3. realizar una prueba rápida de regresión de Taller;
+4. confirmar que no existan archivos temporales/debug;
+5. recién entonces commit + push de los cambios legítimos y de esta Bitácora.
+
+======================================================================
+FIN ACTUALIZACIÓN 23/09/2026 – TALLER / REEMPLAZOS / TRIM
+======================================================================
+
+
+======================================================================
+46. PENDIENTE PRIORIZADO PARA LA PRÓXIMA JORNADA – ACCESO DE DOCENTE CON REEMPLAZO FINALIZADO
+======================================================================
+
+REQUERIMIENTO FUNCIONAL
+-----------------------
+Cuando un docente ingresó al Portal Docente por un reemplazo temporal y ese
+reemplazo deja de estar vigente porque alcanzó su fecha final, el usuario debe
+poder seguir autenticándose en el sitio, pero ya no debe conservar acceso a las
+funciones académicas que dependían de ese reemplazo.
+
+Si el docente no posee otra asignación directa ni otro reemplazo vigente que le
+otorgue acceso adicional, debe ver SOLAMENTE estas tarjetas con sus respectivos
+enlaces:
+
+1. Gestiones Docentes
+2. Normativa Vigente
+3. Enlaces Institucionales
+
+NO debe ver el resto de las tarjetas/funciones docentes derivadas del reemplazo
+finalizado.
+
+CONDICIONES A CUIDAR AL IMPLEMENTAR
+-----------------------------------
+- No eliminar ni bloquear el usuario: debe seguir pudiendo iniciar sesión.
+- La restricción debe derivarse de la ausencia de asignaciones/reemplazos
+  vigentes, no de borrar el perfil.
+- Si el mismo docente tiene otra asignación directa activa o un segundo
+  reemplazo todavía vigente, NO debe aplicarse el modo restringido global; debe
+  conservar los accesos que correspondan a esas funciones vigentes.
+- Al iniciar una nueva asignación/reemplazo válido, el portal debe recuperar
+  automáticamente las tarjetas correspondientes sin necesidad de recrear el
+  usuario.
+- No afectar roles adicionales que el usuario pudiera tener por otra función
+  institucional; revisar la composición de roles antes de ocultar tarjetas.
+
+ARCHIVOS / LÓGICA A REVISAR MAÑANA
+----------------------------------
+Priorizar:
+- docentes/index.html
+- protector/lector de acceso del Portal Docente;
+- lógica de tarjetas y permisos del portal;
+- consulta de asignaciones_docentes;
+- consulta de reemplazos_docentes y vigencia por fecha;
+- cualquier helper actual que determine habilitaciones de Si.R.A.,
+  Calificaciones, Documentación u otras tarjetas.
+
+PRUEBA MÍNIMA ESPERADA
+----------------------
+Caso A – reemplazo vigente:
+- el docente ve las funciones asociadas al reemplazo.
+
+Caso B – fecha final superada y sin otro vínculo vigente:
+- puede iniciar sesión;
+- sólo ve Gestiones Docentes, Normativa Vigente y Enlaces Institucionales.
+
+Caso C – tiene otro vínculo vigente:
+- no queda limitado a esas tres tarjetas;
+- mantiene los accesos que correspondan al vínculo activo.
+
+======================================================================
+FIN PENDIENTE PRIORIZADO 23/09/2026
+======================================================================
+
+
+======================================================================
+47. ESTADO DE ENTREGA PARA CONTINUAR – 23/09/2026
+======================================================================
+
+FUENTE DE CÓDIGO
+----------------
+Base histórica:
+Website-EETP495(20260922-204850).zip
+
+Trabajo actual:
+Proyecto local del usuario en Linux Mint / VS Code con los cambios del 23/09
+aplicados y probados.
+
+Repositorio:
+git@github-eetp495:eetp495rafaela/website-eetp495.git
+
+Rama:
+main
+
+HEAD PREVIO AL BLOQUE 23/09:
+9a4234e2e086ee54bf970c3b56243037b079faaf
+
+ESTADO FUNCIONAL PARA RETOMAR
+-----------------------------
+CERRADO / PROBADO:
+- reemplazos temporales de Taller en Si.R.A.;
+- asistencia compartida titular/reemplazante;
+- horarios simultáneos titular + reemplazante;
+- visualización titular/reemplazo en Admin/SOPORTE y Gestión;
+- calificaciones de Taller para reemplazantes;
+- edición compartida de notas;
+- cierre de trimestre sólo por asignación directa;
+- carga bajo demanda Ciclo/Curso/Grupo;
+- reasignación definitiva de un bloque;
+- TRIM manual durante trimestre;
+- consolidación de TRIM al cerrar trimestre según cálculo o corrección manual.
+
+PENDIENTE INMEDIATO PARA MAÑANA:
+- implementar el modo restringido del Portal Docente al finalizar un reemplazo,
+  mostrando únicamente:
+  1. Gestiones Docentes
+  2. Normativa Vigente
+  3. Enlaces Institucionales
+  siempre que no exista otra asignación/reemplazo/rol vigente que deba conservar
+  accesos adicionales.
+
+PENDIENTE DE CIERRE TÉCNICO:
+- regresión final rápida;
+- git diff --check;
+- git status;
+- commit;
+- push;
+- actualizar HEAD/commit en esta Bitácora después del commit definitivo.
+
+======================================================================
+FIN ESTADO DE ENTREGA 23/09/2026
 ======================================================================
