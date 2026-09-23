@@ -19,6 +19,7 @@ import {
   where,
   serverTimestamp,
   FieldPath,
+  deleteField,
 } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -65,81 +66,19 @@ function normalizarCorreo(correo) {
 }
 
 async function sincronizarReemplazoTallerConCalificaciones({
-  reemplazoId,
-  asignacionTitularId,
   cursoId,
   cicloLectivo,
   reemplazanteCorreo,
   actualizadoPor,
 }) {
-  const idReemplazo = String(reemplazoId || "").trim();
-  const idAsignacion = String(asignacionTitularId || "").trim();
   const idCurso = String(cursoId || "").trim();
   const ciclo = Number(cicloLectivo || 0);
   const correoReemplazante = normalizarCorreo(reemplazanteCorreo);
   const correoOperador = normalizarCorreo(actualizadoPor);
 
-  if (
-    !idReemplazo ||
-    !idAsignacion ||
-    !idCurso ||
-    !ciclo ||
-    !correoReemplazante ||
-    !correoOperador
-  ) {
+  if (!idCurso || !ciclo || !correoReemplazante || !correoOperador) {
     throw new Error(
       "No se pudo preparar la vinculación del reemplazo con calificaciones.",
-    );
-  }
-
-  /*
-   * El orden de espacios debe coincidir con el utilizado al inicializar
-   * calificaciones: los tres Talleres activos, ordenados por nombre.
-   * Así Gestión no necesita permiso de lectura sobre las notas del curso.
-   */
-  const consultaAsignaciones = query(
-    collection(db, "asignaciones_docentes"),
-    where("cursoId", "==", idCurso),
-  );
-
-  const resultadoAsignaciones = await getDocs(consultaAsignaciones);
-  const porEspacio = new Map();
-
-  resultadoAsignaciones.forEach((documento) => {
-    const asignacion = { id: documento.id, ...documento.data() };
-    const estado = String(asignacion.estado || "").trim().toUpperCase();
-    const tipo = String(asignacion.espacioTipo || "").trim().toUpperCase();
-
-    if (
-      !["ACTIVA", "ACTIVO"].includes(estado) ||
-      tipo !== "TALLER" ||
-      Number(asignacion.cicloLectivo || 0) !== ciclo
-    ) {
-      return;
-    }
-
-    const espacioId = String(asignacion.espacioId || "").trim();
-
-    if (espacioId && !porEspacio.has(espacioId)) {
-      porEspacio.set(espacioId, asignacion);
-    }
-  });
-
-  const asignaciones = Array.from(porEspacio.values()).sort((a, b) =>
-    String(a.espacioNombre || "").localeCompare(
-      String(b.espacioNombre || ""),
-      "es",
-      { sensitivity: "base" },
-    ),
-  );
-
-  const indiceEspacio = asignaciones.findIndex(
-    (asignacion) => asignacion.id === idAsignacion,
-  );
-
-  if (asignaciones.length !== 3 || indiceEspacio < 0) {
-    throw new Error(
-      "No se pudo identificar el Taller del reemplazo dentro del Registro de Calificaciones.",
     );
   }
 
@@ -148,29 +87,146 @@ async function sincronizarReemplazoTallerConCalificaciones({
     "calificaciones_taller",
     `${ciclo}__${idCurso}`,
   );
-  const marcaTiempo = serverTimestamp();
 
-  try {
-    await updateDoc(
-      referenciaRegistro,
-      new FieldPath(
-        `reemplazosEspacio${indiceEspacio + 1}`,
-        correoReemplazante,
-      ),
-      idReemplazo,
-      "actualizadoEn",
-      marcaTiempo,
-      "actualizadoPor",
-      correoOperador,
+  const documentoRegistro = await getDoc(referenciaRegistro);
+
+  /*
+   * Si el Registro todavía no existe, no hay nada que sincronizar.
+   * Cuando SOPORTE lo inicialice tomará los reemplazos vigentes.
+   */
+  if (!documentoRegistro.exists()) return;
+
+  const registro = documentoRegistro.data();
+
+  /*
+   * Reconciliamos por los espacioId reales guardados en el Registro de
+   * Calificaciones. Así no dependemos del orden alfabético de las
+   * asignaciones ni dejamos referencias viejas cuando un reemplazo termina.
+   */
+  const numeroPorEspacioId = new Map();
+
+  [1, 2, 3].forEach((numero) => {
+    const espacioId = String(registro[`espacio${numero}Id`] || "").trim();
+    if (espacioId) numeroPorEspacioId.set(espacioId, numero);
+  });
+
+  const consultaReemplazos = query(
+    collection(db, "reemplazos_docentes"),
+    where("reemplazanteCorreo", "==", correoReemplazante),
+  );
+
+  const resultadoReemplazos = await getDocs(consultaReemplazos);
+
+  const partesHoy = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "America/Argentina/Cordoba",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).formatToParts(new Date());
+
+  const valoresHoy = Object.fromEntries(
+    partesHoy
+      .filter((parte) => parte.type !== "literal")
+      .map((parte) => [parte.type, parte.value]),
+  );
+
+  const hoy = `${valoresHoy.year}-${valoresHoy.month}-${valoresHoy.day}`;
+  const candidatosPorNumero = new Map();
+
+  resultadoReemplazos.forEach((documento) => {
+    const reemplazo = { id: documento.id, ...documento.data() };
+    const estado = String(reemplazo.estado || "").trim().toUpperCase();
+    const tipo = String(reemplazo.tipoHorario || "").trim().toUpperCase();
+
+    if (
+      estado !== "ACTIVO" ||
+      tipo !== "TALLER" ||
+      String(reemplazo.cursoId || "").trim() !== idCurso ||
+      Number(reemplazo.cicloLectivo || 0) !== ciclo
+    ) {
+      return;
+    }
+
+    const numero = numeroPorEspacioId.get(
+      String(reemplazo.espacioId || "").trim(),
     );
-  } catch (error) {
+
+    if (!numero) return;
+
+    const fechaDesde = String(reemplazo.fechaDesde || "").trim();
+    const fechaHasta = String(reemplazo.fechaHasta || "").trim();
+
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(fechaDesde)) return;
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(fechaHasta)) return;
+
+    /* Los reemplazos ya vencidos no deben permanecer vinculados. */
+    if (fechaHasta < hoy) return;
+
+    const candidato = {
+      id: documento.id,
+      fechaDesde,
+      fechaHasta,
+      vigenteHoy: fechaDesde <= hoy && hoy <= fechaHasta,
+    };
+
+    const actual = candidatosPorNumero.get(numero);
+
+    if (!actual) {
+      candidatosPorNumero.set(numero, candidato);
+      return;
+    }
+
     /*
-     * Si todavía no existe el registro, no hay nada que sincronizar.
-     * Al inicializarlo desde SOPORTE se incorporará el reemplazo activo.
+     * Si hubiera más de un reemplazo ACTIVO no superpuesto para el mismo
+     * espacio, priorizamos el vigente hoy. Si ambos son futuros, dejamos el
+     * más próximo.
      */
-    if (error?.code === "not-found") return;
-    throw error;
-  }
+    if (candidato.vigenteHoy && !actual.vigenteHoy) {
+      candidatosPorNumero.set(numero, candidato);
+      return;
+    }
+
+    if (
+      candidato.vigenteHoy === actual.vigenteHoy &&
+      candidato.fechaDesde < actual.fechaDesde
+    ) {
+      candidatosPorNumero.set(numero, candidato);
+    }
+  });
+
+  const cambios = [];
+
+  [1, 2, 3].forEach((numero) => {
+    const mapaActual = registro[`reemplazosEspacio${numero}`] || {};
+    const idActual = String(mapaActual[correoReemplazante] || "").trim();
+    const idDeseado = String(candidatosPorNumero.get(numero)?.id || "").trim();
+
+    if (idDeseado && idDeseado !== idActual) {
+      cambios.push(
+        new FieldPath(`reemplazosEspacio${numero}`, correoReemplazante),
+        idDeseado,
+      );
+      return;
+    }
+
+    if (!idDeseado && idActual) {
+      cambios.push(
+        new FieldPath(`reemplazosEspacio${numero}`, correoReemplazante),
+        deleteField(),
+      );
+    }
+  });
+
+  if (!cambios.length) return;
+
+  cambios.push(
+    "actualizadoEn",
+    serverTimestamp(),
+    "actualizadoPor",
+    correoOperador,
+  );
+
+  await updateDoc(referenciaRegistro, ...cambios);
 }
 
 async function sincronizarReemplazoTallerConAsistencias({
@@ -796,13 +852,32 @@ async function desactivarReemplazo(idReemplazo) {
   }
 
   try {
-    await updateDoc(doc(db, "reemplazos_docentes", id), {
+    const referenciaReemplazo = doc(db, "reemplazos_docentes", id);
+    const documentoReemplazo = await getDoc(referenciaReemplazo);
+    const datosReemplazo = documentoReemplazo.exists()
+      ? documentoReemplazo.data()
+      : null;
+
+    await updateDoc(referenciaReemplazo, {
       estado: "INACTIVO",
       actualizadoEn: serverTimestamp(),
       actualizadoPor: normalizarCorreo(usuarioActual.email),
       finalizadoEn: serverTimestamp(),
       finalizadoPor: normalizarCorreo(usuarioActual.email),
     });
+
+    if (
+      datosReemplazo &&
+      String(datosReemplazo.tipoHorario || "").trim().toUpperCase() ===
+        "TALLER"
+    ) {
+      await sincronizarReemplazoTallerConCalificaciones({
+        cursoId: datosReemplazo.cursoId || "",
+        cicloLectivo: Number(datosReemplazo.cicloLectivo || 0),
+        reemplazanteCorreo: datosReemplazo.reemplazanteCorreo || "",
+        actualizadoPor: usuarioActual.email,
+      });
+    }
 
     await Swal.fire({
       icon: "success",
@@ -850,7 +925,32 @@ async function eliminarReemplazo(idReemplazo) {
   }
 
   try {
-    await deleteDoc(doc(db, "reemplazos_docentes", id));
+    const usuarioActual = auth.currentUser;
+
+    if (!usuarioActual) {
+      throw new Error("No se pudo validar la sesión actual.");
+    }
+
+    const referenciaReemplazo = doc(db, "reemplazos_docentes", id);
+    const documentoReemplazo = await getDoc(referenciaReemplazo);
+    const datosReemplazo = documentoReemplazo.exists()
+      ? documentoReemplazo.data()
+      : null;
+
+    await deleteDoc(referenciaReemplazo);
+
+    if (
+      datosReemplazo &&
+      String(datosReemplazo.tipoHorario || "").trim().toUpperCase() ===
+        "TALLER"
+    ) {
+      await sincronizarReemplazoTallerConCalificaciones({
+        cursoId: datosReemplazo.cursoId || "",
+        cicloLectivo: Number(datosReemplazo.cicloLectivo || 0),
+        reemplazanteCorreo: datosReemplazo.reemplazanteCorreo || "",
+        actualizadoPor: usuarioActual.email,
+      });
+    }
 
     await Swal.fire({
       icon: "success",

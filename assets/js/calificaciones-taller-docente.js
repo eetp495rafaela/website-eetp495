@@ -664,14 +664,17 @@ async function solicitarCierreTrimestre() {
   if (![1, 2, 3].includes(trimestre)) return;
 
   /*
-   * No cerramos mientras existan cambios locales sin guardar.
+   * Las notas de los tres Talleres sí deben estar guardadas antes del cierre.
+   * Un cambio pendiente de TRIM puede quedar en pantalla: al confirmar el
+   * cierre se consolidará exactamente ese valor manual. Si no hay corrección
+   * manual, se guardará el TRIM calculado con las tres notas persistidas.
    */
-  if (cantidadCambiosPendientes() > 0) {
+  if (cambiosPendientesCalificacionesTallerDocente.size > 0) {
     if (window.Swal) {
       await Swal.fire({
         icon: "info",
-        title: "Hay cambios sin guardar",
-        text: "Guardá primero las calificaciones pendientes y luego cerrá el trimestre.",
+        title: "Hay calificaciones sin guardar",
+        text: "Guardá primero las notas de Taller pendientes y luego cerrá el trimestre.",
         confirmButtonText: "Aceptar",
         returnFocus: false,
       });
@@ -771,6 +774,12 @@ async function solicitarCierreTrimestre() {
               </p>
 
               <p>
+                Al confirmar, se guardará para cada estudiante el TRIM que
+                corresponda: el calculado automáticamente o el valor que haya
+                sido corregido manualmente.
+              </p>
+
+              <p>
                 Podés cerrar igualmente, pero una vez confirmado
                 ningún docente de Taller podrá modificar las
                 calificaciones de este trimestre.
@@ -785,6 +794,12 @@ async function solicitarCierreTrimestre() {
 
               <p>
                 Todas las calificaciones de Taller están cargadas.
+              </p>
+
+              <p>
+                Al confirmar, se guardará para cada estudiante el TRIM que
+                corresponda: el calculado automáticamente o el valor que haya
+                sido corregido manualmente.
               </p>
 
               <p>
@@ -811,6 +826,121 @@ async function solicitarCierreTrimestre() {
       boton.disabled = true;
       boton.innerHTML =
         '<i class="fa-solid fa-spinner fa-spin"></i> Cerrando...';
+    }
+
+    /*
+     * TRIM se consolida recién al cerrar el trimestre. Para cada alumno:
+     * - una corrección manual pendiente tiene prioridad;
+     * - un TRIM MANUAL ya guardado se conserva;
+     * - en cualquier otro caso se usa el cálculo automático actual;
+     * - si faltan notas, cualquier TRIM previo se limpia.
+     *
+     * El cierre se ejecuta sólo después de que todas estas escrituras hayan
+     * terminado correctamente.
+     */
+    for (const alumnoId of alumnosIds) {
+      const campoResultado = campoResultadoTrimestre(trimestre);
+      const resultadoAutomatico = resultadoAutomaticoGuardado(
+        registroActual,
+        trimestre,
+        alumnoId,
+      );
+      const entradaExistente = entradaResultadoExistente(
+        registroActual,
+        trimestre,
+        alumnoId,
+      );
+      const valorExistente = Number(
+        obtenerValorMapa(registroActual[campoResultado], alumnoId),
+      );
+      const tieneCambioPendiente =
+        cambiosPendientesTrimCalificacionesTallerDocente.has(alumnoId);
+      const valorPendiente = tieneCambioPendiente
+        ? cambiosPendientesTrimCalificacionesTallerDocente.get(alumnoId)
+        : null;
+
+      let valorFinal = null;
+      let modoFinal = "AUTO";
+
+      if (resultadoAutomatico !== null) {
+        if (tieneCambioPendiente && valorPendiente !== "AUTO") {
+          valorFinal = Number(valorPendiente);
+          modoFinal = "MANUAL";
+        } else if (
+          !tieneCambioPendiente &&
+          entradaExistente &&
+          typeof entradaExistente === "object" &&
+          String(entradaExistente.modo || "").toUpperCase() === "MANUAL" &&
+          Number.isInteger(valorExistente) &&
+          valorExistente >= 1 &&
+          valorExistente <= 10
+        ) {
+          valorFinal = valorExistente;
+          modoFinal = "MANUAL";
+        } else {
+          valorFinal = resultadoAutomatico;
+          modoFinal = "AUTO";
+        }
+      }
+
+      if (
+        valorFinal !== null &&
+        (!Number.isInteger(valorFinal) || valorFinal < 1 || valorFinal > 10)
+      ) {
+        throw new Error("Se encontró un resultado TRIM fuera del rango 1 a 10.");
+      }
+
+      const entradaYaCoincide =
+        valorFinal === null
+          ? entradaExistente === null
+          : entradaExistente &&
+            typeof entradaExistente === "object" &&
+            valorExistente === valorFinal &&
+            String(entradaExistente.modo || "AUTO").toUpperCase() === modoFinal;
+
+      if (!entradaYaCoincide) {
+        const marcaTiempoTrim = serverTimestamp();
+
+        await updateDoc(
+          referencia,
+          new FieldPath(campoResultado, alumnoId),
+          valorFinal === null
+            ? null
+            : {
+                valor: valorFinal,
+                modo: modoFinal,
+                por: correo,
+                en: marcaTiempoTrim,
+              },
+          "ultimaOperacion",
+          {
+            tipo: "TRIM",
+            alumnoId,
+            trimestre,
+            espacioId: "",
+            reemplazoId: "",
+            por: correo,
+            en: marcaTiempoTrim,
+          },
+          "actualizadoEn",
+          marcaTiempoTrim,
+          "actualizadoPor",
+          correo,
+        );
+
+        registroActual[campoResultado] ||= {};
+        registroActual[campoResultado][alumnoId] =
+          valorFinal === null
+            ? null
+            : {
+                valor: valorFinal,
+                modo: modoFinal,
+                por: correo,
+                en: new Date(),
+              };
+      }
+
+      cambiosPendientesTrimCalificacionesTallerDocente.delete(alumnoId);
     }
 
     const marcaTiempo = serverTimestamp();
@@ -1630,94 +1760,30 @@ async function guardarCambiosPendientes() {
 
       notasGuardadas += 1;
 
+      /*
+       * TRIM ya no se persiste automáticamente al guardar la tercera nota.
+       * Sólo se recalcula la celda en pantalla con las notas ya guardadas.
+       * El valor definitivo se consolida cuando se cierra el trimestre.
+       */
       const resultadoAutomatico = resultadoAutomaticoGuardado(
         registroCalificacionesTallerDocente,
         trimestre,
         alumnoId,
       );
-      const resultadoExistente = entradaResultadoExistente(
-        registroCalificacionesTallerDocente,
-        trimestre,
-        alumnoId,
-      );
-      const tieneTrimPendiente =
-        cambiosPendientesTrimCalificacionesTallerDocente.has(alumnoId);
-      const resultadoEraManual =
-        resultadoExistente &&
-        typeof resultadoExistente === "object" &&
-        resultadoExistente.modo === "MANUAL";
-      const resultadoEraAuto =
-        resultadoExistente &&
-        typeof resultadoExistente === "object" &&
-        resultadoExistente.modo === "AUTO";
-      const valorAutoExistente = Number(resultadoExistente?.valor);
-
-      /*
-       * Si se quitó una de las tres notas, TRIM deja de existir aunque antes
-       * hubiera sido manual. Si las tres siguen completas, un MANUAL se
-       * conserva y un cambio explícito del docente se procesa más abajo.
-       */
-      const debeLimpiarTrim =
-        resultadoAutomatico === null && resultadoExistente !== null;
-      const debeGuardarTrimAuto =
-        resultadoAutomatico !== null &&
-        !tieneTrimPendiente &&
-        !resultadoEraManual &&
-        (!resultadoEraAuto || valorAutoExistente !== resultadoAutomatico);
-
-      if (debeLimpiarTrim || debeGuardarTrimAuto) {
-        const marcaTiempoTrim = serverTimestamp();
-        const valorTrim = debeLimpiarTrim ? null : resultadoAutomatico;
-
-        await updateDoc(
-          referencia,
-          new FieldPath(campoResultadoTrimestre(trimestre), alumnoId),
-          valorTrim === null
-            ? null
-            : {
-                valor: valorTrim,
-                modo: "AUTO",
-                por: correo,
-                en: marcaTiempoTrim,
-              },
-          "ultimaOperacion",
-          {
-            tipo: "TRIM",
-            alumnoId,
-            trimestre,
-            espacioId: "",
-            reemplazoId,
-            por: correo,
-            en: marcaTiempoTrim,
-          },
-          "actualizadoEn",
-          marcaTiempoTrim,
-          "actualizadoPor",
-          correo,
-        );
-
-        actualizarRegistroLocalTrimDespuesDeGuardar(
-          registroCalificacionesTallerDocente,
-          alumnoId,
-          valorTrim,
-          "AUTO",
-          correo,
-        );
-
-        trimGuardados += 1;
-      }
 
       if (resultadoAutomatico === null) {
         cambiosPendientesTrimCalificacionesTallerDocente.delete(alumnoId);
       }
 
       cambiosPendientesCalificacionesTallerDocente.delete(alumnoId);
+      actualizarCeldaTrimAlumno(alumnoId);
     }
 
     /*
-     * Después de las notas se guardan los cambios explícitos de TRIM.
-     * AUTO recalcula el resultado institucional con las tres notas ya
-     * persistidas. Un valor 1..10 se guarda como MANUAL.
+     * Los cambios explícitos de TRIM pueden seguir guardándose manualmente
+     * durante el trimestre. Lo que se elimina es sólo el guardado automático
+     * disparado por la tercera nota. Al cerrar, el sistema vuelve a consolidar
+     * el valor definitivo visible para cada alumno.
      */
     const trimPendientes = Array.from(
       cambiosPendientesTrimCalificacionesTallerDocente.entries(),
@@ -1966,7 +2032,7 @@ function renderizarTabla(registro) {
           <div class="acciones-calificaciones-taller-docente">
             <div class="ayuda-edicion-calificaciones-taller">
               <i class="fa-solid fa-circle-info"></i>
-              Podés cargar tu Taller. La columna TRIM se habilita después de guardar las tres notas.
+              Podés cargar tu Taller. TRIM se calcula al completar las tres notas, puede ajustarse manualmente y se consolida al cerrar el trimestre.
             </div>
 
             <div class="botones-acciones-calificaciones-taller-docente">
