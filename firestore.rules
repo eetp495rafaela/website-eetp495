@@ -313,6 +313,11 @@ function reemplazoCalificacionesVigente(
 }
 
 function docentePuedeEditarEspacio1(datos, reemplazoId) {
+  let correo = request.auth.token.email;
+  let reemplazoVinculado = datos
+    .get("reemplazosEspacio1", {})
+    .get(correo, "");
+
   return esDocentePorPerfil()
     && (
       asignacionTallerActiva(
@@ -320,19 +325,27 @@ function docentePuedeEditarEspacio1(datos, reemplazoId) {
         datos.get("cursoId", ""),
         datos.get("espacio1Id", ""),
         datos.get("cicloLectivo", 0),
-        request.auth.token.email
+        correo
       )
-      || reemplazoCalificacionesVigente(
-        reemplazoId,
+      || (
+        reemplazoId == reemplazoVinculado
+        && reemplazoCalificacionesVigente(
+        reemplazoVinculado,
         datos.get("espacio1AsignacionId", ""),
         datos.get("cursoId", ""),
         datos.get("espacio1Id", ""),
         datos.get("cicloLectivo", 0)
+        )
       )
     );
 }
 
 function docentePuedeEditarEspacio2(datos, reemplazoId) {
+  let correo = request.auth.token.email;
+  let reemplazoVinculado = datos
+    .get("reemplazosEspacio2", {})
+    .get(correo, "");
+
   return esDocentePorPerfil()
     && (
       asignacionTallerActiva(
@@ -340,19 +353,27 @@ function docentePuedeEditarEspacio2(datos, reemplazoId) {
         datos.get("cursoId", ""),
         datos.get("espacio2Id", ""),
         datos.get("cicloLectivo", 0),
-        request.auth.token.email
+        correo
       )
-      || reemplazoCalificacionesVigente(
-        reemplazoId,
+      || (
+        reemplazoId == reemplazoVinculado
+        && reemplazoCalificacionesVigente(
+        reemplazoVinculado,
         datos.get("espacio2AsignacionId", ""),
         datos.get("cursoId", ""),
         datos.get("espacio2Id", ""),
         datos.get("cicloLectivo", 0)
+        )
       )
     );
 }
 
 function docentePuedeEditarEspacio3(datos, reemplazoId) {
+  let correo = request.auth.token.email;
+  let reemplazoVinculado = datos
+    .get("reemplazosEspacio3", {})
+    .get(correo, "");
+
   return esDocentePorPerfil()
     && (
       asignacionTallerActiva(
@@ -360,14 +381,17 @@ function docentePuedeEditarEspacio3(datos, reemplazoId) {
         datos.get("cursoId", ""),
         datos.get("espacio3Id", ""),
         datos.get("cicloLectivo", 0),
-        request.auth.token.email
+        correo
       )
-      || reemplazoCalificacionesVigente(
-        reemplazoId,
+      || (
+        reemplazoId == reemplazoVinculado
+        && reemplazoCalificacionesVigente(
+        reemplazoVinculado,
         datos.get("espacio3AsignacionId", ""),
         datos.get("cursoId", ""),
         datos.get("espacio3Id", ""),
         datos.get("cicloLectivo", 0)
+        )
       )
     );
 }

@@ -15,7 +15,10 @@ import {
   deleteDoc,
   addDoc,
   updateDoc,
+  query,
+  where,
   serverTimestamp,
+  FieldPath,
 } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -59,6 +62,115 @@ function normalizarCorreo(correo) {
   return String(correo || "")
     .trim()
     .toLowerCase();
+}
+
+async function sincronizarReemplazoTallerConCalificaciones({
+  reemplazoId,
+  asignacionTitularId,
+  cursoId,
+  cicloLectivo,
+  reemplazanteCorreo,
+  actualizadoPor,
+}) {
+  const idReemplazo = String(reemplazoId || "").trim();
+  const idAsignacion = String(asignacionTitularId || "").trim();
+  const idCurso = String(cursoId || "").trim();
+  const ciclo = Number(cicloLectivo || 0);
+  const correoReemplazante = normalizarCorreo(reemplazanteCorreo);
+  const correoOperador = normalizarCorreo(actualizadoPor);
+
+  if (
+    !idReemplazo ||
+    !idAsignacion ||
+    !idCurso ||
+    !ciclo ||
+    !correoReemplazante ||
+    !correoOperador
+  ) {
+    throw new Error(
+      "No se pudo preparar la vinculación del reemplazo con calificaciones.",
+    );
+  }
+
+  /*
+   * El orden de espacios debe coincidir con el utilizado al inicializar
+   * calificaciones: los tres Talleres activos, ordenados por nombre.
+   * Así Gestión no necesita permiso de lectura sobre las notas del curso.
+   */
+  const consultaAsignaciones = query(
+    collection(db, "asignaciones_docentes"),
+    where("cursoId", "==", idCurso),
+  );
+
+  const resultadoAsignaciones = await getDocs(consultaAsignaciones);
+  const porEspacio = new Map();
+
+  resultadoAsignaciones.forEach((documento) => {
+    const asignacion = { id: documento.id, ...documento.data() };
+    const estado = String(asignacion.estado || "").trim().toUpperCase();
+    const tipo = String(asignacion.espacioTipo || "").trim().toUpperCase();
+
+    if (
+      !["ACTIVA", "ACTIVO"].includes(estado) ||
+      tipo !== "TALLER" ||
+      Number(asignacion.cicloLectivo || 0) !== ciclo
+    ) {
+      return;
+    }
+
+    const espacioId = String(asignacion.espacioId || "").trim();
+
+    if (espacioId && !porEspacio.has(espacioId)) {
+      porEspacio.set(espacioId, asignacion);
+    }
+  });
+
+  const asignaciones = Array.from(porEspacio.values()).sort((a, b) =>
+    String(a.espacioNombre || "").localeCompare(
+      String(b.espacioNombre || ""),
+      "es",
+      { sensitivity: "base" },
+    ),
+  );
+
+  const indiceEspacio = asignaciones.findIndex(
+    (asignacion) => asignacion.id === idAsignacion,
+  );
+
+  if (asignaciones.length !== 3 || indiceEspacio < 0) {
+    throw new Error(
+      "No se pudo identificar el Taller del reemplazo dentro del Registro de Calificaciones.",
+    );
+  }
+
+  const referenciaRegistro = doc(
+    db,
+    "calificaciones_taller",
+    `${ciclo}__${idCurso}`,
+  );
+  const marcaTiempo = serverTimestamp();
+
+  try {
+    await updateDoc(
+      referenciaRegistro,
+      new FieldPath(
+        `reemplazosEspacio${indiceEspacio + 1}`,
+        correoReemplazante,
+      ),
+      idReemplazo,
+      "actualizadoEn",
+      marcaTiempo,
+      "actualizadoPor",
+      correoOperador,
+    );
+  } catch (error) {
+    /*
+     * Si todavía no existe el registro, no hay nada que sincronizar.
+     * Al inicializarlo desde SOPORTE se incorporará el reemplazo activo.
+     */
+    if (error?.code === "not-found") return;
+    throw error;
+  }
 }
 
 function mostrarMensajeReemplazo(texto = "", tipo = "") {
@@ -498,7 +610,37 @@ async function registrarReemplazoDocente(evento) {
       actualizadoPor: normalizarCorreo(usuarioActual.email),
     };
 
-    await addDoc(collection(db, "reemplazos_docentes"), datosReemplazo);
+    const referenciaReemplazo = await addDoc(
+      collection(db, "reemplazos_docentes"),
+      datosReemplazo,
+    );
+
+    if (tipoHorario === "TALLER") {
+      try {
+        await sincronizarReemplazoTallerConCalificaciones({
+          reemplazoId: referenciaReemplazo.id,
+          asignacionTitularId,
+          cursoId: asignacion.cursoId || "",
+          cicloLectivo: Number(asignacion.cicloLectivo || 0),
+          reemplazanteCorreo,
+          actualizadoPor: usuarioActual.email,
+        });
+      } catch (errorSincronizacion) {
+        /*
+         * Evitamos dejar un reemplazo de Taller activo si el Registro de
+         * Calificaciones existente no pudo quedar vinculado al mismo.
+         */
+        await updateDoc(referenciaReemplazo, {
+          estado: "INACTIVO",
+          actualizadoEn: serverTimestamp(),
+          actualizadoPor: normalizarCorreo(usuarioActual.email),
+          finalizadoEn: serverTimestamp(),
+          finalizadoPor: normalizarCorreo(usuarioActual.email),
+        });
+
+        throw errorSincronizacion;
+      }
+    }
 
     mostrarMensajeReemplazo("Reemplazo registrado correctamente.", "ok");
 
