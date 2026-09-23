@@ -770,7 +770,7 @@ async function cargarEstudiantesParaClaseSira() {
     renderizarListaEstudiantesSira(clase, estudiantes);
 
     mostrarMensajeSira(
-      "Estudiantes cargados correctamente. En el próximo paso activamos el guardado.",
+      "Estudiantes cargados correctamente.",
     );
   } catch (error) {
     console.error("Error al cargar estudiantes Si.R.A.:", error);
