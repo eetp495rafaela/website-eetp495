@@ -876,47 +876,42 @@ async function obtenerAsistenciaExistenteSira(clase) {
     .toUpperCase();
 
   /*
-   * Taller tiene un único registro de asistencia por clase + fecha.
-   *
-   * El reemplazante conserva la búsqueda por reemplazoId que ya está probada.
-   * El docente con asignación directa busca por clase + fecha, sin depender
-   * del correo histórico guardado en la asistencia. Así una reasignación
-   * permanente conserva todo el historial para el nuevo docente.
+   * Taller tiene un único registro de asistencia por clase + fecha y su ID
+   * es determinístico. Lo consultamos directamente por documento en lugar de
+   * hacer una consulta de colección. Esto permite que el titular actual y el
+   * reemplazante vigente trabajen sobre el mismo registro, incluso si fue
+   * creado por otro docente, y evita que Firestore rechace una consulta LIST
+   * que no puede demostrar de antemano quién creó cada asistencia.
    *
    * Educación Física conserva la búsqueda anterior para no modificar el
    * comportamiento que ya está funcionando.
    */
-  let consulta = null;
+  if (tipo === "TALLER") {
+    const idAsistencia = obtenerIdAsistenciaSira(clase);
 
-  if (tipo === "TALLER" && clase.esReemplazoTemporal) {
-    const reemplazoId = String(clase.reemplazoId || "").trim();
-
-    if (!reemplazoId) {
+    if (!idAsistencia) {
       return null;
     }
 
-    consulta = query(
-      collection(db, "asistencias_clases"),
-      where("reemplazoId", "==", reemplazoId),
-      where("tipoHorario", "==", "TALLER"),
-      where("fecha", "==", fecha),
-      where("horarioId", "==", clase.id),
-    );
-  } else if (tipo === "TALLER") {
-    consulta = query(
-      collection(db, "asistencias_clases"),
-      where("tipoHorario", "==", "TALLER"),
-      where("fecha", "==", fecha),
-      where("horarioId", "==", clase.id),
-    );
-  } else {
-    consulta = query(
-      collection(db, "asistencias_clases"),
-      where("docenteCorreo", "==", correoDocente),
-      where("fecha", "==", fecha),
-      where("horarioId", "==", clase.id),
-    );
+    const referencia = doc(db, "asistencias_clases", idAsistencia);
+    const documento = await getDoc(referencia);
+
+    if (!documento.exists()) {
+      return null;
+    }
+
+    return {
+      id: documento.id,
+      ...documento.data(),
+    };
   }
+
+  const consulta = query(
+    collection(db, "asistencias_clases"),
+    where("docenteCorreo", "==", correoDocente),
+    where("fecha", "==", fecha),
+    where("horarioId", "==", clase.id),
+  );
 
   const resultado = await getDocs(consulta);
 

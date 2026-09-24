@@ -2672,7 +2672,38 @@ match /horarios/{horarioId} {
     }
 
     match /asistencias_clases/{asistenciaId} {
-      allow get, list: if esSoporte()
+      /*
+       * GET puntual: Si.R.A. de Taller usa un ID determinístico por
+       * clase + fecha. Permitimos que un docente activo consulte también
+       * un ID todavía inexistente; si el documento existe, debe superar
+       * exactamente las mismas validaciones de acceso que antes.
+       */
+      allow get: if esSoporte()
+        || esGestionInstitucional()
+        || (
+          esDocentePorPerfil()
+          && (
+            !exists(
+              /databases/$(database)/documents/asistencias_clases/$(asistenciaId)
+            )
+
+            || resource.data.docenteCorreo
+              == request.auth.token.email
+
+            || resource.data.get("docenteTitularCorreo", "")
+              == request.auth.token.email
+
+            || docenteAsignadoActualPuedeLeerAsistenciaTaller(resource.data)
+
+            || reemplazoPuedeLeerAsistenciaTaller(resource.data)
+          )
+        );
+
+      /*
+       * Las consultas de colección conservan las condiciones anteriores.
+       * Educación Física continúa usando este camino.
+       */
+      allow list: if esSoporte()
         || esGestionInstitucional()
         || (
           esDocentePorPerfil()
