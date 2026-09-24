@@ -68,7 +68,7 @@
     </header>
 
     <main class="contenedor" id="inicio">
-      <section class="grupo">
+      <section class="grupo" data-panel-docente-principal>
         <h2>Panel de Accesos Principales para Docentes</h2>
 
         <div class="grid grid-docente-principal">
@@ -217,6 +217,7 @@
 
           <a
             class="tarjeta tarjeta-enlace"
+            data-acceso-docente-limitado
             href="https://drive.google.com/drive/folders/1NoVpghNJCUUHBSTrvQVYmSbqrCXgT4Dy"
             target="_blank"
             rel="noopener noreferrer"
@@ -231,6 +232,7 @@
 
           <a
             class="tarjeta tarjeta-enlace"
+            data-acceso-docente-limitado
             href="https://drive.google.com/drive/folders/12uzImxU1baMY8YFNFPLPRPbyljqSlJtI?usp=sharing"
             target="_blank"
             rel="noopener noreferrer"
@@ -261,6 +263,7 @@
 
           <a
             class="tarjeta tarjeta-enlace"
+            data-acceso-docente-limitado
             href="#enlaces-institucionales-docente"
           >
             <i class="fa-solid fa-link"></i>
@@ -1153,6 +1156,7 @@
       <section
         class="grupo seccion-destino"
         id="enlaces-institucionales-docente"
+        data-acceso-docente-limitado
       >
         <h2>Enlaces Institucionales</h2>
 
@@ -1274,7 +1278,7 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script
       type="module"
-      src="../assets/js/proteger-portal.js?v=20260831-appcheck1"
+      src="../assets/js/proteger-portal.js?v=20260924-1"
     ></script>
     <script
       type="module"

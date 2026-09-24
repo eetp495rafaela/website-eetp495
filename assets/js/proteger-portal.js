@@ -14,8 +14,12 @@ import {
 
 import {
   getFirestore,
+  collection,
   doc,
   getDoc,
+  getDocs,
+  query,
+  where,
   setDoc,
   serverTimestamp,
 } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
@@ -216,6 +220,118 @@ function normalizarCorreo(correo) {
   return String(correo || "")
     .trim()
     .toLowerCase();
+}
+
+function fechaActualLocalIso() {
+  const ahora = new Date();
+  const anio = ahora.getFullYear();
+  const mes = String(ahora.getMonth() + 1).padStart(2, "0");
+  const dia = String(ahora.getDate()).padStart(2, "0");
+
+  return `${anio}-${mes}-${dia}`;
+}
+
+function reemplazoDocenteVigente(reemplazo, fechaActual) {
+  const estado = normalizarValorComparacion(reemplazo?.estado);
+  const fechaDesde = String(reemplazo?.fechaDesde || "").trim();
+  const fechaHasta = String(reemplazo?.fechaHasta || "").trim();
+
+  return (
+    estado === "ACTIVO" &&
+    fechaDesde &&
+    fechaHasta &&
+    fechaActual >= fechaDesde &&
+    fechaActual <= fechaHasta
+  );
+}
+
+async function obtenerVinculosDocenteReemplazante(correo) {
+  const asignacionesPorId = new Map();
+
+  const consultasAsignaciones = [
+    query(
+      collection(db, "asignaciones_docentes"),
+      where("docenteCorreo", "==", correo),
+      where("estado", "==", "ACTIVA"),
+    ),
+    query(
+      collection(db, "asignaciones_docentes"),
+      where("docenteCorreo", "==", correo),
+      where("estado", "==", "ACTIVO"),
+    ),
+  ];
+
+  for (const consultaAsignaciones of consultasAsignaciones) {
+    const resultado = await getDocs(consultaAsignaciones);
+
+    resultado.forEach((documento) => {
+      asignacionesPorId.set(documento.id, documento.data());
+    });
+  }
+
+  const resultadoReemplazos = await getDocs(
+    query(
+      collection(db, "reemplazos_docentes"),
+      where("reemplazanteCorreo", "==", correo),
+    ),
+  );
+
+  const fechaActual = fechaActualLocalIso();
+  let tieneReemplazoVigente = false;
+
+  resultadoReemplazos.forEach((documento) => {
+    if (reemplazoDocenteVigente(documento.data(), fechaActual)) {
+      tieneReemplazoVigente = true;
+    }
+  });
+
+  return {
+    tieneAsignacionDirecta: asignacionesPorId.size > 0,
+    tieneReemplazoVigente,
+  };
+}
+
+function instalarVistaDocenteLimitada() {
+  document.body.dataset.docenteAccesoLimitado = "true";
+
+  if (!document.getElementById("estilosAccesoDocenteLimitado")) {
+    const estilos = document.createElement("style");
+
+    estilos.id = "estilosAccesoDocenteLimitado";
+    estilos.textContent = `
+      body[data-docente-acceso-limitado="true"]
+        [data-panel-docente-principal]
+        .grid-docente-principal
+        > :not([data-acceso-docente-limitado]) {
+        display: none !important;
+      }
+
+      body[data-docente-acceso-limitado="true"]
+        main#inicio
+        > section:not([data-panel-docente-principal]):not([data-acceso-docente-limitado]) {
+        display: none !important;
+      }
+    `;
+
+    document.head.appendChild(estilos);
+  }
+
+  const hashesPermitidos = new Set([
+    "",
+    "#inicio",
+    "#enlaces-institucionales-docente",
+  ]);
+
+  const controlarHashLimitado = () => {
+    const hashActual = String(window.location.hash || "").trim();
+
+    if (!hashesPermitidos.has(hashActual)) {
+      window.location.replace("#inicio");
+    }
+  };
+
+  controlarHashLimitado();
+  window.addEventListener("hashchange", controlarHashLimitado);
 }
 
 async function registrarUltimoIngreso(user, perfil, correo, rolUsuario) {
@@ -590,12 +706,6 @@ onAuthStateChanged(auth, async (user) => {
       return;
     }
 
-    if (accesoVencido(perfil.fechaFinAcceso)) {
-      await signOut(auth);
-      volverAlLogin("Tu acceso al portal ha finalizado.");
-      return;
-    }
-
     if (!rolesUsuario.length) {
       await signOut(auth);
       volverAlLogin("Tu cuenta no tiene roles válidos configurados.");
@@ -655,6 +765,46 @@ onAuthStateChanged(auth, async (user) => {
       return;
     }
 
+    const perfilConAccesoVencido = accesoVencido(perfil.fechaFinAcceso);
+    const tipoVinculoNormalizado = normalizarValorComparacion(
+      perfil.tipoVinculo || perfil.situacionRevista,
+    );
+
+    const esDocenteReemplazante =
+      rolUsuario === "DOCENTE" && tipoVinculoNormalizado === "REEMPLAZANTE";
+
+    let accesoDocenteLimitado = false;
+
+    if (perfilConAccesoVencido) {
+      /*
+       * Un reemplazante cuyo acceso temporal llegó a su fecha final puede
+       * seguir entrando al Portal Docente, pero únicamente a los recursos
+       * institucionales permanentes. Para cualquier otro perfil se conserva
+       * el comportamiento anterior de acceso vencido.
+       */
+      if (!esDocenteReemplazante) {
+        await signOut(auth);
+        volverAlLogin("Tu acceso al portal ha finalizado.");
+        return;
+      }
+
+      accesoDocenteLimitado = true;
+    } else if (esDocenteReemplazante) {
+      /*
+       * Mientras el perfil todavía está vigente, la colección de reemplazos
+       * es la fuente de verdad. Si el docente obtuvo una asignación directa o
+       * posee otro reemplazo vigente, mantiene el Portal Docente completo.
+       */
+      const vinculos = await obtenerVinculosDocenteReemplazante(correo);
+
+      accesoDocenteLimitado =
+        !vinculos.tieneAsignacionDirecta && !vinculos.tieneReemplazoVigente;
+    }
+
+    if (accesoDocenteLimitado) {
+      instalarVistaDocenteLimitada();
+    }
+
     await registrarUltimoIngreso(user, perfil, correo, rolUsuario);
     iniciarControlInactividad();
     ajustarVistaPortalAlumno(perfil, rolUsuario);
@@ -667,6 +817,7 @@ onAuthStateChanged(auth, async (user) => {
       estado,
       tipoVinculo: perfil.tipoVinculo || "",
       situacionRevista: perfil.situacionRevista || "",
+      accesoDocenteLimitado,
     };
 
     window.dispatchEvent(
