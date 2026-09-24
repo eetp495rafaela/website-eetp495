@@ -16,6 +16,8 @@ import {
   doc,
   getDoc,
   getDocs,
+  query,
+  where,
   setDoc,
   updateDoc,
   addDoc,
@@ -494,6 +496,97 @@ function normalizarCorreo(correo) {
   return String(correo || "")
     .trim()
     .toLowerCase();
+}
+
+function normalizarTextoMayusculas(valor) {
+  return String(valor || "")
+    .trim()
+    .toUpperCase();
+}
+
+function usuarioEsAlumnoCursandoParaCalificaciones(usuario) {
+  const rolPrincipal = normalizarTextoMayusculas(usuario?.rol);
+  const roles = Array.isArray(usuario?.roles)
+    ? usuario.roles.map((rol) => normalizarTextoMayusculas(rol))
+    : [];
+  const tipoVinculo = normalizarTextoMayusculas(usuario?.tipoVinculo);
+  const situacionRevista = normalizarTextoMayusculas(
+    usuario?.situacionRevista,
+  );
+
+  return (
+    normalizarTextoMayusculas(usuario?.estado) === "ACTIVO" &&
+    (rolPrincipal === "ALUMNO" || roles.includes("ALUMNO")) &&
+    (tipoVinculo === "CURSANDO" || situacionRevista === "CURSANDO")
+  );
+}
+
+function crearMapaAlumnosCalificacionesDesdeUsuarios(estudiantes) {
+  const alumnos = {};
+
+  estudiantes.forEach((estudiante) => {
+    const id = String(estudiante.id || estudiante.correo || "").trim();
+
+    if (!id) return;
+
+    alumnos[id] = {
+      id,
+      correo: normalizarCorreo(estudiante.correo || id),
+      dni: String(estudiante.dni || "").trim(),
+      nombre: String(
+        estudiante.nombreCompleto || estudiante.nombre || id,
+      ).trim(),
+      grupoTaller: normalizarTextoMayusculas(estudiante.grupoTaller),
+    };
+  });
+
+  return alumnos;
+}
+
+async function sincronizarAlumnosRegistroCalificacionesCursoActual(cursoId) {
+  const idCurso = String(cursoId || "").trim();
+
+  if (!idCurso || !usuarioSoporte) {
+    return { actualizado: false, motivo: "SIN_CURSO" };
+  }
+
+  const cicloLectivo = new Date().getFullYear();
+  const referenciaRegistro = doc(
+    db,
+    "calificaciones_taller",
+    `${cicloLectivo}__${idCurso}`,
+  );
+
+  const registro = await getDoc(referenciaRegistro);
+
+  if (!registro.exists()) {
+    return { actualizado: false, motivo: "SIN_REGISTRO" };
+  }
+
+  const consultaEstudiantes = query(
+    collection(db, "usuarios"),
+    where("cursoId", "==", idCurso),
+  );
+
+  const resultadoEstudiantes = await getDocs(consultaEstudiantes);
+
+  const estudiantes = resultadoEstudiantes.docs
+    .map((documento) => ({
+      id: documento.id,
+      ...documento.data(),
+    }))
+    .filter(usuarioEsAlumnoCursandoParaCalificaciones);
+
+  await updateDoc(referenciaRegistro, {
+    alumnos: crearMapaAlumnosCalificacionesDesdeUsuarios(estudiantes),
+    actualizadoEn: serverTimestamp(),
+    actualizadoPor: normalizarCorreo(usuarioSoporte.email),
+  });
+
+  return {
+    actualizado: true,
+    cantidad: estudiantes.length,
+  };
 }
 
 async function enviarAlBackendInformesAdmin(datos) {
@@ -1457,6 +1550,31 @@ formAsignarCursoEstudiante.addEventListener("submit", async (event) => {
       actualizadoEn: serverTimestamp(),
     });
 
+    let avisoSincronizacionCalificaciones = "";
+
+    try {
+      const sincronizacion =
+        await sincronizarAlumnosRegistroCalificacionesCursoActual(curso.id);
+
+      if (sincronizacion.actualizado) {
+        avisoSincronizacionCalificaciones =
+          "<p>El Registro de Calificaciones de Taller también quedó actualizado.</p>";
+      }
+    } catch (errorSincronizacion) {
+      console.warn(
+        "El curso/grupo se guardó, pero no se pudo sincronizar el Registro de Calificaciones:",
+        errorSincronizacion,
+      );
+
+      avisoSincronizacionCalificaciones = `
+        <p style="color:#9b2c2c">
+          El curso/grupo se guardó, pero no se pudo actualizar automáticamente
+          el Registro de Calificaciones. Podés sincronizarlo desde
+          Calificaciones de Taller → Inicializar / actualizar.
+        </p>
+      `;
+    }
+
     const nombreEstudiante = estudianteEnAsignacion.nombreCompleto;
 
     cerrarModalAsignarCursoEstudiante();
@@ -1465,7 +1583,8 @@ formAsignarCursoEstudiante.addEventListener("submit", async (event) => {
       title: "Curso asignado",
       html: `
     <p><strong>${nombreEstudiante}</strong></p>
-    <p>${curso.nombre || `${anio}º ${division}`} · ${grupoTaller}</p>
+    <p>${curso.nombre || `${anio}º ${division}`} · ${grupoTaller || "Exceptuado de Taller"}</p>
+    ${avisoSincronizacionCalificaciones}
   `,
       icon: "success",
       confirmButtonText: "Aceptar",
@@ -4974,6 +5093,31 @@ async function importarAsignacionesCursosAlumnos(asignaciones) {
     await lote.commit();
 
     cantidadActualizada += grupoAsignaciones.length;
+  }
+
+  /*
+   * Si ya existe el Registro de Calificaciones del ciclo actual, una
+   * importación de cursos/grupos debe reflejarse allí sin obligar a
+   * reinicializarlo manualmente. Se sincroniza una sola vez por curso,
+   * no una vez por estudiante, para evitar lecturas/escrituras innecesarias.
+   */
+  const cursosAfectados = [
+    ...new Set(
+      asignaciones
+        .map((asignacion) => String(asignacion.cursoId || "").trim())
+        .filter(Boolean),
+    ),
+  ];
+
+  for (const cursoId of cursosAfectados) {
+    try {
+      await sincronizarAlumnosRegistroCalificacionesCursoActual(cursoId);
+    } catch (errorSincronizacion) {
+      console.warn(
+        `No se pudo sincronizar automáticamente el Registro de Calificaciones del curso ${cursoId}:`,
+        errorSincronizacion,
+      );
+    }
   }
 
   return cantidadActualizada;
