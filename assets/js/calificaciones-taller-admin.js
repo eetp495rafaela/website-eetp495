@@ -532,6 +532,140 @@ function crearDatosRegistro({
   };
 }
 
+async function sincronizarRegistroCalificacionesExistente({
+  referenciaRegistro,
+  registroActual,
+  curso,
+  cursoId,
+  cicloLectivo,
+}) {
+  await validarPeriodosConfigurados(cicloLectivo);
+
+  const [asignaciones, estudiantes] = await Promise.all([
+    obtenerAsignacionesTaller(cursoId, cicloLectivo),
+    obtenerEstudiantesCurso(cursoId),
+  ]);
+
+  const reemplazos = await obtenerMapasReemplazos(
+    cursoId,
+    cicloLectivo,
+    asignaciones,
+  );
+
+  const porEspacio = new Map();
+
+  asignaciones.forEach((asignacion, indice) => {
+    const espacioId = String(asignacion.espacioId || "").trim();
+
+    if (!espacioId) return;
+
+    porEspacio.set(espacioId, {
+      asignacion,
+      reemplazos: reemplazos[indice] || {},
+    });
+  });
+
+  const cambios = {
+    alumnos: crearMapaAlumnos(estudiantes),
+    actualizadoEn: serverTimestamp(),
+    actualizadoPor: normalizarCorreo(usuarioSoporteCalificaciones?.email),
+  };
+
+  for (let numero = 1; numero <= 3; numero += 1) {
+    const espacioId = String(
+      registroActual[`espacio${numero}Id`] || "",
+    ).trim();
+
+    const actual = porEspacio.get(espacioId);
+
+    if (!actual) {
+      throw new Error(
+        `No se encontró una asignación activa para ${
+          registroActual[`espacio${numero}Nombre`] || espacioId || `Taller ${numero}`
+        }. Revisá las asignaciones antes de actualizar el registro.`,
+      );
+    }
+
+    cambios[`espacio${numero}Nombre`] = String(
+      actual.asignacion.espacioNombre ||
+        registroActual[`espacio${numero}Nombre`] ||
+        "",
+    ).trim();
+
+    cambios[`espacio${numero}DocenteCorreo`] = normalizarCorreo(
+      actual.asignacion.docenteCorreo,
+    );
+
+    cambios[`espacio${numero}AsignacionId`] = actual.asignacion.id;
+    cambios[`reemplazosEspacio${numero}`] = actual.reemplazos;
+  }
+
+  const cantidadG1 = estudiantes.filter(
+    (estudiante) => normalizarMayusculas(estudiante.grupoTaller) === "G1",
+  ).length;
+
+  const cantidadG2 = estudiantes.filter(
+    (estudiante) => normalizarMayusculas(estudiante.grupoTaller) === "G2",
+  ).length;
+
+  const cantidadExceptuados = estudiantes.length - cantidadG1 - cantidadG2;
+
+  const confirmacion = await Swal.fire({
+    icon: "question",
+    title: "Actualizar registro existente",
+    html: `
+      <div style="text-align:left">
+        <p>
+          Ya existe el Registro de Calificaciones de
+          <strong>${escaparHtml(obtenerNombreCurso(curso))}</strong>.
+        </p>
+        <p>
+          Se actualizarán solamente docentes/asignaciones, reemplazos y
+          estudiantes del curso. <strong>Las calificaciones no se modifican.</strong>
+        </p>
+        <p>
+          Estudiantes actuales: <strong>${estudiantes.length}</strong>
+          (G1: ${cantidadG1} · G2: ${cantidadG2} · Exceptuados: ${cantidadExceptuados})
+        </p>
+      </div>
+    `,
+    showCancelButton: true,
+    confirmButtonText: "Sí, actualizar",
+    cancelButtonText: "Cancelar",
+    reverseButtons: true,
+    focusCancel: true,
+  });
+
+  if (!confirmacion.isConfirmed) {
+    mostrarMensaje("Actualización cancelada.");
+    return false;
+  }
+
+  mostrarMensaje("Actualizando estructura del registro...");
+
+  await updateDoc(referenciaRegistro, cambios);
+
+  await Swal.fire({
+    icon: "success",
+    title: "Registro actualizado",
+    html: `
+      <p>
+        Se sincronizó correctamente el Registro de Calificaciones de
+        <strong>${escaparHtml(obtenerNombreCurso(curso))}</strong>.
+      </p>
+      <p>Las calificaciones existentes fueron conservadas.</p>
+    `,
+    confirmButtonText: "Aceptar",
+  });
+
+  mostrarMensaje(
+    `Registro actualizado con ${estudiantes.length} estudiante(s).`,
+    "ok",
+  );
+
+  return true;
+}
+
 async function inicializarRegistroCalificaciones(evento) {
   evento.preventDefault();
 
@@ -587,21 +721,13 @@ async function inicializarRegistroCalificaciones(evento) {
     const existente = await getDoc(referenciaRegistro);
 
     if (existente.exists()) {
-      await Swal.fire({
-        icon: "info",
-        title: "El registro ya existe",
-        html: `
-          <p>
-            Ya existe el Registro de Calificaciones de
-            <strong>${escaparHtml(obtenerNombreCurso(curso))}</strong>
-            para el ciclo <strong>${cicloLectivo}</strong>.
-          </p>
-          <p>No se modificó ningún dato.</p>
-        `,
-        confirmButtonText: "Aceptar",
+      await sincronizarRegistroCalificacionesExistente({
+        referenciaRegistro,
+        registroActual: existente.data(),
+        curso,
+        cursoId,
+        cicloLectivo,
       });
-
-      mostrarMensaje(`El registro ${registroId} ya está inicializado.`, "ok");
       return;
     }
 
