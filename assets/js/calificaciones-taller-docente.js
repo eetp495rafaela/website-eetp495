@@ -475,6 +475,18 @@ function ordenarAlumnos(a, b) {
   });
 }
 
+function estudianteCursaTaller(alumno) {
+  const grupo = String(alumno?.grupoTaller || "")
+    .trim()
+    .toUpperCase();
+
+  return grupo === "G1" || grupo === "G2";
+}
+
+function alumnoCursaTaller(registro, alumnoId) {
+  return estudianteCursaTaller(registro?.alumnos?.[alumnoId]);
+}
+
 function alumnosFiltrados(registro) {
   const alumnos = Object.entries(registro.alumnos || {}).map(([id, datos]) => ({
     id,
@@ -733,7 +745,9 @@ async function solicitarCierreTrimestre() {
      */
     let pendientes = 0;
 
-    const alumnosIds = Object.keys(registroActual.alumnos || {});
+    const alumnosIds = Object.keys(registroActual.alumnos || {}).filter(
+      (alumnoId) => alumnoCursaTaller(registroActual, alumnoId),
+    );
 
     alumnosIds.forEach((alumnoId) => {
       [1, 2, 3].forEach((espacioNumero) => {
@@ -1210,6 +1224,10 @@ function celdaNota(registro, trimestre, espacioNumero, alumnoId) {
   const campo = campoNotaTrimestre(trimestre, espacioNumero);
   const valorOriginal = obtenerValorMapa(registro[campo], alumnoId);
 
+  if (!alumnoCursaTaller(registro, alumnoId)) {
+    return '<td><span class="nota-sin-cargar">—</span></td>';
+  }
+
   const editable =
     trimestre === trimestreEditableCalificacionesTallerDocente &&
     espacioNumero === espacioEditableNumeroCalificacionesTallerDocente &&
@@ -1558,6 +1576,10 @@ function contenidoCeldaTrim(registro, trimestre, alumnoId) {
 }
 
 function celdaTrim(registro, trimestre, alumnoId) {
+  if (!alumnoCursaTaller(registro, alumnoId)) {
+    return '<td class="nota-trim"><span class="nota-sin-cargar">—</span></td>';
+  }
+
   return `
     <td
       class="nota-trim"
@@ -1946,7 +1968,9 @@ function renderizarTabla(registro) {
           <td class="col-estudiante">${escaparHtml(
             alumno.nombre || alumno.correo || id,
           )}</td>
-          <td class="col-grupo">${escaparHtml(alumno.grupoTaller || "—")}</td>
+          <td class="col-grupo">${escaparHtml(
+            estudianteCursaTaller(alumno) ? alumno.grupoTaller : "Exceptuado",
+          )}</td>
 
           ${celdaNota(registro, 1, 1, id)}
           ${celdaNota(registro, 1, 2, id)}

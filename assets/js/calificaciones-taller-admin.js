@@ -351,24 +351,13 @@ async function obtenerEstudiantesCurso(cursoId) {
     );
   }
 
-  const sinGrupo = estudiantes.filter(
-    (estudiante) =>
-      !["G1", "G2"].includes(normalizarMayusculas(estudiante.grupoTaller)),
-  );
-
-  if (sinGrupo.length) {
-    const muestra = sinGrupo
-      .slice(0, 5)
-      .map((estudiante) => estudiante.nombreCompleto || estudiante.id)
-      .join(", ");
-
-    const resto = sinGrupo.length > 5 ? ` y ${sinGrupo.length - 5} más` : "";
-
-    throw new Error(
-      `Hay ${sinGrupo.length} estudiante(s) sin Grupo 1/Grupo 2 definido: ${muestra}${resto}. Asignales grupo antes de inicializar.`,
-    );
-  }
-
+  /*
+   * Un estudiante sin G1/G2 sigue perteneciendo al curso. En este sistema
+   * esa condición indica que está exceptuado de cursar Taller, por lo que
+   * no debe impedir la inicialización del Registro de Calificaciones.
+   * Se conserva igualmente dentro de `alumnos` para que aparezca en la
+   * vista "Todos" y continúe formando parte del listado institucional.
+   */
   return estudiantes;
 }
 
@@ -637,6 +626,8 @@ async function inicializarRegistroCalificaciones(evento) {
       (estudiante) => normalizarMayusculas(estudiante.grupoTaller) === "G2",
     ).length;
 
+    const cantidadExceptuados = estudiantes.length - cantidadG1 - cantidadG2;
+
     const detalleTalleres = asignaciones
       .map(
         (asignacion) => `
@@ -666,7 +657,7 @@ async function inicializarRegistroCalificaciones(evento) {
           <p>
             Estudiantes:
             <strong>${estudiantes.length}</strong>
-            (G1: ${cantidadG1} · G2: ${cantidadG2})
+            (G1: ${cantidadG1} · G2: ${cantidadG2} · Exceptuados: ${cantidadExceptuados})
           </p>
           <p><strong>Talleres:</strong></p>
           <ul>${detalleTalleres}</ul>
