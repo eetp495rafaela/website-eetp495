@@ -1,8 +1,8 @@
 BITÁCORA MAESTRA – PORTAL INSTITUCIONAL E.E.T.P. N.º 495
 ========================================================
 
-Referencia: EETP495-BITACORA-MAESTRA-2026-09-23
-Fecha de consolidación: 23/09/2026
+Referencia: EETP495-BITACORA-MAESTRA-2026-09-24
+Fecha de consolidación: 24/09/2026
 Institución: E.E.T.P. N.º 495 “Malvinas Argentinas” – Rafaela, Santa Fe
 Modalidad: Técnico en Informática Profesional y Personal
 Dominio: https://eetp495rafaela.edu.ar
@@ -20,19 +20,16 @@ transversal o no esté claro qué archivos intervienen.
 FUENTES UTILIZADAS PARA ESTA CONSOLIDACIÓN
 ------------------------------------------
 1. Último ZIP completo recibido y revisado:
-   Website-EETP495(20260922-204850).zip
+   Website-EETP495(20260924-193152).zip
 
 2. Estado Git contenido en ese ZIP:
    commit completo:
-   9a4234e2e086ee54bf970c3b56243037b079faaf
-   commit corto: 9a4234e
-   fecha: 2026-09-22 17:36:51 -0300
-   mensaje: "Reglas actualizadas y SiRA docente modificado para reemplazos de EF"
+   0e25c30ca3d7af8cc7989bdd02ae4c47c95a6101
+   commit corto: 0e25c30
+   fecha: 2026-09-24 15:50:21 -0300
+   mensaje: "Arreglo Sincronización Calificaciones, Docentes, Reemplazos, etc"
    rama: main
-   origin/main: mismo commit
-   estado del working tree del ZIP: la Bitácora Maestra ya contenía cambios
-   posteriores al HEAD y figuraba modificada; el código funcional restante
-   correspondía al commit 9a4234e.
+   estado del working tree contenido en el ZIP: limpio.
 
 3. La Bitácora Maestra incluida dentro del ZIP ya estaba consolidada al
    22/09/2026 aunque ese cambio todavía no formaba parte del HEAD. Esta versión
@@ -7550,4 +7547,162 @@ PENDIENTE DE CIERRE TÉCNICO:
 
 ======================================================================
 FIN ESTADO DE ENTREGA 23/09/2026
+======================================================================
+======================================================================
+48. ACTUALIZACIÓN 24/09/2026 – CIERRE DE TALLER / ACCESOS / SINCRONIZACIÓN
+======================================================================
+
+48.1 SI.R.A. – TALLER: CARGA DE ESTUDIANTES
+--------------------------------------------
+Durante una prueba con un docente con asignación directa de Taller se observó
+que Si.R.A. encontraba correctamente la clase, pero Firestore rechazaba el paso
+previo a cargar estudiantes con "Missing or insufficient permissions".
+
+Se revisó el flujo de lectura de asistencia de Taller para trabajar sobre el
+documento puntual determinado por clase + fecha, preservando el comportamiento
+de Educación Física.
+
+Resultado final confirmado por el usuario:
+- el docente ve la clase asignada;
+- puede cargar los estudiantes;
+- Si.R.A. funciona correctamente para Taller;
+- Educación Física continúa funcionando.
+
+El usuario detectó además que una parte del último inconveniente de prueba se
+debía a una condición/configuración propia durante la validación y confirmó el
+funcionamiento correcto antes de cerrar el punto.
+
+48.2 PORTAL DOCENTE – REEMPLAZO FINALIZADO
+------------------------------------------
+Se implementó y probó el pendiente que había quedado documentado el 23/09.
+
+Regla final:
+Si un usuario docente ya no posee una asignación directa ni un reemplazo vigente
+que le otorgue funciones académicas, puede continuar iniciando sesión, pero el
+Portal Docente queda limitado a estas tres tarjetas:
+
+1. Gestiones Docentes
+2. Normativa Vigente
+3. Enlaces Institucionales
+
+Condiciones confirmadas:
+- no se elimina ni bloquea el usuario;
+- un hash antiguo de una sección no autorizada no permite recuperar una función
+  académica vencida;
+- cuando vuelve a existir un vínculo válido, el portal recupera los accesos que
+  correspondan;
+- la implementación no debe anular otros vínculos/roles válidos del usuario.
+
+Prueba funcional: OK.
+
+Con esto, el pendiente documentado en la sección 46 queda CERRADO.
+
+48.3 CALIFICACIONES DE TALLER – ESTUDIANTES / GRUPO TALLER
+----------------------------------------------------------
+Se revisó un caso en el que un alumno activo del curso no aparecía correctamente
+en el Registro de Calificaciones de Taller al cambiar su situación de grupo.
+
+Puntos verificados durante el diagnóstico:
+- el grupo del estudiante se guarda correctamente en la colección `usuarios`;
+- Si.R.A. toma correctamente el grupo desde la información actual del alumno;
+- el Registro de Calificaciones utiliza además su propia estructura interna de
+  alumnos dentro de `calificaciones_taller`;
+- un curso debe tener su Registro de Calificaciones inicializado/actualizado para
+  poder ser consultado por los docentes;
+- al sincronizar/actualizar el registro deben preservarse todas las notas, TRIM,
+  cierres e históricos existentes.
+
+Durante la prueba final, un alumno que no aparecía comenzó a sincronizarse
+correctamente luego de moverlo temporalmente de curso y volverlo a su curso
+original. Posteriormente:
+- al asignarle grupo, apareció habilitado para cargar calificación;
+- al refrescar el portal, la información se reflejó correctamente;
+- al modificar nuevamente su situación de grupo, Si.R.A. y Calificaciones
+  respondieron a la situación actual del estudiante.
+
+También se confirmó visualmente que el Registro de Calificaciones puede mostrar
+estudiantes con la leyenda `Exceptuado` en la vista correspondiente cuando el
+registro contiene esa situación.
+
+No se pudo reproducir nuevamente el estado transitorio inicial que había dejado
+al alumno fuera de sincronización. El usuario decidió cerrar el punto porque el
+flujo actual quedó funcionando correctamente.
+
+REGLA DE PRUDENCIA PARA FUTUROS CAMBIOS
+---------------------------------------
+No modificar las Firestore Rules ni la arquitectura de reemplazos/TRIM para
+resolver un caso de alumno/grupo sin comprobar primero:
+1. `usuarios` (curso y grupo actuales);
+2. que el registro `calificaciones_taller` del curso/ciclo esté inicializado;
+3. la estructura `alumnos` del documento de calificaciones;
+4. la sincronización/actualización del registro.
+
+48.4 CALIFICACIONES / TRIM – ESTADO FUNCIONAL CONSERVADO
+--------------------------------------------------------
+Se mantiene como arquitectura vigente lo ya consolidado el 23/09:
+- las notas de ELE / INF / ORG se guardan individualmente;
+- el TRIM puede mostrarse/calcularse durante el trimestre;
+- el reemplazante temporal puede cargar/editar las notas de su espacio y editar
+  TRIM mientras su reemplazo esté vigente;
+- el reemplazante temporal NO puede cerrar trimestre;
+- el cierre corresponde a un docente con asignación directa;
+- al cerrar se consolida la nota TRIM definitiva respetando una corrección manual
+  si existe y utilizando el cálculo automático cuando corresponde;
+- no reintroducir el guardado automático problemático de TRIM inmediatamente al
+  ingresar la tercera nota.
+
+48.5 GIT / FUENTE ACTUAL REVISADA
+---------------------------------
+El usuario informó haber realizado commit/push del bloque principal y confirmó
+que el sistema estaba funcionando correctamente.
+
+El ZIP completo entregado el 24/09/2026 para revisión fue:
+Website-EETP495(20260924-193152).zip
+
+Estado Git verificado dentro de ese ZIP:
+- rama: main
+- HEAD: 0e25c30ca3d7af8cc7989bdd02ae4c47c95a6101
+- commit corto: 0e25c30
+- mensaje: "Arreglo Sincronización Calificaciones, Docentes, Reemplazos, etc"
+- fecha: 24/09/2026 15:50:21 -0300
+- working tree del ZIP: limpio.
+
+IMPORTANTE:
+Después de generar ese ZIP se realizaron pruebas y ajustes adicionales del flujo
+de estudiantes/grupos dentro de esta conversación. Al cierre de la jornada no
+se verificó desde aquí un commit posterior a 0e25c30. Antes de la próxima sesión,
+si se desea consolidar absolutamente todo, ejecutar `git status` y confirmar si
+existen cambios locales posteriores a ese commit.
+
+48.6 ESTADO FUNCIONAL AL CIERRE DEL 24/09
+-----------------------------------------
+CERRADO / PROBADO:
+- reemplazos temporales de Taller;
+- Si.R.A. compartido titular/reemplazante;
+- lectura/carga de estudiantes en Si.R.A. para Taller;
+- horarios visibles para titular y reemplazante vigente;
+- visualización titular + reemplazo en Admin/SOPORTE y Gestión;
+- calificaciones compartidas entre asignación directa y reemplazo vigente;
+- selección bajo demanda Ciclo / Curso / Grupo;
+- cierre de trimestre restringido a asignación directa;
+- arquitectura definitiva de TRIM;
+- reasignación definitiva de bloques;
+- acceso restringido del docente cuando finaliza su reemplazo;
+- sincronización funcional observada de curso/grupo del estudiante con Si.R.A. y
+  Registro de Calificaciones.
+
+PENDIENTES FUNCIONALES ABIERTOS DE ESTE BLOQUE:
+- ninguno confirmado al cierre de la jornada.
+
+PRÓXIMA CONTINUIDAD RECOMENDADA
+-------------------------------
+Antes de iniciar una nueva mejora:
+1. ejecutar `git status`;
+2. si existen cambios posteriores a 0e25c30, revisarlos y consolidarlos;
+3. usar esta Bitácora + el código actual como fuente de verdad;
+4. no modificar los flujos de Taller ya cerrados salvo que aparezca un caso
+   reproducible concreto.
+
+======================================================================
+FIN ACTUALIZACIÓN 24/09/2026
 ======================================================================
