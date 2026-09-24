@@ -5333,9 +5333,13 @@ function validarFilasImportacionUsuarios(filas) {
   const encabezadosObligatorios = [
     "NOMBRE_COMPLETO",
     "CORREO_DE_ACCESO",
+    "DNI",
     "ROL",
     "SITUACION_DE_REVISTA",
     "FECHA_FINALIZACION",
+    "ANIO",
+    "DIVISION",
+    "GRUPO",
   ];
 
   const rolesValidos = [
@@ -5395,6 +5399,17 @@ function validarFilasImportacionUsuarios(filas) {
       .trim()
       .toUpperCase();
 
+    const anioTexto = String(fila.ANIO ?? "").trim();
+    const anio = anioTexto ? Number(anioTexto) : null;
+
+    const division = String(fila.DIVISION || "")
+      .trim()
+      .toUpperCase();
+
+    const grupoTaller = String(fila.GRUPO || "")
+      .trim()
+      .toUpperCase();
+
     let fechaFinalizacion = fila.FECHA_FINALIZACION || "";
 
     if (fechaFinalizacion instanceof Date) {
@@ -5439,6 +5454,25 @@ function validarFilasImportacionUsuarios(filas) {
       erroresFila.push("la fecha debe tener formato AAAA-MM-DD");
     }
 
+    if (rol === "ALUMNO") {
+      const estaCursando = situacionRevista === "CURSANDO";
+      const tieneAlgunDatoCurso = anioTexto || division || grupoTaller;
+
+      if (estaCursando || tieneAlgunDatoCurso) {
+        if (!Number.isInteger(anio) || anio < 1 || anio > 6) {
+          erroresFila.push("para ALUMNO, ANIO debe ser un número entre 1 y 6");
+        }
+
+        if (!division) {
+          erroresFila.push("para ALUMNO, falta DIVISION");
+        }
+      }
+
+      if (grupoTaller && !["G1", "G2"].includes(grupoTaller)) {
+        erroresFila.push("GRUPO debe ser G1, G2 o quedar vacío");
+      }
+    }
+
     if (erroresFila.length) {
       errores.push({
         fila: numeroFilaExcel,
@@ -5449,12 +5483,16 @@ function validarFilasImportacionUsuarios(filas) {
     }
 
     usuariosValidos.push({
+      filaExcel: numeroFilaExcel,
       nombreCompleto,
       correo,
       dni: dni || null,
       rol,
       tipoVinculo: situacionRevista,
       fechaFinAcceso: fechaFinalizacion || null,
+      anio: rol === "ALUMNO" ? anio : null,
+      division: rol === "ALUMNO" ? division : "",
+      grupoTaller: rol === "ALUMNO" ? grupoTaller || null : null,
     });
   });
 
@@ -5464,6 +5502,154 @@ function validarFilasImportacionUsuarios(filas) {
     errores,
     usuariosValidos,
   };
+}
+
+async function resolverCursosImportacionUsuarios(usuarios) {
+  const resultadoCursos = await getDocs(collection(db, "cursos"));
+
+  const cursosActivos = resultadoCursos.docs
+    .map((documento) => ({
+      id: documento.id,
+      ...documento.data(),
+    }))
+    .filter(
+      (curso) =>
+        String(curso.estado || "ACTIVO")
+          .trim()
+          .toUpperCase() === "ACTIVO",
+    );
+
+  const errores = [];
+  const usuariosPreparados = usuarios.map((usuario) => {
+    if (usuario.rol !== "ALUMNO") {
+      return usuario;
+    }
+
+    const tieneCurso = Number.isInteger(usuario.anio) && usuario.division;
+
+    if (!tieneCurso) {
+      return usuario;
+    }
+
+    const curso = cursosActivos.find(
+      (item) =>
+        Number(item.anio) === usuario.anio &&
+        String(item.division || "")
+          .trim()
+          .toUpperCase() === usuario.division,
+    );
+
+    if (!curso) {
+      errores.push({
+        fila: usuario.filaExcel,
+        detalle: `no existe un curso ACTIVO para ${usuario.anio}º ${usuario.division}`,
+      });
+
+      return usuario;
+    }
+
+    return {
+      ...usuario,
+      cursoId: curso.id,
+      cursoNombre:
+        String(curso.nombre || "").trim() ||
+        `${usuario.anio}º ${usuario.division}`,
+    };
+  });
+
+  return {
+    correcto: errores.length === 0,
+    errores,
+    usuariosPreparados,
+  };
+}
+
+function normalizarTextoComparacion(valor) {
+  return String(valor ?? "").trim();
+}
+
+function prepararActualizacionUsuarioExistente(usuario) {
+  const actual = usuario.datosExistentes || {};
+  const cambios = {};
+
+  const nombreActual = normalizarTextoComparacion(actual.nombreCompleto);
+  const dniActual = normalizarTextoComparacion(actual.dni).replace(/\D/g, "");
+  const rolActual = normalizarTextoComparacion(actual.rol).toUpperCase();
+  const tipoVinculoActual = normalizarTextoComparacion(
+    actual.tipoVinculo,
+  ).toUpperCase();
+  const fechaFinActual = normalizarTextoComparacion(actual.fechaFinAcceso);
+  const correoActual = normalizarCorreo(actual.correo);
+  const estadoActual = normalizarTextoComparacion(actual.estado).toUpperCase();
+
+  if (!correoActual) {
+    cambios.correo = usuario.correo;
+  }
+
+  if (!estadoActual) {
+    cambios.estado = "ACTIVO";
+  }
+
+  if (!nombreActual && usuario.nombreCompleto) {
+    cambios.nombreCompleto = usuario.nombreCompleto;
+  }
+
+  if (!dniActual && usuario.dni) {
+    cambios.dni = usuario.dni;
+  }
+
+  if (!rolActual && usuario.rol) {
+    cambios.rol = usuario.rol;
+  }
+
+  const rolEfectivo = rolActual || usuario.rol;
+  const rolesActuales = Array.isArray(actual.roles)
+    ? actual.roles
+        .map((rol) => normalizarTextoComparacion(rol).toUpperCase())
+        .filter(Boolean)
+    : [];
+
+  if (!rolesActuales.length && rolEfectivo) {
+    cambios.roles = [rolEfectivo];
+  }
+
+  if (usuario.tipoVinculo && tipoVinculoActual !== usuario.tipoVinculo) {
+    cambios.tipoVinculo = usuario.tipoVinculo;
+  }
+
+  // Una fecha vacía en el archivo maestro no borra una fecha ya existente.
+  // Si el archivo trae una fecha, se considera el dato vigente.
+  if (
+    usuario.fechaFinAcceso &&
+    fechaFinActual !== normalizarTextoComparacion(usuario.fechaFinAcceso)
+  ) {
+    cambios.fechaFinAcceso = usuario.fechaFinAcceso;
+  }
+
+  if (usuario.rol === "ALUMNO" && usuario.cursoId) {
+    const camposAcademicos = {
+      cursoId: usuario.cursoId,
+      cursoAnio: usuario.anio,
+      cursoDivision: usuario.division,
+      cursoNombre: usuario.cursoNombre || null,
+      grupoTaller: usuario.grupoTaller || null,
+    };
+
+    Object.entries(camposAcademicos).forEach(([campo, valor]) => {
+      const actualCampo = actual[campo] ?? null;
+
+      if (String(actualCampo ?? "") !== String(valor ?? "")) {
+        cambios[campo] = valor;
+      }
+    });
+  }
+
+  if (Object.keys(cambios).length) {
+    cambios.actualizadoEn = serverTimestamp();
+    cambios.actualizadoPor = normalizarCorreo(usuarioSoporte.email);
+  }
+
+  return cambios;
 }
 
 async function revisarUsuariosExistentes(usuarios) {
@@ -5486,21 +5672,67 @@ async function revisarUsuariosExistentes(usuarios) {
   const resultados = await Promise.all(
     usuariosSinDuplicados.map(async (usuario) => {
       const referenciaUsuario = doc(db, "usuarios", usuario.correo);
-
       const documentoUsuario = await getDoc(referenciaUsuario);
+      const datosExistentes = documentoUsuario.exists()
+        ? documentoUsuario.data()
+        : null;
+
+      const rolExistente = normalizarTextoComparacion(
+        datosExistentes?.rol,
+      ).toUpperCase();
 
       return {
         ...usuario,
         existe: documentoUsuario.exists(),
+        datosExistentes,
+        conflictoRol: Boolean(
+          documentoUsuario.exists() &&
+            rolExistente &&
+            usuario.rol &&
+            rolExistente !== usuario.rol,
+        ),
       };
     }),
   );
 
   return {
     nuevos: resultados.filter((usuario) => !usuario.existe),
-    existentes: resultados.filter((usuario) => usuario.existe),
+    existentes: resultados.filter(
+      (usuario) => usuario.existe && !usuario.conflictoRol,
+    ),
+    conflictosRol: resultados.filter((usuario) => usuario.conflictoRol),
     correosRepetidos: [...new Set(correosRepetidos)],
   };
+}
+
+async function actualizarUsuariosExistentes(usuarios) {
+  const preparados = usuarios
+    .map((usuario) => ({
+      usuario,
+      cambios: prepararActualizacionUsuarioExistente(usuario),
+    }))
+    .filter((item) => Object.keys(item.cambios).length > 0);
+
+  if (!preparados.length) {
+    return 0;
+  }
+
+  const TAMANIO_LOTE = 450;
+  let cantidadActualizada = 0;
+
+  for (let inicio = 0; inicio < preparados.length; inicio += TAMANIO_LOTE) {
+    const grupo = preparados.slice(inicio, inicio + TAMANIO_LOTE);
+    const lote = writeBatch(db);
+
+    grupo.forEach(({ usuario, cambios }) => {
+      lote.update(doc(db, "usuarios", usuario.correo), cambios);
+    });
+
+    await lote.commit();
+    cantidadActualizada += grupo.length;
+  }
+
+  return cantidadActualizada;
 }
 
 async function importarUsuariosNuevos(usuarios) {
@@ -5519,18 +5751,33 @@ async function importarUsuariosNuevos(usuarios) {
     grupoUsuarios.forEach((usuario) => {
       const referencia = doc(db, "usuarios", usuario.correo);
 
-      lote.set(referencia, {
+      const datosUsuario = {
         correo: usuario.correo,
         nombreCompleto: usuario.nombreCompleto,
         dni: usuario.dni || null,
         rol: usuario.rol,
+        roles: [usuario.rol],
         estado: "ACTIVO",
         tipoVinculo: usuario.tipoVinculo,
         fechaFinAcceso: usuario.fechaFinAcceso || null,
         fechaAlta: serverTimestamp(),
         actualizadoEn: serverTimestamp(),
         creadoPor: normalizarCorreo(usuarioSoporte.email),
-      });
+      };
+
+      if (usuario.rol === "ALUMNO") {
+        datosUsuario.cursoId = usuario.cursoId || null;
+        datosUsuario.cursoAnio = usuario.cursoId ? usuario.anio : null;
+        datosUsuario.cursoDivision = usuario.cursoId ? usuario.division : null;
+        datosUsuario.cursoNombre = usuario.cursoId
+          ? usuario.cursoNombre || null
+          : null;
+        datosUsuario.grupoTaller = usuario.cursoId
+          ? usuario.grupoTaller || null
+          : null;
+      }
+
+      lote.set(referencia, datosUsuario);
     });
 
     await lote.commit();
@@ -5631,17 +5878,67 @@ archivoImportacionUsuarios.addEventListener("change", async () => {
       return;
     }
 
+    const resolucionCursos = await resolverCursosImportacionUsuarios(
+      validacion.usuariosValidos,
+    );
+
+    if (!resolucionCursos.correcto) {
+      const detalleErroresCursos = resolucionCursos.errores
+        .slice(0, 8)
+        .map(
+          (errorFila) =>
+            `<li><strong>Fila ${errorFila.fila}:</strong> ${errorFila.detalle}</li>`,
+        )
+        .join("");
+
+      const textoExtraCursos =
+        resolucionCursos.errores.length > 8
+          ? `<p>Y ${resolucionCursos.errores.length - 8} error(es) más.</p>`
+          : "";
+
+      await Swal.fire({
+        title: "Hay cursos que no existen",
+        html: `
+          <p>No se modificó ningún usuario.</p>
+          <p>Revisá ANIO y DIVISION en las filas indicadas:</p>
+          <ul style="text-align:left; margin-top:12px;">
+            ${detalleErroresCursos}
+          </ul>
+          ${textoExtraCursos}
+        `,
+        icon: "warning",
+        confirmButtonText: "Aceptar",
+      });
+
+      return;
+    }
+
+    const usuariosPreparados = resolucionCursos.usuariosPreparados;
+    const alumnosPreparados = usuariosPreparados.filter(
+      (usuario) => usuario.rol === "ALUMNO" && usuario.cursoId,
+    );
+    const alumnosConGrupo = alumnosPreparados.filter((usuario) =>
+      ["G1", "G2"].includes(usuario.grupoTaller),
+    ).length;
+    const alumnosSinGrupo = alumnosPreparados.length - alumnosConGrupo;
+
     const confirmacionImportacion = await Swal.fire({
-      title: "Usuarios listos para importar",
+      title: "Archivo maestro listo para importar",
       html: `
-    <p><strong>Archivo:</strong> ${archivo.name}</p>
-    <p><strong>Usuarios encontrados:</strong> ${filas.length}</p>
-    <p><strong>Usuarios válidos:</strong> ${validacion.usuariosValidos.length}</p>
-    <p style="margin-top:14px;">
-      En el próximo paso el sistema comprobará cuáles ya existen
-      antes de crear registros nuevos.
-    </p>
-  `,
+        <p><strong>Archivo:</strong> ${archivo.name}</p>
+        <p><strong>Usuarios encontrados:</strong> ${filas.length}</p>
+        <p><strong>Usuarios válidos:</strong> ${usuariosPreparados.length}</p>
+        <p><strong>Alumnos con curso:</strong> ${alumnosPreparados.length}</p>
+        <p><strong>Con grupo G1/G2:</strong> ${alumnosConGrupo}</p>
+        <p><strong>Sin grupo de Taller:</strong> ${alumnosSinGrupo}</p>
+        <p style="margin-top:14px;">
+          Para los alumnos se importarán también ANIO, DIVISION y GRUPO.
+          En docentes y personal esas tres columnas se ignoran.
+        </p>
+        <p>
+          En el próximo paso el sistema comprobará qué usuarios ya existen.
+        </p>
+      `,
       icon: "question",
       showCancelButton: true,
       confirmButtonText: "Continuar con la importación",
@@ -5653,36 +5950,57 @@ archivoImportacionUsuarios.addEventListener("change", async () => {
       return;
     }
 
-    const revision = await revisarUsuariosExistentes(
-      validacion.usuariosValidos,
+    const revision = await revisarUsuariosExistentes(usuariosPreparados);
+
+    if (revision.conflictosRol.length) {
+      const detalleConflictos = revision.conflictosRol
+        .slice(0, 8)
+        .map((usuario) => {
+          const rolActual = normalizarTextoComparacion(
+            usuario.datosExistentes?.rol,
+          ).toUpperCase();
+
+          return `<li><strong>Fila ${usuario.filaExcel}:</strong> ${usuario.correo} figura como ${rolActual} en Firestore y como ${usuario.rol} en el archivo.</li>`;
+        })
+        .join("");
+
+      const textoExtraConflictos =
+        revision.conflictosRol.length > 8
+          ? `<p>Y ${revision.conflictosRol.length - 8} conflicto(s) de rol más.</p>`
+          : "";
+
+      await Swal.fire({
+        title: "Hay roles que requieren revisión",
+        html: `
+          <p>No se modificó ningún usuario.</p>
+          <p>
+            Para evitar cambiar permisos por accidente, el importador no reemplaza
+            automáticamente un rol ya existente por otro distinto.
+          </p>
+          <ul style="text-align:left; margin-top:12px;">
+            ${detalleConflictos}
+          </ul>
+          ${textoExtraConflictos}
+        `,
+        icon: "warning",
+        confirmButtonText: "Aceptar",
+      });
+
+      return;
+    }
+
+    const existentesActualizar = revision.existentes.filter(
+      (usuario) =>
+        Object.keys(prepararActualizacionUsuarioExistente(usuario)).length > 0,
     );
 
-    const listaExistentes = revision.existentes
-      .slice(0, 8)
-      .map(
-        (usuario) => `<li>${usuario.nombreCompleto} — ${usuario.correo}</li>`,
-      )
-      .join("");
+    const existentesSinCambios =
+      revision.existentes.length - existentesActualizar.length;
 
-    const listaRepetidos = revision.correosRepetidos
-      .slice(0, 8)
-      .map((correo) => `<li>${correo}</li>`)
-      .join("");
-
-    const masExistentes =
-      revision.existentes.length > 8
-        ? `<p>Y ${revision.existentes.length - 8} usuario(s) existente(s) más.</p>`
-        : "";
-
-    const masRepetidos =
-      revision.correosRepetidos.length > 8
-        ? `<p>Y ${revision.correosRepetidos.length - 8} correo(s) repetido(s) más.</p>`
-        : "";
-
-    if (!revision.nuevos.length) {
+    if (!revision.nuevos.length && !existentesActualizar.length) {
       await Swal.fire({
-        title: "No hay usuarios nuevos para importar",
-        text: "Todos los correos del archivo ya están registrados o hay correos repetidos que revisar.",
+        title: "No hay cambios para importar",
+        text: "Todos los usuarios del archivo ya existen y sus datos coinciden con Firestore.",
         icon: "info",
         confirmButtonText: "Aceptar",
       });
@@ -5691,25 +6009,40 @@ archivoImportacionUsuarios.addEventListener("change", async () => {
     }
 
     const confirmacionFinal = await Swal.fire({
-      title: "¿Importar usuarios?",
+      title: "¿Importar archivo maestro?",
       html: `
-    <p>Se crearán <strong>${revision.nuevos.length}</strong> usuario(s) nuevo(s).</p>
-    <p>Los usuarios ya existentes no se modificarán.</p>
-    ${
-      revision.correosRepetidos.length
-        ? `
-          <p style="margin-top:14px;">
-            <strong>Atención:</strong> se detectaron
-            ${revision.correosRepetidos.length} correo(s) repetido(s) en el archivo.
-            Solo se tomará una vez cada correo.
-          </p>
-        `
-        : ""
-    }
-  `,
+        <p>Se crearán <strong>${revision.nuevos.length}</strong> usuario(s) nuevo(s).</p>
+        <p>
+          Se completarán o actualizarán datos de
+          <strong>${existentesActualizar.length}</strong>
+          usuario(s) ya existente(s).
+        </p>
+        <p>
+          Sin cambios necesarios: <strong>${existentesSinCambios}</strong>.
+        </p>
+        <p style="margin-top:14px; text-align:left;">
+          <strong>Reglas para usuarios existentes:</strong><br>
+          • Nombre y DNI sólo se completan si estaban vacíos.<br>
+          • El rol existente no se reemplaza automáticamente.<br>
+          • La situación de revista se actualiza con el archivo.<br>
+          • Una FECHA_FINALIZACION informada se actualiza; una celda vacía no borra una fecha existente.<br>
+          • En ALUMNOS, ANIO, DIVISION y GRUPO del archivo son los datos académicos vigentes.
+        </p>
+        ${
+          revision.correosRepetidos.length
+            ? `
+              <p style="margin-top:14px;">
+                <strong>Atención:</strong> se detectaron
+                ${revision.correosRepetidos.length} correo(s) repetido(s) en el archivo.
+                Solo se tomará una vez cada correo.
+              </p>
+            `
+            : ""
+        }
+      `,
       icon: "warning",
       showCancelButton: true,
-      confirmButtonText: `Sí, importar ${revision.nuevos.length}`,
+      confirmButtonText: "Sí, importar",
       cancelButtonText: "Cancelar",
       confirmButtonColor: "#198754",
     });
@@ -5720,7 +6053,7 @@ archivoImportacionUsuarios.addEventListener("change", async () => {
 
     try {
       Swal.fire({
-        title: "Importando usuarios...",
+        title: "Importando archivo maestro...",
         text: "Por favor, esperá un momento.",
         allowOutsideClick: false,
         allowEscapeKey: false,
@@ -5729,25 +6062,33 @@ archivoImportacionUsuarios.addEventListener("change", async () => {
         },
       });
 
+      const cantidadActualizada =
+        await actualizarUsuariosExistentes(existentesActualizar);
+
       const cantidadImportada = await importarUsuariosNuevos(revision.nuevos);
 
       await Swal.fire({
         title: "Importación completada",
         html: `
-      <p>Se registraron correctamente <strong>${cantidadImportada}</strong> usuario(s).</p>
-      <p>Los usuarios ya pueden iniciar sesión con su cuenta de Google autorizada.</p>
-    `,
+          <p>Usuarios nuevos creados: <strong>${cantidadImportada}</strong>.</p>
+          <p>Usuarios existentes actualizados: <strong>${cantidadActualizada}</strong>.</p>
+          <p>
+            Los alumnos nuevos y actualizados quedaron vinculados al curso,
+            división y grupo de Taller indicados en el archivo.
+          </p>
+        `,
         icon: "success",
         confirmButtonText: "Aceptar",
       });
 
       await cargarUsuarios();
+      await cargarEstudiantes();
     } catch (error) {
-      console.error("Error al importar usuarios:", error);
+      console.error("Error al importar archivo maestro de usuarios:", error);
 
       await Swal.fire({
         title: "No se pudo completar la importación",
-        text: "No se registraron los usuarios. Revisá la conexión, los permisos y volvé a intentarlo.",
+        text: "La operación quedó incompleta. Revisá conexión y permisos antes de volver a ejecutar el archivo.",
         icon: "error",
         confirmButtonText: "Aceptar",
       });
