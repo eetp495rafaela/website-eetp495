@@ -2969,6 +2969,36 @@ body.modal-abierto {
 .tabla-calendario-admin td:last-child .btn-accion:last-child {
   margin-right: 0;
 }
+
+.acciones-calendario-admin {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.btn-limpiar-calendario-admin {
+  border-color: #b42318;
+  background: #b42318;
+  color: #ffffff;
+}
+
+.btn-limpiar-calendario-admin:hover {
+  background: #8f1d14;
+}
+
+@media (max-width: 700px) {
+  .acciones-calendario-admin {
+    width: 100%;
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .acciones-calendario-admin .btn-accion {
+    width: 100%;
+  }
+}
 /* Separación de botones de Estudiantes en móvil */
 @media (max-width: 700px) {
   .acciones-usuarios-listado {

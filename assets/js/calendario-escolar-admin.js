@@ -52,6 +52,10 @@ const btnActualizarEventosCalendarioAdmin = document.getElementById(
   "btnActualizarEventosCalendarioAdmin",
 );
 
+const btnLimpiarCalendarioEscolarAdmin = document.getElementById(
+  "btnLimpiarCalendarioEscolarAdmin",
+);
+
 const cuerpoTablaCalendarioAdmin = document.getElementById(
   "cuerpoTablaCalendarioAdmin",
 );
@@ -411,6 +415,185 @@ if (btnActualizarEventosCalendarioAdmin) {
   btnActualizarEventosCalendarioAdmin.addEventListener(
     "click",
     cargarEventosCalendarioAdmin,
+  );
+}
+
+/* =====================================================
+   LIMPIAR CALENDARIO ESCOLAR
+===================================================== */
+
+async function limpiarCalendarioEscolarAdmin() {
+  if (!btnLimpiarCalendarioEscolarAdmin) {
+    return;
+  }
+
+  const usuario = auth.currentUser;
+
+  if (!usuario) {
+    await Swal.fire({
+      title: "Sesión no disponible",
+      text: "No se detectó una sesión activa.",
+      icon: "error",
+      confirmButtonText: "Aceptar",
+    });
+
+    return;
+  }
+
+  const contenidoOriginal = btnLimpiarCalendarioEscolarAdmin.innerHTML;
+
+  try {
+    btnLimpiarCalendarioEscolarAdmin.disabled = true;
+    btnLimpiarCalendarioEscolarAdmin.innerHTML = `
+      <i class="fa-solid fa-spinner fa-spin"></i>
+      Consultando...
+    `;
+
+    mostrarMensajeListadoCalendarioAdmin(
+      "Consultando eventos antes de limpiar el calendario...",
+    );
+
+    const respuesta = await fetch(BACKEND_CALENDARIO_ESCOLAR_URL, {
+      cache: "no-store",
+    });
+
+    if (!respuesta.ok) {
+      throw new Error("No se pudieron consultar los eventos del calendario.");
+    }
+
+    const datos = await respuesta.json();
+
+    if (!datos.ok) {
+      throw new Error(datos.error || "No se pudieron consultar los eventos.");
+    }
+
+    const eventos = Array.isArray(datos.eventos) ? datos.eventos : [];
+
+    if (!eventos.length) {
+      await cargarEventosCalendarioAdmin();
+
+      await Swal.fire({
+        title: "Calendario vacío",
+        text: "No hay eventos publicados para eliminar.",
+        icon: "info",
+        confirmButtonText: "Aceptar",
+      });
+
+      return;
+    }
+
+    const primeraConfirmacion = await Swal.fire({
+      title: "Limpiar Calendario Escolar",
+      html: `
+        <p>Se eliminarán <strong>${eventos.length}</strong> evento(s) publicados.</p>
+        <p style="margin-top:10px">
+          Esta acción se utiliza al finalizar el ciclo lectivo y
+          <strong>no se puede deshacer</strong>.
+        </p>
+      `,
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Continuar",
+      cancelButtonText: "Cancelar",
+      reverseButtons: true,
+    });
+
+    if (!primeraConfirmacion.isConfirmed) {
+      return;
+    }
+
+    const segundaConfirmacion = await Swal.fire({
+      title: "Confirmación final",
+      html: `
+        <p>Para eliminar todos los eventos, escribí</p>
+        <p style="margin-top:8px"><strong>LIMPIAR</strong></p>
+      `,
+      icon: "error",
+      input: "text",
+      inputPlaceholder: "LIMPIAR",
+      showCancelButton: true,
+      confirmButtonText: "Eliminar todos los eventos",
+      cancelButtonText: "Cancelar",
+      reverseButtons: true,
+      inputValidator: (valor) =>
+        String(valor || "").trim().toUpperCase() === "LIMPIAR"
+          ? undefined
+          : 'Escribí "LIMPIAR" para confirmar la operación.',
+    });
+
+    if (!segundaConfirmacion.isConfirmed) {
+      return;
+    }
+
+    btnLimpiarCalendarioEscolarAdmin.innerHTML = `
+      <i class="fa-solid fa-spinner fa-spin"></i>
+      Limpiando...
+    `;
+
+    const idToken = await usuario.getIdToken(true);
+    let eliminados = 0;
+
+    for (const evento of eventos) {
+      const idEvento = String(evento?.id || "").trim();
+
+      if (!idEvento) {
+        throw new Error(
+          `Se eliminaron ${eliminados} evento(s), pero se encontró un evento sin identificador.`,
+        );
+      }
+
+      const resultado = await enviarAlBackendCalendario({
+        accion: "eliminar_evento_calendario",
+        idToken,
+        idEvento,
+      });
+
+      if (!resultado.ok) {
+        throw new Error(
+          resultado.error ||
+            `Se eliminaron ${eliminados} evento(s), pero no se pudo completar la limpieza.`,
+        );
+      }
+
+      eliminados += 1;
+
+      mostrarMensajeListadoCalendarioAdmin(
+        `Limpiando calendario: ${eliminados} de ${eventos.length} evento(s)...`,
+      );
+    }
+
+    cancelarEdicionCalendarioAdmin();
+    await cargarEventosCalendarioAdmin();
+
+    await Swal.fire({
+      title: "Calendario limpio",
+      text: `Se eliminaron ${eliminados} evento(s) correctamente.`,
+      icon: "success",
+      confirmButtonText: "Aceptar",
+    });
+  } catch (error) {
+    console.error("Error al limpiar el Calendario Escolar:", error);
+
+    await cargarEventosCalendarioAdmin();
+
+    await Swal.fire({
+      title: "No se pudo completar la limpieza",
+      text:
+        error.message ||
+        "Ocurrió un error al intentar limpiar el Calendario Escolar.",
+      icon: "error",
+      confirmButtonText: "Aceptar",
+    });
+  } finally {
+    btnLimpiarCalendarioEscolarAdmin.disabled = false;
+    btnLimpiarCalendarioEscolarAdmin.innerHTML = contenidoOriginal;
+  }
+}
+
+if (btnLimpiarCalendarioEscolarAdmin) {
+  btnLimpiarCalendarioEscolarAdmin.addEventListener(
+    "click",
+    limpiarCalendarioEscolarAdmin,
   );
 }
 
