@@ -17,6 +17,7 @@ import {
   getDocs,
   setDoc,
   updateDoc,
+  deleteDoc,
   FieldPath,
   query,
   where,
@@ -53,6 +54,10 @@ const mensajeCalificaciones = document.getElementById(
 );
 const btnConsultarCierresCalificaciones = document.getElementById(
   "btnConsultarCierresCalificacionesTaller",
+);
+
+const btnEliminarRegistroCalificaciones = document.getElementById(
+  "btnEliminarRegistroCalificacionesTaller",
 );
 
 const estadoCierresCalificaciones = document.getElementById(
@@ -1114,6 +1119,132 @@ async function consultarCierresCalificacionesTaller() {
   }
 }
 
+async function eliminarRegistroCalificacionesTaller() {
+  if (
+    !usuarioSoporteCalificaciones ||
+    !cicloCalificaciones ||
+    !cursoCalificaciones
+  ) {
+    return;
+  }
+
+  const cicloLectivo = Number(cicloCalificaciones.value || 0);
+  const cursoId = String(cursoCalificaciones.value || "").trim();
+
+  if (!Number.isInteger(cicloLectivo) || !cursoId) {
+    await Swal.fire({
+      icon: "info",
+      title: "Seleccioná el registro",
+      text: "Elegí primero un ciclo lectivo y un curso.",
+      confirmButtonText: "Aceptar",
+    });
+    return;
+  }
+
+  const curso = cursosCalificaciones.find((item) => item.id === cursoId);
+  const registroId = `${cicloLectivo}__${cursoId}`;
+  const referencia = doc(db, "calificaciones_taller", registroId);
+
+  if (btnEliminarRegistroCalificaciones) {
+    btnEliminarRegistroCalificaciones.disabled = true;
+  }
+
+  try {
+    const documento = await getDoc(referencia);
+
+    if (!documento.exists()) {
+      await Swal.fire({
+        icon: "info",
+        title: "No existe el registro",
+        text: "El curso seleccionado no tiene un Registro de Calificaciones para ese ciclo lectivo.",
+        confirmButtonText: "Aceptar",
+      });
+      return;
+    }
+
+    const registro = documento.data();
+    const nombreCurso =
+      registro.cursoNombre || obtenerNombreCurso(curso) || cursoId;
+
+    const confirmacion = await Swal.fire({
+      icon: "warning",
+      title: "Eliminar Registro de Calificaciones",
+      html: `
+        <div style="text-align:left">
+          <p>
+            Vas a eliminar definitivamente el registro de
+            <strong>${escaparHtml(nombreCurso)}</strong> · ciclo
+            <strong>${cicloLectivo}</strong>.
+          </p>
+          <p>
+            Se eliminarán las notas, TRIM, cierres y datos anuales contenidos
+            en este documento. Esta acción <strong>no se puede deshacer</strong>.
+          </p>
+          <p>
+            Los PDF no se almacenan en el sistema. Si necesitás conservarlos,
+            generálos y descargálos antes de eliminar el registro.
+          </p>
+          <p>Escribí <strong>ELIMINAR</strong> para confirmar.</p>
+        </div>
+      `,
+      input: "text",
+      inputPlaceholder: "ELIMINAR",
+      showCancelButton: true,
+      confirmButtonText: "Eliminar definitivamente",
+      cancelButtonText: "Cancelar",
+      confirmButtonColor: "#8f1d14",
+      reverseButtons: true,
+      focusCancel: true,
+      preConfirm: (valor) => {
+        if (String(valor || "").trim().toUpperCase() !== "ELIMINAR") {
+          Swal.showValidationMessage('Escribí "ELIMINAR" para confirmar.');
+          return false;
+        }
+
+        return true;
+      },
+    });
+
+    if (!confirmacion.isConfirmed) return;
+
+    await deleteDoc(referencia);
+
+    if (estadoCierresCalificaciones) {
+      estadoCierresCalificaciones.textContent =
+        "El registro fue eliminado. Podés inicializarlo nuevamente si fuera necesario.";
+      estadoCierresCalificaciones.className = "mensaje-formulario ok";
+    }
+
+    mostrarMensaje(
+      `Registro ${registroId} eliminado definitivamente.`,
+      "ok",
+    );
+
+    await Swal.fire({
+      icon: "success",
+      title: "Registro eliminado",
+      text: `Se eliminó el Registro de Calificaciones de ${nombreCurso} · ${cicloLectivo}.`,
+      confirmButtonText: "Aceptar",
+    });
+  } catch (error) {
+    console.error("Error al eliminar Registro de Calificaciones:", error);
+
+    await Swal.fire({
+      icon: "error",
+      title: "No se pudo eliminar",
+      text:
+        error?.code === "permission-denied"
+          ? "Firebase rechazó la eliminación. Verificá que la cuenta tenga rol SOPORTE."
+          : error?.message || "Ocurrió un error al eliminar el registro.",
+      confirmButtonText: "Aceptar",
+    });
+  } finally {
+    if (btnEliminarRegistroCalificaciones) {
+      btnEliminarRegistroCalificaciones.disabled = false;
+    }
+  }
+}
+
 if (formInicializar) {
   formInicializar.addEventListener("submit", inicializarRegistroCalificaciones);
 }
@@ -1122,6 +1253,13 @@ if (btnConsultarCierresCalificaciones) {
   btnConsultarCierresCalificaciones.addEventListener(
     "click",
     consultarCierresCalificacionesTaller,
+  );
+}
+
+if (btnEliminarRegistroCalificaciones) {
+  btnEliminarRegistroCalificaciones.addEventListener(
+    "click",
+    eliminarRegistroCalificacionesTaller,
   );
 }
 

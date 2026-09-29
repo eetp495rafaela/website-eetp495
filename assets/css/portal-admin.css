@@ -608,6 +608,16 @@ body {
   background: #8f1d14;
 }
 
+.btn-eliminar-registro-calificaciones {
+  border-color: #8f1d14;
+  background: #8f1d14;
+  color: #fff;
+}
+
+.btn-eliminar-registro-calificaciones:hover {
+  background: #6f1710;
+}
+
 .btn-icono-tabla {
   width: 34px;
   min-width: 34px;

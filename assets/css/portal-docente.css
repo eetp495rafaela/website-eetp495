@@ -4941,6 +4941,52 @@ body {
   transform: none;
 }
 
+.acciones-pdf-calificaciones-taller-docente {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  margin-top: 14px;
+  padding: 12px 14px;
+  border: 1px solid #c7ddd5;
+  border-radius: 12px;
+  background: #f3fbf8;
+}
+
+.acciones-pdf-calificaciones-taller-docente .texto-pdf-calificaciones {
+  color: #315e50;
+  font-size: 0.86rem;
+  font-weight: 800;
+}
+
+.botones-pdf-calificaciones-taller-docente {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.btn-pdf-calificaciones-taller-docente {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-height: 38px;
+  padding: 8px 13px;
+  border: 1px solid #2f6957;
+  border-radius: 9px;
+  background: #fff;
+  color: #255545;
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.btn-pdf-calificaciones-taller-docente:hover {
+  background: #e8f6f0;
+}
+
 @media (max-width: 700px) {
   .acciones-calificaciones-taller-docente {
     flex-direction: column;
@@ -4956,5 +5002,18 @@ body {
   .btn-guardar-calificaciones-taller-docente,
   .btn-cerrar-trimestre-calificaciones-taller-docente {
     width: 100%;
+  }
+
+  .acciones-pdf-calificaciones-taller-docente {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .botones-pdf-calificaciones-taller-docente {
+    justify-content: stretch;
+  }
+
+  .btn-pdf-calificaciones-taller-docente {
+    flex: 1 1 100%;
   }
 }

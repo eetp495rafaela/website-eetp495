@@ -632,6 +632,389 @@ function trimestreCerradoCalificacionesTaller(registro, trimestre) {
   return String(cierre?.estado || "").toUpperCase() === "CERRADO";
 }
 
+function alumnosParaPdfCalificacionesTaller(registro) {
+  return Object.entries(registro?.alumnos || {})
+    .map(([id, datos]) => ({
+      id,
+      ...datos,
+    }))
+    .sort(ordenarAlumnos);
+}
+
+function valorPdfCalificacionesTaller(registro, campo, alumnoId) {
+  const valor = obtenerValorMapa(registro?.[campo], alumnoId);
+
+  if (valor === undefined || valor === null || valor === "") {
+    return "-";
+  }
+
+  return String(valor);
+}
+
+function grupoPdfCalificacionesTaller(alumno) {
+  return estudianteCursaTaller(alumno)
+    ? String(alumno.grupoTaller || "").trim().toUpperCase()
+    : "Exceptuado";
+}
+
+function nombreArchivoPdfCalificacionesTaller(texto) {
+  return String(texto || "calificaciones-taller")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-zA-Z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .toLowerCase();
+}
+
+function obtenerDocumentoPdfCalificacionesTaller() {
+  const JsPdf = window.jspdf?.jsPDF;
+
+  if (!JsPdf) {
+    throw new Error("No se pudo cargar el generador de PDF.");
+  }
+
+  const documento = new JsPdf({
+    orientation: "landscape",
+    unit: "mm",
+    format: "a4",
+  });
+
+  if (typeof documento.autoTable !== "function") {
+    throw new Error("No se pudo cargar el generador de tablas PDF.");
+  }
+
+  return documento;
+}
+
+function dibujarEncabezadoPdfCalificacionesTaller(
+  documento,
+  registro,
+  titulo,
+  subtitulo = "",
+) {
+  const anchoPagina = documento.internal.pageSize.getWidth();
+
+  documento.setFont("helvetica", "bold");
+  documento.setFontSize(15);
+  documento.text('E.E.T.P. N° 495 "Malvinas Argentinas"', 14, 14);
+
+  documento.setFontSize(13);
+  documento.text(titulo, anchoPagina - 14, 14, { align: "right" });
+
+  documento.setDrawColor(70);
+  documento.setLineWidth(0.35);
+  documento.line(14, 18, anchoPagina - 14, 18);
+
+  documento.setFont("helvetica", "normal");
+  documento.setFontSize(9.5);
+  documento.text(
+    `Curso: ${registro.cursoNombre || "-"}    Ciclo lectivo: ${registro.cicloLectivo || "-"}`,
+    14,
+    24,
+  );
+
+  if (subtitulo) {
+    documento.text(subtitulo, 14, 29);
+  }
+}
+
+function piePaginaPdfCalificacionesTaller(documento) {
+  const paginas = documento.internal.getNumberOfPages();
+
+  for (let pagina = 1; pagina <= paginas; pagina += 1) {
+    documento.setPage(pagina);
+
+    const ancho = documento.internal.pageSize.getWidth();
+    const alto = documento.internal.pageSize.getHeight();
+
+    documento.setFont("helvetica", "normal");
+    documento.setFontSize(8);
+    documento.setTextColor(90);
+    documento.text(
+      `Generado: ${new Intl.DateTimeFormat("es-AR", {
+        dateStyle: "short",
+        timeStyle: "short",
+      }).format(new Date())}`,
+      14,
+      alto - 7,
+    );
+    documento.text(`Página ${pagina} de ${paginas}`, ancho - 14, alto - 7, {
+      align: "right",
+    });
+  }
+}
+
+function abrirPdfCalificacionesTaller(documento, nombreArchivo) {
+  const nombre = `${nombreArchivoPdfCalificacionesTaller(nombreArchivo)}.pdf`;
+
+  try {
+    const url = documento.output("bloburl");
+    const ventana = window.open(url, "_blank");
+
+    if (ventana) {
+      ventana.opener = null;
+    } else {
+      documento.save(nombre);
+    }
+  } catch (error) {
+    console.warn("No se pudo abrir el PDF en una pestaña nueva:", error);
+    documento.save(nombre);
+  }
+}
+
+async function generarPdfTrimestreCalificacionesTaller(trimestre) {
+  const registro = registroCalificacionesTallerDocente;
+
+  if (!registro || ![1, 2, 3].includes(trimestre)) return;
+
+  if (!trimestreCerradoCalificacionesTaller(registro, trimestre)) {
+    await Swal.fire({
+      icon: "info",
+      title: "Trimestre todavía abierto",
+      text: "El PDF trimestral se habilita cuando el trimestre queda cerrado.",
+      confirmButtonText: "Aceptar",
+    });
+    return;
+  }
+
+  try {
+    const documento = obtenerDocumentoPdfCalificacionesTaller();
+    const alumnos = alumnosParaPdfCalificacionesTaller(registro);
+    const campoResultado = campoResultadoTrimestre(trimestre);
+    const taller1 = abreviarNombreTaller(registro.espacio1Nombre || "Taller 1");
+    const taller2 = abreviarNombreTaller(registro.espacio2Nombre || "Taller 2");
+    const taller3 = abreviarNombreTaller(registro.espacio3Nombre || "Taller 3");
+
+    dibujarEncabezadoPdfCalificacionesTaller(
+      documento,
+      registro,
+      "REGISTRO DE CALIFICACIONES DE TALLER",
+      `${nombreTrimestre(trimestre)} · ${registro.espacio1Nombre || "Taller 1"} · ${registro.espacio2Nombre || "Taller 2"} · ${registro.espacio3Nombre || "Taller 3"}`,
+    );
+
+    documento.autoTable({
+      startY: 34,
+      margin: { left: 14, right: 14, bottom: 13 },
+      head: [["N°", "DNI", "Estudiante", "Grupo", taller1, taller2, taller3, "TRIM"]],
+      body: alumnos.map((alumno, indice) => [
+        indice + 1,
+        alumno.dni || "-",
+        alumno.nombre || alumno.correo || alumno.id,
+        grupoPdfCalificacionesTaller(alumno),
+        valorPdfCalificacionesTaller(
+          registro,
+          campoNotaTrimestre(trimestre, 1),
+          alumno.id,
+        ),
+        valorPdfCalificacionesTaller(
+          registro,
+          campoNotaTrimestre(trimestre, 2),
+          alumno.id,
+        ),
+        valorPdfCalificacionesTaller(
+          registro,
+          campoNotaTrimestre(trimestre, 3),
+          alumno.id,
+        ),
+        valorPdfCalificacionesTaller(registro, campoResultado, alumno.id),
+      ]),
+      theme: "grid",
+      styles: {
+        font: "helvetica",
+        fontSize: 8,
+        cellPadding: 1.6,
+        textColor: [35, 35, 35],
+        lineColor: [160, 160, 160],
+        lineWidth: 0.15,
+      },
+      headStyles: {
+        fillColor: [127, 56, 45],
+        textColor: [255, 255, 255],
+        fontStyle: "bold",
+        halign: "center",
+      },
+      columnStyles: {
+        0: { cellWidth: 10, halign: "center" },
+        1: { cellWidth: 24, halign: "center" },
+        2: { cellWidth: 78 },
+        3: { cellWidth: 24, halign: "center" },
+        4: { cellWidth: 24, halign: "center" },
+        5: { cellWidth: 24, halign: "center" },
+        6: { cellWidth: 24, halign: "center" },
+        7: { cellWidth: 24, halign: "center", fontStyle: "bold" },
+      },
+    });
+
+    piePaginaPdfCalificacionesTaller(documento);
+
+    abrirPdfCalificacionesTaller(
+      documento,
+      `${registro.cicloLectivo}-${registro.cursoNombre}-${nombreTrimestre(trimestre)}-taller`,
+    );
+  } catch (error) {
+    console.error("No se pudo generar el PDF trimestral:", error);
+    await Swal.fire({
+      icon: "error",
+      title: "No se pudo generar el PDF",
+      text: error?.message || "Ocurrió un error al preparar el archivo.",
+      confirmButtonText: "Aceptar",
+    });
+  }
+}
+
+async function generarPdfAnualCalificacionesTaller() {
+  const registro = registroCalificacionesTallerDocente;
+
+  if (!registro) return;
+
+  const todosCerrados = [1, 2, 3].every((trimestre) =>
+    trimestreCerradoCalificacionesTaller(registro, trimestre),
+  );
+
+  if (!todosCerrados) {
+    await Swal.fire({
+      icon: "info",
+      title: "Ciclo todavía abierto",
+      text: "El PDF anual se habilita cuando los tres trimestres están cerrados.",
+      confirmButtonText: "Aceptar",
+    });
+    return;
+  }
+
+  try {
+    const documento = obtenerDocumentoPdfCalificacionesTaller();
+    const alumnos = alumnosParaPdfCalificacionesTaller(registro);
+
+    dibujarEncabezadoPdfCalificacionesTaller(
+      documento,
+      registro,
+      "RESUMEN ANUAL DE CALIFICACIONES DE TALLER",
+      `${registro.espacio1Nombre || "Taller 1"} · ${registro.espacio2Nombre || "Taller 2"} · ${registro.espacio3Nombre || "Taller 3"}`,
+    );
+
+    documento.autoTable({
+      startY: 34,
+      margin: { left: 14, right: 14, bottom: 13 },
+      head: [[
+        "N°",
+        "DNI",
+        "Estudiante",
+        "Grupo",
+        "1° TRIM",
+        "2° TRIM",
+        "3° TRIM",
+        "Final",
+        "Diciembre",
+        "Febrero",
+      ]],
+      body: alumnos.map((alumno, indice) => [
+        indice + 1,
+        alumno.dni || "-",
+        alumno.nombre || alumno.correo || alumno.id,
+        grupoPdfCalificacionesTaller(alumno),
+        valorPdfCalificacionesTaller(registro, "trim1Resultado", alumno.id),
+        valorPdfCalificacionesTaller(registro, "trim2Resultado", alumno.id),
+        valorPdfCalificacionesTaller(registro, "trim3Resultado", alumno.id),
+        valorPdfCalificacionesTaller(registro, "calificacionFinal", alumno.id),
+        valorPdfCalificacionesTaller(registro, "diciembre", alumno.id),
+        valorPdfCalificacionesTaller(registro, "febrero", alumno.id),
+      ]),
+      theme: "grid",
+      styles: {
+        font: "helvetica",
+        fontSize: 7.7,
+        cellPadding: 1.5,
+        textColor: [35, 35, 35],
+        lineColor: [160, 160, 160],
+        lineWidth: 0.15,
+      },
+      headStyles: {
+        fillColor: [127, 56, 45],
+        textColor: [255, 255, 255],
+        fontStyle: "bold",
+        halign: "center",
+      },
+      columnStyles: {
+        0: { cellWidth: 9, halign: "center" },
+        1: { cellWidth: 22, halign: "center" },
+        2: { cellWidth: 72 },
+        3: { cellWidth: 22, halign: "center" },
+        4: { cellWidth: 23, halign: "center" },
+        5: { cellWidth: 23, halign: "center" },
+        6: { cellWidth: 23, halign: "center" },
+        7: { cellWidth: 22, halign: "center", fontStyle: "bold" },
+        8: { cellWidth: 22, halign: "center" },
+        9: { cellWidth: 22, halign: "center" },
+      },
+    });
+
+    piePaginaPdfCalificacionesTaller(documento);
+
+    abrirPdfCalificacionesTaller(
+      documento,
+      `${registro.cicloLectivo}-${registro.cursoNombre}-resumen-anual-taller`,
+    );
+  } catch (error) {
+    console.error("No se pudo generar el PDF anual:", error);
+    await Swal.fire({
+      icon: "error",
+      title: "No se pudo generar el PDF",
+      text: error?.message || "Ocurrió un error al preparar el archivo.",
+      confirmButtonText: "Aceptar",
+    });
+  }
+}
+
+function controlesPdfCalificacionesTaller(registro) {
+  const cerrados = [1, 2, 3].filter((trimestre) =>
+    trimestreCerradoCalificacionesTaller(registro, trimestre),
+  );
+
+  if (!cerrados.length) return "";
+
+  const botonesTrimestre = cerrados
+    .map(
+      (trimestre) => `
+        <button
+          type="button"
+          class="btn-pdf-calificaciones-taller-docente"
+          data-pdf-trimestre="${trimestre}"
+        >
+          <i class="fa-solid fa-file-pdf"></i>
+          PDF ${trimestre}° trimestre
+        </button>
+      `,
+    )
+    .join("");
+
+  const botonAnual =
+    cerrados.length === 3
+      ? `
+        <button
+          type="button"
+          id="btnPdfAnualCalificacionesTallerDocente"
+          class="btn-pdf-calificaciones-taller-docente"
+        >
+          <i class="fa-solid fa-file-pdf"></i>
+          PDF anual
+        </button>
+      `
+      : "";
+
+  return `
+    <div class="acciones-pdf-calificaciones-taller-docente">
+      <div class="texto-pdf-calificaciones">
+        <i class="fa-solid fa-print"></i>
+        Informes disponibles para imprimir o descargar
+      </div>
+      <div class="botones-pdf-calificaciones-taller-docente">
+        ${botonesTrimestre}
+        ${botonAnual}
+      </div>
+    </div>
+  `;
+}
+
 function actualizarBotonCerrarTrimestre() {
   const boton = document.getElementById(
     "btnCerrarTrimestreCalificacionesTallerDocente",
@@ -1437,6 +1820,27 @@ function conectarControlesEdicion() {
     botonCerrarTrimestre.addEventListener("click", solicitarCierreTrimestre);
   }
 
+  document
+    .querySelectorAll("[data-pdf-trimestre]")
+    .forEach((botonPdf) => {
+      botonPdf.addEventListener("click", () => {
+        generarPdfTrimestreCalificacionesTaller(
+          Number(botonPdf.dataset.pdfTrimestre || 0),
+        );
+      });
+    });
+
+  const botonPdfAnual = document.getElementById(
+    "btnPdfAnualCalificacionesTallerDocente",
+  );
+
+  if (botonPdfAnual) {
+    botonPdfAnual.addEventListener(
+      "click",
+      generarPdfAnualCalificacionesTaller,
+    );
+  }
+
   actualizarBotonGuardar();
   actualizarBotonCerrarTrimestre();
 }
@@ -2046,6 +2450,8 @@ function renderizarTabla(registro) {
         </tbody>
       </table>
     </div>
+
+    ${controlesPdfCalificacionesTaller(registro)}
 
     ${
       puedeEditar
