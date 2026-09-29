@@ -901,7 +901,9 @@ async function solicitarCierreTrimestre() {
         valorFinal !== null &&
         (!Number.isInteger(valorFinal) || valorFinal < 1 || valorFinal > 10)
       ) {
-        throw new Error("Se encontró un resultado TRIM fuera del rango 1 a 10.");
+        throw new Error(
+          "Se encontró un resultado TRIM fuera del rango 1 a 10.",
+        );
       }
 
       const entradaYaCoincide =
@@ -1469,12 +1471,7 @@ function calcularResultadoAutomatico(valores) {
 
 function resultadoAutomaticoGuardado(registro, trimestre, alumnoId) {
   const valores = [1, 2, 3].map((espacioNumero) =>
-    notaNumericaDesdeRegistro(
-      registro,
-      trimestre,
-      espacioNumero,
-      alumnoId,
-    ),
+    notaNumericaDesdeRegistro(registro, trimestre, espacioNumero, alumnoId),
   );
 
   return calcularResultadoAutomatico(valores);
@@ -2205,7 +2202,7 @@ async function cargarRegistroSeleccionado() {
 
     if (error?.code === "permission-denied") {
       mostrarMensaje(
-        "Firebase rechazó la lectura del registro. Revisá la asignación o el reemplazo asociado al curso.",
+        "Es posible que no se haya inicializado el registro de calificaciones. Consulta con el Administrador del Portal.",
         "error",
       );
       return;
