@@ -3804,12 +3804,168 @@ function crearCeldaAccionesAsignacion(asignacion) {
     cambiarEstadoAsignacion(asignacion);
   });
 
+  const btnEliminar = document.createElement("button");
+
+  btnEliminar.type = "button";
+  btnEliminar.className = "btn-tabla btn-eliminar-asignacion btn-icono-tabla";
+  btnEliminar.title = "Eliminar asignación";
+  btnEliminar.setAttribute("aria-label", "Eliminar asignación");
+  btnEliminar.innerHTML = '<i class="fa-solid fa-trash-can"></i>';
+
+  btnEliminar.addEventListener("click", () => {
+    eliminarAsignacion(asignacion);
+  });
+
   contenedor.appendChild(btnEditar);
   contenedor.appendChild(btnEstado);
+  contenedor.appendChild(btnEliminar);
 
   celda.appendChild(contenedor);
 
   return celda;
+}
+
+async function eliminarAsignacion(asignacion) {
+  if (!usuarioSoporte || !asignacion?.id) return;
+
+  try {
+    mostrarMensajeAsignaciones("Verificando vínculos de la asignación...");
+
+    const [consultaReemplazos, consultaHorariosDocente] = await Promise.all([
+      getDocs(
+        query(
+          collection(db, "reemplazos_docentes"),
+          where("asignacionTitularId", "==", asignacion.id),
+        ),
+      ),
+      getDocs(
+        query(
+          collection(db, "horarios"),
+          where("docenteCorreo", "==", normalizarCorreo(asignacion.docenteCorreo)),
+        ),
+      ),
+    ]);
+
+    const reemplazosActivos = consultaReemplazos.docs.filter((documento) => {
+      const datos = documento.data();
+      return String(datos.estado || "").trim().toUpperCase() === "ACTIVO";
+    });
+
+    if (reemplazosActivos.length) {
+      await Swal.fire({
+        icon: "warning",
+        title: "No se puede eliminar",
+        html: `
+          <p>Esta asignación tiene <strong>${reemplazosActivos.length}</strong> reemplazo(s) vigente(s).</p>
+          <p style="margin-top:8px;">Finalizá o eliminá primero los reemplazos activos y luego volvé a intentar.</p>
+        `,
+        confirmButtonText: "Aceptar",
+      });
+
+      mostrarMensajeAsignaciones(
+        "La asignación no se eliminó porque tiene reemplazos vigentes.",
+        "error",
+      );
+      return;
+    }
+
+    const cursoId = String(asignacion.cursoId || "").trim();
+    const espacioId = String(asignacion.espacioId || "").trim();
+    const cicloLectivo = Number(asignacion.cicloLectivo || 0);
+    const correoDocente = normalizarCorreo(asignacion.docenteCorreo);
+
+    const horariosVinculados = consultaHorariosDocente.docs.filter((documento) => {
+      const datos = documento.data();
+      const asignacionHorario = String(datos.asignacionId || "").trim();
+
+      if (asignacionHorario) {
+        return asignacionHorario === asignacion.id;
+      }
+
+      return (
+        String(datos.cursoId || "").trim() === cursoId &&
+        String(datos.espacioId || "").trim() === espacioId &&
+        Number(datos.cicloLectivo || 0) === cicloLectivo &&
+        normalizarCorreo(datos.docenteCorreo) === correoDocente
+      );
+    });
+
+    const resultado = await Swal.fire({
+      icon: "warning",
+      title: "¿Eliminar asignación definitivamente?",
+      html: `
+        <p>Se eliminará de Firestore la asignación de:</p>
+        <strong>${asignacion.docenteNombre || asignacion.docenteCorreo}</strong>
+        <p style="margin-top:8px;">
+          ${asignacion.cursoNombre || "Curso"} — ${asignacion.espacioNombre || "Espacio curricular"}
+        </p>
+        ${
+          horariosVinculados.length
+            ? `<p style="margin-top:12px;">Además, <strong>${horariosVinculados.length}</strong> bloque(s) horario(s) vinculado(s) quedarán como <strong>Docente sin asignar</strong>.</p>`
+            : ""
+        }
+        <p style="margin-top:12px;"><strong>Esta acción no elimina asistencias ni calificaciones históricas.</strong></p>
+        <p style="margin-top:8px;">Esta acción no se puede deshacer.</p>
+      `,
+      showCancelButton: true,
+      confirmButtonText: "Sí, eliminar",
+      cancelButtonText: "Cancelar",
+      reverseButtons: true,
+      focusCancel: true,
+      confirmButtonColor: "#b42318",
+    });
+
+    if (!resultado.isConfirmed) {
+      mostrarMensajeAsignaciones("");
+      return;
+    }
+
+    if (horariosVinculados.length > 450) {
+      throw new Error(
+        "La asignación tiene demasiados bloques horarios vinculados para eliminarlos en una sola operación.",
+      );
+    }
+
+    const lote = writeBatch(db);
+    const correoSoporte = normalizarCorreo(usuarioSoporte.email);
+
+    horariosVinculados.forEach((documento) => {
+      lote.update(documento.ref, {
+        asignacionId: "",
+        docenteNombre: "",
+        docenteCorreo: "",
+        actualizadoEn: serverTimestamp(),
+        actualizadoPor: correoSoporte,
+      });
+    });
+
+    lote.delete(doc(db, "asignaciones_docentes", asignacion.id));
+
+    await lote.commit();
+
+    mostrarMensajeAsignaciones(
+      horariosVinculados.length
+        ? `Asignación eliminada. Se liberaron ${horariosVinculados.length} bloque(s) horario(s).`
+        : "Asignación eliminada correctamente.",
+      "ok",
+    );
+
+    await cargarAsignaciones();
+  } catch (error) {
+    console.error("Error al eliminar asignación:", error);
+
+    mostrarMensajeAsignaciones(
+      error.message || "No se pudo eliminar la asignación.",
+      "error",
+    );
+
+    await Swal.fire({
+      icon: "error",
+      title: "No se pudo eliminar",
+      text: error.message || "Ocurrió un error al eliminar la asignación.",
+      confirmButtonText: "Aceptar",
+    });
+  }
 }
 
 async function cambiarEstadoAsignacion(asignacion) {

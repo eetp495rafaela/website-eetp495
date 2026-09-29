@@ -604,6 +604,16 @@ body {
   background: #b42318;
 }
 
+.btn-eliminar-asignacion {
+  background: #8f1d14;
+}
+
+.btn-icono-tabla {
+  width: 34px;
+  min-width: 34px;
+  padding: 7px;
+}
+
 .btn-tabla:hover {
   filter: brightness(0.92);
 }
