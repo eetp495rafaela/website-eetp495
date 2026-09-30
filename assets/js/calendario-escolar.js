@@ -15,7 +15,7 @@ const btnCalendarioSiguiente = document.getElementById("calendarioSiguiente");
 
 const anioCalendarioEscolar = document.getElementById("anioCalendarioEscolar");
 
-const ANIO_CALENDARIO = new Date().getFullYear();
+let ANIO_CALENDARIO = new Date().getFullYear();
 
 const nombresMeses = [
   "Enero",
@@ -47,10 +47,13 @@ if (anioCalendarioEscolar) {
    MES INICIAL
 ===================================================== */
 
-const mesActual = new Date().getMonth();
+function obtenerIndiceInicialCalendarioActual() {
+  const mesActual = new Date().getMonth();
 
-let indiceInicialCalendario =
-  mesActual - Math.floor(obtenerCantidadMesesVisibles() / 2);
+  return mesActual - Math.floor(obtenerCantidadMesesVisibles() / 2);
+}
+
+let indiceInicialCalendario = obtenerIndiceInicialCalendarioActual();
 
 /* =====================================================
    RESPONSIVE
@@ -67,6 +70,31 @@ function obtenerCantidadMesesVisibles() {
 
   return 3;
 }
+
+/* =====================================================
+   CAMBIO AUTOMÁTICO DE AÑO
+===================================================== */
+
+function actualizarAnioCalendarioSiCorresponde() {
+  const anioActual = new Date().getFullYear();
+
+  if (anioActual === ANIO_CALENDARIO) {
+    return;
+  }
+
+  ANIO_CALENDARIO = anioActual;
+
+  if (anioCalendarioEscolar) {
+    anioCalendarioEscolar.textContent = ANIO_CALENDARIO;
+  }
+
+  indiceInicialCalendario = obtenerIndiceInicialCalendarioActual();
+  mostrarMesesCalendario();
+}
+
+// Si la página queda abierta durante el cambio de año, también se actualiza
+// sin necesidad de volver a cargarla.
+setInterval(actualizarAnioCalendarioSiCorresponde, 60 * 1000);
 
 /* =====================================================
    FECHAS
