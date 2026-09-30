@@ -52,20 +52,22 @@ const btnInicializar = document.getElementById(
 const mensajeCalificaciones = document.getElementById(
   "mensajeCalificacionesTallerAdmin",
 );
-const btnConsultarCierresCalificaciones = document.getElementById(
-  "btnConsultarCierresCalificacionesTaller",
+const btnVerRegistrosCalificaciones = document.getElementById(
+  "btnVerRegistrosCalificacionesTaller",
 );
-
-const btnEliminarRegistroCalificaciones = document.getElementById(
-  "btnEliminarRegistroCalificacionesTaller",
+const panelRegistrosCalificaciones = document.getElementById(
+  "panelRegistrosCalificacionesTaller",
 );
-
-const estadoCierresCalificaciones = document.getElementById(
-  "estadoCierresCalificacionesTaller",
+const cuerpoRegistrosCalificaciones = document.getElementById(
+  "cuerpoRegistrosCalificacionesTaller",
+);
+const mensajeRegistrosCalificaciones = document.getElementById(
+  "mensajeRegistrosCalificacionesTaller",
 );
 
 let usuarioSoporteCalificaciones = null;
 let cursosCalificaciones = [];
+let registrosCalificacionesTaller = [];
 
 function normalizarCorreo(correo) {
   return String(correo || "")
@@ -93,6 +95,14 @@ function mostrarMensaje(texto, tipo = "") {
 
   mensajeCalificaciones.textContent = texto;
   mensajeCalificaciones.className = `mensaje-formulario ${tipo}`.trim();
+}
+
+function mostrarMensajeRegistros(texto = "", tipo = "") {
+  if (!mensajeRegistrosCalificaciones) return;
+
+  mensajeRegistrosCalificaciones.textContent = texto;
+  mensajeRegistrosCalificaciones.className =
+    `mensaje-formulario ${tipo}`.trim();
 }
 
 function limpiarSelectorCursos(mensaje = "Seleccionar curso") {
@@ -668,6 +678,10 @@ async function sincronizarRegistroCalificacionesExistente({
     "ok",
   );
 
+  if (panelRegistrosCalificaciones && !panelRegistrosCalificaciones.hidden) {
+    await cargarRegistrosCalificacionesTaller();
+  }
+
   return true;
 }
 
@@ -847,6 +861,10 @@ async function inicializarRegistroCalificaciones(evento) {
       `Registro ${registroId} creado correctamente con ${estudiantes.length} estudiante(s).`,
       "ok",
     );
+
+    if (panelRegistrosCalificaciones && !panelRegistrosCalificaciones.hidden) {
+      await cargarRegistrosCalificacionesTaller();
+    }
   } catch (error) {
     console.error("Error al inicializar calificaciones de Taller:", error);
 
@@ -875,23 +893,225 @@ function nombreTrimestreAdmin(trimestre) {
   return "";
 }
 
-async function reabrirTrimestreCalificacionesTaller(trimestre) {
+function obtenerCierreTrimestreRegistro(registro, trimestre) {
+  return (
+    registro?.cierresTrimestres?.[String(trimestre)] ||
+    registro?.cierresTrimestres?.[trimestre] ||
+    null
+  );
+}
+
+function trimestreEstaCerrado(registro, trimestre) {
+  const cierre = obtenerCierreTrimestreRegistro(registro, trimestre);
+  return normalizarMayusculas(cierre?.estado) === "CERRADO";
+}
+
+function ordenarRegistrosCalificaciones(a, b) {
+  const diferenciaCiclo =
+    Number(b.cicloLectivo || b.cicloLectivoDocId || 0) -
+    Number(a.cicloLectivo || a.cicloLectivoDocId || 0);
+
+  if (diferenciaCiclo !== 0) return diferenciaCiclo;
+
+  const diferenciaAnio = Number(a.cursoAnio || 0) - Number(b.cursoAnio || 0);
+
+  if (diferenciaAnio !== 0) return diferenciaAnio;
+
+  const diferenciaDivision = String(a.cursoDivision || "").localeCompare(
+    String(b.cursoDivision || ""),
+    "es",
+    { numeric: true, sensitivity: "base" },
+  );
+
+  if (diferenciaDivision !== 0) return diferenciaDivision;
+
+  return String(a.cursoNombre || a.cursoId || a.id).localeCompare(
+    String(b.cursoNombre || b.cursoId || b.id),
+    "es",
+    { sensitivity: "base" },
+  );
+}
+
+function htmlEstadoTrimestreRegistro(registro, trimestre) {
+  if (!trimestreEstaCerrado(registro, trimestre)) {
+    return `
+      <div class="estado-trimestre-registro-calificaciones">
+        <span class="estado estado-activo">Abierto</span>
+      </div>
+    `;
+  }
+
+  return `
+    <div class="estado-trimestre-registro-calificaciones">
+      <span class="estado estado-inactivo">Cerrado</span>
+      <button
+        type="button"
+        class="btn-tabla btn-editar btn-reabrir-registro-calificaciones"
+        data-registro-id="${escaparHtml(registro.id)}"
+        data-trimestre="${trimestre}"
+      >
+        <i class="fa-solid fa-lock-open"></i>
+        Reabrir
+      </button>
+    </div>
+  `;
+}
+
+function renderizarRegistrosCalificacionesTaller() {
+  if (!cuerpoRegistrosCalificaciones) return;
+
+  if (!registrosCalificacionesTaller.length) {
+    cuerpoRegistrosCalificaciones.innerHTML = `
+      <tr>
+        <td colspan="7" class="tabla-vacia">
+          No hay registros de Calificaciones de Taller inicializados.
+        </td>
+      </tr>
+    `;
+    return;
+  }
+
+  cuerpoRegistrosCalificaciones.innerHTML = registrosCalificacionesTaller
+    .map((registro) => {
+      const cicloLectivo = Number(
+        registro.cicloLectivo || registro.cicloLectivoDocId || 0,
+      );
+      const cursoNombre = String(
+        registro.cursoNombre || registro.cursoId || "Curso sin identificar",
+      ).trim();
+      const cantidadAlumnos = Object.keys(registro.alumnos || {}).length;
+
+      return `
+        <tr>
+          <td><strong>${escaparHtml(cicloLectivo || "—")}</strong></td>
+          <td>${escaparHtml(cursoNombre)}</td>
+          <td>${cantidadAlumnos}</td>
+          <td>${htmlEstadoTrimestreRegistro(registro, 1)}</td>
+          <td>${htmlEstadoTrimestreRegistro(registro, 2)}</td>
+          <td>${htmlEstadoTrimestreRegistro(registro, 3)}</td>
+          <td>
+            <div class="acciones-tabla acciones-registro-calificaciones">
+              <button
+                type="button"
+                class="btn-tabla btn-desactivar btn-icono-tabla btn-eliminar-registro-calificaciones-tabla"
+                data-registro-id="${escaparHtml(registro.id)}"
+                title="Eliminar registro completo"
+                aria-label="Eliminar registro de ${escaparHtml(cursoNombre)} · ${escaparHtml(cicloLectivo)}"
+              >
+                <i class="fa-solid fa-trash-can"></i>
+              </button>
+            </div>
+          </td>
+        </tr>
+      `;
+    })
+    .join("");
+
+  cuerpoRegistrosCalificaciones
+    .querySelectorAll(".btn-reabrir-registro-calificaciones")
+    .forEach((boton) => {
+      boton.addEventListener("click", () => {
+        reabrirTrimestreCalificacionesTaller(
+          String(boton.dataset.registroId || "").trim(),
+          Number(boton.dataset.trimestre || 0),
+        );
+      });
+    });
+
+  cuerpoRegistrosCalificaciones
+    .querySelectorAll(".btn-eliminar-registro-calificaciones-tabla")
+    .forEach((boton) => {
+      boton.addEventListener("click", () => {
+        eliminarRegistroCalificacionesTaller(
+          String(boton.dataset.registroId || "").trim(),
+        );
+      });
+    });
+}
+
+async function cargarRegistrosCalificacionesTaller() {
   if (
     !usuarioSoporteCalificaciones ||
-    !cicloCalificaciones ||
-    !cursoCalificaciones ||
-    ![1, 2, 3].includes(trimestre)
+    !btnVerRegistrosCalificaciones ||
+    !panelRegistrosCalificaciones ||
+    !cuerpoRegistrosCalificaciones
   ) {
     return;
   }
 
-  const cicloLectivo = Number(cicloCalificaciones.value || 0);
-  const cursoId = String(cursoCalificaciones.value || "").trim();
+  panelRegistrosCalificaciones.hidden = false;
+  btnVerRegistrosCalificaciones.disabled = true;
+  btnVerRegistrosCalificaciones.innerHTML = `
+    <i class="fa-solid fa-spinner fa-spin"></i>
+    Cargando...
+  `;
 
-  if (!Number.isInteger(cicloLectivo) || !cursoId) return;
+  cuerpoRegistrosCalificaciones.innerHTML = `
+    <tr>
+      <td colspan="7" class="tabla-vacia">
+        Consultando registros...
+      </td>
+    </tr>
+  `;
+  mostrarMensajeRegistros("");
 
-  const registroId = `${cicloLectivo}__${cursoId}`;
-  const referencia = doc(db, "calificaciones_taller", registroId);
+  try {
+    const resultado = await getDocs(collection(db, "calificaciones_taller"));
+
+    registrosCalificacionesTaller = resultado.docs
+      .map((documento) => ({
+        id: documento.id,
+        ...documento.data(),
+      }))
+      .sort(ordenarRegistrosCalificaciones);
+
+    renderizarRegistrosCalificacionesTaller();
+
+    mostrarMensajeRegistros(
+      registrosCalificacionesTaller.length
+        ? `Se encontraron ${registrosCalificacionesTaller.length} registro(s) inicializado(s).`
+        : "No hay registros inicializados.",
+      registrosCalificacionesTaller.length ? "ok" : "",
+    );
+  } catch (error) {
+    console.error("Error al listar Registros de Calificaciones:", error);
+
+    registrosCalificacionesTaller = [];
+    cuerpoRegistrosCalificaciones.innerHTML = `
+      <tr>
+        <td colspan="7" class="tabla-vacia">
+          No se pudieron consultar los registros.
+        </td>
+      </tr>
+    `;
+
+    mostrarMensajeRegistros(
+      error?.code === "permission-denied"
+        ? "Firebase rechazó la consulta. Verificá que la cuenta tenga rol SOPORTE."
+        : error?.message || "No se pudieron consultar los registros.",
+      "error",
+    );
+  } finally {
+    btnVerRegistrosCalificaciones.disabled = false;
+    btnVerRegistrosCalificaciones.innerHTML = `
+      <i class="fa-solid fa-list"></i>
+      Ver registros
+    `;
+  }
+}
+
+async function reabrirTrimestreCalificacionesTaller(registroId, trimestre) {
+  const id = String(registroId || "").trim();
+
+  if (
+    !usuarioSoporteCalificaciones ||
+    !id ||
+    ![1, 2, 3].includes(Number(trimestre))
+  ) {
+    return;
+  }
+
+  const referencia = doc(db, "calificaciones_taller", id);
 
   try {
     const documento = await getDoc(referencia);
@@ -901,13 +1121,15 @@ async function reabrirTrimestreCalificacionesTaller(trimestre) {
     }
 
     const registro = documento.data();
+    const cierre = obtenerCierreTrimestreRegistro(registro, trimestre);
+    const cursoNombre = String(
+      registro.cursoNombre || registro.cursoId || "Curso sin identificar",
+    ).trim();
+    const cicloLectivo = Number(
+      registro.cicloLectivo || registro.cicloLectivoDocId || 0,
+    );
 
-    const cierre =
-      registro.cierresTrimestres?.[String(trimestre)] ||
-      registro.cierresTrimestres?.[trimestre] ||
-      null;
-
-    if (!cierre || String(cierre.estado || "").toUpperCase() !== "CERRADO") {
+    if (!cierre || normalizarMayusculas(cierre.estado) !== "CERRADO") {
       await Swal.fire({
         icon: "info",
         title: "Trimestre ya abierto",
@@ -915,22 +1137,24 @@ async function reabrirTrimestreCalificacionesTaller(trimestre) {
         confirmButtonText: "Aceptar",
       });
 
-      await consultarCierresCalificacionesTaller();
+      await cargarRegistrosCalificacionesTaller();
       return;
     }
 
     const confirmacion = await Swal.fire({
       icon: "warning",
-      title: "Reabrir trimestre",
+      title: `Reabrir ${nombreTrimestreAdmin(trimestre)}`,
       html: `
-        <p>
-          Vas a reabrir el
-          <strong>${nombreTrimestreAdmin(trimestre)}</strong>.
-        </p>
-        <p>
-          Si su período todavía está vigente, los docentes volverán
-          a poder modificar las calificaciones.
-        </p>
+        <div style="text-align:left">
+          <p>
+            Registro: <strong>${escaparHtml(cursoNombre)}</strong> · ciclo
+            <strong>${escaparHtml(cicloLectivo || "")}</strong>.
+          </p>
+          <p>
+            Si el período correspondiente todavía está vigente, los docentes
+            volverán a poder modificar las calificaciones de ese trimestre.
+          </p>
+        </div>
       `,
       showCancelButton: true,
       confirmButtonText: "Sí, reabrir",
@@ -942,7 +1166,6 @@ async function reabrirTrimestreCalificacionesTaller(trimestre) {
     if (!confirmacion.isConfirmed) return;
 
     const correo = normalizarCorreo(usuarioSoporteCalificaciones.email);
-
     const marcaTiempo = serverTimestamp();
 
     const cierreReabierto = {
@@ -976,11 +1199,11 @@ async function reabrirTrimestreCalificacionesTaller(trimestre) {
     await Swal.fire({
       icon: "success",
       title: "Trimestre reabierto",
-      text: `${nombreTrimestreAdmin(trimestre)} fue reabierto correctamente.`,
+      text: `${nombreTrimestreAdmin(trimestre)} de ${cursoNombre} fue reabierto correctamente.`,
       confirmButtonText: "Aceptar",
     });
 
-    await consultarCierresCalificacionesTaller();
+    await cargarRegistrosCalificacionesTaller();
   } catch (error) {
     console.error("Error al reabrir trimestre de Taller:", error);
 
@@ -990,164 +1213,18 @@ async function reabrirTrimestreCalificacionesTaller(trimestre) {
       text:
         error?.code === "permission-denied"
           ? "Firebase rechazó la reapertura. Verificá los permisos de SOPORTE."
-          : "Ocurrió un error al intentar reabrir el trimestre.",
+          : error?.message || "Ocurrió un error al intentar reabrir el trimestre.",
       confirmButtonText: "Aceptar",
     });
   }
 }
 
-async function consultarCierresCalificacionesTaller() {
-  if (
-    !usuarioSoporteCalificaciones ||
-    !cicloCalificaciones ||
-    !cursoCalificaciones ||
-    !estadoCierresCalificaciones
-  ) {
-    return;
-  }
+async function eliminarRegistroCalificacionesTaller(registroId) {
+  const id = String(registroId || "").trim();
 
-  const cicloLectivo = Number(cicloCalificaciones.value || 0);
-  const cursoId = String(cursoCalificaciones.value || "").trim();
+  if (!usuarioSoporteCalificaciones || !id) return;
 
-  if (!Number.isInteger(cicloLectivo) || !cursoId) {
-    estadoCierresCalificaciones.textContent =
-      "Seleccioná un ciclo lectivo y un curso.";
-    estadoCierresCalificaciones.className = "mensaje-formulario error";
-    return;
-  }
-
-  const registroId = `${cicloLectivo}__${cursoId}`;
-
-  const referencia = doc(db, "calificaciones_taller", registroId);
-
-  if (btnConsultarCierresCalificaciones) {
-    btnConsultarCierresCalificaciones.disabled = true;
-    btnConsultarCierresCalificaciones.innerHTML = `
-      <i class="fa-solid fa-spinner fa-spin"></i>
-      Consultando...
-    `;
-  }
-
-  estadoCierresCalificaciones.textContent =
-    "Consultando estado de los trimestres...";
-  estadoCierresCalificaciones.className = "mensaje-formulario";
-
-  try {
-    const documento = await getDoc(referencia);
-
-    if (!documento.exists()) {
-      estadoCierresCalificaciones.textContent =
-        "El curso seleccionado todavía no tiene inicializado su Registro de Calificaciones.";
-      estadoCierresCalificaciones.className = "mensaje-formulario error";
-      return;
-    }
-
-    const registro = documento.data();
-    const cierres = registro.cierresTrimestres || {};
-
-    const cerrados = [1, 2, 3].filter((trimestre) => {
-      const cierre = cierres[String(trimestre)] || cierres[trimestre] || null;
-
-      return String(cierre?.estado || "").toUpperCase() === "CERRADO";
-    });
-
-    if (!cerrados.length) {
-      estadoCierresCalificaciones.innerHTML =
-        "<strong>No hay trimestres cerrados.</strong>";
-      estadoCierresCalificaciones.className = "mensaje-formulario ok";
-      return;
-    }
-
-    const botones = cerrados
-      .map(
-        (trimestre) => `
-      <button
-        type="button"
-        class="btn-accion btn-reabrir-trimestre-calificaciones"
-        data-trimestre="${trimestre}"
-      >
-        <i class="fa-solid fa-lock-open"></i>
-        Reabrir ${nombreTrimestreAdmin(trimestre)}
-      </button>
-    `,
-      )
-      .join("");
-
-    estadoCierresCalificaciones.innerHTML = `
-  <div>
-    <strong>Trimestres cerrados:</strong>
-    ${cerrados.map((trimestre) => nombreTrimestreAdmin(trimestre)).join(" · ")}
-  </div>
-
-  <div
-    class="acciones"
-    style="margin-top: 12px"
-  >
-    ${botones}
-  </div>
-`;
-
-    estadoCierresCalificaciones.className = "mensaje-formulario ok";
-
-    estadoCierresCalificaciones
-      .querySelectorAll(".btn-reabrir-trimestre-calificaciones")
-      .forEach((boton) => {
-        boton.addEventListener("click", () => {
-          reabrirTrimestreCalificacionesTaller(
-            Number(boton.dataset.trimestre || 0),
-          );
-        });
-      });
-  } catch (error) {
-    console.error(
-      "Error al consultar cierres de Calificaciones de Taller:",
-      error,
-    );
-
-    estadoCierresCalificaciones.textContent =
-      "No se pudo consultar el estado de los trimestres.";
-
-    estadoCierresCalificaciones.className = "mensaje-formulario error";
-  } finally {
-    if (btnConsultarCierresCalificaciones) {
-      btnConsultarCierresCalificaciones.disabled = false;
-      btnConsultarCierresCalificaciones.innerHTML = `
-        <i class="fa-solid fa-lock-open"></i>
-        Consultar cierres
-      `;
-    }
-  }
-}
-
-async function eliminarRegistroCalificacionesTaller() {
-  if (
-    !usuarioSoporteCalificaciones ||
-    !cicloCalificaciones ||
-    !cursoCalificaciones
-  ) {
-    return;
-  }
-
-  const cicloLectivo = Number(cicloCalificaciones.value || 0);
-  const cursoId = String(cursoCalificaciones.value || "").trim();
-
-  if (!Number.isInteger(cicloLectivo) || !cursoId) {
-    await Swal.fire({
-      icon: "info",
-      title: "Seleccioná el registro",
-      text: "Elegí primero un ciclo lectivo y un curso.",
-      confirmButtonText: "Aceptar",
-    });
-    return;
-  }
-
-  const curso = cursosCalificaciones.find((item) => item.id === cursoId);
-  const registroId = `${cicloLectivo}__${cursoId}`;
-  const referencia = doc(db, "calificaciones_taller", registroId);
-
-  if (btnEliminarRegistroCalificaciones) {
-    btnEliminarRegistroCalificaciones.disabled = true;
-  }
+  const referencia = doc(db, "calificaciones_taller", id);
 
   try {
     const documento = await getDoc(referencia);
@@ -1156,15 +1233,20 @@ async function eliminarRegistroCalificacionesTaller() {
       await Swal.fire({
         icon: "info",
         title: "No existe el registro",
-        text: "El curso seleccionado no tiene un Registro de Calificaciones para ese ciclo lectivo.",
+        text: "El Registro de Calificaciones seleccionado ya no existe.",
         confirmButtonText: "Aceptar",
       });
+      await cargarRegistrosCalificacionesTaller();
       return;
     }
 
     const registro = documento.data();
-    const nombreCurso =
-      registro.cursoNombre || obtenerNombreCurso(curso) || cursoId;
+    const nombreCurso = String(
+      registro.cursoNombre || registro.cursoId || "Curso sin identificar",
+    ).trim();
+    const cicloLectivo = Number(
+      registro.cicloLectivo || registro.cicloLectivoDocId || 0,
+    );
 
     const confirmacion = await Swal.fire({
       icon: "warning",
@@ -1174,7 +1256,7 @@ async function eliminarRegistroCalificacionesTaller() {
           <p>
             Vas a eliminar definitivamente el registro de
             <strong>${escaparHtml(nombreCurso)}</strong> · ciclo
-            <strong>${cicloLectivo}</strong>.
+            <strong>${escaparHtml(cicloLectivo || "")}</strong>.
           </p>
           <p>
             Se eliminarán las notas, TRIM, cierres y datos anuales contenidos
@@ -1209,16 +1291,7 @@ async function eliminarRegistroCalificacionesTaller() {
 
     await deleteDoc(referencia);
 
-    if (estadoCierresCalificaciones) {
-      estadoCierresCalificaciones.textContent =
-        "El registro fue eliminado. Podés inicializarlo nuevamente si fuera necesario.";
-      estadoCierresCalificaciones.className = "mensaje-formulario ok";
-    }
-
-    mostrarMensaje(
-      `Registro ${registroId} eliminado definitivamente.`,
-      "ok",
-    );
+    mostrarMensaje(`Registro ${id} eliminado definitivamente.`, "ok");
 
     await Swal.fire({
       icon: "success",
@@ -1226,6 +1299,8 @@ async function eliminarRegistroCalificacionesTaller() {
       text: `Se eliminó el Registro de Calificaciones de ${nombreCurso} · ${cicloLectivo}.`,
       confirmButtonText: "Aceptar",
     });
+
+    await cargarRegistrosCalificacionesTaller();
   } catch (error) {
     console.error("Error al eliminar Registro de Calificaciones:", error);
 
@@ -1238,10 +1313,6 @@ async function eliminarRegistroCalificacionesTaller() {
           : error?.message || "Ocurrió un error al eliminar el registro.",
       confirmButtonText: "Aceptar",
     });
-  } finally {
-    if (btnEliminarRegistroCalificaciones) {
-      btnEliminarRegistroCalificaciones.disabled = false;
-    }
   }
 }
 
@@ -1249,17 +1320,10 @@ if (formInicializar) {
   formInicializar.addEventListener("submit", inicializarRegistroCalificaciones);
 }
 
-if (btnConsultarCierresCalificaciones) {
-  btnConsultarCierresCalificaciones.addEventListener(
+if (btnVerRegistrosCalificaciones) {
+  btnVerRegistrosCalificaciones.addEventListener(
     "click",
-    consultarCierresCalificacionesTaller,
-  );
-}
-
-if (btnEliminarRegistroCalificaciones) {
-  btnEliminarRegistroCalificaciones.addEventListener(
-    "click",
-    eliminarRegistroCalificacionesTaller,
+    cargarRegistrosCalificacionesTaller,
   );
 }
 

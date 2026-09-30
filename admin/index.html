@@ -8,7 +8,7 @@
 
     <title>Panel de Soporte | E.E.T.P. Nº 495</title>
 
-    <link rel="stylesheet" href="../assets/css/portal-admin.css?v=20260915-1" />
+    <link rel="stylesheet" href="../assets/css/portal-admin.css?v=20260930-1" />
     <link rel="icon" href="../assets/img/logo.png" />
 
     <link
@@ -900,22 +900,22 @@
         <div class="panel-info">
           <div class="encabezado-listado">
             <div>
-              <h3>Inicializar o actualizar registro de calificaciones</h3>
+              <h3>Registros de calificaciones</h3>
               <p>
-                Crea el registro institucional de Taller para un curso de 1º o
-                2º año. Si ya existe, sincroniza docentes, reemplazos y
-                estudiantes sin modificar las calificaciones cargadas.
+                Inicializá o actualizá un registro de Taller y administrá desde
+                un único listado los cierres trimestrales y la eliminación de
+                registros que ya no necesites conservar en línea.
               </p>
             </div>
           </div>
 
           <form
             id="formInicializarCalificacionesTaller"
-            class="formulario-usuario"
+            class="formulario-usuario formulario-calificaciones-taller-admin"
             autocomplete="off"
           >
-            <div class="form-grid">
-              <div class="campo-formulario">
+            <div class="barra-calificaciones-taller-admin">
+              <div class="campo-formulario campo-ciclo-calificaciones-taller-admin">
                 <label for="cicloCalificacionesTaller">Ciclo lectivo *</label>
                 <input
                   id="cicloCalificacionesTaller"
@@ -927,14 +927,14 @@
                 />
               </div>
 
-              <div class="campo-formulario campo-doble">
+              <div class="campo-formulario campo-curso-calificaciones-taller-admin">
                 <label for="cursoCalificacionesTaller">Curso *</label>
                 <select id="cursoCalificacionesTaller" required>
                   <option value="">Cargando cursos...</option>
                 </select>
               </div>
 
-              <div class="acciones" style="align-self: end; margin: 0">
+              <div class="acciones-calificaciones-taller-admin">
                 <button
                   class="btn-accion"
                   id="btnInicializarCalificacionesTaller"
@@ -942,6 +942,15 @@
                 >
                   <i class="fa-solid fa-arrows-rotate"></i>
                   Inicializar / actualizar
+                </button>
+
+                <button
+                  class="btn-accion"
+                  id="btnVerRegistrosCalificacionesTaller"
+                  type="button"
+                >
+                  <i class="fa-solid fa-list"></i>
+                  Ver registros
                 </button>
               </div>
             </div>
@@ -951,53 +960,47 @@
               class="mensaje-formulario"
             ></p>
           </form>
-          <div class="encabezado-listado" style="margin-top: 24px">
-            <div>
-              <h3>Administrar cierre de trimestres</h3>
-              <p>
-                Consultá el estado de los trimestres del registro seleccionado.
-                Los trimestres cerrados podrán ser reabiertos únicamente por
-                SOPORTE.
-              </p>
+
+          <div id="panelRegistrosCalificacionesTaller" hidden>
+            <div class="encabezado-listado encabezado-registros-calificaciones-taller">
+              <div>
+                <h3>Registros inicializados</h3>
+                <p>
+                  Cada fila corresponde a un curso y ciclo lectivo. Podés
+                  reabrir únicamente los trimestres cerrados o eliminar el
+                  registro completo.
+                </p>
+              </div>
             </div>
-          </div>
 
-          <div class="acciones">
-            <button
-              class="btn-accion"
-              id="btnConsultarCierresCalificacionesTaller"
-              type="button"
-            >
-              <i class="fa-solid fa-lock-open"></i>
-              Consultar cierres
-            </button>
-          </div>
-
-          <div
-            id="estadoCierresCalificacionesTaller"
-            class="mensaje-formulario"
-          ></div>
-
-          <div class="encabezado-listado" style="margin-top: 28px">
-            <div>
-              <h3>Limpieza anual del registro</h3>
-              <p>
-                Elimina definitivamente de Firestore el Registro de
-                Calificaciones del ciclo y curso seleccionados. Usalo sólo
-                cuando ya no necesites conservar esos datos en línea.
-              </p>
+            <div class="tabla-contenedor tabla-registros-calificaciones-taller-contenedor">
+              <table class="tabla-usuarios tabla-registros-calificaciones-taller">
+                <thead>
+                  <tr>
+                    <th>Ciclo</th>
+                    <th>Curso</th>
+                    <th>Alumnos</th>
+                    <th>1.er trimestre</th>
+                    <th>2.º trimestre</th>
+                    <th>3.er trimestre</th>
+                    <th>Acciones</th>
+                  </tr>
+                </thead>
+                <tbody id="cuerpoRegistrosCalificacionesTaller">
+                  <tr>
+                    <td colspan="7" class="tabla-vacia">
+                      Presioná “Ver registros” para consultar los registros de
+                      Calificaciones de Taller.
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
             </div>
-          </div>
 
-          <div class="acciones">
-            <button
-              class="btn-accion btn-eliminar-registro-calificaciones"
-              id="btnEliminarRegistroCalificacionesTaller"
-              type="button"
-            >
-              <i class="fa-solid fa-trash-can"></i>
-              Eliminar registro
-            </button>
+            <p
+              id="mensajeRegistrosCalificacionesTaller"
+              class="mensaje-formulario"
+            ></p>
           </div>
         </div>
 
@@ -4052,7 +4055,7 @@
     <script type="module" src="../assets/js/admin.js?v=20260929-1"></script>
     <script
       type="module"
-      src="../assets/js/calificaciones-taller-admin.js?v=20260929-2"
+      src="../assets/js/calificaciones-taller-admin.js?v=20260930-1"
     ></script>
     <script
       type="module"

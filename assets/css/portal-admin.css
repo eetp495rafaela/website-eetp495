@@ -4677,3 +4677,136 @@ body.swal2-shown {
     white-space: normal;
   }
 }
+
+/* =========================
+   CALIFICACIONES DE TALLER · ADMIN
+========================= */
+
+.formulario-calificaciones-taller-admin {
+  margin-top: 18px;
+}
+
+.barra-calificaciones-taller-admin {
+  display: flex;
+  align-items: flex-end;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.campo-ciclo-calificaciones-taller-admin {
+  flex: 0 0 150px;
+}
+
+.campo-curso-calificaciones-taller-admin {
+  flex: 0 1 230px;
+  min-width: 190px;
+}
+
+.acciones-calificaciones-taller-admin {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-left: auto;
+}
+
+.acciones-calificaciones-taller-admin .btn-accion {
+  min-width: 0;
+  min-height: 44px;
+  padding: 10px 14px;
+}
+
+#panelRegistrosCalificacionesTaller {
+  margin-top: 22px;
+  padding-top: 22px;
+  border-top: 1px solid var(--borde);
+}
+
+.encabezado-registros-calificaciones-taller {
+  align-items: flex-start;
+}
+
+.tabla-registros-calificaciones-taller {
+  min-width: 1040px;
+}
+
+.tabla-registros-calificaciones-taller th:nth-child(1),
+.tabla-registros-calificaciones-taller td:nth-child(1) {
+  width: 90px;
+}
+
+.tabla-registros-calificaciones-taller th:nth-child(3),
+.tabla-registros-calificaciones-taller td:nth-child(3) {
+  width: 90px;
+  text-align: center;
+}
+
+.tabla-registros-calificaciones-taller th:nth-child(4),
+.tabla-registros-calificaciones-taller th:nth-child(5),
+.tabla-registros-calificaciones-taller th:nth-child(6),
+.tabla-registros-calificaciones-taller td:nth-child(4),
+.tabla-registros-calificaciones-taller td:nth-child(5),
+.tabla-registros-calificaciones-taller td:nth-child(6) {
+  min-width: 155px;
+}
+
+.tabla-registros-calificaciones-taller th:last-child,
+.tabla-registros-calificaciones-taller td:last-child {
+  width: 78px;
+  text-align: center;
+}
+
+.estado-trimestre-registro-calificaciones {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  flex-wrap: wrap;
+}
+
+.estado-trimestre-registro-calificaciones .estado {
+  min-width: 68px;
+}
+
+.btn-reabrir-registro-calificaciones {
+  min-height: 30px;
+  padding: 5px 8px;
+  font-size: 0.74rem;
+}
+
+.acciones-registro-calificaciones {
+  justify-content: center;
+}
+
+.btn-eliminar-registro-calificaciones-tabla {
+  background: #8f1d14;
+}
+
+.btn-eliminar-registro-calificaciones-tabla:hover {
+  background: #6f1710;
+}
+
+@media (max-width: 900px) {
+  .acciones-calificaciones-taller-admin {
+    margin-left: 0;
+  }
+}
+
+@media (max-width: 700px) {
+  .barra-calificaciones-taller-admin {
+    align-items: stretch;
+  }
+
+  .campo-ciclo-calificaciones-taller-admin,
+  .campo-curso-calificaciones-taller-admin {
+    flex: 1 1 100%;
+    min-width: 0;
+  }
+
+  .acciones-calificaciones-taller-admin {
+    width: 100%;
+  }
+
+  .acciones-calificaciones-taller-admin .btn-accion {
+    flex: 1 1 190px;
+  }
+}
