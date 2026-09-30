@@ -58,10 +58,7 @@ async function generarBackupSistema() {
       throw new Error(datos.mensaje || "No se pudo generar el backup.");
     }
 
-    mostrarMensajeBackup(
-      `Backup generado correctamente: ${datos.archivo?.nombre || "archivo creado en Drive"}`,
-      "mensaje-exito",
-    );
+    mostrarMensajeBackup("Backup creado correctamente", "mensaje-exito");
 
     await Swal.fire({
       title: "Backup generado",
