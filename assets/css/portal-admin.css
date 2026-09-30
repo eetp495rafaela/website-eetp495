@@ -4687,33 +4687,33 @@ body.swal2-shown {
 }
 
 .barra-calificaciones-taller-admin {
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   align-items: flex-end;
   gap: 14px;
-  flex-wrap: wrap;
 }
 
-.campo-ciclo-calificaciones-taller-admin {
-  flex: 0 0 150px;
-}
-
+.campo-ciclo-calificaciones-taller-admin,
 .campo-curso-calificaciones-taller-admin {
-  flex: 0 1 230px;
-  min-width: 190px;
+  width: 100%;
+  min-width: 0;
+}
+
+.campo-ciclo-calificaciones-taller-admin input,
+.campo-curso-calificaciones-taller-admin select {
+  width: 100%;
 }
 
 .acciones-calificaciones-taller-admin {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  flex-wrap: wrap;
-  margin-left: auto;
+  display: contents;
 }
 
 .acciones-calificaciones-taller-admin .btn-accion {
+  width: 100%;
   min-width: 0;
   min-height: 44px;
   padding: 10px 14px;
+  align-self: end;
 }
 
 #panelRegistrosCalificacionesTaller {
@@ -4786,27 +4786,17 @@ body.swal2-shown {
 }
 
 @media (max-width: 900px) {
-  .acciones-calificaciones-taller-admin {
-    margin-left: 0;
+  .barra-calificaciones-taller-admin {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
 @media (max-width: 700px) {
   .barra-calificaciones-taller-admin {
-    align-items: stretch;
-  }
-
-  .campo-ciclo-calificaciones-taller-admin,
-  .campo-curso-calificaciones-taller-admin {
-    flex: 1 1 100%;
-    min-width: 0;
-  }
-
-  .acciones-calificaciones-taller-admin {
-    width: 100%;
+    grid-template-columns: 1fr;
   }
 
   .acciones-calificaciones-taller-admin .btn-accion {
-    flex: 1 1 190px;
+    width: 100%;
   }
 }
