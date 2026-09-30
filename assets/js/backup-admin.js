@@ -58,7 +58,7 @@ async function generarBackupSistema() {
       throw new Error(datos.mensaje || "No se pudo generar el backup.");
     }
 
-    mostrarMensajeBackup("Backup creado correctamente", "mensaje-exito");
+    mostrarMensajeBackup("Backup manual creado correctamente", "mensaje-exito");
 
     await Swal.fire({
       title: "Backup generado",
