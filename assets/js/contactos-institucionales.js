@@ -15,6 +15,8 @@ import {
   getDoc,
   getDocs,
   getFirestore,
+  query,
+  where,
 } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -233,11 +235,15 @@ async function cargarContactos() {
   mostrarMensaje("Cargando contactos...");
 
   try {
-    const resultado = await getDocs(collection(db, "usuarios"));
+    const consulta = query(
+      collection(db, "usuarios"),
+      where("rol", "!=", "ALUMNO"),
+    );
+
+    const resultado = await getDocs(consulta);
 
     contactosCargados = resultado.docs
       .map(prepararContacto)
-      .filter((contacto) => contacto.rol !== "ALUMNO")
       .sort((a, b) =>
         a.nombreCompleto.localeCompare(b.nombreCompleto, "es", {
           sensitivity: "base",

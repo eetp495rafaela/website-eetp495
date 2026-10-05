@@ -208,6 +208,15 @@ function puedeAdministrarReemplazos() {
   ]);
 }
 
+function puedeConsultarContactosInstitucionales() {
+  return usuarioActivoTieneRoles([
+    "SOPORTE",
+    "DIRECCION",
+    "SECRETARIA",
+    "ASISTENTE_ADMINISTRATIVO"
+  ]);
+}
+
 /* =====================================================
    REGISTRO DE CALIFICACIONES DE TALLER
    Funciones auxiliares de acceso, períodos y validación
@@ -2325,6 +2334,17 @@ allow list: if alumnoPuedeListarCompaneros();
        * Consulta de listados de usuarios.
        */
 allow list: if esSoporte()
+
+   /*
+   * Contactos Institucionales puede consultar únicamente
+   * usuarios cuyo rol principal no sea ALUMNO. La consulta
+   * del cliente debe incluir rol != ALUMNO.
+   */
+
+|| (
+  puedeConsultarContactosInstitucionales()
+  && resource.data.get("rol", "") != "ALUMNO"
+)
 
    /*
    * Administración de reemplazos puede consultar
