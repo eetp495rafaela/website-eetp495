@@ -75,6 +75,15 @@
             </p>
           </a>
 
+          <a class="tarjeta tarjeta-enlace" href="#contactos-institucionales">
+            <i class="fa-solid fa-address-book"></i>
+            <h3>Contactos Institucionales</h3>
+            <p>
+              Consulta de usuarios institucionales y preparación de etiquetas
+              para la futura sincronización de contactos.
+            </p>
+          </a>
+
           <a class="tarjeta tarjeta-enlace" href="#espacios-curriculares">
             <i class="fa-solid fa-book-bookmark"></i>
             <h3>Espacios Curriculares</h3>
@@ -448,6 +457,87 @@
           </div>
 
           <p id="mensajeUsuarios" class="mensaje-formulario"></p>
+        </div>
+
+        <a class="btn-volver" href="#inicio">
+          <i class="fa-solid fa-arrow-up"></i>
+          Volver al inicio
+        </a>
+      </section>
+
+      <section class="grupo seccion-destino" id="contactos-institucionales">
+        <h2>Contactos Institucionales</h2>
+
+        <div class="panel-info">
+          <p>
+            Esta primera etapa consulta los usuarios institucionales ya
+            registrados en el Portal. Los alumnos no forman parte de este
+            listado. Todavía no se modifica ningún dato ni se sincroniza con
+            Google Contacts.
+          </p>
+
+          <div class="acciones">
+            <button
+              class="btn-accion"
+              id="btnVerContactosInstitucionales"
+              type="button"
+            >
+              <i class="fa-solid fa-address-book"></i>
+              Ver contactos
+            </button>
+          </div>
+
+          <div class="filtros-usuarios">
+            <div class="campo-filtro campo-busqueda">
+              <label for="buscarContactoInstitucional">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                Buscar contacto
+              </label>
+              <input
+                id="buscarContactoInstitucional"
+                type="search"
+                placeholder="Nombre, correo, rol o etiqueta..."
+                autocomplete="off"
+              />
+            </div>
+
+            <div class="campo-filtro">
+              <label for="filtroEstadoContactoInstitucional">Estado</label>
+              <select id="filtroEstadoContactoInstitucional">
+                <option value="">Todos</option>
+                <option value="ACTIVO">ACTIVO</option>
+                <option value="INACTIVO">INACTIVO</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="tabla-contenedor">
+            <table class="tabla-usuarios">
+              <thead>
+                <tr>
+                  <th>Nombre completo</th>
+                  <th>Correo</th>
+                  <th>Rol</th>
+                  <th>Situación de Revista</th>
+                  <th>Etiquetas</th>
+                  <th>Estado</th>
+                </tr>
+              </thead>
+              <tbody id="cuerpoTablaContactosInstitucionales">
+                <tr>
+                  <td colspan="6" class="tabla-vacia">
+                    Todavía no se consultaron los contactos. Presioná “Ver
+                    contactos” para cargarlos.
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <p
+            id="mensajeContactosInstitucionales"
+            class="mensaje-formulario"
+          ></p>
         </div>
 
         <a class="btn-volver" href="#inicio">
@@ -4053,6 +4143,10 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
     <script type="module" src="../assets/js/admin.js?v=20260929-1"></script>
+    <script
+      type="module"
+      src="../assets/js/contactos-institucionales.js?v=20261005-1"
+    ></script>
     <script
       type="module"
       src="../assets/js/calificaciones-taller-admin.js?v=20260930-1"

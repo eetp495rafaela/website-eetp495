@@ -87,6 +87,19 @@
           <a
             class="tarjeta tarjeta-enlace"
             hidden=""
+            href="#contactos-institucionales"
+            id="tarjetaContactosInstitucionales"
+          >
+            <i class="fa-solid fa-address-book"> </i>
+            <h3>Contactos Institucionales</h3>
+            <p>
+              Consulta de usuarios institucionales y preparación de etiquetas
+              para la futura sincronización de contactos.
+            </p>
+          </a>
+          <a
+            class="tarjeta tarjeta-enlace"
+            hidden=""
             href="#reemplazos-docentes-gestion"
             id="tarjetaReemplazosDocentesGestion"
           >
@@ -265,6 +278,89 @@
               </p>
             </div>
             <p class="mensaje-gestion" id="mensajeDocentesGestion"></p>
+          </div>
+        </div>
+        <a class="btn-volver" href="#inicio">
+          <i class="fa-solid fa-arrow-up"> </i>
+          Volver al inicio
+        </a>
+      </section>
+      <section
+        class="grupo seccion-destino"
+        hidden=""
+        id="contactos-institucionales"
+      >
+        <h2>Contactos Institucionales</h2>
+        <div class="panel-info panel-gestion-listado">
+          <i class="fa-solid fa-address-book"> </i>
+          <div class="contenido-panel-gestion">
+            <h3>Contactos del personal institucional</h3>
+            <p>
+              Esta primera etapa consulta los usuarios ya registrados en el
+              Portal. Los alumnos no forman parte del listado. Todavía no se
+              modifica ningún dato ni se sincroniza con Google Contacts.
+            </p>
+
+            <div class="acciones-gestion">
+              <button
+                class="btn-gestion"
+                id="btnVerContactosInstitucionales"
+                type="button"
+              >
+                <i class="fa-solid fa-address-book"> </i>
+                Ver contactos
+              </button>
+            </div>
+
+            <div class="filtros-gestion">
+              <div class="campo-filtro-gestion campo-busqueda-gestion">
+                <label for="buscarContactoInstitucional">
+                  <i class="fa-solid fa-magnifying-glass"> </i>
+                  Buscar contacto
+                </label>
+                <input
+                  autocomplete="off"
+                  id="buscarContactoInstitucional"
+                  placeholder="Nombre, correo, rol o etiqueta..."
+                  type="search"
+                />
+              </div>
+              <div class="campo-filtro-gestion">
+                <label for="filtroEstadoContactoInstitucional"> Estado </label>
+                <select id="filtroEstadoContactoInstitucional">
+                  <option value="">Todos</option>
+                  <option value="ACTIVO">ACTIVO</option>
+                  <option value="INACTIVO">INACTIVO</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="tabla-contenedor">
+              <table class="tabla-gestion">
+                <thead>
+                  <tr>
+                    <th>Nombre completo</th>
+                    <th>Correo</th>
+                    <th>Rol</th>
+                    <th>Situación de Revista</th>
+                    <th>Etiquetas</th>
+                    <th>Estado</th>
+                  </tr>
+                </thead>
+                <tbody id="cuerpoTablaContactosInstitucionales">
+                  <tr>
+                    <td class="tabla-vacia" colspan="6">
+                      Todavía no se consultaron los contactos. Presioná “Ver
+                      contactos” para cargarlos.
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <p
+              class="mensaje-gestion"
+              id="mensajeContactosInstitucionales"
+            ></p>
           </div>
         </div>
         <a class="btn-volver" href="#inicio">
@@ -1237,6 +1333,10 @@
     ></script>
     <script
       src="../assets/js/gestion.js?v=20260923-horarios1"
+      type="module"
+    ></script>
+    <script
+      src="../assets/js/contactos-institucionales.js?v=20261005-1"
       type="module"
     ></script>
     <script
