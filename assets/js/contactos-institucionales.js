@@ -29,6 +29,9 @@ const firebaseConfig = {
   appId: "1:658183549494:web:84fe7da91b1ea8990f1e97",
 };
 
+const BACKEND_GOOGLE_CONTACTS_URL =
+  "https://script.google.com/macros/s/AKfycbzMp_Gbkr_mU9jqRWaS7SdOYVr9stUvdzfD57Y6iHOsKw2yGEhYf2MBmFZNaS8-Adg/exec";
+
 const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
@@ -62,6 +65,9 @@ const mensajeContactos = document.getElementById(
 );
 const btnImportarEtiquetas = document.getElementById(
   "btnImportarEtiquetasContactos",
+);
+const btnSincronizarGoogleContacts = document.getElementById(
+  "btnSincronizarGoogleContacts",
 );
 const archivoEtiquetas = document.getElementById(
   "archivoEtiquetasContactos",
@@ -565,6 +571,168 @@ async function importarEtiquetasDesdeArchivo(archivo) {
   }
 }
 
+async function obtenerTokenAppCheckContactos_() {
+  const obtenerToken = window.obtenerTokenAppCheckPortal;
+
+  if (typeof obtenerToken !== "function") {
+    throw new Error(
+      "No se pudo inicializar la verificación de seguridad del portal. Recargá la página.",
+    );
+  }
+
+  return obtenerToken();
+}
+
+function prepararContactosParaGoogle_() {
+  return contactosCargados
+    .filter((contacto) => contacto.estado === "ACTIVO")
+    .map((contacto) => ({
+      nombre: contacto.nombreCompleto,
+      correo: contacto.correo,
+      etiquetas: contacto.etiquetasContacto,
+    }))
+    .filter((contacto) => contacto.correo);
+}
+
+async function previsualizarGoogleContacts_() {
+  if (!accesoContactosHabilitado) return;
+
+  const usuario = auth.currentUser;
+
+  if (!usuario) {
+    throw new Error(
+      "No se encontró una sesión activa. Recargá la página e intentá nuevamente.",
+    );
+  }
+
+  if (obtenerRolActivo() !== "SOPORTE") {
+    throw new Error(
+      "Solo Soporte Técnico puede sincronizar Google Contacts.",
+    );
+  }
+
+  if (!contactosCargados.length) {
+    await cargarContactos();
+  }
+
+  const contactos = prepararContactosParaGoogle_();
+
+  if (!contactos.length) {
+    throw new Error(
+      "No hay contactos institucionales activos para sincronizar.",
+    );
+  }
+
+  const [idToken, appCheckToken] = await Promise.all([
+    usuario.getIdToken(true),
+    obtenerTokenAppCheckContactos_(),
+  ]);
+
+  const respuesta = await fetch(BACKEND_GOOGLE_CONTACTS_URL, {
+    method: "POST",
+    headers: {
+      "Content-Type": "text/plain;charset=utf-8",
+    },
+    body: JSON.stringify({
+      accion: "previsualizar",
+      idToken,
+      appCheckToken,
+      contactos,
+    }),
+  });
+
+  if (!respuesta.ok) {
+    throw new Error(
+      "No se pudo establecer comunicación con el backend de Google Contacts.",
+    );
+  }
+
+  const resultado = await respuesta.json();
+
+  if (!resultado?.ok) {
+    throw new Error(
+      resultado?.error ||
+        "El backend rechazó la previsualización de Google Contacts.",
+    );
+  }
+
+  return resultado;
+}
+
+async function mostrarPrevisualizacionGoogleContacts_() {
+  if (!btnSincronizarGoogleContacts) return;
+
+  const textoOriginal = btnSincronizarGoogleContacts.innerHTML;
+  btnSincronizarGoogleContacts.disabled = true;
+  btnSincronizarGoogleContacts.innerHTML =
+    '<i class="fa-solid fa-spinner fa-spin"></i> Analizando...';
+
+  mostrarMensaje("Analizando Google Contacts...");
+
+  try {
+    const resultado = await previsualizarGoogleContacts_();
+    const etiquetasNuevas = Array.isArray(resultado.etiquetasNuevas)
+      ? resultado.etiquetasNuevas
+      : [];
+
+    const detalleEtiquetas = etiquetasNuevas.length
+      ? etiquetasNuevas.map((etiqueta) => String(etiqueta)).join(", ")
+      : "Ninguna";
+
+    if (window.Swal) {
+      await Swal.fire({
+        icon: "info",
+        title: "Vista previa de Google Contacts",
+        html: [
+          `<strong>Contactos activos analizados:</strong> ${resultado.total || 0}`,
+          `<strong>Nuevos:</strong> ${resultado.nuevos || 0}`,
+          `<strong>Ya existentes:</strong> ${resultado.existentes || 0}`,
+          `<strong>Etiquetas nuevas:</strong> ${detalleEtiquetas}`,
+          `<strong>Errores:</strong> ${Array.isArray(resultado.errores) ? resultado.errores.length : 0}`,
+          "",
+          "<em>Esta vista previa no modifica Google Contacts.</em>",
+        ].join("<br>"),
+        confirmButtonText: "Entendido",
+      });
+    } else {
+      window.alert(
+        [
+          `Contactos activos analizados: ${resultado.total || 0}`,
+          `Nuevos: ${resultado.nuevos || 0}`,
+          `Ya existentes: ${resultado.existentes || 0}`,
+          `Etiquetas nuevas: ${detalleEtiquetas}`,
+          `Errores: ${Array.isArray(resultado.errores) ? resultado.errores.length : 0}`,
+          "",
+          "Esta vista previa no modifica Google Contacts.",
+        ].join("\n"),
+      );
+    }
+
+    mostrarMensaje(
+      `Vista previa completada: ${resultado.total || 0} contacto(s) activo(s) analizado(s).`,
+      "ok",
+    );
+  } catch (error) {
+    console.error("Error al previsualizar Google Contacts:", error);
+    mostrarMensaje(
+      error?.message || "No se pudo consultar Google Contacts.",
+      "error",
+    );
+
+    if (window.Swal) {
+      await Swal.fire({
+        icon: "error",
+        title: "No se pudo consultar Google Contacts",
+        text: error?.message || "Ocurrió un error inesperado.",
+        confirmButtonText: "Entendido",
+      });
+    }
+  } finally {
+    btnSincronizarGoogleContacts.disabled = false;
+    btnSincronizarGoogleContacts.innerHTML = textoOriginal;
+  }
+}
+
 if (btnImportarEtiquetas && archivoEtiquetas) {
   btnImportarEtiquetas.addEventListener("click", () => {
     archivoEtiquetas.click();
@@ -574,6 +742,13 @@ if (btnImportarEtiquetas && archivoEtiquetas) {
     const archivo = archivoEtiquetas.files?.[0];
     if (archivo) importarEtiquetasDesdeArchivo(archivo);
   });
+}
+
+if (btnSincronizarGoogleContacts) {
+  btnSincronizarGoogleContacts.addEventListener(
+    "click",
+    mostrarPrevisualizacionGoogleContacts_,
+  );
 }
 
 if (btnVerContactos) {
