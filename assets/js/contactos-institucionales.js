@@ -64,14 +64,8 @@ const cuerpoTabla = document.getElementById(
 const mensajeContactos = document.getElementById(
   "mensajeContactosInstitucionales",
 );
-const btnImportarEtiquetas = document.getElementById(
-  "btnImportarEtiquetasContactos",
-);
 const btnSincronizarGoogleContacts = document.getElementById(
   "btnSincronizarGoogleContacts",
-);
-const archivoEtiquetas = document.getElementById(
-  "archivoEtiquetasContactos",
 );
 
 let contactosCargados = [];
@@ -159,43 +153,13 @@ function crearCeldaAccionesContacto_(contacto) {
   btnEditar.className = "btn-tabla btn-editar btn-editar-etiquetas-contacto";
   btnEditar.dataset.contactoId = contacto.id;
   btnEditar.title = "Editar etiquetas";
-  btnEditar.setAttribute("aria-label", `Editar etiquetas de ${contacto.nombreCompleto || contacto.correo}`);
+  btnEditar.setAttribute(
+    "aria-label",
+    `Editar etiquetas de ${contacto.nombreCompleto || contacto.correo}`,
+  );
   btnEditar.innerHTML = '<i class="fa-solid fa-pen"></i> Editar';
 
   contenedor.appendChild(btnEditar);
-
-  if (obtenerRolActivo() === "SOPORTE") {
-    const excluidoGoogle = contacto.sincronizarGoogleContacts === false;
-    const btnGoogle = document.createElement("button");
-
-    btnGoogle.type = "button";
-    btnGoogle.dataset.contactoId = contacto.id;
-
-    if (excluidoGoogle) {
-      btnGoogle.className =
-        "btn-tabla btn-editar btn-reincorporar-google-contacto";
-      btnGoogle.title = "Volver a incluir en Google Contacts";
-      btnGoogle.setAttribute(
-        "aria-label",
-        `Volver a incluir ${contacto.nombreCompleto || contacto.correo} en Google Contacts`,
-      );
-      btnGoogle.innerHTML =
-        '<i class="fa-solid fa-rotate-left"></i> Reincorporar';
-    } else {
-      btnGoogle.className =
-        "btn-tabla btn-eliminar btn-eliminar-google-contacto";
-      btnGoogle.title = "Eliminar de Google Contacts";
-      btnGoogle.setAttribute(
-        "aria-label",
-        `Eliminar ${contacto.nombreCompleto || contacto.correo} de Google Contacts`,
-      );
-      btnGoogle.innerHTML =
-        '<i class="fa-solid fa-trash"></i> Eliminar';
-    }
-
-    contenedor.appendChild(btnGoogle);
-  }
-
   celda.appendChild(contenedor);
 
   return celda;
@@ -464,24 +428,7 @@ async function cargarContactos() {
 }
 
 
-function normalizarEncabezado(valor) {
-  return String(valor || "")
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .replace(/[^a-zA-Z0-9]/g, "")
-    .toUpperCase();
-}
 
-function buscarIndiceEncabezado(encabezados, candidatos) {
-  const normalizados = encabezados.map(normalizarEncabezado);
-
-  for (const candidato of candidatos) {
-    const indice = normalizados.indexOf(normalizarEncabezado(candidato));
-    if (indice >= 0) return indice;
-  }
-
-  return -1;
-}
 
 function convertirEtiquetas(valor) {
   const vistas = Array.isArray(valor) ? valor : [valor];
@@ -517,200 +464,9 @@ function etiquetasIguales(actuales, nuevas) {
   return a.length === b.length && a.every((valor, indice) => valor === b[indice]);
 }
 
-function extraerContactosDesdeLibro(libro) {
-  const candidatosCorreo = [
-    "CORREO ELECTRÓNICO",
-    "CORREO ELECTRONICO",
-    "CORREO_DE_ACCESO",
-    "CORREO",
-    "EMAIL",
-  ];
-  const candidatosEtiquetas = [
-    "ÁREA/ESPACIO CURRICULAR",
-    "AREA/ESPACIO CURRICULAR",
-    "AREA_ESPACIO_CURRICULAR",
-    "ETIQUETAS",
-    "ETIQUETAS_CONTACTO",
-  ];
 
-  for (const nombreHoja of libro.SheetNames) {
-    const hoja = libro.Sheets[nombreHoja];
-    const filas = XLSX.utils.sheet_to_json(hoja, {
-      header: 1,
-      defval: "",
-      raw: false,
-    });
 
-    if (!filas.length) continue;
 
-    let filaEncabezado = -1;
-    let indiceCorreo = -1;
-    let indiceEtiquetas = -1;
-
-    for (let i = 0; i < Math.min(filas.length, 15); i += 1) {
-      const fila = Array.isArray(filas[i]) ? filas[i] : [];
-      const correo = buscarIndiceEncabezado(fila, candidatosCorreo);
-      const etiquetas = buscarIndiceEncabezado(fila, candidatosEtiquetas);
-
-      if (correo >= 0 && etiquetas >= 0) {
-        filaEncabezado = i;
-        indiceCorreo = correo;
-        indiceEtiquetas = etiquetas;
-        break;
-      }
-    }
-
-    if (filaEncabezado < 0) continue;
-
-    const contactos = [];
-
-    for (let i = filaEncabezado + 1; i < filas.length; i += 1) {
-      const fila = Array.isArray(filas[i]) ? filas[i] : [];
-      const correo = normalizarCorreo(fila[indiceCorreo]);
-      const etiquetas = convertirEtiquetas(fila[indiceEtiquetas]);
-
-      if (!correo) continue;
-
-      contactos.push({ correo, etiquetas });
-    }
-
-    return contactos;
-  }
-
-  throw new Error(
-    "No se encontraron las columnas de correo y Área/Espacio Curricular (o Etiquetas).",
-  );
-}
-
-async function leerArchivoEtiquetas(archivo) {
-  if (!window.XLSX) {
-    throw new Error("No se pudo cargar el lector de archivos XLSX/CSV.");
-  }
-
-  const buffer = await archivo.arrayBuffer();
-  const libro = XLSX.read(buffer, { type: "array" });
-  return extraerContactosDesdeLibro(libro);
-}
-
-async function confirmarImportacion(resumen) {
-  const detalle = [
-    `Coincidencias: ${resumen.coincidencias}`,
-    `A actualizar: ${resumen.actualizaciones.length}`,
-    `Sin cambios: ${resumen.sinCambios}`,
-    `Sin usuario en el Portal: ${resumen.sinCoincidencia.length}`,
-  ].join("<br>");
-
-  if (window.Swal) {
-    const respuesta = await Swal.fire({
-      title: "Importar etiquetas de contactos",
-      html: detalle,
-      icon: resumen.sinCoincidencia.length ? "warning" : "question",
-      showCancelButton: true,
-      confirmButtonText: "Importar etiquetas",
-      cancelButtonText: "Cancelar",
-      reverseButtons: true,
-    });
-
-    return respuesta.isConfirmed;
-  }
-
-  return window.confirm(
-    detalle.replaceAll("<br>", "\n") + "\n\n¿Continuar con la importación?",
-  );
-}
-
-async function importarEtiquetasDesdeArchivo(archivo) {
-  if (!archivo || !accesoContactosHabilitado) return;
-
-  mostrarMensaje("Analizando archivo de etiquetas...");
-
-  try {
-    if (!contactosCargados.length) {
-      await cargarContactos();
-    }
-
-    const filasImportadas = await leerArchivoEtiquetas(archivo);
-    const contactosPorCorreo = new Map(
-      contactosCargados.map((contacto) => [contacto.correo, contacto]),
-    );
-
-    const porCorreo = new Map();
-    filasImportadas.forEach((fila) => {
-      if (!porCorreo.has(fila.correo)) {
-        porCorreo.set(fila.correo, fila);
-      } else {
-        const existente = porCorreo.get(fila.correo);
-        existente.etiquetas = convertirEtiquetas([
-          ...existente.etiquetas,
-          ...fila.etiquetas,
-        ]);
-      }
-    });
-
-    const resumen = {
-      coincidencias: 0,
-      sinCambios: 0,
-      actualizaciones: [],
-      sinCoincidencia: [],
-    };
-
-    porCorreo.forEach((fila, correo) => {
-      const contacto = contactosPorCorreo.get(correo);
-
-      if (!contacto) {
-        resumen.sinCoincidencia.push(correo);
-        return;
-      }
-
-      resumen.coincidencias += 1;
-
-      if (etiquetasIguales(contacto.etiquetasContacto, fila.etiquetas)) {
-        resumen.sinCambios += 1;
-        return;
-      }
-
-      resumen.actualizaciones.push({ contacto, etiquetas: fila.etiquetas });
-    });
-
-    const confirmado = await confirmarImportacion(resumen);
-    if (!confirmado) {
-      mostrarMensaje("Importación cancelada. No se modificó ningún usuario.");
-      return;
-    }
-
-    if (!resumen.actualizaciones.length) {
-      mostrarMensaje("No había etiquetas para actualizar.", "ok");
-      return;
-    }
-
-    const batch = writeBatch(db);
-
-    resumen.actualizaciones.forEach(({ contacto, etiquetas }) => {
-      batch.update(doc(db, "usuarios", contacto.id), {
-        etiquetasContacto: etiquetas,
-      });
-    });
-
-    await batch.commit();
-    await cargarContactos();
-
-    let mensaje = `${resumen.actualizaciones.length} usuario(s) actualizado(s) correctamente.`;
-
-    if (resumen.sinCoincidencia.length) {
-      mensaje += ` ${resumen.sinCoincidencia.length} correo(s) del archivo no existen como usuario del Portal y fueron omitidos.`;
-    }
-
-    mostrarMensaje(mensaje, "ok");
-  } catch (error) {
-    console.error("Error al importar etiquetas de contactos:", error);
-    mostrarMensaje(
-      error?.message || "No se pudieron importar las etiquetas.",
-      "error",
-    );
-  } finally {
-    if (archivoEtiquetas) archivoEtiquetas.value = "";
-  }
-}
 
 async function obtenerTokenAppCheckContactos_() {
   const obtenerToken = window.obtenerTokenAppCheckPortal;
@@ -724,218 +480,13 @@ async function obtenerTokenAppCheckContactos_() {
   return obtenerToken();
 }
 
-async function marcarSincronizacionGoogleContacts_(contacto, habilitado) {
-  const referencia = doc(db, "usuarios", contacto.id);
-  const batch = writeBatch(db);
 
-  batch.update(referencia, {
-    sincronizarGoogleContacts: Boolean(habilitado),
-  });
 
-  await batch.commit();
 
-  const documentoServidor = await getDocFromServer(referencia);
-
-  if (!documentoServidor.exists()) {
-    throw new Error("El usuario ya no existe en el Portal.");
-  }
-
-  const valorServidor =
-    documentoServidor.data()?.sincronizarGoogleContacts !== false;
-
-  if (valorServidor !== Boolean(habilitado)) {
-    throw new Error(
-      "El servidor no confirmó el cambio de sincronización con Google Contacts.",
-    );
-  }
-
-  contacto.sincronizarGoogleContacts = Boolean(habilitado);
-}
-
-async function solicitarEliminacionGoogleContact_(correo) {
-  const usuario = auth.currentUser;
-
-  if (!usuario) {
-    throw new Error(
-      "No se encontró una sesión activa. Recargá la página e intentá nuevamente.",
-    );
-  }
-
-  if (obtenerRolActivo() !== "SOPORTE") {
-    throw new Error(
-      "Solo Soporte Técnico puede eliminar contactos de Google Contacts.",
-    );
-  }
-
-  const [idToken, appCheckToken] = await Promise.all([
-    usuario.getIdToken(true),
-    obtenerTokenAppCheckContactos_(),
-  ]);
-
-  const respuesta = await fetch(BACKEND_GOOGLE_CONTACTS_URL, {
-    method: "POST",
-    headers: {
-      "Content-Type": "text/plain;charset=utf-8",
-    },
-    body: JSON.stringify({
-      accion: "eliminar",
-      idToken,
-      appCheckToken,
-      correo,
-    }),
-  });
-
-  if (!respuesta.ok) {
-    throw new Error(
-      "No se pudo establecer comunicación con el backend de Google Contacts.",
-    );
-  }
-
-  const resultado = await respuesta.json();
-
-  if (!resultado?.ok) {
-    throw new Error(
-      resultado?.error ||
-        "El backend rechazó la eliminación de Google Contacts.",
-    );
-  }
-
-  return resultado;
-}
-
-async function eliminarContactoGoogle_(contacto) {
-  if (!contacto || obtenerRolActivo() !== "SOPORTE") return;
-
-  let confirmado = false;
-
-  if (window.Swal) {
-    const respuesta = await Swal.fire({
-      icon: "warning",
-      title: "Eliminar de Google Contacts",
-      html: [
-        `<strong>${contacto.nombreCompleto || "Sin nombre"}</strong>`,
-        `<br><span>${contacto.correo}</span>`,
-        "<br><br>El usuario seguirá existiendo en el Portal.",
-        "<br>Solo se eliminará de Google Contacts de la cuenta Soporte y quedará excluido de futuras sincronizaciones.",
-      ].join(""),
-      showCancelButton: true,
-      confirmButtonText: "Eliminar de Google Contacts",
-      cancelButtonText: "Cancelar",
-      reverseButtons: true,
-      focusCancel: true,
-    });
-
-    confirmado = Boolean(respuesta.isConfirmed);
-  } else {
-    confirmado = window.confirm(
-      [
-        `Eliminar ${contacto.nombreCompleto || contacto.correo} de Google Contacts.`,
-        "",
-        "El usuario seguirá existiendo en el Portal y quedará excluido de futuras sincronizaciones.",
-        "",
-        "¿Continuar?",
-      ].join("\n"),
-    );
-  }
-
-  if (!confirmado) return;
-
-  mostrarMensaje(
-    `Eliminando ${contacto.nombreCompleto || contacto.correo} de Google Contacts...`,
-  );
-
-  try {
-    await marcarSincronizacionGoogleContacts_(contacto, false);
-
-    try {
-      await solicitarEliminacionGoogleContact_(contacto.correo);
-    } catch (errorGoogle) {
-      try {
-        await marcarSincronizacionGoogleContacts_(contacto, true);
-      } catch (errorRestauracion) {
-        console.error(
-          "No se pudo restaurar la inclusión en Google Contacts:",
-          errorRestauracion,
-        );
-      }
-
-      throw errorGoogle;
-    }
-
-    aplicarFiltros();
-
-    mostrarMensaje(
-      `${contacto.nombreCompleto || contacto.correo} fue eliminado de Google Contacts y excluido de futuras sincronizaciones.`,
-      "ok",
-    );
-
-    if (window.Swal) {
-      await Swal.fire({
-        icon: "success",
-        title: "Contacto eliminado",
-        html: [
-          "Se eliminó de Google Contacts.",
-          "<br>El usuario permanece intacto en el Portal.",
-          "<br>Podés reincorporarlo cuando quieras desde esta misma tabla.",
-        ].join(""),
-        confirmButtonText: "Entendido",
-      });
-    }
-  } catch (error) {
-    console.error("Error al eliminar contacto de Google Contacts:", error);
-    aplicarFiltros();
-    mostrarMensaje(
-      error?.message || "No se pudo eliminar el contacto de Google Contacts.",
-      "error",
-    );
-
-    if (window.Swal) {
-      await Swal.fire({
-        icon: "error",
-        title: "No se pudo eliminar",
-        text: error?.message || "Ocurrió un error inesperado.",
-        confirmButtonText: "Entendido",
-      });
-    }
-  }
-}
-
-async function reincorporarContactoGoogle_(contacto) {
-  if (!contacto || obtenerRolActivo() !== "SOPORTE") return;
-
-  try {
-    await marcarSincronizacionGoogleContacts_(contacto, true);
-    aplicarFiltros();
-
-    mostrarMensaje(
-      `${contacto.nombreCompleto || contacto.correo} volverá a incluirse en la próxima sincronización con Google Contacts.`,
-      "ok",
-    );
-
-    if (window.Swal) {
-      await Swal.fire({
-        icon: "success",
-        title: "Contacto reincorporado",
-        text: "Volverá a crearse o actualizarse en Google Contacts en la próxima sincronización.",
-        confirmButtonText: "Entendido",
-      });
-    }
-  } catch (error) {
-    console.error("Error al reincorporar contacto a Google Contacts:", error);
-    mostrarMensaje(
-      error?.message || "No se pudo reincorporar el contacto.",
-      "error",
-    );
-  }
-}
 
 function prepararContactosParaGoogle_(contactosFuente) {
   return contactosFuente
-    .filter(
-      (contacto) =>
-        contacto.estado === "ACTIVO" &&
-        contacto.sincronizarGoogleContacts !== false,
-    )
+    .filter((contacto) => contacto.estado === "ACTIVO")
     .map((contacto) => ({
       nombre: contacto.nombreCompleto,
       correo: contacto.correo,
@@ -1076,12 +627,13 @@ async function mostrarPrevisualizacionGoogleContacts_() {
           `<strong>Contactos activos analizados:</strong> ${resultado.total || 0}`,
           `<strong>Nuevos:</strong> ${resultado.nuevos || 0}`,
           `<strong>Ya existentes:</strong> ${resultado.existentes || 0}`,
+          `<strong>Contactos a eliminar:</strong> ${resultado.contactosAEliminar || 0}`,
           `<strong>Etiquetas nuevas:</strong> ${detalleEtiquetas}`,
           `<strong>Asignaciones de etiquetas:</strong> ${resultado.etiquetasAAgregar || 0}`,
           `<strong>Etiquetas a quitar:</strong> ${resultado.etiquetasAQuitar || 0}`,
           `<strong>Errores:</strong> ${cantidadErrores}`,
           "",
-          "<em>La sincronización no elimina contactos. Agrega y quita etiquetas institucionales para que Google Contacts coincida con el Portal.</em>",
+          "<em>Google Contacts quedará alineado con los contactos institucionales activos del Portal. Sólo se eliminan contactos previamente gestionados por esta sincronización.</em>",
         ].join("<br>"),
         showCancelButton: true,
         confirmButtonText: "Sincronizar ahora",
@@ -1097,13 +649,14 @@ async function mostrarPrevisualizacionGoogleContacts_() {
           `Contactos activos analizados: ${resultado.total || 0}`,
           `Nuevos: ${resultado.nuevos || 0}`,
           `Ya existentes: ${resultado.existentes || 0}`,
+          `Contactos a eliminar: ${resultado.contactosAEliminar || 0}`,
           `Etiquetas nuevas: ${detalleEtiquetas}`,
           `Asignaciones de etiquetas: ${resultado.etiquetasAAgregar || 0}`,
           `Etiquetas a quitar: ${resultado.etiquetasAQuitar || 0}`,
           `Errores: ${cantidadErrores}`,
           "",
-          "La sincronización no elimina contactos.",
-          "Agrega y quita etiquetas institucionales para que Google Contacts coincida con el Portal.",
+          "Google Contacts quedará alineado con los contactos institucionales activos del Portal.",
+          "Sólo se eliminan contactos previamente gestionados por esta sincronización.",
           "",
           "¿Querés sincronizar ahora?",
         ].join("\n"),
@@ -1140,6 +693,7 @@ async function mostrarPrevisualizacionGoogleContacts_() {
           `<strong>Contactos procesados:</strong> ${resultadoSincronizacion.total || 0}`,
           `<strong>Creados:</strong> ${resultadoSincronizacion.creados || 0}`,
           `<strong>Actualizados:</strong> ${resultadoSincronizacion.actualizados || 0}`,
+          `<strong>Eliminados:</strong> ${resultadoSincronizacion.contactosEliminados || 0}`,
           `<strong>Etiquetas creadas:</strong> ${resultadoSincronizacion.etiquetasCreadas || 0}`,
           `<strong>Asignaciones de etiquetas:</strong> ${resultadoSincronizacion.etiquetasAsignadas || 0}`,
           `<strong>Etiquetas quitadas:</strong> ${resultadoSincronizacion.etiquetasQuitadas || 0}`,
@@ -1156,6 +710,7 @@ async function mostrarPrevisualizacionGoogleContacts_() {
           `Contactos procesados: ${resultadoSincronizacion.total || 0}`,
           `Creados: ${resultadoSincronizacion.creados || 0}`,
           `Actualizados: ${resultadoSincronizacion.actualizados || 0}`,
+          `Eliminados: ${resultadoSincronizacion.contactosEliminados || 0}`,
           `Etiquetas creadas: ${resultadoSincronizacion.etiquetasCreadas || 0}`,
           `Asignaciones de etiquetas: ${resultadoSincronizacion.etiquetasAsignadas || 0}`,
           `Etiquetas quitadas: ${resultadoSincronizacion.etiquetasQuitadas || 0}`,
@@ -1195,42 +750,13 @@ async function mostrarPrevisualizacionGoogleContacts_() {
 if (cuerpoTabla) {
   cuerpoTabla.addEventListener("click", (event) => {
     const botonEditar = event.target.closest(".btn-editar-etiquetas-contacto");
-    const botonEliminar = event.target.closest(".btn-eliminar-google-contacto");
-    const botonReincorporar = event.target.closest(
-      ".btn-reincorporar-google-contacto",
-    );
-
-    const boton = botonEditar || botonEliminar || botonReincorporar;
-    if (!boton) return;
+    if (!botonEditar) return;
 
     const contacto = contactosCargados.find(
-      (item) => item.id === boton.dataset.contactoId,
+      (item) => item.id === botonEditar.dataset.contactoId,
     );
 
-    if (botonEditar) {
-      editarEtiquetasContacto_(contacto);
-      return;
-    }
-
-    if (botonEliminar) {
-      eliminarContactoGoogle_(contacto);
-      return;
-    }
-
-    if (botonReincorporar) {
-      reincorporarContactoGoogle_(contacto);
-    }
-  });
-}
-
-if (btnImportarEtiquetas && archivoEtiquetas) {
-  btnImportarEtiquetas.addEventListener("click", () => {
-    archivoEtiquetas.click();
-  });
-
-  archivoEtiquetas.addEventListener("change", () => {
-    const archivo = archivoEtiquetas.files?.[0];
-    if (archivo) importarEtiquetasDesdeArchivo(archivo);
+    editarEtiquetasContacto_(contacto);
   });
 }
 
