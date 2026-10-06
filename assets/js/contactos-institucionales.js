@@ -288,6 +288,23 @@ function aplicarFiltros() {
   renderizarContactos(filtrados);
 }
 
+async function consultarContactosInstitucionales_() {
+  const consulta = query(
+    collection(db, "usuarios"),
+    where("rol", "!=", "ALUMNO"),
+  );
+
+  const resultado = await getDocs(consulta);
+
+  return resultado.docs
+    .map(prepararContacto)
+    .sort((a, b) =>
+      a.nombreCompleto.localeCompare(b.nombreCompleto, "es", {
+        sensitivity: "base",
+      }),
+    );
+}
+
 async function cargarContactos() {
   if (!accesoContactosHabilitado || !cuerpoTabla) {
     return;
@@ -296,20 +313,7 @@ async function cargarContactos() {
   mostrarMensaje("Cargando contactos...");
 
   try {
-    const consulta = query(
-      collection(db, "usuarios"),
-      where("rol", "!=", "ALUMNO"),
-    );
-
-    const resultado = await getDocs(consulta);
-
-    contactosCargados = resultado.docs
-      .map(prepararContacto)
-      .sort((a, b) =>
-        a.nombreCompleto.localeCompare(b.nombreCompleto, "es", {
-          sensitivity: "base",
-        }),
-      );
+    contactosCargados = await consultarContactosInstitucionales_();
 
     cargarOpcionesEtiquetas();
     aplicarFiltros();
@@ -583,8 +587,8 @@ async function obtenerTokenAppCheckContactos_() {
   return obtenerToken();
 }
 
-function prepararContactosParaGoogle_() {
-  return contactosCargados
+function prepararContactosParaGoogle_(contactosFuente) {
+  return contactosFuente
     .filter((contacto) => contacto.estado === "ACTIVO")
     .map((contacto) => ({
       nombre: contacto.nombreCompleto,
@@ -611,11 +615,10 @@ async function solicitarGoogleContacts_(accion) {
     );
   }
 
-  if (!contactosCargados.length) {
-    await cargarContactos();
-  }
-
-  const contactos = prepararContactosParaGoogle_();
+  // La sincronización consulta los usuarios directamente en segundo plano.
+  // No carga ni modifica la tabla visible de Contactos Institucionales.
+  const contactosFuente = await consultarContactosInstitucionales_();
+  const contactos = prepararContactosParaGoogle_(contactosFuente);
 
   if (!contactos.length) {
     throw new Error(
