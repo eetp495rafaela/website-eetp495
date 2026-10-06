@@ -8056,3 +8056,318 @@ de generar parches.
 ======================================================================
 FIN ESTADO DE CONTINUIDAD 06/10/2026
 ======================================================================
+
+
+======================================================================
+52. ACTUALIZACIÓN 06/10/2026 – SINCRONIZACIÓN REAL CON GOOGLE CONTACTS
+======================================================================
+
+52.1 OBJETIVO Y ARQUITECTURA CONFIRMADA
+---------------------------------------
+Se implementó y probó la sincronización real de Contactos Institucionales desde
+el Portal hacia Google Contacts.
+
+Fuente institucional de verdad:
+- Firestore, colección `usuarios`.
+
+Destino operativo:
+- Google Contacts.
+
+Cuenta maestra actualmente sincronizada:
+- soportetecnico.tec495@gmail.com
+
+Regla de arquitectura:
+Google Contacts NO reemplaza a Firestore. Los usuarios, estados, datos
+institucionales y `etiquetasContacto` se administran desde el Portal y luego se
+reflejan en Google Contacts.
+
+Los ALUMNOS continúan excluidos del listado y de esta sincronización.
+
+52.2 BACKEND APPS SCRIPT
+------------------------
+Proyecto creado:
+- “EETP495 - Sincronizacion Google Contacts”
+
+Servicio avanzado:
+- Google People API habilitada.
+
+Web App:
+- ejecuta como la cuenta maestra `soportetecnico.tec495@gmail.com`;
+- acceso del despliegue: “Cualquiera”;
+- URL de producción:
+  https://script.google.com/macros/s/AKfycbzMp_Gbkr_mU9jqRWaS7SdOYVr9stUvdzfD57Y6iHOsKw2yGEhYf2MBmFZNaS8-Adg/exec
+
+Acciones del backend:
+- `previsualizar`
+- `sincronizar`
+
+52.3 SEGURIDAD DEL BACKEND
+--------------------------
+El backend NO acepta una sincronización anónima válida.
+
+Cada solicitud enviada desde el Portal incluye:
+- Firebase Auth `idToken`;
+- Firebase App Check token.
+
+Validaciones implementadas:
+1. presencia de `idToken`;
+2. presencia de `appCheckToken`;
+3. validación del usuario mediante Firebase Identity Toolkit;
+4. envío de `X-Firebase-AppCheck`;
+5. consulta del perfil institucional en Firestore usando el token del usuario;
+6. estado institucional `ACTIVO`;
+7. rol autorizado `SOPORTE`.
+
+La API key de navegador NO se reutiliza en el backend.
+
+Se utiliza una key de servidor existente en Google Cloud:
+- nombre: `Apps Script - Firebase Auth`;
+- restringida a Identity Toolkit API;
+- sin restricción por referer;
+- guardada como Script Property:
+  `FIREBASE_SERVER_API_KEY`.
+
+No registrar el valor real de esa clave en la bitácora ni en el repositorio.
+
+52.4 PORTAL ADMIN – VISTA PREVIA Y SINCRONIZACIÓN
+-------------------------------------------------
+Se incorporó en Contactos Institucionales:
+- botón “Sincronizar con Google Contacts”;
+- vista previa obligatoria;
+- confirmación “Sincronizar ahora”;
+- resultado final de la operación.
+
+La sincronización no necesita mostrar previamente la tabla de contactos.
+“Ver contactos” y “Sincronizar” quedaron conceptualmente separados:
+- Ver contactos: consulta y administra la tabla.
+- Sincronizar: trabaja con los usuarios institucionales en segundo plano.
+
+La vista previa informa actualmente:
+- contactos activos analizados;
+- nuevos;
+- existentes;
+- etiquetas nuevas;
+- asignaciones de etiquetas;
+- etiquetas a quitar;
+- errores.
+
+El resultado final informa:
+- contactos procesados;
+- creados;
+- actualizados;
+- etiquetas creadas;
+- asignaciones de etiquetas;
+- etiquetas quitadas;
+- errores.
+
+52.5 PRIMERA SINCRONIZACIÓN Y PROBLEMA DE CUOTA
+-----------------------------------------------
+Primera ejecución real observada:
+- contactos activos: 85;
+- existentes: 83;
+- nuevos: 2;
+- se alcanzaron 361 asignaciones de etiquetas;
+- aparecieron 6 errores de People API.
+
+Motivo:
+se realizaba una escritura `contactGroups.members.modify` por cada combinación
+contacto + etiqueta.
+
+Error observado:
+`Quota exceeded` para escrituras de grupos de contactos por minuto/usuario.
+
+Corrección implementada:
+- acumular los `resourceName` de contactos por etiqueta;
+- realizar una sola llamada `contactGroups.members.modify` por etiqueta;
+- la operación admite lotes de miembros y evita cientos de escrituras
+  individuales consecutivas.
+
+Resultado posterior:
+- desaparecieron los errores de cuota;
+- una prueba procesó 85 contactos, 84 actualizados y 382 asignaciones;
+- apareció un único error HTTP 502 transitorio de Google para un contacto;
+- las pruebas posteriores continuaron correctamente.
+
+52.6 SINCRONIZACIÓN DE ALTAS Y BAJAS DE ETIQUETAS
+--------------------------------------------------
+Inicialmente la sincronización sólo agregaba etiquetas y nunca las quitaba.
+
+Se amplió el backend para que el Portal sea también la referencia de las
+etiquetas institucionales:
+
+- etiqueta presente en Portal y ausente en Google:
+  se agrega;
+
+- etiqueta eliminada en Portal pero todavía presente en Google:
+  se quita del contacto;
+
+- el contacto NO se elimina por quitar una etiqueta.
+
+Para poder comparar membresías se amplió la lectura de People API:
+`personFields: "names,emailAddresses,metadata,memberships"`.
+
+Se agregó un historial de etiquetas administradas por el Portal en Script
+Properties:
+`ETIQUETAS_GOOGLE_CONTACTS_GESTIONADAS`
+
+Objetivo:
+- reconocer qué grupos son institucionales;
+- permitir quitar etiquetas institucionales antiguas;
+- NO tocar grupos personales de Google Contacts que no pertenezcan al Portal.
+
+Las modificaciones de membresía se agrupan por etiqueta utilizando:
+- `resourceNamesToAdd`
+- `resourceNamesToRemove`
+
+52.7 PRUEBA REAL DE ELIMINACIÓN DE ETIQUETA
+-------------------------------------------
+Prueba controlada:
+- se quitó una etiqueta a un docente desde Contactos Institucionales;
+- el cambio persistió correctamente en Firestore;
+- al recargar el Portal, la etiqueta continuó eliminada;
+- la vista previa de Google Contacts informó:
+  - Contactos activos analizados: 85
+  - Nuevos: 0
+  - Ya existentes: 85
+  - Etiquetas nuevas: Ninguna
+  - Asignaciones de etiquetas: 0
+  - Etiquetas a quitar: 1
+  - Errores: 0
+- se ejecutó la sincronización;
+- Google Contacts quitó correctamente esa etiqueta;
+- el contacto permaneció existente.
+
+Estado:
+FUNCIONANDO Y PROBADO.
+
+52.8 TABLA DE CONTACTOS / EDICIÓN DE ETIQUETAS
+----------------------------------------------
+La tabla de Contactos Institucionales en Admin fue simplificada.
+
+Columnas eliminadas:
+- Rol
+- Situación de Revista
+- Estado
+
+Columnas finales:
+- Nombre completo
+- Correo
+- Etiquetas
+- Acciones
+
+Se agregó la acción:
+- Editar
+
+“Editar” permite modificar `etiquetasContacto` directamente desde la tabla.
+
+Comportamiento probado:
+- agregar etiquetas: OK;
+- quitar etiquetas: OK;
+- persistencia después de recargar: OK;
+- array vacío de etiquetas: contemplado;
+- lectura posterior directa desde Firestore para confirmar que el valor fue
+  realmente persistido.
+
+El alta de un nuevo contacto NO debe hacerse desde esta sección.
+Decisión de arquitectura:
+- primero se da de alta el usuario desde Usuarios;
+- luego, en Contactos Institucionales, se administran sus etiquetas;
+- de esta forma no se crea una agenda paralela ni usuarios huérfanos.
+
+52.9 PARCHES DEL BLOQUE GOOGLE CONTACTS
+---------------------------------------
+Secuencia funcional consolidada durante este bloque:
+- Parche 06: vista previa segura de Google Contacts.
+- Parche 07: sincronización real con confirmación.
+- Parche 08: sincronizar sin listar contactos en la tabla.
+- Parche 09: simplificación de tabla + edición de etiquetas.
+- Parche 10: confirmación de persistencia al quitar etiquetas.
+- Parche 11: vista previa y resultado con altas/bajas de etiquetas.
+
+Nota:
+los números de parche son referencias de trabajo de esta jornada. Para cualquier
+modificación futura manda siempre el HEAD/código actual del repositorio.
+
+======================================================================
+53. PENDIENTES VIGENTES – 06/10/2026
+======================================================================
+
+53.1 PRÓXIMA ACCIÓN: “ELIMINAR” EN CONTACTOS INSTITUCIONALES
+------------------------------------------------------------
+PRIORIDAD INMEDIATA AL RETOMAR.
+
+Pendiente agregar una acción “Eliminar” por fila en la tabla de Contactos
+Institucionales.
+
+La acción NO debe eliminar el usuario de Firestore ni darlo de baja del Portal.
+
+Criterio propuesto a terminar de implementar/probar:
+- eliminar el contacto únicamente de Google Contacts;
+- conservar intacto el usuario institucional;
+- registrar una condición de exclusión para que una sincronización posterior no
+  vuelva a crear automáticamente ese contacto mientras siga excluido;
+- pedir confirmación explícita antes de ejecutar;
+- reflejar claramente en la interfaz que se elimina de Google Contacts, no del
+  Portal.
+
+Antes de codificar, revisar el modelo final elegido para la marca de exclusión y
+su interacción con usuarios activos/inactivos.
+
+53.2 DISTRIBUIR CONTACTOS A OTRAS CUENTAS INSTITUCIONALES
+---------------------------------------------------------
+Pendiente sincronizar el mismo conjunto institucional también con:
+
+- direccion.tec495@gmail.com
+- vicedireccion.tec495@gmail.com
+- prosecretaria.tec495@gmail.com
+
+Motivo de la pausa:
+el usuario no dispone actualmente de las personas/credenciales necesarias para
+acceder a esas cuentas y autorizar/configurar Apps Script.
+
+Arquitectura acordada para retomar:
+- una copia del backend Apps Script por cada cuenta Google destino;
+- cada Web App se ejecuta como su propia cuenta propietaria;
+- todas reciben los contactos desde la misma fuente Firestore;
+- idealmente el Portal Admin tendrá un único flujo que sincronice las cuatro
+  cuentas y muestre un resultado por cuenta.
+
+Orden previsto:
+1. configurar primero `direccion.tec495@gmail.com`;
+2. probar los 85 contactos y etiquetas;
+3. repetir con Vicedirección;
+4. repetir con Prosecretaría;
+5. integrar las cuatro URLs/backend desde el Portal Admin.
+
+No intentar resolverlo compartiendo la agenda de Soporte como si Google Contacts
+fuera una base común: cada cuenta tiene su propio conjunto de contactos.
+
+53.3 REINTENTOS ANTE ERRORES TEMPORALES DE GOOGLE
+-------------------------------------------------
+Mejora opcional pendiente:
+incorporar reintentos automáticos con espera breve ante respuestas transitorias
+de People API como:
+- 429
+- 500
+- 502
+- 503
+- 504
+
+Se detectó un 502 aislado durante las pruebas. No bloqueó la continuidad y las
+sincronizaciones posteriores funcionaron, por lo que no es prioridad antes de
+la acción “Eliminar”.
+
+53.4 REGLA DE CONTINUIDAD
+-------------------------
+Al retomar este bloque:
+1. trabajar sobre el repositorio/HEAD actual;
+2. comenzar por la acción “Eliminar”;
+3. mantener Firestore `usuarios` como fuente institucional;
+4. no borrar usuarios del Portal desde Contactos Institucionales;
+5. no eliminar grupos personales de Google Contacts;
+6. mantener la vista previa antes de cualquier sincronización destructiva;
+7. cuando haya acceso a las otras cuentas, retomar la distribución multi-cuenta.
+
+======================================================================
+FIN ACTUALIZACIÓN GOOGLE CONTACTS Y PENDIENTES – 06/10/2026
+======================================================================

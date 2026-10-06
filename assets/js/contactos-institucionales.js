@@ -163,6 +163,39 @@ function crearCeldaAccionesContacto_(contacto) {
   btnEditar.innerHTML = '<i class="fa-solid fa-pen"></i> Editar';
 
   contenedor.appendChild(btnEditar);
+
+  if (obtenerRolActivo() === "SOPORTE") {
+    const excluidoGoogle = contacto.sincronizarGoogleContacts === false;
+    const btnGoogle = document.createElement("button");
+
+    btnGoogle.type = "button";
+    btnGoogle.dataset.contactoId = contacto.id;
+
+    if (excluidoGoogle) {
+      btnGoogle.className =
+        "btn-tabla btn-editar btn-reincorporar-google-contacto";
+      btnGoogle.title = "Volver a incluir en Google Contacts";
+      btnGoogle.setAttribute(
+        "aria-label",
+        `Volver a incluir ${contacto.nombreCompleto || contacto.correo} en Google Contacts`,
+      );
+      btnGoogle.innerHTML =
+        '<i class="fa-solid fa-rotate-left"></i> Reincorporar';
+    } else {
+      btnGoogle.className =
+        "btn-tabla btn-eliminar btn-eliminar-google-contacto";
+      btnGoogle.title = "Eliminar de Google Contacts";
+      btnGoogle.setAttribute(
+        "aria-label",
+        `Eliminar ${contacto.nombreCompleto || contacto.correo} de Google Contacts`,
+      );
+      btnGoogle.innerHTML =
+        '<i class="fa-solid fa-trash"></i> Eliminar';
+    }
+
+    contenedor.appendChild(btnGoogle);
+  }
+
   celda.appendChild(contenedor);
 
   return celda;
@@ -691,9 +724,218 @@ async function obtenerTokenAppCheckContactos_() {
   return obtenerToken();
 }
 
+async function marcarSincronizacionGoogleContacts_(contacto, habilitado) {
+  const referencia = doc(db, "usuarios", contacto.id);
+  const batch = writeBatch(db);
+
+  batch.update(referencia, {
+    sincronizarGoogleContacts: Boolean(habilitado),
+  });
+
+  await batch.commit();
+
+  const documentoServidor = await getDocFromServer(referencia);
+
+  if (!documentoServidor.exists()) {
+    throw new Error("El usuario ya no existe en el Portal.");
+  }
+
+  const valorServidor =
+    documentoServidor.data()?.sincronizarGoogleContacts !== false;
+
+  if (valorServidor !== Boolean(habilitado)) {
+    throw new Error(
+      "El servidor no confirmó el cambio de sincronización con Google Contacts.",
+    );
+  }
+
+  contacto.sincronizarGoogleContacts = Boolean(habilitado);
+}
+
+async function solicitarEliminacionGoogleContact_(correo) {
+  const usuario = auth.currentUser;
+
+  if (!usuario) {
+    throw new Error(
+      "No se encontró una sesión activa. Recargá la página e intentá nuevamente.",
+    );
+  }
+
+  if (obtenerRolActivo() !== "SOPORTE") {
+    throw new Error(
+      "Solo Soporte Técnico puede eliminar contactos de Google Contacts.",
+    );
+  }
+
+  const [idToken, appCheckToken] = await Promise.all([
+    usuario.getIdToken(true),
+    obtenerTokenAppCheckContactos_(),
+  ]);
+
+  const respuesta = await fetch(BACKEND_GOOGLE_CONTACTS_URL, {
+    method: "POST",
+    headers: {
+      "Content-Type": "text/plain;charset=utf-8",
+    },
+    body: JSON.stringify({
+      accion: "eliminar",
+      idToken,
+      appCheckToken,
+      correo,
+    }),
+  });
+
+  if (!respuesta.ok) {
+    throw new Error(
+      "No se pudo establecer comunicación con el backend de Google Contacts.",
+    );
+  }
+
+  const resultado = await respuesta.json();
+
+  if (!resultado?.ok) {
+    throw new Error(
+      resultado?.error ||
+        "El backend rechazó la eliminación de Google Contacts.",
+    );
+  }
+
+  return resultado;
+}
+
+async function eliminarContactoGoogle_(contacto) {
+  if (!contacto || obtenerRolActivo() !== "SOPORTE") return;
+
+  let confirmado = false;
+
+  if (window.Swal) {
+    const respuesta = await Swal.fire({
+      icon: "warning",
+      title: "Eliminar de Google Contacts",
+      html: [
+        `<strong>${contacto.nombreCompleto || "Sin nombre"}</strong>`,
+        `<br><span>${contacto.correo}</span>`,
+        "<br><br>El usuario seguirá existiendo en el Portal.",
+        "<br>Solo se eliminará de Google Contacts de la cuenta Soporte y quedará excluido de futuras sincronizaciones.",
+      ].join(""),
+      showCancelButton: true,
+      confirmButtonText: "Eliminar de Google Contacts",
+      cancelButtonText: "Cancelar",
+      reverseButtons: true,
+      focusCancel: true,
+    });
+
+    confirmado = Boolean(respuesta.isConfirmed);
+  } else {
+    confirmado = window.confirm(
+      [
+        `Eliminar ${contacto.nombreCompleto || contacto.correo} de Google Contacts.`,
+        "",
+        "El usuario seguirá existiendo en el Portal y quedará excluido de futuras sincronizaciones.",
+        "",
+        "¿Continuar?",
+      ].join("\n"),
+    );
+  }
+
+  if (!confirmado) return;
+
+  mostrarMensaje(
+    `Eliminando ${contacto.nombreCompleto || contacto.correo} de Google Contacts...`,
+  );
+
+  try {
+    await marcarSincronizacionGoogleContacts_(contacto, false);
+
+    try {
+      await solicitarEliminacionGoogleContact_(contacto.correo);
+    } catch (errorGoogle) {
+      try {
+        await marcarSincronizacionGoogleContacts_(contacto, true);
+      } catch (errorRestauracion) {
+        console.error(
+          "No se pudo restaurar la inclusión en Google Contacts:",
+          errorRestauracion,
+        );
+      }
+
+      throw errorGoogle;
+    }
+
+    aplicarFiltros();
+
+    mostrarMensaje(
+      `${contacto.nombreCompleto || contacto.correo} fue eliminado de Google Contacts y excluido de futuras sincronizaciones.`,
+      "ok",
+    );
+
+    if (window.Swal) {
+      await Swal.fire({
+        icon: "success",
+        title: "Contacto eliminado",
+        html: [
+          "Se eliminó de Google Contacts.",
+          "<br>El usuario permanece intacto en el Portal.",
+          "<br>Podés reincorporarlo cuando quieras desde esta misma tabla.",
+        ].join(""),
+        confirmButtonText: "Entendido",
+      });
+    }
+  } catch (error) {
+    console.error("Error al eliminar contacto de Google Contacts:", error);
+    aplicarFiltros();
+    mostrarMensaje(
+      error?.message || "No se pudo eliminar el contacto de Google Contacts.",
+      "error",
+    );
+
+    if (window.Swal) {
+      await Swal.fire({
+        icon: "error",
+        title: "No se pudo eliminar",
+        text: error?.message || "Ocurrió un error inesperado.",
+        confirmButtonText: "Entendido",
+      });
+    }
+  }
+}
+
+async function reincorporarContactoGoogle_(contacto) {
+  if (!contacto || obtenerRolActivo() !== "SOPORTE") return;
+
+  try {
+    await marcarSincronizacionGoogleContacts_(contacto, true);
+    aplicarFiltros();
+
+    mostrarMensaje(
+      `${contacto.nombreCompleto || contacto.correo} volverá a incluirse en la próxima sincronización con Google Contacts.`,
+      "ok",
+    );
+
+    if (window.Swal) {
+      await Swal.fire({
+        icon: "success",
+        title: "Contacto reincorporado",
+        text: "Volverá a crearse o actualizarse en Google Contacts en la próxima sincronización.",
+        confirmButtonText: "Entendido",
+      });
+    }
+  } catch (error) {
+    console.error("Error al reincorporar contacto a Google Contacts:", error);
+    mostrarMensaje(
+      error?.message || "No se pudo reincorporar el contacto.",
+      "error",
+    );
+  }
+}
+
 function prepararContactosParaGoogle_(contactosFuente) {
   return contactosFuente
-    .filter((contacto) => contacto.estado === "ACTIVO")
+    .filter(
+      (contacto) =>
+        contacto.estado === "ACTIVO" &&
+        contacto.sincronizarGoogleContacts !== false,
+    )
     .map((contacto) => ({
       nombre: contacto.nombreCompleto,
       correo: contacto.correo,
@@ -953,13 +1195,31 @@ async function mostrarPrevisualizacionGoogleContacts_() {
 if (cuerpoTabla) {
   cuerpoTabla.addEventListener("click", (event) => {
     const botonEditar = event.target.closest(".btn-editar-etiquetas-contacto");
-    if (!botonEditar) return;
-
-    const contacto = contactosCargados.find(
-      (item) => item.id === botonEditar.dataset.contactoId,
+    const botonEliminar = event.target.closest(".btn-eliminar-google-contacto");
+    const botonReincorporar = event.target.closest(
+      ".btn-reincorporar-google-contacto",
     );
 
-    editarEtiquetasContacto_(contacto);
+    const boton = botonEditar || botonEliminar || botonReincorporar;
+    if (!boton) return;
+
+    const contacto = contactosCargados.find(
+      (item) => item.id === boton.dataset.contactoId,
+    );
+
+    if (botonEditar) {
+      editarEtiquetasContacto_(contacto);
+      return;
+    }
+
+    if (botonEliminar) {
+      eliminarContactoGoogle_(contacto);
+      return;
+    }
+
+    if (botonReincorporar) {
+      reincorporarContactoGoogle_(contacto);
+    }
   });
 }
 
