@@ -769,6 +769,18 @@ body {
    CONTACTOS INSTITUCIONALES
 ========================= */
 
+#contactos-institucionales .panel-contactos-gestion {
+  display: block;
+}
+
+#contactos-institucionales .panel-contactos-gestion .contenido-panel-gestion {
+  width: 100%;
+}
+
+#contactos-institucionales .panel-contactos-gestion .contenido-panel-gestion > p:first-child {
+  margin-top: 0;
+}
+
 #contactos-institucionales .filtros-contactos-institucionales {
   grid-template-columns: repeat(3, minmax(0, 1fr));
   margin: 20px 0 24px;
