@@ -148,6 +148,94 @@ function crearCelda(texto) {
   return celda;
 }
 
+function crearCeldaAccionesContacto_(contacto) {
+  const celda = document.createElement("td");
+  const contenedor = document.createElement("div");
+  contenedor.className = "acciones-tabla";
+
+  const btnEditar = document.createElement("button");
+  btnEditar.type = "button";
+  btnEditar.className = "btn-tabla btn-editar btn-editar-etiquetas-contacto";
+  btnEditar.dataset.contactoId = contacto.id;
+  btnEditar.title = "Editar etiquetas";
+  btnEditar.setAttribute("aria-label", `Editar etiquetas de ${contacto.nombreCompleto || contacto.correo}`);
+  btnEditar.innerHTML = '<i class="fa-solid fa-pen"></i> Editar';
+
+  contenedor.appendChild(btnEditar);
+  celda.appendChild(contenedor);
+
+  return celda;
+}
+
+async function editarEtiquetasContacto_(contacto) {
+  if (!contacto) return;
+
+  const valorActual = contacto.etiquetasContacto.join(", ");
+  let etiquetasNuevas = null;
+
+  if (window.Swal) {
+    const respuesta = await Swal.fire({
+      title: "Editar etiquetas del contacto",
+      html: [
+        `<strong>${contacto.nombreCompleto || "Sin nombre"}</strong>`,
+        `<br><span>${contacto.correo}</span>`,
+        "<br><br><small>Separá las etiquetas con comas. Si dejás el campo vacío, el contacto quedará sin etiquetas.</small>",
+      ].join(""),
+      input: "textarea",
+      inputValue: valorActual,
+      inputPlaceholder: "Docentes, Tutores, PrimeroA...",
+      showCancelButton: true,
+      confirmButtonText: "Guardar etiquetas",
+      cancelButtonText: "Cancelar",
+      reverseButtons: true,
+      preConfirm: (valor) => convertirEtiquetas(valor),
+    });
+
+    if (!respuesta.isConfirmed) return;
+    etiquetasNuevas = Array.isArray(respuesta.value)
+      ? respuesta.value
+      : convertirEtiquetas(respuesta.value);
+  } else {
+    const valor = window.prompt(
+      `Etiquetas de ${contacto.nombreCompleto || contacto.correo}, separadas por comas:`,
+      valorActual,
+    );
+
+    if (valor === null) return;
+    etiquetasNuevas = convertirEtiquetas(valor);
+  }
+
+  if (etiquetasIguales(contacto.etiquetasContacto, etiquetasNuevas)) {
+    mostrarMensaje("No hubo cambios en las etiquetas del contacto.", "ok");
+    return;
+  }
+
+  mostrarMensaje(`Guardando etiquetas de ${contacto.nombreCompleto || contacto.correo}...`);
+
+  try {
+    const batch = writeBatch(db);
+    batch.update(doc(db, "usuarios", contacto.id), {
+      etiquetasContacto: etiquetasNuevas,
+    });
+    await batch.commit();
+
+    contacto.etiquetasContacto = [...etiquetasNuevas];
+    cargarOpcionesEtiquetas();
+    aplicarFiltros();
+
+    mostrarMensaje(
+      `Etiquetas de ${contacto.nombreCompleto || contacto.correo} actualizadas correctamente.`,
+      "ok",
+    );
+  } catch (error) {
+    console.error("Error al editar etiquetas del contacto:", error);
+    mostrarMensaje(
+      error?.message || "No se pudieron guardar las etiquetas del contacto.",
+      "error",
+    );
+  }
+}
+
 function obtenerEtiquetas(usuario) {
   if (!Array.isArray(usuario.etiquetasContacto)) {
     return [];
@@ -215,7 +303,7 @@ function renderizarContactos(contactos) {
   if (!contactos.length) {
     const fila = document.createElement("tr");
     const celda = document.createElement("td");
-    celda.colSpan = 6;
+    celda.colSpan = 4;
     celda.className = "tabla-vacia";
     celda.textContent = "No se encontraron contactos con esos filtros.";
     fila.appendChild(celda);
@@ -232,10 +320,8 @@ function renderizarContactos(contactos) {
 
     fila.appendChild(crearCelda(contacto.nombreCompleto || "Sin nombre"));
     fila.appendChild(crearCelda(contacto.correo));
-    fila.appendChild(crearCelda(contacto.rol));
-    fila.appendChild(crearCelda(contacto.tipoVinculo));
     fila.appendChild(crearCelda(etiquetas));
-    fila.appendChild(crearCelda(contacto.estado));
+    fila.appendChild(crearCeldaAccionesContacto_(contacto));
 
     cuerpoTabla.appendChild(fila);
   });
@@ -274,9 +360,6 @@ function aplicarFiltros() {
     const contenido = [
       contacto.nombreCompleto,
       contacto.correo,
-      contacto.rol,
-      contacto.tipoVinculo,
-      contacto.estado,
       ...contacto.etiquetasContacto,
     ]
       .join(" ")
@@ -838,6 +921,19 @@ async function mostrarPrevisualizacionGoogleContacts_() {
     btnSincronizarGoogleContacts.disabled = false;
     btnSincronizarGoogleContacts.innerHTML = textoOriginal;
   }
+}
+
+if (cuerpoTabla) {
+  cuerpoTabla.addEventListener("click", (event) => {
+    const botonEditar = event.target.closest(".btn-editar-etiquetas-contacto");
+    if (!botonEditar) return;
+
+    const contacto = contactosCargados.find(
+      (item) => item.id === botonEditar.dataset.contactoId,
+    );
+
+    editarEtiquetasContacto_(contacto);
+  });
 }
 
 if (btnImportarEtiquetas && archivoEtiquetas) {
