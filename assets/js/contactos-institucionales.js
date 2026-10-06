@@ -594,7 +594,7 @@ function prepararContactosParaGoogle_() {
     .filter((contacto) => contacto.correo);
 }
 
-async function previsualizarGoogleContacts_() {
+async function solicitarGoogleContacts_(accion) {
   if (!accesoContactosHabilitado) return;
 
   const usuario = auth.currentUser;
@@ -634,7 +634,7 @@ async function previsualizarGoogleContacts_() {
       "Content-Type": "text/plain;charset=utf-8",
     },
     body: JSON.stringify({
-      accion: "previsualizar",
+      accion,
       idToken,
       appCheckToken,
       contactos,
@@ -652,11 +652,48 @@ async function previsualizarGoogleContacts_() {
   if (!resultado?.ok) {
     throw new Error(
       resultado?.error ||
-        "El backend rechazó la previsualización de Google Contacts.",
+        "El backend rechazó la solicitud de Google Contacts.",
     );
   }
 
   return resultado;
+}
+
+async function previsualizarGoogleContacts_() {
+  return solicitarGoogleContacts_("previsualizar");
+}
+
+async function sincronizarGoogleContacts_() {
+  return solicitarGoogleContacts_("sincronizar");
+}
+
+function cantidadErroresGoogleContacts_(resultado) {
+  return Array.isArray(resultado?.errores)
+    ? resultado.errores.length
+    : 0;
+}
+
+function detalleErroresGoogleContacts_(resultado) {
+  const errores = Array.isArray(resultado?.errores)
+    ? resultado.errores
+    : [];
+
+  if (!errores.length) {
+    return "";
+  }
+
+  const primeros = errores.slice(0, 5).map((item) => {
+    const correo = String(item?.correo || "").trim();
+    const error = String(item?.error || "Error desconocido").trim();
+
+    return correo ? `${correo}: ${error}` : error;
+  });
+
+  if (errores.length > primeros.length) {
+    primeros.push(`... y ${errores.length - primeros.length} error(es) más.`);
+  }
+
+  return primeros.join("\n");
 }
 
 async function mostrarPrevisualizacionGoogleContacts_() {
@@ -679,50 +716,117 @@ async function mostrarPrevisualizacionGoogleContacts_() {
       ? etiquetasNuevas.map((etiqueta) => String(etiqueta)).join(", ")
       : "Ninguna";
 
+    const cantidadErrores = cantidadErroresGoogleContacts_(resultado);
+    let confirmarSincronizacion = false;
+
     if (window.Swal) {
-      await Swal.fire({
-        icon: "info",
+      const decision = await Swal.fire({
+        icon: cantidadErrores ? "warning" : "info",
         title: "Vista previa de Google Contacts",
         html: [
           `<strong>Contactos activos analizados:</strong> ${resultado.total || 0}`,
           `<strong>Nuevos:</strong> ${resultado.nuevos || 0}`,
           `<strong>Ya existentes:</strong> ${resultado.existentes || 0}`,
           `<strong>Etiquetas nuevas:</strong> ${detalleEtiquetas}`,
-          `<strong>Errores:</strong> ${Array.isArray(resultado.errores) ? resultado.errores.length : 0}`,
+          `<strong>Errores:</strong> ${cantidadErrores}`,
           "",
-          "<em>Esta vista previa no modifica Google Contacts.</em>",
+          "<em>La sincronización creará los contactos nuevos y actualizará los existentes. No elimina contactos ni quita etiquetas.</em>",
+        ].join("<br>"),
+        showCancelButton: true,
+        confirmButtonText: "Sincronizar ahora",
+        cancelButtonText: "Cancelar",
+        reverseButtons: true,
+        focusCancel: true,
+      });
+
+      confirmarSincronizacion = Boolean(decision.isConfirmed);
+    } else {
+      confirmarSincronizacion = window.confirm(
+        [
+          `Contactos activos analizados: ${resultado.total || 0}`,
+          `Nuevos: ${resultado.nuevos || 0}`,
+          `Ya existentes: ${resultado.existentes || 0}`,
+          `Etiquetas nuevas: ${detalleEtiquetas}`,
+          `Errores: ${cantidadErrores}`,
+          "",
+          "La sincronización creará los contactos nuevos y actualizará los existentes.",
+          "No elimina contactos ni quita etiquetas.",
+          "",
+          "¿Querés sincronizar ahora?",
+        ].join("\n"),
+      );
+    }
+
+    if (!confirmarSincronizacion) {
+      mostrarMensaje(
+        `Vista previa completada: ${resultado.total || 0} contacto(s) activo(s) analizado(s). Sincronización cancelada.`,
+        "ok",
+      );
+      return;
+    }
+
+    btnSincronizarGoogleContacts.innerHTML =
+      '<i class="fa-solid fa-spinner fa-spin"></i> Sincronizando...';
+    mostrarMensaje("Sincronizando Google Contacts...");
+
+    const resultadoSincronizacion = await sincronizarGoogleContacts_();
+    const erroresSincronizacion = cantidadErroresGoogleContacts_(
+      resultadoSincronizacion,
+    );
+    const detalleErrores = detalleErroresGoogleContacts_(
+      resultadoSincronizacion,
+    );
+
+    if (window.Swal) {
+      await Swal.fire({
+        icon: erroresSincronizacion ? "warning" : "success",
+        title: erroresSincronizacion
+          ? "Sincronización completada con observaciones"
+          : "Google Contacts sincronizado",
+        html: [
+          `<strong>Contactos procesados:</strong> ${resultadoSincronizacion.total || 0}`,
+          `<strong>Creados:</strong> ${resultadoSincronizacion.creados || 0}`,
+          `<strong>Actualizados:</strong> ${resultadoSincronizacion.actualizados || 0}`,
+          `<strong>Etiquetas creadas:</strong> ${resultadoSincronizacion.etiquetasCreadas || 0}`,
+          `<strong>Asignaciones de etiquetas:</strong> ${resultadoSincronizacion.etiquetasAsignadas || 0}`,
+          `<strong>Errores:</strong> ${erroresSincronizacion}`,
+          detalleErrores
+            ? `<br><small>${detalleErrores.replace(/\n/g, "<br>")}</small>`
+            : "",
         ].join("<br>"),
         confirmButtonText: "Entendido",
       });
     } else {
       window.alert(
         [
-          `Contactos activos analizados: ${resultado.total || 0}`,
-          `Nuevos: ${resultado.nuevos || 0}`,
-          `Ya existentes: ${resultado.existentes || 0}`,
-          `Etiquetas nuevas: ${detalleEtiquetas}`,
-          `Errores: ${Array.isArray(resultado.errores) ? resultado.errores.length : 0}`,
-          "",
-          "Esta vista previa no modifica Google Contacts.",
+          `Contactos procesados: ${resultadoSincronizacion.total || 0}`,
+          `Creados: ${resultadoSincronizacion.creados || 0}`,
+          `Actualizados: ${resultadoSincronizacion.actualizados || 0}`,
+          `Etiquetas creadas: ${resultadoSincronizacion.etiquetasCreadas || 0}`,
+          `Asignaciones de etiquetas: ${resultadoSincronizacion.etiquetasAsignadas || 0}`,
+          `Errores: ${erroresSincronizacion}`,
+          detalleErrores ? `\n${detalleErrores}` : "",
         ].join("\n"),
       );
     }
 
     mostrarMensaje(
-      `Vista previa completada: ${resultado.total || 0} contacto(s) activo(s) analizado(s).`,
-      "ok",
+      erroresSincronizacion
+        ? `Sincronización completada con ${erroresSincronizacion} error(es).`
+        : `Google Contacts sincronizado correctamente: ${resultadoSincronizacion.total || 0} contacto(s) procesado(s).`,
+      erroresSincronizacion ? "error" : "ok",
     );
   } catch (error) {
-    console.error("Error al previsualizar Google Contacts:", error);
+    console.error("Error al sincronizar Google Contacts:", error);
     mostrarMensaje(
-      error?.message || "No se pudo consultar Google Contacts.",
+      error?.message || "No se pudo sincronizar Google Contacts.",
       "error",
     );
 
     if (window.Swal) {
       await Swal.fire({
         icon: "error",
-        title: "No se pudo consultar Google Contacts",
+        title: "No se pudo sincronizar Google Contacts",
         text: error?.message || "Ocurrió un error inesperado.",
         confirmButtonText: "Entendido",
       });
