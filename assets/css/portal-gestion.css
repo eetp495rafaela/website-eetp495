@@ -799,7 +799,41 @@ body {
 }
 
 #contactos-institucionales .tabla-contactos-institucionales .tabla-gestion {
-  min-width: 900px;
+  min-width: 760px;
+}
+
+#contactos-institucionales .acciones-tabla {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  flex-wrap: nowrap;
+}
+
+#contactos-institucionales .btn-tabla {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 34px;
+  padding: 7px 10px;
+  border: 0;
+  border-radius: 8px;
+  color: #ffffff;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.78rem;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+#contactos-institucionales .btn-editar {
+  background: var(--gestion-verde);
+}
+
+#contactos-institucionales .btn-editar:hover,
+#contactos-institucionales .btn-editar:focus-visible {
+  filter: brightness(0.92);
 }
 
 @media (max-width: 900px) {
