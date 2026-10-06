@@ -13,6 +13,7 @@ import {
   collection,
   doc,
   getDoc,
+  getDocFromServer,
   getDocs,
   getFirestore,
   query,
@@ -213,13 +214,33 @@ async function editarEtiquetasContacto_(contacto) {
   mostrarMensaje(`Guardando etiquetas de ${contacto.nombreCompleto || contacto.correo}...`);
 
   try {
+    const referencia = doc(db, "usuarios", contacto.id);
     const batch = writeBatch(db);
-    batch.update(doc(db, "usuarios", contacto.id), {
-      etiquetasContacto: etiquetasNuevas,
+    batch.update(referencia, {
+      etiquetasContacto: [...etiquetasNuevas],
     });
     await batch.commit();
 
-    contacto.etiquetasContacto = [...etiquetasNuevas];
+    /*
+     * Confirmamos contra el servidor el valor realmente persistido.
+     * Esto evita que una eliminación parezca correcta sólo por el estado
+     * local del navegador y garantiza que [] también quede guardado.
+     */
+    const documentoServidor = await getDocFromServer(referencia);
+
+    if (!documentoServidor.exists()) {
+      throw new Error("El usuario ya no existe en el Portal.");
+    }
+
+    const etiquetasGuardadas = obtenerEtiquetas(documentoServidor.data());
+
+    if (!etiquetasIguales(etiquetasGuardadas, etiquetasNuevas)) {
+      throw new Error(
+        "El servidor no confirmó el cambio de etiquetas. Volvé a intentarlo.",
+      );
+    }
+
+    contacto.etiquetasContacto = [...etiquetasGuardadas];
     cargarOpcionesEtiquetas();
     aplicarFiltros();
 
