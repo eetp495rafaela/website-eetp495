@@ -1,8 +1,8 @@
 BITÁCORA MAESTRA – PORTAL INSTITUCIONAL E.E.T.P. N.º 495
 ========================================================
 
-Referencia: EETP495-BITACORA-MAESTRA-2026-09-24
-Fecha de consolidación: 24/09/2026
+Referencia: EETP495-BITACORA-MAESTRA-2026-10-06
+Fecha de consolidación: 06/10/2026
 Institución: E.E.T.P. N.º 495 “Malvinas Argentinas” – Rafaela, Santa Fe
 Modalidad: Técnico en Informática Profesional y Personal
 Dominio: https://eetp495rafaela.edu.ar
@@ -7705,4 +7705,354 @@ Antes de iniciar una nueva mejora:
 
 ======================================================================
 FIN ACTUALIZACIÓN 24/09/2026
+======================================================================
+
+======================================================================
+49. ACTUALIZACIÓN 24–27/09/2026 – IMPORTACIÓN MASIVA / TRANSICIÓN ANUAL
+======================================================================
+
+OBJETIVO
+--------
+Se avanzó sobre la importación masiva de estudiantes, docentes y personal para
+que el Portal pueda incorporar o completar datos desde un archivo maestro sin
+destruir información ya existente.
+
+CRITERIO GENERAL CONFIRMADO
+---------------------------
+- La colección `usuarios` continúa siendo la fuente principal de usuarios.
+- La importación debe completar datos faltantes cuando el usuario ya existe.
+- No debe recrear usuarios innecesariamente.
+- No debe modificar ni eliminar asignaciones docentes ya existentes.
+- Debe preservar caracteres y acentos correctamente.
+- El archivo maestro debe poder descargarse nuevamente en CSV.
+- El archivo se diseña también como base para la transición anual 2026 -> 2027.
+
+CAMPOS DEL ARCHIVO MAESTRO
+--------------------------
+Base histórica utilizada:
+1. NOMBRE_COMPLETO
+2. CORREO_DE_ACCESO
+3. DNI
+4. ROL
+5. SITUACION_DE_REVISTA
+6. FECHA_FINALIZACION
+
+Campos ampliados incorporados/revisados:
+7. Curso
+8. División
+9. Grupo de Taller
+
+La lógica debía permitir completar información de estudiantes/docentes/personal
+sin afectar las relaciones académicas ya cargadas en el Portal.
+
+TRANSICIÓN ANUAL
+----------------
+El archivo maestro se pensó para acompañar movimientos de cierre/inicio de ciclo:
+- promoción;
+- repetición;
+- egreso;
+- actualización de curso/división/grupo;
+- continuidad de personal y docentes.
+
+REEMPLAZOS
+----------
+Las fechas de finalización de reemplazos no se resolvieron mediante esta
+importación masiva; quedaron para carga/gestión posterior según el flujo propio
+de Reemplazos Docentes.
+
+PARCHEO / ESTADO
+----------------
+Durante este bloque se trabajó con una secuencia de parches sobre el importador.
+Se registró como referencia:
+- Parche 22: aplicado correctamente.
+- Parche 23b: no aplicó sobre `admin/index.html` en la posición esperada y se
+  descartó como parche directo para esa base.
+
+Estado funcional consolidado:
+- archivo maestro preparado;
+- importación orientada a completar usuarios existentes;
+- preservación de asignaciones docentes como condición obligatoria;
+- transición anual contemplada como objetivo del mismo archivo maestro.
+
+======================================================================
+FIN ACTUALIZACIÓN IMPORTACIÓN MASIVA / TRANSICIÓN ANUAL
+======================================================================
+
+
+======================================================================
+50. ACTUALIZACIÓN 05–06/10/2026 – CONTACTOS INSTITUCIONALES
+======================================================================
+
+50.1 OBJETIVO FUNCIONAL
+-----------------------
+Se creó una nueva sección “Contactos Institucionales” como preparación para una
+futura integración con Google Contacts.
+
+La sección NO constituye una agenda paralela ni una nueva base de usuarios.
+La arquitectura acordada es:
+- `usuarios` de Firestore sigue siendo la fuente maestra;
+- no se crea una colección paralela de contactos;
+- no se utiliza Google Sheets como base permanente de esta función;
+- los ALUMNOS quedan excluidos;
+- los usuarios institucionales reciben únicamente un nuevo campo de apoyo:
+  `etiquetasContacto`.
+
+Objetivo de las etiquetas:
+permitir que en una etapa posterior los contactos institucionales puedan
+crearse/actualizarse en Google Contacts y agruparse por etiquetas como:
+- Docentes
+- Tutores
+- PrimeroA
+- SegundoB
+- QuintoC
+- EducacionFisica
+- DibujoTecnico
+- etc.
+
+Convención acordada para etiquetas:
+- sin acentos;
+- sin espacios;
+- mayúscula inicial por palabra cuando corresponda;
+- criterio uniforme para evitar duplicados lógicos en futuras automatizaciones.
+
+50.2 PARCHE 01 – LISTADO DE CONTACTOS INSTITUCIONALES
+-----------------------------------------------------
+Se agregó la sección en Portal Admin y Portal Gestión.
+
+Función inicial:
+- consultar usuarios institucionales ya registrados;
+- excluir alumnos;
+- mostrar una tabla con:
+  Nombre completo | Correo | Rol | Situación de Revista | Etiquetas | Estado;
+- permitir búsqueda general y filtro por estado;
+- no modificar datos en esta primera etapa.
+
+Archivo principal de lógica:
+- `assets/js/contactos-institucionales.js`
+
+La tarjeta/entrada fue incorporada en los portales correspondientes.
+
+50.3 PARCHE 02 – PERMISOS / ROLES / CONSULTA FIRESTORE
+------------------------------------------------------
+Se cambió la consulta del cliente para pedir directamente:
+`rol != "ALUMNO"`
+
+en lugar de descargar todos los usuarios y filtrar después en memoria.
+
+Se agregó soporte de permisos para consultar Contactos Institucionales a:
+- SOPORTE
+- DIRECCION
+- SECRETARIA
+- ASISTENTE_ADMINISTRATIVO
+
+PRECEPTORIA no fue incorporada a este permiso específico.
+
+Se ajustaron las Firestore Security Rules con la condición de que la consulta
+solicite usuarios cuyo rol principal sea distinto de ALUMNO.
+
+El despliegue de reglas fue realizado y probado.
+
+50.4 PARCHE 03 – IMPORTACIÓN DE ETIQUETAS DESDE XLSX/CSV
+--------------------------------------------------------
+Se agregó “Importar etiquetas” en Contactos Institucionales.
+
+Formatos admitidos:
+- .xlsx
+- .xls
+- .csv
+
+La importación identifica usuarios por correo electrónico y actualiza
+EXCLUSIVAMENTE:
+
+`etiquetasContacto: [...]`
+
+No debe modificar:
+- nombre;
+- correo;
+- rol;
+- situación de revista;
+- estado;
+- curso/división/grupo;
+- asignaciones;
+- ni ningún otro dato del usuario.
+
+La lectura de encabezados normaliza mayúsculas/minúsculas, acentos y signos para
+aceptar variantes razonables del archivo.
+
+Encabezado utilizado en la prueba real:
+`Área/Espacio Curricular`
+
+Las etiquetas de una celda pueden venir separadas por comas o punto y coma.
+Si el mismo correo aparece más de una vez, las etiquetas se combinan y se
+evitan duplicados.
+
+Antes de escribir, el sistema muestra una vista previa con:
+- Coincidencias
+- A actualizar
+- Sin cambios
+- Sin usuario en el Portal
+
+PRUEBA REAL 06/10/2026
+----------------------
+Con el archivo institucional preparado:
+- Coincidencias: 83
+- A actualizar: 83
+- Sin cambios: 0
+- Sin usuario en el Portal: 11
+
+La cantidad “A actualizar: 83” fue considerada correcta porque ninguno de esos
+usuarios tenía aún etiquetas cargadas.
+
+Los 11 correos sin usuario se omiten; la importación NO crea usuarios nuevos.
+
+La importación se realizó sobre la versión publicada del Portal para que App
+Check reconozca las solicitudes a Firestore como verificadas.
+
+50.5 PARCHE 04 – FILTRO POR ETIQUETA
+-----------------------------------
+Se agregó un tercer filtro específico para `etiquetasContacto`.
+
+Distribución final en escritorio:
+Buscar contacto | Etiqueta | Estado
+
+Los tres controles ocupan una sola fila y reparten el ancho disponible.
+
+Comportamiento:
+- el desplegable se genera dinámicamente con las etiquetas existentes;
+- elimina duplicados;
+- ordena alfabéticamente;
+- permite filtrar por coincidencia exacta de etiqueta;
+- se combina con búsqueda general y estado;
+- al volver a importar etiquetas, el selector se reconstruye con los valores
+  actualizados;
+- en pantallas chicas los filtros pasan a una columna.
+
+Archivos modificados por el Parche 04:
+- admin/index.html
+- gestion/index.html
+- assets/css/portal-admin.css
+- assets/css/portal-gestion.css
+- assets/js/contactos-institucionales.js
+
+Resumen verificado antes del commit:
+- 5 archivos modificados
+- 128 inserciones
+- 6 eliminaciones
+- `git diff --check`: limpio
+
+50.6 PARCHE 05 – UNIFICACIÓN VISUAL EN PORTAL GESTIÓN
+-----------------------------------------------------
+Después del Parche 04 se compararon Admin y Gestión.
+
+Requerimiento final:
+Gestión debía conservar su identidad visual y colores propios, pero la sección
+Contactos Institucionales debía tener la misma composición visual que Admin.
+
+Ajustes aplicados:
+- se eliminó el encabezado interno redundante con ícono grande +
+  “Contactos del personal institucional”;
+- la tarjeta comienza directamente con el texto descriptivo;
+- se mantienen los botones y colores verdes propios de Gestión;
+- se conserva la fila de tres filtros;
+- se mejora la separación entre filtros y tabla;
+- se corrige una clase de filtros que había quedado aplicada accidentalmente en
+  la sección Estudiantes;
+- no se modificó la lógica funcional de importación ni filtrado.
+
+Archivos modificados:
+- gestion/index.html
+- assets/css/portal-gestion.css
+
+Verificación:
+- `git apply --check`: correcto, con un warning únicamente de modo de archivo
+  CSS (100644/100755), no de contenido;
+- `git diff --check`: limpio;
+- `git status`: sólo los dos archivos esperados;
+- commit/push realizados;
+- prueba visual publicada: usuario confirmó “Ahora quedó genial”.
+
+50.7 ESTADO GIT / FUENTE DE REFERENCIA DEL BLOQUE
+-------------------------------------------------
+ZIP completo revisado antes de los Parches 04 y 05:
+`Website-EETP495(20261006-110809).zip`
+
+HEAD contenido en ese ZIP:
+572e786853e8915bf69d4ad6092a7d611ef39527
+commit corto: 572e786
+
+Ese ZIP ya incluía el Parche 03 de importación de etiquetas.
+
+Los Parches 04 y 05 fueron aplicados posteriormente y luego se realizó
+commit/push de ambos bloques. Los hashes de esos dos commits no quedaron
+capturados dentro del ZIP disponible al momento de esta consolidación.
+
+Por lo tanto, para futuros trabajos manda:
+1. repositorio local/HEAD actual del usuario;
+2. ZIP o archivos actuales entregados posteriormente;
+3. esta Bitácora.
+
+50.8 ESTADO FUNCIONAL CERRADO AL 06/10/2026
+------------------------------------------
+CERRADO / PROBADO:
+- sección Contactos Institucionales en Admin;
+- sección Contactos Institucionales en Gestión;
+- exclusión de ALUMNOS;
+- permisos de consulta para roles autorizados;
+- lectura de usuarios institucionales desde Firestore;
+- importación de `etiquetasContacto` desde XLSX/CSV;
+- identificación por correo;
+- vista previa antes de importar;
+- actualización sólo del campo de etiquetas;
+- filtro por búsqueda;
+- filtro por etiqueta;
+- filtro por estado;
+- combinación de los tres filtros;
+- diseño Admin;
+- diseño Gestión alineado con Admin respetando CSS/colores de Gestión.
+
+PENDIENTE INMEDIATO
+-------------------
+La integración REAL con Google Contacts todavía NO fue implementada.
+
+Próxima etapa prevista:
+- definir el mecanismo de autenticación/backend necesario;
+- crear/actualizar contactos institucionales tomando `usuarios` como fuente;
+- aplicar en Google Contacts las etiquetas almacenadas en `etiquetasContacto`;
+- evitar duplicados por correo;
+- definir comportamiento ante usuarios INACTIVOS y cambios de datos;
+- diseñar sincronización segura sin convertir Google Contacts en la fuente
+  maestra.
+
+REGLA DE ARQUITECTURA A CONSERVAR
+---------------------------------
+Google Contacts será un destino sincronizado / herramienta operativa.
+Firestore `usuarios` continúa siendo la fuente institucional de verdad.
+
+======================================================================
+FIN ACTUALIZACIÓN CONTACTOS INSTITUCIONALES – 06/10/2026
+======================================================================
+
+
+======================================================================
+51. ESTADO DE CONTINUIDAD – 06/10/2026
+======================================================================
+
+ÚLTIMO BLOQUE CERRADO
+---------------------
+Contactos Institucionales hasta importación, etiquetas, filtros y unificación
+visual Admin/Gestión.
+
+SIGUIENTE BLOQUE PROPUESTO
+--------------------------
+Integración con Google Contacts.
+
+ANTES DE MODIFICACIONES TRANSVERSALES
+-------------------------------------
+Usar como fuente prioritaria el repositorio actual del usuario. Si la tarea
+involucra autenticación Google, backend, Apps Script, Cloud Functions, reglas o
+varios portales simultáneamente, revisar nuevamente el ZIP/código vigente antes
+de generar parches.
+
+======================================================================
+FIN ESTADO DE CONTINUIDAD 06/10/2026
 ======================================================================
