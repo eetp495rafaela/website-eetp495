@@ -985,6 +985,30 @@ body.modal-abierto {
     grid-column: span 1;
   }
 }
+
+/* =========================
+   CONTACTOS INSTITUCIONALES
+========================= */
+
+#contactos-institucionales .filtros-contactos-institucionales {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin-bottom: 22px;
+}
+
+#contactos-institucionales .tabla-contactos-institucionales {
+  margin-top: 0;
+}
+
+@media (max-width: 850px) {
+  #contactos-institucionales .filtros-contactos-institucionales {
+    grid-template-columns: 1fr;
+  }
+
+  #contactos-institucionales .filtros-contactos-institucionales .campo-busqueda {
+    grid-column: span 1;
+  }
+}
+
 /* =========================
    PERFIL DEL USUARIO
 ========================= */

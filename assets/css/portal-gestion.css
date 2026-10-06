@@ -764,6 +764,38 @@ body {
     grid-template-columns: 1fr;
   }
 }
+
+/* =========================
+   CONTACTOS INSTITUCIONALES
+========================= */
+
+#contactos-institucionales .filtros-contactos-institucionales {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin: 20px 0 24px;
+  padding: 16px;
+  border: 1px solid var(--gestion-borde);
+  border-radius: 14px;
+  background: #f8fbff;
+}
+
+#contactos-institucionales .tabla-contactos-institucionales {
+  width: 100%;
+  overflow-x: auto;
+  border: 1px solid var(--gestion-borde);
+  border-radius: 14px;
+  background: #ffffff;
+}
+
+#contactos-institucionales .tabla-contactos-institucionales .tabla-gestion {
+  min-width: 900px;
+}
+
+@media (max-width: 900px) {
+  #contactos-institucionales .filtros-contactos-institucionales {
+    grid-template-columns: 1fr;
+  }
+}
+
 /* =========================
    GESTIÓN - DOCENTES
 ========================= */

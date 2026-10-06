@@ -48,6 +48,9 @@ const btnVerContactos = document.getElementById(
   "btnVerContactosInstitucionales",
 );
 const buscarContacto = document.getElementById("buscarContactoInstitucional");
+const filtroEtiqueta = document.getElementById(
+  "filtroEtiquetaContactoInstitucional",
+);
 const filtroEstado = document.getElementById(
   "filtroEstadoContactoInstitucional",
 );
@@ -166,6 +169,38 @@ function prepararContacto(documento) {
   };
 }
 
+
+function cargarOpcionesEtiquetas() {
+  if (!filtroEtiqueta) return;
+
+  const seleccionActual = filtroEtiqueta.value;
+  const etiquetas = Array.from(
+    new Set(
+      contactosCargados.flatMap((contacto) => contacto.etiquetasContacto),
+    ),
+  ).sort((a, b) =>
+    a.localeCompare(b, "es", { sensitivity: "base" }),
+  );
+
+  filtroEtiqueta.innerHTML = "";
+
+  const opcionTodas = document.createElement("option");
+  opcionTodas.value = "";
+  opcionTodas.textContent = "Todas";
+  filtroEtiqueta.appendChild(opcionTodas);
+
+  etiquetas.forEach((etiqueta) => {
+    const opcion = document.createElement("option");
+    opcion.value = etiqueta;
+    opcion.textContent = etiqueta;
+    filtroEtiqueta.appendChild(opcion);
+  });
+
+  if (etiquetas.includes(seleccionActual)) {
+    filtroEtiqueta.value = seleccionActual;
+  }
+}
+
 function renderizarContactos(contactos) {
   if (!cuerpoTabla) return;
 
@@ -206,10 +241,23 @@ function aplicarFiltros() {
   const texto = String(buscarContacto?.value || "")
     .trim()
     .toLocaleLowerCase("es");
+  const etiquetaSeleccionada = String(filtroEtiqueta?.value || "")
+    .trim()
+    .toLocaleLowerCase("es");
   const estado = normalizarTexto(filtroEstado?.value);
 
   const filtrados = contactosCargados.filter((contacto) => {
     if (estado && contacto.estado !== estado) {
+      return false;
+    }
+
+    if (
+      etiquetaSeleccionada &&
+      !contacto.etiquetasContacto.some(
+        (etiqueta) =>
+          etiqueta.trim().toLocaleLowerCase("es") === etiquetaSeleccionada,
+      )
+    ) {
       return false;
     }
 
@@ -257,6 +305,7 @@ async function cargarContactos() {
         }),
       );
 
+    cargarOpcionesEtiquetas();
     aplicarFiltros();
   } catch (error) {
     console.error("Error al cargar los contactos institucionales:", error);
@@ -533,6 +582,10 @@ if (btnVerContactos) {
 
 if (buscarContacto) {
   buscarContacto.addEventListener("input", aplicarFiltros);
+}
+
+if (filtroEtiqueta) {
+  filtroEtiqueta.addEventListener("change", aplicarFiltros);
 }
 
 if (filtroEstado) {
