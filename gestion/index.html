@@ -296,9 +296,9 @@
           <div class="contenido-panel-gestion">
             <h3>Contactos del personal institucional</h3>
             <p>
-              Esta primera etapa consulta los usuarios ya registrados en el
-              Portal. Los alumnos no forman parte del listado. Todavía no se
-              modifica ningún dato ni se sincroniza con Google Contacts.
+              Consultá los usuarios institucionales ya registrados en el Portal
+              y asignales las etiquetas utilizadas para la futura sincronización
+              con Google Contacts. Los alumnos no forman parte del listado.
             </p>
 
             <div class="acciones-gestion">
@@ -310,6 +310,22 @@
                 <i class="fa-solid fa-address-book"> </i>
                 Ver contactos
               </button>
+
+              <button
+                class="btn-gestion"
+                id="btnImportarEtiquetasContactos"
+                type="button"
+              >
+                <i class="fa-solid fa-file-import"> </i>
+                Importar etiquetas
+              </button>
+
+              <input
+                accept=".xlsx,.xls,.csv"
+                hidden
+                id="archivoEtiquetasContactos"
+                type="file"
+              />
             </div>
 
             <div class="filtros-gestion">
@@ -1327,6 +1343,7 @@
       <i class="fa-solid fa-arrow-up"> </i>
     </button>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
     <script
       src="../assets/js/proteger-portal.js?v=20260831-appcheck1"
       type="module"
@@ -1336,7 +1353,7 @@
       type="module"
     ></script>
     <script
-      src="../assets/js/contactos-institucionales.js?v=20261005-2"
+      src="../assets/js/contactos-institucionales.js?v=20261006-1"
       type="module"
     ></script>
     <script

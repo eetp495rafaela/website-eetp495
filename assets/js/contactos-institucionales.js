@@ -17,6 +17,7 @@ import {
   getFirestore,
   query,
   where,
+  writeBatch,
 } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -55,6 +56,12 @@ const cuerpoTabla = document.getElementById(
 );
 const mensajeContactos = document.getElementById(
   "mensajeContactosInstitucionales",
+);
+const btnImportarEtiquetas = document.getElementById(
+  "btnImportarEtiquetasContactos",
+);
+const archivoEtiquetas = document.getElementById(
+  "archivoEtiquetasContactos",
 );
 
 let contactosCargados = [];
@@ -258,6 +265,266 @@ async function cargarContactos() {
       "error",
     );
   }
+}
+
+
+function normalizarEncabezado(valor) {
+  return String(valor || "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-zA-Z0-9]/g, "")
+    .toUpperCase();
+}
+
+function buscarIndiceEncabezado(encabezados, candidatos) {
+  const normalizados = encabezados.map(normalizarEncabezado);
+
+  for (const candidato of candidatos) {
+    const indice = normalizados.indexOf(normalizarEncabezado(candidato));
+    if (indice >= 0) return indice;
+  }
+
+  return -1;
+}
+
+function convertirEtiquetas(valor) {
+  const vistas = Array.isArray(valor) ? valor : [valor];
+  const resultado = [];
+  const vistasNormalizadas = new Set();
+
+  vistas.forEach((item) => {
+    String(item || "")
+      .split(/[,;]+/)
+      .map((etiqueta) => etiqueta.trim())
+      .filter(Boolean)
+      .forEach((etiqueta) => {
+        const clave = etiqueta.toLocaleLowerCase("es");
+        if (!vistasNormalizadas.has(clave)) {
+          vistasNormalizadas.add(clave);
+          resultado.push(etiqueta);
+        }
+      });
+  });
+
+  return resultado;
+}
+
+function etiquetasIguales(actuales, nuevas) {
+  const preparar = (lista) =>
+    convertirEtiquetas(lista)
+      .map((etiqueta) => etiqueta.toLocaleLowerCase("es"))
+      .sort((a, b) => a.localeCompare(b, "es"));
+
+  const a = preparar(actuales);
+  const b = preparar(nuevas);
+
+  return a.length === b.length && a.every((valor, indice) => valor === b[indice]);
+}
+
+function extraerContactosDesdeLibro(libro) {
+  const candidatosCorreo = [
+    "CORREO ELECTRÓNICO",
+    "CORREO ELECTRONICO",
+    "CORREO_DE_ACCESO",
+    "CORREO",
+    "EMAIL",
+  ];
+  const candidatosEtiquetas = [
+    "ÁREA/ESPACIO CURRICULAR",
+    "AREA/ESPACIO CURRICULAR",
+    "AREA_ESPACIO_CURRICULAR",
+    "ETIQUETAS",
+    "ETIQUETAS_CONTACTO",
+  ];
+
+  for (const nombreHoja of libro.SheetNames) {
+    const hoja = libro.Sheets[nombreHoja];
+    const filas = XLSX.utils.sheet_to_json(hoja, {
+      header: 1,
+      defval: "",
+      raw: false,
+    });
+
+    if (!filas.length) continue;
+
+    let filaEncabezado = -1;
+    let indiceCorreo = -1;
+    let indiceEtiquetas = -1;
+
+    for (let i = 0; i < Math.min(filas.length, 15); i += 1) {
+      const fila = Array.isArray(filas[i]) ? filas[i] : [];
+      const correo = buscarIndiceEncabezado(fila, candidatosCorreo);
+      const etiquetas = buscarIndiceEncabezado(fila, candidatosEtiquetas);
+
+      if (correo >= 0 && etiquetas >= 0) {
+        filaEncabezado = i;
+        indiceCorreo = correo;
+        indiceEtiquetas = etiquetas;
+        break;
+      }
+    }
+
+    if (filaEncabezado < 0) continue;
+
+    const contactos = [];
+
+    for (let i = filaEncabezado + 1; i < filas.length; i += 1) {
+      const fila = Array.isArray(filas[i]) ? filas[i] : [];
+      const correo = normalizarCorreo(fila[indiceCorreo]);
+      const etiquetas = convertirEtiquetas(fila[indiceEtiquetas]);
+
+      if (!correo) continue;
+
+      contactos.push({ correo, etiquetas });
+    }
+
+    return contactos;
+  }
+
+  throw new Error(
+    "No se encontraron las columnas de correo y Área/Espacio Curricular (o Etiquetas).",
+  );
+}
+
+async function leerArchivoEtiquetas(archivo) {
+  if (!window.XLSX) {
+    throw new Error("No se pudo cargar el lector de archivos XLSX/CSV.");
+  }
+
+  const buffer = await archivo.arrayBuffer();
+  const libro = XLSX.read(buffer, { type: "array" });
+  return extraerContactosDesdeLibro(libro);
+}
+
+async function confirmarImportacion(resumen) {
+  const detalle = [
+    `Coincidencias: ${resumen.coincidencias}`,
+    `A actualizar: ${resumen.actualizaciones.length}`,
+    `Sin cambios: ${resumen.sinCambios}`,
+    `Sin usuario en el Portal: ${resumen.sinCoincidencia.length}`,
+  ].join("<br>");
+
+  if (window.Swal) {
+    const respuesta = await Swal.fire({
+      title: "Importar etiquetas de contactos",
+      html: detalle,
+      icon: resumen.sinCoincidencia.length ? "warning" : "question",
+      showCancelButton: true,
+      confirmButtonText: "Importar etiquetas",
+      cancelButtonText: "Cancelar",
+      reverseButtons: true,
+    });
+
+    return respuesta.isConfirmed;
+  }
+
+  return window.confirm(
+    detalle.replaceAll("<br>", "\n") + "\n\n¿Continuar con la importación?",
+  );
+}
+
+async function importarEtiquetasDesdeArchivo(archivo) {
+  if (!archivo || !accesoContactosHabilitado) return;
+
+  mostrarMensaje("Analizando archivo de etiquetas...");
+
+  try {
+    if (!contactosCargados.length) {
+      await cargarContactos();
+    }
+
+    const filasImportadas = await leerArchivoEtiquetas(archivo);
+    const contactosPorCorreo = new Map(
+      contactosCargados.map((contacto) => [contacto.correo, contacto]),
+    );
+
+    const porCorreo = new Map();
+    filasImportadas.forEach((fila) => {
+      if (!porCorreo.has(fila.correo)) {
+        porCorreo.set(fila.correo, fila);
+      } else {
+        const existente = porCorreo.get(fila.correo);
+        existente.etiquetas = convertirEtiquetas([
+          ...existente.etiquetas,
+          ...fila.etiquetas,
+        ]);
+      }
+    });
+
+    const resumen = {
+      coincidencias: 0,
+      sinCambios: 0,
+      actualizaciones: [],
+      sinCoincidencia: [],
+    };
+
+    porCorreo.forEach((fila, correo) => {
+      const contacto = contactosPorCorreo.get(correo);
+
+      if (!contacto) {
+        resumen.sinCoincidencia.push(correo);
+        return;
+      }
+
+      resumen.coincidencias += 1;
+
+      if (etiquetasIguales(contacto.etiquetasContacto, fila.etiquetas)) {
+        resumen.sinCambios += 1;
+        return;
+      }
+
+      resumen.actualizaciones.push({ contacto, etiquetas: fila.etiquetas });
+    });
+
+    const confirmado = await confirmarImportacion(resumen);
+    if (!confirmado) {
+      mostrarMensaje("Importación cancelada. No se modificó ningún usuario.");
+      return;
+    }
+
+    if (!resumen.actualizaciones.length) {
+      mostrarMensaje("No había etiquetas para actualizar.", "ok");
+      return;
+    }
+
+    const batch = writeBatch(db);
+
+    resumen.actualizaciones.forEach(({ contacto, etiquetas }) => {
+      batch.update(doc(db, "usuarios", contacto.id), {
+        etiquetasContacto: etiquetas,
+      });
+    });
+
+    await batch.commit();
+    await cargarContactos();
+
+    let mensaje = `${resumen.actualizaciones.length} usuario(s) actualizado(s) correctamente.`;
+
+    if (resumen.sinCoincidencia.length) {
+      mensaje += ` ${resumen.sinCoincidencia.length} correo(s) del archivo no existen como usuario del Portal y fueron omitidos.`;
+    }
+
+    mostrarMensaje(mensaje, "ok");
+  } catch (error) {
+    console.error("Error al importar etiquetas de contactos:", error);
+    mostrarMensaje(
+      error?.message || "No se pudieron importar las etiquetas.",
+      "error",
+    );
+  } finally {
+    if (archivoEtiquetas) archivoEtiquetas.value = "";
+  }
+}
+
+if (btnImportarEtiquetas && archivoEtiquetas) {
+  btnImportarEtiquetas.addEventListener("click", () => {
+    archivoEtiquetas.click();
+  });
+
+  archivoEtiquetas.addEventListener("change", () => {
+    const archivo = archivoEtiquetas.files?.[0];
+    if (archivo) importarEtiquetasDesdeArchivo(archivo);
+  });
 }
 
 if (btnVerContactos) {

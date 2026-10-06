@@ -2447,6 +2447,13 @@ allow delete: if esSoporte()
  */
 allow update: if esSoporte()
   || (
+    puedeConsultarContactosInstitucionales()
+    && resource.data.get("rol", "") != "ALUMNO"
+    && request.resource.data.diff(resource.data).affectedKeys()
+      .hasOnly(["etiquetasContacto"])
+    && request.resource.data.get("etiquetasContacto", []) is list
+  )
+  || (
     esGestionInstitucional()
 
     && resource.data.rol == "ALUMNO"
