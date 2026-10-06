@@ -999,6 +999,33 @@ body.modal-abierto {
   margin-top: 0;
 }
 
+#contactos-institucionales .acciones-tabla {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  flex-wrap: nowrap;
+}
+
+#contactos-institucionales .btn-eliminar-google-contacto {
+  background: #b42318;
+  border-color: #b42318;
+  color: #ffffff;
+  opacity: 1;
+}
+
+#contactos-institucionales .btn-eliminar-google-contacto i {
+  color: #ffffff;
+}
+
+#contactos-institucionales .btn-eliminar-google-contacto:hover,
+#contactos-institucionales .btn-eliminar-google-contacto:focus-visible {
+  background: #8f1d14;
+  border-color: #8f1d14;
+  color: #ffffff;
+}
+
 @media (max-width: 850px) {
   #contactos-institucionales .filtros-contactos-institucionales {
     grid-template-columns: 1fr;
