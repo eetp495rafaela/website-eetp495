@@ -8371,3 +8371,412 @@ Al retomar este bloque:
 ======================================================================
 FIN ACTUALIZACIÓN GOOGLE CONTACTS Y PENDIENTES – 06/10/2026
 ======================================================================
+======================================================================
+54. ACTUALIZACIÓN 07/10/2026 – MODELO DEFINITIVO DE GOOGLE CONTACTS
+======================================================================
+
+54.1 DECISIÓN FUNCIONAL DEFINITIVA
+----------------------------------
+Se descartó la idea de eliminar manualmente contactos individuales desde la
+tabla de Contactos Institucionales.
+
+Regla definitiva:
+- Firestore `usuarios` continúa siendo la fuente institucional de verdad.
+- Google Contacts sólo refleja automáticamente esa información.
+- SOPORTE/Admin es el único que da de alta usuarios, modifica roles, situación
+  de revista, estado y demás datos administrativos.
+- Los roles de Gestión autorizados pueden consultar Contactos Institucionales y
+  editar `etiquetasContacto`, pero no crean ni eliminan usuarios desde esta
+  sección.
+- Un usuario institucional ACTIVO debe existir en las agendas sincronizadas.
+- Un usuario dado de baja/inactivo deja de formar parte del conjunto deseado y
+  se elimina automáticamente de Google Contacts en la siguiente sincronización.
+- Si vuelve a activarse, se crea/actualiza nuevamente en la próxima
+  sincronización.
+- Las etiquetas son institucionales/globales y se almacenan una sola vez en
+  Firestore.
+
+Consecuencia:
+se eliminó del diseño definitivo la lógica de exclusión individual
+`sincronizarGoogleContacts: false` y también la acción
+Eliminar/Reincorporar por contacto.
+
+54.2 FRONTEND FINAL DE CONTACTOS INSTITUCIONALES
+------------------------------------------------
+Se revisó el proyecto completo recibido en:
+`Website-EETP495(20261006-214901).zip`
+
+Parches consolidados:
+- Parche 15: modelo definitivo de Contactos Institucionales.
+- Parche 16: información de bajas automáticas en la vista previa.
+
+Estado final de la sección Admin:
+- botón `Ver contactos`;
+- botón `Sincronizar ahora`;
+- tabla:
+  Nombre completo | Correo | Etiquetas | Acciones;
+- acción por fila:
+  Editar;
+- filtros:
+  búsqueda, etiqueta y estado;
+- sin botón Importar etiquetas;
+- sin Eliminar;
+- sin Reincorporar.
+
+La importación inicial de etiquetas desde XLSX/CSV ya cumplió su objetivo y fue
+retirada de la interfaz.
+
+Estado final de Gestión:
+- misma estructura funcional y visual que Admin;
+- conserva los colores propios del Portal Gestión;
+- permite ver contactos y editar etiquetas;
+- no administra altas/bajas institucionales.
+
+54.3 BACKEND V2.1 – BAJAS AUTOMÁTICAS SEGURAS
+---------------------------------------------
+Se reemplazó la eliminación individual por un historial de contactos
+administrados por el sistema:
+
+`CONTACTOS_GOOGLE_CONTACTS_GESTIONADOS`
+
+Objetivo:
+- recordar qué correos fueron administrados por esta sincronización;
+- eliminar únicamente contactos previamente gestionados por el Portal;
+- NO borrar contactos personales ajenos a la institución.
+
+Primera vista previa con el nuevo modelo:
+- contactos activos analizados: 85;
+- nuevos: 0;
+- existentes: 85;
+- contactos a eliminar: 0;
+- etiquetas nuevas: ninguna;
+- asignaciones: 0;
+- etiquetas a quitar: 0;
+- errores: 0.
+
+La primera sincronización estableció la nueva línea de base.
+
+54.4 INCIDENTE FIRESTORE – CUOTA DIARIA
+---------------------------------------
+Durante las pruebas del 06/10/2026 Firestore devolvió:
+
+HTTP 429
+RESOURCE_EXHAUSTED
+Quota exceeded
+
+Firebase Console confirmó:
+`Superaste tus límites de uso diarios`.
+
+No fue un error del backend ni de Google Contacts.
+Se esperó al reinicio de cuota del día siguiente.
+
+El cambio temporal que mostraba el detalle técnico del 429 en el Portal se
+revirtió antes de continuar.
+
+54.5 BACKEND V2.2 – REINTENTOS Y MENOS ESCRITURAS
+-------------------------------------------------
+Se incorporaron reintentos automáticos ante errores transitorios de People API:
+- 429 transitorio;
+- 500;
+- 502;
+- 503;
+- 504;
+- `service is currently unavailable`.
+
+Espera exponencial implementada:
+- 0,8 s;
+- 1,6 s;
+- 3,2 s.
+
+No se reintenta una cuota diaria realmente agotada.
+
+También se agregó la comparación de nombre/correo para NO ejecutar
+`updateContact` cuando el contacto ya coincide.
+
+Prueba previa:
+- 85 procesados;
+- 83 actualizados;
+- 2 errores transitorios de Google (`service is currently unavailable`).
+
+Prueba posterior con v2.2:
+- 85 procesados;
+- 0 creados;
+- 1 actualizado;
+- 0 eliminados;
+- 0 etiquetas creadas;
+- 0 asignaciones;
+- 0 etiquetas quitadas;
+- 0 errores.
+
+Resultado:
+FUNCIONANDO Y PROBADO.
+
+54.6 PRUEBAS FUNCIONALES DE ALTA/BAJA/ETIQUETAS
+-----------------------------------------------
+Se realizaron pruebas reales:
+
+1. Desactivar un usuario:
+   - desapareció de Google Contacts correctamente.
+
+2. Reactivar el mismo usuario:
+   - volvió a sincronizarse correctamente.
+
+3. Modificar etiquetas:
+   - el cambio se reflejó correctamente en Google Contacts.
+
+4. Eliminar dos usuarios de prueba:
+   - la sincronización automática posterior detectó 83 contactos activos;
+   - eliminó los dos contactos gestionados que ya no correspondían.
+
+54.7 BACKEND V2.3 – SINCRONIZACIÓN AUTOMÁTICA
+----------------------------------------------
+Se agregó la función:
+
+`sincronizarAutomaticamente()`
+
+Esta función:
+- no depende de una sesión humana;
+- lee Firestore mediante el OAuth del propietario del Apps Script;
+- reutiliza exactamente la lógica ya probada de sincronización;
+- registra la última ejecución en:
+  `ULTIMA_SINCRONIZACION_GOOGLE_CONTACTS`;
+- conserva reintentos ante errores temporales;
+- mantiene el historial de contactos y etiquetas administradas.
+
+Manifest de Soporte:
+se agregó scope:
+`https://www.googleapis.com/auth/datastore`
+
+y se conservaron:
+- `https://www.googleapis.com/auth/contacts`
+- `https://www.googleapis.com/auth/script.external_request`
+
+Prueba manual de `sincronizarAutomaticamente()`:
+- contactos institucionales activos obtenidos de Firestore: 83;
+- total: 83;
+- creados: 0;
+- actualizados: 1;
+- sin cambios: 82;
+- contactos eliminados: 2;
+- etiquetas creadas: 0;
+- etiquetas asignadas: 0;
+- etiquetas quitadas: 0;
+- errores: 0.
+
+La diferencia 85 -> 83 fue correcta porque previamente se habían eliminado dos
+usuarios de prueba.
+
+54.8 TRIGGER NOCTURNO DE SOPORTE
+--------------------------------
+Se configuró el activador horario para:
+
+Función:
+`sincronizarAutomaticamente`
+
+Fuente:
+`Basado en el tiempo`
+
+Tipo:
+`Cronómetro por día`
+
+Franja:
+02:00 a.m. - 03:00 a.m.
+
+Zona horaria:
+America/Argentina/Buenos_Aires / GMT-03:00
+
+Pendiente de control operativo:
+verificar en `Ejecuciones` la primera ejecución nocturna real y confirmar
+`errores: []`.
+
+======================================================================
+55. ARQUITECTURA MULTICUENTA DEFINIDA – 07/10/2026
+======================================================================
+
+55.1 CUENTAS DESTINO DE ESTA ETAPA
+----------------------------------
+Se preparó la incorporación de:
+
+- `direccion.tec495@gmail.com`
+- `vicedireccion.tec495@gmail.com`
+- `prosecretaria.tec495@gmail.com`
+
+Asistente Administrativo queda para una etapa posterior.
+
+55.2 PRINCIPIO DE SEGURIDAD
+---------------------------
+Se decidió NO conceder a Dirección, Vicedirección ni Prosecretaría permisos
+directos IAM sobre Firestore.
+
+Arquitectura definitiva propuesta:
+
+Firestore
+   |
+   v
+Apps Script Soporte
+   |-- Google Contacts Soporte
+   |
+   `-- Fuente central HTTPS protegida por token individual
+        |
+        |-- Apps Script Dirección -> Google Contacts Dirección
+        |-- Apps Script Vicedirección -> Google Contacts Vicedirección
+        `-- Apps Script Prosecretaría -> Google Contacts Prosecretaría
+
+Ventajas:
+- sólo Soporte lee Firestore directamente;
+- las cuentas destino no reciben permisos sobre Firebase;
+- cada cuenta sólo modifica SUS propios Google Contacts;
+- cada destino tiene un token independiente;
+- un destino puede revocarse desde Script Properties de Soporte;
+- no se comparten credenciales de Google;
+- no hace falta desplegar los proyectos destino como Web App.
+
+55.3 BACKEND SOPORTE V2.4
+-------------------------
+Archivo preparado:
+`EETP495_Google_Contacts_Backend_SOPORTE_v2_4.gs`
+
+Agrega la acción interna:
+`obtener_contactos_destino`
+
+Esta acción se procesa ANTES de Firebase Auth/App Check porque no proviene del
+navegador; se autentica mediante un token individual de destino.
+
+Script Properties de Soporte:
+- `TOKEN_DESTINO_DIRECCION`
+- `TOKEN_DESTINO_VICEDIRECCION`
+- `TOKEN_DESTINO_PROSECRETARIA`
+
+Se agregó la función:
+`prepararTokensDestinos()`
+
+Comportamiento:
+- crea los tres tokens si todavía no existen;
+- no reemplaza tokens existentes;
+- los tokens nunca deben guardarse en la bitácora, repositorio ni archivos
+  compartidos.
+
+55.4 PLANTILLA DE CUENTA DESTINO
+--------------------------------
+Se preparó una única plantilla reutilizable para las tres cuentas.
+
+Archivos por cuenta:
+- `Code.gs`
+- `appsscript.json`
+- `CONFIGURACION.txt`
+
+Script Properties obligatorias en cada cuenta destino:
+- `FUENTE_CONTACTOS_URL`
+- `DESTINO_ID`
+- `TOKEN_DESTINO`
+
+Valores de `DESTINO_ID`:
+- Dirección: `DIRECCION`
+- Vicedirección: `VICEDIRECCION`
+- Prosecretaría: `PROSECRETARIA`
+
+`FUENTE_CONTACTOS_URL` debe ser la URL `/exec` vigente del Web App de Soporte.
+
+`TOKEN_DESTINO` debe copiarse únicamente desde la propiedad correspondiente
+del Apps Script de Soporte.
+
+Scopes de los proyectos destino:
+- `https://www.googleapis.com/auth/contacts`
+- `https://www.googleapis.com/auth/script.external_request`
+
+Servicio avanzado:
+- People API v1.
+
+No requieren:
+- scope datastore;
+- Firebase Auth;
+- App Check;
+- acceso IAM a Firestore;
+- despliegue como Web App.
+
+55.5 PRIMERA CONFIGURACIÓN DE CADA CUENTA
+-----------------------------------------
+Para cada cuenta destino:
+
+1. iniciar sesión con la cuenta propietaria;
+2. crear un proyecto Apps Script nuevo;
+3. pegar `Code.gs`;
+4. habilitar el manifiesto y pegar `appsscript.json`;
+5. habilitar People API;
+6. configurar las tres Script Properties;
+7. ejecutar manualmente `sincronizarAhora()`;
+8. aceptar los permisos OAuth;
+9. verificar el resumen y Google Contacts;
+10. si todo está correcto, crear trigger diario:
+    `sincronizarAutomaticamente`
+    franja 02:00-03:00;
+11. al día siguiente revisar `Ejecuciones`.
+
+La primera sincronización establece la línea de base de contactos gestionados
+de esa agenda. A partir de ese momento las bajas se eliminan automáticamente
+de forma segura.
+
+55.6 PAQUETE PREPARADO
+----------------------
+Paquete:
+`EETP495_Google_Contacts_Multicuenta_2026-10-07.zip`
+
+Contenido:
+- backend Soporte v2.4;
+- carpeta DIRECCION;
+- carpeta VICEDIRECCION;
+- carpeta PROSECRETARIA;
+- instrucciones generales;
+- configuración específica de cada cuenta.
+
+Estado:
+PREPARADO.
+La instalación en las cuentas destino queda pendiente hasta disponer de las
+personas que brindan acceso a cada cuenta.
+
+======================================================================
+56. ESTADO DE CONTINUIDAD – 07/10/2026
+======================================================================
+
+CERRADO / PROBADO
+-----------------
+- Contactos Institucionales Admin y Gestión;
+- edición de etiquetas;
+- sincronización manual de Soporte;
+- altas;
+- cambios;
+- cambios de etiquetas;
+- bajas automáticas seguras;
+- reactivación;
+- reintentos transitorios;
+- reducción de escrituras innecesarias;
+- lectura automática desde Firestore;
+- ejecución manual de `sincronizarAutomaticamente()` con 0 errores.
+
+PENDIENTE INMEDIATO
+-------------------
+1. Confirmar que el trigger nocturno de Soporte ejecutó correctamente.
+2. Actualizar Soporte a backend v2.4.
+3. Ejecutar `prepararTokensDestinos()`.
+4. Configurar Dirección cuando se disponga de acceso.
+5. Probar primera sincronización de Dirección.
+6. Repetir Vicedirección.
+7. Repetir Prosecretaría.
+8. Dejar Asistente Administrativo para una etapa posterior.
+
+REGLAS A CONSERVAR
+------------------
+- Firestore `usuarios` es la fuente institucional de verdad.
+- Google Contacts nunca es la fuente maestra.
+- sólo SOPORTE administra altas, bajas, roles y datos administrativos;
+- Gestión puede editar etiquetas institucionales;
+- las cuentas destino no deben recibir acceso IAM a Firestore;
+- no almacenar tokens/keys reales en repositorio ni bitácora;
+- no eliminar contactos personales no administrados por el Portal;
+- no volver a incorporar la acción manual Eliminar por contacto;
+- no volver a incorporar Importar etiquetas salvo una necesidad excepcional de
+  migración masiva futura.
+
+======================================================================
+FIN ACTUALIZACIÓN 07/10/2026
+======================================================================
