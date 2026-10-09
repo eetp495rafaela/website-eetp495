@@ -35,6 +35,8 @@ const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
+const HASH_CALIFICACIONES_TALLER_DOCENTE = "#calificaciones-taller-docente";
+
 const tarjetaCalificacionesTallerDocente = document.getElementById(
   "tarjetaCalificacionesTallerDocente",
 );
@@ -124,6 +126,10 @@ function mostrarVistaInformativa(texto) {
   `;
 }
 
+function obtenerCicloLectivoActual() {
+  return new Date().getFullYear();
+}
+
 function esAsignacionTallerPrimerCiclo(asignacion) {
   const tipo = normalizarTexto(
     asignacion.espacioTipo ||
@@ -133,8 +139,13 @@ function esAsignacionTallerPrimerCiclo(asignacion) {
   );
 
   const anio = Number(asignacion.cursoAnio || asignacion.anioCurso || 0);
+  const cicloLectivo = Number(asignacion.cicloLectivo || 0);
 
-  return tipo.includes("TALLER") && (anio === 1 || anio === 2);
+  return (
+    tipo === "TALLER" &&
+    (anio === 1 || anio === 2) &&
+    cicloLectivo === obtenerCicloLectivoActual()
+  );
 }
 
 function estaReemplazoVigente(reemplazo) {
@@ -150,9 +161,12 @@ function estaReemplazoVigente(reemplazo) {
     String(hoy.getDate()).padStart(2, "0"),
   ].join("-");
 
+  const cicloLectivo = Number(reemplazo.cicloLectivo || 0);
+
   return (
     estado === "ACTIVO" &&
-    tipo.includes("TALLER") &&
+    tipo === "TALLER" &&
+    cicloLectivo === obtenerCicloLectivoActual() &&
     fechaDesde &&
     fechaHasta &&
     fechaHoy >= fechaDesde &&
@@ -2621,6 +2635,46 @@ async function cargarRegistroSeleccionado() {
   }
 }
 
+function establecerVisibilidadModuloCalificaciones(puedeVer) {
+  if (tarjetaCalificacionesTallerDocente) {
+    tarjetaCalificacionesTallerDocente.hidden = !puedeVer;
+
+    if (puedeVer) {
+      tarjetaCalificacionesTallerDocente.style.removeProperty("display");
+    } else {
+      tarjetaCalificacionesTallerDocente.style.setProperty(
+        "display",
+        "none",
+        "important",
+      );
+    }
+  }
+
+  if (seccionCalificacionesTallerDocente) {
+    seccionCalificacionesTallerDocente.hidden = !puedeVer;
+
+    if (puedeVer) {
+      seccionCalificacionesTallerDocente.style.removeProperty("display");
+    } else {
+      seccionCalificacionesTallerDocente.style.setProperty(
+        "display",
+        "none",
+        "important",
+      );
+    }
+  }
+}
+
+function controlarAccesoModuloCalificaciones(puedeVer) {
+  if (puedeVer) return;
+
+  const hashActual = String(window.location.hash || "").trim();
+
+  if (hashActual === HASH_CALIFICACIONES_TALLER_DOCENTE) {
+    window.location.replace("#inicio");
+  }
+}
+
 async function prepararModulo(correoDocente) {
   try {
     const [titulares, reemplazos] = await Promise.all([
@@ -2633,16 +2687,13 @@ async function prepararModulo(correoDocente) {
       ...reemplazos,
     ]);
 
-    if (!accesosCalificacionesTallerDocente.length) {
+    const puedeVerModulo = accesosCalificacionesTallerDocente.length > 0;
+
+    establecerVisibilidadModuloCalificaciones(puedeVerModulo);
+    controlarAccesoModuloCalificaciones(puedeVerModulo);
+
+    if (!puedeVerModulo) {
       return;
-    }
-
-    if (tarjetaCalificacionesTallerDocente) {
-      tarjetaCalificacionesTallerDocente.hidden = false;
-    }
-
-    if (seccionCalificacionesTallerDocente) {
-      seccionCalificacionesTallerDocente.hidden = false;
     }
 
     cargarCiclosDisponibles();
@@ -2651,10 +2702,14 @@ async function prepararModulo(correoDocente) {
       "Error al preparar Registro de Calificaciones de Taller:",
       error,
     );
+
+    establecerVisibilidadModuloCalificaciones(false);
+    controlarAccesoModuloCalificaciones(false);
   }
 }
 
 actualizarEstadoVisualEdicion();
+establecerVisibilidadModuloCalificaciones(false);
 
 if (cicloCalificacionesTallerDocente) {
   cicloCalificacionesTallerDocente.addEventListener(
@@ -2694,8 +2749,20 @@ if (grupoCalificacionesTallerDocente) {
 }
 
 onAuthStateChanged(auth, (user) => {
-  if (!user) return;
+  if (!user) {
+    usuarioCalificacionesTallerDocente = null;
+    accesosCalificacionesTallerDocente = [];
+    establecerVisibilidadModuloCalificaciones(false);
+    controlarAccesoModuloCalificaciones(false);
+    return;
+  }
 
   usuarioCalificacionesTallerDocente = user;
   prepararModulo(normalizarCorreo(user.email));
+});
+
+window.addEventListener("hashchange", () => {
+  controlarAccesoModuloCalificaciones(
+    accesosCalificacionesTallerDocente.length > 0,
+  );
 });
