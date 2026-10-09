@@ -1395,7 +1395,7 @@ async function generarPizarraHorarios() {
     abrirPizarraImprimible(bloques, cicloLectivo);
 
     mostrarMensajePizarra(
-      `Pizarra del ciclo lectivo ${cicloLectivo} generada correctamente con ${bloques.length} bloques activos.`,
+      `Pizarra del ciclo lectivo ${cicloLectivo} generada correctamente.`,
       "ok",
     );
   } catch (error) {
