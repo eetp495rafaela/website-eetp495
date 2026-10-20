@@ -42,6 +42,7 @@ const ROLES_PERMITIDOS = new Set([
   "DIRECCION",
   "SECRETARIA",
   "ASISTENTE_ADMINISTRATIVO",
+  "PRECEPTORIA",
 ]);
 
 const tarjetaContactos = document.getElementById(

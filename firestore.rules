@@ -213,7 +213,8 @@ function puedeConsultarContactosInstitucionales() {
     "SOPORTE",
     "DIRECCION",
     "SECRETARIA",
-    "ASISTENTE_ADMINISTRATIVO"
+    "ASISTENTE_ADMINISTRATIVO",
+    "PRECEPTORIA"
   ]);
 }
 
