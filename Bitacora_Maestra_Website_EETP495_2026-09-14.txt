@@ -1,8 +1,8 @@
 BITÁCORA MAESTRA – PORTAL INSTITUCIONAL E.E.T.P. N.º 495
 ========================================================
 
-Referencia: EETP495-BITACORA-MAESTRA-2026-10-06
-Fecha de consolidación: 06/10/2026
+Referencia: EETP495-BITACORA-MAESTRA-2026-10-09
+Fecha de consolidación: 09/10/2026
 Institución: E.E.T.P. N.º 495 “Malvinas Argentinas” – Rafaela, Santa Fe
 Modalidad: Técnico en Informática Profesional y Personal
 Dominio: https://eetp495rafaela.edu.ar
@@ -8779,4 +8779,162 @@ REGLAS A CONSERVAR
 
 ======================================================================
 FIN ACTUALIZACIÓN 07/10/2026
+======================================================================
+
+======================================================================
+57. ACTUALIZACIÓN 09/10/2026 – REGISTRO DE CALIFICACIONES DOCENTE
+======================================================================
+
+57.1 OBJETIVO
+-------------
+Se corrigió la visibilidad de la tarjeta:
+
+`Registro de Calificaciones`
+
+en el Portal Docente.
+
+Regla funcional definitiva:
+
+La tarjeta debe mostrarse ÚNICAMENTE a docentes que tengan una asignación
+vigente de tipo TALLER correspondiente a 1° o 2° año del ciclo lectivo actual.
+
+No alcanza con que el docente tenga cualquier espacio cuyo nombre contenga la
+palabra "Taller".
+
+57.2 REGLA DE VISIBILIDAD
+-------------------------
+La tarjeta se habilita sólo cuando el docente cumple simultáneamente:
+
+- usuario con rol DOCENTE activo;
+- asignación ACTIVA/ACTIVO;
+- `espacioTipo = TALLER`;
+- curso correspondiente a 1° o 2° año;
+- ciclo lectivo igual al año actual.
+
+También se contemplan reemplazos vigentes que correspondan realmente a Taller
+de 1° o 2° año.
+
+Debe permanecer oculta para:
+
+- docentes de Taller de 3° año;
+- docentes de Taller de 4° año;
+- docentes de Taller de 5° año;
+- docentes de espacios que no sean TALLER;
+- docentes con asignaciones de ciclos lectivos anteriores;
+- docentes que sólo tengan coincidencias de texto con la palabra "Taller" pero
+  cuyo `espacioTipo` no sea exactamente TALLER.
+
+57.3 RELACIÓN CON Si.R.A.
+-------------------------
+NO se modificó la lógica de Si.R.A.
+
+Regla vigente de Si.R.A.:
+- visible para docentes de Taller de 1° a 5° año;
+- visible para docentes de Educación Física;
+- continúa utilizando sus validaciones propias de asignación, horario y
+  reemplazos.
+
+Por lo tanto, ambas tarjetas tienen reglas diferentes:
+
+Si.R.A.
+-> Taller de 1° a 5° + Educación Física.
+
+Registro de Calificaciones
+-> exclusivamente Taller de 1° y 2°.
+
+57.4 ARCHIVOS MODIFICADOS
+-------------------------
+Parche aplicado:
+`30-restringir-registro-calificaciones-docentes-taller-1y2.patch`
+
+Archivos:
+- `assets/js/calificaciones-taller-docente.js`
+- `docentes/index.html`
+
+El parche:
+- mantiene la tarjeta oculta por defecto;
+- valida asignaciones del ciclo lectivo actual;
+- exige tipo exacto TALLER;
+- limita la habilitación a 1° y 2° año;
+- contempla reemplazos vigentes;
+- protege también el acceso directo a la sección;
+- actualiza la versión del JS para evitar caché antigua.
+
+57.5 FUENTE DE CÓDIGO REVISADA
+------------------------------
+ZIP completo utilizado para revisar y preparar este ajuste:
+
+`Website-EETP495(20261009-175636).zip`
+
+Regla de precedencia:
+el repositorio/HEAD actual posterior a este parche pasa a ser la fuente de mayor
+confianza frente a versiones anteriores de esta Bitácora.
+
+57.6 VALIDACIÓN
+---------------
+Aplicación local:
+- `git apply`: correcta;
+- `git diff --check`: sin errores;
+- sólo quedaron modificados los dos archivos previstos.
+
+Pruebas funcionales en producción:
+
+1. Docente con Taller de 1° o 2° año
+   -> ve `Registro de Calificaciones`.
+
+2. Docente con Taller de 3°, 4° o 5° año
+   -> NO ve `Registro de Calificaciones`.
+
+3. Docente sin Taller
+   -> NO ve `Registro de Calificaciones`.
+
+4. Si.R.A.
+   -> continúa funcionando con su regla anterior.
+
+Resultado informado por el usuario:
+`Funciona perfecto`.
+
+Estado:
+CERRADO / PROBADO EN PRODUCCIÓN.
+
+57.7 REGLA A CONSERVAR
+----------------------
+No ampliar nuevamente la visibilidad de `Registro de Calificaciones` por simple
+coincidencia con la palabra "Taller".
+
+Para futuras modificaciones, conservar esta condición:
+
+`Registro de Calificaciones = Taller exacto de 1° o 2° año, ciclo vigente`.
+
+Si se cambia la estructura de asignaciones, reemplazos o tipos de espacio,
+revisar expresamente esta regla antes de modificar el Portal Docente.
+
+======================================================================
+58. ESTADO DE CONTINUIDAD – 09/10/2026
+======================================================================
+
+ÚLTIMO BLOQUE CERRADO
+---------------------
+Restricción correcta de la tarjeta `Registro de Calificaciones` en Portal
+Docente.
+
+CERRADO / PROBADO
+-----------------
+- visibilidad exclusiva para Taller de 1° y 2° año;
+- exclusión de Taller de 3°, 4° y 5°;
+- exclusión de docentes sin Taller;
+- validación por ciclo lectivo actual;
+- reemplazos vigentes contemplados;
+- acceso directo a la sección protegido;
+- Si.R.A. sin cambios.
+
+PENDIENTES RELACIONADOS
+-----------------------
+No quedan pendientes funcionales de este ajuste.
+
+Los pendientes generales del proyecto continúan siendo los registrados en las
+secciones anteriores de esta Bitácora.
+
+======================================================================
+FIN ACTUALIZACIÓN 09/10/2026
 ======================================================================
