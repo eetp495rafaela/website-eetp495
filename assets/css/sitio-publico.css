@@ -49,6 +49,8 @@ header {
 
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
+  row-gap: 16px;
 }
 
 .logo img {
@@ -77,6 +79,11 @@ header {
 
 .acceso-portal {
   margin-left: auto;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 12px;
 }
 
 .btn-portal {
@@ -101,6 +108,55 @@ header {
 
 .btn-portal:hover {
   background: var(--naranja);
+}
+
+/* Acceso público al manual de usuario. */
+.btn-manual {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 12px 20px;
+  border: 2px solid var(--azul);
+  border-radius: 8px;
+  background: #ffffff;
+  color: var(--azul);
+  text-decoration: none;
+  font-weight: 700;
+  white-space: nowrap;
+  transition: 0.25s;
+}
+.btn-manual:hover {
+  background: #e6f0fc;
+}
+.btn-manual:focus-visible,
+.btn-portal:focus-visible {
+  outline: 3px solid var(--naranja);
+  outline-offset: 3px;
+}
+
+/* Separación del extremo derecho solo en monitores de escritorio.
+   Avanza progresivamente hasta 60px y no cambia tablets ni celulares. */
+@media (min-width: 1280px) {
+  .acceso-portal {
+    transform: translateX(clamp(0px, calc((100vw - 1280px) * 0.16), 60px));
+  }
+}
+
+/* PRUEBA REVERSIBLE: accesos del encabezado apilados solo en escritorio. */
+@media (min-width: 1280px) {
+  .acceso-portal {
+    flex-direction: column;
+    flex-wrap: nowrap;
+    align-items: stretch;
+    gap: 10px;
+  }
+
+  .acceso-portal > .btn-portal,
+  .acceso-portal > .btn-manual {
+    width: 224px;
+    justify-content: center;
+  }
 }
 
 /* =====================================================
@@ -1371,11 +1427,15 @@ body.sin-scroll {
 
   .acceso-portal {
     margin: 22px 0 0;
+    width: 100%;
+    justify-content: center;
   }
 
-  .btn-portal {
+  .btn-portal,
+  .btn-manual {
     justify-content: center;
-    min-width: 230px;
+    min-width: 0;
+    flex: 1 1 230px;
   }
 
   /* ---------- HERO ---------- */
@@ -1719,6 +1779,19 @@ body.sin-scroll {
     height: 280px;
   }
 }
+/* En celulares pequeños, los accesos quedan uno debajo del otro. */
+@media (max-width: 560px) {
+  .acceso-portal {
+    flex-direction: column;
+    align-items: center;
+  }
+  .btn-portal,
+  .btn-manual {
+    width: min(100%, 320px);
+    flex: none;
+  }
+}
+
 /* =====================================================
    AJUSTE TABLET - ENCABEZADO SITIO PÚBLICO
 ===================================================== */
@@ -1759,10 +1832,13 @@ body.sin-scroll {
     grid-column: 1 / -1;
     margin-left: 0;
     width: 100%;
+    justify-content: center;
   }
 
-  .btn-portal {
-    width: 100%;
+  .btn-portal,
+  .btn-manual {
+    flex: 1 1 0;
+    min-width: 0;
     justify-content: center;
   }
 }
