@@ -96,7 +96,7 @@ function renderizarHorarioCompletoAlumno(
     const bloquesDia = bloquesAula
       .filter((bloque) => bloque.dia === dia.valor)
       .sort(
-        (a, b) => Number(a.bloqueNumero || 0) - Number(b.bloqueNumero || 0),
+        (a, b) => String(a.horaInicio || "").localeCompare(String(b.horaInicio || "")),
       );
 
     return `
@@ -540,7 +540,7 @@ async function cargarHorarioAulaAlumno(usuario) {
 
       if (diaA !== diaB) return diaA - diaB;
 
-      return Number(a.bloqueNumero || 0) - Number(b.bloqueNumero || 0);
+      return String(a.horaInicio || "").localeCompare(String(b.horaInicio || ""));
     });
 
     bloquesTaller.sort((a, b) => {

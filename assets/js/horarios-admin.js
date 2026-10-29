@@ -1224,6 +1224,11 @@ async function existeBloqueHorarioAula(datosBloque, idIgnorar = "") {
 
     const mismoDia = String(datos.dia || "") === String(datosBloque.dia);
 
+    // El número de bloque se repite en mañana y tarde: el turno también importa.
+    const mismoTurno =
+      String(datos.turno || "").trim().toUpperCase() ===
+      String(datosBloque.turno || "").trim().toUpperCase();
+
     const mismoBloque =
       Number(datos.bloqueNumero || 0) === Number(datosBloque.bloqueNumero);
 
@@ -1234,6 +1239,7 @@ async function existeBloqueHorarioAula(datosBloque, idIgnorar = "") {
       mismoCiclo &&
       mismoCurso &&
       mismoDia &&
+      mismoTurno &&
       mismoBloque &&
       activo
     ) {
