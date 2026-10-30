@@ -2727,3 +2727,42 @@ body {
 #examenes #estadoSimeAlumno.error-consulta p { color: #912b2b !important; }
 #examenes #formInscripcionSime[hidden],
 #examenes #ayudaInscripcionSime[hidden] { display: none !important; }
+
+
+/* =====================================================
+   CORRECCIÓN RESPONSIVE 29/10/2026 — Si.M.E.
+   El ancho mínimo de tablas no debe expandir la página.
+===================================================== */
+@media (max-width: 760px) {
+  #examenes,
+  #examenes > .panel-info {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  #examenes .sime-grid {
+    grid-template-columns: minmax(0, 1fr);
+    min-width: 0;
+  }
+
+  #examenes .sime-bloque {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  #examenes .tabla-contenedor {
+    max-width: 100%;
+    min-width: 0;
+    overflow-x: auto;
+  }
+
+  #examenes .sime-bloque .acciones-sime {
+    min-width: 0;
+  }
+
+  #examenes .sime-bloque .btn-accion {
+    max-width: 100%;
+    min-width: 0;
+    white-space: normal;
+  }
+}
