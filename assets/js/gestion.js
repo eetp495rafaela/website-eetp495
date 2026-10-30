@@ -12,6 +12,7 @@ import {
   where,
   addDoc,
   doc,
+  getDoc,
   updateDoc,
   serverTimestamp,
 } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
@@ -42,6 +43,71 @@ const BACKEND_CALENDARIO_ESCOLAR_URL =
 const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
+
+// Gestión: lectura puntual por ciclo. Las reglas impiden listar o editar esta colección.
+const cicloPeriodosGestion = document.getElementById("cicloPeriodosGestion");
+const btnConsultarPeriodosGestion = document.getElementById("btnConsultarPeriodosGestion");
+const resumenPeriodosGestion = document.getElementById("resumenPeriodosGestion");
+
+function mostrarPeriodosGestion(ciclo, datos) {
+  if (!resumenPeriodosGestion) return;
+  resumenPeriodosGestion.replaceChildren();
+  if (!datos) {
+    const aviso = document.createElement("p");
+    aviso.className = "mensaje-gestion";
+    aviso.textContent = "No hay períodos registrados para el ciclo " + ciclo + ".";
+    resumenPeriodosGestion.appendChild(aviso);
+    return;
+  }
+  const titulo = document.createElement("h4");
+  titulo.textContent = "Ciclo lectivo " + ciclo;
+  resumenPeriodosGestion.appendChild(titulo);
+  const grilla = document.createElement("div");
+  grilla.className = "grilla-periodos-gestion";
+  const fechaVisible = (valor) => {
+    const partes = String(valor || "").split("-");
+    return partes.length === 3 ? [partes[2], partes[1], partes[0]].join("/") : "Sin registrar";
+  };
+  for (let n = 1; n <= 3; n += 1) {
+    const bloque = document.createElement("div");
+    bloque.className = "trimestre-consulta-gestion";
+    const tituloBloque = document.createElement("strong");
+    tituloBloque.textContent = n + "° Trimestre";
+    const fechas = document.createElement("span");
+    fechas.textContent = fechaVisible(datos["trimestre" + n + "Inicio"]) +
+      " al " + fechaVisible(datos["trimestre" + n + "Fin"]);
+    bloque.append(tituloBloque, fechas);
+    grilla.appendChild(bloque);
+  }
+  resumenPeriodosGestion.appendChild(grilla);
+}
+
+if (btnConsultarPeriodosGestion) {
+  btnConsultarPeriodosGestion.addEventListener("click", async () => {
+    if (!resumenPeriodosGestion) return;
+    const ciclo = Number(cicloPeriodosGestion?.value || 0);
+    if (!Number.isInteger(ciclo) || ciclo < 2020 || ciclo > 2100) {
+      resumenPeriodosGestion.textContent = "Ingresá un ciclo lectivo válido (2020 a 2100).";
+      return;
+    }
+    if (!auth.currentUser) {
+      resumenPeriodosGestion.textContent = "Iniciá sesión para consultar los períodos.";
+      return;
+    }
+    btnConsultarPeriodosGestion.disabled = true;
+    resumenPeriodosGestion.textContent = "Consultando períodos registrados...";
+    try {
+      const registro = await getDoc(doc(db, "configuracion_periodos", String(ciclo)));
+      mostrarPeriodosGestion(ciclo, registro.exists() ? registro.data() : null);
+    } catch (error) {
+      console.error("No se pudieron consultar períodos de asistencia:", error);
+      resumenPeriodosGestion.textContent =
+        "No fue posible consultar los períodos. Verificá tu sesión o permisos.";
+    } finally {
+      btnConsultarPeriodosGestion.disabled = false;
+    }
+  });
+}
 
 const btnVerCursosGestion = document.getElementById("btnVerCursosGestion");
 const vistaCursosGestion = document.getElementById("vistaCursosGestion");
