@@ -2705,3 +2705,25 @@ body {
 .horario-sexto-celda .bloque-horario-docente-alumno {
   font-size: 0.75rem;
 }
+
+/* Si.M.E. 2026: estado cerrado legible y formulario condicionado al backend. */
+#examenes #estadoSimeAlumno.cerrado {
+  border: 1px solid #ebc266;
+  background: #fff7df;
+  color: #633d0a;
+}
+#examenes #estadoSimeAlumno.cerrado p,
+#examenes #estadoSimeAlumno.cerrado a {
+  color: #633d0a !important;
+  opacity: 1 !important;
+  font-weight: 700;
+  line-height: 1.5;
+}
+#examenes #estadoSimeAlumno.error-consulta {
+  background: #fff0f0;
+  color: #912b2b;
+  border: 1px solid #e6a2a2;
+}
+#examenes #estadoSimeAlumno.error-consulta p { color: #912b2b !important; }
+#examenes #formInscripcionSime[hidden],
+#examenes #ayudaInscripcionSime[hidden] { display: none !important; }
