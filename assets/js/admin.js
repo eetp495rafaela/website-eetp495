@@ -225,6 +225,42 @@ const mensajePeriodosAsistencia = document.getElementById(
   "mensajePeriodosAsistencia",
 );
 
+// Resumen de los tres trimestres efectivamente guardados para el ciclo elegido.
+// Firestore no permite listar todos los ciclos; cada consulta usa getDoc por ID.
+function mostrarPeriodosRegistradosAdmin(ciclo, datos) {
+  const contenedor = document.getElementById("resumenPeriodosRegistradosAdmin");
+  if (!contenedor) return;
+  contenedor.replaceChildren();
+  const encabezado = document.createElement("h4");
+  encabezado.textContent = "Períodos registrados · Ciclo " + ciclo;
+  contenedor.appendChild(encabezado);
+  if (!datos) {
+    const vacio = document.createElement("p");
+    vacio.textContent = "No se registraron períodos para este ciclo lectivo.";
+    contenedor.appendChild(vacio);
+    return;
+  }
+  const grilla = document.createElement("div");
+  grilla.className = "grilla-periodos-registrados";
+  const fechaVisible = (valor) => {
+    const texto = String(valor || "");
+    const partes = texto.split("-");
+    return partes.length === 3 ? [partes[2], partes[1], partes[0]].join("/") : texto || "Sin registrar";
+  };
+  for (let n = 1; n <= 3; n += 1) {
+    const tarjeta = document.createElement("div");
+    tarjeta.className = "tarjeta-periodo-registrado";
+    const titulo = document.createElement("strong");
+    titulo.textContent = n + "° Trimestre";
+    const detalle = document.createElement("span");
+    detalle.textContent = fechaVisible(datos["trimestre" + n + "Inicio"]) +
+      " al " + fechaVisible(datos["trimestre" + n + "Fin"]);
+    tarjeta.append(titulo, detalle);
+    grilla.appendChild(tarjeta);
+  }
+  contenedor.appendChild(grilla);
+}
+
 async function cargarPeriodosAsistencia(cicloLectivo) {
   if (!cicloLectivo) return;
 
@@ -245,6 +281,7 @@ async function cargarPeriodosAsistencia(cicloLectivo) {
       trimestre3Inicio.value = "";
       trimestre3Fin.value = "";
 
+      mostrarPeriodosRegistradosAdmin(cicloLectivo, null);
       mensajePeriodosAsistencia.textContent = `Todavía no hay períodos configurados para ${cicloLectivo}.`;
 
       mensajePeriodosAsistencia.className = "mensaje-formulario";
@@ -253,6 +290,7 @@ async function cargarPeriodosAsistencia(cicloLectivo) {
     }
 
     const datos = documento.data();
+    mostrarPeriodosRegistradosAdmin(cicloLectivo, datos);
 
     trimestre1Inicio.value = datos.trimestre1Inicio || "";
     trimestre1Fin.value = datos.trimestre1Fin || "";
@@ -268,6 +306,8 @@ async function cargarPeriodosAsistencia(cicloLectivo) {
     mensajePeriodosAsistencia.className = "mensaje-formulario ok";
   } catch (error) {
     console.error("Error al cargar períodos de asistencia:", error);
+    const contenedor = document.getElementById("resumenPeriodosRegistradosAdmin");
+    if (contenedor) contenedor.textContent = "No se pudieron consultar los períodos registrados.";
 
     mensajePeriodosAsistencia.textContent =
       "No se pudieron cargar los períodos. Revisá conexión o permisos de Firebase.";
@@ -343,6 +383,11 @@ async function guardarPeriodosAsistencia() {
       { merge: true },
     );
 
+    mostrarPeriodosRegistradosAdmin(cicloLectivo, {
+      trimestre1Inicio: t1Inicio, trimestre1Fin: t1Fin,
+      trimestre2Inicio: t2Inicio, trimestre2Fin: t2Fin,
+      trimestre3Inicio: t3Inicio, trimestre3Fin: t3Fin,
+    });
     mensajePeriodosAsistencia.textContent = `Períodos del ciclo lectivo ${cicloLectivo} guardados correctamente.`;
 
     mensajePeriodosAsistencia.className = "mensaje-formulario ok";
