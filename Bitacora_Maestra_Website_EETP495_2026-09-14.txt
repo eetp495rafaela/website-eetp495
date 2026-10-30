@@ -9874,3 +9874,103 @@ Se publicaron únicamente los tres archivos CSS indicados.
 
 FIN ACTUALIZACIÓN 29/10/2026 – BLOQUE 71
 ======================================================================
+
+
+======================================================================
+72. DIAGNÓSTICO – UNIFICACIÓN TALLER 1.º/2.º EN Si.M.E.
+======================================================================
+
+FECHA: 30/10/2026
+MOTIVO: la selección de "Materias a rendir" del Portal Alumno
+muestra tres talleres específicos en primero y segundo año,
+mientras Admin/Gestión crean una única mesa de "Taller".
+ESTADO: DIAGNÓSTICO CONFIRMADO EN CÓDIGO GITHUB;
+CORRECCIÓN FUNCIONAL PENDIENTE DE BACKEND ACTUAL.
+NO SE MODIFICÓ EL CIRCUITO DE INSCRIPCIONES.
+
+FUENTE DEL PROBLEMA
+-------------------
+1) En admin.js y gestion.js, cargar espacios para mesas lee
+   espacios_curriculares de Firestore, oculta las tres áreas
+   de Taller en 1.º y 2.º y añade sujetos virtuales:
+      TALLER_EXAMEN_1  → 1.º · Taller
+      TALLER_EXAMEN_2  → 2.º · Taller
+   La mesa guarda espacioId, espacioNombre, espacioAnio y
+   espacioTipo, con tipo TALLER_EXAMEN; no son documentos
+   individuales existentes garantizados en Firestore.
+2) En sime-alumno.js, la acción de Apps Script
+   obtener_materias_por_curso devuelve materias reales con
+   espacioId/nombre; los tres Taller aparecen sin agrupar.
+   registrar_inscripcion envía espaciosIds según las casillas
+   seleccionadas. Generación de permisos/inscripciones y
+   validaciones se realizan EN el Apps Script, no en HTML/JS.
+3) En mesas-docente.js ya hay equivalencia de asignaciones
+   reales TALLER de 1.º y 2.º con el ID virtual de su mesa,
+   pero NO resuelve el vínculo del backend de inscripciones.
+4) En mesas-alumno.js se cargan mesas PUBLICADAS desde
+   Firestore y filtran por espacioNombre/cursos visibles;
+   no se cotejan directamente con la inscripción Si.M.E.
+   Ésta es una relación funcional distinta de mostrar mesas.
+
+DECISIÓN DE MODELO REQUERIDO
+----------------------------
+Cada año de origen (1.º / 2.º) debe mostrar una única opción
+"Taller" en el formulario del alumno, con IDENTIFICADOR
+CANÓNICO COMPARTIDO por la mesa y la inscripción.
+Sus tres áreas históricas se consideran equivalentes SOLO
+para inscripciones/mesas, no para horarios ni calificaciones.
+Conservar las áreas individuales reales en las demás funciones.
+La inscripción y su permiso deben contener una sola materia
+"Taller", no tres renglones, y permitir imprimir/consultar.
+No transformar al vuelo "Taller" en tres espaciosIds reales
+si Apps Script los procesa como tres materias separadas.
+
+ÁREAS HISTÓRICAS EN CÓDIGO
+--------------------------
+1.º: Taller Electricidad; Taller Informática;
+Taller Organización de la Empresa.
+2.º: Taller Electrónica; Taller Informática;
+Taller Documentos Comerciales.
+
+BLOQUEO ACTUAL PARA APLICACIÓN COMPLETA
+---------------------------------------
+No se dispone de fuente verificada del Apps Script Si.M.E.
+en la cuenta conectada (Google Drive tiene la planilla, pero
+no el código fuente desplegado). El backend puede validar
+exclusivamente IDs reales de las materias, por lo que enviar
+TALLER_EXAMEN_1/2 sin adaptar su lógica puede rechazar
+inscripciones o generar permisos erróneos.
+Se decidió NO publicar un parche superficial que oculte
+dos áreas, ni enviar tres IDs bajo una casilla "Taller".
+No cambiar datos reales ni migrar inscripciones existentes
+sin examinar el script desplegado y preparar rollback.
+
+PLAN TÉCNICO
+------------
+A) Recuperar código Apps Script y verificar versión desplegada,
+   funciones de obtener_materias_por_curso, registrar_inscripcion,
+   listado/permiso PDF, estados, búsquedas y borrados por materia.
+B) Incorporar el ID canónico Taller por año en la fuente de
+   materias que el backend entrega al alumno. Validar
+   registrar_inscripcion contra los cursos/años permitidos;
+   guardar y emitir UNA sola materia "Taller".
+C) Adaptar listados de Gestión/Soporte y vínculo con mesa
+   TALLER_EXAMEN_1 / TALLER_EXAMEN_2; contemplar inscripciones
+   antiguas a las áreas, evitando duplicarlas.
+D) Probar inscripción 1.º/2.º Taller, imprimir permiso, listado
+   por mesa, visualización en Alumno/Docente/Admin/Gestión,
+   y funcionamiento intacto de 3.º/4.º/5.º y de otras materias.
+E) Solo después del backup, test y autorización de despliegue,
+   publicar Apps Script y frontend correspondiente, verificar
+   versión y actualizar esta bitácora.
+
+FIREBASE
+--------
+Conector Firebase propuesto nuevamente el 30/10/2026 a pedido
+del titular. Su estado observado seguía "sin instalar";
+requiere acción explícita de usuario. Aunque se conecte,
+NO sustituye Apps Script para cambiar el esquema de inscripciones
+y permisos de Si.M.E. Ninguna regla ni documento Firebase se tocó.
+
+FIN DE DIAGNÓSTICO 30/10/2026 – BLOQUE 72
+======================================================================
