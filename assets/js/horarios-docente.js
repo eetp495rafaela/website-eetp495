@@ -42,6 +42,7 @@ const vistaHorarioEducacionFisicaDocente = document.getElementById(
 const btnVerMisHorariosDocente = document.getElementById(
   "btnVerMisHorariosDocente",
 );
+const enlaceMisHorariosDocente = document.getElementById("enlaceMisHorariosDocente");
 
 let usuarioHorarioDocenteActual = null;
 
@@ -890,49 +891,104 @@ async function cargarHorarioEducacionFisicaDocente(usuario) {
   }
 }
 
-if (btnVerMisHorariosDocente) {
-  btnVerMisHorariosDocente.addEventListener("click", async () => {
-    if (!usuarioHorarioDocenteActual) {
-      mostrarMensajeHorarioDocente(
-        "No se detectó una sesión activa. Volvé a iniciar sesión.",
-        "error",
-      );
-      return;
-    }
+// Consulta a demanda: entrar mediante la tarjeta la ejecuta una sola vez
+// por sesión de página. El botón permite solicitar una actualización.
+let horariosConsultadosDocente = false;
+let consultaHorariosPendienteDocente = null;
+let clicPendienteDeAutenticacionDocente = false;
 
-    btnVerMisHorariosDocente.disabled = true;
-
-    const textoOriginal = btnVerMisHorariosDocente.innerHTML;
-
-    btnVerMisHorariosDocente.innerHTML = `
-      <i class="fa-solid fa-spinner fa-spin"></i>
-      Cargando...
-    `;
-
-    try {
-      await cargarHorarioAulaDocente(usuarioHorarioDocenteActual);
-      await cargarHorarioTallerDocente(usuarioHorarioDocenteActual);
-      await cargarHorarioEducacionFisicaDocente(usuarioHorarioDocenteActual);
-    } finally {
-      btnVerMisHorariosDocente.disabled = false;
-      btnVerMisHorariosDocente.innerHTML = textoOriginal;
-    }
-  });
-}
-
-onAuthStateChanged(auth, (usuario) => {
-  if (!usuario) return;
-
-  usuarioHorarioDocenteActual = usuario;
-
+function mostrarHorariosSinConsultarDocente() {
+  for (const vista of [
+    vistaHorarioAulaDocente,
+    vistaHorarioTallerDocente,
+    vistaHorarioEducacionFisicaDocente,
+  ]) {
+    mostrarModalidadConHorariosDocente(vista, true);
+  }
   mostrarMensajeHorarioDocente(
-    "Todavía no se consultó tu horario de aula. Presioná “Ver mis horarios” para cargarlo.",
+    "Todavía no se consultó tu horario de aula. Presioná “Actualizar horarios” para cargarlo.",
   );
-
   mostrarMensajeHorarioTallerDocente(
-    "Todavía no se consultó tu horario de taller. Presioná “Ver mis horarios” para cargarlo.",
+    "Todavía no se consultó tu horario de taller. Presioná “Actualizar horarios” para cargarlo.",
   );
   mostrarMensajeHorarioEducacionFisicaDocente(
-    "Todavía no se consultó tu horario de Educación Física. Presioná “Ver mis horarios” para cargarlo.",
+    "Todavía no se consultó tu horario de Educación Física. Presioná “Actualizar horarios” para cargarlo.",
   );
+}
+
+async function consultarMisHorariosDocente(forzar = false) {
+  if (consultaHorariosPendienteDocente) return consultaHorariosPendienteDocente;
+  if (!forzar && horariosConsultadosDocente) return;
+
+  if (!usuarioHorarioDocenteActual) {
+    clicPendienteDeAutenticacionDocente = true;
+    mostrarMensajeHorarioDocente("Verificando tu sesión para consultar los horarios...");
+    return;
+  }
+
+  const usuarioConsultado = usuarioHorarioDocenteActual;
+  const textoOriginal = btnVerMisHorariosDocente?.innerHTML || "";
+  if (btnVerMisHorariosDocente) {
+    btnVerMisHorariosDocente.disabled = true;
+    btnVerMisHorariosDocente.innerHTML =
+      '<i class="fa-solid fa-spinner fa-spin"></i> Cargando...';
+  }
+
+  const tarea = (async () => {
+    try {
+      await cargarHorarioAulaDocente(usuarioConsultado);
+      await cargarHorarioTallerDocente(usuarioConsultado);
+      await cargarHorarioEducacionFisicaDocente(usuarioConsultado);
+      const fallo = [
+        vistaHorarioAulaDocente,
+        vistaHorarioTallerDocente,
+        vistaHorarioEducacionFisicaDocente,
+      ].some((vista) => !vista || vista.querySelector(".mensaje-error"));
+      // Si alguna consulta falló, permitir reintentar en el siguiente ingreso.
+      if (usuarioHorarioDocenteActual?.uid === usuarioConsultado.uid) {
+        horariosConsultadosDocente = !fallo;
+      }
+    } finally {
+      if (btnVerMisHorariosDocente) {
+        btnVerMisHorariosDocente.disabled = false;
+        btnVerMisHorariosDocente.innerHTML = textoOriginal;
+      }
+    }
+  })();
+
+  consultaHorariosPendienteDocente = tarea;
+  try {
+    await tarea;
+  } finally {
+    if (consultaHorariosPendienteDocente === tarea) {
+      consultaHorariosPendienteDocente = null;
+    }
+  }
+}
+
+enlaceMisHorariosDocente?.addEventListener("click", () => {
+  // Conserva el desplazamiento nativo del ancla de la tarjeta.
+  void consultarMisHorariosDocente();
+});
+
+btnVerMisHorariosDocente?.addEventListener("click", () => {
+  void consultarMisHorariosDocente(true);
+});
+
+onAuthStateChanged(auth, (usuario) => {
+  const uidAnterior = usuarioHorarioDocenteActual?.uid || null;
+  usuarioHorarioDocenteActual = usuario || null;
+
+  if (uidAnterior !== (usuario?.uid || null)) {
+    horariosConsultadosDocente = false;
+    if (!consultaHorariosPendienteDocente) mostrarHorariosSinConsultarDocente();
+  }
+  if (!usuario) {
+    clicPendienteDeAutenticacionDocente = false;
+    return;
+  }
+  if (clicPendienteDeAutenticacionDocente) {
+    clicPendienteDeAutenticacionDocente = false;
+    void consultarMisHorariosDocente();
+  }
 });
