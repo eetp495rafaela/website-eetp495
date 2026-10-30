@@ -156,13 +156,14 @@ function renderizarGrillaAulaSextoAlumno(bloquesAula) {
       .filter(({ inicio }) => inicio <= ultimaHora)
       .sort((a, b) => a.inicio.localeCompare(b.inicio));
 
-    const cabecera = `<div class="horario-sexto-cabecera horario-sexto-hora-titulo">Hora</div>` +
+    const cabecera = `<div class="horario-sexto-cabecera horario-sexto-hora-titulo">Bloque</div>` +
       DIAS_HORARIO_AULA_ALUMNO.map((dia) =>
         `<div class="horario-sexto-cabecera">${dia.etiqueta}</div>`
       ).join("");
 
-    const filas = franjas.map(({ inicio, fin }) => {
-      const horario = `<div class="horario-sexto-hora">${textoSeguroAulaSexto(inicio)}<span>a ${textoSeguroAulaSexto(fin)}</span></div>`;
+    // Cada turno reinicia su numeración; el horario real permanece en las tarjetas.
+    const filas = franjas.map(({ inicio }, indiceBloque) => {
+      const horario = `<div class="horario-sexto-hora">Bloque ${indiceBloque + 1}</div>`;
       const dias = DIAS_HORARIO_AULA_ALUMNO.map((dia) => {
         const bloquesCelda = bloquesTurno.filter((bloque) =>
           bloque.dia === dia.valor && horaNormalizadaAulaSexto(bloque.horaInicio) === inicio
@@ -197,6 +198,7 @@ function renderizarHorarioCompletoAlumno(
   const grupoTaller = String(perfilAlumno.grupoTaller || "")
     .trim()
     .toUpperCase();
+  const esSexto = Number(perfilAlumno.cursoAnio || 0) === 6;
 
   const htmlAula = DIAS_HORARIO_AULA_ALUMNO.map((dia) => {
     const bloquesDia = bloquesAula
@@ -364,7 +366,7 @@ function renderizarHorarioCompletoAlumno(
       ${cursoVisible || `${perfilAlumno.cursoAnio}º ${perfilAlumno.cursoDivision}`}
 
       ${
-        grupoTaller
+        !esSexto && grupoTaller
           ? `<span class="separador-horario-alumno">|</span>
              <strong>Grupo de taller:</strong> ${grupoTaller}`
           : ""
@@ -379,14 +381,15 @@ function renderizarHorarioCompletoAlumno(
 
       ${
         bloquesAula.length
-          ? Number(perfilAlumno.cursoAnio || 0) === 6
+          ? esSexto
             ? renderizarGrillaAulaSextoAlumno(bloquesAula)
             : `<div class="grilla-horario-aula-alumno">${htmlAula}</div>`
           : `<p class="mensaje-formulario">Todavía no hay horarios de aula cargados para tu curso.</p>`
       }
     </section>
 
-        <section class="bloque-horario-seccion-alumno">
+    ${!esSexto ? `
+    <section class="bloque-horario-seccion-alumno">
       <div class="titulo-horario-seccion-alumno">
         <h3>Horario de Taller</h3>
         <p>
@@ -421,6 +424,7 @@ function renderizarHorarioCompletoAlumno(
           : `<p class="mensaje-formulario">Todavía no hay horarios de Educación Física cargados para tu curso.</p>`
       }
     </section>
+    ` : ""}
   `;
 }
 
