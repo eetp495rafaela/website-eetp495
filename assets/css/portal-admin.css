@@ -5133,3 +5133,57 @@ body {
 @media (max-width: 760px) {
   #panelPeriodosAsistencia .grilla-periodos-registrados { grid-template-columns: 1fr; }
 }
+
+
+/* =====================================================
+   CORRECCIÓN RESPONSIVE 29/10/2026 — CONFIGURACIÓN
+   Las tablas interiores no deben ensanchar la grilla móvil.
+   Conserva desplazamiento horizontal solo dentro de tablas.
+===================================================== */
+@media (max-width: 760px) {
+  #configuracion,
+  #configuracion > .grid-configuracion-portal {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  #configuracion .grid-configuracion-portal {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  #configuracion .grid-configuracion-portal > .panel-info {
+    min-width: 0;
+    max-width: 100%;
+    height: auto;
+  }
+
+  #configuracion .grid-configuracion-portal .acciones {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  #configuracion .grid-configuracion-portal .btn-accion {
+    display: inline-flex;
+    flex: 1 1 100%;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    white-space: normal;
+    overflow-wrap: anywhere;
+    text-align: center;
+  }
+
+  #configuracion .grid-configuracion-portal .tabla-contenedor {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    overflow-x: auto;
+  }
+
+  #configuracion .grid-configuracion-portal input,
+  #configuracion .grid-configuracion-portal select,
+  #configuracion .grid-configuracion-portal textarea {
+    max-width: 100%;
+    min-width: 0;
+  }
+}
