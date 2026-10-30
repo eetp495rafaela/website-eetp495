@@ -27,6 +27,8 @@ const auth = getAuth(app);
 const estadoSimeAlumno = document.getElementById("estadoSimeAlumno");
 
 const formInscripcionSime = document.getElementById("formInscripcionSime");
+const ayudaInscripcionSime = document.getElementById("ayudaInscripcionSime");
+const tituloInscripcionSime = document.getElementById("tituloInscripcionSime");
 
 const anioCursadoSime = document.getElementById("anioCursadoSime");
 
@@ -204,8 +206,15 @@ function mostrarEstadoSime(configuracion) {
 
   const abierto = estanAbiertasInscripcionesSime(configuracion);
   const turno = String(configuracion?.turnoExamen || "").trim();
+  estadoSimeAlumno.classList.remove("error-consulta");
   estadoSimeAlumno.classList.toggle("abierto", abierto);
   estadoSimeAlumno.classList.toggle("cerrado", !abierto);
+  // No mostrar instrucciones ni formulario durante la inscripción cerrada.
+  if (formInscripcionSime) formInscripcionSime.hidden = !abierto;
+  if (ayudaInscripcionSime) ayudaInscripcionSime.hidden = !abierto;
+  if (tituloInscripcionSime) {
+    tituloInscripcionSime.textContent = abierto ? "Nueva inscripción" : "Inscripciones cerradas";
+  }
   estadoSimeAlumno.replaceChildren();
 
   const mensaje = document.createElement("p");
@@ -832,10 +841,17 @@ onAuthStateChanged(auth, async (usuario) => {
     console.error("Error al cargar S.I.M.E.:", error);
     // Sin confirmación del backend, no permitir una inscripción a ciegas.
     bloquearFormularioSime(true);
+    if (formInscripcionSime) formInscripcionSime.hidden = true;
+    if (ayudaInscripcionSime) ayudaInscripcionSime.hidden = true;
+    if (tituloInscripcionSime) tituloInscripcionSime.textContent = "Inscripciones no disponibles";
     if (estadoSimeAlumno) {
-      estadoSimeAlumno.classList.add("cerrado");
-      estadoSimeAlumno.firstElementChild.textContent =
-        "No se pudo comprobar si las inscripciones están abiertas.";
+      estadoSimeAlumno.classList.remove("abierto", "cerrado");
+      estadoSimeAlumno.classList.add("error-consulta");
+      estadoSimeAlumno.replaceChildren();
+      const avisoError = document.createElement("p");
+      avisoError.textContent =
+        "No se pudo comprobar el estado de las inscripciones. Intentá nuevamente más tarde.";
+      estadoSimeAlumno.appendChild(avisoError);
     }
   }
 });
