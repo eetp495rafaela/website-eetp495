@@ -51,6 +51,10 @@ const mensajeMesasDocente = document.getElementById("mensajeMesasDocente");
 
 let mesasDocenteCargadas = [];
 
+// Sólo consultar Si.M.E. al hacer clic en «Ver inscriptos».
+const URL_BACKEND_SIME_TRIBUNAL_DOCENTE = "https://script.google.com/macros/s/AKfycbwAoJxUZp7KRFneMwMUsfilojhYM7HdBl8_JVue1T9AukKD-EIacqT7UxhdokdSO6TRdQ/exec";
+let consultaInscriptosEnCursoDocente = false;
+
 function obtenerDbDocente() {
   return db;
 }
@@ -217,7 +221,7 @@ function renderizarMesasDocente(mesas) {
   if (!ordenadas.length) {
     cuerpoTablaMesasDocente.innerHTML = `
       <tr>
-        <td colspan="5" class="tabla-vacia">
+        <td colspan="6" class="tabla-vacia">
           No hay mesas de examen publicadas para mostrar con esos filtros.
         </td>
       </tr>
@@ -242,6 +246,9 @@ function renderizarMesasDocente(mesas) {
           </td>
           <td>${escaparHtmlDocente(cursos)}</td>
           <td>${escaparHtmlDocente(nombreTribunalMesaDocente(mesa))}</td>
+          <td>
+            ${Array.isArray(mesa.tribunal) && mesa.tribunal.length === 3 && mesa.tribunal.some((integrante) => normalizarCorreoMesaDocente(integrante.correo) === normalizarCorreoMesaDocente(auth.currentUser?.email)) ? `<button type="button" class="btn-docente-mesas btn-ver-inscriptos-docente" data-mesa-id="${escaparHtmlDocente(mesa.id)}"><i class="fa-solid fa-list-check" aria-hidden="true"></i> Ver inscriptos</button>` : "—"}
+          </td>
         </tr>
       `;
     })
@@ -392,7 +399,7 @@ async function cargarMesasDocente() {
 
     cuerpoTablaMesasDocente.innerHTML = `
       <tr>
-        <td colspan="5" class="tabla-vacia">
+        <td colspan="6" class="tabla-vacia">
           Consultando mesas de examen publicadas...
         </td>
       </tr>
@@ -437,7 +444,7 @@ async function cargarMesasDocente() {
     if (!mesasDocenteCargadas.length) {
       cuerpoTablaMesasDocente.innerHTML = `
         <tr>
-          <td colspan="5" class="tabla-vacia">
+          <td colspan="6" class="tabla-vacia">
             No hay mesas de examen publicadas.
           </td>
         </tr>
@@ -454,7 +461,7 @@ async function cargarMesasDocente() {
 
     cuerpoTablaMesasDocente.innerHTML = `
       <tr>
-        <td colspan="5" class="tabla-vacia">
+        <td colspan="6" class="tabla-vacia">
           No se pudieron cargar las mesas de examen.
         </td>
       </tr>
@@ -497,3 +504,103 @@ if (btnActualizarMesasDocente) {
   .forEach((control) => {
     control.addEventListener("change", aplicarFiltrosMesasDocente);
   });
+
+
+// Nómina del tribunal: consulta a demanda, sin descargas generales.
+async function verInscriptosMesaDocente(idMesa, boton) {
+  if (consultaInscriptosEnCursoDocente) return;
+
+  const mesa = mesasDocenteCargadas.find((item) => item.id === idMesa);
+  const usuario = auth.currentUser;
+  const correo = normalizarCorreoMesaDocente(usuario?.email);
+  const tribunal = Array.isArray(mesa?.tribunal) ? mesa.tribunal : [];
+
+  if (!usuario || !correo || !mesa ||
+      String(mesa.estado || "").trim().toUpperCase() !== "PUBLICADA" ||
+      tribunal.length !== 3 ||
+      !tribunal.some((integrante) => normalizarCorreoMesaDocente(integrante.correo) === correo)) {
+    window.Swal?.fire({
+      title: "Acceso no permitido",
+      text: "Solo los integrantes del tribunal pueden consultar los inscriptos de esta mesa publicada.",
+      icon: "warning",
+      confirmButtonText: "Aceptar",
+    });
+    return;
+  }
+
+  consultaInscriptosEnCursoDocente = true;
+  if (boton) boton.disabled = true;
+
+  try {
+    if (!window.Swal) throw new Error("No está disponible la ventana de consulta.");
+
+    window.Swal.fire({
+      title: "Inscriptos",
+      text: "Consultando inscripciones de esta mesa...",
+      allowOutsideClick: false,
+      allowEscapeKey: false,
+      showConfirmButton: false,
+      didOpen: () => window.Swal.showLoading(),
+    });
+
+    const idToken = await usuario.getIdToken(true);
+    const respuesta = await fetch(URL_BACKEND_SIME_TRIBUNAL_DOCENTE, {
+      method: "POST",
+      headers: { "Content-Type": "text/plain;charset=utf-8" },
+      body: JSON.stringify({
+        accion: "listar_inscriptos_mesa_docente",
+        idToken,
+        idMesa,
+      }),
+    });
+
+    if (!respuesta.ok) {
+      throw new Error("No se pudo conectar con S.I.M.E.");
+    }
+    const datos = await respuesta.json();
+    if (!datos?.ok || !Array.isArray(datos.inscriptos)) {
+      throw new Error(datos?.mensaje || "No se pudo consultar la nómina.");
+    }
+
+    const inscriptos = datos.inscriptos;
+    const contenido = inscriptos.length
+      ? `<div class="contenedor-inscriptos-tribunal-docente">
+          <table class="tabla-inscriptos-tribunal-docente">
+            <thead><tr><th>Apellido y nombre</th><th>Año en que cursó</th></tr></thead>
+            <tbody>${inscriptos.map((inscripto) => `
+              <tr>
+                <td>${escaparHtmlDocente(inscripto.nombreCompleto)}</td>
+                <td>${escaparHtmlDocente(inscripto.anioCursado)}</td>
+              </tr>`).join("")}</tbody>
+          </table>
+        </div>`
+      : `<p>No hay estudiantes inscriptos para esta mesa.</p>`;
+
+    await window.Swal.fire({
+      title: "Inscriptos",
+      html: contenido,
+      width: "min(640px, calc(100vw - 24px))",
+      confirmButtonText: "Cerrar",
+    });
+  } catch (error) {
+    window.Swal?.fire({
+      title: "No se pudo consultar la nómina",
+      text: error.message || "Intentá nuevamente.",
+      icon: "error",
+      confirmButtonText: "Aceptar",
+    });
+  } finally {
+    consultaInscriptosEnCursoDocente = false;
+    if (boton && boton.isConnected) boton.disabled = false;
+  }
+}
+
+function registrarEventosInscriptosDocente() {
+  if (!cuerpoTablaMesasDocente) return;
+  cuerpoTablaMesasDocente.addEventListener("click", (evento) => {
+    const boton = evento.target.closest(".btn-ver-inscriptos-docente");
+    if (!boton || !cuerpoTablaMesasDocente.contains(boton)) return;
+    void verInscriptosMesaDocente(boton.dataset.mesaId || "", boton);
+  });
+}
+registrarEventosInscriptosDocente();
