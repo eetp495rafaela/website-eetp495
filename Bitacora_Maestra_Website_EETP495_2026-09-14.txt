@@ -1,8 +1,8 @@
 BITÁCORA MAESTRA – PORTAL INSTITUCIONAL E.E.T.P. N.º 495
 ========================================================
 
-Referencia: EETP495-BITACORA-MAESTRA-2026-10-09
-Fecha de consolidación: 09/10/2026
+Referencia: EETP495-BITACORA-MAESTRA-2026-10-29
+Fecha de consolidación: 29/10/2026
 Institución: E.E.T.P. N.º 495 “Malvinas Argentinas” – Rafaela, Santa Fe
 Modalidad: Técnico en Informática Profesional y Personal
 Dominio: https://eetp495rafaela.edu.ar
@@ -13,7 +13,9 @@ Rama principal: main
 PROPÓSITO
 ---------
 Esta es la referencia maestra técnico-funcional del sitio público y del Portal
-Institucional completo. Debe permitir retomar el proyecto en un chat nuevo sin
+Institucional completo.
+ATENCIÓN: para estado VIGENTE al 29/10/2026, leer primero secciones 59–69
+al final del documento; las secciones 1–58 conservan el historial. Debe permitir retomar el proyecto en un chat nuevo sin
 tener que volver a enviar el ZIP completo, salvo cuando una modificación sea
 transversal o no esté claro qué archivos intervienen.
 
@@ -8937,4 +8939,717 @@ secciones anteriores de esta Bitácora.
 
 ======================================================================
 FIN ACTUALIZACIÓN 09/10/2026
+======================================================================
+
+======================================================================
+59. CONTINUIDAD CONSOLIDADA – 29/10/2026
+======================================================================
+
+FECHA: 29/10/2026
+MOTIVO: consolidación integral de proyecto, infraestructura, cambios,
+decisiones, estado Git y pendientes de trabajo para reanudación futura.
+ESTADO: CONFIRMADO (código y commits citados) / PENDIENTE (indicado).
+RESPONSABLE DE DECISIONES FUNCIONALES: titular del proyecto, Juan Pablo.
+IMPORTANTE: este ANEXO es la fotografía vigente a 29/10/2026; las
+secciones históricas 1–58 quedan preservadas íntegramente como historial.
+Cuando un estado histórico contradiga este anexo, contrastar con la
+versión actual de GitHub y con el backend real antes de actuar.
+
+59.1 RESUMEN DE CONTINUIDAD DE UNA PÁGINA
+-----------------------------------------
+PROYECTO: Portal Institucional E.E.T.P. N.º 495 “Malvinas Argentinas”
+SEDE: Rafaela, Santa Fe, Argentina.
+SITIO: https://eetp495rafaela.edu.ar/
+CÓDIGO: https://github.com/eetp495rafaela/website-eetp495
+RAMA: main.
+FIREBASE: portal-institucional-eet-fa5c7 (ver .firebaserc).
+TRABAJO LOCAL: ~/Website-EETP495 (Linux Mint / VS Code).
+PARCHES: ~/Descargas/Parches_WebSite_EETP495 (fuera del repositorio).
+ÚLTIMO COMMIT FUNCIONAL CONFIRMADO:
+afb7321 – «Mejora visual horarios sexto año y oculta taller y educacion fisica».
+ESTADO GIT REPORTADO: main sincronizada con origin/main, árbol limpio.
+META: puesta en marcha institucional general desde ciclo lectivo 2027.
+ARQUITECTURA: HTML/CSS/JS + Firebase Auth/Firestore/App Check + backends
+Google Apps Script, Google Sheets, Drive, People API/Google Contacts.
+PORTALES: público, Login, Alumno, Docente, Gestión, Soporte.
+Si.M.E.: inscripción y permisos de exámenes en backend externo.
+Mesas: cronograma en Firestore, PUBLICADA/OCULTA, tribunal de 3 docentes.
+Docentes tribunal: ven mesas PUBLICADAS donde están designados; AÚN NO
+ven desde el Portal Docente la lista de alumnos inscriptos en esas mesas.
+6.º A/B/C: Aula en contraturno; grilla especial en Portal Alumno con
+Mañana/Tarde separados, celdas vacías y bloques numerados.
+PENDIENTE EXPRESO: Docente > “Ver mis horarios”: ocultar modalidades
+sin horarios/asignaciones; si no tiene EF no mostrar sección EF.
+OTROS PENDIENTES INMEDIATOS:
+- Separación visual antes de “Períodos de asistencia” en Soporte/Gestión.
+- Ver en esa sección los períodos de asistencia registrados.
+- Si.M.E. cerrado: mejorar el diseño del aviso y evitar que el mismo
+  formulario diga abajo “completá los datos para inscribirte”.
+- Nóminas de inscriptos visibles SOLO para docentes del tribunal.
+- Comprobación en campo de contraturno con docente y estudiante.
+Este documento constituye la referencia documental, NO una copia
+de seguridad ni una certificación de ejecución en producción.
+
+59.2 ÍNDICE DE ESTA CONSOLIDACIÓN
+---------------------------------
+60  Sitio público, dominio, accesos y manual
+61  Portales y permisos por rol
+62  Firebase, seguridad y datos
+63  Apps Script, Sheets, Drive, Google Contacts
+64  Si.M.E., Mesas de Examen y tribunales
+65  Horarios, reemplazos, Si.R.A., calificaciones y documentación
+66  Cambios y commits confirmados hasta el 29/10
+67  Arquitectura, archivos, tecnologías y mantenimiento
+68  Pendientes, decisiones tomadas y límites
+69  Procedimiento para retomar el proyecto
+
+======================================================================
+60. SITIO PÚBLICO, DOMINIO Y MANUAL
+======================================================================
+
+60.1 IDENTIDAD, ALCANCE Y SITIO
+-------------------------------
+Sitio público: index.html; estilos assets/css/sitio-publico.css.
+Institución E.E.T.P. N.º 495 “Malvinas Argentinas” de Rafaela;
+Tecnicatura en Informática Profesional y Personal.
+Secciones: encabezado institucional, presentación, historia de la escuela,
+oferta académica, Plan de Estudios de 1.º a 6.º, galería de imágenes,
+Calendario Escolar 2026, contacto, ubicación, redes y pie de página.
+Contacto y horario publicados históricamente: ver sección 3.
+Dominio https://eetp495rafaela.edu.ar/ activo en Cloudflare con
+delegación ARIU. En raíz: CNAME, robots.txt y sitemap.xml.
+Sitio con SEO básico, datos estructurados y Google Analytics.
+La web pública es abierta; los portales internos exigen autenticación.
+No confundir este sitio con el Google Sites escolar anterior, que puede
+seguir temporalmente publicado hasta la migración definitiva.
+
+60.2 ACCESO PÚBLICO Y DOCUMENTACIÓN
+------------------------------------
+El encabezado y el pie incluyen Portal Institucional y Manual de Usuario.
+En escritorio amplio la opción aprobada es dos botones APILADOS:
+“Portal Institucional” arriba; “Manual de Usuario” debajo.
+Se adaptan al ancho en tablet y celular; se abre PDF en pestaña nueva:
+assets/pdfs/Manual_Usuario_Completo_Portal_EETP495_Octubre_2026.pdf.
+El manual cubre sitio público y todas las categorías de usuarios;
+también explica solicitudes de alta de quienes finalizaron el cursado.
+Commit GitHub de incorporación: 84c66d2 «Agregamos manual de usuario».
+El PDF es documentación de orientación: revisar si cambian pantallas.
+
+60.3 INGRESO Y ALTAS
+--------------------
+login.html: autenticación de Google mediante Firebase Authentication,
+verificación de perfil ACTIVO y roles, selector si hay varios roles y
+redirección a portal autorizado. App Check/reCAPTCHA se emplea donde
+está configurado. Sesiones se protegen, con controles de inactividad.
+Quien egresó o completó cursado sin cuenta puede utilizar “Solicitar
+acceso como estudiante”, identificarse con su Google autorizado,
+indicar apellido y nombre y DNI y enviar solicitud; Soporte debe
+revisar y aprobar. No confundir CURSADA_COMPLETA con matrícula regular:
+conserva Si.M.E. y programas que correspondan; no recibe todas las
+funciones de cursado como horarios habituales y compañeros.
+La colección real de solicitudes documentada es
+solicitudes_alta_alumnos (ver sección 5 histórica y código vigente).
+
+60.4 GOOGLE SITES LEGADO
+------------------------
+Incidencia 27/10: sitio Google Sites anterior, sección
+“Alumnado / Desbloqueo netbooks”, puede derivar consultas al correo
+soportetecnico.tec495@gmail.com. La institución NO genera códigos
+de desbloqueo. Enlazar exclusivamente a desbloqueo.dgp.educ.ar.
+PENDIENTE verificar la corrección en el Google Sites y planificar
+su retiro cuando la web nueva lo reemplace.
+
+======================================================================
+61. FUNCIONES DE LOS PORTALES Y RESPONSABILIDADES
+======================================================================
+
+61.1 SOPORTE – admin/index.html
+--------------------------------
+Rol SOPORTE: administración transversal.
+Gestión de usuarios/roles, estados ACTIVO/INACTIVO, solicitudes de alta,
+importaciones, datos de alumnos y cambio de ciclo lectivo.
+Cursos, divisiones, espacios curriculares y asignaciones docentes.
+Horarios Aula/Taller/Educación Física, docentes libres de Taller,
+pizarra general, reemplazos docentes.
+Si.R.A. y consultas de asistencias, períodos trimestrales, cierres
+y controles de calificaciones Taller según permisos, limpieza controlada.
+Documentación académica, informes, galería, calendario y contactos.
+Si.M.E.: configuración del llamado, consulta de inscriptos/permisos,
+listados imprimibles y herramientas de limpieza/eliminación.
+Mesas: cargar, editar, designar tribunal (3 docentes), publicar,
+ocultar y eliminar; limpieza de mesas por período.
+Backups parciales, soporte de usuarios y herramientas institucionales.
+NO asumir que todo cambio de UI tiene permiso backend equivalente.
+
+61.2 GESTIÓN – gestion/index.html
+----------------------------------
+Roles: DIRECCION, SECRETARIA, PRECEPTORIA,
+ASISTENTE_ADMINISTRATIVO. No tienen exactamente los mismos permisos.
+Consultas autorizadas de cursos, estudiantes, docentes, horarios, Si.R.A.,
+partes, situación de asistencia, documentación, contactos, Si.M.E.,
+listados, mesas, organización institucional y calendario.
+DIRECCION puede crear/editar/publicar/ocultar Mesas de Examen,
+incluyendo tres docentes integrantes del tribunal; otros roles consultan
+según permisos. PRECEPTORIA excluida de cargar/finalizar reemplazos.
+En el tablero de Organización Institucional se reordenaron cuatro
+opciones y “Actualizar eventos” queda separado.
+El módulo Reemplazos en Gestión tuvo trabajos y pendientes históricos
+por cuota Firestore 429: verificar despliegue/estado antes de darlo
+por completamente cerrado. Contactos Institucionales habilitados para
+Preceptoría por commit f8f171f (20/10/2026).
+
+61.3 DOCENTES – docentes/index.html
+------------------------------------
+Funcionalidad según asignaciones y reemplazos vigentes:
+“Mis Horarios”, pizarra institucional, Si.R.A. (Taller/EF habilitados),
+Parte de Asistencia, Situación de Asistencia, Listas de Estudiantes
+incluidos cursos cubiertos por reemplazo vigente, Agenda Institucional
+y contactos, documentación académica, informes pedagógicos, mesas de
+examen publicadas y enlaces de interés docente.
+Registro de Calificaciones SOLO Taller real 1.º/2.º del ciclo actual
+y reemplazantes que correspondan; regla cerrada 09/10.
+Docente designado en tribunal de una mesa PUBLICADA puede verla por
+coincidencia de su correo Google con el guardado en el tribunal,
+aunque no sea profesor titular de la materia. Para mesas antiguas sin
+tribunal, subsiste compatibilidad por asignación de espacio curricular.
+La nómina de alumnos inscriptos por tribunal AÚN NO ESTÁ IMPLEMENTADA.
+
+PENDIENTE NUEVO Y EXPLÍCITO – PORTAL DOCENTE “VER MIS HORARIOS”:
+Mostrar SOLAMENTE las modalidades que realmente tiene:
+Aula y/o Taller y/o Educación Física. Si no tiene EF, no mostrar el
+título ni el cuadro de EF. Igual criterio para Taller/Aula cuando no
+corresponda. Revisar asignaciones ACTIVAS, reemplazos VIGENTES,
+horarios reales y permisos para no ocultar algo que sí corresponde.
+La vista debe conservar contraturnos, días y horas correctos.
+NO CONFUNDIR con ocultar Taller/EF en sexto del Portal Alumno
+(eso YA está implementado). NO TOCAR HASTA REVISAR CÓDIGO ACTUAL.
+
+61.4 ALUMNOS – alumnos/index.html
+----------------------------------
+Estudiante con cuenta aprobada y curso vigente: Mi Horario, docentes
+del curso, referentes y compañeros habilitados, materiales y
+programas de examen, inscripción Si.M.E. y mis inscripciones/permisos,
+mesas publicadas y composición del tribunal.
+El Portal Alumno en 6.º A/B/C es especial: NO tiene Taller ni EF;
+esas secciones se ocultan solo para 6.º. Aula admite contraturno.
+Grilla de Aula 6.º separa Mañana y Tarde; filas idénticas entre días,
+huecos vacíos para clases no asignadas y “Bloque 1, Bloque 2…”
+por cada turno. La tarjeta de clase sigue indicando la hora real.
+Alumnos 1.º–5.º mantienen la visualización original de Aula/Taller/EF.
+Estudiante CURSADA_COMPLETA conserva funciones pertinentes a materias
+adeudadas y exámenes, no el conjunto del alumnado activo.
+
+61.5 MATRIZ ORIENTATIVA DE VISIBILIDAD
+--------------------------------------
+PÚBLICO: web, calendario, manual, contacto. Sin Google.
+ALUMNO: datos y horarios propios, Si.M.E. propio, mesas publicadas.
+DOCENTE: asignaciones/reemplazos, listas autorizadas, mesas publicadas
+donde integra tribunal; SIN listado Si.M.E. por tribunal aún.
+DIRECCION: administración/visibilidad de mesas y tribunal; inscriptos.
+GESTIÓN OTROS: consulta institucional según rol, con restricciones.
+SOPORTE: administración institucional, incluidas eliminaciones.
+Cualquier pantalla oculta es comodidad UX, NO frontera de seguridad.
+
+======================================================================
+62. FIREBASE, MODELO DE DATOS Y SEGURIDAD
+======================================================================
+
+62.1 PROYECTO Y COMPONENTES
+---------------------------
+.firebaserc declara proyecto portal-institucional-eet-fa5c7.
+firebase.json enlaza las reglas firestore.rules.
+Se utiliza Firebase Authentication con Google, Cloud Firestore y
+Firebase App Check/reCAPTCHA configurado para proteger accesos.
+Firestore guarda perfiles, cursos, asignaciones, reemplazos, horarios,
+mesas, asistencias, configuración y otros datos institucionales.
+Reglas RLS-equivalentes de Firestore deben contrastarse con versión
+de producción antes de editar; una lectura de reglas versionadas no
+prueba el despliegue vigente. No publicar secretos de Apps Script o
+Firebase ni credenciales en GitHub/bitácora.
+
+62.2 MAPA FUNCIONAL DE COLECCIONES
+----------------------------------
+usuarios: perfiles, correos, roles, estados, datos de alumno/docente.
+solicitudes_alta_alumnos: solicitudes de alta pendientes de Soporte.
+cursos, espacios_curriculares: organización escolar.
+asignaciones_docentes: docente, curso, espacio, ciclo lectivo, estado.
+horarios: Aula/Taller/EF por fecha/día/turno/bloque y docente.
+reemplazos_docentes: titular, reemplazante, período, curso/espacio,
+tipo y estado; acceso temporario.
+mesas_examen: fecha, hora, período, materia, cursos, estado y tribunal
+(arreglo con nombres y correos de 3 docentes).
+asistencias_clases: registros Si.R.A.
+configuracion_periodos: fechas de trimestres.
+referentes_institucionales, accesos_recientes y colecciones de
+documentación, informes y otros módulos según historial/código.
+Éste es un MAPA, no esquema exhaustivo; consultar firestore.rules y
+datos actuales antes de ejecutar consultas o migraciones.
+
+62.3 PERMISOS Y SEGURIDAD
+-------------------------
+La UI debe verificar correo Google, rol activo, perfil ACTIVO,
+autorización por asignación, fechas de reemplazos y otras reglas.
+No deshabilitar permisos Firestore para “arreglar” un error visual.
+El frontend de listas docentes filtra cursos asignados/reemplazos,
+pero la auditoría señaló que algunas lecturas de alumnos pueden ser
+más amplias que las vistas. Para nuevas nóminas de tribunales,
+implementar backend con autorizaciones reales, no solo un filtro JS.
+Autorización: docente ACTIVO + correo integrante del tribunal de mesa
+PUBLICADA + pertenencia de inscripciones a esa mesa/llamado;
+consultar sólo datos mínimos, no abrir endpoint de Soporte.
+Respetar política institucional de privacidad de estudiantes.
+
+======================================================================
+63. BACKENDS EXTERNOS Y GOOGLE WORKSPACE
+======================================================================
+
+63.1 APPS SCRIPT – MAPA
+-----------------------
+Existen Web Apps Apps Script externas, no todas con código actualizado
+dentro del repositorio. Arquitectura y URLs históricas documentadas en
+sección 20; verificar despliegue y código actual de cada una.
+Funciones históricas:
+- Si.M.E.: configuración, formularios, inscripción, permisos,
+  listados, limpieza y backend Google Sheets/Drive.
+- Documentación Académica: carga/consulta/eliminación de PDF/Drive
+  coordinada con acceso y registros institucionales.
+- Informes Pedagógico-Didácticos: documentación sensible.
+- Calendario Escolar: Sheets, consulta pública y actualización
+  autorizada desde Gestión/Soporte.
+- Galería Institucional: fotografías, backend Drive, sincronización.
+- Backup Firestore parcial: JSON a Drive; NO backup completo.
+- Baja global de usuarios: coordinación Auth/Firestore/Si.M.E./Drive.
+No dar por actualizados los Web Apps únicamente por un commit web.
+
+63.2 GOOGLE SHEETS / DRIVE
+--------------------------
+Si.M.E. guarda inscripciones/configuración en Google Sheets,
+crea permisos PDF y los almacena en Drive; al finalizar llamados
+hay procedimientos separados para limpieza de registros/archivos.
+Otros recursos: calendarios, planillas de calificaciones, gestiones
+docentes, normativa, inventario y documentos; enlaces desde portal.
+No asumir que eliminar de Sheets elimina automáticamente de Drive
+o de Firestore sin comprobar el backend actual.
+Material de Estudio permite múltiples documentos por curso/espacio
+donde está autorizado; eliminación debe ser coordinada.
+
+63.3 GOOGLE CONTACTS / PEOPLE API
+----------------------------------
+Fuente maestra: los contactos/roles/etiquetas institucionales del sistema.
+Se importaron 83 docentes desde planilla y se sincronizan mediante
+Apps Script/Google People API hacia Google Contacts.
+Cuenta principal histórica operativa:
+soportetecnico.tec495@gmail.com.
+Existe vista previa y confirmación desde Soporte, control de cambios,
+etiquetas y manejo de cuotas/reintentos; hubo errores temporales de
+contactGroups.members.modify por cuota de escrituras por minuto.
+Trigger diario de Soporte estaba configurado; verificar ejecuciones
+reales y versiones vigentes antes de declararlo probado actualmente.
+La decisión institucional es NO crear departamentos ni envíos masivos
+desde la sección Contactos; usar etiquetas sincronizadas a las
+cuentas autorizadas y enviar correo desde los propios clientes.
+PENDIENTE: replicar/adaptar Apps Script y trigger en las cuentas
+institucionales de Dirección, Secretaría, Preceptoría y Asistente
+Administrativo cuando estén disponibles, verificando permisos reales.
+Google Contacts no sustituye la fuente de verdad Firestore.
+
+63.4 BACKUPS
+-------------
+El backup actual de Firestore exporta JSON a Drive (parcial).
+NO cubre automáticamente Auth, Apps Script y propiedades,
+permisos PDF Si.M.E., Sheets, Drive, Contacts, galería completa,
+ni dominios/configuración. El diseño y prueba de RESTAURACIÓN de un
+backup total son pendientes históricos prioritarios.
+Nunca operar limpieza masiva sin backup y autorización previa.
+
+======================================================================
+64. Si.M.E., MESAS Y TRIBUNALES – ESTADO ACTUAL
+======================================================================
+
+64.1 DECISIÓN INSTITUCIONAL SOBRE EL CIRCUITO
+----------------------------------------------
+1) Soporte configura/abre inscripción para el llamado de examen.
+2) Alumnos inscriben materias PENDIENTES de años cursados anteriores,
+   seleccionando año y curso de origen.
+3) Se cierran inscripciones y se genera el listado definitivo.
+4) Dirección analiza inscriptos, crea mesas, fechas, horarios y
+   conforma los tribunales.
+5) Se publican las mesas sólo después de organizar el cronograma.
+Si.M.E. y Cronograma Mesas son técnicamente independientes.
+NO vincular publicación automática al abrir inscripciones.
+
+64.2 INSCRIPCIÓN/ESTADO/PERMISO
+-------------------------------
+Si.M.E. backend Apps Script con Sheets y Drive. Se inscribe por
+materias del año de cursado correspondiente, hasta el límite vigente
+del formulario; produce permiso PDF. Mis inscripciones permite
+consultar registros/permisos. Alumno no tiene anulación directa,
+Soporte dispone de administración/limpieza.
+Mejora de 29/10: al estar cerrado el llamado, formulario de
+inscripción debe deshabilitarse, “Mis inscripciones” permanecer
+disponible, aviso enlazar al Calendario Escolar público.
+ATENCIÓN PENDIENTE VISUAL 29/10: captura evidencia que el mensaje
+“inscripciones cerradas” NO se ve bien y la vista conserva debajo
+texto tipo “completá los datos para inscribirte”. Es contradictorio.
+Corregir presentación/legibilidad y ocultar TODAS las instrucciones
+de completar/inscribirse mientras esté cerrado. No basta con bloquear
+controles; probar estados ABIERTO/CERRADO y consultas previas.
+El comportamiento visual aprobado NO equivale a prueba definitiva
+del backend cerrado; comprobar Apps Script.
+
+64.3 MESAS DE EXAMEN
+---------------------
+Mesas en colección Firestore mesas_examen: período, fecha/hora,
+espacio curricular, curso(s), estado OCULTA/PUBLICADA y tribunal.
+Nueva mesa se guarda OCULTA y pasa a PUBLICADA por decisión explícita.
+Soporte/Dirección cargan/editan; Soporte puede eliminar y limpiar
+períodos. Gestión restante consulta según rol.
+Tabla “Mesas cargadas”: acciones editar/publicar/eliminar sólo con
+iconos accesibles y compactos; tipografía/columnas ajustadas para
+disminuir saltos de línea.
+Formulario compactado: Fecha | Hora | Período | Estado | Espacio
+Curricular en fila amplia; debajo “Tribunal examinador” y tres
+selectores; botones Guardar/Cancelar de igual tamaño, responsive.
+
+64.4 TRIBUNAL DE 3 DOCENTES – ETAPA 1 TERMINADA
+------------------------------------------------
+Tres docentes ACTIVOS, distintos entre sí, elegidos en los tres
+desplegables de la mesa. Publicación requiere tribunal completo;
+los nombres/correos quedan en el documento de la mesa.
+Cada docente ve en Portal Docente sólo las mesas PUBLICADAS en las
+que su correo figura en tribunal. Mesa anterior sin tribunal:
+compatibilidad por asignación docente a espacio curricular.
+Alumnos ven los integrantes del tribunal en mesas publicadas.
+No existe aún el detalle de inscriptos por mesa en Portal Docente.
+
+64.5 FILTROS Y DECISIONES EXPLÍCITAS
+-------------------------------------
+Se decidió no añadir un filtro rígido por curso ni período que oculte
+mesas de la misma materia al estudiante: debe identificar el año,
+la materia y el horario en que se anotó. El sistema limpia registros
+al finalizar llamados, pero las limpiezas de Sheets/Drive/Firestore
+son separadas y deben verificarse.
+Se corrigieron listados imprimibles Soporte/Gestión: restringir al
+llamado configurado; si no hay inscriptos, indicar ausencia en vez de
+usar inscripciones de otro período. No reintroducir fallback.
+Algunas funcionalidades futuras como inscripción fuera de término y
+permiso QR seguro están PENDIENTES de definición/implementación.
+
+64.6 ETAPA 2 PRIORITARIA PARA LA PRÓXIMA JORNADA
+------------------------------------------------
+Cada docente designado en el tribunal debe consultar SOLAMENTE
+las personas inscriptas en su mesa, no todas las inscripciones.
+Backend Si.M.E. / Apps Script aún no ofrece acceso docente acotado
+verificado en el repositorio; NO reutilizar sin control el endpoint
+administrativo de listados de Soporte/Gestión.
+Verificar identidad (token y backend), rol/estado, correo del tribunal,
+mesa PUBLICADA y correspondencia real materia/año/llamado/curso.
+Mostrar datos mínimos y respetar estados de inscripción.
+Revisar código de Apps Script ACTUAL antes de programar backend.
+ESTADO: PENDIENTE, no simular que ya funciona.
+
+======================================================================
+65. HORARIOS, REEMPLAZOS, ASISTENCIAS Y EVALUACIÓN
+======================================================================
+
+65.1 AULA Y CONTRATURNO
+------------------------
+Problema encontrado 29/10: validación de bloque ocupado de Aula
+ignoraba TURNO y rechazaba en 6.º A un lunes por la mañana (bloques
+3/4) porque existía bloque del mismo número por la tarde.
+Se corrigió para comparar también turno, preservando prevención de
+duplicados del mismo curso/día/turno/bloque.
+Prácticas Profesionalizantes de 6.º A/B puede dictarse por mañana
+aunque el curso normalmente sea de tarde. 6.º C cursa de mañana
+y puede tener Aula en contraturno de tarde. No convertir esa materia
+en Taller por no poder usar franjas variables; Taller tiene horario
+fijo, distinto, que no debe alterarse.
+Probada carga real exitosa del bloque en Firebase; quedan por probar
+las visualizaciones con docente y alumno de esas materias.
+Horarios Aula de Admin/Soporte se muestran por horario cronológico y
+turnos según filtro; cuando no se elige turno, se debe distinguir
+visualmente cada turno sin confundir números de bloque.
+
+65.2 VISTA ALUMNO SEXTO AÑO
+----------------------------
+Se implementó grilla Aula especial SOLO en 6.º:
+turnos Mañana/Tarde separados, lunes a viernes alineados por franja,
+celdas vacías donde no hay clase; columna izquierda indica
+“Bloque 1, Bloque 2...” y la numeración reinicia por turno.
+Tarjetas contienen hora real para evitar redundancia.
+A 6.º se le ocultan completamente Taller y Educación Física,
+porque esos cursos no los cursan. A 1.º–5.º no se les modifica
+la estructura anterior de Aula, Taller y EF.
+Commit final de esta mejora: afb7321. Visualización en campo
+con cuentas reales de docentes/alumnos aún pendiente.
+
+65.3 HORARIOS TALLER/EF EN SOPORTE
+----------------------------------
+Elegir curso en Taller actualiza automáticamente los horarios,
+sin necesidad de pulsar Actualizar; EF conserva comportamiento
+equivalente. El botón Actualizar puede permanecer como recarga manual.
+No cambiar horarios fijos de Taller por mejorar Aula en contraturno.
+
+65.4 REEMPLAZOS DOCENTES
+-------------------------
+El alta/asignación de reemplazantes ya funciona.
+La sección “Listas de Estudiantes” del Portal Docente YA contempla
+reemplazos ACTIVOS de Taller/EF en fechas desde/hasta, mostrando
+las listas del curso temporal. Cuando deja de estar vigente,
+deja de incluir el curso salvo otra asignación autorizada.
+Esta función se revisó y no necesita una segunda implementación.
+Pendiente histórico: validar creación/consulta/finalización desde
+los roles de Gestión autorizados y exclusión de Preceptoría.
+
+65.5 Si.R.A. / SITUACIÓN DE ASISTENCIA
+---------------------------------------
+Registro por fecha y clase autorizada, marcas Presente/Ausente/Tarde,
+observaciones, corrección de existentes y modo día de lluvia para EF.
+Parte semanal por Taller/EF; Situación de Asistencia anual/trimestres,
+porcentajes y regla de 4 tardanzas equivalen a una falta.
+Configuración de períodos 1.º/2.º/3.º trimestre desde Soporte,
+consultas desde Gestión según rol. No cambiar reglas funcionales
+sin revisar código y procedimientos escolares.
+PENDIENTE VISUAL/FUNCIONAL 29/10:
+a) Añadir separación/margen superior entre la sección precedente y
+   el título “Períodos de asistencia” (capturas Portal Soporte/Gestión).
+b) Mostrar dentro de esa sección los períodos YA REGISTRADOS:
+   ciclo lectivo, inicio y fin de 1.º/2.º/3.º trimestre; vista clara
+   para ambos perfiles, sólo lectura en quien no pueda editar.
+   Evitar guardar por duplicado y no alterar fechas al consultar.
+   Revisar fuente Firestore configuracion_periodos.
+Estas mejoras no están implementadas. NO marcar como resueltas.
+
+65.6 CALIFICACIONES DE TALLER
+------------------------------
+“Registro de Calificaciones” exclusivo para docentes con Taller
+real de 1.º o 2.º, con asignación activa/ciclo correcto y sustitución
+vigente autorizada. No se presenta para docentes sin Taller ni
+para Taller de 3.º a 5.º. Gestiona cargas, promedios y cierres por
+trimestre con reglas documentadas en historial. Soporte administra
+según permisos. No ampliar visibilidad solo porque una materia se
+parezca nominalmente a Taller.
+
+65.7 DOCUMENTACIÓN Y CONTACTOS
+--------------------------------
+Documentación Académica: Planes Anuales, Programas de Examen,
+Materiales de Estudio (incluye múltiples PDF/título o tema por
+espacio), Drive/Firestore y eliminación coordinada.
+Informes Pedagógico-Didácticos: acceso autorizado sensible.
+Agenda/Contactos institucionales por correo, etiquetas, relación
+con docentes/estudiantes y actualización a Google Contacts.
+Calendario público e institucional, galería y enlaces provinciales.
+
+======================================================================
+66. CAMBIOS Y COMMITS VERIFICADOS
+======================================================================
+
+09/10: restricciones de Registro de Calificaciones Taller 1.º/2.º,
+       mejoras pizarra y contactos. Historial anterior íntegro.
+20/10 f8f171f: Contactos Institucionales en Preceptoría.
+20/10 f27bf23: responsive de portales y modales.
+26/10 84c66d2: Manual de Usuario completo y botones públicos.
+29/10 f2a4a3b: horarios Aula sexto en contraturno sin conflicto de
+       bloques del turno habitual.
+29/10 7d1cbdc: horarios, Si.M.E., tribunal de 3 integrantes y
+       presentaciones de Admin/Gestión/Alumno/Docente.
+29/10 afb7321: bloques numerados de sexto y ocultamiento de
+       Taller y EF para alumnos de sexto.
+Confirmación del titular: git status limpia y main actualizada con
+origin/main en afb7321, posterior al push.
+Los últimos códigos funcionales publicados fueron esos commits.
+Esta actualización añade SOLO documentación; no despliega scripts,
+no modifica reglas Firebase ni datos y NO afirma pruebas en producción
+de todo el circuito.
+
+======================================================================
+67. INVENTARIO, DEPENDENCIAS Y MANTENIMIENTO
+======================================================================
+
+67.1 RUTAS FUNDAMENTALES
+-------------------------
+index.html, login.html: sitio público y login.
+admin/index.html: Soporte; gestion/index.html: Gestión.
+docentes/index.html: Docentes; alumnos/index.html: Alumnos.
+assets/css/sitio-publico.css, portal-admin.css, portal-gestion.css,
+portal-alumno.css: estilos; otros estilos en assets/css/.
+assets/js/admin.js, gestion.js: control principal de portales.
+assets/js/horarios-admin.js, horarios-alumno.js,
+horarios-docente.js: horarios.
+assets/js/mesas-alumno.js, mesas-docente.js: consulta mesas.
+assets/js/sime-alumno.js, sime-admin.js,
+listado-inscriptos-sime-admin.js,
+listado-inscriptos-sime-gestion.js: Si.M.E.
+assets/js/listas-estudiantes-docente.js: listas de cursos,
+incluyendo reemplazos vigentes.
+assets/js/reemplazos-docentes-admin.js,
+reemplazos-docentes-gestion.js: reemplazos.
+assets/js/sira-docente.js, sira-admin.js, sira-gestion.js:
+asistencia, junto a módulos de partes y situación.
+assets/js/calificaciones-taller-docente.js y
+calificaciones-taller-admin.js: calificaciones/cierres.
+assets/js/documentacion-admin.js, material-estudio.js,
+documentacion-alumno.js e informes-docente.js: documentación.
+assets/js/contactos-institucionales.js, agenda-docente.js,
+docentes-alumno.js, mis-companeros-alumno.js: contactos.
+assets/js/calendario-escolar.js, calendario-escolar-admin.js,
+galeria.js, galeria-admin.js: público y multimedia.
+Archivos de protección/autenticación y utilidades en assets/js/.
+firestore.rules, .firebaserc, firebase.json: Firebase.
+CNAME, sitemap.xml, robots.txt: dominio/SEO.
+README.md y Bitacora_Maestra_Website_EETP495_2026-09-14.txt:
+documentación.
+El inventario pormenorizado y backends completos históricos
+siguen en secciones 20 a 23.
+
+67.2 TECNOLOGÍAS
+-----------------
+HTML5/CSS3/JavaScript ES modules; Firebase Web SDK;
+Firebase Auth Google, Cloud Firestore y App Check;
+Google Apps Script (Web Apps), Google Sheets, Google Drive;
+People API, Contacts; GitHub; Cloudflare DNS/ARIU;
+SweetAlert2/otras bibliotecas e íconos referenciados en HTML.
+VS Code/Live Server para probar localmente. ¡ATENCIÓN!
+Probar en Live Server sigue apuntando a datos reales si está
+configurado contra Firebase/Apps Script de producción; cualquier
+guardado/edición desde allí afecta datos reales.
+
+67.3 REGLAS DE TRABAJO
+-----------------------
+No modificar por intuición. Primero diagnóstico SOLO LECTURA
+sobre últimos archivos/GitHub y backend pertinente; acordar
+reglas y cambios; aplicar parches acotados y reversibles con
+respaldo fuera del repositorio; usar --apply sólo tras prueba de
+compatibilidad. Contrastar que no se pierdan cambios previos.
+Verificar git diff --check, git status, sintaxis/visuales y
+regresiones; commit/push sólo tras aprobación. No alterar
+entornos ni datos reales sin autorización.
+No almacenar secretos en esta bitácora, URLs privadas con tokens,
+claves API ni datos personales de alumnos.
+Identificar “CONFIRMADO”, “PENDIENTE”, “HIPÓTESIS” y origen de
+cada dato. Las funciones externas pueden diferir del frontend:
+si Apps Script actual no está disponible, solicitar el fuente
+antes de editar o prometer permisos.
+
+======================================================================
+68. PENDIENTES PRIORIZADOS PARA 30/10/2026 Y CICLO 2027
+======================================================================
+
+[P1] Si.M.E. — Docentes del tribunal: ver la nómina de inscriptos
+de sus mesas PUBLICADAS, sin acceso a otras mesas. Requiere
+revisión y adaptación SEGURA del Apps Script Si.M.E. real.
+ESTADO: PENDIENTE, prioridad acordada para próxima jornada.
+
+[P2] Portal Docente — “Ver mis horarios”: mostrar sólo las
+modalidades que el docente tenga realmente: Aula y/o Taller
+y/o Educación Física. Ocultar completamente el encabezado y
+sección de EF si no dicta EF; igual lógica para cualquier
+modalidad ausente; respetar reemplazos y contraturno.
+ESTADO: PENDIENTE solicitado expresamente el 29/10.
+
+[P3] Períodos de asistencia — Soporte y Gestión:
+dar aire/margen superior antes del título “Períodos de asistencia”;
+mostrar listado de trimestres ya registrados con ciclo lectivo,
+fechas inicio/fin, evitando duplicados y respetando permisos.
+ESTADO: PENDIENTE, solicitado con capturas 29/10.
+
+[P4] Si.M.E. estado CERRADO — Portal Alumno:
+mejorar claridad visual del aviso de inscripciones cerradas;
+no mostrar debajo texto contradictorio como “Completá los datos
+para inscribirte”; mantener “Mis inscripciones” y enlace
+Calendario Escolar. Comprobar abierto/cerrado.
+ESTADO: PENDIENTE, capturas 29/10.
+
+[P5] Verificación funcional de horarios de Aula en contraturno
+con una cuenta docente y una de estudiante de sexto.
+ESTADO: PENDIENTE de prueba de campo.
+
+[P6] Reemplazos en Gestión y cuotas Firestore:
+confirmar creación/consulta/finalización y roles permitidos,
+con PRECEPTORIA excluida. Algunos flujos pausados por 429.
+ESTADO: pendiente de revalidación.
+
+[P7] Google Contacts multicuenta:
+verificar trigger diario Soporte y replicar/adaptar Scripts
+en cuentas administrativas autorizadas cuando estén disponibles.
+ESTADO: PENDIENTE.
+
+[P8] Backup TOTAL del sistema y ensayo real de restauración
+(Firebase Auth/Firestore/configuraciones, Apps Script/propiedades,
+Sheets/Drive/Si.M.E. permisos, Contacts y recursos).
+ESTADO: PENDIENTE prioritario histórico.
+
+[P9] Si.M.E. – QR de verificación por permiso e inscripciones
+fuera de término, sujetas a decisión institucional. No asumidas.
+ESTADO: PENDIENTE.
+
+[P10] Limpieza de datos entre llamados/ciclos: validar en
+Firebase, Sheets y Drive que cada operación borre solamente lo
+pretendido, previo respaldo/ autorización. ESTADO: PENDIENTE.
+
+[P11] Preparar ciclo 2027: períodos trimestrales, cambios de
+cursado/egreso, nuevas asignaciones y horarios, contactos,
+calendario, permisos y formación de usuarios. ESTADO: PENDIENTE.
+
+[P12] Google Sites anterior y desbloqueo netbooks:
+corregir enlace/indicaciones para derivación oficial; planificar
+migración definitiva. ESTADO: PENDIENTE.
+
+[P13] Seguridad: auditoría de permisos de lectura de alumnos,
+backend Si.M.E., App Check, acceso por curso/tribunal y datos
+sensibles; no confundir filtrado en navegador con seguridad
+servidor. ESTADO: PENDIENTE.
+
+68.1 FUNCIONES YA RESUELTAS — NO DUPLICAR DESARROLLOS
+------------------------------------------------------
+- Reemplazante activo puede ver lista de alumnos del curso de
+  Taller/EF reemplazado durante su período: lógica YA EXISTENTE.
+- Contraturno de Aula sexto: registro de bloques con turno corregido.
+- Vista Alumno de sexto: grilla especial mañana/tarde y sin Taller/EF.
+- Tribunal de tres docentes por mesa y visualización en portales:
+  ETAPA 1 IMPLEMENTADA; ETAPA 2 NO.
+- Si.M.E. cerrado: bloqueo del formulario y enlace calendario
+  incorporados; PENDIENTE pulir aviso e instrucciones contradictorias.
+- Listados Si.M.E. por llamado aislado del resto del ciclo.
+- En Aula/otras vistas existen filtros y ordenamientos ya aplicados;
+  revalidar antes de cambiar.
+- No implementar atajo “publicar mesas al abrir inscripciones”:
+  Dirección publica luego de estudiar las inscripciones.
+- No imponer filtro extra obligatorio por curso/período en consulta
+  de mesas del alumno: decisión explícita del usuario.
+
+======================================================================
+69. CÓMO RETOMAR EL PROYECTO EN OTRO CHAT
+======================================================================
+
+1) Abrir ESTA Bitácora completa, empezando por sección 59 y
+   sección 68; usar secciones 1–58 para decisiones e historial.
+2) Verificar el último commit de main y git status LOCAL; no
+   aplicar parches sobre ZIP histórico sin comparar con HEAD.
+3) Revisar código vigente del módulo exacto, firestore.rules,
+   documentos reales y Apps Script actual cuando corresponda.
+4) Confirmar PENDIENTE versus YA IMPLEMENTADO: los pendientes
+   antiguos pueden haberse resuelto.
+5) Elegir un cambio pequeño por vez, primero diagnóstico sólo
+   lectura; solicitar aprobación antes de modificar.
+6) Si requiere SQL, Sheets, Firebase o scripts externos,
+   identificar qué se modifica, dónde, backup y rollback antes.
+7) Parches reproducibles en Descargas/Parches_WebSite_EETP495,
+   mantener respaldos fuera del repo; evitar duplicados.
+8) Ensayar UI en monitor, tablet y celular; verificar permisos
+   con roles reales y evitar usar datos de estudiantes en pruebas
+   públicas o capturas.
+9) Validar git diff/check/status, ejecutar commit y push de
+   archivos concretos y verificar SHA en origin/main.
+10) Registrar en esta Bitácora fecha, motivo, estado, archivos,
+    commits, pruebas, decisiones y pendientes.
+11) No confundir “código versionado”, “función comprobada” y
+    “servicio externo desplegado”: son evidencias distintas.
+12) Si.M.E. y Firestore en Live Server pueden guardar datos REALES.
+    No crear/eliminar registros de prueba sin autorización.
+13) No dar por cerrado el trabajo del 29/10 sin tener presentes
+    los pendientes de las capturas y el acceso de docentes a
+    inscriptos del tribunal.
+
+FIN DE CONSOLIDACIÓN 29/10/2026.
 ======================================================================
