@@ -2766,3 +2766,36 @@ body {
     white-space: normal;
   }
 }
+
+
+/* =====================================================
+   RESPONSIVE — HORARIO SEXTO / SCROLL INTERNO — 30/10/2026
+   El grid de sexto tiene un mínimo interno de 875 px.
+   En móvil el contenedor exterior debe poder ENCOGER:
+   sólo la grilla semanal se desplaza horizontalmente.
+   Las materias, turnos y horarios de 1.º a 5.º no cambian.
+===================================================== */
+@media (max-width: 760px) {
+  #horarios .panel-info,
+  #horarios .vista-horario-aula-alumno,
+  #horarios .bloque-horario-seccion-alumno,
+  #horarios .horario-aula-sexto-alumno,
+  #horarios .horario-sexto-turno {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  #horarios .horario-aula-sexto-alumno {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  #horarios .horario-sexto-desplazamiento {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    -webkit-overflow-scrolling: touch;
+  }
+}
