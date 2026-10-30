@@ -5103,3 +5103,33 @@ body {
     grid-column: span 4;
   }
 }
+
+/* Separar la configuración de períodos del módulo anterior y mostrar lo guardado. */
+#panelPeriodosAsistencia:not([hidden]) { margin-top: 30px; }
+#panelPeriodosAsistencia .resumen-periodos-registrados {
+  margin-top: 22px;
+  padding: 17px;
+  border: 1px solid #cdddea;
+  border-radius: 12px;
+  background: #eef6fd;
+  color: #173b60;
+}
+#panelPeriodosAsistencia .resumen-periodos-registrados h4 { margin: 0 0 12px; }
+#panelPeriodosAsistencia .grilla-periodos-registrados {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+#panelPeriodosAsistencia .tarjeta-periodo-registrado {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  padding: 12px;
+  border-radius: 9px;
+  background: #fff;
+  border: 1px solid #dce7f3;
+  color: #163450;
+}
+@media (max-width: 760px) {
+  #panelPeriodosAsistencia .grilla-periodos-registrados { grid-template-columns: 1fr; }
+}
