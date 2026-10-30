@@ -111,8 +111,15 @@ function obtenerEtiquetaTurnoDocente(turno) {
   return valor || "";
 }
 
+// Ocultar sólo modalidades sin bloques; errores siguen visibles para diagnóstico.
+function mostrarModalidadConHorariosDocente(vista, tieneBloques) {
+  const seccion = vista?.closest(".bloque-horario-docente");
+  if (seccion) seccion.style.display = tieneBloques ? "" : "none";
+}
+
 function renderizarHorarioAulaDocente(bloques) {
   if (!vistaHorarioAulaDocente) return;
+  mostrarModalidadConHorariosDocente(vistaHorarioAulaDocente, bloques.length > 0);
 
   if (!bloques.length) {
     mostrarMensajeHorarioDocente("Todavía no tenés horarios de aula cargados.");
@@ -224,6 +231,7 @@ function renderizarHorarioAulaDocente(bloques) {
 
 function renderizarHorarioTallerDocente(bloques) {
   if (!vistaHorarioTallerDocente) return;
+  mostrarModalidadConHorariosDocente(vistaHorarioTallerDocente, bloques.length > 0);
 
   if (!bloques.length) {
     mostrarMensajeHorarioTallerDocente(
@@ -337,6 +345,7 @@ function renderizarHorarioEducacionFisicaDocente(bloques) {
   if (!vistaHorarioEducacionFisicaDocente) {
     return;
   }
+  mostrarModalidadConHorariosDocente(vistaHorarioEducacionFisicaDocente, bloques.length > 0);
 
   if (!bloques.length) {
     mostrarMensajeHorarioEducacionFisicaDocente(
@@ -487,6 +496,7 @@ async function cargarHorarioAulaDocente(usuario) {
     renderizarHorarioAulaDocente(bloques);
   } catch (error) {
     console.error("Error al cargar horario de aula docente:", error);
+    mostrarModalidadConHorariosDocente(vistaHorarioAulaDocente, true);
 
     mostrarMensajeHorarioDocente(
       error.message || "No se pudo cargar tu horario de aula.",
@@ -692,6 +702,7 @@ async function cargarHorarioTallerDocente(usuario) {
     renderizarHorarioTallerDocente(bloques);
   } catch (error) {
     console.error("Error al cargar horario de taller docente:", error);
+    mostrarModalidadConHorariosDocente(vistaHorarioTallerDocente, true);
 
     mostrarMensajeHorarioTallerDocente(
       error.message || "No se pudo cargar tu horario de taller.",
@@ -870,6 +881,7 @@ async function cargarHorarioEducacionFisicaDocente(usuario) {
       "Error al cargar horario de Educación Física docente:",
       error,
     );
+    mostrarModalidadConHorariosDocente(vistaHorarioEducacionFisicaDocente, true);
 
     mostrarMensajeHorarioEducacionFisicaDocente(
       error.message || "No se pudo cargar tu horario de Educación Física.",
