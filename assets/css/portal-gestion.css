@@ -3542,3 +3542,53 @@ body {
     grid-column: span 4 !important;
   }
 }
+
+/* Consulta trimestral de asistencia - Gestion */
+.panel-periodos-consulta-gestion { margin-top: 28px; }
+.filtros-periodos-consulta-gestion {
+  display: flex;
+  align-items: end;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin: 18px 0;
+}
+.filtros-periodos-consulta-gestion .campo-filtro-gestion { width: 170px; }
+#cicloPeriodosGestion {
+  display: block;
+  width: 100%;
+  min-height: 42px;
+  padding: 9px 12px;
+  background: #fff;
+  color: #12385c;
+  border: 1px solid #b8cce0;
+  border-radius: 9px;
+  box-sizing: border-box;
+  font: inherit;
+}
+.resumen-periodos-gestion {
+  padding: 18px;
+  background: #eef6fc;
+  border: 1px solid #cee0f0;
+  border-radius: 12px;
+  color: #173b60;
+}
+.resumen-periodos-gestion h4 { margin: 0 0 14px; }
+.grilla-periodos-gestion {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+.trimestre-consulta-gestion {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 13px;
+  background: white;
+  border: 1px solid #d7e5f0;
+  border-radius: 10px;
+  color: #173b60;
+}
+@media (max-width: 760px) {
+  .grilla-periodos-gestion { grid-template-columns: 1fr; }
+  .filtros-periodos-consulta-gestion .campo-filtro-gestion { width: 100%; }
+}
