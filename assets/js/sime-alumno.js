@@ -117,15 +117,13 @@ async function mostrarAvisoInscripcionesCerradasSime() {
     configuracionSimeAlumno?.fechaApertura,
   );
 
-  const mensaje = fechaApertura
-    ? `Las inscripciones abren el ${fechaApertura}.`
-    : "Las inscripciones todavía no se encuentran abiertas.";
+  const mensaje = "Las inscripciones a mesas de examen se encuentran cerradas.";
 
   await Swal.fire({
     title: "Inscripciones no disponibles",
     html: `
     <p>${mensaje}</p>
-    <p>A partir de la fecha indicada podrás registrar tu inscripción.</p>
+    <p>Consultá el <a href="../index.html#calendario-escolar" target="_blank" rel="noopener noreferrer">Calendario Escolar</a> en el sitio público para conocer las fechas de inscripción.</p>
   `,
     icon: "info",
     confirmButtonText: "Aceptar",
@@ -173,25 +171,62 @@ function actualizarEncabezadoAlumnoSime(alumno) {
   rolUsuarioEncabezado.textContent = "Estudiante";
 }
 
+// Respeta el estado real calculado por Si.M.E.; si no viene informado,
+// utiliza el estado administrativo configurado como respaldo visual.
+function estanAbiertasInscripcionesSime(configuracion) {
+  if (!configuracion) return false;
+
+  const estadoReal = configuracion.estadoRealInscripciones;
+  if (typeof estadoReal?.abierto === "boolean") {
+    return estadoReal.abierto;
+  }
+
+  if (
+    String(configuracion.estadoInscripciones || "CERRADO")
+      .trim()
+      .toUpperCase() !== "ABIERTO"
+  ) return false;
+
+  // Respaldo cuando el backend no envía estadoRealInscripciones.
+  const ahora = new Date();
+  const hoy = [
+    ahora.getFullYear(),
+    String(ahora.getMonth() + 1).padStart(2, "0"),
+    String(ahora.getDate()).padStart(2, "0"),
+  ].join("-");
+  const apertura = String(configuracion.fechaApertura || "").slice(0, 10);
+  const cierre = String(configuracion.fechaCierre || "").slice(0, 10);
+  return (!apertura || hoy >= apertura) && (!cierre || hoy <= cierre);
+}
+
 function mostrarEstadoSime(configuracion) {
   if (!estadoSimeAlumno) return;
 
-  const estado = String(configuracion.estadoInscripciones || "CERRADO")
-    .trim()
-    .toUpperCase();
+  const abierto = estanAbiertasInscripcionesSime(configuracion);
+  const turno = String(configuracion?.turnoExamen || "").trim();
+  estadoSimeAlumno.classList.toggle("abierto", abierto);
+  estadoSimeAlumno.classList.toggle("cerrado", !abierto);
+  estadoSimeAlumno.replaceChildren();
 
-  const turno = String(configuracion.turnoExamen || "").trim();
+  const mensaje = document.createElement("p");
+  mensaje.textContent = abierto
+    ? `Inscripciones abiertas${turno ? ` para el turno ${turno}` : ""}.`
+    : "Las inscripciones a mesas de examen se encuentran cerradas.";
+  estadoSimeAlumno.appendChild(mensaje);
 
-  estadoSimeAlumno.classList.remove("abierto", "cerrado");
-
-  if (estado === "ABIERTO") {
-    estadoSimeAlumno.classList.add("abierto");
-    estadoSimeAlumno.textContent = `Inscripciones abiertas para el turno ${turno}.`;
-    return;
+  if (!abierto) {
+    const aviso = document.createElement("p");
+    aviso.append("Consultá el ");
+    const enlace = document.createElement("a");
+    enlace.href = "../index.html#calendario-escolar";
+    enlace.target = "_blank";
+    enlace.rel = "noopener noreferrer";
+    enlace.textContent = "Calendario Escolar";
+    aviso.append(enlace, " en el sitio público para conocer las fechas de inscripción.");
+    estadoSimeAlumno.appendChild(aviso);
   }
 
-  estadoSimeAlumno.classList.add("cerrado");
-  estadoSimeAlumno.textContent = `Las inscripciones para el turno ${turno} no se encuentran abiertas.`;
+  bloquearFormularioSime(!abierto);
 }
 
 function cargarAniosCursadoSime(anios) {
@@ -220,6 +255,9 @@ function bloquearFormularioSime(bloquear) {
     control.disabled = bloquear;
   });
 }
+
+// El formulario permanece inhabilitado hasta comprobar el estado del llamado.
+bloquearFormularioSime(true);
 
 function mostrarMateriasSime(materias) {
   if (!listaMateriasSime) return;
@@ -630,10 +668,7 @@ if (formInscripcionSime) {
       );
       return;
     }
-    const estadoRealInscripciones =
-      configuracionSimeAlumno?.estadoRealInscripciones;
-
-    if (estadoRealInscripciones && estadoRealInscripciones.abierto === false) {
+    if (!estanAbiertasInscripcionesSime(configuracionSimeAlumno)) {
       await mostrarAvisoInscripcionesCerradasSime();
       return;
     }
@@ -746,7 +781,8 @@ if (formInscripcionSime) {
         "error",
       );
     } finally {
-      btnRegistrarInscripcionSime.disabled = false;
+      btnRegistrarInscripcionSime.disabled =
+        !estanAbiertasInscripcionesSime(configuracionSimeAlumno);
     }
   });
 }
@@ -778,12 +814,28 @@ onAuthStateChanged(auth, async (usuario) => {
     const resultadoSime = await cargarConfiguracionSimeAlumno(usuario);
 
     alumnoSime = resultadoSime.alumno;
-    configuracionSimeAlumno = resultadoSime.configuracion;
+    configuracionSimeAlumno = { ...(resultadoSime.configuracion || {}) };
+    // Compatibilidad con respuestas que envían el estado real fuera de configuracion.
+    if (
+      resultadoSime.estadoRealInscripciones &&
+      !configuracionSimeAlumno.estadoRealInscripciones
+    ) {
+      configuracionSimeAlumno.estadoRealInscripciones =
+        resultadoSime.estadoRealInscripciones;
+    }
 
     actualizarEncabezadoAlumnoSime(alumnoSime);
 
     cargarAniosCursadoSime(configuracionSimeAlumno.aniosCursado || []);
+    mostrarEstadoSime(configuracionSimeAlumno);
   } catch (error) {
     console.error("Error al cargar S.I.M.E.:", error);
+    // Sin confirmación del backend, no permitir una inscripción a ciegas.
+    bloquearFormularioSime(true);
+    if (estadoSimeAlumno) {
+      estadoSimeAlumno.classList.add("cerrado");
+      estadoSimeAlumno.firstElementChild.textContent =
+        "No se pudo comprobar si las inscripciones están abiertas.";
+    }
   }
 });

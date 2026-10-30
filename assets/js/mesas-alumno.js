@@ -199,6 +199,13 @@ function aplicarFiltrosMesasAlumno() {
   renderizarMesasAlumno(mesasFiltradas);
 }
 
+function nombreTribunalMesaAlumno(mesa) {
+  const miembros = Array.isArray(mesa.tribunal) ? mesa.tribunal : [];
+  return miembros.length
+    ? miembros.map((item) => String(item.nombre || item.correo || "").trim()).filter(Boolean).join(" · ")
+    : "Sin tribunal asignado";
+}
+
 function renderizarMesasAlumno(mesas) {
   if (!cuerpoTablaMesasAlumno) return;
 
@@ -207,7 +214,7 @@ function renderizarMesasAlumno(mesas) {
   if (!ordenadas.length) {
     cuerpoTablaMesasAlumno.innerHTML = `
       <tr>
-        <td colspan="4" class="tabla-vacia">
+        <td colspan="5" class="tabla-vacia">
           No hay mesas de examen publicadas para mostrar con esos filtros.
         </td>
       </tr>
@@ -231,6 +238,7 @@ function renderizarMesasAlumno(mesas) {
             <strong>${escaparHtmlAlumno(mesa.espacioNombre || "-")}</strong>
           </td>
           <td>${escaparHtmlAlumno(cursos)}</td>
+          <td>${escaparHtmlAlumno(nombreTribunalMesaAlumno(mesa))}</td>
         </tr>
       `;
     })
@@ -313,7 +321,7 @@ async function cargarMesasAlumno() {
 
     cuerpoTablaMesasAlumno.innerHTML = `
       <tr>
-        <td colspan="4" class="tabla-vacia">
+        <td colspan="5" class="tabla-vacia">
           Consultando mesas de examen publicadas...
         </td>
       </tr>
@@ -328,7 +336,7 @@ async function cargarMesasAlumno() {
 
       cuerpoTablaMesasAlumno.innerHTML = `
     <tr>
-      <td colspan="4" class="tabla-vacia">
+      <td colspan="5" class="tabla-vacia">
         No tenés mesas de examen correspondientes a tus inscripciones.
       </td>
     </tr>
@@ -359,7 +367,7 @@ async function cargarMesasAlumno() {
     if (!mesasAlumnoCargadas.length) {
       cuerpoTablaMesasAlumno.innerHTML = `
         <tr>
-          <td colspan="4" class="tabla-vacia">
+          <td colspan="5" class="tabla-vacia">
             No hay mesas de examen publicadas.
           </td>
         </tr>
@@ -376,7 +384,7 @@ async function cargarMesasAlumno() {
 
     cuerpoTablaMesasAlumno.innerHTML = `
       <tr>
-        <td colspan="4" class="tabla-vacia">
+        <td colspan="5" class="tabla-vacia">
           No se pudieron cargar las mesas de examen.
         </td>
       </tr>

@@ -1190,36 +1190,51 @@
           <form autocomplete="off" id="formMesaGestion">
             <input id="mesaGestionId" type="hidden" />
             <div class="form-grid-gestion form-grid-mesas-gestion">
-              <div class="campo-filtro-gestion">
+              <div class="campo-filtro-gestion mesa-form-basico">
                 <label for="mesaGestionFecha"> Fecha * </label>
                 <input id="mesaGestionFecha" required="" type="date" />
               </div>
-              <div class="campo-filtro-gestion">
+              <div class="campo-filtro-gestion mesa-form-basico">
                 <label for="mesaGestionHora"> Hora * </label>
                 <select id="mesaGestionHora" required="">
                   <option value="">Seleccionar hora</option>
                 </select>
               </div>
-              <div class="campo-filtro-gestion">
+              <div class="campo-filtro-gestion mesa-form-basico">
                 <label for="mesaGestionPeriodo"> Período * </label>
                 <select id="mesaGestionPeriodo" required="">
                   <option value="">Seleccionar período</option>
                 </select>
               </div>
-              <div class="campo-filtro-gestion">
+              <div class="campo-filtro-gestion mesa-form-basico">
                 <label for="mesaGestionEstado"> Estado * </label>
                 <select id="mesaGestionEstado" required="">
                   <option selected="" value="OCULTA">OCULTA</option>
                   <option value="PUBLICADA">PUBLICADA</option>
                 </select>
               </div>
-              <div class="campo-filtro-gestion">
+              <div class="campo-filtro-gestion mesa-form-espacio">
                 <label for="mesaGestionEspacio"> Espacio curricular * </label>
                 <select id="mesaGestionEspacio" required="">
                   <option value="">Cargando espacios curriculares...</option>
                 </select>
               </div>
-              <div class="campo-filtro-gestion campo-mesas-cursos-gestion">
+                            <div class="campo-filtro-gestion titulo-tribunal-mesa-gestion mesa-form-titulo">
+                <h4>Tribunal examinador</h4>
+              </div>
+              <div class="campo-filtro-gestion mesa-form-integrante">
+                <label for="tribunalMesaGestion1">Integrante 1 *</label>
+                <select id="tribunalMesaGestion1" required><option value="">Seleccionar docente</option></select>
+              </div>
+              <div class="campo-filtro-gestion mesa-form-integrante">
+                <label for="tribunalMesaGestion2">Integrante 2 *</label>
+                <select id="tribunalMesaGestion2" required><option value="">Seleccionar docente</option></select>
+              </div>
+              <div class="campo-filtro-gestion mesa-form-integrante">
+                <label for="tribunalMesaGestion3">Integrante 3 *</label>
+                <select id="tribunalMesaGestion3" required><option value="">Seleccionar docente</option></select>
+              </div>
+<div class="campo-filtro-gestion campo-mesas-cursos-gestion">
                 <label> Cursos * </label>
                 <div class="opciones-mesas-gestion" id="mesaGestionCursos">
                   Cargando cursos...
@@ -1298,13 +1313,14 @@
                   <th>Hora</th>
                   <th>Espacio curricular</th>
                   <th>Cursos</th>
+                  <th>Tribunal</th>
                   <th>Estado</th>
                   <th class="columna-acciones-mesas-gestion">Acciones</th>
                 </tr>
               </thead>
               <tbody id="cuerpoTablaMesasGestion">
                 <tr>
-                  <td class="tabla-vacia" colspan="6">
+                  <td class="tabla-vacia" colspan="7">
                     Todavía no se consultaron las mesas. Presioná “Actualizar
                     mesas” para cargarlas.
                   </td>

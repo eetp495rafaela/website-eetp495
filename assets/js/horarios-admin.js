@@ -1367,6 +1367,9 @@ const DIAS_HORARIO_EF = [
 function renderizarHorarioAulaCargado(bloques) {
   if (!vistaHorarioAula) return;
 
+  // Sin filtro de turno se muestran ambos, siempre por su horario real.
+  const mostrarTurnos = !String(horarioAulaTurno?.value || "").trim();
+
   if (!bloques.length) {
     vistaHorarioAula.innerHTML = `
       <p class="mensaje-formulario">
@@ -1379,9 +1382,12 @@ function renderizarHorarioAulaCargado(bloques) {
   const htmlDias = DIAS_HORARIO_AULA.map((dia) => {
     const bloquesDia = bloques
       .filter((bloque) => bloque.dia === dia.valor)
-      .sort(
-        (a, b) => Number(a.bloqueNumero || 0) - Number(b.bloqueNumero || 0),
-      );
+      .sort((a, b) => {
+        const porHora = String(a.horaInicio || "").localeCompare(
+          String(b.horaInicio || ""),
+        );
+        return porHora || Number(a.bloqueNumero || 0) - Number(b.bloqueNumero || 0);
+      });
 
     return `
       <div class="dia-horario-admin">
@@ -1391,7 +1397,15 @@ function renderizarHorarioAulaCargado(bloques) {
           bloquesDia.length
             ? bloquesDia
                 .map(
-                  (bloque) => `
+                  (bloque, indice) => `
+                    ${
+                      mostrarTurnos &&
+                      (indice === 0 || bloquesDia[indice - 1].turno !== bloque.turno)
+                        ? `<div class="etiqueta-turno-horario-admin">
+                            ${String(bloque.turno || "").toUpperCase() === "MANANA" ? "Turno mañana" : String(bloque.turno || "").toUpperCase() === "TARDE" ? "Turno tarde" : "Turno sin especificar"}
+                          </div>`
+                        : ""
+                    }
                     <div class="tarjeta-bloque-horario-admin">
   <div class="encabezado-tarjeta-bloque-horario">
     <div class="bloque-horario-hora">
@@ -3240,7 +3254,11 @@ if (horarioTallerTurno) {
 
 if (horarioTallerCurso) {
   horarioTallerCurso.addEventListener("change", async () => {
-    await cargarMateriasHorarioTaller();
+    // La lista se actualiza al seleccionar curso, sin usar "Actualizar horario".
+    await Promise.all([
+      cargarMateriasHorarioTaller(),
+      cargarHorarioTallerRegistrado(),
+    ]);
     await cargarDocenteAsignadoHorarioTaller();
   });
 }
@@ -3295,7 +3313,7 @@ if (horarioEfCicloLectivo) {
   });
 }
 
-onAuthStateChanged(auth, (usuario) => {
+onAuthStateChanged(auth, async (usuario) => {
   if (!usuario) return;
 
   if (horarioAulaCurso) {
@@ -3335,8 +3353,12 @@ onAuthStateChanged(auth, (usuario) => {
   if (vistaHorarioEf) {
     vistaHorarioEf.innerHTML = `
       <p class="mensaje-formulario">
-        Todavía no se consultó el horario de Educación Física. Presioná “Actualizar horario” para comenzar.
+        Seleccioná un curso para consultar su horario de Educación Física.
       </p>
     `;
   }
+
+  // Los tres selectores comparten la lista de cursos. El botón Actualizar queda
+  // como opción manual para volver a consultar los datos si hubo cambios.
+  await cargarCursosHorarioAula();
 });

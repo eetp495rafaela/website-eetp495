@@ -79,6 +79,112 @@ function mostrarMensajeHorarioAlumno(texto, tipo = "") {
   `;
 }
 
+// Grilla especial de Aula para 6.º año: cada franja horaria es una fila compartida.
+// Se utilizan las franjas reales del horario de Aula; los huecos se dejan vacíos.
+const FRANJAS_AULA_SEXTO = {
+  MANANA: [
+    ["07:15", "07:55"],
+    ["07:55", "08:35"],
+    ["08:45", "09:25"],
+    ["09:25", "10:05"],
+    ["10:15", "10:55"],
+    ["10:55", "11:35"],
+    ["11:40", "12:20"],
+  ],
+  TARDE: [
+    ["13:15", "13:55"],
+    ["13:55", "14:35"],
+    ["14:45", "15:25"],
+    ["15:25", "16:05"],
+    ["16:15", "16:55"],
+    ["16:55", "17:35"],
+    ["17:40", "18:20"],
+  ],
+};
+
+function textoSeguroAulaSexto(valor) {
+  return String(valor ?? "").replace(/[&<>"']/g, (caracter) => ({
+    "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;",
+  })[caracter]);
+}
+
+function horaNormalizadaAulaSexto(valor) {
+  const hora = String(valor || "").trim();
+  const partes = /^(\d{1,2}):(\d{2})$/.exec(hora);
+  return partes ? `${partes[1].padStart(2, "0")}:${partes[2]}` : hora;
+}
+
+function turnoBloqueAulaSexto(bloque) {
+  const turno = String(bloque.turno || "").trim().toUpperCase()
+    .normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  if (turno === "MANANA" || turno === "TARDE") return turno;
+  // Compatibilidad con horarios antiguos sin turno registrado.
+  return horaNormalizadaAulaSexto(bloque.horaInicio) < "13:00" ? "MANANA" : "TARDE";
+}
+
+function tarjetaBloqueAulaSexto(bloque) {
+  return `<div class="tarjeta-bloque-horario-alumno">
+    <div class="bloque-horario-hora-alumno">${textoSeguroAulaSexto(bloque.horaInicio || "-")} a ${textoSeguroAulaSexto(bloque.horaFin || "-")}</div>
+    <div class="bloque-horario-materia-alumno">${textoSeguroAulaSexto(bloque.espacioCurricular || "-")}</div>
+    <div class="bloque-horario-docente-alumno">${textoSeguroAulaSexto(bloque.docenteNombre || "Docente sin cargar")}</div>
+    ${bloque.ubicacion ? `<div class="bloque-horario-ubicacion-alumno">${textoSeguroAulaSexto(bloque.ubicacion)}</div>` : ""}
+  </div>`;
+}
+
+function renderizarGrillaAulaSextoAlumno(bloquesAula) {
+  const resultado = [];
+  for (const turno of ["MANANA", "TARDE"]) {
+    const bloquesTurno = bloquesAula.filter((bloque) => turnoBloqueAulaSexto(bloque) === turno);
+    if (!bloquesTurno.length) continue;
+
+    // Incluir TODAS las franjas desde el inicio del turno hasta el último bloque
+    // ocupado de la semana, incluso si están libres todos los días.
+    const franjasBase = FRANJAS_AULA_SEXTO[turno];
+    const franjasPorHora = new Map(franjasBase.map(([inicio, fin]) => [inicio, fin]));
+    for (const bloque of bloquesTurno) {
+      const inicio = horaNormalizadaAulaSexto(bloque.horaInicio);
+      if (inicio && !franjasPorHora.has(inicio)) {
+        // No ocultar horarios excepcionales cargados fuera de la grilla usual.
+        franjasPorHora.set(inicio, horaNormalizadaAulaSexto(bloque.horaFin));
+      }
+    }
+    const ultimaHora = bloquesTurno.reduce((ultima, bloque) => {
+      const inicio = horaNormalizadaAulaSexto(bloque.horaInicio);
+      return inicio > ultima ? inicio : ultima;
+    }, "");
+    const franjas = Array.from(franjasPorHora, ([inicio, fin]) => ({ inicio, fin }))
+      .filter(({ inicio }) => inicio <= ultimaHora)
+      .sort((a, b) => a.inicio.localeCompare(b.inicio));
+
+    const cabecera = `<div class="horario-sexto-cabecera horario-sexto-hora-titulo">Hora</div>` +
+      DIAS_HORARIO_AULA_ALUMNO.map((dia) =>
+        `<div class="horario-sexto-cabecera">${dia.etiqueta}</div>`
+      ).join("");
+
+    const filas = franjas.map(({ inicio, fin }) => {
+      const horario = `<div class="horario-sexto-hora">${textoSeguroAulaSexto(inicio)}<span>a ${textoSeguroAulaSexto(fin)}</span></div>`;
+      const dias = DIAS_HORARIO_AULA_ALUMNO.map((dia) => {
+        const bloquesCelda = bloquesTurno.filter((bloque) =>
+          bloque.dia === dia.valor && horaNormalizadaAulaSexto(bloque.horaInicio) === inicio
+        );
+        return `<div class="horario-sexto-celda ${bloquesCelda.length ? "con-clase" : "sin-clase"}" ${bloquesCelda.length ? "" : 'aria-label="Sin clase en este horario"'}>
+          ${bloquesCelda.length ? bloquesCelda.map(tarjetaBloqueAulaSexto).join("") : '<span aria-hidden="true">—</span>'}
+        </div>`;
+      }).join("");
+      return horario + dias;
+    }).join("");
+
+    const titulo = turno === "MANANA" ? "Turno Mañana" : "Turno Tarde";
+    resultado.push(`<section class="horario-sexto-turno" aria-label="${titulo}">
+      <h4 class="horario-sexto-titulo">${titulo}</h4>
+      <div class="horario-sexto-desplazamiento" tabindex="0" aria-label="Grilla semanal de ${titulo}; desplazamiento horizontal disponible en pantallas pequeñas">
+        <div class="horario-sexto-grilla">${cabecera}${filas}</div>
+      </div>
+    </section>`);
+  }
+  return `<div class="horario-aula-sexto-alumno">${resultado.join("")}</div>`;
+}
+
 function renderizarHorarioCompletoAlumno(
   bloquesAula,
   bloquesTaller,
@@ -273,7 +379,9 @@ function renderizarHorarioCompletoAlumno(
 
       ${
         bloquesAula.length
-          ? `<div class="grilla-horario-aula-alumno">${htmlAula}</div>`
+          ? Number(perfilAlumno.cursoAnio || 0) === 6
+            ? renderizarGrillaAulaSextoAlumno(bloquesAula)
+            : `<div class="grilla-horario-aula-alumno">${htmlAula}</div>`
           : `<p class="mensaje-formulario">Todavía no hay horarios de aula cargados para tu curso.</p>`
       }
     </section>

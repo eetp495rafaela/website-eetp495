@@ -641,6 +641,90 @@ async function cargarCursosMesaGestion() {
   }
 }
 
+// TRIBUNALES EXAMINADORES: docentes activos registrados en el portal.
+const selectTribunalMesaGestion = [1, 2, 3].map((numero) =>
+  document.getElementById(`tribunalMesaGestion${numero}`),
+);
+let docentesTribunalMesaGestion = [];
+
+function normalizarCorreoTribunalMesaGestion(correo) {
+  return String(correo || "").trim().toLowerCase();
+}
+
+async function cargarDocentesTribunalMesaGestion() {
+  selectTribunalMesaGestion.forEach((select) => {
+    if (select) select.innerHTML = '<option value="">Cargando docentes...</option>';
+  });
+
+  try {
+    // Ambas consultas cumplen las reglas de lectura de Dirección, incluso
+    // si un docente tiene DOCENTE como rol adicional.
+    const consultas = await Promise.all([
+      getDocs(query(collection(db, "usuarios"), where("rol", "==", "DOCENTE"), where("estado", "==", "ACTIVO"))),
+      getDocs(query(collection(db, "usuarios"), where("roles", "array-contains", "DOCENTE"), where("estado", "==", "ACTIVO"))),
+    ]);
+    const porCorreo = new Map();
+    consultas.forEach((resultado) => resultado.forEach((documento) => {
+      const datos = documento.data();
+      const correo = normalizarCorreoTribunalMesaGestion(datos.correo || documento.id);
+      const roles = Array.isArray(datos.roles) ? datos.roles : [];
+      if (!correo || String(datos.estado || "").toUpperCase() !== "ACTIVO" ||
+          !(String(datos.rol || "").toUpperCase() === "DOCENTE" || roles.includes("DOCENTE"))) return;
+      const nombre = String(datos.nombreCompleto || datos.nombre || correo).trim();
+      porCorreo.set(correo, { correo, nombre });
+    }));
+    docentesTribunalMesaGestion = [...porCorreo.values()].sort((a, b) =>
+      a.nombre.localeCompare(b.nombre, "es", { sensitivity: "base" }),
+    );
+    selectTribunalMesaGestion.forEach((select) => {
+      if (!select) return;
+      const actual = select.value;
+      select.replaceChildren(new Option("Seleccionar docente", ""));
+      docentesTribunalMesaGestion.forEach((docente) =>
+        select.add(new Option(`${docente.nombre} — ${docente.correo}`, docente.correo)),
+      );
+      if (actual) select.value = actual;
+    });
+  } catch (error) {
+    console.error("No se pudieron consultar los docentes del tribunal:", error);
+    selectTribunalMesaGestion.forEach((select) => {
+      if (select) select.innerHTML = '<option value="">No se pudieron cargar docentes</option>';
+    });
+  }
+}
+
+function obtenerTribunalMesaGestion() {
+  return selectTribunalMesaGestion.map((select) => {
+    const correo = normalizarCorreoTribunalMesaGestion(select?.value);
+    const docente = docentesTribunalMesaGestion.find((item) => item.correo === correo);
+    return docente ? { correo: docente.correo, nombre: docente.nombre } : null;
+  }).filter(Boolean);
+}
+
+function tribunalCompletoMesaGestion(tribunal) {
+  return Array.isArray(tribunal) && tribunal.length === 3 &&
+    new Set(tribunal.map((item) => normalizarCorreoTribunalMesaGestion(item.correo))).size === 3;
+}
+
+function seleccionarTribunalMesaGestion(tribunal) {
+  const lista = Array.isArray(tribunal) ? tribunal : [];
+  selectTribunalMesaGestion.forEach((select, i) => {
+    if (!select) return;
+    const correo = normalizarCorreoTribunalMesaGestion(lista[i]?.correo);
+    // Un docente inactivo previamente asignado no se reemplaza silenciosamente.
+    if (correo && ![...select.options].some((op) => op.value === correo)) {
+      select.add(new Option(`${lista[i]?.nombre || correo} (no activo)`, correo));
+    }
+    select.value = correo;
+  });
+}
+
+function nombreTribunalMesaGestion(mesa) {
+  const miembros = Array.isArray(mesa.tribunal) ? mesa.tribunal : [];
+  return miembros.length ? miembros.map((persona) =>
+    String(persona.nombre || persona.correo || "").trim()).filter(Boolean).join(" · ") : "Sin asignar";
+}
+
 async function prepararFormularioMesaGestion() {
   if (!formMesaGestion) return;
 
@@ -649,7 +733,7 @@ async function prepararFormularioMesaGestion() {
 
   mostrarMensajeMesaFormGestion("Cargando opciones de mesas...");
 
-  await Promise.all([cargarEspaciosMesaGestion(), cargarCursosMesaGestion()]);
+  await Promise.all([cargarEspaciosMesaGestion(), cargarCursosMesaGestion(), cargarDocentesTribunalMesaGestion()]);
 
   mostrarMensajeMesaFormGestion(
     "Opciones cargadas. Ya podés preparar una mesa.",
@@ -689,6 +773,7 @@ function limpiarFormularioMesaGestion() {
   if (!formMesaGestion) return;
 
   formMesaGestion.reset();
+  seleccionarTribunalMesaGestion([]);
 
   if (mesaGestionId) {
     mesaGestionId.value = "";
@@ -757,6 +842,12 @@ async function guardarMesaGestion(event) {
 
   const espacio = obtenerEspacioSeleccionadoMesaGestion();
   const cursos = obtenerCursosSeleccionadosMesaGestion();
+  const tribunal = obtenerTribunalMesaGestion();
+
+  if (!tribunalCompletoMesaGestion(tribunal)) {
+    mostrarMensajeMesaFormGestion("Seleccioná tres docentes diferentes para el tribunal.", "error");
+    return;
+  }
 
   if (!fecha || !hora || !periodo || !espacio || !cursos.length) {
     mostrarMensajeMesaFormGestion(
@@ -799,6 +890,7 @@ async function guardarMesaGestion(event) {
 
       cursos,
       cursosNombres: cursos.map((curso) => curso.nombre),
+      tribunal,
 
       actualizadoEn: serverTimestamp(),
       actualizadoPor: usuario.email || "",
@@ -1017,7 +1109,7 @@ function renderizarMesasGestion(mesas) {
   if (!ordenadas.length) {
     cuerpoTablaMesasGestion.innerHTML = `
       <tr>
-        <td colspan="6" class="tabla-vacia">
+        <td colspan="7" class="tabla-vacia">
           No hay mesas de examen para mostrar con esos filtros.
         </td>
       </tr>
@@ -1045,7 +1137,8 @@ function renderizarMesasGestion(mesas) {
           <td>
             <strong>${escaparHtmlGestion(mesa.espacioNombre || "-")}</strong>
           </td>
-          <td>${escaparHtmlGestion(cursos)}</td>
+          <td class="celda-mesa-cursos" title="${escaparHtmlGestion(cursos)}">${escaparHtmlGestion(cursos)}</td>
+          <td class="celda-mesa-tribunal" title="${escaparHtmlGestion(nombreTribunalMesaGestion(mesa))}">${escaparHtmlGestion(nombreTribunalMesaGestion(mesa))}</td>
           <td>
             <span class="estado-gestion ${publicada ? "activo" : "inactivo"}">
               ${publicada ? "PUBLICADA" : "OCULTA"}
@@ -1059,23 +1152,25 @@ function renderizarMesasGestion(mesas) {
       ? `
         <div class="acciones-mesa-gestion">
           <button
-            class="btn-gestion btn-mesa-editar-gestion"
+            class="btn-gestion btn-mesa-icono btn-mesa-editar-gestion"
             type="button"
+            title="Editar mesa"
+            aria-label="Editar mesa"
             data-accion-mesa-gestion="editar"
             data-id-mesa="${escaparHtmlGestion(mesa.id)}"
           >
-            <i class="fa-solid fa-pen-to-square"></i>
-            Editar
+            <i class="fa-solid fa-pen-to-square" aria-hidden="true"></i>
           </button>
 
           <button
-            class="btn-gestion btn-mesa-estado-gestion"
+            class="btn-gestion btn-mesa-icono btn-mesa-estado-gestion"
             type="button"
+            title="${publicada ? "Ocultar mesa" : "Publicar mesa"}"
+            aria-label="${publicada ? "Ocultar mesa" : "Publicar mesa"}"
             data-accion-mesa-gestion="estado"
             data-id-mesa="${escaparHtmlGestion(mesa.id)}"
           >
-            <i class="fa-solid ${publicada ? "fa-eye-slash" : "fa-eye"}"></i>
-            ${publicada ? "Ocultar" : "Publicar"}
+            <i class="fa-solid ${publicada ? "fa-eye-slash" : "fa-eye"}" aria-hidden="true"></i>
           </button>
         </div>
       `
@@ -1140,6 +1235,7 @@ function editarMesaGestion(idMesa) {
   if (mesaGestionEspacio) {
     mesaGestionEspacio.value = mesa.espacioId || "";
   }
+  seleccionarTribunalMesaGestion(mesa.tribunal);
 
   const idsCursos = Array.isArray(mesa.cursos)
     ? mesa.cursos.map((curso) => String(curso.id || ""))
@@ -1206,6 +1302,11 @@ async function cambiarEstadoMesaGestion(idMesa) {
     .toUpperCase();
   const nuevoEstado = estadoActual === "PUBLICADA" ? "OCULTA" : "PUBLICADA";
 
+  if (nuevoEstado === "PUBLICADA" && !tribunalCompletoMesaGestion(mesa.tribunal)) {
+    await Swal.fire("Tribunal incompleto", "Editá la mesa y seleccioná tres docentes distintos antes de publicarla.", "warning");
+    return;
+  }
+
   const confirmacion = await Swal.fire({
     title: nuevoEstado === "PUBLICADA" ? "¿Publicar mesa?" : "¿Ocultar mesa?",
     text:
@@ -1265,7 +1366,7 @@ async function cargarMesasGestion() {
 
     cuerpoTablaMesasGestion.innerHTML = `
       <tr>
-        <td colspan="6" class="tabla-vacia">
+        <td colspan="7" class="tabla-vacia">
           Consultando mesas de examen...
         </td>
       </tr>
@@ -1298,7 +1399,7 @@ async function cargarMesasGestion() {
 
     cuerpoTablaMesasGestion.innerHTML = `
       <tr>
-        <td colspan="6" class="tabla-vacia">
+        <td colspan="7" class="tabla-vacia">
           No se pudieron cargar las mesas de examen.
         </td>
       </tr>

@@ -483,6 +483,16 @@ body {
   font-weight: 800;
 }
 
+.estado-sime p + p {
+  margin-top: 6px;
+}
+
+.estado-sime a {
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
 .sime-grid {
   display: grid;
   grid-template-columns: minmax(320px, 0.9fr) minmax(420px, 1.4fr);
@@ -2577,4 +2587,121 @@ body {
     margin-left: 0 !important;
     box-sizing: border-box !important;
   }
+}
+
+/* =====================================================
+   HORARIO DE AULA - SEXTO AÑO
+   Grilla alineada por hora, con turnos separados.
+   No afecta la presentación de 1.º a 5.º, Taller ni Educación Física.
+===================================================== */
+.horario-aula-sexto-alumno {
+  display: grid;
+  gap: 24px;
+}
+
+.horario-sexto-titulo {
+  margin: 0 0 12px;
+  padding: 9px 14px;
+  border-left: 4px solid #19e0d2;
+  border-radius: 8px;
+  background: rgba(20, 228, 212, 0.12);
+  color: #eaf6ff;
+  font-size: 1rem;
+  font-weight: 900;
+}
+
+.horario-sexto-desplazamiento {
+  overflow-x: auto;
+  max-width: 100%;
+  border-radius: 12px;
+  scrollbar-gutter: stable;
+}
+
+.horario-sexto-desplazamiento:focus-visible {
+  outline: 2px solid #19e0d2;
+  outline-offset: 2px;
+}
+
+.horario-sexto-grilla {
+  display: grid;
+  grid-template-columns: 105px repeat(5, minmax(148px, 1fr));
+  gap: 5px;
+  min-width: 875px;
+  align-items: stretch;
+}
+
+.horario-sexto-cabecera,
+.horario-sexto-hora {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 8px 5px;
+  background: #164569;
+  color: #f0fbff;
+  font-size: 0.84rem;
+  font-weight: 900;
+  text-align: center;
+}
+
+.horario-sexto-cabecera {
+  border-radius: 8px 8px 3px 3px;
+}
+
+.horario-sexto-hora {
+  flex-direction: column;
+  gap: 2px;
+  border-radius: 6px;
+  font-size: 0.81rem;
+}
+
+.horario-sexto-hora span {
+  color: #b8d5e7;
+  font-size: 0.75rem;
+}
+
+.horario-sexto-celda {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-height: 73px;
+  border-radius: 8px;
+  border: 1px solid rgba(139, 194, 223, 0.22);
+}
+
+.horario-sexto-celda.sin-clase {
+  align-items: center;
+  justify-content: center;
+  background: rgba(245, 250, 255, 0.065);
+  color: rgba(204, 224, 236, 0.45);
+  font-size: 1rem;
+}
+
+.horario-sexto-celda.con-clase {
+  background: #f3f7fb;
+}
+
+.horario-sexto-celda .tarjeta-bloque-horario-alumno {
+  flex: 1;
+  margin: 0;
+  padding: 9px;
+  border: 0;
+  border-radius: 8px;
+  box-shadow: none;
+}
+
+.horario-sexto-celda .tarjeta-bloque-horario-alumno + .tarjeta-bloque-horario-alumno {
+  border-top: 1px solid #cbdceb;
+  margin-top: 0;
+}
+
+.horario-sexto-celda .bloque-horario-hora-alumno {
+  font-size: 0.74rem;
+}
+
+.horario-sexto-celda .bloque-horario-materia-alumno {
+  font-size: 0.85rem;
+}
+
+.horario-sexto-celda .bloque-horario-docente-alumno {
+  font-size: 0.75rem;
 }

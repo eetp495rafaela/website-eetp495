@@ -202,6 +202,13 @@ function aplicarFiltrosMesasDocente() {
   renderizarMesasDocente(mesasFiltradas);
 }
 
+function nombreTribunalMesaDocente(mesa) {
+  const miembros = Array.isArray(mesa.tribunal) ? mesa.tribunal : [];
+  return miembros.length
+    ? miembros.map((item) => String(item.nombre || item.correo || "").trim()).filter(Boolean).join(" · ")
+    : "Sin tribunal asignado";
+}
+
 function renderizarMesasDocente(mesas) {
   if (!cuerpoTablaMesasDocente) return;
 
@@ -210,7 +217,7 @@ function renderizarMesasDocente(mesas) {
   if (!ordenadas.length) {
     cuerpoTablaMesasDocente.innerHTML = `
       <tr>
-        <td colspan="4" class="tabla-vacia">
+        <td colspan="5" class="tabla-vacia">
           No hay mesas de examen publicadas para mostrar con esos filtros.
         </td>
       </tr>
@@ -234,6 +241,7 @@ function renderizarMesasDocente(mesas) {
             <strong>${escaparHtmlDocente(mesa.espacioNombre || "-")}</strong>
           </td>
           <td>${escaparHtmlDocente(cursos)}</td>
+          <td>${escaparHtmlDocente(nombreTribunalMesaDocente(mesa))}</td>
         </tr>
       `;
     })
@@ -384,7 +392,7 @@ async function cargarMesasDocente() {
 
     cuerpoTablaMesasDocente.innerHTML = `
       <tr>
-        <td colspan="4" class="tabla-vacia">
+        <td colspan="5" class="tabla-vacia">
           Consultando mesas de examen publicadas...
         </td>
       </tr>
@@ -409,7 +417,16 @@ async function cargarMesasDocente() {
 
         const espacioId = String(mesa.espacioId || "").trim();
 
-        return estado === "PUBLICADA" && espaciosIdsAutorizados.has(espacioId);
+        if (estado !== "PUBLICADA") return false;
+        const tribunal = Array.isArray(mesa.tribunal) ? mesa.tribunal : [];
+        if (tribunal.length) {
+          const correo = normalizarCorreoMesaDocente(auth.currentUser?.email);
+          return tribunal.some((miembro) =>
+            normalizarCorreoMesaDocente(miembro.correo) === correo,
+          );
+        }
+        // Mesas antiguas, anteriores a la función Tribunal: conservar comportamiento previo.
+        return espaciosIdsAutorizados.has(espacioId);
       });
 
     console.log(
@@ -420,7 +437,7 @@ async function cargarMesasDocente() {
     if (!mesasDocenteCargadas.length) {
       cuerpoTablaMesasDocente.innerHTML = `
         <tr>
-          <td colspan="4" class="tabla-vacia">
+          <td colspan="5" class="tabla-vacia">
             No hay mesas de examen publicadas.
           </td>
         </tr>
@@ -437,7 +454,7 @@ async function cargarMesasDocente() {
 
     cuerpoTablaMesasDocente.innerHTML = `
       <tr>
-        <td colspan="4" class="tabla-vacia">
+        <td colspan="5" class="tabla-vacia">
           No se pudieron cargar las mesas de examen.
         </td>
       </tr>

@@ -1356,6 +1356,18 @@ body.modal-abierto {
   text-align: center;
 }
 
+/* Distingue contraturno solamente al mostrar todos los turnos. */
+.etiqueta-turno-horario-admin {
+  margin: 10px 0 7px;
+  padding: 5px 8px;
+  border-radius: 7px;
+  color: #114785;
+  background: #e6f0fd;
+  font-size: 0.74rem;
+  font-weight: 900;
+  text-align: center;
+}
+
 .tarjeta-bloque-horario-admin {
   padding: 10px;
   border-radius: 12px;
@@ -1868,6 +1880,32 @@ body.modal-abierto {
 
 .tabla-mesas-admin {
   min-width: 980px;
+}
+
+/* EETP495: listado compacto de Mesas de Examen, sin alterar otras tablas. */
+.tabla-mesas-admin th,
+.tabla-mesas-admin td {
+  padding: 10px 8px;
+  font-size: 0.79rem;
+  line-height: 1.35;
+}
+.tabla-mesas-admin .celda-mesa-cursos,
+.tabla-mesas-admin .celda-mesa-tribunal {
+  font-size: 0.75rem;
+  line-height: 1.3;
+}
+.tabla-mesas-admin .acciones-tabla {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 6px;
+}
+.tabla-mesas-admin .btn-mesa-icono {
+  width: 34px;
+  min-width: 34px;
+  height: 34px;
+  min-height: 34px;
+  padding: 0;
+  font-size: 0.84rem;
 }
 
 .estado-mesa-admin {
@@ -5006,5 +5044,62 @@ body {
     width: 100% !important;
     min-width: 0 !important;
     margin: 0 !important;
+  }
+}
+
+/* EETP495 - DISTRIBUCION DEL FORMULARIO DE MESAS - VERSION 2026-10-29 */
+/* Primera fila: Fecha, Hora, Periodo, Estado. Segunda: Espacio curricular.
+   Tercera: Tribunal. Cuarta: integrantes. Solo aplica a Mesas de Examen. */
+#formMesaExamenAdmin > .form-grid {
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: 16px;
+}
+#formMesaExamenAdmin .mesa-form-basico { grid-column: span 3; min-width: 0; }
+#formMesaExamenAdmin .mesa-form-espacio { grid-column: 1 / -1; min-width: 0; }
+#formMesaExamenAdmin .mesa-form-titulo { grid-column: 1 / -1; min-width: 0; }
+#formMesaExamenAdmin .mesa-form-integrante { grid-column: span 4; min-width: 0; }
+#formMesaExamenAdmin .campo-mesas-cursos-admin { grid-column: 1 / -1; }
+#formMesaExamenAdmin .mesa-form-titulo h4 {
+  margin: 4px 0 0;
+  color: var(--azul-oscuro);
+  font-size: 1rem;
+  font-weight: 800;
+}
+#formMesaExamenAdmin > .acciones > #btnGuardarMesaExamenAdmin,
+#formMesaExamenAdmin > .acciones > #btnCancelarMesaExamenAdmin {
+  width: 220px;
+  min-width: 220px;
+  height: 46px;
+  min-height: 46px;
+  flex: 0 0 220px;
+  box-sizing: border-box;
+  justify-content: center;
+}
+@media (max-width: 1100px) {
+  #formMesaExamenAdmin > .form-grid { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+  #formMesaExamenAdmin .mesa-form-basico { grid-column: span 3; }
+  #formMesaExamenAdmin .mesa-form-integrante { grid-column: span 2; }
+}
+@media (max-width: 760px) {
+  #formMesaExamenAdmin .mesa-form-integrante { grid-column: span 3; }
+}
+@media (max-width: 560px) {
+  #formMesaExamenAdmin > .form-grid { grid-template-columns: minmax(0, 1fr); }
+  #formMesaExamenAdmin .mesa-form-basico,
+  #formMesaExamenAdmin .mesa-form-integrante { grid-column: 1 / -1; }
+  #formMesaExamenAdmin > .acciones > #btnGuardarMesaExamenAdmin,
+  #formMesaExamenAdmin > .acciones > #btnCancelarMesaExamenAdmin {
+    width: 100%; min-width: 0; flex: 1 1 100%;
+  }
+}
+
+/* EETP495 - 5 CAMPOS EN FILA - PRUEBA REVERSIBLE 2026-10-29 */
+/* Solo escritorio amplio: Fecha | Hora | Periodo | Estado | Espacio curricular. */
+@media (min-width: 1280px) {
+  #formMesaExamenAdmin .mesa-form-basico {
+    grid-column: span 2;
+  }
+  #formMesaExamenAdmin .mesa-form-espacio {
+    grid-column: span 4;
   }
 }

@@ -2512,6 +2512,90 @@ function cargarPeriodosMesasExamenAdmin() {
   }
 }
 
+// TRIBUNALES EXAMINADORES: docentes activos registrados en el portal.
+const selectTribunalMesaAdmin = [1, 2, 3].map((numero) =>
+  document.getElementById(`tribunalMesaAdmin${numero}`),
+);
+let docentesTribunalMesaAdmin = [];
+
+function normalizarCorreoTribunalMesaAdmin(correo) {
+  return String(correo || "").trim().toLowerCase();
+}
+
+async function cargarDocentesTribunalMesaAdmin() {
+  selectTribunalMesaAdmin.forEach((select) => {
+    if (select) select.innerHTML = '<option value="">Cargando docentes...</option>';
+  });
+
+  try {
+    // Ambas consultas cumplen las reglas de lectura de Dirección, incluso
+    // si un docente tiene DOCENTE como rol adicional.
+    const consultas = await Promise.all([
+      getDocs(query(collection(db, "usuarios"), where("rol", "==", "DOCENTE"), where("estado", "==", "ACTIVO"))),
+      getDocs(query(collection(db, "usuarios"), where("roles", "array-contains", "DOCENTE"), where("estado", "==", "ACTIVO"))),
+    ]);
+    const porCorreo = new Map();
+    consultas.forEach((resultado) => resultado.forEach((documento) => {
+      const datos = documento.data();
+      const correo = normalizarCorreoTribunalMesaAdmin(datos.correo || documento.id);
+      const roles = Array.isArray(datos.roles) ? datos.roles : [];
+      if (!correo || String(datos.estado || "").toUpperCase() !== "ACTIVO" ||
+          !(String(datos.rol || "").toUpperCase() === "DOCENTE" || roles.includes("DOCENTE"))) return;
+      const nombre = String(datos.nombreCompleto || datos.nombre || correo).trim();
+      porCorreo.set(correo, { correo, nombre });
+    }));
+    docentesTribunalMesaAdmin = [...porCorreo.values()].sort((a, b) =>
+      a.nombre.localeCompare(b.nombre, "es", { sensitivity: "base" }),
+    );
+    selectTribunalMesaAdmin.forEach((select) => {
+      if (!select) return;
+      const actual = select.value;
+      select.replaceChildren(new Option("Seleccionar docente", ""));
+      docentesTribunalMesaAdmin.forEach((docente) =>
+        select.add(new Option(`${docente.nombre} — ${docente.correo}`, docente.correo)),
+      );
+      if (actual) select.value = actual;
+    });
+  } catch (error) {
+    console.error("No se pudieron consultar los docentes del tribunal:", error);
+    selectTribunalMesaAdmin.forEach((select) => {
+      if (select) select.innerHTML = '<option value="">No se pudieron cargar docentes</option>';
+    });
+  }
+}
+
+function obtenerTribunalMesaAdmin() {
+  return selectTribunalMesaAdmin.map((select) => {
+    const correo = normalizarCorreoTribunalMesaAdmin(select?.value);
+    const docente = docentesTribunalMesaAdmin.find((item) => item.correo === correo);
+    return docente ? { correo: docente.correo, nombre: docente.nombre } : null;
+  }).filter(Boolean);
+}
+
+function tribunalCompletoMesaAdmin(tribunal) {
+  return Array.isArray(tribunal) && tribunal.length === 3 &&
+    new Set(tribunal.map((item) => normalizarCorreoTribunalMesaAdmin(item.correo))).size === 3;
+}
+
+function seleccionarTribunalMesaAdmin(tribunal) {
+  const lista = Array.isArray(tribunal) ? tribunal : [];
+  selectTribunalMesaAdmin.forEach((select, i) => {
+    if (!select) return;
+    const correo = normalizarCorreoTribunalMesaAdmin(lista[i]?.correo);
+    // Un docente inactivo previamente asignado no se reemplaza silenciosamente.
+    if (correo && ![...select.options].some((op) => op.value === correo)) {
+      select.add(new Option(`${lista[i]?.nombre || correo} (no activo)`, correo));
+    }
+    select.value = correo;
+  });
+}
+
+function nombreTribunalMesaAdmin(mesa) {
+  const miembros = Array.isArray(mesa.tribunal) ? mesa.tribunal : [];
+  return miembros.length ? miembros.map((persona) =>
+    String(persona.nombre || persona.correo || "").trim()).filter(Boolean).join(" · ") : "Sin asignar";
+}
+
 async function prepararFormularioMesasExamenAdmin() {
   if (!formMesaExamenAdmin) return;
 
@@ -2523,6 +2607,7 @@ async function prepararFormularioMesasExamenAdmin() {
   await Promise.all([
     cargarCursosMesasExamenAdmin(),
     cargarEspaciosMesasExamenAdmin(),
+    cargarDocentesTribunalMesaAdmin(),
   ]);
 
   mostrarMensajeMesaExamenAdmin(
@@ -2568,6 +2653,7 @@ function limpiarFormularioMesaExamenAdmin() {
   if (!formMesaExamenAdmin) return;
 
   formMesaExamenAdmin.reset();
+  seleccionarTribunalMesaAdmin([]);
 
   if (mesaExamenAdminId) {
     mesaExamenAdminId.value = "";
@@ -2624,6 +2710,12 @@ async function guardarMesaExamenAdmin(event) {
 
   const espacio = obtenerEspacioSeleccionadoMesaAdmin();
   const cursos = obtenerCursosSeleccionadosMesaAdmin();
+  const tribunal = obtenerTribunalMesaAdmin();
+
+  if (!tribunalCompletoMesaAdmin(tribunal)) {
+    mostrarMensajeMesaExamenAdmin("Seleccioná tres docentes diferentes para el tribunal.", "error");
+    return;
+  }
 
   if (!fecha || !hora || !periodo || !estado || !espacio || !cursos.length) {
     mostrarMensajeMesaExamenAdmin(
@@ -2654,6 +2746,7 @@ async function guardarMesaExamenAdmin(event) {
     espacioTipo: espacio.tipo,
     cursos,
     cursosNombres: cursos.map((curso) => curso.nombre),
+    tribunal,
     actualizadoEn: serverTimestamp(),
     actualizadoPor: usuario.email || "",
   };
@@ -2859,7 +2952,7 @@ function renderizarMesasExamenAdmin(mesas) {
   if (!ordenadas.length) {
     cuerpoTablaMesasExamenAdmin.innerHTML = `
       <tr>
-        <td colspan="7" class="tabla-vacia">
+        <td colspan="8" class="tabla-vacia">
           No hay mesas de examen para mostrar.
         </td>
       </tr>
@@ -2889,8 +2982,9 @@ function renderizarMesasExamenAdmin(mesas) {
           <td>
             <strong>${escaparHtml(mesa.espacioNombre)}</strong>
           </td>
-          <td class="celda-mesa-cursos">${escaparHtml(cursos)}</td>
+          <td class="celda-mesa-cursos" title="${escaparHtml(cursos)}">${escaparHtml(cursos)}</td>
           <td>${escaparHtml(mesa.periodo)}</td>
+          <td class="celda-mesa-tribunal" title="${escaparHtml(nombreTribunalMesaAdmin(mesa))}">${escaparHtml(nombreTribunalMesaAdmin(mesa))}</td>
           <td>
             <span class="estado-mesa-admin ${estaPublicada ? "publicada" : "oculta"}">
               ${estaPublicada ? "PUBLICADA" : "OCULTA"}
@@ -2899,33 +2993,36 @@ function renderizarMesasExamenAdmin(mesas) {
           <td>
             <div class="acciones-tabla">
               <button
-                class="btn-tabla btn-editar"
+                class="btn-tabla btn-editar btn-mesa-icono"
                 type="button"
+                title="Editar mesa"
+                aria-label="Editar mesa"
                 data-accion-mesa="editar"
                 data-id-mesa="${escaparHtml(mesa.id)}"
               >
-                <i class="fa-solid fa-pen-to-square"></i>
-                Editar
+                <i class="fa-solid fa-pen-to-square" aria-hidden="true"></i>
               </button>
 
               <button
-                class="btn-tabla ${estaPublicada ? "btn-ocultar-mesa" : "btn-publicar-mesa"}"
+                class="btn-tabla btn-mesa-icono ${estaPublicada ? "btn-ocultar-mesa" : "btn-publicar-mesa"}"
                 type="button"
+                title="${estaPublicada ? "Ocultar mesa" : "Publicar mesa"}"
+                aria-label="${estaPublicada ? "Ocultar mesa" : "Publicar mesa"}"
                 data-accion-mesa="estado"
                 data-id-mesa="${escaparHtml(mesa.id)}"
               >
-                <i class="fa-solid ${estaPublicada ? "fa-eye-slash" : "fa-eye"}"></i>
-                ${estaPublicada ? "Ocultar" : "Publicar"}
+                <i class="fa-solid ${estaPublicada ? "fa-eye-slash" : "fa-eye"}" aria-hidden="true"></i>
               </button>
 
               <button
-                class="btn-tabla btn-eliminar-mesa"
+                class="btn-tabla btn-mesa-icono btn-eliminar-mesa"
                 type="button"
+                title="Eliminar mesa"
+                aria-label="Eliminar mesa"
                 data-accion-mesa="eliminar"
                 data-id-mesa="${escaparHtml(mesa.id)}"
               >
-                <i class="fa-solid fa-trash-can"></i>
-                Eliminar
+                <i class="fa-solid fa-trash-can" aria-hidden="true"></i>
               </button>
             </div>
           </td>
@@ -2945,7 +3042,7 @@ async function cargarMesasExamenAdmin() {
 
   cuerpoTablaMesasExamenAdmin.innerHTML = `
     <tr>
-      <td colspan="7" class="tabla-vacia">
+      <td colspan="8" class="tabla-vacia">
         Cargando mesas de examen...
       </td>
     </tr>
@@ -2966,7 +3063,7 @@ async function cargarMesasExamenAdmin() {
 
     cuerpoTablaMesasExamenAdmin.innerHTML = `
       <tr>
-        <td colspan="7" class="tabla-vacia">
+        <td colspan="8" class="tabla-vacia">
           No se pudieron cargar las mesas de examen.
         </td>
       </tr>
@@ -2993,6 +3090,7 @@ function editarMesaExamenAdmin(idMesa) {
   mesaExamenAdminPeriodo.value = mesa.periodo || "";
   mesaExamenAdminEstado.value = mesa.estado || "PUBLICADA";
   mesaExamenAdminEspacio.value = mesa.espacioId || "";
+  seleccionarTribunalMesaAdmin(mesa.tribunal);
 
   const idsCursos = Array.isArray(mesa.cursos)
     ? mesa.cursos.map((curso) => String(curso.id || ""))
@@ -3034,6 +3132,11 @@ async function cambiarEstadoMesaExamenAdmin(idMesa) {
     .trim()
     .toUpperCase();
   const nuevoEstado = estadoActual === "PUBLICADA" ? "OCULTA" : "PUBLICADA";
+
+  if (nuevoEstado === "PUBLICADA" && !tribunalCompletoMesaAdmin(mesa.tribunal)) {
+    await Swal.fire("Tribunal incompleto", "Editá la mesa y seleccioná tres docentes distintos antes de publicarla.", "warning");
+    return;
+  }
 
   const confirmacion = await Swal.fire({
     title: nuevoEstado === "PUBLICADA" ? "¿Publicar mesa?" : "¿Ocultar mesa?",

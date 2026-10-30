@@ -127,12 +127,9 @@ function filtrarInscripcionesPeriodoListadoSime(inscripciones, configuracion) {
     configuracion?.turnoExamen || "",
   );
 
-  /*
-   * Si la configuración coincide con registros activos, usamos solamente
-   * ese llamado. Si no coincide con ninguno, NO descartamos las inscripciones:
-   * usamos todas las activas. Esto evita el falso mensaje "Sin inscripciones"
-   * cuando hay registros válidos pero cambió la configuración del llamado.
-   */
+  // No mezclar inscripciones de llamados diferentes en el listado imprimible.
+  // Si faltan los datos del llamado, no se genera un listado ambiguo.
+  if (!cicloConfigurado || !turnoConfigurado) return [];
   const activasDelLlamado = activas.filter((inscripcion) => {
     if (
       cicloConfigurado &&
@@ -151,7 +148,7 @@ function filtrarInscripcionesPeriodoListadoSime(inscripciones, configuracion) {
     return true;
   });
 
-  return activasDelLlamado.length ? activasDelLlamado : activas;
+  return activasDelLlamado;
 }
 
 function agruparInscripcionesListadoSime(inscripciones) {
@@ -849,7 +846,7 @@ async function generarListadoSimePdfGestion() {
 
       await Swal.fire({
         title: "Sin inscripciones activas",
-        text: "No se encontraron inscripciones activas registradas en S.I.M.E.",
+        text: "No hay inscripciones activas para el llamado configurado.",
         icon: "info",
         confirmButtonText: "Aceptar",
       });

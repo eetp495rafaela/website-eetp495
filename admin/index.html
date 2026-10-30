@@ -1918,26 +1918,26 @@
             <input id="mesaExamenAdminId" type="hidden" />
 
             <div class="form-grid">
-              <div class="campo-formulario">
+              <div class="campo-formulario mesa-form-basico">
                 <label for="mesaExamenAdminFecha">Fecha *</label>
                 <input id="mesaExamenAdminFecha" type="date" required />
               </div>
 
-              <div class="campo-formulario">
+              <div class="campo-formulario mesa-form-basico">
                 <label for="mesaExamenAdminHora">Hora *</label>
                 <select id="mesaExamenAdminHora" required>
                   <option value="">Seleccionar hora</option>
                 </select>
               </div>
 
-              <div class="campo-formulario">
+              <div class="campo-formulario mesa-form-basico">
                 <label for="mesaExamenAdminPeriodo">Período *</label>
                 <select id="mesaExamenAdminPeriodo" required>
                   <option value="">Seleccionar período</option>
                 </select>
               </div>
 
-              <div class="campo-formulario">
+              <div class="campo-formulario mesa-form-basico">
                 <label for="mesaExamenAdminEstado">Estado *</label>
                 <select id="mesaExamenAdminEstado" required>
                   <option value="OCULTA" selected>OCULTA</option>
@@ -1945,14 +1945,29 @@
                 </select>
               </div>
 
-              <div class="campo-formulario campo-doble">
+              <div class="campo-formulario campo-doble mesa-form-espacio">
                 <label for="mesaExamenAdminEspacio">Espacio curricular *</label>
                 <select id="mesaExamenAdminEspacio" required>
                   <option value="">Cargando espacios curriculares...</option>
                 </select>
               </div>
 
-              <div class="campo-formulario campo-mesas-cursos-admin">
+                            <div class="campo-formulario titulo-tribunal-mesa-admin mesa-form-titulo">
+                <h4>Tribunal examinador</h4>
+              </div>
+              <div class="campo-formulario mesa-form-integrante">
+                <label for="tribunalMesaAdmin1">Integrante 1 *</label>
+                <select id="tribunalMesaAdmin1" required><option value="">Seleccionar docente</option></select>
+              </div>
+              <div class="campo-formulario mesa-form-integrante">
+                <label for="tribunalMesaAdmin2">Integrante 2 *</label>
+                <select id="tribunalMesaAdmin2" required><option value="">Seleccionar docente</option></select>
+              </div>
+              <div class="campo-formulario mesa-form-integrante">
+                <label for="tribunalMesaAdmin3">Integrante 3 *</label>
+                <select id="tribunalMesaAdmin3" required><option value="">Seleccionar docente</option></select>
+              </div>
+<div class="campo-formulario campo-mesas-cursos-admin">
                 <label>Cursos *</label>
                 <div id="mesaExamenAdminCursos" class="opciones-mesas-admin">
                   Cargando cursos...
@@ -2060,6 +2075,7 @@
                   <th>Espacio curricular</th>
                   <th>Cursos</th>
                   <th>Período</th>
+                  <th>Tribunal</th>
                   <th>Estado</th>
                   <th>Acciones</th>
                 </tr>
@@ -2067,7 +2083,7 @@
 
               <tbody id="cuerpoTablaMesasExamenAdmin">
                 <tr>
-                  <td colspan="7" class="tabla-vacia">
+                  <td colspan="8" class="tabla-vacia">
                     Todavía no se consultaron las mesas. Presioná “Actualizar
                     mesas” para cargarlas.
                   </td>
