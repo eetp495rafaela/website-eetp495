@@ -9786,3 +9786,91 @@ sobrescribir los commits nuevos de main.
 
 FIN ACTUALIZACIÓN 29/10/2026 – BLOQUE 70
 ======================================================================
+
+
+======================================================================
+71. AJUSTE RESPONSIVE PORTALES – 29/10/2026
+======================================================================
+
+FECHA: 29/10/2026
+MOTIVO: captura de celular en Soporte > Configuración del Portal
+mostró tarjetas/botones mucho más anchos que el viewport, texto
+cortado y desplazamiento horizontal no deseado. Se solicitó auditar
+responsividad de todos los portales internos.
+ESTADO: CSS PUBLICADO EN GITHUB, prueba de layout estático realizada;
+PENDIENTE validación con sesión real y Android/iOS.
+
+DIAGNÓSTICO
+-----------
+Soporte: la grilla .grid-configuracion-portal pasaba a 1fr con
+ancho mínimo implícito del elemento de grid. Tablas anchas
+en paneles de Solicitudes/Usuarios inactivos forzaban el
+único track móvil a un ancho aproximado de 804 px en pantalla
+de 390 px. Se cortaban botones de Backup, Pizarra y Limpieza.
+Alumno: fenómeno análogo en #examenes .sime-grid, con
+un track de ancho mínimo y tablas de Si.M.E. que expandían
+el ancho del documento hasta ~599 px en viewport 390.
+Docente: a 768 px Agenda Institucional seguía usando
+tres columnas con mínimos 320/150/280 px más separaciones,
+produciendo desbordamiento ~837 px.
+Gestión: no se detectó desbordamiento general en la prueba
+estática; las tablas anchas se desplazan dentro de su contenedor.
+
+CORRECCIONES CONCRETAS
+-----------------------
+1) assets/css/portal-admin.css – commit 16892ba:
+   - en celular (<=760px) grilla Configuración = minmax(0,1fr)
+     y min-width:0/max-width:100% en paneles;
+   - botones ocupar el ancho útil sin truncar texto;
+   - tablas con overflow-x:auto dentro del panel, no en body;
+   - inputs/selects/textarea contenidos en panel.
+2) assets/css/portal-alumno.css – commit dfda983:
+   - Si.M.E. en una columna minmax(0,1fr);
+   - paneles min-width:0; tablas con scroll horizontal interno;
+   - botones sin ancho mínimo forzado.
+3) assets/css/portal-docente.css – commit d3142a6:
+   - Agenda Institucional entre 701 y 950 px pasa a dos
+     columnas adaptables, con buscador ocupando fila completa;
+   - menos de 701 px conserva la regla previa de una columna.
+4) assets/css/portal-gestion.css: sin cambio (no se confirmó
+   defecto equivalente que justificara modificarlo).
+
+VALIDACIÓN
+----------
+Reproducción local con copia HTML/CSS del ZIP del proyecto
+y navegador Chromium sin iniciar sesión. La versión de las
+reglas afectadas fue contrastada con archivos vigentes en GitHub.
+Se ensayaron anchos de 320, 360, 390, 428, 600, 768,
+850 y 1024 px sobre los cuatro portales.
+Los ocho tamaños no mostraron overflow horizontal de la
+página tras el ajuste. Verificación específica de Admin
+390 px: botón Backup termina dentro del viewport, y tabla
+ancha conserva scroll interno.
+LIMITACIÓN: estas son pruebas de layout estático. No se
+probó login, datos inyectados por Firebase, tablas cargadas,
+modales en uso ni dispositivos físicos reales. No afirmar
+que TODOS los flujos responsivos están verificados.
+
+PENDIENTES DE QA
+----------------
+A) Captura real celular de Soporte > Configuración del Portal,
+   especialmente Backup/Pizarra/Limpiar asistencias y tablas.
+B) Alumno > Si.M.E. abierto/cerrado y Mis inscripciones,
+   tablas con resultados reales y grilla Aula sexto.
+C) Docente > Agenda Institucional a 768 px y en celular,
+   listas, horarios, mesas, modales.
+D) Gestión > Horarios, Si.M.E., Mesas y Situación de Asistencia
+   en celular y tablet con datos reales.
+E) Tablet horizontal, zoom y teclado virtual en formularios.
+F) Después de la validación, actualizar el estado CONFIRMADO
+   o registrar nuevos defectos; no tocar la lógica operativa
+   de Firestore, Si.M.E. ni Apps Script por ajustes visuales.
+
+SIN CAMBIOS EN DATOS NI BACKEND
+-------------------------------
+No se modificaron colecciones, reglas Firestore, inscripciones,
+cuentas, calendarios, horarios ni desplegados Apps Script.
+Se publicaron únicamente los tres archivos CSS indicados.
+
+FIN ACTUALIZACIÓN 29/10/2026 – BLOQUE 71
+======================================================================
