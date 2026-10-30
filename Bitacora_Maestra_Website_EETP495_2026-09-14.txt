@@ -9653,3 +9653,136 @@ servidor. ESTADO: PENDIENTE.
 
 FIN DE CONSOLIDACIÓN 29/10/2026.
 ======================================================================
+
+
+======================================================================
+70. ACTUALIZACIÓN – 29/10/2026 – IMPLEMENTACIÓN DIRECTA EN GITHUB
+======================================================================
+
+FECHA: 29/10/2026
+MOTIVO: desarrollar e incorporar de manera directa al repositorio
+los pendientes inmediatos acordados para Portal Docente,
+Si.M.E. cerrado y consulta de períodos trimestrales.
+AUTORIZACIÓN: el titular solicitó aplicar y publicar directamente
+los cambios, sin paso por parches manuales.
+ESTADO: IMPLEMENTADO EN GITHUB (no verificado con cuentas reales).
+PRECAUCIÓN: no se modificaron datos Firestore, Google Sheets, Drive,
+Apps Script ni reglas de seguridad. Los cambios frontend en main
+requieren comprobación visual y funcional en las cuentas autorizadas.
+
+70.1 PORTAL DOCENTE – HORARIOS POR MODALIDAD
+---------------------------------------------
+Commit e0b95e4 – assets/js/horarios-docente.js.
+Al pulsar "Ver mis horarios", el módulo consulta Aula,
+Taller y Educación Física. Cuando la consulta exitosa de una
+modalidad devuelve CERO bloques activos/autorizados, se oculta
+esa sección completa (incluido su título). Si hay bloques,
+la sección permanece visible. Ante error de consulta se conserva
+visible el mensaje, para evitar confundir problemas de permisos
+con ausencia real de clases.
+Esto incluye bloques de Taller/EF por reemplazo vigente según la
+lógica anterior de cada carga. No se modificaron los horarios
+ni los registros reales. Pendiente prueba con docentes que
+tienen una, dos, tres o ninguna modalidad, y reemplazantes.
+
+70.2 PORTAL ALUMNO – Si.M.E. CERRADO
+-------------------------------------
+Commits 46d7d58, 18cb5eb, e152f64.
+Archivos alumnos/index.html, assets/js/sime-alumno.js,
+assets/css/portal-alumno.css.
+Se mejoró el aviso con colores legibles y enlace al
+Calendario Escolar; el formulario y sus instrucciones aparecen
+solo cuando la configuración Si.M.E. informa abierto.
+Mientras esté cerrado, no invita a completar campos. "Mis
+inscripciones" continúa disponible. Si el backend no responde,
+la inscripción se mantiene bloqueada y se muestra estado de
+consulta fallida sin afirmar que el período esté cerrado.
+Pendiente verificar visual escritorio/móvil, llamada backend
+ABIERTO/CERRADO, permisos y registros previos. La validación
+definitiva de inscripción debe existir igualmente en Apps Script.
+
+70.3 SOPORTE – PERÍODOS DE ASISTENCIA
+--------------------------------------
+Commits 0de403e, af51d98, b6d6b20.
+Archivos assets/js/admin.js, admin/index.html y
+assets/css/portal-admin.css.
+Se agregó margen superior a la sección de configuración para
+separarla del panel anterior, y un resumen legible de los
+tres trimestres efectivamente configurados para el ciclo
+lectivo seleccionado. La lectura ya existía y se hace por
+getDoc(configuracion_periodos/{cicloLectivo}); tras guardar
+se actualiza el resumen en pantalla. No se introducen nuevas
+escrituras ni nuevas colecciones.
+IMPORTANTE: Firestore no permite LISTAR toda la colección
+configuracion_periodos. Se consulta un ciclo por su ID, no
+todos los años de forma masiva.
+
+70.4 GESTIÓN – CONSULTA DE PERÍODOS
+------------------------------------
+Commits 2dc0a1c, da75bb4, ac71d16.
+Archivos gestion/index.html, assets/js/gestion.js y
+assets/css/portal-gestion.css.
+Nueva tarjeta "Períodos de asistencia registrados" dentro
+de Situación de Asistencia, selector del ciclo lectivo y botón
+Consultar períodos. Muestra inicio y fin de tres trimestres
+para el ciclo indicado. Solo lectura (getDoc), sin botones
+de guardar ni modificación de fechas. Las reglas versionadas
+de Firestore autorizan lectura a esGestionInstitucional()
+y reservan escritura a esSoporte().
+Pendiente probar con roles Dirección, Secretaría, Preceptoría
+y Asistente Administrativo, y verificar que las reglas
+desplegadas coincidan con las del repositorio.
+
+70.5 ESTADO DE ACCESOS Y BLOQUEO PARA Si.M.E. TRIBUNALES
+--------------------------------------------------------
+PENDIENTE: la lista de inscriptos por mesa del tribunal.
+NO se implementó ni publicó un endpoint alternativo.
+Se pudo localizar la planilla de referencia S.I.M.E. en
+una cuenta conectada de Google Drive, pero eso no equivale
+a disponer de la versión actual de Apps Script ni de su
+despliegue, propiedades y funciones de autorización.
+Se hallaron referencias históricas a backends previos,
+pero no se deben usar como fuente actual sin verificación.
+Para implementar se requiere:
+- Código completo de Apps Script actualmente desplegado.
+- Confirmación de versión de Web App y autenticación Firebase.
+- Correspondencia de inscripción a mesa/espacio, curso, año,
+  turno y período.
+- Validación servidor de docente ACTIVO, correo del integrante
+  designado y mesa PUBLICADA; datos mínimos.
+- Pruebas de que un docente NO puede ver otras mesas.
+- Backup y redeploy controlado antes de activar la función.
+No alterar la planilla de inscripciones en pruebas.
+ESTADO: PENDIENTE por seguridad y falta de código vigente.
+
+70.6 VERIFICACIÓN Y PUBLICACIÓN
+--------------------------------
+Se confirmaron lecturas de los archivos actualizados en main
+mediante el conector GitHub y presencia de los selectores,
+funciones y referencias agregadas. No se pudo realizar test
+E2E autenticado ni verificación del sitio productivo mediante
+navegador en esta sesión. No declarar QA funcional terminada.
+La cuenta local del usuario deberá ejecutar:
+  cd ~/Website-EETP495
+  git pull --ff-only origin main
+  git status
+antes de modificar o volver a hacer push, para evitar
+sobrescribir los commits nuevos de main.
+
+70.7 PRÓXIMOS PASOS
+-------------------
+1. Probar horarios del Docente según modalidades (incluye
+   reemplazos) y horarios de sexto en contraturno.
+2. Probar avisos Si.M.E. abierto/cerrado y permisos anteriores
+   con una cuenta Alumno, en PC y celular.
+3. Verificar períodos de asistencia configurados en Soporte
+   y lectura por los diferentes roles de Gestión.
+4. Obtener versión desplegada de Apps Script Si.M.E. y
+   diseñar/listar únicamente inscriptos de mesa propia.
+5. Validar publicación efectiva en el dominio institucional,
+   distinta del push correcto a GitHub.
+6. Registrar resultados de pruebas, capturas, incidencias
+   y SHA más reciente de main antes de cerrar estos pendientes.
+
+FIN ACTUALIZACIÓN 29/10/2026 – BLOQUE 70
+======================================================================
