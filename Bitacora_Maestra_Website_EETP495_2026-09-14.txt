@@ -10150,3 +10150,44 @@ sitio cuando corresponda.
 
 FIN ACTUALIZACIÓN 30/10/2026 — BLOQUE 73
 ======================================================================
+
+
+======================================================================
+74. CONFIRMACIÓN DE REEMPLAZOS DOCENTES EN GESTIÓN — 30/10/2026
+======================================================================
+
+FECHA: 30/10/2026
+MOTIVO: el titular informó que ya realizó pruebas funcionales
+de Reemplazos Docentes desde el Portal Gestión y que todo
+funciona correctamente. Evitar reiterar tareas ya comprobadas.
+
+ESTADO: CONFIRMADO POR EL TITULAR; PENDIENTE FUNCIONAL CERRADO.
+
+ALCANCE:
+- Registro/consulta/finalización de reemplazos desde Portal
+  Gestión: funcionalidad existente y probada satisfactoriamente
+  por el titular, sin necesidad de nuevo desarrollo.
+- El antiguo aviso sobre errores 429 de Firestore no constituye
+  una incidencia activa reportada en esas pruebas. NO se afirma
+  que todos los escenarios de cuota estén auditados.
+- Sin modificación de código, Firestore, usuarios ni reglas en
+  esta actualización; se registra exclusivamente la confirmación.
+
+ACTUALIZACIÓN DE PRIORIDADES:
+- El punto [P6] de la sección 73.2 ya NO es un pendiente
+  funcional. Queda SUPERADO por esta prueba del titular.
+- Mantener la auditoría GENERAL de permisos y cuotas Firestore
+  como mantenimiento preventivo, sin atribuir defectos concretos
+  a Reemplazos.
+- Próximo trabajo recomendado: planificación del backup TOTAL,
+  verificación de los medios de recuperación y ensayo de
+  restauración en entorno aislado; todo bajo autorización.
+- Otros pendientes vigentes: seguridad por roles, Google
+  Contacts multicuenta, preparación 2027, limpieza entre
+  ciclos, decisiones futuras Si.M.E. y verificación Google Sites.
+
+EVIDENCIA: confirmación explícita del titular en conversación.
+No se ejecutaron pruebas nuevas ni lecturas de Firestore.
+
+FIN ACTUALIZACIÓN 30/10/2026 — BLOQUE 74
+======================================================================
