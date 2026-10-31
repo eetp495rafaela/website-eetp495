@@ -566,7 +566,7 @@ async function verInscriptosMesaDocente(idMesa, boton) {
     const contenido = inscriptos.length
       ? `<div class="contenedor-inscriptos-tribunal-docente">
           <table class="tabla-inscriptos-tribunal-docente">
-            <thead><tr><th>Apellido y nombre</th><th>Año en que cursó</th></tr></thead>
+            <thead><tr><th scope="col">Apellido y nombre</th><th scope="col">Año en que cursó</th></tr></thead>
             <tbody>${inscriptos.map((inscripto) => `
               <tr>
                 <td>${escaparHtmlDocente(inscripto.nombreCompleto)}</td>
@@ -579,7 +579,8 @@ async function verInscriptosMesaDocente(idMesa, boton) {
     await window.Swal.fire({
       title: "Inscriptos",
       html: contenido,
-      width: "min(640px, calc(100vw - 24px))",
+      customClass: { popup: "modal-inscriptos-tribunal-docente" },
+      width: "min(680px, calc(100vw - 28px))",
       confirmButtonText: "Cerrar",
     });
   } catch (error) {
