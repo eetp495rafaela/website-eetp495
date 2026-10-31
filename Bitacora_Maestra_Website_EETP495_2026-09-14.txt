@@ -9974,3 +9974,179 @@ y permisos de Si.M.E. Ninguna regla ni documento Firebase se tocó.
 
 FIN DE DIAGNÓSTICO 30/10/2026 – BLOQUE 72
 ======================================================================
+
+
+======================================================================
+73. CIERRE DE JORNADA Y ACTUALIZACIÓN DE PENDIENTES — 30/10/2026
+======================================================================
+
+FECHA: 30/10/2026
+MOTIVO: conciliar código vigente de main, desplegados externos,
+capturas y pruebas funcionales confirmadas por el titular; evitar
+repetir desarrollos y actualizar los pendientes del bloque 68.
+ESTADO: CONSOLIDACIÓN CONFIRMADA EN GITHUB Y POR PRUEBAS
+REPORTADAS, CON SALVEDADES EXPLÍCITAS DE QA.
+CRITERIO: esta sección ACTUALIZA estados anteriores de bloques
+68, 70, 71 y 72; se mantiene el historial completo sin reescribirlo.
+
+73.1 FUNCIONES CERRADAS/VALIDADAS
+--------------------------------
+[A] Si.M.E. — UNIFICACIÓN DE TALLER 1.º/2.º
+- El titular recuperó la fuente real del Apps Script y realizó
+  respaldo antes de actualizar el proyecto existente.
+- Modificación del backend para ofrecer una sola materia Taller
+  en 1.º y 2.º, con IDs TALLER_EXAMEN_1/2, manteniendo las áreas
+  individuales en los demás módulos de la escuela.
+- Se probó obtener_materias_por_curso para ambos años y se
+  verificó una sola opción Taller en Portal Alumno (producción).
+- No generalizar el resultado a toda la generación de PDF ni a
+  todas las vías de inscripción sin pruebas adicionales.
+ESTADO: CONFIRMADA unificación visual/backend de materias.
+La sección 72 queda superada en este punto.
+
+[B] TRIBUNALES Y NÓMINA DE INSCRIPTOS
+- Mesas de examen con tribunal de tres docentes: funcionando.
+- Se incorporó en Portal Docente el botón "Ver inscriptos" por
+  cada mesa PUBLICADA con tribunal explícito que contiene
+  el correo de la cuenta docente. Consulta a demanda.
+- El servidor Apps Script valida token, rol/cuenta y membresía
+  de mesa, y devuelve exclusivamente apellido y nombre y
+  año calendario en que cursó la materia; no exponer DNI.
+- Se desplegó nueva versión de la Web App existente de Si.M.E.
+  mediante acción del titular; no se creó otro backend paralelo.
+- Prueba REAL positiva con inscripción de alumno de prueba:
+  mesa de Matemática de 1.º (año cursado 2025), y Taller
+  de 1.º (años cursados 2023 y 2025). UI funcional aprobada.
+- Incidencia detectada: la columna TURNO_EXAMEN de Sheets se
+  interpretaba como Date; "noviembre 2026" se leía como
+  Sun Nov 01 2026. Diagnóstico solo lectura: cuatro
+  inscripciones ACTIVAS de ciclo 2026, cero coincidencias de
+  llamado antes del ajuste. Backend corregido para normalizar
+  ambos formatos; el titular comprobó nóminas reales después.
+- Ventana de inscriptos mejorada: dos columnas separadas, tabla
+  con encabezado amarillo, filas espaciadas/alternadas,
+  ventana responsive y botón Cerrar institucional.
+- Commits frontend relevantes:
+  c0cac5a, ed87f02 (botón y vinculación con Apps Script);
+  9def4ef (CSS autónomo del modal);
+  b9673a6, 9377ea6 (modal y carga de CSS).
+- Archivos: docentes/index.html, assets/js/mesas-docente.js,
+  assets/css/modal-inscriptos-tribunal-docente.css.
+- No se editaron filas de inscripciones durante la corrección.
+ESTADO: CONFIRMADA funcionalidad y presentación positiva.
+QA ADICIONAL PENDIENTE: probar denegación efectiva desde OTRA
+cuenta docente que no integra el tribunal y una mesa OCULTA;
+validar acceso negativo en servidor, no solo el ocultamiento
+del botón. No confundir con reabrir el desarrollo ya aprobado.
+
+[C] HORARIOS, AVISOS Y PERÍODOS
+- Horarios de sexto en contraturno y grilla Aula: confirmado
+  por pruebas del titular. Corrección de desborde de grilla
+  sexto en teléfono, manteniendo scroll horizontal SOLO en la
+  grilla, no en la página. Commits 6fbcacd, 3156897.
+- Portal Docente / Mis Horarios: carga a demanda mediante clic,
+  caché de sesión y actualización manual; evita consulta
+  automática a los horarios al abrir el portal. Commits
+  e90266f, f51d5c0; ESTADO IMPLEMENTADA EN CÓDIGO,
+  pendiente comprobar específicamente el flujo de autenticación,
+  actualización manual y modalidades con una cuenta docente real.
+- Inscripciones Si.M.E. cerradas: aviso corregido y confirmado.
+- Períodos de asistencia: titular probó Soporte y Gestión;
+  lectura correcta de trimestres del ciclo 2027. Confirmado
+  en perfiles utilizados; otros perfiles administrativos pueden
+  requerir QA de permisos por separado.
+- Tribunales de tres integrantes y horarios de sexto: confirmados
+  por el titular. No crear tareas de desarrollo duplicadas.
+
+[D] RESPONSIVE — PORTALES Y SOporte
+- El titular informó que revisó los responsive de los portales
+  y confirmó su funcionamiento como OK. No continuar auditoría
+  global salvo incidencia nueva y reproducible.
+- Soporte > Estudiantes: botones "Importar cursos" y
+  "Ver estudiantes" con espacio vertical y eliminación del
+  espacio vacío de "Finalización de estudiantes con Cursada
+  Completa"; corrección publicada en commits 2b4b6f8 y
+  b8a5ac9. El titular confirmó su presentación en celular.
+- Portal Alumno > sexto: corrección móvil confirmada por el
+  titular directamente en su teléfono.
+ESTADO: CONFIRMADO POR USUARIO. No reabrir QA responsive global
+sin solicitud expresa o defecto nuevo.
+
+73.2 PENDIENTES VIGENTES PRIORIZADOS
+------------------------------------
+[P6] REEMPLAZOS DOCENTES EN GESTIÓN — PRIORIDAD OPERATIVA
+El código ACTUAL de assets/js/reemplazos-docentes-gestion.js ya
+incluye registrar, consultar y finalizar, así como restricciones
+de roles; NO duplicar desarrollo. Falta QA funcional con roles
+Dirección, Secretaría y Asistente Administrativo, y comprobar
+que PRECEPTORÍA no pueda administrar. Validar cuotas Firestore
+y evitar lecturas masivas; antecedente de 429. Si hay errores,
+revisar consultas/índices/reglas antes de modificar.
+
+[P8] BACKUP Y RESTAURACIÓN COMPLETA — PRIORIDAD ALTA
+Planificar respaldo integral y ENSAYO de restauración de GitHub,
+Firebase Auth/Firestore, reglas y configuración, Apps Script
+(fuente, implementaciones y propiedades), Si.M.E. Sheets/Drive,
+permisos PDF, contactos, calendarios y demás recursos. No
+ejecutar restauración sobre producción sin autorización.
+
+[P7] CONTACTOS MULTICUENTA — PENDIENTE POR DISPONIBILIDAD
+Mantener sincronización existente de la cuenta Soporte.
+Cuando estén disponibles las cuentas institucionales de
+Dirección, Secretaría, Preceptoría y Asistente Administrativo,
+adaptar/verificar la sincronización diaria de Google Contacts
+con sus etiquetas. No añadir departamentos ni envíos masivos
+desde el portal (decisión institucional anterior).
+
+[P11] PREPARACIÓN DEL CICLO 2027 — EN PLANIFICACIÓN
+Fechas trimestrales del ciclo 2027 ya están registradas y
+consultables (NO repetir carga). Continúan la transición de
+curso/egreso, actualización de asignaciones y horarios,
+calendario institucional, contactos, permisos y formación.
+Validar cada etapa antes de cambios en datos reales.
+
+[P13] AUDITORÍA DE SEGURIDAD — PENDIENTE ESPECÍFICO
+Probar roles efectivos y reglas desplegadas Firestore, App Check,
+lectura de listas de alumnos por curso, acceso de reemplazantes,
+restricciones de tribunal y protecciones del backend Si.M.E.
+En particular, ejecutar prueba negativa real del endpoint
+"listar_inscriptos_mesa_docente" para no integrantes y mesas
+no publicadas. No confundir filtros cliente con autorización.
+
+[P10] LIMPIEZA ENTRE LLAMADOS Y CICLOS
+Revisar con respaldo y criterios explícitos el borrado de
+documentos/inscripciones/archivos en Firestore, Sheets y Drive.
+Prohibido probar borrados masivos con datos de producción.
+
+[P9] MEJORAS FUTURAS Si.M.E. POR DEFINIR
+QR de verificación de permisos e inscripciones fuera de plazo:
+pendientes de decisión institucional. No asumir reglas.
+
+[P12] GOOGLE SITES ANTIGUO / DESBLOQUEO NETBOOKS
+Se detectó información que deriva consultas al correo del
+soporte escolar. Debe verificarse si ya se corrigió para
+remitir al portal oficial de desbloqueo; NO registrar como
+resuelto sin prueba. Planificar retiro/migración del antiguo
+sitio cuando corresponda.
+
+73.3 REGLAS DE CONTINUIDAD
+--------------------------
+1. Trabajar contra HEAD real de main y Apps Script desplegado,
+   no contra ZIP histórico. Identificar estado LOCAL antes de
+   commit/push: git status --short --branch y git pull --ff-only.
+2. Para Firestore/Sheets, priorizar consultas explícitas bajo
+   demanda y de alcance acotado; cuota de Firestore limitada.
+3. Los respaldos deben conservarse fuera del repo si contienen
+   secretos, documentos o datos personales.
+4. Cambios de producción o nuevos permisos se acuerdan antes.
+5. Distinguir confirmación visual, pruebas positivas y controles
+   negativos de autorización. Las capturas de usuarios de prueba
+   no se publican en bitácoras con datos identificatorios.
+6. La fuente Apps Script Si.M.E. está en el proyecto externo y
+   en las copias hechas por el titular; la versión y los IDs
+   reales de implementación no se inspeccionaron desde GitHub.
+7. Próximo trabajo recomendado: Reemplazos en Gestión (lectura,
+   roles y cuota), o respaldo integral como medida preventiva.
+
+FIN ACTUALIZACIÓN 30/10/2026 — BLOQUE 73
+======================================================================
