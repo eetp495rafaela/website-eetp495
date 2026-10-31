@@ -10191,3 +10191,106 @@ No se ejecutaron pruebas nuevas ni lecturas de Firestore.
 
 FIN ACTUALIZACIÓN 30/10/2026 — BLOQUE 74
 ======================================================================
+
+
+======================================================================
+75. NUEVO PERMISO DE EXAMEN S.I.M.E. — CIERRE 30/10/2026
+======================================================================
+
+FECHA: 30/10/2026
+MOTIVO: rediseño del permiso de examen A4 para mejorar la
+identidad institucional, legibilidad e impresión, sin alterar
+los datos ni el circuito de inscripción vigente.
+
+ESTADO: DISEÑO APROBADO; PRUEBA VISUAL REAL CONFIRMADA POR
+EL TITULAR TRAS CORRECCIÓN DE IMPRESIÓN.
+DESPLIEGUE DE ÚLTIMA CORRECCIÓN DE COLORES EN WEB APP:
+NO CONFIRMADO EXPLÍCITAMENTE; VERIFICAR ANTES DE CERRAR
+LA PUBLICACIÓN PARA NUEVAS INSCRIPCIONES.
+
+75.1 DISEÑO APROBADO
+--------------------
+- Permiso A4 con escudo, encabezado azul oscuro y línea dorada,
+  título institucional, turno del llamado y fecha de emisión.
+- Aviso de presentación obligatoria con DNI; texto dirigido a
+  Dirección; datos del alumno (apellido/nombre, DNI,
+  curso de origen y año calendario en que cursó la materia).
+- Tabla únicamente con los espacios curriculares inscriptos,
+  sin filas vacías, y columnas para fecha del examen,
+  espacio curricular, calificación y firma de presidencia.
+- Recordatorio sobre proceso evaluativo; firmas de padre/madre/
+  tutor y del estudiante; pie de página institucional.
+- Se probó visualización A4 con dos y hasta doce materias.
+- Conservar los datos originales, la lógica de inscripciones,
+  permisos existentes, vínculo de archivo en Drive y limpieza
+  de permisos al finalizar el período.
+- Hoja PLANTILLA_PERMISO de Google Sheets se conserva intacta
+  como respaldo; el generador nuevo usa HTML propio y PDF.
+- No crear una planilla adicional ni introducir migraciones.
+
+75.2 CAMBIOS DE APPS SCRIPT Y CORRECCIÓN DE COLORES
+--------------------------------------------------
+- El titular respaldó y reemplazó Código.gs del proyecto
+  S.I.M.E. - Backend Inscripciones y actualizó la
+  implementación existente de la Web App para nuevo diseño.
+- En prueba real, el PDF exportado por Apps Script mostró
+  encabezado blanco y perdió fondos de colores que sí se
+  apreciaban en el modelo inicial.
+- Diagnóstico: diferencia entre motores/opciones de impresión;
+  se reprodujo localmente la omisión de fondos y se comprobó
+  la corrección con color de impresión forzado.
+- Corrección indicada dentro de <style> en
+  obtenerBlobNuevoPermisoSime:
+  * {
+    box-sizing: border-box;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+- Se recomendó ejecutar generarPermisoPdfPruebaSime, que
+  crea un PDF ficticio en Drive SIN crear una inscripción,
+  para verificar el resultado antes de desplegar.
+- El titular confirmó: "Perfecto ahora!" tras esta corrección.
+  Se toma como confirmación visual de PDF corregido, sin
+  presumir que la versión final de Web App fue desplegada.
+- No modificar ni eliminar inscripciones, permisos reales o
+  reglas Firebase para ajustar esta presentación.
+- Los archivos de Apps Script NO están incluidos en este repo
+  GitHub; conservar backups locales del script, diff y ZIP.
+- Paquetes entregados en la sesión:
+  SIME_Nuevo_Permiso_SinQR_2026-10-30.zip
+  SIME_Correccion_Colores_Permiso_2026-10-30.zip
+  (Copias locales del usuario; no asumir rutas sincronizadas.)
+
+75.3 QR — DECISIÓN INSTITUCIONAL
+--------------------------------
+- Dirección NO aprobó por ahora QR de autenticidad.
+- ESTADO: EN PAUSA / SIN IMPLEMENTAR.
+- El nuevo PDF conserva solamente un espacio visual vacío
+  reservado para QR futuro. No generar códigos ni tokens,
+  no habilitar URL de verificación ni guardar registros extra.
+- Si Dirección decide retomar la idea, acordar primero alcance,
+  privacidad y verificación real de inscripción/turno vigente.
+- Al finalizar el llamado se eliminan inscripciones y
+  permisos para liberar Drive; NO guardar auditoría histórica
+  ni agregar almacenamiento permanente sin nueva autorización.
+
+75.4 CIERRE Y PRÓXIMA SESIÓN
+----------------------------
+- Objetivo principal logrado: nuevo diseño aprobado y aspecto
+  de impresión corregido, según prueba del titular.
+- Verificar sólo si la última corrección CSS se incluyó en una
+  nueva versión de la implementación EXISTENTE de Apps Script.
+  Si aún no, desplegarla cuando el titular retome el trabajo.
+- Si se generó un PDF ficticio para la prueba, eliminar ese
+  archivo de Drive manualmente cuando sea conveniente,
+  sin tocar inscripciones reales.
+- Sin cambios requeridos en GitHub para esta mejora de PDF;
+  la Bitácora se actualiza solo como documentación.
+- La laptop se sincroniza por git pull --ff-only origin main;
+  dicho comando NO actualiza ni descarga Código.gs de Apps
+  Script, administrado independientemente.
+- Próximo eje, a elección del titular: plan de backup integral,
+  control de seguridad por roles o preparación ciclo 2027.
+
+FIN ACTUALIZACIÓN 30/10/2026 — BLOQUE 75
+======================================================================
