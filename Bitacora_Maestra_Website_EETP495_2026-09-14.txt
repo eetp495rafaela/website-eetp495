@@ -10294,3 +10294,46 @@ LA PUBLICACIÓN PARA NUEVAS INSCRIPCIONES.
 
 FIN ACTUALIZACIÓN 30/10/2026 — BLOQUE 75
 ======================================================================
+
+
+======================================================================
+76. CONFIRMACIÓN DE DESPLIEGUE DEL PERMISO Si.M.E. — 30/10/2026
+======================================================================
+
+FECHA: 30/10/2026
+MOTIVO: el titular confirmó explícitamente que actualizó
+también la implementación existente de Google Apps Script
+tras la corrección de los colores del nuevo permiso PDF.
+
+ESTADO: IMPLEMENTACIÓN ACTUALIZADA — CONFIRMADO POR EL TITULAR.
+
+ACTUALIZACIÓN RESPECTO DEL BLOQUE 75:
+- La advertencia «despliegue de última corrección de colores
+  no confirmado» del apartado 75 queda SUPERADA.
+- El backend Si.M.E. actual contiene la modificación visual
+  para conservar encabezado azul, fondo dorado y colores de
+  impresión del permiso A4.
+- El titular confirmó la actualización de la implementación
+  existente, sin crear otro Web App ni cambiar el circuito
+  de inscripción o el almacenamiento de permisos.
+- QR: sigue EN PAUSA por decisión de Dirección; únicamente
+  se mantiene el espacio visual reservado, sin generar QR.
+- No se modificó GitHub del portal, Firestore, Drive ni
+  inscripciones en esta actualización de bitácora.
+- La confirmación del despliegue proviene del titular.
+  No se verificó una nueva inscripción/descarga posterior
+  directamente desde la implementación web en esta sesión.
+
+SINCRONIZACIÓN LOCAL:
+  cd ~/Website-EETP495
+  git pull --ff-only origin main
+  git status --short --branch
+
+Recordatorio: Git sincroniza el repositorio y la Bitácora,
+NO el Código.gs de Apps Script, gestionado por separado.
+
+CIERRE DE JORNADA: sin acciones obligatorias adicionales
+de Si.M.E.; se retoman pendientes generales en otra sesión.
+
+FIN ACTUALIZACIÓN 30/10/2026 — BLOQUE 76
+======================================================================
