@@ -15,6 +15,7 @@ import {
   getDoc,
   getDocFromServer,
   getDocs,
+  getDocsFromServer,
   getFirestore,
   query,
   where,
@@ -67,6 +68,9 @@ const mensajeContactos = document.getElementById(
 );
 const btnSincronizarGoogleContacts = document.getElementById(
   "btnSincronizarGoogleContacts",
+);
+const btnGenerarAgendaContactos = document.getElementById(
+  "btnGenerarAgendaContactosInstitucionales",
 );
 
 let contactosCargados = [];
@@ -431,6 +435,129 @@ async function cargarContactos() {
 
 
 
+
+/* Agenda institucional alfabética: consulta en tiempo real, sin guardar PDF. */
+function escaparHtmlAgenda_(valor) {
+  return String(valor ?? "").replace(/[&<>"']/g, (caracter) => ({
+    "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;",
+  })[caracter]);
+}
+
+function letraAgenda_(texto) {
+  const letra = String(texto || "").trim().charAt(0).toLocaleUpperCase("es");
+  if (letra === "Ñ") return "Ñ";
+  const base = letra.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  return /^[A-Z]$/.test(base) ? base : "#";
+}
+
+function construirHtmlAgenda_(contactos) {
+  const comparar = new Intl.Collator("es", { sensitivity: "base", numeric: true });
+  const ordenados = [...contactos].sort((a, b) =>
+    comparar.compare(a.nombreCompleto, b.nombreCompleto) ||
+    comparar.compare(a.correo, b.correo),
+  );
+  const grupos = new Map();
+  ordenados.forEach((contacto) => {
+    const letra = letraAgenda_(contacto.nombreCompleto);
+    if (!grupos.has(letra)) grupos.set(letra, []);
+    grupos.get(letra).push(contacto);
+  });
+  const contenido = [...grupos.entries()]
+    .sort(([a], [b]) => comparar.compare(a, b))
+    .map(([letra, items]) =>
+      '<section class="grupo"><h2>' + escaparHtmlAgenda_(letra) + '</h2>' +
+      items.map((contacto) =>
+        '<div class="contacto"><strong>' + escaparHtmlAgenda_(contacto.nombreCompleto) +
+        '</strong><span>' + escaparHtmlAgenda_(contacto.correo) + '</span></div>'
+      ).join("") + '</section>'
+    ).join("");
+  const logo = new URL("../assets/img/logo.png", window.location.href).href;
+  const fecha = new Intl.DateTimeFormat("es-AR", {
+    day: "2-digit", month: "2-digit", year: "numeric",
+    hour: "2-digit", minute: "2-digit",
+  }).format(new Date());
+  const estilos = [
+    ":root{color-scheme:light}*{box-sizing:border-box}",
+    "body{font-family:Arial,Helvetica,sans-serif;margin:0;color:#193954;background:#edf2f8}",
+    ".barra{background:#073683;color:white;padding:13px 20px;display:flex;justify-content:space-between;align-items:center;gap:15px}",
+    ".barra button{background:white;color:#073683;border:0;border-radius:8px;padding:10px 14px;font-weight:700;cursor:pointer}",
+    "main{background:white;max-width:210mm;margin:22px auto;padding:17mm 15mm;box-shadow:0 4px 24px #0002}",
+    "header{display:flex;align-items:center;gap:13px;padding-bottom:15px;border-bottom:2px solid #0b4c95;margin-bottom:15px}",
+    "header img{height:50px;width:50px;object-fit:contain}",
+    "h1{font-size:19px;color:#073683;margin:0 0 4px}",
+    ".subtitulo{font-size:10.5px;line-height:1.6;color:#576f84;margin:0}",
+    ".listado{column-count:2;column-gap:10mm}",
+    "h2{font-size:18px;color:#105c9d;border-bottom:1px solid #ccdeec;margin:13px 0 6px;padding-bottom:4px;break-after:avoid}",
+    ".grupo{break-inside:auto}.contacto{break-inside:avoid;padding:5px 0 7px;border-bottom:1px solid #e6edf4}",
+    ".contacto strong{display:block;font-size:11px;line-height:1.4;overflow-wrap:anywhere}",
+    ".contacto span{display:block;font-size:9.4px;color:#476178;line-height:1.4;overflow-wrap:anywhere}",
+    "footer{margin-top:18px;border-top:1px solid #ccdeec;padding-top:9px;color:#657d91;font-size:9px}",
+    "@page{size:A4 portrait;margin:12mm}",
+    "@media print{body{background:white}.barra{display:none}main{max-width:none;margin:0;padding:0;box-shadow:none}.listado{column-count:2}header{break-after:avoid}}",
+    "@media screen and (max-width:560px){.barra{flex-direction:column;align-items:stretch}main{margin:10px;padding:20px}.listado{column-count:1}}",
+  ].join("");
+  return [
+    '<!doctype html><html lang="es"><head><meta charset="utf-8">',
+    '<meta name="viewport" content="width=device-width,initial-scale=1">',
+    '<title>Agenda institucional | E.E.T.P. N.º 495</title><style>' + estilos + '</style></head><body>',
+    '<div class="barra"><strong>Agenda institucional - Vista imprimible</strong>',
+    '<button type="button" onclick="window.print()">Imprimir / Guardar PDF</button></div>',
+    '<main><header><img src="' + escaparHtmlAgenda_(logo) + '" alt="Escudo E.E.T.P. N.º 495">',
+    '<div><h1>E.E.T.P. N.º 495 “Malvinas Argentinas”</h1>',
+    '<p class="subtitulo">Agenda institucional alfabética · ' + ordenados.length + ' contactos activos',
+    '<br>Generada el ' + escaparHtmlAgenda_(fecha) + '</p></div></header>',
+    '<div class="listado">' + contenido + '</div>',
+    '<footer>Uso institucional · Fuente: Portal Institucional · No incluye estudiantes ni usuarios inactivos.</footer>',
+    '</main></body></html>',
+  ].join("\n");
+}
+
+async function generarAgendaContactosImprimible_() {
+  if (!btnGenerarAgendaContactos || !accesoContactosHabilitado || !auth.currentUser) {
+    return;
+  }
+  // La ventana debe abrirse directamente desde el clic para evitar bloqueos.
+  const ventana = window.open("", "_blank");
+  if (!ventana) {
+    mostrarMensaje("Permití las ventanas emergentes para generar la agenda.", "error");
+    return;
+  }
+  ventana.document.write('<!doctype html><html lang="es"><meta charset="utf-8"><title>Agenda institucional</title><body style="font-family:Arial;padding:24px">Preparando la agenda institucional...</body></html>');
+  ventana.document.close();
+  const original = btnGenerarAgendaContactos.innerHTML;
+  btnGenerarAgendaContactos.disabled = true;
+  btnGenerarAgendaContactos.textContent = "Generando agenda...";
+  try {
+    // El documento utiliza la fuente del portal, no Google Sheets ni los contactos del dispositivo.
+    const resultado = await getDocsFromServer(query(
+      collection(db, "usuarios"),
+      where("rol", "!=", "ALUMNO"),
+    ));
+    const contactos = resultado.docs.map(prepararContacto).filter(
+      (contacto) => contacto.estado === "ACTIVO" && contacto.nombreCompleto && contacto.correo,
+    );
+    if (!contactos.length) throw new Error("No hay contactos institucionales activos.");
+    if (!ventana.closed) {
+      ventana.document.open();
+      ventana.document.write(construirHtmlAgenda_(contactos));
+      ventana.document.close();
+      ventana.focus();
+    }
+    mostrarMensaje("Agenda preparada con " + contactos.length + " contactos.", "ok");
+  } catch (error) {
+    console.error("Error al generar la agenda institucional:", error);
+    mostrarMensaje(error?.message || "No se pudo generar la agenda.", "error");
+    if (!ventana.closed) {
+      ventana.document.open();
+      ventana.document.write('<!doctype html><html lang="es"><meta charset="utf-8"><title>Error</title><body style="font-family:Arial;padding:24px">No se pudo generar la agenda. Revisá el mensaje en el portal.</body></html>');
+      ventana.document.close();
+    }
+  } finally {
+    btnGenerarAgendaContactos.disabled = false;
+    btnGenerarAgendaContactos.innerHTML = original;
+  }
+}
+
 function convertirEtiquetas(valor) {
   const vistas = Array.isArray(valor) ? valor : [valor];
   const resultado = [];
@@ -770,6 +897,10 @@ if (btnSincronizarGoogleContacts) {
 
 if (btnVerContactos) {
   btnVerContactos.addEventListener("click", cargarContactos);
+}
+
+if (btnGenerarAgendaContactos) {
+  btnGenerarAgendaContactos.addEventListener("click", generarAgendaContactosImprimible_);
 }
 
 if (buscarContacto) {
