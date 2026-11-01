@@ -4319,6 +4319,56 @@ body {
 }
 
 /* =====================================================
+   VENTANAS EMERGENTES DEL PORTAL DOCENTE - 01/11/2026
+   Paleta institucional marrón / bordó.
+   Respeta los estilos particulares de modales especializados.
+===================================================== */
+.swal2-popup {
+  border-radius: 16px !important;
+  font-family: "Nunito Sans", sans-serif !important;
+}
+
+.swal2-title {
+  color: var(--clay-dark, #4a241c) !important;
+  font-weight: 800 !important;
+}
+
+.swal2-html-container {
+  color: var(--bordo-texto, #3b241f) !important;
+}
+
+.swal2-popup .swal2-confirm {
+  min-height: 42px;
+  border-radius: 10px !important;
+  border: 0 !important;
+  background: var(--clay, #6b352a) !important;
+  color: #ffffff !important;
+  font-family: inherit !important;
+  font-weight: 800 !important;
+}
+
+.swal2-popup .swal2-confirm:hover {
+  background: var(--clay-dark, #4a241c) !important;
+}
+
+.swal2-popup .swal2-cancel {
+  min-height: 42px;
+  border-radius: 10px !important;
+  border: 1px solid var(--clay-soft, #b98778) !important;
+  background: var(--cream, #fffcf0) !important;
+  color: var(--clay-dark, #4a241c) !important;
+  font-family: inherit !important;
+  font-weight: 800 !important;
+}
+
+.swal2-popup .swal2-confirm:focus-visible,
+.swal2-popup .swal2-cancel:focus-visible {
+  outline: 2px solid var(--clay-medium, #8a4a3c) !important;
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px rgba(138, 74, 60, 0.17) !important;
+}
+
+/* =====================================================
    MATERIAL DE ESTUDIO - SELECCIÓN DE VARIOS CURSOS
 ===================================================== */
 
