@@ -10337,3 +10337,205 @@ de Si.M.E.; se retoman pendientes generales en otra sesión.
 
 FIN ACTUALIZACIÓN 30/10/2026 — BLOQUE 76
 ======================================================================
+
+
+======================================================================
+77. ACTUALIZACIÓN — 01/11/2026 — CONTACTOS Y AGENDA INSTITUCIONAL
+======================================================================
+
+FECHA: 01/11/2026.
+MOTIVO: documentar la recuperación del backend de Google Contacts,
+la primera sincronización de ADMIN_AUXILIAR, la nueva agenda
+alfabética imprimible y ajustes visuales del Portal Institucional.
+CRITERIO: registrar evidencia y distinguir CONFIRMADO, IMPLEMENTADO
+y PENDIENTE. Se conserva íntegro el historial anterior.
+
+77.1 RECUPERACIÓN DE APPS SCRIPT CENTRAL (SOPORTE)
+--------------------------------------------------
+- Incidencia 31/10: el código de la cuenta destino ADMIN_AUXILIAR
+  fue pegado por error en el editor de Apps Script central de
+  soportetecnico.tec495@gmail.com.
+- Se recuperó y guardó el código original equivalente al respaldo
+  EETP495_Google_Contacts_Backend_SOPORTE_v2_4.gs y a la versión
+  histórica 20 del 07/10/2026.
+- Se verificaron Script Properties FIREBASE_SERVER_API_KEY,
+  TOKEN_DESTINO_ADMIN_AUXILIAR y TOKEN_DESTINO_PRECEPTORIA;
+  existen y tienen valor. No registrar los valores de los tokens.
+- Se comprobó que el activador de sincronizarAutomaticamente
+  continúa configurado y que la última ejecución visible,
+  del 31/10/2026 a las 02:27, registraba 0 % de error.
+- La implementación Web App activa permanecía en la versión 20,
+  descripción "Contactos Institucionales Correos v2.4 Tokens".
+- No se modificó la URL ni se publicó una implementación nueva.
+ESTADO: CÓDIGO Y CONFIGURACIÓN RESTABLECIDOS/VERIFICADOS.
+ALCANCE: no se ejecutó una prueba extremo a extremo nueva del
+backend central después de la recuperación; no confundir la
+verificación de configuración con todas las pruebas funcionales.
+
+77.2 ADMIN_AUXILIAR: PRIMERA SINCRONIZACIÓN REAL
+------------------------------------------------
+Cuenta destino: enviotrabajos495@gmail.com.
+- Proyecto Apps Script destino con Código.gs, appsscript.json,
+  People API y Script Properties configurados.
+- El 31/10, probarConexionAdminAuxiliar consultó la fuente
+  central: destino ADMIN_AUXILIAR, 86 contactos, ejecución
+  sin errores, sin modificar Google Contacts.
+- El 01/11, primer intento de sincronización real detectó
+  la ausencia de obtenerMembresiasContacto_ (86 errores).
+  Se agregó esa función auxiliar al proyecto destino.
+- Segundo intento: 85 sin cambios, 1 actualizado, 36 asignaciones
+  y 13 bajas de etiquetas, con 2 errores transitorios en las
+  etiquetas TerceroC y SegundoD ("The operation was aborted").
+- El titular eliminó los contactos de la cuenta destino con
+  respaldo disponible para comprobar una reconstrucción completa.
+- Prueba REAL final 01/11, 09:38–09:42: 86 contactos recibidos,
+  86 creados, 0 actualizados, 0 eliminados, 35 etiquetas creadas,
+  403 asignaciones, 0 etiquetas quitadas y errores=[].
+- Precaución: el campo ok=true de resultados parciales no basta;
+  para considerar exitosa la operación hay que revisar errores[].
+ESTADO: SINCRONIZACIÓN MANUAL COMPLETA CONFIRMADA POR REGISTRO.
+PENDIENTE: comprobar/crear el activador diario de ADMIN_AUXILIAR
+(no hay confirmación de su creación); continuar con PRECEPTORÍA
+y verificar qué otras cuentas institucionales requieren el script.
+NO repetir alta de contactos ni restaurar los eliminados si ya
+fueron recreados, para evitar duplicados.
+
+77.3 SISTEMA ANTERIOR BASADO EN GOOGLE SHEETS
+----------------------------------------------
+- Script antiguo: SincronizarContactos, función procesarListaDocentes,
+  asociado a la hoja Listado_Correos_Institucionales.
+- La función antigua podía actualizar y borrar contactos, cambiar
+  etiquetas, limpiar DOCENTES!F y ordenar PROFESORES!B.
+- En la captura del 01/11 había cuatro activadores temporizados:
+  uno propio y tres registrados como "Otro usuario".
+- El titular ELIMINÓ el activador de "Yo".
+- Quedaron TRES activadores de otros propietarios por eliminar
+  desde las cuentas correspondientes. El titular indicó que se
+  ocupará de esto en la escuela.
+- También existen mecanismos manuales (menú onOpen y doGet) que
+  pueden ejecutar el sistema antiguo; no afirmar que están
+  neutralizados. No se aplicó la propuesta de deshabilitar la
+  función mediante una bandera en Código.gs.
+- Mantener la hoja y el script antiguos como respaldo temporal.
+ESTADO: DESACTIVACIÓN PARCIAL CONFIRMADA; TRES ACTIVADORES
+PENDIENTES. NO declarar retirado el sistema antiguo.
+
+77.4 AGENDA INSTITUCIONAL ALFABÉTICA IMPRIMIBLE
+------------------------------------------------
+- En la sección Contactos Institucionales se incorporó
+  "Generar agenda PDF":
+  * Soporte/Admin: a la derecha de "Sincronizar ahora".
+  * Gestión: junto a "Ver contactos".
+- La misma funcionalidad consulta Firestore (usuarios,
+  rol != ALUMNO) y filtra estado ACTIVO con nombre y correo.
+  No se basa en el Google Sheets antiguo ni en la copia de
+  contactos sincronizada en cada cuenta.
+- Genera una vista A4 de dos columnas, agrupada alfabéticamente
+  por la inicial del campo nombreCompleto, con escudo, fecha
+  y acción "Imprimir / Guardar PDF" del navegador.
+- No guarda archivos PDF en Google Drive ni en Firestore.
+- Importante: el orden se basa en el campo nombreCompleto.
+  Para ordenar estrictamente por apellido, ese campo debe
+  contener el apellido en primer lugar; revisar datos reales
+  si apareciera un orden inesperado.
+- El titular confirmó que la agenda funciona y se ve perfecta
+  desde la vista de Soporte.
+- En Gestión se incorporó el botón y luego se igualaron ambos
+  botones en CSS: 220 px de ancho, 44 px de alto, texto sin salto
+  de línea y adaptación a móvil de hasta 520 px.
+Commits realizados en main:
+  3c20660 - generador imprimible (contactos-institucionales.js).
+  d5949b2 - botón de Soporte (admin/index.html).
+  d7caf13 - botón de Gestión (gestion/index.html).
+  f90b1a3 - ajuste CSS de tamaños en Gestión.
+  2209532 - versión CSS actualizada en gestion/index.html.
+ESTADO: IMPLEMENTADO EN GITHUB; GENERACIÓN Y DISEÑO EN SOPORTE
+CONFIRMADOS POR EL TITULAR. Verificación final del botón
+redimensionado de Gestión y prueba desde perfiles permitidos:
+PENDIENTE de confirmación explícita.
+
+77.5 MODALES — PALETAS DE LOS PORTALES
+--------------------------------------
+- En el Portal Docente se detectó que algunos avisos SweetAlert2
+  aún mostraban el botón de confirmación violeta por defecto.
+- Se agregó presentación institucional marrón/bordó:
+  confirmación #6b352a, hover oscuro #4a241c, cancelar crema,
+  títulos y texto acordes, bordes y foco accesibles.
+- Se mantuvieron sin cambios de lógica el guardado de asistencias
+  Si.R.A. y las mesas de examen; también el modal especializado
+  para ver inscriptos del tribunal.
+- Se preservaron las reglas responsive existentes de SweetAlert2
+  para pantallas pequeñas; NO se hizo una prueba visual real
+  completa en celular ni del aviso corregido.
+- Los CSS de Gestión, Soporte/Admin y Alumnado ya tenían
+  colores específicos de sus respectivos portales.
+Commits:
+  6e42611 - assets/css/portal-docente.css.
+  e909878 - docentes/index.html (versión CSS).
+ESTADO: CAMBIO IMPLEMENTADO; PENDIENTE QA VISUAL EN DOCENTE,
+INCLUIDO CELULAR, SIN REABRIR UNA AUDITORÍA RESPONSIVE GLOBAL.
+
+77.6 SINCRONIZACIÓN DE LA LAPTOP
+--------------------------------
+- El titular ejecutó en ~/Website-EETP495:
+    git pull --ff-only origin main
+    git status --short --branch
+- Resultado: fast-forward 2209532..e909878 y salida
+  "## main...origin/main", sin cambios locales pendientes.
+- El último commit incorporado en esa prueba fue e909878.
+- Las ediciones de Apps Script externo no se descargan con Git.
+ESTADO: SINCRONIZACIÓN LOCAL CONFIRMADA HASTA e909878.
+La actualización de ESTA bitácora requerirá un nuevo git pull.
+
+77.7 PENDIENTES VIGENTES Y PRIORIDADES
+---------------------------------------
+[P1 - INMEDIATO] Eliminar los tres activadores restantes del
+Google Sheets antiguo desde sus cuentas creadoras; después
+verificar que ninguno siga ejecutándose. Mantener hoja histórica
+y revisar disparadores manuales/Web App si se desea desactivar
+por completo el mecanismo anterior.
+
+[P2 - CONTACTOS] Verificar el activador diario de ADMIN_AUXILIAR;
+configurar/validar PRECEPTORÍA y restantes destinos autorizados.
+No intervenir sobre el Apps Script central sin respaldo.
+
+[P3 - QA VISUAL] Comprobar el ajuste final de botones en Gestión,
+la agenda PDF desde los perfiles autorizados y los modales
+SweetAlert2 de Docente en PC y celular.
+
+[P4 - BACKUP] Planificar respaldo integral y ensayo de
+restauración en entorno aislado: GitHub, Firebase Auth,
+Firestore, reglas, Apps Script, propiedades, implementaciones,
+Google Sheets, Drive, Si.M.E. y Google Contacts.
+
+[P5 - SEGURIDAD] Auditoría específica de reglas y permisos por
+roles, pruebas negativas del endpoint de tribunal Si.M.E.,
+acceso a datos institucionales y cuotas/lecturas Firestore.
+
+[P6 - CICLO 2027] Mantener planificación de cambios de curso,
+egreso, asignaciones, horarios y calendario. Los períodos
+trimestrales de 2027 ya cargados NO deben repetirse.
+
+[P7 - OTROS] Verificar corrección del Google Sites antiguo para
+desbloqueo de netbooks, revisar con respaldo la limpieza de
+datos entre llamados/ciclos, y mantener QR Si.M.E. e
+inscripciones fuera de término sujetos a decisión institucional.
+
+NO REABRIR COMO DESARROLLOS PENDIENTES:
+- Reemplazos Docentes en Gestión: titular confirmó su
+  funcionamiento el 30/10/2026 (bloque 74).
+- Ver inscriptos del tribunal y unificación de Taller en Si.M.E.:
+  pruebas positivas ya documentadas (bloques 73 y 76).
+
+77.8 CONTINUIDAD
+----------------
+Fuente de código: consultar HEAD real de main antes de cambios.
+Para próximas modificaciones de Apps Script, verificar su
+código y despliegue real por separado de GitHub. No incluir
+tokens ni datos personales en la bitácora.
+Retomar contactos primero por [P1] y [P2]; agenda/modal por [P3].
+No se cambió Firestore, Apps Script, Sheets ni Drive mediante
+esta actualización documental.
+
+FIN ACTUALIZACIÓN 01/11/2026 — BLOQUE 77
+======================================================================
