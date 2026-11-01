@@ -769,6 +769,32 @@ body {
    CONTACTOS INSTITUCIONALES
 ========================= */
 
+/* Botones iguales para Ver contactos y Generar agenda PDF, solo en Gestión. */
+#contactos-institucionales .acciones-gestion > .btn-gestion {
+  box-sizing: border-box;
+  flex: 0 0 220px;
+  width: 220px;
+  min-width: 220px;
+  min-height: 44px;
+  height: 44px;
+  white-space: nowrap;
+  text-align: center;
+}
+
+#contactos-institucionales .acciones-gestion > .btn-gestion i {
+  flex-shrink: 0;
+}
+
+/* En pantallas estrechas ambos botones ocupan el ancho disponible. */
+@media (max-width: 520px) {
+  #contactos-institucionales .acciones-gestion > .btn-gestion {
+    flex: 1 1 100%;
+    width: 100%;
+    min-width: 0;
+  }
+}
+
+
 #contactos-institucionales .panel-contactos-gestion {
   display: block;
 }
