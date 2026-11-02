@@ -10753,3 +10753,119 @@ una vez verificado este commit.
 
 FIN ACTUALIZACIÓN 02/11/2026 — BLOQUE 79
 ======================================================================
+
+
+======================================================================
+80. GESTIÓN Y TODOS LOS CURSOS: LISTADOS PDF DE ESTUDIANTES
+======================================================================
+
+FECHA: 02/11/2026.
+MOTIVO: incorporar en Gestión la generación de listados PDF de
+estudiantes e incorporar en los dos portales la opción de
+imprimir TODOS LOS CURSOS o un curso individual.
+AUTORIZACIÓN: expresa del titular, 02/11/2026.
+ESTADO: IMPLEMENTADO Y VERIFICADO EN GITHUB, PENDIENTE PRUEBAS
+EN PRODUCCIÓN CON SESIONES AUTORIZADAS.
+
+80.1 FUNCIONAMIENTO ACORDADO
+----------------------------
+- Portal Soporte > Estudiantes:
+  se conserva el botón "Generar listado PDF" a la derecha
+  de "Ver estudiantes".
+- Portal Gestión > Estudiantes:
+  se agregó "Generar listado PDF" al lado de "Ver estudiantes";
+  los dos botones mantienen la paleta verde y el ancho de
+  220 px, con presentación adaptable en celular.
+- Modal SweetAlert2: selección obligatoria de un curso activo
+  O de la opción visible "TODOS LOS CURSOS".
+- Selección individual: listado únicamente de los estudiantes
+  activos asignados al curso elegido.
+- TODOS LOS CURSOS: un único documento con secciones por curso,
+  ordenadas primero por año y luego por división, y los
+  estudiantes de cada curso ordenados alfabéticamente.
+- Se mantiene la separación por letras dentro de cada curso,
+  incluida Ñ.
+- Los tres campos son APELLIDO Y NOMBRE | DNI | CORREO;
+  no se agrega la columna FIRMA.
+- A4 horizontal, escudo y nombre institucional, fecha de
+  generación, cantidad total y cantidad por curso, impresión o
+  Guardar PDF en el navegador. Sin Drive ni archivos persistidos.
+- Cursos inactivos y estudiantes sin curso activo asignado no
+  aparecen en "TODOS LOS CURSOS".
+- No se incorporan usuarios INACTIVOS ni con vínculo BAJA /
+  CURSADA_COMPLETA. Si falta un DNI, su celda queda vacía.
+- Si una selección no contiene estudiantes activos, el portal
+  informa el resultado y no crea una lista vacía.
+
+80.2 IMPLEMENTACIÓN COMPARTIDA
+-------------------------------
+- Se creó assets/js/listado-estudiantes-pdf.js, único generador
+  reutilizado por Soporte y Gestión.
+- Se retiró de assets/js/admin.js la implementación anterior
+  de PDF por curso para evitar mantener dos códigos distintos;
+  no se modificó su consulta/listado normal de estudiantes.
+- En ambos index.html se carga la nueva versión
+  listado-estudiantes-pdf.js?v=20261102-todos1.
+- Se actualizó la versión admin.js en Soporte para no reutilizar
+  la versión antigua que registraba un listener duplicado.
+- Se agregaron estilos solo para botones de la sección
+  Estudiantes en assets/css/portal-gestion.css; no se modificaron
+  estilos de las otras secciones de Gestión.
+
+COMMITS:
+  7dec8ae — nuevo módulo común de listados PDF.
+  25820b7 — quitar código duplicado del Portal Soporte.
+  e54c0d7 — integrar módulo en index de Soporte.
+  417d560 — botón e integración en Gestión.
+  81ff1fb — botones responsive de Gestión.
+
+80.3 DATOS, SEGURIDAD Y PERMISOS
+---------------------------------
+- El selector consulta cursos activos de Firestore solo
+  cuando se pulsa el botón.
+- Tras confirmar, consulta usuarios con rol principal ALUMNO
+  mediante el mismo criterio ya usado en Gestión, evitando
+  índices compuestos para el filtro por curso.
+- Agrupa localmente por cursoId entre los cursos activos
+  permitidos. No se consulta ni se modifica la colección
+  al cargar el portal.
+- El nuevo módulo valida sesión autenticada, perfil ACTIVO
+  y rol seleccionado: Soporte en /admin/; Dirección, Secretaría,
+  Asistente Administrativo y Preceptoría en /gestion/.
+- Firestore mantiene la autorización definitiva por reglas.
+  Las reglas existentes permiten consultar cursos y alumnos
+  desde los roles de Gestión, por lo que NO se editaron.
+- Ninguna cuenta, DNI, correo, clave, token o dato real se
+  incluyó en esta bitácora. Respetar siempre el acuerdo de
+  confidencialidad y aprobación previa del titular.
+
+80.4 PRUEBAS Y PENDIENTES
+-------------------------
+CONFIRMADO:
+- Revisión directa del código vigente en main y reglas
+  Firestore.
+- Compilación sintáctica JavaScript del módulo compartido
+  y de admin.js tras retirar el bloque anterior.
+- Construcción con datos FICTICIOS: dos cursos inicialmente
+  desordenados, orden por año/división, alumnos alfabetizados
+  en cada curso, manejo de Ñ, caracteres escapados, DNI
+  presente/faltante y una sola opción individual.
+- Verificación posterior de los archivos y referencias nuevas
+  en GitHub. Sin escrituras ni consultas a usuarios reales.
+
+PENDIENTE DE PRUEBA REAL:
+1. En Soporte, abrir modal, elegir un curso y generar PDF.
+2. En Soporte, elegir TODOS LOS CURSOS y comprobar orden y
+   encabezados, especialmente al cambiar de página.
+3. En Gestión, repetir ambas modalidades con rol autorizado,
+   comprobar color del modal y botones en PC y celular.
+4. En ambos, comprobar vista previa de impresión A4 horizontal.
+5. Tras la validación visual, sincronizar el repositorio local
+   de la laptop con git pull --ff-only origin main.
+6. Conservar pendientes previos de Google Contacts,
+   eliminación de activadores antiguos y respaldo integral.
+
+No confundir validación del código con pruebas de producción.
+
+FIN ACTUALIZACIÓN 02/11/2026 — BLOQUE 80
+======================================================================
