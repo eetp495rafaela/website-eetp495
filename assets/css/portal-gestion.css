@@ -3635,3 +3635,10 @@ body {
   .grilla-periodos-gestion { grid-template-columns: 1fr; }
   .filtros-periodos-consulta-gestion .campo-filtro-gestion { width: 100%; }
 }
+
+/* Fuente institucional en el selector del modal de listados de estudiantes.
+   Afecta solamente al desplegable de este modal (Soporte y Gestión). */
+.swal2-popup .swal2-select.selector-curso-listado-pdf,
+.swal2-popup .swal2-select.selector-curso-listado-pdf option {
+  font-family: "Nunito Sans", sans-serif !important;
+}
