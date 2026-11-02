@@ -11036,3 +11036,74 @@ Solicitar aprobación expresa antes de futuros cambios.
 
 FIN ACTUALIZACIÓN 02/11/2026 — BLOQUE 82
 ======================================================================
+
+
+======================================================================
+83. REFERENTES INSTITUCIONALES: ROL PRINCIPAL O ADICIONAL
+======================================================================
+
+FECHA: 02/11/2026.
+MOTIVO: el selector "Persona" del formulario Referentes Institucionales
+en Soporte solo consideraba el campo rol (rol principal), omitiendo
+roles adicionales válidos para el cargo elegido.
+AUTORIZACIÓN: expresa del titular en la conversación del 02/11/2026.
+ESTADO: CAMBIO IMPLEMENTADO Y VERIFICADO EN GITHUB; PENDIENTE
+COMPROBACIÓN VISUAL EN LA SESIÓN REAL DE SOPORTE.
+
+83.1 DIAGNÓSTICO
+-----------------
+- Archivo: assets/js/referentes-admin.js.
+- Función: cargarPersonasParaCargo(cargo, personaSeleccionada).
+- El filtro anterior comprobaba solamente usuario.rol,
+  por lo que una persona cuyo rol secundario fuera DIRECCION,
+  SECRETARIA, ASISTENTE_ADMINISTRATIVO o PRECEPTORIA no
+  aparecía en el selector correspondiente.
+- La carga inicial de usuarios ya restringía a estado ACTIVO
+  y ordenaba por nombreCompleto; no requería cambios.
+- Los usuarios guardan roles en rol y roles[]; el Portal Soporte
+  ya reconoce ambos campos al editar perfiles.
+
+83.2 CORRECCIÓN
+---------------
+- El filtro de personas elegibles combina usuario.rol con
+  usuario.roles cuando este último es un array:
+    const roles = [usuario.rol,
+      ...(Array.isArray(usuario.roles) ? usuario.roles : [])]
+      .map(rol => String(rol || "").trim().toUpperCase());
+    return roles.includes(rolNecesario);
+- Se conservan los cargos y roles que ya tenían asignados:
+  DIRECTORA / VICE_DIRECTORA -> DIRECCION;
+  SECRETARIO / PRO_SECRETARIO -> SECRETARIA;
+  ASISTENTE_ADMINISTRATIVO -> ASISTENTE_ADMINISTRATIVO;
+  PRECEPTOR -> PRECEPTORIA.
+- Se mantiene la lista de usuarios ACTIVO, el orden alfabético
+  y las validaciones de asignación y duplicidad existentes.
+- No se modificaron reglas de Firestore, documentos, usuarios,
+  permisos, registros de referentes ni lógica de guardado.
+- admin/index.html carga la nueva versión del archivo:
+  referentes-admin.js?v=20261102-roles-principal-adicional.
+
+83.3 COMMITS
+-------------
+  a99a9dc — aplicar filtro de roles principal y adicionales.
+  3a293e0 — actualizar referencia JS en Portal Soporte.
+
+83.4 PRUEBAS Y PENDIENTES
+--------------------------
+- Se validó sintaxis JavaScript.
+- Pruebas con datos ficticios: rol principal, rol adicional,
+  roles múltiples, ausencia de array roles y exclusión de
+  personas sin el rol requerido.
+- Pendiente: comprobar desde Soporte que seleccionar cada cargo
+  muestre personas ACTIVO con el rol correspondiente, sea
+  principal o adicional. Probar también edición de referente.
+- Refrescar con Ctrl + Shift + R.
+- Sincronizar laptop con git pull --ff-only origin main.
+- Pendientes históricos de los bloques anteriores siguen vigentes.
+
+CRITERIO: los datos de los proyectos son confidenciales y no
+se comparten con terceros sin autorización expresa del titular.
+Solicitar autorización previa para nuevos cambios.
+
+FIN ACTUALIZACIÓN 02/11/2026 — BLOQUE 83
+======================================================================
