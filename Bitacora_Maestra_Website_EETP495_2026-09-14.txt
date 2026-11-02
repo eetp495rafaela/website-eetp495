@@ -10638,3 +10638,118 @@ backup, auditoría de permisos y planificación 2027.
 
 FIN ACTUALIZACIÓN 02/11/2026 — BLOQUE 78
 ======================================================================
+
+
+======================================================================
+79. LISTADO PDF DE ESTUDIANTES POR CURSO Y LEGIBILIDAD DE PLENARIAS
+======================================================================
+
+FECHA: 02/11/2026.
+MOTIVO: añadir desde Soporte un listado de estudiantes imprimible
+por curso y aumentar la legibilidad de la planilla de personal
+para reuniones plenarias.
+AUTORIZACIÓN: explícita del titular, con capturas del Portal
+Soporte y la planilla ya generada.
+ESTADO: IMPLEMENTADO Y VERIFICADO EN GITHUB; PENDIENTE PRUEBA
+VISUAL Y FUNCIONAL EN PRODUCCIÓN CON SESIÓN REAL.
+
+79.1 PLANILLA DE DOCENTES Y PERSONAL: FUENTES MÁS GRANDES
+---------------------------------------------------------
+- En assets/js/contactos-institucionales.js se aumentaron:
+  * Celdas comunes de 10 px a 12,5 px (nombre y DNI).
+  * Correo de 9,2 px a 12 px.
+  * Encabezados de 10,5 px a 12 px.
+  * Letra de separación alfabética de 13 px a 14 px.
+- Se mantiene A4 apaisado, distribución de cuatro columnas,
+  filas de 15 mm de alto, agrupación A-Z/Ñ y firma en blanco.
+- Se modificó la versión cargada del script en los portales
+  Soporte y Gestión para evitar una versión antigua en caché:
+  contactos-institucionales.js?v=20261102-plenaria-legible.
+- No se cambiaron filtros, lectura de Firestore ni datos de
+  usuarios para esta mejora de presentación.
+ESTADO: CÓDIGO PUBLICADO EN MAIN; VERIFICACIÓN VISUAL PENDIENTE.
+
+79.2 NUEVO PDF DE ESTUDIANTES POR CURSO — PORTAL SOPORTE
+--------------------------------------------------------
+- Nuevo botón "Generar listado PDF" a la derecha de
+  "Ver estudiantes" en Soporte > Estudiantes.
+- Al hacer clic, se consultan los cursos activos de la
+  colección cursos y se presenta un modal SweetAlert2 que
+  utiliza los colores y estilos existentes del Portal Soporte.
+- El usuario debe elegir un curso antes de generar el PDF;
+  Cancelar no crea documentos ni hace cambios en Firestore.
+- Tras confirmar, la ventana imprimible se abre en el mismo
+  clic para evitar bloqueos de ventanas emergentes.
+- La consulta posterior lee únicamente usuarios cuyo
+  cursoId sea el curso seleccionado. Se filtra en el cliente
+  rol principal ALUMNO, estado ACTIVO, situación distinta
+  de BAJA o CURSADA_COMPLETA y presencia de nombre completo.
+- Listado con escudo, curso, fecha y cantidad; orden por
+  nombreCompleto (registrado como apellido y nombre), letras
+  alfabéticas A-Z/Ñ y tabla:
+    APELLIDO Y NOMBRE | DNI | CORREO.
+  No hay columna FIRMA.
+- Formato A4 horizontal con impresión/Guardar PDF desde el
+  navegador; tamaño de letra legible, cabeceras repetibles al
+  cambiar página y vista adaptable a celular con desplazamiento
+  horizontal únicamente de la tabla.
+- Si falta DNI, se deja su celda en blanco y se informa el total.
+- Si un curso no tiene alumnos activos, el sistema lo informa
+  y no genera un listado ficticio.
+- No se guarda el PDF en Drive/Firestore y no se modifican
+  alumnos, asignaciones, cursos, contactos, reglas ni Apps Script.
+- Esta funcionalidad está disponible en Soporte, no en Gestión
+  ni en el Portal Docente; usa el flujo de sesión y permisos
+  existente de assets/js/admin.js.
+- Los tres botones Importar cursos, Ver estudiantes y Generar
+  listado PDF tienen estilo equivalente en PC y disposición
+  adaptable a pantallas pequeñas. No se modifica el diseño de
+  botones fuera de la sección Estudiantes.
+
+79.3 ARCHIVOS Y COMMITS
+-----------------------
+  assets/js/admin.js: 581926a — modal, consulta por curso y PDF.
+  admin/index.html: 3138d70 — botón y versiones del módulo/CSS.
+  assets/css/portal-admin.css: fdfbd9e — botones responsive.
+  assets/js/contactos-institucionales.js: d9228f0 — tipografía.
+  admin/index.html: 5fb9622 — versión de caché del PDF plenaria.
+  gestion/index.html: c851c9b — misma versión en Gestión.
+
+VERIFICACIONES TÉCNICAS:
+- Sintaxis de los módulos JavaScript comprobada, sin ejecutar
+  lecturas o escrituras reales sobre Firestore.
+- Generación de tabla estudiantil comprobada con datos ficticios:
+  tres columnas, Ñ, correos escapados, DNI válidos y ausentes,
+  títulos, A4 horizontal y aviso de DNI faltantes.
+- Versiones de módulos y CSS consultadas nuevamente en GitHub.
+- No se hicieron pruebas en navegador real con cuentas y
+  datos institucionales; no registrar como QA aprobado.
+
+79.4 PENDIENTES
+---------------
+[P1] Probar con cuenta autorizada de Soporte el modal para
+seleccionar curso, las opciones reales y el PDF generado.
+[P2] Verificar impresión A4 horizontal, tamaño y ajuste de los
+correos y nombres largos, cabeceras en varias páginas.
+[P3] Comprobar desde Soporte y Gestión que el tamaño de letra
+de la planilla de personal sea legible en papel real.
+[P4] Si se observan alumnos sin curso o con datos incompletos,
+revisarlos desde Soporte antes de alterar reglas del listado.
+[P5] Permanecen los pendientes generales del bloque 78:
+triggers antiguos de Google Sheets, contactos multicuenta,
+backup y seguridad por roles.
+[P6] Sincronizar laptop con git pull --ff-only origin main
+una vez verificado este commit.
+
+79.5 CONFIDENCIALIDAD Y CONTROL DE CAMBIOS
+------------------------------------------
+- Mantener los datos de usuarios, DNI, correo y cursos
+  exclusivamente para uso institucional autorizado.
+- No difundir información del portal, GitHub, Firestore,
+  Supabase u otros proyectos a terceros sin autorización.
+- Antes de nuevos cambios solicitar aprobación expresa.
+- Se preservan las reglas de acceso actuales y no se exponen
+  datos personales en el historial de desarrollo.
+
+FIN ACTUALIZACIÓN 02/11/2026 — BLOQUE 79
+======================================================================
