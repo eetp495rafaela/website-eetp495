@@ -450,6 +450,11 @@ function letraAgenda_(texto) {
   return /^[A-Z]$/.test(base) ? base : "#";
 }
 
+function obtenerDniAgenda_(contacto) {
+  const dni = String(contacto.dni ?? "").replace(/\D/g, "");
+  return /^[0-9]{7,8}$/.test(dni) ? dni : "";
+}
+
 function construirHtmlAgenda_(contactos) {
   const comparar = new Intl.Collator("es", { sensitivity: "base", numeric: true });
   const ordenados = [...contactos].sort((a, b) =>
@@ -462,52 +467,84 @@ function construirHtmlAgenda_(contactos) {
     if (!grupos.has(letra)) grupos.set(letra, []);
     grupos.get(letra).push(contacto);
   });
-  const contenido = [...grupos.entries()]
+
+  const filas = [...grupos.entries()]
     .sort(([a], [b]) => comparar.compare(a, b))
     .map(([letra, items]) =>
-      '<section class="grupo"><h2>' + escaparHtmlAgenda_(letra) + '</h2>' +
+      '<tbody class="grupo">' +
+      '<tr class="fila-letra"><th scope="rowgroup" colspan="4">' +
+      escaparHtmlAgenda_(letra) + '</th></tr>' +
       items.map((contacto) =>
-        '<div class="contacto"><strong>' + escaparHtmlAgenda_(contacto.nombreCompleto) +
-        '</strong><span>' + escaparHtmlAgenda_(contacto.correo) + '</span></div>'
-      ).join("") + '</section>'
+        '<tr class="fila-persona">' +
+        '<td class="col-nombre">' + escaparHtmlAgenda_(contacto.nombreCompleto) + '</td>' +
+        '<td class="col-dni">' + escaparHtmlAgenda_(obtenerDniAgenda_(contacto)) + '</td>' +
+        '<td class="col-correo">' + escaparHtmlAgenda_(contacto.correo) + '</td>' +
+        '<td class="col-firma"></td>' +
+        '</tr>'
+      ).join("") + '</tbody>'
     ).join("");
+
+  const faltantesDni = ordenados.filter((contacto) => !obtenerDniAgenda_(contacto)).length;
   const logo = new URL("../assets/img/logo.png", window.location.href).href;
-  const fecha = new Intl.DateTimeFormat("es-AR", {
+  const fechaGeneracion = new Intl.DateTimeFormat("es-AR", {
     day: "2-digit", month: "2-digit", year: "numeric",
     hour: "2-digit", minute: "2-digit",
   }).format(new Date());
+
   const estilos = [
     ":root{color-scheme:light}*{box-sizing:border-box}",
     "body{font-family:Arial,Helvetica,sans-serif;margin:0;color:#193954;background:#edf2f8}",
     ".barra{background:#073683;color:white;padding:13px 20px;display:flex;justify-content:space-between;align-items:center;gap:15px}",
     ".barra button{background:white;color:#073683;border:0;border-radius:8px;padding:10px 14px;font-weight:700;cursor:pointer}",
-    "main{background:white;max-width:210mm;margin:22px auto;padding:17mm 15mm;box-shadow:0 4px 24px #0002}",
-    "header{display:flex;align-items:center;gap:13px;padding-bottom:15px;border-bottom:2px solid #0b4c95;margin-bottom:15px}",
-    "header img{height:50px;width:50px;object-fit:contain}",
-    "h1{font-size:19px;color:#073683;margin:0 0 4px}",
-    ".subtitulo{font-size:10.5px;line-height:1.6;color:#576f84;margin:0}",
-    ".listado{column-count:2;column-gap:10mm}",
-    "h2{font-size:18px;color:#105c9d;border-bottom:1px solid #ccdeec;margin:13px 0 6px;padding-bottom:4px;break-after:avoid}",
-    ".grupo{break-inside:auto}.contacto{break-inside:avoid;padding:5px 0 7px;border-bottom:1px solid #e6edf4}",
-    ".contacto strong{display:block;font-size:11px;line-height:1.4;overflow-wrap:anywhere}",
-    ".contacto span{display:block;font-size:9.4px;color:#476178;line-height:1.4;overflow-wrap:anywhere}",
-    "footer{margin-top:18px;border-top:1px solid #ccdeec;padding-top:9px;color:#657d91;font-size:9px}",
-    "@page{size:A4 portrait;margin:12mm}",
-    "@media print{body{background:white}.barra{display:none}main{max-width:none;margin:0;padding:0;box-shadow:none}.listado{column-count:2}header{break-after:avoid}}",
-    "@media screen and (max-width:560px){.barra{flex-direction:column;align-items:stretch}main{margin:10px;padding:20px}.listado{column-count:1}}",
+    "main{background:white;max-width:297mm;margin:20px auto;padding:12mm;box-shadow:0 4px 24px #0002}",
+    "header{display:flex;align-items:center;gap:12px;padding-bottom:10px;border-bottom:2px solid #0b4c95;margin-bottom:10px}",
+    "header img{width:47px;height:47px;object-fit:contain}",
+    "h1{font-size:17px;color:#073683;margin:0 0 4px}",
+    ".subtitulo{font-size:10px;color:#506779;line-height:1.5;margin:0}",
+    ".datos-reunion{display:flex;flex-wrap:wrap;gap:10px 28px;margin:13px 0 12px;font-size:11px;color:#193954}",
+    ".datos-reunion span{white-space:nowrap}",
+    ".tabla-scroll{overflow-x:auto}",
+    ".planilla{width:100%;min-width:840px;border-collapse:collapse;table-layout:fixed}",
+    ".planilla col.nombre{width:32%}.planilla col.dni{width:12%}.planilla col.correo{width:34%}.planilla col.firma{width:22%}",
+    ".planilla thead th{border:1px solid #8ea9be;background:#dfeefa;color:#073683;padding:9px 7px;font-size:10.5px;text-align:left;text-transform:uppercase}",
+    ".planilla tbody .fila-letra th{border:1px solid #8ea9be;background:#eef5fb;color:#105c9d;font-size:13px;text-align:left;padding:7px 9px}",
+    ".planilla tbody td{border:1px solid #aebdca;height:15mm;min-height:15mm;padding:7px 8px;vertical-align:middle;font-size:10px;line-height:1.35}",
+    ".planilla .col-nombre{font-weight:700;overflow-wrap:anywhere}",
+    ".planilla .col-dni{font-variant-numeric:tabular-nums;white-space:nowrap}",
+    ".planilla .col-correo{font-size:9.2px;overflow-wrap:anywhere}",
+    ".planilla .col-firma{background:#fff}",
+    ".observacion{font-size:10px;color:#4c6275;margin:10px 0 0}",
+    "footer{margin-top:12px;color:#657d91;font-size:9px;line-height:1.4}",
+    "@page{size:A4 landscape;margin:11mm 10mm}",
+    "@media print{body{background:#fff}main{max-width:none;margin:0;padding:0;box-shadow:none}.barra{display:none}.tabla-scroll{overflow:visible}.planilla{min-width:0;width:100%}.planilla thead{display:table-header-group}.planilla tbody{display:table-row-group}.planilla tr{break-inside:avoid;page-break-inside:avoid}.planilla .fila-letra{break-after:avoid;page-break-after:avoid}header{break-after:avoid}*{-webkit-print-color-adjust:exact;print-color-adjust:exact}}",
+    "@media screen and (max-width:700px){.barra{flex-direction:column;align-items:stretch}main{margin:10px;padding:16px}.datos-reunion{gap:8px}}",
   ].join("");
+
   return [
     '<!doctype html><html lang="es"><head><meta charset="utf-8">',
     '<meta name="viewport" content="width=device-width,initial-scale=1">',
-    '<title>Agenda institucional | E.E.T.P. N.º 495</title><style>' + estilos + '</style></head><body>',
-    '<div class="barra"><strong>Agenda institucional - Vista imprimible</strong>',
+    '<title>Planilla de asistencia - Reunión plenaria | E.E.T.P. N.º 495</title><style>' + estilos + '</style></head><body>',
+    '<div class="barra"><strong>Planilla de asistencia - Vista imprimible</strong>',
     '<button type="button" onclick="window.print()">Imprimir / Guardar PDF</button></div>',
     '<main><header><img src="' + escaparHtmlAgenda_(logo) + '" alt="Escudo E.E.T.P. N.º 495">',
     '<div><h1>E.E.T.P. N.º 495 “Malvinas Argentinas”</h1>',
-    '<p class="subtitulo">Agenda institucional alfabética · ' + ordenados.length + ' contactos activos',
-    '<br>Generada el ' + escaparHtmlAgenda_(fecha) + '</p></div></header>',
-    '<div class="listado">' + contenido + '</div>',
-    '<footer>Uso institucional · Fuente: Portal Institucional · No incluye estudiantes ni usuarios inactivos.</footer>',
+    '<p class="subtitulo">Planilla de asistencia · Reunión plenaria · ' +
+      ordenados.length + ' usuarios activos (sin alumnado)<br>Generada el ' +
+      escaparHtmlAgenda_(fechaGeneracion) + '</p></div></header>',
+    '<div class="datos-reunion"><span><strong>Fecha de reunión:</strong> ___________________</span>',
+    '<span><strong>Horario:</strong> _______________</span>',
+    '<span><strong>Lugar:</strong> ___________________________</span></div>',
+    '<div class="tabla-scroll"><table class="planilla">',
+    '<colgroup><col class="nombre"><col class="dni"><col class="correo"><col class="firma"></colgroup>',
+    '<thead><tr><th scope="col">APELLIDO Y NOMBRE</th><th scope="col">DNI</th>',
+    '<th scope="col">CORREO</th><th scope="col">FIRMA</th></tr></thead>',
+    filas, '</table></div>',
+    faltantesDni
+      ? '<p class="observacion">DNI pendientes de completar: ' + faltantesDni +
+        '. Las celdas vacías pueden completarse a mano.</p>'
+      : '',
+    '<footer>Uso institucional · Fuente: Portal Institucional · No incluye alumnado ni usuarios inactivos. ' +
+      'Documento con datos personales: conservar y distribuir únicamente entre personal autorizado.</footer>',
     '</main></body></html>',
   ].join("\n");
 }
