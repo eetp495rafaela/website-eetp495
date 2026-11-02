@@ -68,52 +68,66 @@ function htmlListado(cursos, alumnos, todos) {
   alumnos.forEach(a=>{const id=String(a.cursoId||"").trim();if(porCurso.has(id))porCurso.get(id).push(a)});
   const conAlumnos=ordenados.filter(c=>porCurso.get(c.id).length>0);
   const cantidad=conAlumnos.reduce((n,c)=>n+porCurso.get(c.id).length,0);
-  const faltantes=alumnos.filter(a=>!dni(a.dni)).length;
-  const titulo=todos?"Todos los cursos":String(ordenados[0]?.nombre||ordenados[0]?.id||"Curso");
   const logo=new URL("../assets/img/logo.png",window.location.href).href;
   const fecha=new Intl.DateTimeFormat("es-AR",{
     day:"2-digit",month:"2-digit",year:"numeric",hour:"2-digit",minute:"2-digit"
   }).format(new Date());
-  const tabla=c=>'<section class="curso"><h2>Curso: '+esc(c.nombre||c.id)+
-    ' <small>('+porCurso.get(c.id).length+' estudiantes)</small></h2>'+
-    '<div class="desplazamiento"><table><colgroup><col class="nombre"><col class="dni"><col class="correo"></colgroup>'+
-    '<thead><tr><th>APELLIDO Y NOMBRE</th><th>DNI</th><th>CORREO</th></tr></thead>'+
-    filas(porCurso.get(c.id))+'</table></div></section>';
+  // Un encabezado institucional por curso; en "Todos" cada uno comienza en nueva hoja.
+  const tabla = c => {
+    const lista = porCurso.get(c.id);
+    const cantidadCurso = lista.length;
+    // Ajuste progresivo para que cursos numerosos aprovechen una sola hoja A4.
+    const densidad = cantidadCurso > 55 ? " ultra-compacto" :
+      cantidadCurso > 44 ? " muy-compacto" :
+      cantidadCurso > 32 ? " compacto" : "";
+    const faltantesCurso = lista.filter(a => !dni(a.dni)).length;
+    return '<section class="curso' + densidad + '">' +
+      '<header><img src="' + esc(logo) + '" alt="Escudo E.E.T.P. N.º 495">' +
+      '<div><h1>E.E.T.P. N.º 495 “Malvinas Argentinas”</h1>' +
+      '<p>Listado de estudiantes · <strong>Curso: ' + esc(c.nombre || c.id) +
+      '</strong> · ' + cantidadCurso + ' estudiantes activos' +
+      '<br>Generado el ' + esc(fecha) + '</p></div></header>' +
+      '<div class="desplazamiento"><table>' +
+      '<colgroup><col class="nombre"><col class="dni"><col class="correo"></colgroup>' +
+      '<thead><tr><th>APELLIDO Y NOMBRE</th><th>DNI</th><th>CORREO</th></tr></thead>' +
+      filas(lista) + '</table></div>' +
+      (faltantesCurso ? '<p class="aviso">DNI pendientes de completar: ' + faltantesCurso + '.</p>' : '') +
+      '<footer>Uso interno institucional · Datos personales: distribuir solo a personal autorizado.</footer>' +
+      '</section>';
+  };
   const estilos=[
     ":root{color-scheme:light}*{box-sizing:border-box}",
     "body{margin:0;background:#eff4fa;color:#173b60;font-family:Arial,Helvetica,sans-serif}",
     ".barra{display:flex;align-items:center;justify-content:space-between;gap:12px;background:#083d79;color:white;padding:13px 20px}",
     ".barra button{border:0;border-radius:8px;background:white;color:#083d79;padding:10px 14px;font-weight:bold;cursor:pointer}",
-    "main{max-width:297mm;margin:18px auto;padding:12mm;background:white;box-shadow:0 5px 22px #0002}",
-    "header{display:flex;align-items:center;gap:12px;border-bottom:2px solid #0b4f9c;padding-bottom:12px;margin-bottom:15px}",
-    "header img{width:48px;height:48px;object-fit:contain}",
-    "h1{font-size:18px;color:#083d79;margin:0 0 5px}",
-    "header p{font-size:11px;color:#476680;margin:0;line-height:1.5}",
-    ".curso{margin:18px 0 0}.curso h2{font-size:15px;background:#edf5ff;border-left:4px solid #0b4f9c;padding:8px;margin:0 0 8px;color:#083d79;break-after:avoid;page-break-after:avoid}",
+    "main{max-width:210mm;margin:18px auto;padding:11mm;background:white;box-shadow:0 5px 22px #0002}",
+    "header{display:flex;align-items:center;gap:10px;border-bottom:2px solid #0b4f9c;padding-bottom:7px;margin-bottom:9px}",
+    "header img{width:39px;height:39px;object-fit:contain}",
+    "h1{font-size:16px;color:#083d79;margin:0 0 4px}",
+    "header p{font-size:10px;color:#476680;margin:0;line-height:1.4}",
+    ".curso{margin:0 0 16px}.curso + .curso{margin-top:18px}",
     ".curso small{font-size:11px;font-weight:normal}",
-    ".desplazamiento{overflow-x:auto}table{width:100%;min-width:760px;border-collapse:collapse;table-layout:fixed}",
-    "col.nombre{width:39%}col.dni{width:16%}col.correo{width:45%}",
-    "thead th{border:1px solid #8ea9be;background:#dfeefa;color:#073683;font-size:12px;text-align:left;padding:9px}",
-    ".letra th{border:1px solid #8ea9be;background:#eef5fb;color:#105c9d;text-align:left;padding:8px;font-size:14px}",
-    "tbody td{border:1px solid #adbdca;height:12mm;padding:7px 9px;vertical-align:middle;font-size:12.5px;line-height:1.35}",
-    "td.nombre{font-weight:bold;overflow-wrap:anywhere}td.dni{white-space:nowrap}td.correo{font-size:12px;overflow-wrap:anywhere}",
-    "footer,.aviso{margin-top:12px;font-size:10px;color:#516c82}",
-    "@page{size:A4 landscape;margin:11mm 10mm}",
-    "@media print{body{background:white}.barra{display:none}main{max-width:none;margin:0;padding:0;box-shadow:none}.desplazamiento{overflow:visible}table{width:100%;min-width:0}thead{display:table-header-group}tbody{display:table-row-group}tr{break-inside:avoid;page-break-inside:avoid}.letra{break-after:avoid;page-break-after:avoid}*{-webkit-print-color-adjust:exact;print-color-adjust:exact}}",
+    ".desplazamiento{overflow-x:auto}table{width:100%;min-width:680px;border-collapse:collapse;table-layout:fixed}",
+    "col.nombre{width:43%}col.dni{width:16%}col.correo{width:41%}",
+    "thead th{border:1px solid #8ea9be;background:#dfeefa;color:#073683;font-size:11px;text-align:left;padding:7px}",
+    ".letra th{border:1px solid #8ea9be;background:#eef5fb;color:#105c9d;text-align:left;padding:4px 7px;font-size:12px}",
+    "tbody td{border:1px solid #adbdca;height:7mm;padding:4px 6px;vertical-align:middle;font-size:11.5px;line-height:1.2}",
+    "td.nombre{font-weight:bold;overflow-wrap:anywhere}td.dni{white-space:nowrap}td.correo{font-size:10.5px;overflow-wrap:anywhere}",
+    "footer,.aviso{margin-top:6px;font-size:9px;color:#516c82}",
+    ".curso.compacto tbody td{height:5.5mm;padding:2px 5px;font-size:10.5px}.curso.compacto .letra th{padding:2px 5px;font-size:11px}.curso.compacto td.correo{font-size:9.8px}",
+    ".curso.muy-compacto tbody td{height:4.7mm;padding:1px 4px;font-size:10px}.curso.muy-compacto .letra th{padding:1px 4px;font-size:10px}.curso.muy-compacto td.correo{font-size:9.3px}",
+    ".curso.ultra-compacto tbody td{height:4mm;padding:0 4px;font-size:9.3px}.curso.ultra-compacto .letra th{padding:1px 3px;font-size:9px}.curso.ultra-compacto td.correo{font-size:8.8px}",
+    "@page{size:A4 portrait;margin:9mm 10mm}",
+    "@media print{body{background:white}.barra{display:none}main{max-width:none;margin:0;padding:0;box-shadow:none}.desplazamiento{overflow:visible}table{width:100%;min-width:0}thead{display:table-header-group}tbody{display:table-row-group}tr{break-inside:avoid;page-break-inside:avoid}.letra{break-after:avoid;page-break-after:avoid}.curso header{break-after:avoid;page-break-after:avoid}main.todos .curso + .curso{break-before:page;page-break-before:always}.curso{margin:0}*{-webkit-print-color-adjust:exact;print-color-adjust:exact}}",
     "@media screen and (max-width:700px){.barra{flex-direction:column;align-items:stretch}main{margin:10px;padding:16px}}"
   ].join("");
   return [
     '<!doctype html><html lang="es"><head><meta charset="utf-8">',
     '<meta name="viewport" content="width=device-width,initial-scale=1">',
-    '<title>Listado de estudiantes - '+esc(titulo)+'</title><style>'+estilos+'</style></head><body>',
+    '<title>Listado de estudiantes - '+esc(todos ? "Todos los cursos" : (ordenados[0]?.nombre || "Curso"))+'</title><style>'+estilos+'</style></head><body>',
     '<div class="barra"><strong>Listado de estudiantes</strong><button type="button" onclick="window.print()">Imprimir / Guardar PDF</button></div>',
-    '<main><header><img src="'+esc(logo)+'" alt="Escudo E.E.T.P. N.º 495">',
-    '<div><h1>E.E.T.P. N.º 495 “Malvinas Argentinas”</h1>',
-    '<p>Listado de estudiantes · <strong>'+esc(titulo)+'</strong> · '+
-    cantidad+' estudiantes activos · '+conAlumnos.length+' curso(s)<br>Generado el '+esc(fecha)+'</p></div></header>',
+    '<main class="' + (todos ? 'todos' : 'individual') + '">',
     conAlumnos.map(tabla).join(""),
-    faltantes?'<p class="aviso">DNI pendientes de completar: '+faltantes+'.</p>':"",
-    '<footer>Uso interno institucional · Contiene datos personales. Distribuir solo a personal autorizado.</footer>',
     '</main></body></html>'
   ].join("\n");
 }
