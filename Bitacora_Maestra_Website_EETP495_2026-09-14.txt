@@ -10966,3 +10966,73 @@ autorizadas y se requiere aprobación previa a nuevos cambios.
 
 FIN ACTUALIZACIÓN 02/11/2026 — BLOQUE 81
 ======================================================================
+
+
+======================================================================
+82. TIPOGRAFÍA NUNITO SANS EN SELECTOR PDF DE ESTUDIANTES
+======================================================================
+
+FECHA: 02/11/2026.
+MOTIVO: uniformar la fuente tipográfica del desplegable del modal
+"Listado de estudiantes" con el resto del Portal Institucional.
+AUTORIZACIÓN: expresa del titular, 02/11/2026.
+ESTADO: IMPLEMENTADO Y VERIFICADO EN GITHUB. PENDIENTE DE VALIDACIÓN
+VISUAL EN LOS NAVEGADORES DE SOPORTE Y GESTIÓN.
+
+82.1 DIAGNÓSTICO
+-----------------
+- El portal usa la familia "Nunito Sans" (Google Fonts).
+- El modal SweetAlert2 hereda la estética institucional, pero el
+  desplegable nativo podía mostrar la fuente predeterminada del
+  navegador, distinta del título, texto y botones.
+- Se acordó cambiar exclusivamente la familia tipográfica de
+  dicho selector, sin modificar listas, filtros o PDF.
+
+82.2 CORRECCIÓN
+---------------
+- assets/js/listado-estudiantes-pdf.js:
+  customClass: { input: "selector-curso-listado-pdf" }
+  aplicado solo al Swal.fire con input:"select" que permite
+  elegir un curso o TODOS LOS CURSOS.
+- assets/css/portal-admin.css y assets/css/portal-gestion.css:
+  .swal2-popup .swal2-select.selector-curso-listado-pdf,
+  .swal2-popup .swal2-select.selector-curso-listado-pdf option {
+    font-family: "Nunito Sans", sans-serif !important;
+  }
+- Los estilos son específicos: no cambian el resto de los
+  desplegables ni los demás modales.
+- Se actualizaron las versiones de CSS y JS en admin/index.html
+  y gestion/index.html, sufijo 20261102-nunito-selector.
+- Los navegadores y sistemas operativos pueden renderizar las
+  opciones del menú desplegado con controles nativos. El estilo
+  aplicado solicita Nunito Sans, pero la apariencia final de las
+  opciones depende del navegador y debe probarse visualmente.
+
+82.3 COMMITS
+-------------
+  b263203 — clase CSS exclusiva para el selector del listado.
+  e502a39 — estilos de Soporte.
+  a174084 — estilos de Gestión.
+  6cbfe6d — nuevas versiones de recursos en Soporte.
+  ce6a5c4 — nuevas versiones de recursos en Gestión.
+
+82.4 CONTROL Y PENDIENTES
+--------------------------
+- Se comprobó sintaxis del JavaScript y presencia de clases,
+  reglas y referencias actualizadas antes del commit.
+- Se mantuvieron el listado para un curso o TODOS, agrupación
+  alfabética, A4 vertical y saltos de página por curso.
+- No se modificaron permisos, reglas, documentos de Firestore,
+  Apps Script, sincronizaciones ni datos personales.
+- Falta comprobación visual del selector desde Soporte y
+  Gestión en PC y celular. Hacer Ctrl + Shift + R para omitir
+  caché anterior.
+- Sincronizar la laptop con git pull --ff-only origin main.
+- Los pendientes generales anteriores permanecen sin cambios.
+
+CRITERIO PERMANENTE: confidencialidad sobre repositorios y datos
+institucionales; no compartirlos con terceros sin autorización.
+Solicitar aprobación expresa antes de futuros cambios.
+
+FIN ACTUALIZACIÓN 02/11/2026 — BLOQUE 82
+======================================================================
