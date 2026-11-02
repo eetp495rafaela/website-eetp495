@@ -171,6 +171,7 @@ async function alHacerClic() {
     const respuesta=await window.Swal.fire({
       title:"Listado de estudiantes",text:"Elegí un curso o todos los cursos.",
       input:"select",inputOptions:opciones,inputPlaceholder:"Seleccionar curso",
+      customClass:{input:"selector-curso-listado-pdf"},
       showCancelButton:true,confirmButtonText:"Generar PDF",cancelButtonText:"Cancelar",
       returnFocus:false,
       preConfirm:()=>{
