@@ -16,7 +16,6 @@ import {
   doc,
   getDoc,
   getDocs,
-  getDocsFromServer,
   query,
   where,
   setDoc,
@@ -52,7 +51,6 @@ const checksRolesAdicionalesUsuario = Array.from(
 );
 const btnVerUsuarios = document.getElementById("btnVerUsuarios");
 const btnVerEstudiantes = document.getElementById("btnVerEstudiantes");
-const btnGenerarListadoEstudiantes = document.getElementById("btnGenerarListadoEstudiantes");
 
 const btnImportarCursosAlumnos = document.getElementById(
   "btnImportarCursosAlumnos",
@@ -5174,185 +5172,6 @@ if (btnVerEstudiantes) {
   btnVerEstudiantes.addEventListener("click", cargarEstudiantes);
 }
 
-
-/* Listado por curso: PDF imprimible, consulta a demanda, sin escrituras. */
-function escaparHtmlListadoAlumnos_(valor) {
-  return String(valor ?? "").replace(/[&<>"']/g, c => ({
-    "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
-  })[c]);
-}
-function inicialListadoAlumnos_(nombre) {
-  const inicial = String(nombre || "").trim().charAt(0).toLocaleUpperCase("es");
-  if (inicial === "Ñ") return "Ñ";
-  const normalizada = inicial.normalize("NFD").replace(/[\u0300-\u036f]/g,"");
-  return /^[A-Z]$/.test(normalizada) ? normalizada : "#";
-}
-function dniListadoAlumnos_(valor) {
-  const dni = String(valor ?? "").replace(/\D/g,"");
-  return /^[0-9]{7,8}$/.test(dni) ? dni : "";
-}
-function construirHtmlListadoAlumnos_(curso, alumnos) {
-  const comparar = new Intl.Collator("es",{sensitivity:"base",numeric:true});
-  const ordenados = [...alumnos].sort((a,b)=>
-    comparar.compare(a.nombreCompleto || "",b.nombreCompleto || "") ||
-    comparar.compare(a.correo || "",b.correo || ""));
-  const grupos = new Map();
-  ordenados.forEach(alumno=>{
-    const inicial = inicialListadoAlumnos_(alumno.nombreCompleto);
-    if (!grupos.has(inicial)) grupos.set(inicial,[]);
-    grupos.get(inicial).push(alumno);
-  });
-  const filas = [...grupos.entries()].sort(([a],[b])=>comparar.compare(a,b))
-    .map(([inicial,items])=>'<tbody><tr class="letra"><th scope="rowgroup" colspan="3">'+
-      escaparHtmlListadoAlumnos_(inicial)+'</th></tr>'+
-      items.map(alumno=>'<tr><td class="nombre">'+
-        escaparHtmlListadoAlumnos_(alumno.nombreCompleto)+'</td><td class="dni">'+
-        escaparHtmlListadoAlumnos_(dniListadoAlumnos_(alumno.dni))+'</td><td class="correo">'+
-        escaparHtmlListadoAlumnos_(alumno.correo || "")+'</td></tr>').join("")+
-      '</tbody>').join("");
-  const sinDni = ordenados.filter(alumno=>!dniListadoAlumnos_(alumno.dni)).length;
-  const nombreCurso = String(curso.nombre || curso.id || "Curso seleccionado").trim();
-  const logo = new URL("../assets/img/logo.png",window.location.href).href;
-  const fecha = new Intl.DateTimeFormat("es-AR",{
-    day:"2-digit",month:"2-digit",year:"numeric",hour:"2-digit",minute:"2-digit"
-  }).format(new Date());
-  const estilos = [
-    ":root{color-scheme:light}*{box-sizing:border-box}",
-    "body{margin:0;background:#eef3f9;color:#183b60;font-family:Arial,Helvetica,sans-serif}",
-    ".barra{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px 20px;background:#083d79;color:white}",
-    ".barra button{border:0;border-radius:8px;padding:10px 14px;background:white;color:#083d79;font-weight:700;cursor:pointer}",
-    "main{max-width:297mm;margin:20px auto;padding:12mm;background:white;box-shadow:0 5px 22px #0002}",
-    "header{display:flex;align-items:center;gap:12px;border-bottom:2px solid #0b4f9c;padding-bottom:12px;margin-bottom:14px}",
-    "header img{width:48px;height:48px;object-fit:contain}",
-    "h1{font-size:18px;color:#083d79;margin:0 0 5px}",
-    "header p{margin:0;font-size:11.5px;line-height:1.5;color:#476680}",
-    ".tabla-scroll{overflow-x:auto}table{width:100%;min-width:760px;border-collapse:collapse;table-layout:fixed}",
-    "col.nombre{width:39%}col.dni{width:16%}col.correo{width:45%}",
-    "thead th{border:1px solid #8ea9be;background:#dfeefa;color:#073683;font-size:12px;text-align:left;padding:9px;text-transform:uppercase}",
-    ".letra th{border:1px solid #8ea9be;background:#eef5fb;color:#105c9d;font-size:14px;text-align:left;padding:7px 9px}",
-    "tbody td{border:1px solid #adbdca;height:12mm;padding:7px 9px;vertical-align:middle;line-height:1.35;font-size:12.5px}",
-    "td.nombre{font-weight:700;overflow-wrap:anywhere}td.dni{white-space:nowrap;font-variant-numeric:tabular-nums}",
-    "td.correo{font-size:12px;overflow-wrap:anywhere}",
-    ".nota{margin:10px 0 0;font-size:10px;color:#506b80}",
-    "footer{margin-top:12px;font-size:9px;color:#5c788e}",
-    "@page{size:A4 landscape;margin:11mm 10mm}",
-    "@media print{body{background:white}.barra{display:none}main{max-width:none;margin:0;padding:0;box-shadow:none}.tabla-scroll{overflow:visible}table{width:100%;min-width:0}thead{display:table-header-group}tbody{display:table-row-group}tr{break-inside:avoid;page-break-inside:avoid}.letra{break-after:avoid;page-break-after:avoid}*{-webkit-print-color-adjust:exact;print-color-adjust:exact}}",
-    "@media screen and (max-width:700px){.barra{flex-direction:column;align-items:stretch}main{margin:10px;padding:16px}}"
-  ].join("");
-  return ['<!doctype html><html lang="es"><head><meta charset="utf-8">',
-    '<meta name="viewport" content="width=device-width,initial-scale=1">',
-    '<title>Listado de estudiantes - '+escaparHtmlListadoAlumnos_(nombreCurso)+'</title><style>'+estilos+'</style></head><body>',
-    '<div class="barra"><strong>Listado de estudiantes - Vista imprimible</strong>',
-    '<button type="button" onclick="window.print()">Imprimir / Guardar PDF</button></div>',
-    '<main><header><img src="'+escaparHtmlListadoAlumnos_(logo)+'" alt="Escudo E.E.T.P. N.º 495">',
-    '<div><h1>E.E.T.P. N.º 495 “Malvinas Argentinas”</h1><p>Listado de estudiantes · Curso: <strong>'+
-      escaparHtmlListadoAlumnos_(nombreCurso)+'</strong> · '+ordenados.length+' estudiantes activos',
-    '<br>Generado el '+escaparHtmlListadoAlumnos_(fecha)+'</p></div></header>',
-    '<div class="tabla-scroll"><table><colgroup><col class="nombre"><col class="dni"><col class="correo"></colgroup>',
-    '<thead><tr><th scope="col">APELLIDO Y NOMBRE</th><th scope="col">DNI</th><th scope="col">CORREO</th></tr></thead>',
-    filas,'</table></div>',
-    sinDni?'<p class="nota">DNI pendientes de completar: '+sinDni+'. Las celdas vacías pueden completarse a mano.</p>':'',
-    '<footer>Uso interno institucional · Datos personales: distribuir solo entre personal autorizado.</footer>',
-    '</main></body></html>'].join("\n");
-}
-async function generarListadoAlumnosPorCurso_() {
-  if (!usuarioSoporte || !window.Swal || !btnGenerarListadoEstudiantes) return;
-  const boton = btnGenerarListadoEstudiantes;
-  const htmlOriginal = boton.innerHTML;
-  boton.disabled = true;
-  try {
-    window.Swal.fire({
-      title:"Listado de estudiantes",text:"Consultando cursos registrados...",
-      allowOutsideClick:false,allowEscapeKey:false,showConfirmButton:false,
-      didOpen:()=>window.Swal.showLoading()
-    });
-    const documentos = await getDocsFromServer(collection(db,"cursos"));
-    const cursos = documentos.docs.map(d=>({id:d.id,...d.data()}))
-      .filter(c=>String(c.estado || "ACTIVO").trim().toUpperCase()==="ACTIVO")
-      .sort((a,b)=>(Number(a.anio || 0)-Number(b.anio || 0)) ||
-        String(a.division || "").localeCompare(String(b.division || ""),"es",{numeric:true}));
-    window.Swal.close();
-    if (!cursos.length) {
-      await window.Swal.fire({title:"Sin cursos disponibles",
-        text:"No hay cursos activos registrados.",icon:"info",confirmButtonText:"Aceptar"});
-      return;
-    }
-    const opciones = Object.fromEntries(cursos.map(c=>[c.id,String(c.nombre || c.id)]));
-    const seleccion = await window.Swal.fire({
-      title:"Listado de estudiantes",
-      text:"Seleccioná el curso que querés imprimir.",
-      input:"select",inputOptions:opciones,inputPlaceholder:"Seleccionar curso",
-      showCancelButton:true,confirmButtonText:"Generar PDF",
-      cancelButtonText:"Cancelar",returnFocus:false,
-      preConfirm:()=>{
-        const id = String(window.Swal.getInput()?.value || "").trim();
-        if (!id || !cursos.some(c=>c.id===id)) {
-          window.Swal.showValidationMessage("Seleccioná un curso para continuar.");
-          return false;
-        }
-        // Ventana creada al confirmar, en interacción directa (evita bloqueo emergente).
-        const ventana = window.open("","_blank");
-        if (!ventana) {
-          window.Swal.showValidationMessage("Permití las ventanas emergentes para generar el PDF.");
-          return false;
-        }
-        ventana.document.write('<!doctype html><html lang="es"><meta charset="utf-8"><title>Preparando listado</title><body style="font-family:Arial;padding:24px">Preparando listado de estudiantes...</body></html>');
-        ventana.document.close();
-        return {id,ventana};
-      }
-    });
-    if (!seleccion.isConfirmed || !seleccion.value) return;
-    const {id,ventana} = seleccion.value;
-    const curso = cursos.find(c=>c.id===id);
-    try {
-      const documentosAlumnos = await getDocsFromServer(query(
-        collection(db,"usuarios"),where("cursoId","==",id)
-      ));
-      const alumnos = documentosAlumnos.docs.map(d=>d.data()).filter(a=>{
-        const rol = String(a.rol || "").trim().toUpperCase();
-        const estado = String(a.estado || "").trim().toUpperCase();
-        const vinculo = String(a.tipoVinculo || "").trim().toUpperCase();
-        return rol==="ALUMNO" && estado==="ACTIVO" && vinculo!=="BAJA" &&
-          vinculo!=="CURSADA_COMPLETA" && String(a.nombreCompleto || "").trim();
-      });
-      if (!alumnos.length) {
-        if (!ventana.closed) ventana.close();
-        await window.Swal.fire({title:"Sin estudiantes en este curso",
-          text:"No hay estudiantes activos asignados al curso seleccionado.",
-          icon:"info",confirmButtonText:"Aceptar"});
-        return;
-      }
-      if (!ventana.closed) {
-        ventana.document.open();
-        ventana.document.write(construirHtmlListadoAlumnos_(curso,alumnos));
-        ventana.document.close();
-        ventana.focus();
-      }
-    } catch (error) {
-      console.error("Error al consultar estudiantes para el PDF:",error);
-      if (!ventana.closed) {
-        ventana.document.open();
-        ventana.document.write('<!doctype html><html lang="es"><meta charset="utf-8"><title>Error</title><body style="font-family:Arial;padding:24px">No se pudo generar el listado. Revisá el portal.</body></html>');
-        ventana.document.close();
-      }
-      await window.Swal.fire({title:"No se pudo generar el listado",
-        text:"Revisá la conexión y los permisos de Firestore.",
-        icon:"error",confirmButtonText:"Aceptar"});
-    }
-  } catch (error) {
-    console.error("Error al preparar el listado de estudiantes:",error);
-    window.Swal?.close();
-    await window.Swal?.fire({title:"No se pudieron consultar los cursos",
-      text:"Revisá la conexión y los permisos de Firestore.",
-      icon:"error",confirmButtonText:"Aceptar"});
-  } finally {
-    boton.disabled = false;
-    boton.innerHTML = htmlOriginal;
-  }
-}
-if (btnGenerarListadoEstudiantes) {
-  btnGenerarListadoEstudiantes.addEventListener("click",generarListadoAlumnosPorCurso_);
-}
 
 if (btnImportarCursosAlumnos) {
   btnImportarCursosAlumnos.addEventListener("click", () => {
