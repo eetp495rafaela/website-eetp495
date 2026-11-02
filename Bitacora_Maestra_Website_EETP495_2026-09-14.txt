@@ -10869,3 +10869,100 @@ No confundir validación del código con pruebas de producción.
 
 FIN ACTUALIZACIÓN 02/11/2026 — BLOQUE 80
 ======================================================================
+
+
+======================================================================
+81. IMPRESIÓN DE LISTADOS PDF: VERTICAL Y HOJA POR CURSO
+======================================================================
+
+FECHA: 02/11/2026.
+MOTIVO: requerimiento del titular de imprimir los listados de estudiantes
+en A4 vertical, comenzar cada curso en una hoja diferente cuando se
+selecciona TODOS LOS CURSOS y aumentar exclusivamente la letra de los
+datos de la planilla del personal de reuniones plenarias.
+AUTORIZACIÓN: petición expresa en conversación del 02/11/2026.
+ESTADO: IMPLEMENTADO EN GITHUB, PROBADO CON DATOS FICTICIOS;
+PENDIENTE VALIDACIÓN FINAL EN NAVEGADOR Y CON CUENTAS REALES.
+
+81.1 LISTADO PDF DE ESTUDIANTES (SOPORTE Y GESTIÓN)
+---------------------------------------------------
+- Archivo: assets/js/listado-estudiantes-pdf.js, generador común.
+- Formato nuevo: A4 VERTICAL (portrait), márgenes 9 mm arriba/
+  abajo y 10 mm a izquierda/derecha.
+- Selección de un curso: impresión continua del curso elegido,
+  permitiendo tantas páginas como sean necesarias.
+- Selección TODOS LOS CURSOS: orden por año/división;
+  cada curso empieza en una nueva hoja mediante CSS de impresión:
+  main.todos .curso + .curso { break-before: page;
+                               page-break-before: always; }
+- Cada sección incluye su propio encabezado con identificación
+  institucional, nombre de curso, cantidad de estudiantes y fecha.
+- Se mantienen las columnas APELLIDO Y NOMBRE, DNI y CORREO,
+  agrupación por letra y el filtro de alumnos activos con
+  curso válido. Sin firma.
+- Se ajustó el ancho de columnas a 43% / 16% / 41% y el tamaño
+  de la tabla al papel vertical.
+- La altura de filas y letra se adapta progresivamente según
+  cantidad de alumnos del curso para procurar que quepa en una
+  sola hoja. No se ocultan ni recortan estudiantes: en cursos
+  excepcionalmente grandes o con textos extensos puede
+  requerirse una hoja adicional.
+- La opción individual NO fuerza un salto por cantidad de hojas.
+- NO se modificaron Firestore, perfiles, registros, permisos ni
+  reglas existentes.
+- Versionado/caché actualizado en admin/index.html y
+  gestion/index.html:
+  listado-estudiantes-pdf.js?v=20261102-a4-vertical-curso-hoja.
+
+81.2 PLANILLA DOCENTES / PERSONAL
+---------------------------------
+- Archivo: assets/js/contactos-institucionales.js.
+- Solo las celdas de datos (no los encabezados) se incrementaron:
+  apellido y nombre + DNI: font-size de 12,5 a 14,5 px;
+  correo: font-size de 12 a 14 px.
+- Encabezados de columna permanecen en 12 px.
+- Sigue siendo A4 HORIZONTAL con la columna FIRMA y
+  separación alfabética.
+- Referencias de caché actualizadas en ambos portales:
+  contactos-institucionales.js?v=20261102-plenaria-fuente-mayor.
+- Ubicación exacta para modificar a futuro: dentro de
+  construirHtmlAgenda_(), array estilos, reglas
+  ".planilla tbody td" (nombre y DNI), y
+  ".planilla .col-correo" (correo).
+- Mantener ".planilla thead th" sin cambios si solo se
+  busca agrandar los datos de los contactos.
+
+81.3 COMMITS
+-------------
+  67d4d7a — estudiantes: A4 portrait y curso por hoja.
+  c897baa — docentes: agrandar tipografía de datos.
+  fd6da2d — Soporte: versiones nuevas de JS.
+  15c1c98 — Gestión: versiones nuevas de JS.
+
+81.4 VALIDACIÓN / PENDIENTES
+-----------------------------
+- Las pruebas de sintaxis JavaScript y generación HTML ficticia
+  verificaron A4 vertical, saltos de página CSS para TODOS,
+  encabezados institucionales por curso, orden de cursos,
+  selección individual y reglas de las fuentes del personal.
+- Se simuló PDF con datos ficticios en A4 mediante motor
+  de impresión: ejemplos con 28, 35 y 45 alumnos por curso
+  resultaron en una página por curso, sin mezclar cursos.
+  Esto NO reemplaza prueba real de Chromium/impresora con
+  matrículas y correos de producción.
+- Pendiente probar ambos escenarios (un curso/TODOS) desde
+  Soporte y Gestión, comprobar vista previa de impresión y
+  legibilidad en A4 vertical. Revisar cursos con alta matrícula.
+- Pendiente validar nuevo tamaño de letra de la planilla
+  de personal en vista previa e impresión A4 horizontal.
+- Pendiente sincronizar laptop con git pull --ff-only origin main.
+- Todos los pendientes históricos de los bloques 79 y 80 que
+  no hayan sido explícitamente confirmados siguen vigentes.
+
+CRITERIO DE CONFIDENCIALIDAD: no incluir DNI ni datos reales
+de la comunidad educativa en pruebas, bitácora o repositorios.
+Los datos de los proyectos se usan únicamente en tareas
+autorizadas y se requiere aprobación previa a nuevos cambios.
+
+FIN ACTUALIZACIÓN 02/11/2026 — BLOQUE 81
+======================================================================
