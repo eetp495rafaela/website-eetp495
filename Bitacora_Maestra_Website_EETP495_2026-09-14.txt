@@ -11107,3 +11107,82 @@ Solicitar autorización previa para nuevos cambios.
 
 FIN ACTUALIZACIÓN 02/11/2026 — BLOQUE 83
 ======================================================================
+
+
+======================================================================
+84. CIERRE CONFIRMADO: REFERENTES Y TIPOGRAFÍA DEL SELECTOR
+======================================================================
+
+FECHA: 02/11/2026.
+MOTIVO: documentar la comprobación de funcionamiento comunicada
+por el titular y su ajuste local del tamaño de letra del selector
+de cursos para generar listados PDF.
+AUTORIZACIÓN: expresa del titular, 02/11/2026, para registrar
+el cierre de estos cambios en la Bitácora Maestra.
+ESTADO: CONFIRMADO POR EL USUARIO Y VERIFICADO EN GITHUB.
+
+84.1 REFERENTES INSTITUCIONALES — CONFIRMADO
+---------------------------------------------
+- El titular informó: "Todo funciona perfecto", luego de las
+  correcciones del formulario Referentes Institucionales.
+- Se deja constancia de su validación de uso, sin atribuir
+  pruebas directas en producción al asistente.
+- En el selector Persona se consideran el rol principal
+  (usuario.rol) y los roles adicionales (usuario.roles[]).
+- Continúa mostrándose solo personal ACTIVO, en orden
+  alfabético, de acuerdo con el cargo seleccionado.
+- Código confirmado en assets/js/referentes-admin.js.
+- Se considera cerrada la comprobación general pendiente
+  consignada en el bloque 83. La validación exhaustiva de
+  todos los cargos y escenarios de edición, si se requiriera,
+  puede realizarse aparte y no se declara aquí efectuada.
+
+84.2 SELECTOR DE CURSOS PDF — FUENTE NUNITO SANS 0.88REM
+-------------------------------------------------------
+- El titular ajustó en su copia local el tamaño de fuente
+  del desplegable de selección de cursos a 0.88rem.
+- Commit local tras rebase: 0aea290 — "Aumenté a 0.88rem
+  el tamaño del texto selector de cursos".
+- El ajuste se comprobó publicado en los dos CSS de GitHub:
+  assets/css/portal-admin.css
+  assets/css/portal-gestion.css
+- Reglas exclusivas del selector:
+  .swal2-popup .swal2-select.selector-curso-listado-pdf,
+  .swal2-popup .swal2-select.selector-curso-listado-pdf option {
+    font-family: "Nunito Sans", sans-serif !important;
+    font-size: 0.88rem !important;
+  }
+- El usuario informó que todo funciona correctamente.
+  Se considera confirmado el resultado de uso, sin alterar
+  los otros formularios ni las funciones del PDF.
+
+84.3 SINCRONIZACIÓN GIT
+-----------------------
+- Durante la sincronización, el equipo local tenía un commit
+  propio y origin/main tres commits nuevos, por lo que
+  git pull --ff-only rechazó correctamente el avance.
+- Se diagnosticó mediante git log --left-right y git status.
+- El titular ejecutó git rebase origin/main con éxito.
+- Resultado confirmado entonces: main [adelante 1], con
+  nuevo commit 0aea290. Posteriormente se comprobó que
+  las reglas 0.88rem están presentes en los CSS de GitHub.
+- No se utilizó push --force ni se descartaron commits.
+- Tras incorporar este bloque de bitácora al repositorio,
+  se debe traer este nuevo commit a la laptop mediante
+  git pull --ff-only origin main, si el árbol local lo permite.
+
+84.4 ALCANCE Y PENDIENTES
+--------------------------
+- Único cambio de este bloque: documentación del cierre.
+- No se modificaron archivos de aplicación, datos de
+  Firestore, reglas, cuentas, roles, referentes ni PDFs.
+- Las notas "pendiente de comprobación visual" de los
+  bloques 82 y 83 quedan complementadas por la posterior
+  confirmación del titular, registrada aquí.
+- Se mantienen los pendientes históricos no comprendidos
+  en este cierre y no confirmados expresamente.
+- Mantener la confidencialidad de los datos y proyectos;
+  solicitar autorización previa antes de nuevos cambios.
+
+FIN ACTUALIZACIÓN 02/11/2026 — BLOQUE 84
+======================================================================
