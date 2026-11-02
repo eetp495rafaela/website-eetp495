@@ -10539,3 +10539,102 @@ esta actualización documental.
 
 FIN ACTUALIZACIÓN 01/11/2026 — BLOQUE 77
 ======================================================================
+
+
+======================================================================
+78. PLANILLA DE ASISTENCIA PARA REUNIONES PLENARIAS — 02/11/2026
+======================================================================
+
+FECHA: 02/11/2026.
+MOTIVO: adaptar la agenda institucional alfabética a una planilla
+imprimible para registrar la asistencia y firma del personal
+en reuniones plenarias.
+AUTORIZACIÓN: expresa del titular en conversación del 02/11/2026.
+ESTADO: IMPLEMENTADO EN GITHUB (main); PENDIENTE prueba visual
+y de impresión con sesión real autorizada.
+
+78.1 REVISIÓN DE FUENTES Y DATOS
+--------------------------------
+- Se revisó el generador vigente en
+  assets/js/contactos-institucionales.js, los botones de Soporte
+  y Gestión, el registro de usuarios y firestore.rules.
+- El campo dni YA EXISTE en los documentos de la colección
+  usuarios y se carga/edita desde el Portal Soporte.
+- El DNI no es obligatorio en todos los registros:
+  cuando falta o no tiene siete u ocho dígitos se deja su celda
+  vacía y se muestra el total de DNI pendientes de completar.
+- La consulta conserva el filtro rol principal != ALUMNO y
+  excluye usuarios que no estén ACTIVO, sin nombre o sin correo.
+- Se conserva la agrupación por inicial de nombreCompleto y
+  el orden alfabético con Intl.Collator("es") (incluye Ñ).
+  Recordar que el orden por apellido requiere apellido primero
+  en el campo nombreCompleto de Firestore.
+
+78.2 DISEÑO DE LA PLANILLA
+--------------------------
+- Nuevo título imprimible: "Planilla de asistencia - Reunión
+  plenaria", con escudo de la E.E.T.P. N.º 495, cantidad de
+  usuarios activos y fecha de generación.
+- Espacios para completar fecha, horario y lugar de reunión.
+- Formato A4 HORIZONTAL (apaisado), tabla de cuatro columnas:
+  APELLIDO Y NOMBRE (32 %) | DNI (12 %) | CORREO (34 %) |
+  FIRMA (22 %). Cada fila dispone de 15 mm de alto para firma.
+- Letras alfabéticas como filas separadoras, cabeceras repetibles
+  en cada página y prevención de corte de filas al imprimir.
+- Vista de consulta adaptable a dispositivos estrechos mediante
+  desplazamiento horizontal de la tabla; el PDF se imprime en
+  tamaño A4 horizontal.
+- Si falta un DNI, no se omite a esa persona: casillero en blanco.
+- Continúa la acción "Imprimir / Guardar PDF" del navegador;
+  no se crean archivos en Firestore ni en Google Drive.
+- Se mantiene el texto del botón "Generar agenda PDF" en
+  Soporte y Gestión para no afectar la disposición visual
+  existente, aunque el contenido ahora es una planilla de firmas.
+
+78.3 ARCHIVOS Y COMMITS
+-----------------------
+- assets/js/contactos-institucionales.js:
+  commit 6726c36 — nuevo generador con DNI y firma.
+- admin/index.html:
+  commit cf7f265 — versión nueva del generador para Soporte.
+- gestion/index.html:
+  commit a2c6185 — versión nueva para Gestión.
+- Nombre de versión: 20261102-asistencia-plenaria.
+- Se probó la construcción del HTML con datos ficticios:
+  títulos, columnas, agrupación con Ñ, DNI normalizados,
+  DNI ausente, escape seguro de caracteres y A4 horizontal.
+- Se releyeron los tres archivos desde GitHub después de
+  aplicarlos y se verificó la nueva versión en ambos portales.
+- No se modificaron las reglas de Firestore, la base de datos,
+  los documentos reales, Google Contacts ni Apps Script.
+
+78.4 RESGUARDO DE DATOS Y PERMISOS
+----------------------------------
+- El DNI es un dato personal; el documento se genera únicamente
+  desde los accesos de Contactos Institucionales habilitados por
+  roles y las reglas existentes de Firestore.
+- Los PDF impresos/guardados deben permanecer en el circuito
+  institucional autorizado. No divulgar ni publicar planillas.
+- Acuerdo explícito del titular: no compartir datos/código de
+  sus repositorios, Firestore, Supabase ni otros proyectos con
+  terceras personas sin su permiso y solicitar siempre
+  autorización expresa antes de implementar cambios.
+- La autorización de este bloque se limita a la modificación
+  aprobada del generador y su documentación.
+
+78.5 VALIDACIONES PENDIENTES
+----------------------------
+[P1] Confirmar en producción la tabla desde Soporte y Gestión
+con usuarios de prueba/perfiles autorizados, sin enviar
+capturas con DNI reales si no son necesarias.
+[P2] Comprobar impresión o Guardar PDF en A4 horizontal:
+cabeceras al cambiar de página, agrupación por letras,
+lectura de correos largos y espacio suficiente para firmar.
+[P3] Revisar si hay usuarios activos sin DNI y completarlos,
+si corresponde, mediante Soporte > Usuarios > Editar usuario.
+[P4] Mantener pendientes previos del bloque 77: activadores
+antiguos de Google Sheets, Google Contacts multicuenta,
+backup, auditoría de permisos y planificación 2027.
+
+FIN ACTUALIZACIÓN 02/11/2026 — BLOQUE 78
+======================================================================
