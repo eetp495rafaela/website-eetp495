@@ -321,11 +321,12 @@ function cargarPersonasParaCargo(cargo, personaSeleccionada = "") {
   const rolNecesario = obtenerRolParaCargo(cargo);
 
   const personas = usuariosReferentesCargados.filter((usuario) => {
-    const rol = String(usuario.rol || "")
-      .trim()
-      .toUpperCase();
+    const roles = [
+      usuario.rol,
+      ...(Array.isArray(usuario.roles) ? usuario.roles : []),
+    ].map((rol) => String(rol || "").trim().toUpperCase());
 
-    return rol === rolNecesario;
+    return roles.includes(rolNecesario);
   });
 
   opcionInicial.textContent = personas.length
