@@ -1008,13 +1008,14 @@ body.modal-abierto {
   flex-wrap: nowrap;
 }
 
-
 @media (max-width: 850px) {
   #contactos-institucionales .filtros-contactos-institucionales {
     grid-template-columns: 1fr;
   }
 
-  #contactos-institucionales .filtros-contactos-institucionales .campo-busqueda {
+  #contactos-institucionales
+    .filtros-contactos-institucionales
+    .campo-busqueda {
     grid-column: span 1;
   }
 }
@@ -4873,7 +4874,6 @@ body.swal2-shown {
   }
 }
 
-
 /* =====================================================
    RESPONSIVE GLOBAL PORTAL ADMIN - MÓVIL / TABLET
    Revisión 2026-10-20
@@ -4955,8 +4955,7 @@ body {
   max-width: 100%;
 }
 
-@media (max-width: 700px),
-  (max-width: 950px) and (max-height: 620px) {
+@media (max-width: 700px), (max-width: 950px) and (max-height: 620px) {
   /* Modales simples/confirmaciones: ocupan el ancho útil y permiten scroll. */
   .modal:not([hidden]),
   .modal-confirmacion:not([hidden]) {
@@ -5054,11 +5053,25 @@ body {
   grid-template-columns: repeat(12, minmax(0, 1fr));
   gap: 16px;
 }
-#formMesaExamenAdmin .mesa-form-basico { grid-column: span 3; min-width: 0; }
-#formMesaExamenAdmin .mesa-form-espacio { grid-column: 1 / -1; min-width: 0; }
-#formMesaExamenAdmin .mesa-form-titulo { grid-column: 1 / -1; min-width: 0; }
-#formMesaExamenAdmin .mesa-form-integrante { grid-column: span 4; min-width: 0; }
-#formMesaExamenAdmin .campo-mesas-cursos-admin { grid-column: 1 / -1; }
+#formMesaExamenAdmin .mesa-form-basico {
+  grid-column: span 3;
+  min-width: 0;
+}
+#formMesaExamenAdmin .mesa-form-espacio {
+  grid-column: 1 / -1;
+  min-width: 0;
+}
+#formMesaExamenAdmin .mesa-form-titulo {
+  grid-column: 1 / -1;
+  min-width: 0;
+}
+#formMesaExamenAdmin .mesa-form-integrante {
+  grid-column: span 4;
+  min-width: 0;
+}
+#formMesaExamenAdmin .campo-mesas-cursos-admin {
+  grid-column: 1 / -1;
+}
 #formMesaExamenAdmin .mesa-form-titulo h4 {
   margin: 4px 0 0;
   color: var(--azul-oscuro);
@@ -5076,20 +5089,34 @@ body {
   justify-content: center;
 }
 @media (max-width: 1100px) {
-  #formMesaExamenAdmin > .form-grid { grid-template-columns: repeat(6, minmax(0, 1fr)); }
-  #formMesaExamenAdmin .mesa-form-basico { grid-column: span 3; }
-  #formMesaExamenAdmin .mesa-form-integrante { grid-column: span 2; }
+  #formMesaExamenAdmin > .form-grid {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+  }
+  #formMesaExamenAdmin .mesa-form-basico {
+    grid-column: span 3;
+  }
+  #formMesaExamenAdmin .mesa-form-integrante {
+    grid-column: span 2;
+  }
 }
 @media (max-width: 760px) {
-  #formMesaExamenAdmin .mesa-form-integrante { grid-column: span 3; }
+  #formMesaExamenAdmin .mesa-form-integrante {
+    grid-column: span 3;
+  }
 }
 @media (max-width: 560px) {
-  #formMesaExamenAdmin > .form-grid { grid-template-columns: minmax(0, 1fr); }
+  #formMesaExamenAdmin > .form-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
   #formMesaExamenAdmin .mesa-form-basico,
-  #formMesaExamenAdmin .mesa-form-integrante { grid-column: 1 / -1; }
+  #formMesaExamenAdmin .mesa-form-integrante {
+    grid-column: 1 / -1;
+  }
   #formMesaExamenAdmin > .acciones > #btnGuardarMesaExamenAdmin,
   #formMesaExamenAdmin > .acciones > #btnCancelarMesaExamenAdmin {
-    width: 100%; min-width: 0; flex: 1 1 100%;
+    width: 100%;
+    min-width: 0;
+    flex: 1 1 100%;
   }
 }
 
@@ -5105,7 +5132,9 @@ body {
 }
 
 /* Separar la configuración de períodos del módulo anterior y mostrar lo guardado. */
-#panelPeriodosAsistencia:not([hidden]) { margin-top: 30px; }
+#panelPeriodosAsistencia:not([hidden]) {
+  margin-top: 30px;
+}
 #panelPeriodosAsistencia .resumen-periodos-registrados {
   margin-top: 22px;
   padding: 17px;
@@ -5114,7 +5143,9 @@ body {
   background: #eef6fd;
   color: #173b60;
 }
-#panelPeriodosAsistencia .resumen-periodos-registrados h4 { margin: 0 0 12px; }
+#panelPeriodosAsistencia .resumen-periodos-registrados h4 {
+  margin: 0 0 12px;
+}
 #panelPeriodosAsistencia .grilla-periodos-registrados {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -5131,9 +5162,10 @@ body {
   color: #163450;
 }
 @media (max-width: 760px) {
-  #panelPeriodosAsistencia .grilla-periodos-registrados { grid-template-columns: 1fr; }
+  #panelPeriodosAsistencia .grilla-periodos-registrados {
+    grid-template-columns: 1fr;
+  }
 }
-
 
 /* =====================================================
    CORRECCIÓN RESPONSIVE 29/10/2026 — CONFIGURACIÓN
@@ -5188,29 +5220,31 @@ body {
   }
 }
 
-
-
 /* Estudiantes: tres botones equivalentes, responsive (02/11/2026). */
 #estudiantes .acciones-estudiantes {
-  display:flex;
-  align-items:center;
-  justify-content:flex-end;
-  flex-wrap:wrap;
-  gap:10px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 10px;
 }
 #estudiantes .acciones-estudiantes > .btn-accion {
-  box-sizing:border-box;
-  flex:0 0 190px;
-  width:190px;
-  min-width:190px;
-  min-height:44px;
-  padding:10px 12px;
-  font-size:0.88rem;
-  white-space:nowrap;
+  box-sizing: border-box;
+  flex: 0 0 190px;
+  width: 190px;
+  min-width: 190px;
+  min-height: 44px;
+  padding: 10px 12px;
+  font-size: 0.88rem;
+  white-space: nowrap;
 }
-@media (max-width:1100px) {
-  #estudiantes .encabezado-listado {flex-wrap:wrap}
-  #estudiantes .acciones-estudiantes {justify-content:flex-start}
+@media (max-width: 1100px) {
+  #estudiantes .encabezado-listado {
+    flex-wrap: wrap;
+  }
+  #estudiantes .acciones-estudiantes {
+    justify-content: flex-start;
+  }
 }
 
 /* 30/10/2026 — dos ajustes puntuales del Admin en celular.
@@ -5244,4 +5278,5 @@ body {
 .swal2-popup .swal2-select.selector-curso-listado-pdf,
 .swal2-popup .swal2-select.selector-curso-listado-pdf option {
   font-family: "Nunito Sans", sans-serif !important;
+  font-size: 0.81rem !important;
 }

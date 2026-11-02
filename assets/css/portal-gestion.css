@@ -811,7 +811,6 @@ body {
   }
 }
 
-
 #contactos-institucionales .panel-contactos-gestion {
   display: block;
 }
@@ -820,7 +819,10 @@ body {
   width: 100%;
 }
 
-#contactos-institucionales .panel-contactos-gestion .contenido-panel-gestion > p:first-child {
+#contactos-institucionales
+  .panel-contactos-gestion
+  .contenido-panel-gestion
+  > p:first-child {
   margin-top: 0;
 }
 
@@ -3446,7 +3448,6 @@ body {
   }
 }
 
-
 /* =====================================================
    RESPONSIVE GLOBAL - ALERTAS / VIEWPORT MÓVIL
    Revisión 2026-10-20
@@ -3487,8 +3488,7 @@ body {
   max-width: 100%;
 }
 
-@media (max-width: 700px),
-  (max-width: 950px) and (max-height: 620px) {
+@media (max-width: 700px), (max-width: 950px) and (max-height: 620px) {
   .swal2-container {
     padding: max(10px, env(safe-area-inset-top))
       max(10px, env(safe-area-inset-right))
@@ -3536,11 +3536,25 @@ body {
   grid-template-columns: repeat(12, minmax(0, 1fr)) !important;
   gap: 16px !important;
 }
-#panelMesaDireccionGestion #formMesaGestion .mesa-form-basico { grid-column: span 3 !important; min-width: 0; }
-#panelMesaDireccionGestion #formMesaGestion .mesa-form-espacio { grid-column: 1 / -1 !important; min-width: 0; }
-#panelMesaDireccionGestion #formMesaGestion .mesa-form-titulo { grid-column: 1 / -1 !important; min-width: 0; }
-#panelMesaDireccionGestion #formMesaGestion .mesa-form-integrante { grid-column: span 4 !important; min-width: 0; }
-#panelMesaDireccionGestion #formMesaGestion .campo-mesas-cursos-gestion { grid-column: 1 / -1 !important; }
+#panelMesaDireccionGestion #formMesaGestion .mesa-form-basico {
+  grid-column: span 3 !important;
+  min-width: 0;
+}
+#panelMesaDireccionGestion #formMesaGestion .mesa-form-espacio {
+  grid-column: 1 / -1 !important;
+  min-width: 0;
+}
+#panelMesaDireccionGestion #formMesaGestion .mesa-form-titulo {
+  grid-column: 1 / -1 !important;
+  min-width: 0;
+}
+#panelMesaDireccionGestion #formMesaGestion .mesa-form-integrante {
+  grid-column: span 4 !important;
+  min-width: 0;
+}
+#panelMesaDireccionGestion #formMesaGestion .campo-mesas-cursos-gestion {
+  grid-column: 1 / -1 !important;
+}
 #panelMesaDireccionGestion #formMesaGestion .mesa-form-titulo h4 {
   margin: 4px 0 0;
   color: var(--gestion-azul-oscuro);
@@ -3558,20 +3572,34 @@ body {
   justify-content: center;
 }
 @media (max-width: 1100px) {
-  #panelMesaDireccionGestion #formMesaGestion > .form-grid-mesas-gestion { grid-template-columns: repeat(6, minmax(0, 1fr)) !important; }
-  #panelMesaDireccionGestion #formMesaGestion .mesa-form-basico { grid-column: span 3 !important; }
-  #panelMesaDireccionGestion #formMesaGestion .mesa-form-integrante { grid-column: span 2 !important; }
+  #panelMesaDireccionGestion #formMesaGestion > .form-grid-mesas-gestion {
+    grid-template-columns: repeat(6, minmax(0, 1fr)) !important;
+  }
+  #panelMesaDireccionGestion #formMesaGestion .mesa-form-basico {
+    grid-column: span 3 !important;
+  }
+  #panelMesaDireccionGestion #formMesaGestion .mesa-form-integrante {
+    grid-column: span 2 !important;
+  }
 }
 @media (max-width: 760px) {
-  #panelMesaDireccionGestion #formMesaGestion .mesa-form-integrante { grid-column: span 3 !important; }
+  #panelMesaDireccionGestion #formMesaGestion .mesa-form-integrante {
+    grid-column: span 3 !important;
+  }
 }
 @media (max-width: 560px) {
-  #panelMesaDireccionGestion #formMesaGestion > .form-grid-mesas-gestion { grid-template-columns: minmax(0, 1fr) !important; }
+  #panelMesaDireccionGestion #formMesaGestion > .form-grid-mesas-gestion {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
   #panelMesaDireccionGestion #formMesaGestion .mesa-form-basico,
-  #panelMesaDireccionGestion #formMesaGestion .mesa-form-integrante { grid-column: 1 / -1 !important; }
+  #panelMesaDireccionGestion #formMesaGestion .mesa-form-integrante {
+    grid-column: 1 / -1 !important;
+  }
   #formMesaGestion > .acciones-mesas-form-gestion > #btnGuardarMesaGestion,
   #formMesaGestion > .acciones-mesas-form-gestion > #btnCancelarMesaGestion {
-    width: 100%; min-width: 0; flex: 1 1 100%;
+    width: 100%;
+    min-width: 0;
+    flex: 1 1 100%;
   }
 }
 
@@ -3587,7 +3615,9 @@ body {
 }
 
 /* Consulta trimestral de asistencia - Gestion */
-.panel-periodos-consulta-gestion { margin-top: 28px; }
+.panel-periodos-consulta-gestion {
+  margin-top: 28px;
+}
 .filtros-periodos-consulta-gestion {
   display: flex;
   align-items: end;
@@ -3595,7 +3625,9 @@ body {
   flex-wrap: wrap;
   margin: 18px 0;
 }
-.filtros-periodos-consulta-gestion .campo-filtro-gestion { width: 170px; }
+.filtros-periodos-consulta-gestion .campo-filtro-gestion {
+  width: 170px;
+}
 #cicloPeriodosGestion {
   display: block;
   width: 100%;
@@ -3615,7 +3647,9 @@ body {
   border-radius: 12px;
   color: #173b60;
 }
-.resumen-periodos-gestion h4 { margin: 0 0 14px; }
+.resumen-periodos-gestion h4 {
+  margin: 0 0 14px;
+}
 .grilla-periodos-gestion {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -3632,8 +3666,12 @@ body {
   color: #173b60;
 }
 @media (max-width: 760px) {
-  .grilla-periodos-gestion { grid-template-columns: 1fr; }
-  .filtros-periodos-consulta-gestion .campo-filtro-gestion { width: 100%; }
+  .grilla-periodos-gestion {
+    grid-template-columns: 1fr;
+  }
+  .filtros-periodos-consulta-gestion .campo-filtro-gestion {
+    width: 100%;
+  }
 }
 
 /* Fuente institucional en el selector del modal de listados de estudiantes.
@@ -3641,4 +3679,5 @@ body {
 .swal2-popup .swal2-select.selector-curso-listado-pdf,
 .swal2-popup .swal2-select.selector-curso-listado-pdf option {
   font-family: "Nunito Sans", sans-serif !important;
+  font-size: 0.81rem !important;
 }
