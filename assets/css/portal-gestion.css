@@ -765,6 +765,23 @@ body {
   }
 }
 
+/* Acciones Estudiantes: dos botones de igual tamaño, responsivos. */
+#estudiantes .acciones-gestion > .btn-gestion {
+  box-sizing: border-box;
+  flex: 0 0 220px;
+  width: 220px;
+  min-width: 220px;
+  min-height: 44px;
+  white-space: nowrap;
+}
+@media (max-width: 520px) {
+  #estudiantes .acciones-gestion > .btn-gestion {
+    flex: 1 1 100%;
+    width: 100%;
+    min-width: 0;
+  }
+}
+
 /* =========================
    CONTACTOS INSTITUCIONALES
 ========================= */
