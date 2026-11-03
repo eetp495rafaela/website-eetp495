@@ -5280,3 +5280,211 @@ body {
   font-family: "Nunito Sans", sans-serif !important;
   font-size: 0.88rem !important;
 }
+
+/* ===========================================================
+   AJUSTES VISUALES EETP495 — 14 solicitudes — 03/11/2026
+   Admin: Usuarios, Espacios, Cursos, Asignaciones, Reemplazos,
+   Referentes, Solicitudes de alta y Usuarios inactivos.
+   =========================================================== */
+#usuarios .acciones-visual-usuarios {
+  display: flex;
+  align-items: stretch;
+  justify-content: flex-start;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 16px;
+}
+#usuarios .acciones-visual-usuarios > .btn-accion {
+  flex: 0 1 220px;
+  min-width: 0;
+}
+#usuarios #mensajeRegistroUsuario:empty,
+#espacios-curriculares #mensajeImportacionPlan:empty,
+#cursos #mensajeRegistroCurso:empty,
+#asignaciones-docentes #mensajeRegistroAsignacion:empty,
+#asignaciones-docentes #mensajeReemplazoDocente:empty,
+#referentes-institucionales #mensajeReferenteInstitucional:empty {
+  min-height: 0;
+  margin: 0;
+}
+#usuarios .separador-usuarios,
+#espacios-curriculares .separador-usuarios,
+#cursos .separador-usuarios,
+#asignaciones-docentes .separador-usuarios,
+#referentes-institucionales .separador-usuarios {
+  margin-top: 18px;
+  margin-bottom: 18px;
+}
+#espacios-curriculares .cabecera-visual-espacios {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+}
+#espacios-curriculares .cabecera-visual-espacios > p {
+  flex: 1 1 auto;
+  min-width: 0;
+  margin: 0;
+}
+#espacios-curriculares .cabecera-visual-espacios > .acciones {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  flex: 0 0 510px;
+  gap: 12px;
+  margin: 0;
+}
+#espacios-curriculares .cabecera-visual-espacios .btn-accion {
+  min-width: 0;
+  width: 100%;
+  white-space: normal;
+}
+#cursos .grid-botones-cursos {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  align-items: end;
+}
+#cursos .campo-boton-visual,
+#asignaciones-docentes .campo-boton-visual {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  min-width: 0;
+}
+#cursos .campo-boton-visual .btn-accion,
+#asignaciones-docentes .campo-boton-visual .btn-accion {
+  width: 100%;
+  min-width: 0;
+  min-height: 44px;
+  white-space: normal;
+}
+#asignaciones-docentes .grid-botones-asignaciones,
+#asignaciones-docentes .grid-botones-reemplazos {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: 16px;
+  align-items: end;
+}
+#asignaciones-docentes .grid-botones-asignaciones > :nth-child(-n+3),
+#asignaciones-docentes .grid-botones-reemplazos > :nth-child(-n+3) {
+  grid-column: span 4;
+}
+#asignaciones-docentes .grid-botones-asignaciones > :nth-child(n+4),
+#asignaciones-docentes .grid-botones-reemplazos > :nth-child(n+4) {
+  grid-column: span 3;
+}
+#referentes-institucionales .grid-ajuste-referentes {
+  display: grid;
+  grid-template-columns: minmax(0, .9fr) minmax(0, 1.2fr) minmax(0, .95fr) minmax(0, .7fr);
+  align-items: end;
+}
+#referentes-institucionales .grid-ajuste-referentes .campo-formulario,
+#asignaciones-docentes .grid-botones-asignaciones .campo-formulario,
+#asignaciones-docentes .grid-botones-reemplazos .campo-formulario {
+  min-width: 0;
+}
+#referentes-institucionales #campoCursoReferenteInstitucional[hidden] {
+  display: none !important;
+}
+#referentes-institucionales .acciones-visuales-referentes {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 12px;
+  margin-top: 16px;
+  width: 100%;
+}
+#referentes-institucionales .acciones-visuales-referentes > button {
+  flex: 1 1 0;
+  width: 0;
+  min-width: 0;
+  min-height: 46px;
+  text-align: center;
+  white-space: normal;
+}
+#referentes-institucionales .acciones-visuales-referentes > button[hidden] {
+  display: none !important;
+}
+.panel-solicitudes-alta > .encabezado-listado,
+.panel-usuarios-inactivos > .encabezado-listado {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+}
+.panel-solicitudes-alta > .encabezado-listado > .acciones,
+.panel-usuarios-inactivos > .encabezado-listado > .acciones {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: flex-start;
+  justify-content: flex-end;
+  margin: 0;
+}
+@media (max-width: 1150px) {
+  #espacios-curriculares .cabecera-visual-espacios {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  #espacios-curriculares .cabecera-visual-espacios > .acciones {
+    flex: 0 0 auto;
+    width: 100%;
+  }
+  #asignaciones-docentes .grid-botones-asignaciones,
+  #asignaciones-docentes .grid-botones-reemplazos {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  #asignaciones-docentes .grid-botones-asignaciones > *,
+  #asignaciones-docentes .grid-botones-reemplazos > * {
+    grid-column: auto;
+  }
+  #referentes-institucionales .grid-ajuste-referentes {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 760px) {
+  /* Las tablas internas deben desplazarse horizontalmente dentro de sus paneles,
+     nunca ensanchar toda la página en celulares. */
+  .grid-configuracion-portal {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .grid-configuracion-portal > .panel-solicitudes-alta,
+  .grid-configuracion-portal > .panel-usuarios-inactivos {
+    min-width: 0;
+    max-width: 100%;
+  }
+  #usuarios .acciones-visual-usuarios > .btn-accion {
+    flex: 1 1 100%;
+    width: 100%;
+  }
+  #cursos .grid-botones-cursos,
+  #asignaciones-docentes .grid-botones-asignaciones,
+  #asignaciones-docentes .grid-botones-reemplazos,
+  #referentes-institucionales .grid-ajuste-referentes {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  #referentes-institucionales .acciones-visuales-referentes {
+    flex-direction: column;
+  }
+  #referentes-institucionales .acciones-visuales-referentes > button {
+    width: 100%;
+    flex: 0 0 auto;
+  }
+  .panel-solicitudes-alta > .encabezado-listado,
+  .panel-usuarios-inactivos > .encabezado-listado {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .panel-solicitudes-alta > .encabezado-listado > .acciones,
+  .panel-usuarios-inactivos > .encabezado-listado > .acciones {
+    justify-content: stretch;
+    width: 100%;
+  }
+  .panel-solicitudes-alta > .encabezado-listado .btn-accion,
+  .panel-usuarios-inactivos > .encabezado-listado .btn-accion {
+    width: 100%;
+    min-width: 0;
+  }
+}
+@media (max-width: 580px) {
+  #espacios-curriculares .cabecera-visual-espacios > .acciones {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

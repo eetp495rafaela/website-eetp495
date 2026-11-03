@@ -8,7 +8,7 @@
 
     <title>Panel de Soporte | E.E.T.P. Nº 495</title>
 
-    <link rel="stylesheet" href="../assets/css/portal-admin.css?v=20261102-nunito-selector" />
+    <link rel="stylesheet" href="../assets/css/portal-admin.css?v=eetp495-visual-3portales-20261103-1" />
     <link rel="stylesheet" href="../assets/css/docentes-libres-taller-admin.css?v=20261103-1" />
     <link rel="icon" href="../assets/img/logo.png" />
 
@@ -366,10 +366,22 @@
               </div>
             </div>
 
-            <div class="acciones">
+            <div class="acciones acciones-visual-usuarios">
               <button class="btn-accion" id="btnRegistrarUsuario" type="submit">
                 <i class="fa-solid fa-user-plus"></i>
                 Registrar usuario
+              </button>
+              <button class="btn-accion" id="btnVerUsuarios" type="button">
+                <i class="fa-solid fa-users"></i>
+                Ver usuarios
+              </button>
+              <button
+                class="btn-accion btn-importar-usuarios"
+                id="btnImportarUsuarios"
+                type="button"
+              >
+                <i class="fa-solid fa-file-import"></i>
+                Importar usuarios
               </button>
             </div>
 
@@ -384,21 +396,6 @@
               <p>Consultá las cuentas autorizadas actualmente.</p>
             </div>
 
-            <div class="acciones-usuarios-listado">
-              <button class="btn-accion" id="btnVerUsuarios" type="button">
-                <i class="fa-solid fa-users"></i>
-                Ver usuarios
-              </button>
-
-              <button
-                class="btn-accion btn-importar-usuarios"
-                id="btnImportarUsuarios"
-                type="button"
-              >
-                <i class="fa-solid fa-file-import"></i>
-                Importar usuarios
-              </button>
-            </div>
 
             <input
               id="archivoImportacionUsuarios"
@@ -579,20 +576,29 @@
         <h2>Espacios Curriculares</h2>
 
         <div class="panel-info">
-          <p>
-            Desde esta sección se importará y administrará el Plan de Estudios
-            institucional, organizado por año y tipo de espacio.
-          </p>
-
-          <div class="acciones">
-            <button
-              class="btn-accion"
-              id="btnImportarPlanEstudios"
-              type="button"
-            >
-              <i class="fa-solid fa-file-import"></i>
-              Importar Plan de Estudios
-            </button>
+          <div class="cabecera-visual-espacios">
+            <p>
+              Desde esta sección se importará y administrará el Plan de Estudios
+              institucional, organizado por año y tipo de espacio.
+            </p>
+            <div class="acciones">
+              <button
+                class="btn-accion"
+                id="btnImportarPlanEstudios"
+                type="button"
+              >
+                <i class="fa-solid fa-file-import"></i>
+                Importar Plan de Estudios
+              </button>
+              <button
+                class="btn-accion"
+                id="btnVerEspaciosCurriculares"
+                type="button"
+              >
+                <i class="fa-solid fa-list"></i>
+                Ver espacios
+              </button>
+            </div>
           </div>
 
           <p id="mensajeImportacionPlan" class="mensaje-formulario"></p>
@@ -608,14 +614,6 @@
               </p>
             </div>
 
-            <button
-              class="btn-accion"
-              id="btnVerEspaciosCurriculares"
-              type="button"
-            >
-              <i class="fa-solid fa-list"></i>
-              Ver espacios
-            </button>
           </div>
 
           <div class="tabla-contenedor">
@@ -664,7 +662,7 @@
             class="formulario-usuario"
             autocomplete="off"
           >
-            <div class="form-grid">
+            <div class="form-grid grid-botones-cursos">
               <div class="campo-formulario">
                 <label for="cursoAnio">Año *</label>
                 <input
@@ -708,14 +706,20 @@
                   <option value="INACTIVO">INACTIVO</option>
                 </select>
               </div>
+              <div class="campo-formulario campo-boton-visual">
+                <button class="btn-accion" id="btnRegistrarCurso" type="submit">
+                  <i class="fa-solid fa-school"></i>
+                  Registrar curso
+                </button>
+              </div>
+              <div class="campo-formulario campo-boton-visual">
+                <button class="btn-accion" id="btnVerCursos" type="button">
+                  <i class="fa-solid fa-list"></i>
+                  Ver cursos
+                </button>
+              </div>
             </div>
 
-            <div class="acciones">
-              <button class="btn-accion" id="btnRegistrarCurso" type="submit">
-                <i class="fa-solid fa-school"></i>
-                Registrar curso
-              </button>
-            </div>
 
             <p id="mensajeRegistroCurso" class="mensaje-formulario"></p>
           </form>
@@ -728,10 +732,6 @@
               <p>Listado de cursos disponibles para asignaciones docentes.</p>
             </div>
 
-            <button class="btn-accion" id="btnVerCursos" type="button">
-              <i class="fa-solid fa-list"></i>
-              Ver cursos
-            </button>
           </div>
 
           <div class="tabla-contenedor">
@@ -782,7 +782,7 @@
             class="formulario-usuario"
             autocomplete="off"
           >
-            <div class="form-grid">
+            <div class="form-grid grid-botones-asignaciones">
               <div class="campo-formulario campo-doble">
                 <label for="asignacionDocente">Docente *</label>
 
@@ -829,18 +829,24 @@
                   <option value="INACTIVA">INACTIVA</option>
                 </select>
               </div>
+              <div class="campo-formulario campo-boton-visual">
+                <button
+                  class="btn-accion"
+                  id="btnRegistrarAsignacion"
+                  type="submit"
+                >
+                  <i class="fa-solid fa-link"></i>
+                  Registrar asignación
+                </button>
+              </div>
+              <div class="campo-formulario campo-boton-visual">
+                <button class="btn-accion" id="btnVerAsignaciones" type="button">
+                  <i class="fa-solid fa-list"></i>
+                  Ver asignaciones
+                </button>
+              </div>
             </div>
 
-            <div class="acciones">
-              <button
-                class="btn-accion"
-                id="btnRegistrarAsignacion"
-                type="submit"
-              >
-                <i class="fa-solid fa-link"></i>
-                Registrar asignación
-              </button>
-            </div>
 
             <p id="mensajeRegistroAsignacion" class="mensaje-formulario"></p>
           </form>
@@ -853,10 +859,6 @@
               <p>Relación entre docentes, cursos y espacios curriculares.</p>
             </div>
 
-            <button class="btn-accion" id="btnVerAsignaciones" type="button">
-              <i class="fa-solid fa-list"></i>
-              Ver asignaciones
-            </button>
           </div>
 
           <div class="filtros-usuarios filtros-asignaciones">
@@ -915,7 +917,7 @@
             class="formulario-usuario"
             autocomplete="off"
           >
-            <div class="form-grid">
+            <div class="form-grid grid-botones-reemplazos">
               <div class="campo-formulario campo-doble">
                 <label for="reemplazoTitular">Docente titular *</label>
 
@@ -955,18 +957,24 @@
 
                 <input id="reemplazoFechaHasta" type="date" required />
               </div>
+              <div class="campo-formulario campo-boton-visual">
+                <button
+                  class="btn-accion"
+                  id="btnRegistrarReemplazo"
+                  type="submit"
+                >
+                  <i class="fa-solid fa-user-clock"></i>
+                  Registrar reemplazo
+                </button>
+              </div>
+              <div class="campo-formulario campo-boton-visual">
+                <button class="btn-accion" id="btnVerReemplazos" type="button">
+                  <i class="fa-solid fa-list"></i>
+                  Ver reemplazos
+                </button>
+              </div>
             </div>
 
-            <div class="acciones">
-              <button
-                class="btn-accion"
-                id="btnRegistrarReemplazo"
-                type="submit"
-              >
-                <i class="fa-solid fa-user-clock"></i>
-                Registrar reemplazo
-              </button>
-            </div>
 
             <p id="mensajeReemplazoDocente" class="mensaje-formulario"></p>
           </form>
@@ -980,10 +988,6 @@
               <p>Reemplazos temporales vigentes, futuros y finalizados.</p>
             </div>
 
-            <button class="btn-accion" id="btnVerReemplazos" type="button">
-              <i class="fa-solid fa-list"></i>
-              Ver reemplazos
-            </button>
           </div>
 
           <div class="tabla-contenedor">
@@ -1161,7 +1165,7 @@
           >
             <input id="referenteInstitucionalId" type="hidden" />
 
-            <div class="form-grid">
+            <div class="form-grid grid-ajuste-referentes">
               <div class="campo-formulario">
                 <label for="referenteCargo">Cargo *</label>
 
@@ -1208,7 +1212,7 @@
               </div>
             </div>
 
-            <div class="acciones">
+            <div class="acciones acciones-visuales-referentes">
               <button
                 class="btn-accion"
                 id="btnGuardarReferenteInstitucional"
@@ -1225,6 +1229,14 @@
                 hidden
               >
                 Cancelar edición
+              </button>
+              <button
+                class="btn-accion"
+                id="btnVerReferentesInstitucionales"
+                type="button"
+              >
+                <i class="fa-solid fa-people-roof"></i>
+                Ver referentes
               </button>
             </div>
 
@@ -1246,14 +1258,6 @@
               </p>
             </div>
 
-            <button
-              class="btn-accion"
-              id="btnVerReferentesInstitucionales"
-              type="button"
-            >
-              <i class="fa-solid fa-people-roof"></i>
-              Ver referentes
-            </button>
           </div>
 
           <div class="filtros-usuarios filtros-referentes-institucionales">
@@ -3069,18 +3073,18 @@
                   completa.
                 </p>
               </div>
+              <div class="acciones">
+                <button
+                  type="button"
+                  class="btn-accion"
+                  id="btnVerSolicitudesAlta"
+                >
+                  <i class="fa-solid fa-list-check"></i>
+                  Ver solicitudes
+                </button>
+              </div>
             </div>
 
-            <div class="acciones">
-              <button
-                type="button"
-                class="btn-accion"
-                id="btnVerSolicitudesAlta"
-              >
-                <i class="fa-solid fa-list-check"></i>
-                Ver solicitudes
-              </button>
-            </div>
 
             <div class="tabla-contenedor">
               <table class="tabla-usuarios tabla-solicitudes-alta">
@@ -3284,18 +3288,18 @@
                   para evaluar su eliminación individual de la base de datos.
                 </p>
               </div>
+              <div class="acciones">
+                <button
+                  type="button"
+                  class="btn-accion"
+                  id="btnVerUsuariosInactivos"
+                >
+                  <i class="fa-solid fa-user-slash"></i>
+                  Ver usuarios para eliminar
+                </button>
+              </div>
             </div>
 
-            <div class="acciones">
-              <button
-                type="button"
-                class="btn-accion"
-                id="btnVerUsuariosInactivos"
-              >
-                <i class="fa-solid fa-user-slash"></i>
-                Ver usuarios para eliminar
-              </button>
-            </div>
 
             <div class="tabla-contenedor">
               <table class="tabla-usuarios tabla-usuarios-inactivos">

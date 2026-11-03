@@ -5167,3 +5167,87 @@ body {
     grid-column: 1 / -1;
   }
 }
+
+/* ===========================================================
+   AJUSTES VISUALES EETP495 — 14 solicitudes — 03/11/2026
+   Docente: Registro Si.R.A., Parte semanal, Listas e Informes.
+   =========================================================== */
+#sira-docente .form-grid-documentacion,
+#parte-sira-docente .form-grid-documentacion {
+  display: grid;
+  align-items: end;
+  gap: 18px;
+}
+#sira-docente .form-grid-documentacion {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+#parte-sira-docente .form-grid-documentacion {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+#sira-docente .form-grid-documentacion > .campo-documentacion,
+#parte-sira-docente .form-grid-documentacion > .campo-documentacion {
+  min-width: 0;
+}
+#sira-docente .form-grid-documentacion > .acciones,
+#parte-sira-docente .form-grid-documentacion > .acciones {
+  display: flex;
+  align-items: stretch;
+  margin: 0;
+  min-width: 0;
+}
+#sira-docente .form-grid-documentacion > .acciones > .btn-accion,
+#parte-sira-docente .form-grid-documentacion > .acciones > .btn-accion {
+  width: 100%;
+  min-width: 0;
+  min-height: 48px;
+  white-space: normal;
+}
+#listas-estudiantes-docente .encabezado-listado,
+#informes-pedagogicos-docente .encabezado-listado {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 20px;
+}
+#listas-estudiantes-docente .encabezado-listado > div:first-child,
+#informes-pedagogicos-docente .encabezado-listado > div:first-child {
+  min-width: 0;
+  flex: 1 1 auto;
+}
+#listas-estudiantes-docente .encabezado-listado > .acciones,
+#informes-pedagogicos-docente .encabezado-listado > .acciones {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: flex-start;
+  justify-content: flex-end;
+  margin: 0;
+}
+@media (max-width: 1020px) {
+  #parte-sira-docente .form-grid-documentacion {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  #listas-estudiantes-docente .encabezado-listado,
+  #informes-pedagogicos-docente .encabezado-listado {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  #listas-estudiantes-docente .encabezado-listado > .acciones,
+  #informes-pedagogicos-docente .encabezado-listado > .acciones {
+    justify-content: flex-start;
+  }
+}
+@media (max-width: 760px) {
+  #sira-docente .form-grid-documentacion,
+  #parte-sira-docente .form-grid-documentacion {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  #listas-estudiantes-docente .encabezado-listado > .acciones,
+  #informes-pedagogicos-docente .encabezado-listado > .acciones {
+    width: 100%;
+  }
+  #listas-estudiantes-docente .encabezado-listado > .acciones .btn-accion,
+  #informes-pedagogicos-docente .encabezado-listado > .acciones .btn-accion {
+    width: 100%;
+    min-width: 0;
+  }
+}
