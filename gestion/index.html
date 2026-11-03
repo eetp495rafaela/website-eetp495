@@ -6,7 +6,7 @@
     <meta content="noindex, nofollow" name="robots" />
     <title>Portal Gestión Institucional | E.E.T.P. Nº 495</title>
     <link
-      href="../assets/css/portal-gestion.css?v=20261103-docentes-libres-github1"
+      href="../assets/css/portal-gestion.css?v=20261103-ajustes-visuales-gestion2"
       rel="stylesheet"
     />
     <link href="../assets/img/logo.png" rel="icon" />
@@ -160,12 +160,15 @@
         <div class="panel-info panel-gestion-listado">
           <i class="fa-solid fa-user-graduate"> </i>
           <div class="contenido-panel-gestion">
-            <h3>Información estudiantil</h3>
-            <p>
+            <div class="encabezado-panel-gestion encabezado-panel-gestion--acciones">
+              <div>
+                <h3>Información estudiantil</h3>
+                <p>
               Consulta de estudiantes registrados, curso actual, grupo de taller
               y estado de acceso al portal.
             </p>
-            <div class="acciones-gestion">
+              </div>
+              <div class="acciones-gestion acciones-gestion-superior">
               <button
                 class="btn-gestion"
                 id="btnVerEstudiantesGestion"
@@ -178,6 +181,7 @@
                 <i class="fa-solid fa-file-pdf"></i>
                 Generar listado PDF
               </button>
+            </div>
             </div>
             <div class="filtros-gestion">
               <div class="campo-filtro-gestion campo-busqueda-gestion">
@@ -451,9 +455,9 @@
                     type="date"
                   />
                 </div>
-              </div>
-              <div class="acciones-gestion">
-                <button
+
+                <div class="campo-filtro-gestion campo-filtro-boton-gestion campo-filtro-boton-reemplazo-gestion">
+<button
                   class="btn-gestion"
                   id="btnRegistrarReemplazoGestion"
                   type="submit"
@@ -461,6 +465,7 @@
                   <i class="fa-solid fa-user-plus"> </i>
                   Registrar reemplazo
                 </button>
+                </div>
               </div>
               <p
                 class="mensaje-gestion"
@@ -808,12 +813,13 @@
                 <label for="fechaInicioSiraGestion"> Fecha de inicio </label>
                 <input id="fechaInicioSiraGestion" type="date" />
               </div>
-            </div>
-            <div class="acciones-gestion">
-              <button class="btn-gestion" id="btnVerSiraGestion" type="button">
+
+              <div class="campo-filtro-gestion campo-filtro-boton-gestion">
+<button class="btn-gestion" id="btnVerSiraGestion" type="button">
                 <i class="fa-solid fa-table-list"> </i>
                 Ver parte semanal
               </button>
+              </div>
             </div>
             <div class="vista-gestion" id="vistaSiraGestion">
               <p class="mensaje-gestion">
@@ -1006,17 +1012,7 @@
               Consulta de documentación académica publicada por los docentes:
               planes anuales, programas de examen y material de estudio.
             </p>
-            <div class="acciones-gestion">
-              <button
-                class="btn-gestion"
-                id="btnVerDocumentacionGestion"
-                type="button"
-              >
-                <i class="fa-solid fa-folder-open"> </i>
-                Ver documentación
-              </button>
-            </div>
-            <div class="filtros-gestion filtros-documentacion-gestion">
+            <div class="filtros-gestion filtros-documentacion-gestion filtros-accion-inline-4">
               <div class="campo-filtro-gestion">
                 <label for="filtroCursoDocumentacionGestion"> Curso </label>
                 <select id="filtroCursoDocumentacionGestion">
@@ -1044,6 +1040,17 @@
                   type="search"
                 />
               </div>
+
+              <div class="campo-filtro-gestion campo-filtro-boton-gestion">
+<button
+                class="btn-gestion"
+                id="btnVerDocumentacionGestion"
+                type="button"
+              >
+                <i class="fa-solid fa-folder-open"> </i>
+                Ver documentación
+              </button>
+              </div>
             </div>
             <div class="vista-gestion" id="vistaDocumentacionGestion">
               <p class="mensaje-gestion">
@@ -1069,17 +1076,7 @@
               Consulta de inscripciones realizadas por estudiantes, materias
               seleccionadas y permisos generados para rendir examen.
             </p>
-            <div class="acciones-gestion">
-              <button
-                class="btn-gestion"
-                id="btnVerInscripcionesSimeGestion"
-                type="button"
-              >
-                <i class="fa-solid fa-list-check"> </i>
-                Ver inscripciones
-              </button>
-            </div>
-            <div class="filtros-gestion filtros-sime-gestion">
+            <div class="filtros-gestion filtros-sime-gestion filtros-accion-inline-5">
               <div class="campo-filtro-gestion">
                 <label for="filtroCursoSimeGestion"> Curso origen </label>
                 <select id="filtroCursoSimeGestion">
@@ -1118,6 +1115,17 @@
                   type="search"
                 />
               </div>
+
+              <div class="campo-filtro-gestion campo-filtro-boton-gestion">
+<button
+                class="btn-gestion"
+                id="btnVerInscripcionesSimeGestion"
+                type="button"
+              >
+                <i class="fa-solid fa-list-check"> </i>
+                Ver inscripciones
+              </button>
+              </div>
             </div>
             <div class="vista-gestion" id="vistaSimeGestion">
               <p class="mensaje-gestion">
@@ -1138,12 +1146,14 @@
         <div class="panel-info panel-gestion-listado">
           <i class="fa-solid fa-file-lines"> </i>
           <div class="contenido-panel-gestion">
-            <h3 id="tituloInformesGestion">Informes pedagógico-didácticos</h3>
-
-            <p id="descripcionInformesGestion">
+            <div class="encabezado-panel-gestion encabezado-panel-gestion--acciones">
+              <div>
+                <h3 id="tituloInformesGestion">Informes pedagógico-didácticos</h3>
+                <p id="descripcionInformesGestion">
               Consultá los informes pedagógico-didácticos registrados.
             </p>
-            <div class="acciones-gestion">
+              </div>
+              <div class="acciones-gestion acciones-gestion-superior">
               <button
                 class="btn-gestion"
                 hidden
@@ -1161,6 +1171,7 @@
                 <i class="fa-solid fa-table-list"> </i>
                 Ver informes creados
               </button>
+            </div>
             </div>
             <form
               class="form-informe-gestion"

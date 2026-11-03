@@ -3958,3 +3958,167 @@ body {
   font-family: "Nunito Sans", sans-serif !important;
   font-size: 0.88rem !important;
 }
+
+/* =====================================================
+   AJUSTES VISUALES CONSULTAS GESTION - 2026-11-03
+   - Si.R.A.: botón inline con filtros
+   - Documentación Académica: botón inline con filtros
+   - S.I.M.E.: botón inline con filtros
+   - Reemplazos Docentes: botón junto a Fecha hasta
+   - Estudiantes / Informes: acciones arriba a la derecha
+   - Mesas de Examen: acciones fijadas arriba a la derecha
+===================================================== */
+
+.campo-filtro-boton-gestion {
+  display: flex;
+  align-items: end;
+}
+
+.campo-filtro-boton-gestion .btn-gestion {
+  width: 100%;
+  min-height: 46px;
+  box-sizing: border-box;
+  justify-content: center;
+  white-space: nowrap;
+}
+
+#sira-gestion .filtros-sira-gestion,
+.filtros-documentacion-gestion.filtros-accion-inline-4 {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+  align-items: end;
+  justify-content: stretch;
+}
+
+#sira-gestion .filtros-sira-gestion .campo-filtro-gestion,
+.filtros-documentacion-gestion.filtros-accion-inline-4 .campo-filtro-gestion,
+#sira-gestion .filtros-sira-gestion .campo-filtro-boton-gestion,
+.filtros-documentacion-gestion.filtros-accion-inline-4 .campo-filtro-boton-gestion {
+  width: 100%;
+  min-width: 0;
+}
+
+#sira-gestion .filtros-sira-gestion input[type="date"],
+#sira-gestion .filtros-sira-gestion select,
+.filtros-documentacion-gestion.filtros-accion-inline-4 input,
+.filtros-documentacion-gestion.filtros-accion-inline-4 select,
+.filtros-documentacion-gestion.filtros-accion-inline-4 .btn-gestion {
+  width: 100%;
+}
+
+.filtros-sime-gestion.filtros-accion-inline-5 {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 16px;
+  align-items: end;
+}
+
+.filtros-sime-gestion.filtros-accion-inline-5 .campo-filtro-gestion,
+.filtros-sime-gestion.filtros-accion-inline-5 .campo-filtro-boton-gestion {
+  width: 100%;
+  min-width: 0;
+}
+
+.filtros-sime-gestion.filtros-accion-inline-5 input,
+.filtros-sime-gestion.filtros-accion-inline-5 select,
+.filtros-sime-gestion.filtros-accion-inline-5 .btn-gestion {
+  width: 100%;
+}
+
+#formReemplazoDocenteGestion .filtros-gestion {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+  align-items: end;
+}
+
+#formReemplazoDocenteGestion .campo-filtro-gestion,
+#formReemplazoDocenteGestion .campo-filtro-boton-reemplazo-gestion {
+  width: 100%;
+  min-width: 0;
+}
+
+#formReemplazoDocenteGestion .campo-filtro-boton-reemplazo-gestion {
+  display: flex;
+  align-items: end;
+}
+
+#formReemplazoDocenteGestion .campo-filtro-boton-reemplazo-gestion .btn-gestion {
+  width: 100%;
+  min-height: 46px;
+  justify-content: center;
+}
+
+.encabezado-panel-gestion--acciones {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+  margin-bottom: 18px;
+}
+
+.encabezado-panel-gestion--acciones > div:first-child {
+  flex: 1 1 auto;
+}
+
+.encabezado-panel-gestion--acciones .acciones-gestion {
+  margin-top: 0;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  flex: 0 0 auto;
+}
+
+#mesas-examen-gestion .encabezado-listado .acciones-gestion,
+#reemplazos-docentes-gestion .encabezado-listado .acciones-gestion {
+  margin-top: 0;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+}
+
+#mesas-examen-gestion .encabezado-listado .btn-gestion,
+#reemplazos-docentes-gestion .encabezado-listado .btn-gestion,
+.encabezado-panel-gestion--acciones .acciones-gestion .btn-gestion {
+  white-space: nowrap;
+}
+
+@media (max-width: 1100px) {
+  #sira-gestion .filtros-sira-gestion,
+  .filtros-documentacion-gestion.filtros-accion-inline-4,
+  .filtros-sime-gestion.filtros-accion-inline-5,
+  #formReemplazoDocenteGestion .filtros-gestion {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .filtros-sime-gestion.filtros-accion-inline-5 .campo-busqueda-gestion {
+    grid-column: span 2;
+  }
+}
+
+@media (max-width: 760px) {
+  .encabezado-panel-gestion--acciones,
+  #mesas-examen-gestion .encabezado-listado,
+  #reemplazos-docentes-gestion .encabezado-listado {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .encabezado-panel-gestion--acciones .acciones-gestion,
+  #mesas-examen-gestion .encabezado-listado .acciones-gestion,
+  #reemplazos-docentes-gestion .encabezado-listado .acciones-gestion {
+    width: 100%;
+    justify-content: flex-start;
+  }
+}
+
+@media (max-width: 600px) {
+  #sira-gestion .filtros-sira-gestion,
+  .filtros-documentacion-gestion.filtros-accion-inline-4,
+  .filtros-sime-gestion.filtros-accion-inline-5,
+  #formReemplazoDocenteGestion .filtros-gestion {
+    grid-template-columns: 1fr;
+  }
+
+  .filtros-sime-gestion.filtros-accion-inline-5 .campo-busqueda-gestion {
+    grid-column: auto;
+  }
+}
