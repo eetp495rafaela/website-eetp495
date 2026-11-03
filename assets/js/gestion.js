@@ -4953,45 +4953,93 @@ function obtenerClaveDocenteLibreTallerGestion(datos) {
   return correo || nombre;
 }
 
-function construirTablaDocentesLibresTallerGestion(disponibilidadTurno) {
-  const cantidadFilas = Math.max(
-    1,
-    ...DIAS_HORARIO_GESTION.map(
-      (dia) => disponibilidadTurno[dia.valor]?.length || 0,
-    ),
-  );
+function construirPanelDocentesLibresTallerGestion(disponibilidadTurno, turno) {
+  const esManana = turno === "MANANA";
+  const tituloTurno = esManana ? "Turno mañana" : "Turno tarde";
+  const idTitulo = esManana
+    ? "tituloDocentesLibresMananaGestion"
+    : "tituloDocentesLibresTardeGestion";
 
-  const filas = Array.from({ length: cantidadFilas }, (_, indice) => {
-    const celdas = DIAS_HORARIO_GESTION.map((dia) => {
-      const nombres = disponibilidadTurno[dia.valor] || [];
-      const nombre = nombres[indice] || "";
+  const dias = DIAS_HORARIO_GESTION.map((dia) => {
+    const docentes = disponibilidadTurno[dia.valor] || [];
+    const cantidad = docentes.length;
 
-      if (!nombre && indice === 0 && !nombres.length) {
-        return "<td>—</td>";
-      }
+    const tarjetas = docentes
+      .map((docente) => {
+        const clasesAula = docente.clasesAula || [];
+        const tieneAula = clasesAula.length > 0;
+        const inicial = String(docente.nombre || "D")
+          .trim()
+          .charAt(0)
+          .toLocaleUpperCase("es");
 
-      return `<td>${escaparHtmlGestion(nombre)}</td>`;
-    }).join("");
+        const detalleAula = tieneAula
+          ? `
+            <ul class="docentes-libres-detalles-aula" aria-label="Clases de aula">
+              ${clasesAula
+                .map(
+                  (clase) => `
+                    <li>
+                      <span>${escaparHtmlGestion(clase.descripcion)}</span>
+                      <small>
+                        <i class="fa-regular fa-clock" aria-hidden="true"></i>
+                        ${escaparHtmlGestion(clase.horario)}
+                      </small>
+                    </li>
+                  `,
+                )
+                .join("")}
+            </ul>
+          `
+          : "";
 
-    return `<tr>${celdas}</tr>`;
+        return `
+          <li class="docentes-libres-docente${tieneAula ? " docentes-libres-con-aula" : ""}">
+            <div class="docentes-libres-identidad">
+              <span class="docentes-libres-inicial" aria-hidden="true">
+                ${escaparHtmlGestion(inicial)}
+              </span>
+              <strong>${escaparHtmlGestion(docente.nombre)}</strong>
+            </div>
+            <span class="docentes-libres-estado${tieneAula ? " docentes-libres-estado-aula" : ""}">
+              <i class="fa-solid ${tieneAula ? "fa-book-open" : "fa-check"}" aria-hidden="true"></i>
+              ${tieneAula ? "Tiene clases de aula" : "Sin clases de Taller"}
+            </span>
+            ${detalleAula}
+          </li>
+        `;
+      })
+      .join("");
+
+    return `
+      <section class="docentes-libres-dia" aria-label="${escaparHtmlGestion(dia.etiqueta)}">
+        <div class="docentes-libres-dia-encabezado">
+          <h5>${escaparHtmlGestion(dia.etiqueta)}</h5>
+          <span class="docentes-libres-cantidad">
+            ${cantidad} ${cantidad === 1 ? "docente" : "docentes"}
+          </span>
+        </div>
+        ${cantidad
+          ? `<ul class="docentes-libres-lista">${tarjetas}</ul>`
+          : `<p class="docentes-libres-vacio">Sin docentes libres de Taller</p>`}
+      </section>
+    `;
   }).join("");
 
   return `
-    <div class="tabla-gestion-contenedor">
-      <table class="tabla-gestion tabla-docentes-libres-taller">
-        <thead>
-          <tr>
-            ${DIAS_HORARIO_GESTION.map(
-              (dia) => `<th>${dia.etiqueta}</th>`,
-            ).join("")}
-          </tr>
-        </thead>
-
-        <tbody>
-          ${filas}
-        </tbody>
-      </table>
-    </div>
+    <section class="docentes-libres-turno ${esManana ? "docentes-libres-manana" : "docentes-libres-tarde"}"
+             aria-labelledby="${idTitulo}">
+      <div class="docentes-libres-turno-encabezado">
+        <span class="docentes-libres-turno-icono" aria-hidden="true">
+          <i class="fa-solid ${esManana ? "fa-sun" : "fa-cloud-sun"}"></i>
+        </span>
+        <div>
+          <h4 id="${idTitulo}">${tituloTurno}</h4>
+          <p>Disponibilidad por día de la semana</p>
+        </div>
+      </div>
+      <div class="docentes-libres-dias">${dias}</div>
+    </section>
   `;
 }
 
@@ -5099,7 +5147,7 @@ async function cargarDocentesLibresTallerGestion() {
      *
      * - Si tiene TALLER, no se mostrará como libre.
      * - Si no tiene TALLER pero tiene AULA,
-     *   se mostrará indicando "(En clase de aula)".
+     *   se mostrará "Tiene clases de aula" con su detalle.
      */
     const bloquesTaller = new Set();
     const bloquesAula = new Map();
@@ -5207,22 +5255,22 @@ async function cargarDocentesLibresTallerGestion() {
               }
             });
 
-            const detalleAula = clasesAgrupadas
-              .map((clase) => {
-                const horarioAgrupado =
-                  clase.horaInicio && clase.horaFin
-                    ? `${clase.horaInicio} a ${clase.horaFin}`
-                    : clase.horario;
+            const detallesAula = clasesAgrupadas.map((clase) => {
+              const horarioAgrupado =
+                clase.horaInicio && clase.horaFin
+                  ? `${clase.horaInicio} a ${clase.horaFin}`
+                  : clase.horario;
 
-                return `${clase.espacio} con ${clase.curso}\n ${horarioAgrupado}`;
-              })
-              .join("\n");
+              return {
+                descripcion: `${clase.espacio} con ${clase.curso}`,
+                horario: horarioAgrupado,
+              };
+            });
 
-            const nombreMostrar = clasesOrdenadas.length
-              ? `${docente.nombre}\n${detalleAula}`
-              : docente.nombre;
-
-            disponibilidad[turno][dia.valor].push(nombreMostrar);
+            disponibilidad[turno][dia.valor].push({
+              nombre: docente.nombre,
+              clasesAula: detallesAula,
+            });
           }
         });
       });
@@ -5231,7 +5279,7 @@ async function cargarDocentesLibresTallerGestion() {
     ["MANANA", "TARDE"].forEach((turno) => {
       DIAS_HORARIO_GESTION.forEach((dia) => {
         disponibilidad[turno][dia.valor].sort((a, b) =>
-          a.localeCompare(b, "es", {
+          a.nombre.localeCompare(b.nombre, "es", {
             sensitivity: "base",
           }),
         );
@@ -5239,13 +5287,28 @@ async function cargarDocentesLibresTallerGestion() {
     });
 
     vistaDocentesLibresTallerGestion.innerHTML = `
-      <h4>Turno mañana</h4>
+      <div class="docentes-libres-introduccion">
+        <div>
+          <span class="docentes-libres-kicker">
+            <i class="fa-solid fa-users-viewfinder" aria-hidden="true"></i>
+            Consulta semanal
+          </span>
+          <h3>Docentes libres de Taller</h3>
+          <p>
+            Docentes sin un bloque de Taller asignado ese día y turno.
+            Si tienen clases de aula, se indica junto a sus horarios.
+          </p>
+        </div>
+        <div class="docentes-libres-leyenda" aria-label="Referencia de estados">
+          <span><i class="fa-solid fa-check" aria-hidden="true"></i> Sin clases de Taller</span>
+          <span class="docentes-libres-leyenda-aula">
+            <i class="fa-solid fa-book-open" aria-hidden="true"></i> Tiene clases de aula
+          </span>
+        </div>
+      </div>
 
-      ${construirTablaDocentesLibresTallerGestion(disponibilidad.MANANA)}
-
-      <h4>Turno tarde</h4>
-
-      ${construirTablaDocentesLibresTallerGestion(disponibilidad.TARDE)}
+      ${construirPanelDocentesLibresTallerGestion(disponibilidad.MANANA, "MANANA")}
+      ${construirPanelDocentesLibresTallerGestion(disponibilidad.TARDE, "TARDE")}
     `;
     docentesLibresTallerGestionCargados = true;
   } catch (error) {
