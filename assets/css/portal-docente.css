@@ -5068,7 +5068,6 @@ body {
   }
 }
 
-
 /* =====================================================
    RESPONSIVE GLOBAL - ALERTAS / VIEWPORT MÓVIL
    Revisión 2026-10-20
@@ -5109,8 +5108,7 @@ body {
   max-width: 100%;
 }
 
-@media (max-width: 700px),
-  (max-width: 950px) and (max-height: 620px) {
+@media (max-width: 700px), (max-width: 950px) and (max-height: 620px) {
   .swal2-container {
     padding: max(10px, env(safe-area-inset-top))
       max(10px, env(safe-area-inset-right))
@@ -5152,7 +5150,6 @@ body {
   }
 }
 
-
 /* =====================================================
    CORRECCIÓN RESPONSIVE 29/10/2026 — AGENDA DOCENTE
    Los tres filtros superan el ancho de tablets de 701–950 px.
@@ -5163,7 +5160,9 @@ body {
     gap: 16px;
   }
 
-  #agenda-institucional-docente .agenda-filtros-docente .campo-documentacion:last-child {
+  #agenda-institucional-docente
+    .agenda-filtros-docente
+    .campo-documentacion:last-child {
     grid-column: 1 / -1;
   }
 }
@@ -5250,4 +5249,9 @@ body {
     width: 100%;
     min-width: 0;
   }
+}
+
+/* Separación entre los filtros y el resultado del Parte de Asistencia */
+#parte-sira-docente #vistaParteSiraDocente {
+  margin-top: 20px;
 }
