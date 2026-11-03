@@ -1,0 +1,290 @@
+/* EETP 495 - Docentes libres de Taller en Portal Admin.
+   Estilos aislados: solo afectan #vistaDocentesLibresTallerAdmin. */
+#vistaDocentesLibresTallerAdmin { min-width: 0; margin-top: 18px; }
+#vistaDocentesLibresTallerAdmin, #vistaDocentesLibresTallerAdmin * { box-sizing: border-box; }
+#vistaDocentesLibresTallerAdmin .docentes-libres-introduccion {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 22px 24px;
+  border: 1px solid #d6e6f0;
+  border-radius: 18px;
+  background: linear-gradient(115deg, #edf7ff 0%, #f5fbf8 100%);
+}
+
+#vistaDocentesLibresTallerAdmin .docentes-libres-kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  margin-bottom: 6px;
+  color: #236b81;
+  font-size: 0.76rem;
+  font-weight: 900;
+  letter-spacing: 0.075em;
+  text-transform: uppercase;
+}
+
+#vistaDocentesLibresTallerAdmin .docentes-libres-introduccion h3 {
+  margin: 0;
+  color: #12375f;
+  font-size: clamp(1.12rem, 2vw, 1.45rem);
+}
+
+#vistaDocentesLibresTallerAdmin .docentes-libres-introduccion p {
+  max-width: 650px;
+  margin-top: 6px;
+  color: #536a7e;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+#vistaDocentesLibresTallerAdmin .docentes-libres-leyenda {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+#vistaDocentesLibresTallerAdmin .docentes-libres-leyenda span,
+#vistaDocentesLibresTallerAdmin .docentes-libres-estado {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  width: fit-content;
+  max-width: 100%;
+  padding: 5px 10px;
+  border: 1px solid #cde8de;
+  border-radius: 999px;
+  color: #116750;
+  background: #ebf8f2;
+  font-size: 0.72rem;
+  font-weight: 800;
+  line-height: 1.35;
+}
+
+#vistaDocentesLibresTallerAdmin .docentes-libres-leyenda .docentes-libres-leyenda-aula,
+#vistaDocentesLibresTallerAdmin .docentes-libres-estado-aula {
+  border-color: #f4dbb3;
+  color: #915406;
+  background: #fff5e5;
+}
+
+#vistaDocentesLibresTallerAdmin .docentes-libres-turno {
+  margin-top: 22px;
+  padding: 20px;
+  border: 1px solid #d6e3ed;
+  border-radius: 18px;
+  background: #fff;
+  box-shadow: 0 6px 18px rgba(27, 68, 104, 0.055);
+}
+
+#vistaDocentesLibresTallerAdmin .docentes-libres-turno-encabezado {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+#vistaDocentesLibresTallerAdmin .docentes-libres-turno-icono {
+  display: grid;
+  flex: 0 0 43px;
+  place-items: center;
+  width: 43px;
+  height: 43px;
+  border-radius: 13px;
+  color: #93610f;
+  background: #fff2d9;
+  font-size: 1.15rem;
+}
+
+#vistaDocentesLibresTallerAdmin .docentes-libres-tarde .docentes-libres-turno-icono {
+  color: #276289;
+  background: #e5f1fb;
+}
+
+#vistaDocentesLibresTallerAdmin .docentes-libres-turno h4 {
+  margin: 0;
+  color: #12375f;
+  font-size: 1.1rem;
+  font-weight: 900;
+}
+
+#vistaDocentesLibresTallerAdmin .docentes-libres-turno-encabezado p {
+  margin-top: 2px;
+  color: #697d8c;
+  font-size: 0.8rem;
+}
+
+#vistaDocentesLibresTallerAdmin .docentes-libres-dias {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 12px;
+  align-items: stretch;
+}
+
+#vistaDocentesLibresTallerAdmin .docentes-libres-dia {
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid #dce6ee;
+  border-radius: 14px;
+  background: #f7fafd;
+}
+
+#vistaDocentesLibresTallerAdmin .docentes-libres-dia-encabezado {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 5px 10px;
+  padding: 12px;
+  border-bottom: 1px solid #dce6ee;
+  background: #eef4fa;
+}
+
+#vistaDocentesLibresTallerAdmin .docentes-libres-dia h5 {
+  margin: 0;
+  color: #19466d;
+  font-size: 0.94rem;
+  font-weight: 900;
+}
+
+#vistaDocentesLibresTallerAdmin .docentes-libres-cantidad {
+  color: #537087;
+  font-size: 0.73rem;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+#vistaDocentesLibresTallerAdmin .docentes-libres-lista {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 0;
+  padding: 12px;
+  list-style: none;
+}
+
+#vistaDocentesLibresTallerAdmin .docentes-libres-docente {
+  min-width: 0;
+  padding: 12px 10px;
+  border: 1px solid #dae8e4;
+  border-left: 3px solid #27a17d;
+  border-radius: 11px;
+  background: #fff;
+  box-shadow: 0 2px 7px rgba(28, 64, 95, 0.035);
+}
+
+#vistaDocentesLibresTallerAdmin .docentes-libres-con-aula {
+  border-color: #f0dec2;
+  border-left-color: #dc9a3b;
+}
+
+#vistaDocentesLibresTallerAdmin .docentes-libres-identidad {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  margin-bottom: 9px;
+}
+
+#vistaDocentesLibresTallerAdmin .docentes-libres-inicial {
+  display: grid;
+  flex: 0 0 28px;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 9px;
+  color: #286f7a;
+  background: #e6f5f3;
+  font-size: 0.78rem;
+  font-weight: 900;
+}
+
+#vistaDocentesLibresTallerAdmin .docentes-libres-identidad strong {
+  min-width: 0;
+  color: #213c58;
+  font-size: 0.83rem;
+  font-weight: 900;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+
+#vistaDocentesLibresTallerAdmin .docentes-libres-estado {
+  font-size: 0.68rem;
+  white-space: normal;
+}
+
+#vistaDocentesLibresTallerAdmin .docentes-libres-detalles-aula {
+  margin: 10px 0 0;
+  padding: 9px 0 0;
+  border-top: 1px dashed #ead9bf;
+  list-style: none;
+}
+
+#vistaDocentesLibresTallerAdmin .docentes-libres-detalles-aula li + li {
+  margin-top: 9px;
+  padding-top: 9px;
+  border-top: 1px solid #f2eee8;
+}
+
+#vistaDocentesLibresTallerAdmin .docentes-libres-detalles-aula li span {
+  display: block;
+  color: #3e5061;
+  font-size: 0.76rem;
+  font-weight: 750;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+
+#vistaDocentesLibresTallerAdmin .docentes-libres-detalles-aula li small {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 4px;
+  color: #657787;
+  font-size: 0.73rem;
+  font-weight: 800;
+}
+
+#vistaDocentesLibresTallerAdmin .docentes-libres-vacio {
+  margin: 12px;
+  padding: 18px 10px;
+  border: 1px dashed #d5e1eb;
+  border-radius: 10px;
+  color: #6f8091;
+  background: #fff;
+  font-size: 0.77rem;
+  text-align: center;
+}
+
+@media (max-width: 1200px) {
+  #vistaDocentesLibresTallerAdmin .docentes-libres-dias {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 850px) {
+  #vistaDocentesLibresTallerAdmin .docentes-libres-dias {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 600px) {
+  #vistaDocentesLibresTallerAdmin .docentes-libres-introduccion,
+  #vistaDocentesLibresTallerAdmin .docentes-libres-turno {
+    padding: 15px;
+  }
+
+  #vistaDocentesLibresTallerAdmin .docentes-libres-dias {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  #vistaDocentesLibresTallerAdmin .docentes-libres-leyenda {
+    width: 100%;
+  }
+
+  #vistaDocentesLibresTallerAdmin .docentes-libres-dia-encabezado {
+    padding: 12px 14px;
+  }
+}

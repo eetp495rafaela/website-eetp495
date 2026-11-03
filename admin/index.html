@@ -9,6 +9,7 @@
     <title>Panel de Soporte | E.E.T.P. Nº 495</title>
 
     <link rel="stylesheet" href="../assets/css/portal-admin.css?v=20261102-nunito-selector" />
+    <link rel="stylesheet" href="../assets/css/docentes-libres-taller-admin.css?v=20261103-1" />
     <link rel="icon" href="../assets/img/logo.png" />
 
     <link
@@ -167,6 +168,12 @@
             <i class="fa-solid fa-screwdriver-wrench"></i>
             <h3>Horario de Taller</h3>
             <p>ABM de bloques horarios de espacios curriculares taller.</p>
+          </a>
+
+          <a class="tarjeta tarjeta-enlace" href="#docentes-libres-taller-admin" id="tarjetaDocentesLibresTallerAdmin">
+            <i class="fa-solid fa-user-clock"></i>
+            <h3>Docentes libres de Taller</h3>
+            <p>Consulta semanal por día y turno, con los detalles de clases de aula.</p>
           </a>
 
           <a class="tarjeta tarjeta-enlace" href="#horario-educacion-fisica">
@@ -2623,6 +2630,29 @@
         </a>
       </section>
 
+      <section class="grupo seccion-destino" id="docentes-libres-taller-admin">
+        <h2>Docentes libres de Taller</h2>
+        <div class="panel-info panel-docentes-libres-taller-admin">
+          <div class="encabezado-listado">
+            <div>
+              <h3>Disponibilidad semanal</h3>
+              <p>Consultá docentes de Taller por turno y día. Cuando tienen clases de aula, se muestran sus horarios.</p>
+            </div>
+            <button class="btn-accion" id="btnActualizarDocentesLibresTallerAdmin" type="button">
+              <i class="fa-solid fa-rotate"></i>
+              Actualizar consulta
+            </button>
+          </div>
+          <div id="vistaDocentesLibresTallerAdmin" class="vista-docentes-libres-taller-admin" aria-live="polite">
+            <p class="mensaje-formulario">La consulta se cargará al ingresar a esta sección.</p>
+          </div>
+        </div>
+        <a class="btn-volver" href="#inicio">
+          <i class="fa-solid fa-arrow-up"></i>
+          Volver al inicio
+        </a>
+      </section>
+
       <section class="grupo seccion-destino" id="horario-educacion-fisica">
         <h2>Horario de Educación Física</h2>
 
@@ -4237,6 +4267,7 @@
     ></script>
     <script type="module" src="../assets/js/backup-admin.js"></script>
     <script type="module" src="../assets/js/galeria-admin.js"></script>
+    <script type="module" src="../assets/js/docentes-libres-taller-admin.js?v=20261103-1"></script>
     <script type="module" src="../assets/js/pizarra-horarios-admin.js"></script>
     <script
       type="module"
