@@ -11186,3 +11186,120 @@ ESTADO: CONFIRMADO POR EL USUARIO Y VERIFICADO EN GITHUB.
 
 FIN ACTUALIZACIÓN 02/11/2026 — BLOQUE 84
 ======================================================================
+
+======================================================================
+85. AJUSTES VISUALES RESPONSIVE Y CIERRE DE REVISIÓN DE PORTALES
+======================================================================
+
+FECHA: 03/11/2026.
+MOTIVO: mejorar la distribución y alineación de formularios, filtros
+y botones en los portales Gestión, Admin y Docente, tanto en
+computadora como en celular, sin alterar la lógica funcional.
+AUTORIZACIÓN: expresa del titular en conversación del 03/11/2026
+para preparar/aplicar los cambios y actualizar la Bitácora.
+ESTADO: IMPLEMENTADO Y PUBLICADO EN GITHUB. EL TITULAR CONFIRMA
+QUE EL RESTO DE LOS AJUSTES FUNCIONA Y SE VE PERFECTO.
+La comprobación visual exhaustiva de todas las resoluciones no se
+atribuye al asistente; la validación de uso proviene del titular.
+
+85.1 PRIMERA RONDA: PORTAL GESTIÓN
+---------------------------------
+- Se redistribuyeron controles de consulta de Si.R.A., Documentación
+  Académica, S.I.M.E., reemplazos docentes, estudiantes, informes
+  pedagógico-didácticos y mesas de examen.
+- Se alinearon botones con filtros o encabezados, manteniendo sus
+  identificadores y la adaptación responsive.
+- Se corrigieron espacios finales de línea y la referencia de caché
+  del CSS tras un primer parche; el enlace de estilo quedó válido.
+- La consulta de Docentes libres de Taller recibió una presentación
+  visual mejorada en Gestión y una equivalente en Admin.
+- Commits de referencia:
+  5168308 — Docentes libres de Taller en Gestión.
+  b6b4a23 — Consulta equivalente en Admin.
+  9f57a45 — Alineación de botones en Portal Gestión.
+
+85.2 SEGUNDA RONDA: 14 AJUSTES EN TRES PORTALES
+-----------------------------------------------
+Portal Gestión (2):
+1) Contactos Institucionales: «Ver contactos» y «Generar agenda PDF»
+   se ubicaron juntos en la esquina superior derecha.
+2) Docentes: «Ver docentes» se ubicó arriba a la derecha, a la
+   altura de «Información docente».
+
+Portal Admin (8):
+3) Usuarios: «Registrar usuario», «Ver usuarios» e «Importar usuarios»
+   alineados, reduciendo el espacio antes de «Usuarios registrados».
+4) Espacios Curriculares: «Importar Plan de Estudios» y «Ver espacios»
+   con el mismo tamaño y en la esquina superior derecha.
+5) Cursos: «Registrar curso» y «Ver cursos» junto al campo «Estado».
+6) Asignaciones Docentes: «Ciclo lectivo» y «Estado» más compactos,
+   con «Registrar asignación» y «Ver asignaciones» en la misma fila.
+7) Reemplazos de Taller y Educación Física: fechas más compactas
+   con «Registrar reemplazo» y «Ver reemplazos» en la misma fila.
+8) Referentes Institucionales: cuatro desplegables en la primera
+   fila; «Guardar referente», «Cancelar edición» y «Ver referentes»
+   en la segunda, con igual ancho y ocupando el ancho disponible.
+   Se conserva la visibilidad condicional de «Cancelar edición».
+9) Solicitudes de alta de estudiantes: «Ver solicitudes» en la
+   esquina superior derecha del panel.
+10) Usuarios inactivos: «Ver usuarios para eliminar» arriba a la
+    derecha del panel.
+
+Portal Docente (4):
+11) Si.R.A. - Registro de asistencia: Fecha, Clase disponible y
+    «Cargar estudiantes» en una fila con tres anchos iguales.
+12) Parte de Asistencia: Tipo, Curso, Fecha de inicio y «Ver parte
+    semanal» en una fila con cuatro anchos iguales.
+13) Listas de Estudiantes: «Ver listas de estudiantes» arriba a la
+    derecha, junto al encabezado.
+14) Informes Pedagógico-Didácticos: «Ver informes» arriba a la
+    derecha, junto al encabezado.
+
+- Los anchos de escritorio y celular se resolvieron con reglas
+  responsive; en pantallas pequeñas los controles se reordenan para
+  facilitar su uso y evitar desbordes.
+- En Admin se revisó además el desbordamiento horizontal de las
+  tablas de solicitudes y usuarios inactivos en pantallas pequeñas.
+- Archivos modificados en esta ronda:
+  gestion/index.html, admin/index.html, docentes/index.html,
+  assets/css/portal-gestion.css, assets/css/portal-admin.css
+  y assets/css/portal-docente.css.
+- El instalador informó que los 23 controles comprobados mantienen
+  sus ID y tipos button/submit, y que los bloques script no cambian.
+  También produjo respaldo automático y pasó git diff --check.
+- Commit publicado: 5c59594 — «Mejoras visuales responsive en
+  portales Admin Gestion y Docente».
+
+85.3 RETOQUES POSTERIORES
+-------------------------
+- Commit 3d1d45c — pequeño ajuste de texto de Docentes libres
+  de Taller (según mensaje registrado en GitHub).
+- Se agregó una separación vertical de 20px entre los cuatro
+  filtros y el resultado de Parte de Asistencia del Portal Docente.
+  Regla CSS específica:
+    #parte-sira-docente #vistaParteSiraDocente {
+      margin-top: 20px;
+    }
+- Archivo: assets/css/portal-docente.css.
+- Commit publicado: 6ba937a — «Ajustar separacion del parte
+  semanal en Portal Docente».
+
+85.4 VALIDACIONES, ESTADO Y LÍMITES
+----------------------------------
+- El titular informó luego de publicar: «el resto funciona y se ve
+  perfecto». Se registra como validación de usuario de los ajustes
+  visuales y su funcionamiento, sin inventar pruebas específicas.
+- Se verificó en GitHub la existencia de los commits mencionados.
+- Los cambios de esta etapa son de presentación HTML/CSS; no se
+  plantearon cambios de scripts, Firebase, reglas, permisos ni datos.
+- Los controles de envío de formularios permanecieron asociados a
+  sus formularios para conservar su comportamiento.
+- Los respaldos de los parches se crearon fuera del repositorio local.
+- No se modifica el estado de pendientes históricos ajenos a esta
+  etapa ni se considera cerrada una prueba no declarada por el titular.
+- Esta actualización de Bitácora modifica solamente el archivo
+  maestro de documentación. La laptop deberá sincronizarse mediante
+  git pull --ff-only origin main, con el árbol de trabajo limpio.
+
+FIN ACTUALIZACIÓN 03/11/2026 — BLOQUE 85
+======================================================================
