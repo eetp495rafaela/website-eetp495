@@ -46,8 +46,12 @@ const auth = getAuth(app);
 
 // Gestión: lectura puntual por ciclo. Las reglas impiden listar o editar esta colección.
 const cicloPeriodosGestion = document.getElementById("cicloPeriodosGestion");
-const btnConsultarPeriodosGestion = document.getElementById("btnConsultarPeriodosGestion");
-const resumenPeriodosGestion = document.getElementById("resumenPeriodosGestion");
+const btnConsultarPeriodosGestion = document.getElementById(
+  "btnConsultarPeriodosGestion",
+);
+const resumenPeriodosGestion = document.getElementById(
+  "resumenPeriodosGestion",
+);
 
 function mostrarPeriodosGestion(ciclo, datos) {
   if (!resumenPeriodosGestion) return;
@@ -55,7 +59,8 @@ function mostrarPeriodosGestion(ciclo, datos) {
   if (!datos) {
     const aviso = document.createElement("p");
     aviso.className = "mensaje-gestion";
-    aviso.textContent = "No hay períodos registrados para el ciclo " + ciclo + ".";
+    aviso.textContent =
+      "No hay períodos registrados para el ciclo " + ciclo + ".";
     resumenPeriodosGestion.appendChild(aviso);
     return;
   }
@@ -66,7 +71,9 @@ function mostrarPeriodosGestion(ciclo, datos) {
   grilla.className = "grilla-periodos-gestion";
   const fechaVisible = (valor) => {
     const partes = String(valor || "").split("-");
-    return partes.length === 3 ? [partes[2], partes[1], partes[0]].join("/") : "Sin registrar";
+    return partes.length === 3
+      ? [partes[2], partes[1], partes[0]].join("/")
+      : "Sin registrar";
   };
   for (let n = 1; n <= 3; n += 1) {
     const bloque = document.createElement("div");
@@ -74,8 +81,10 @@ function mostrarPeriodosGestion(ciclo, datos) {
     const tituloBloque = document.createElement("strong");
     tituloBloque.textContent = n + "° Trimestre";
     const fechas = document.createElement("span");
-    fechas.textContent = fechaVisible(datos["trimestre" + n + "Inicio"]) +
-      " al " + fechaVisible(datos["trimestre" + n + "Fin"]);
+    fechas.textContent =
+      fechaVisible(datos["trimestre" + n + "Inicio"]) +
+      " al " +
+      fechaVisible(datos["trimestre" + n + "Fin"]);
     bloque.append(tituloBloque, fechas);
     grilla.appendChild(bloque);
   }
@@ -87,17 +96,21 @@ if (btnConsultarPeriodosGestion) {
     if (!resumenPeriodosGestion) return;
     const ciclo = Number(cicloPeriodosGestion?.value || 0);
     if (!Number.isInteger(ciclo) || ciclo < 2020 || ciclo > 2100) {
-      resumenPeriodosGestion.textContent = "Ingresá un ciclo lectivo válido (2020 a 2100).";
+      resumenPeriodosGestion.textContent =
+        "Ingresá un ciclo lectivo válido (2020 a 2100).";
       return;
     }
     if (!auth.currentUser) {
-      resumenPeriodosGestion.textContent = "Iniciá sesión para consultar los períodos.";
+      resumenPeriodosGestion.textContent =
+        "Iniciá sesión para consultar los períodos.";
       return;
     }
     btnConsultarPeriodosGestion.disabled = true;
     resumenPeriodosGestion.textContent = "Consultando períodos registrados...";
     try {
-      const registro = await getDoc(doc(db, "configuracion_periodos", String(ciclo)));
+      const registro = await getDoc(
+        doc(db, "configuracion_periodos", String(ciclo)),
+      );
       mostrarPeriodosGestion(ciclo, registro.exists() ? registro.data() : null);
     } catch (error) {
       console.error("No se pudieron consultar períodos de asistencia:", error);
@@ -714,31 +727,59 @@ const selectTribunalMesaGestion = [1, 2, 3].map((numero) =>
 let docentesTribunalMesaGestion = [];
 
 function normalizarCorreoTribunalMesaGestion(correo) {
-  return String(correo || "").trim().toLowerCase();
+  return String(correo || "")
+    .trim()
+    .toLowerCase();
 }
 
 async function cargarDocentesTribunalMesaGestion() {
   selectTribunalMesaGestion.forEach((select) => {
-    if (select) select.innerHTML = '<option value="">Cargando docentes...</option>';
+    if (select)
+      select.innerHTML = '<option value="">Cargando docentes...</option>';
   });
 
   try {
     // Ambas consultas cumplen las reglas de lectura de Dirección, incluso
     // si un docente tiene DOCENTE como rol adicional.
     const consultas = await Promise.all([
-      getDocs(query(collection(db, "usuarios"), where("rol", "==", "DOCENTE"), where("estado", "==", "ACTIVO"))),
-      getDocs(query(collection(db, "usuarios"), where("roles", "array-contains", "DOCENTE"), where("estado", "==", "ACTIVO"))),
+      getDocs(
+        query(
+          collection(db, "usuarios"),
+          where("rol", "==", "DOCENTE"),
+          where("estado", "==", "ACTIVO"),
+        ),
+      ),
+      getDocs(
+        query(
+          collection(db, "usuarios"),
+          where("roles", "array-contains", "DOCENTE"),
+          where("estado", "==", "ACTIVO"),
+        ),
+      ),
     ]);
     const porCorreo = new Map();
-    consultas.forEach((resultado) => resultado.forEach((documento) => {
-      const datos = documento.data();
-      const correo = normalizarCorreoTribunalMesaGestion(datos.correo || documento.id);
-      const roles = Array.isArray(datos.roles) ? datos.roles : [];
-      if (!correo || String(datos.estado || "").toUpperCase() !== "ACTIVO" ||
-          !(String(datos.rol || "").toUpperCase() === "DOCENTE" || roles.includes("DOCENTE"))) return;
-      const nombre = String(datos.nombreCompleto || datos.nombre || correo).trim();
-      porCorreo.set(correo, { correo, nombre });
-    }));
+    consultas.forEach((resultado) =>
+      resultado.forEach((documento) => {
+        const datos = documento.data();
+        const correo = normalizarCorreoTribunalMesaGestion(
+          datos.correo || documento.id,
+        );
+        const roles = Array.isArray(datos.roles) ? datos.roles : [];
+        if (
+          !correo ||
+          String(datos.estado || "").toUpperCase() !== "ACTIVO" ||
+          !(
+            String(datos.rol || "").toUpperCase() === "DOCENTE" ||
+            roles.includes("DOCENTE")
+          )
+        )
+          return;
+        const nombre = String(
+          datos.nombreCompleto || datos.nombre || correo,
+        ).trim();
+        porCorreo.set(correo, { correo, nombre });
+      }),
+    );
     docentesTribunalMesaGestion = [...porCorreo.values()].sort((a, b) =>
       a.nombre.localeCompare(b.nombre, "es", { sensitivity: "base" }),
     );
@@ -747,29 +788,44 @@ async function cargarDocentesTribunalMesaGestion() {
       const actual = select.value;
       select.replaceChildren(new Option("Seleccionar docente", ""));
       docentesTribunalMesaGestion.forEach((docente) =>
-        select.add(new Option(`${docente.nombre} — ${docente.correo}`, docente.correo)),
+        select.add(
+          new Option(`${docente.nombre} — ${docente.correo}`, docente.correo),
+        ),
       );
       if (actual) select.value = actual;
     });
   } catch (error) {
     console.error("No se pudieron consultar los docentes del tribunal:", error);
     selectTribunalMesaGestion.forEach((select) => {
-      if (select) select.innerHTML = '<option value="">No se pudieron cargar docentes</option>';
+      if (select)
+        select.innerHTML =
+          '<option value="">No se pudieron cargar docentes</option>';
     });
   }
 }
 
 function obtenerTribunalMesaGestion() {
-  return selectTribunalMesaGestion.map((select) => {
-    const correo = normalizarCorreoTribunalMesaGestion(select?.value);
-    const docente = docentesTribunalMesaGestion.find((item) => item.correo === correo);
-    return docente ? { correo: docente.correo, nombre: docente.nombre } : null;
-  }).filter(Boolean);
+  return selectTribunalMesaGestion
+    .map((select) => {
+      const correo = normalizarCorreoTribunalMesaGestion(select?.value);
+      const docente = docentesTribunalMesaGestion.find(
+        (item) => item.correo === correo,
+      );
+      return docente
+        ? { correo: docente.correo, nombre: docente.nombre }
+        : null;
+    })
+    .filter(Boolean);
 }
 
 function tribunalCompletoMesaGestion(tribunal) {
-  return Array.isArray(tribunal) && tribunal.length === 3 &&
-    new Set(tribunal.map((item) => normalizarCorreoTribunalMesaGestion(item.correo))).size === 3;
+  return (
+    Array.isArray(tribunal) &&
+    tribunal.length === 3 &&
+    new Set(
+      tribunal.map((item) => normalizarCorreoTribunalMesaGestion(item.correo)),
+    ).size === 3
+  );
 }
 
 function seleccionarTribunalMesaGestion(tribunal) {
@@ -779,7 +835,9 @@ function seleccionarTribunalMesaGestion(tribunal) {
     const correo = normalizarCorreoTribunalMesaGestion(lista[i]?.correo);
     // Un docente inactivo previamente asignado no se reemplaza silenciosamente.
     if (correo && ![...select.options].some((op) => op.value === correo)) {
-      select.add(new Option(`${lista[i]?.nombre || correo} (no activo)`, correo));
+      select.add(
+        new Option(`${lista[i]?.nombre || correo} (no activo)`, correo),
+      );
     }
     select.value = correo;
   });
@@ -787,8 +845,12 @@ function seleccionarTribunalMesaGestion(tribunal) {
 
 function nombreTribunalMesaGestion(mesa) {
   const miembros = Array.isArray(mesa.tribunal) ? mesa.tribunal : [];
-  return miembros.length ? miembros.map((persona) =>
-    String(persona.nombre || persona.correo || "").trim()).filter(Boolean).join(" · ") : "Sin asignar";
+  return miembros.length
+    ? miembros
+        .map((persona) => String(persona.nombre || persona.correo || "").trim())
+        .filter(Boolean)
+        .join(" · ")
+    : "Sin asignar";
 }
 
 async function prepararFormularioMesaGestion() {
@@ -799,7 +861,11 @@ async function prepararFormularioMesaGestion() {
 
   mostrarMensajeMesaFormGestion("Cargando opciones de mesas...");
 
-  await Promise.all([cargarEspaciosMesaGestion(), cargarCursosMesaGestion(), cargarDocentesTribunalMesaGestion()]);
+  await Promise.all([
+    cargarEspaciosMesaGestion(),
+    cargarCursosMesaGestion(),
+    cargarDocentesTribunalMesaGestion(),
+  ]);
 
   mostrarMensajeMesaFormGestion(
     "Opciones cargadas. Ya podés preparar una mesa.",
@@ -911,7 +977,10 @@ async function guardarMesaGestion(event) {
   const tribunal = obtenerTribunalMesaGestion();
 
   if (!tribunalCompletoMesaGestion(tribunal)) {
-    mostrarMensajeMesaFormGestion("Seleccioná tres docentes diferentes para el tribunal.", "error");
+    mostrarMensajeMesaFormGestion(
+      "Seleccioná tres docentes diferentes para el tribunal.",
+      "error",
+    );
     return;
   }
 
@@ -1368,8 +1437,15 @@ async function cambiarEstadoMesaGestion(idMesa) {
     .toUpperCase();
   const nuevoEstado = estadoActual === "PUBLICADA" ? "OCULTA" : "PUBLICADA";
 
-  if (nuevoEstado === "PUBLICADA" && !tribunalCompletoMesaGestion(mesa.tribunal)) {
-    await Swal.fire("Tribunal incompleto", "Editá la mesa y seleccioná tres docentes distintos antes de publicarla.", "warning");
+  if (
+    nuevoEstado === "PUBLICADA" &&
+    !tribunalCompletoMesaGestion(mesa.tribunal)
+  ) {
+    await Swal.fire(
+      "Tribunal incompleto",
+      "Editá la mesa y seleccioná tres docentes distintos antes de publicarla.",
+      "warning",
+    );
     return;
   }
 
@@ -5019,9 +5095,11 @@ function construirPanelDocentesLibresTallerGestion(disponibilidadTurno, turno) {
             ${cantidad} ${cantidad === 1 ? "docente" : "docentes"}
           </span>
         </div>
-        ${cantidad
-          ? `<ul class="docentes-libres-lista">${tarjetas}</ul>`
-          : `<p class="docentes-libres-vacio">Sin docentes libres de Taller</p>`}
+        ${
+          cantidad
+            ? `<ul class="docentes-libres-lista">${tarjetas}</ul>`
+            : `<p class="docentes-libres-vacio">Sin docentes libres de Taller</p>`
+        }
       </section>
     `;
   }).join("");
@@ -5295,8 +5373,7 @@ async function cargarDocentesLibresTallerGestion() {
           </span>
           <h3>Docentes libres de Taller</h3>
           <p>
-            Docentes sin un bloque de Taller asignado ese día y turno.
-            Si tienen clases de aula, se indica junto a sus horarios.
+            Docentes de Taller sin alumnos a cargo. Si tienen clases de aula, se indica junto a sus horarios.
           </p>
         </div>
         <div class="docentes-libres-leyenda" aria-label="Referencia de estados">

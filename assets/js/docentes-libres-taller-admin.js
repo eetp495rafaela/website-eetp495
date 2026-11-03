@@ -1,9 +1,19 @@
 // Consulta de solo lectura de docentes libres de Taller para el Portal Admin.
 // La lógica de disponibilidad es equivalente a la del Portal Gestión.
 // No escribe en Firestore ni altera horarios/asignaciones.
-import { getApp, getApps, initializeApp } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-app.js";
+import {
+  getApp,
+  getApps,
+  initializeApp,
+} from "https://www.gstatic.com/firebasejs/12.15.0/firebase-app.js";
 import { getAuth } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-auth.js";
-import { getFirestore, collection, getDocs, query, where } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
+import {
+  getFirestore,
+  collection,
+  getDocs,
+  query,
+  where,
+} from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyAARktrOpu-Rz683q4RxTK2h1nmkUaUbuA",
@@ -18,9 +28,15 @@ const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
 
-const btnDocentesLibresTallerAdmin = document.getElementById("btnActualizarDocentesLibresTallerAdmin");
-const vistaDocentesLibresTallerAdmin = document.getElementById("vistaDocentesLibresTallerAdmin");
-const tarjetaDocentesLibresTallerAdmin = document.getElementById("tarjetaDocentesLibresTallerAdmin");
+const btnDocentesLibresTallerAdmin = document.getElementById(
+  "btnActualizarDocentesLibresTallerAdmin",
+);
+const vistaDocentesLibresTallerAdmin = document.getElementById(
+  "vistaDocentesLibresTallerAdmin",
+);
+const tarjetaDocentesLibresTallerAdmin = document.getElementById(
+  "tarjetaDocentesLibresTallerAdmin",
+);
 let docentesLibresTallerAdminCargados = false;
 let docentesLibresTallerAdminCargando = false;
 
@@ -33,7 +49,11 @@ const DIAS_HORARIO_ADMIN = [
 ];
 
 function normalizarTextoAdmin(texto) {
-  return String(texto || "").trim().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  return String(texto || "")
+    .trim()
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "");
 }
 function escaparHtmlAdmin(texto) {
   return String(texto || "")
@@ -66,9 +86,11 @@ function obtenerHorarioTextoAdmin(horario) {
   return `${inicio || "-"} a ${fin || "-"}`;
 }
 function obtenerEspacioHorarioAdmin(horario) {
-  return String(horario.espacioCurricular || "").trim()
-    || String(horario.espacioNombre || "").trim()
-    || "Espacio sin cargar";
+  return (
+    String(horario.espacioCurricular || "").trim() ||
+    String(horario.espacioNombre || "").trim() ||
+    "Espacio sin cargar"
+  );
 }
 function obtenerClaveDocenteLibreTallerAdmin(datos) {
   const correo = normalizarTextoAdmin(datos?.docenteCorreo);
@@ -142,9 +164,11 @@ function construirPanelDocentesLibresTallerAdmin(disponibilidadTurno, turno) {
             ${cantidad} ${cantidad === 1 ? "docente" : "docentes"}
           </span>
         </div>
-        ${cantidad
-          ? `<ul class="docentes-libres-lista">${tarjetas}</ul>`
-          : `<p class="docentes-libres-vacio">Sin docentes libres de Taller</p>`}
+        ${
+          cantidad
+            ? `<ul class="docentes-libres-lista">${tarjetas}</ul>`
+            : `<p class="docentes-libres-vacio">Sin docentes libres de Taller</p>`
+        }
       </section>
     `;
   }).join("");
@@ -167,7 +191,8 @@ function construirPanelDocentesLibresTallerAdmin(disponibilidadTurno, turno) {
 }
 
 async function cargarDocentesLibresTallerAdmin() {
-  if (!vistaDocentesLibresTallerAdmin || docentesLibresTallerAdminCargando) return;
+  if (!vistaDocentesLibresTallerAdmin || docentesLibresTallerAdminCargando)
+    return;
   docentesLibresTallerAdminCargando = true;
 
   const textoOriginal = btnDocentesLibresTallerAdmin?.innerHTML || "";
@@ -182,7 +207,6 @@ async function cargarDocentesLibresTallerAdmin() {
       `;
     }
 
-
     vistaDocentesLibresTallerAdmin.innerHTML = `
       <p class="mensaje-formulario">
         Consultando docentes de Taller y horarios activos...
@@ -192,7 +216,9 @@ async function cargarDocentesLibresTallerAdmin() {
     // El Admin está protegido por el rol SOPORTE. No solicitar datos sin sesión.
     await auth.authStateReady();
     if (!auth.currentUser) {
-      throw new Error("No hay una sesión autenticada para realizar la consulta.");
+      throw new Error(
+        "No hay una sesión autenticada para realizar la consulta.",
+      );
     }
 
     const [resultadoAsignaciones, resultadoHorarios] = await Promise.all([
@@ -424,8 +450,7 @@ async function cargarDocentesLibresTallerAdmin() {
           </span>
           <h3>Docentes libres de Taller</h3>
           <p>
-            Docentes sin un bloque de Taller asignado ese día y turno.
-            Si tienen clases de aula, se indica junto a sus horarios.
+            Docentes de Taller sin alumnos a cargo. Si tienen clases de aula, se indica junto a sus horarios.
           </p>
         </div>
         <div class="docentes-libres-leyenda" aria-label="Referencia de estados">
@@ -445,7 +470,6 @@ async function cargarDocentesLibresTallerAdmin() {
       "Error al consultar docentes libres de Taller en Portal Admin:",
       error,
     );
-
 
     vistaDocentesLibresTallerAdmin.innerHTML = `
       <p class="mensaje-formulario error">
@@ -467,12 +491,12 @@ async function cargarDocentesLibresTallerAdmin() {
   }
 }
 
-
 // La tarjeta principal abre la sección. Se consulta una sola vez al ingresar;
 // el botón "Actualizar consulta" fuerza una nueva lectura cuando sea necesario.
 if (tarjetaDocentesLibresTallerAdmin) {
   tarjetaDocentesLibresTallerAdmin.addEventListener("click", () => {
-    if (!docentesLibresTallerAdminCargados) void cargarDocentesLibresTallerAdmin();
+    if (!docentesLibresTallerAdminCargados)
+      void cargarDocentesLibresTallerAdmin();
   });
 }
 if (btnDocentesLibresTallerAdmin) {
