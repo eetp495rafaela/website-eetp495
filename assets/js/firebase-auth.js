@@ -85,7 +85,7 @@ const PORTALES_POR_ROL = {
   },
 
   ASISTENTE_ADMINISTRATIVO: {
-    etiqueta: "Asistente Administrativo",
+    etiqueta: "Auxiliar Administrativo",
     icono: "fa-briefcase",
     url: "gestion/index.html",
   },
@@ -364,7 +364,7 @@ function construirSelectorRoles(perfil) {
 
     const texto = document.createElement("span");
 
-    texto.textContent = `Ingresar como ${portal.etiqueta}`;
+    texto.textContent = portal.etiqueta;
 
     botonRol.append(icono, texto);
 

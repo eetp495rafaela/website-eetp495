@@ -627,7 +627,8 @@ body {
 
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
+  text-align: left;
 
   gap: 10px;
 
@@ -669,6 +670,17 @@ body {
   cursor: not-allowed;
 
   transform: none;
+}
+
+/* Iconos y textos alineados en los botones de selección de rol */
+.btn-rol-portal i {
+  width: 24px;
+  flex-shrink: 0;
+  text-align: center;
+}
+
+.btn-rol-portal span {
+  white-space: nowrap;
 }
 
 .btn-volver-cuenta {
