@@ -11303,3 +11303,67 @@ Portal Docente (4):
 
 FIN ACTUALIZACIÓN 03/11/2026 — BLOQUE 85
 ======================================================================
+
+======================================================================
+86. LOGIN: SELECCIÓN DE ROLES CON BOTONES COMPACTOS
+======================================================================
+
+FECHA: 03/11/2026.
+MOTIVO: mejorar la legibilidad de los botones de acceso cuando una
+cuenta de Google tiene dos o más roles autorizados, evitando que
+las etiquetas ocupen dos líneas en la pantalla de selección.
+AUTORIZACIÓN: expresa del titular para la corrección manual y
+posterior actualización de la Bitácora Maestra.
+ESTADO: IMPLEMENTADO Y PUBLICADO EN GITHUB; COMPROBADA LA
+PRESENCIA DEL CAMBIO EN EL CÓDIGO ACTUAL.
+No se declara realizada una prueba funcional independiente del
+inicio de sesión con cuentas reales.
+
+86.1 CAMBIO DE TEXTOS — assets/js/firebase-auth.js
+---------------------------------------------------
+- En construirSelectorRoles(perfil), se reemplazó:
+    texto.textContent = `Ingresar como ${portal.etiqueta}`;
+  por:
+    texto.textContent = portal.etiqueta;
+- Cada botón muestra solo el nombre del rol, por ejemplo «Docente».
+- Para ASISTENTE_ADMINISTRATIVO se cambió únicamente la etiqueta
+  visible de «Asistente Administrativo» a «Auxiliar Administrativo».
+  El identificador interno ASISTENTE_ADMINISTRATIVO, la URL de
+  destino, la selección del rol activo y los eventos de acceso
+  permanecen intactos.
+- Se conservaron los iconos definidos para cada rol y el mensaje
+  informativo que aparece durante la redirección.
+
+86.2 PRESENTACIÓN — assets/css/portal-login.css
+------------------------------------------------
+- En .btn-rol-portal se configuró:
+    justify-content: flex-start;
+    text-align: left;
+- Se fijó un ancho para los iconos y se impidió que se contraigan,
+  de modo que todos los textos comiencen alineados.
+- Se agregó white-space: nowrap al span de texto para mostrar el
+  nombre del rol en una sola línea.
+- El diseño se dirige exclusivamente a los botones de selección
+  de roles; no modifica los restantes botones del login.
+
+86.3 CONTROL Y PUBLICACIÓN
+--------------------------
+- El titular revisó localmente el estado de Git; solamente
+  figuraban modificados:
+    assets/css/portal-login.css
+    assets/js/firebase-auth.js
+- Se comprobó directamente en el código de GitHub la presencia
+  de los textos y estilos anteriores.
+- Commit publicado en main:
+  70e6a71 — «Mejorar botones de seleccion de roles en login».
+- Se mantienen Firebase Authentication, reglas y perfiles sin
+  modificaciones por esta tarea.
+- Esta actualización de Bitácora modifica únicamente el archivo
+  maestro de documentación. Los cambios de interfaz ya habían
+  sido publicados por el titular.
+- Para sincronizar la copia local de la nueva documentación:
+    git pull --ff-only origin main
+  siempre que el árbol de trabajo esté limpio.
+
+FIN ACTUALIZACIÓN 03/11/2026 — BLOQUE 86
+======================================================================
