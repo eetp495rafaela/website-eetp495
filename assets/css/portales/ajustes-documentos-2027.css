@@ -1,0 +1,72 @@
+/* E.E.T.P. N° 495 · Website 2027 · Integración 19.
+   Cambios exclusivamente visuales: tarjetas de Gestiones Docentes y texto de Gestión.
+   No afecta los permisos, el menú, las consultas ni Normativa Vigente. */
+
+/* Dos filas de cuatro tarjetas iguales en pantalla de escritorio. */
+body.portal-docentes-2027 #gestiones-docentes-2027 .p27-pdf-grid {
+  display: grid !important;
+  grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  grid-auto-rows: 122px;
+  align-items: stretch;
+  gap: 12px;
+}
+body.portal-docentes-2027 #gestiones-docentes-2027 .p27-pdf-card {
+  box-sizing: border-box;
+  width: 100%;
+  height: 122px;
+  min-height: 122px;
+  max-height: 122px;
+  min-width: 0;
+  overflow: hidden;
+  background: #ffffff;
+  color: #123d72;
+  border: 1px solid #cddff0;
+}
+body.portal-docentes-2027 #gestiones-docentes-2027 .p27-pdf-card:is(:nth-child(8n + 2), :nth-child(8n + 4), :nth-child(8n + 5), :nth-child(8n + 7)) {
+  background: #164a91;
+  border-color: #164a91;
+  color: #ffffff;
+}
+body.portal-docentes-2027 #gestiones-docentes-2027 .p27-pdf-card:is(:nth-child(8n + 2), :nth-child(8n + 4), :nth-child(8n + 5), :nth-child(8n + 7)) :is(i,h3) {
+  color: #ffffff;
+}
+body.portal-docentes-2027 #gestiones-docentes-2027 .p27-pdf-card:is(:nth-child(8n + 2), :nth-child(8n + 4), :nth-child(8n + 5), :nth-child(8n + 7)):is(:hover,:focus-visible) {
+  background: #0b326c;
+  border-color: #0b326c;
+  outline-offset: 3px;
+}
+body.portal-docentes-2027 #gestiones-docentes-2027 .p27-pdf-card:not(:nth-child(8n + 2)):not(:nth-child(8n + 4)):not(:nth-child(8n + 5)):not(:nth-child(8n + 7)):is(:hover,:focus-visible) {
+  background: #eff6fe;
+  border-color: #3975ad;
+  outline-offset: 3px;
+}
+
+/* El texto completo de Gestión aprovecha el espacio disponible. */
+body.portal-gestion-2027 #home-panel .dash-banner > div:first-child {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+body.portal-gestion-2027 #home-panel .dash-banner > div:first-child > p {
+  max-width: none !important;
+  width: max-content;
+  white-space: nowrap;
+  font-size: 12.5px;
+}
+
+/* Ajustes a pantallas más angostas, sin desbordar la navegación móvil. */
+@media (max-width: 1099px) {
+  body.portal-docentes-2027 #gestiones-docentes-2027 .p27-pdf-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    grid-auto-rows: 122px;
+  }
+  body.portal-gestion-2027 #home-panel .dash-banner > div:first-child > p {
+    width: auto;
+    max-width: 100% !important;
+    white-space: normal;
+  }
+}
+@media (max-width: 700px) {
+  body.portal-docentes-2027 #gestiones-docentes-2027 .p27-pdf-grid {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+}

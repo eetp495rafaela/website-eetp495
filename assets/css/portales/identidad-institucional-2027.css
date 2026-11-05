@@ -1,0 +1,745 @@
+/* E.E.T.P. N° 495 · Integración 16 · Identidad institucional compartida.
+   Capa VISUAL para las cuatro pantallas 2027. Se carga al final.
+   No modificar visibilidad por permisos, JS, estructura, formularios ni estados de validación.
+   En rojo/verde/ámbar permanecen los mensajes que efectivamente expresan un estado. */
+
+body:is(
+  .portal-alumnos-2027,
+  .portal-docentes-2027,
+  .portal-soporte-2027,
+  .portal-gestion-2027
+) {
+  --eetp-marino: #0b2346;
+  --eetp-azul: #18529b;
+  --eetp-azul-fuerte: #124581;
+  --eetp-azul-medio: #315f8f;
+  --eetp-celeste: #e9f3fd;
+  --eetp-celeste-suave: #f5f9ff;
+  --eetp-blanco: #ffffff;
+  --eetp-borde: #d7e4f0;
+  --eetp-texto: #244667;
+  --eetp-texto-suave: #60788f;
+  background: #f5f8fc;
+  color: var(--eetp-texto);
+  color-scheme: light;
+}
+
+/* Reasignar únicamente variables de IDENTIDAD de los CSS antiguos.
+   Variables semánticas de estados (aprobado, error, ausente, etc.) no se tocan. */
+body.portal-docentes-2027 {
+  --clay: #18529b;
+  --clay-medium: #2868a9;
+  --clay-dark: #123e73;
+  --clay-deep: #0b2346;
+  --clay-soft: #eaf3fd;
+  --cream: #f5f9ff;
+  --warm-white: #fff;
+  --butter: #eaf3fd;
+  --butter-strong: #c7ddf2;
+  --butter-soft: #f5f9ff;
+  --bordo-acento: #18529b;
+  --bordo-terracota: #2868a9;
+  --bordo-marron-profundo: #0b2346;
+  --bordo-marron-medio: #315f8f;
+  --bordo-borde: #d7e4f0;
+  --bordo-beige: #e9f3fd;
+  --bordo-crema: #f5f9ff;
+  --bordo-crema-2: #fff;
+  --bordo-texto: #244667;
+  --bordo-texto-suave: #60788f;
+  --docente-fondo: #f5f8fc;
+  --docente-panel: #fff;
+  --docente-panel-2: #f6faff;
+  --docente-texto: #244667;
+  --docente-texto-suave: #60788f;
+  --docente-tabla: #fff;
+  --docente-tabla-head: #e9f3fd;
+  --docente-tabla-texto: #244667;
+  --docente-dorado: #18529b;
+  --docente-naranja: #2868a9;
+  --docente-borde: #d7e4f0;
+}
+body.portal-gestion-2027 {
+  --gestion-azul-oscuro: #0b2346;
+  --gestion-azul: #18529b;
+  --gestion-naranja: #2868a9;
+  --gestion-fondo: #f5f8fc;
+  --gestion-celeste: #e9f3fd;
+  --gestion-borde: #d7e4f0;
+  --gestion-texto: #244667;
+  --gestion-texto-suave: #60788f;
+}
+body.portal-alumnos-2027 {
+  --alumno-azul-oscuro: #0b2346;
+  --alumno-azul: #18529b;
+  --alumno-celeste: #e9f3fd;
+  --alumno-celeste-suave: #f5f9ff;
+  --alumno-fondo: #f5f8fc;
+  --alumno-violeta: #2868a9;
+  --alumno-naranja: #2868a9;
+  --alumno-borde: #d7e4f0;
+  --alumno-texto: #244667;
+  --alumno-texto-suave: #60788f;
+}
+body.portal-soporte-2027 {
+  --azul-principal: #18529b;
+  --azul-oscuro: #0b2346;
+  --azul-claro: #e9f3fd;
+  --naranja: #2868a9;
+  --fondo: #f5f8fc;
+  --borde: #d7e4f0;
+  --texto: #244667;
+  --texto-suave: #60788f;
+}
+
+/* La maqueta gobierna la navegación. No modificar display/hidden ni disposición. */
+body:is(
+    .portal-alumnos-2027,
+    .portal-docentes-2027,
+    .portal-soporte-2027,
+    .portal-gestion-2027
+  )
+  .work-topline
+  .overline,
+body:is(
+    .portal-alumnos-2027,
+    .portal-docentes-2027,
+    .portal-soporte-2027,
+    .portal-gestion-2027
+  )
+  .eyebrow {
+  color: var(--eetp-azul);
+}
+body:is(
+    .portal-alumnos-2027,
+    .portal-docentes-2027,
+    .portal-soporte-2027,
+    .portal-gestion-2027
+  )
+  :is(.p27-pane, .legacy-workspace)
+  :is(h2, h3, h4):not(.estado-error):not(.mensaje-error) {
+  color: var(--eetp-marino);
+}
+body:is(
+    .portal-alumnos-2027,
+    .portal-docentes-2027,
+    .portal-soporte-2027,
+    .portal-gestion-2027
+  )
+  :is(.p27-pane, .legacy-workspace)
+  :is(label, legend) {
+  color: var(--eetp-texto);
+}
+body:is(
+    .portal-alumnos-2027,
+    .portal-docentes-2027,
+    .portal-soporte-2027,
+    .portal-gestion-2027
+  )
+  :is(.p27-pane, .legacy-workspace)
+  :is(
+    a:not(.btn-accion):not(.btn-gestion):not(.btn-docente-mesas):not(
+        .btn-alumno-mesas
+      )
+  ) {
+  accent-color: var(--eetp-azul);
+}
+
+/* Entradas y elementos no semánticos de formularios, tablas y horarios. */
+body:is(
+    .portal-alumnos-2027,
+    .portal-docentes-2027,
+    .portal-soporte-2027,
+    .portal-gestion-2027
+  )
+  :is(.p27-pane, .legacy-workspace)
+  :is(
+    input:not([type="checkbox"]):not([type="radio"]):not([type="submit"]):not(
+        [type="button"]
+      ),
+    select,
+    textarea
+  ) {
+  background-color: #fff;
+  color: var(--eetp-texto);
+  border-color: var(--eetp-borde);
+}
+body:is(
+    .portal-alumnos-2027,
+    .portal-docentes-2027,
+    .portal-soporte-2027,
+    .portal-gestion-2027
+  )
+  :is(.p27-pane, .legacy-workspace)
+  :is(input, select, textarea):focus-visible {
+  outline: 2px solid var(--eetp-azul);
+  outline-offset: 2px;
+}
+body:is(
+    .portal-alumnos-2027,
+    .portal-docentes-2027,
+    .portal-soporte-2027,
+    .portal-gestion-2027
+  )
+  :is(.p27-pane, .legacy-workspace)
+  :is(
+    .tabla-documentos,
+    .tabla-informes-docente,
+    .tabla-docente-mesas,
+    .tabla-alumno-mesas,
+    .tabla-situacion-asistencia,
+    .tabla-detalle-asistencia-docente,
+    .tabla-usuarios,
+    .tabla-documentacion-alumno,
+    .tabla-gestion,
+    .tabla-contactos,
+    .tabla-estudiantes,
+    .tabla-horarios
+  )
+  thead
+  :is(tr, th),
+body:is(
+    .portal-alumnos-2027,
+    .portal-docentes-2027,
+    .portal-soporte-2027,
+    .portal-gestion-2027
+  )
+  :is(.p27-pane, .legacy-workspace)
+  table
+  thead
+  th {
+  background: var(--eetp-celeste);
+  color: var(--eetp-marino);
+  border-color: var(--eetp-borde);
+}
+body:is(
+    .portal-alumnos-2027,
+    .portal-docentes-2027,
+    .portal-soporte-2027,
+    .portal-gestion-2027
+  )
+  :is(.p27-pane, .legacy-workspace)
+  table
+  tbody
+  td {
+  color: var(--eetp-texto);
+  border-color: var(--eetp-borde);
+}
+body:is(
+    .portal-alumnos-2027,
+    .portal-docentes-2027,
+    .portal-soporte-2027,
+    .portal-gestion-2027
+  )
+  :is(.p27-pane, .legacy-workspace)
+  :is(
+    .panel-info,
+    .documentos-cargados-docente,
+    .tarjeta-bloque-horario-docente,
+    .tarjeta-bloque-horario-gestion,
+    .sira-bloque,
+    .sira-clase-seleccionada,
+    .sira-gestion-bloque,
+    .dia-horario-docente,
+    .dia-horario-aula-docente,
+    .dia-horario-gestion,
+    .sime-bloque
+  ):not(.estado-ok):not(.estado-error) {
+  background: var(--eetp-blanco);
+  border-color: var(--eetp-borde);
+  color: var(--eetp-texto);
+}
+body:is(
+    .portal-alumnos-2027,
+    .portal-docentes-2027,
+    .portal-soporte-2027,
+    .portal-gestion-2027
+  )
+  :is(.p27-pane, .legacy-workspace)
+  :is(
+    .dia-horario-docente,
+    .dia-horario-aula-docente,
+    .dia-horario-gestion,
+    .sira-gestion-bloque
+  )
+  :is(header, h4):not(.estado-gestion) {
+  background-color: var(--eetp-celeste);
+  color: var(--eetp-marino);
+}
+
+/* Botones de ACCIÓN habituales: no convertir los destructivos ni los de estado. */
+body:is(
+    .portal-alumnos-2027,
+    .portal-docentes-2027,
+    .portal-soporte-2027,
+    .portal-gestion-2027
+  )
+  :is(.p27-pane, .legacy-workspace)
+  :is(
+    .btn-accion,
+    .btn-gestion,
+    .btn-docente-mesas,
+    .btn-alumno-mesas,
+    .btn-documentacion,
+    .btn-ver-documento,
+    .btn-ver-documento-docente,
+    .btn-ver-documento-alumno,
+    .btn-informe-docente,
+    .btn-copiar-lista-estudiantes,
+    .btn-filtro-detalle-asistencia-docente.activo
+  ):not(.btn-eliminar):not(.btn-borrar):not(.btn-cancelar):not(
+    .btn-rechazar
+  ):not(.btn-danger):not(.btn-peligro):not([data-accion="eliminar"]):not(
+    [data-accion="borrar"]
+  ) {
+  background: var(--eetp-azul);
+  border-color: var(--eetp-azul);
+  color: #fff;
+  box-shadow: none;
+}
+body:is(
+    .portal-alumnos-2027,
+    .portal-docentes-2027,
+    .portal-soporte-2027,
+    .portal-gestion-2027
+  )
+  :is(.p27-pane, .legacy-workspace)
+  :is(
+    .btn-accion,
+    .btn-gestion,
+    .btn-docente-mesas,
+    .btn-alumno-mesas,
+    .btn-documentacion,
+    .btn-ver-documento,
+    .btn-ver-documento-docente,
+    .btn-ver-documento-alumno,
+    .btn-informe-docente,
+    .btn-copiar-lista-estudiantes,
+    .btn-filtro-detalle-asistencia-docente.activo
+  ):not(.btn-eliminar):not(.btn-borrar):not(.btn-cancelar):not(
+    .btn-rechazar
+  ):not(.btn-danger):not(.btn-peligro):hover {
+  background: var(--eetp-azul-fuerte);
+  border-color: var(--eetp-azul-fuerte);
+  color: #fff;
+}
+body:is(
+    .portal-alumnos-2027,
+    .portal-docentes-2027,
+    .portal-soporte-2027,
+    .portal-gestion-2027
+  )
+  :is(.p27-pane, .legacy-workspace)
+  :is(
+    .btn-accion,
+    .btn-gestion,
+    .btn-docente-mesas,
+    .btn-alumno-mesas,
+    .btn-documentacion
+  ):disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+body:is(
+    .portal-alumnos-2027,
+    .portal-docentes-2027,
+    .portal-soporte-2027,
+    .portal-gestion-2027
+  )
+  :is(.p27-pane, .legacy-workspace)
+  input[type="file"]::file-selector-button {
+  background: var(--eetp-celeste);
+  border-color: var(--eetp-borde);
+  color: var(--eetp-azul-fuerte);
+}
+body:is(
+    .portal-alumnos-2027,
+    .portal-docentes-2027,
+    .portal-soporte-2027,
+    .portal-gestion-2027
+  )
+  :is(.p27-pane, .legacy-workspace)
+  input[type="file"]::file-selector-button:hover {
+  background: #d8e9f9;
+}
+
+/* Docentes: último tema heredado tenía tonos chocolate/amarillo en módulos internos. */
+body.portal-docentes-2027
+  :is(.p27-pane, .legacy-workspace)
+  :is(
+    .encabezado-listado,
+    .encabezado-documentos-cargados,
+    .bloque-horario-docente,
+    .encabezado-docente-mesas,
+    .titulo-agenda-docente,
+    .cantidad-agenda-docente,
+    .titulo-turno-horario-docente,
+    .vista-horario-aula-docente,
+    .vista-horario-taller-docente,
+    .vista-horario-ef-docente,
+    .tarjeta-lista-estudiantes-docente,
+    .tarjeta-bloque-horario-docente,
+    .dato-preceptora-lista
+  )
+  :is(h3, h4, span, strong):not(.estado-ok):not(.estado-error) {
+  color: var(--eetp-marino);
+}
+body.portal-docentes-2027
+  :is(.p27-pane, .legacy-workspace)
+  :is(
+    .bloque-horario-hora-docente,
+    .bloque-horario-materia-docente,
+    .tarjeta-lista-estudiantes-docente li,
+    .sira-estudiante-nombre strong,
+    .sira-estudiante-controles select,
+    .sira-estudiante-controles input
+  ) {
+  color: var(--eetp-texto);
+}
+body.portal-docentes-2027
+  :is(.p27-pane, .legacy-workspace)
+  :is(
+    .sira-estudiante-nombre small,
+    .enlace-correo-agenda-docente,
+    .dia-horario-docente,
+    .dia-horario-aula-docente,
+    .sira-gestion-dia,
+    .documentos-cargados-docente
+  ) {
+  background: var(--eetp-celeste-suave);
+  color: var(--eetp-texto);
+}
+body.portal-docentes-2027
+  :is(.p27-pane, .legacy-workspace)
+  #parte-sira-docente
+  :is(.sira-gestion-dia > h4, .sira-gestion-bloque > header) {
+  background: var(--eetp-celeste);
+  color: var(--eetp-marino);
+}
+body.portal-docentes-2027
+  :is(.p27-pane, .legacy-workspace)
+  :is(
+    .sira-clase-seleccionada h3,
+    .sira-gestion-encabezado h3,
+    .titulo-agenda-docente,
+    .titulo-turno-horario-docente,
+    .encabezado-docente-mesas h3,
+    .encabezado-lista-estudiantes-docente h3
+  ) {
+  color: var(--eetp-marino);
+}
+body.portal-docentes-2027
+  :is(.p27-pane, .legacy-workspace)
+  :is(.btn-filtro-detalle-asistencia-docente:not(.activo), .btn-volver) {
+  color: var(--eetp-azul);
+  border-color: var(--eetp-borde);
+}
+body.portal-docentes-2027
+  :is(.p27-pane, .legacy-workspace)
+  :is(.btn-filtro-detalle-asistencia-docente:not(.activo)):hover {
+  background: var(--eetp-celeste);
+}
+
+/* Gestión/Soporte: símbolos y bordes de identidad, no indicadores de resultado. */
+body:is(.portal-gestion-2027, .portal-soporte-2027)
+  :is(.p27-pane, .legacy-workspace)
+  :is(
+    .icono-bienvenida,
+    .icono-tarjeta,
+    .tarjeta-icono,
+    .etiqueta-curso,
+    .bloque-horario-hora-gestion
+  ) {
+  color: var(--eetp-azul);
+}
+body:is(.portal-gestion-2027, .portal-soporte-2027)
+  :is(.p27-pane, .legacy-workspace)
+  :is(
+    .tarjeta-gestion,
+    .tarjeta-acceso,
+    .panel-configuracion,
+    .tarjeta-documentacion,
+    .bloque-horario-gestion
+  ):not(.estado-gestion):not(.mensaje-gestion) {
+  border-color: var(--eetp-borde);
+}
+
+/* Diálogos del DOM del portal; no se modifica el estado de alertas de error/éxito. */
+body:is(
+    .portal-alumnos-2027,
+    .portal-docentes-2027,
+    .portal-soporte-2027,
+    .portal-gestion-2027
+  )
+  :is(.p27-contact-dialog, .modal-content, .modal-cierre-sesion-portal)
+  :is(h2, h3) {
+  color: var(--eetp-marino);
+}
+body:is(
+    .portal-alumnos-2027,
+    .portal-docentes-2027,
+    .portal-soporte-2027,
+    .portal-gestion-2027
+  )
+  .swal2-popup:not(.swal2-icon-warning):not(.swal2-icon-error):not(
+    .swal2-icon-success
+  )
+  .swal2-title {
+  color: var(--eetp-marino);
+}
+body:is(
+    .portal-alumnos-2027,
+    .portal-docentes-2027,
+    .portal-soporte-2027,
+    .portal-gestion-2027
+  )
+  .swal2-popup
+  .swal2-confirm:not(.swal2-styled-danger) {
+  background-color: var(--eetp-azul) !important;
+  color: #fff !important;
+}
+
+/* Accesibilidad: no ocultar focos y respetar la maqueta en móvil. */
+body:is(
+    .portal-alumnos-2027,
+    .portal-docentes-2027,
+    .portal-soporte-2027,
+    .portal-gestion-2027
+  )
+  :is(button, a, [role="button"]):focus-visible {
+  outline: 2px solid var(--eetp-azul);
+  outline-offset: 3px;
+}
+
+/* Detalles repetidos de la MAQUETA en las cuatro barras laterales. */
+body:is(
+  .portal-alumnos-2027,
+  .portal-docentes-2027,
+  .portal-soporte-2027,
+  .portal-gestion-2027
+) {
+  --accent: #18529b;
+}
+body:is(
+    .portal-alumnos-2027,
+    .portal-docentes-2027,
+    .portal-soporte-2027,
+    .portal-gestion-2027
+  )
+  :is(.side-kicker, .side-intro .overline, .form-eyebrow) {
+  color: var(--eetp-azul);
+}
+body:is(
+    .portal-alumnos-2027,
+    .portal-docentes-2027,
+    .portal-soporte-2027,
+    .portal-gestion-2027
+  )
+  .nav-item.is-active::before {
+  background: var(--eetp-azul);
+}
+body:is(
+    .portal-alumnos-2027,
+    .portal-docentes-2027,
+    .portal-soporte-2027,
+    .portal-gestion-2027
+  )
+  .demo-ribbon
+  a {
+  color: #dcecff;
+}
+
+/* En los CSS de 2026 algunos selectores con IDs tenían más especificidad
+   que la capa general. Únicamente para el aspecto visual se les da prioridad. */
+body.portal-docentes-2027
+  :is(.p27-pane, .legacy-workspace)
+  :is(
+    .panel-info,
+    .documentos-cargados-docente,
+    .barra-consulta-documentos-docente
+  ) {
+  background: #fff !important;
+  color: var(--eetp-texto) !important;
+  border-color: var(--eetp-borde) !important;
+}
+body.portal-docentes-2027
+  :is(.p27-pane, .legacy-workspace)
+  :is(
+    .campo-documentacion,
+    .campo-docente-mesas,
+    .encabezado-listado,
+    .encabezado-documentos-cargados,
+    .encabezado-docente-mesas
+  )
+  :is(label, h3, p),
+body.portal-docentes-2027
+  :is(.p27-pane, .legacy-workspace)
+  :is(
+    .ayuda-cursos-material-estudio,
+    .titulo-agenda-docente,
+    .cantidad-agenda-docente
+  ) {
+  color: var(--eetp-texto) !important;
+}
+body.portal-docentes-2027
+  #panelDocumentacionAcademica
+  :is(input:not([type="checkbox"]):not([type="radio"]), select, textarea) {
+  background: #fff !important;
+  color: var(--eetp-texto) !important;
+  border-color: var(--eetp-borde) !important;
+}
+body.portal-docentes-2027
+  #panelDocumentacionAcademica
+  :is(input:disabled, select:disabled) {
+  background: #eff4fa !important;
+  color: #71849a !important;
+  border-color: var(--eetp-borde) !important;
+}
+body.portal-docentes-2027
+  #panelDocumentacionAcademica
+  :is(.tabla-documentos th, .tabla-documentos thead tr),
+body.portal-docentes-2027 #mesas-examen-docente table thead th,
+body.portal-docentes-2027 #situacion-asistencia-docente table thead th {
+  background: var(--eetp-celeste) !important;
+  color: var(--eetp-marino) !important;
+  border-color: var(--eetp-borde) !important;
+}
+body.portal-docentes-2027
+  #panelDocumentacionAcademica
+  :is(.tabla-documentos td, .tabla-documentos td strong) {
+  color: var(--eetp-texto) !important;
+}
+body.portal-docentes-2027
+  #panelDocumentacionAcademica
+  :is(
+    #btnSubirDocumentoAcademico,
+    #btnVerDocumentosDocente,
+    .btn-ver-documento,
+    .btn-ver-documento-docente
+  ),
+body.portal-docentes-2027 #mesas-examen-docente .btn-docente-mesas {
+  background: var(--eetp-azul) !important;
+  border-color: var(--eetp-azul) !important;
+  color: #fff !important;
+  box-shadow: none !important;
+}
+body.portal-docentes-2027
+  #panelDocumentacionAcademica
+  :is(
+    #btnSubirDocumentoAcademico,
+    #btnVerDocumentosDocente,
+    .btn-ver-documento,
+    .btn-ver-documento-docente
+  ):hover,
+body.portal-docentes-2027 #mesas-examen-docente .btn-docente-mesas:hover {
+  background: var(--eetp-azul-fuerte) !important;
+  border-color: var(--eetp-azul-fuerte) !important;
+}
+body.portal-docentes-2027
+  #panelDocumentacionAcademica
+  input[type="file"]::file-selector-button {
+  background: var(--eetp-celeste) !important;
+  color: var(--eetp-azul-fuerte) !important;
+  border-color: var(--eetp-borde) !important;
+}
+body.portal-docentes-2027
+  #panelDocumentacionAcademica
+  .documentos-cargados-docente {
+  background: var(--eetp-celeste-suave) !important;
+}
+body.portal-docentes-2027
+  #panelDocumentacionAcademica
+  :is(.encabezado-documentos-cargados h3, .encabezado-listado h3) {
+  color: var(--eetp-marino) !important;
+}
+body.portal-docentes-2027
+  #panelDocumentacionAcademica
+  #mensajeDocumentacionAcademica:not(.ok):not(.error):not(.mensaje-error) {
+  color: var(--eetp-texto-suave) !important;
+}
+
+/* Horarios / Si.R.A.: estructura e indicadores de asistencia no cambian. */
+body.portal-docentes-2027
+  :is(
+    #sira-docente,
+    #parte-sira-docente,
+    #situacion-asistencia-docente,
+    #mis-horarios-docente
+  )
+  :is(
+    .dia-horario-docente,
+    .dia-horario-aula-docente,
+    .sira-gestion-dia,
+    .sira-gestion-bloque,
+    .sira-clase-seleccionada
+  ) {
+  background-color: #fff !important;
+  border-color: var(--eetp-borde) !important;
+}
+body.portal-docentes-2027
+  :is(
+    #sira-docente,
+    #parte-sira-docente,
+    #situacion-asistencia-docente,
+    #mis-horarios-docente
+  )
+  :is(
+    .sira-gestion-dia > h4,
+    .sira-gestion-bloque > header,
+    .dia-horario-docente > h4,
+    .dia-horario-aula-docente > h4
+  ) {
+  background: var(--eetp-celeste) !important;
+  color: var(--eetp-marino) !important;
+}
+body.portal-docentes-2027
+  :is(
+    #sira-docente,
+    #parte-sira-docente,
+    #situacion-asistencia-docente,
+    #mis-horarios-docente
+  )
+  :is(
+    .sira-clase-seleccionada h3,
+    .sira-gestion-encabezado h3,
+    .sira-estudiante-nombre strong,
+    .sira-gestion-bloque header h4,
+    .sira-gestion-bloque header strong,
+    .sira-gestion-bloque li
+  ) {
+  color: var(--eetp-texto) !important;
+}
+body.portal-docentes-2027
+  :is(#sira-docente, #parte-sira-docente, #situacion-asistencia-docente)
+  :is(
+    .form-grid-documentacion input:not([type="checkbox"]),
+    .form-grid-documentacion select,
+    .sira-estudiante-controles select,
+    .sira-estudiante-controles input
+  ) {
+  background-color: #fff !important;
+  color: var(--eetp-texto) !important;
+  border-color: var(--eetp-borde) !important;
+}
+/* No cambiar color de .sira-gestion-estado.presentes / .ausentes / .tarde. */
+
+/* Íconos y acentos decorativos de Gestión: azul, no verde de estado. */
+body.portal-gestion-2027
+  :is(.p27-pane, .legacy-workspace)
+  .panel-gestion-listado
+  > i,
+body.portal-gestion-2027
+  :is(.p27-pane, .legacy-workspace)
+  :is(.icono-panel-gestion, .icono-bienvenida, .icono-tarjeta-gestion) {
+  background: var(--eetp-celeste) !important;
+  color: var(--eetp-azul) !important;
+}
+body.portal-gestion-2027
+  :is(.p27-pane, .legacy-workspace)
+  :is(
+    .tarjeta-documentacion-gestion,
+    .bloque-horario-gestion,
+    .panel-gestion-listado
+  ) {
+  border-color: var(--eetp-borde);
+}

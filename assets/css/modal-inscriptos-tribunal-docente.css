@@ -40,7 +40,7 @@
   width: 100%;
   border-collapse: collapse;
   table-layout: fixed;
-  font-size: .95rem;
+  font-size: 0.95rem;
 }
 
 .modal-inscriptos-tribunal-docente .tabla-inscriptos-tribunal-docente th,
@@ -59,13 +59,21 @@
   text-align: left;
 }
 
-.modal-inscriptos-tribunal-docente .tabla-inscriptos-tribunal-docente th:first-child,
-.modal-inscriptos-tribunal-docente .tabla-inscriptos-tribunal-docente td:first-child {
+.modal-inscriptos-tribunal-docente
+  .tabla-inscriptos-tribunal-docente
+  th:first-child,
+.modal-inscriptos-tribunal-docente
+  .tabla-inscriptos-tribunal-docente
+  td:first-child {
   width: 64%;
 }
 
-.modal-inscriptos-tribunal-docente .tabla-inscriptos-tribunal-docente th:last-child,
-.modal-inscriptos-tribunal-docente .tabla-inscriptos-tribunal-docente td:last-child {
+.modal-inscriptos-tribunal-docente
+  .tabla-inscriptos-tribunal-docente
+  th:last-child,
+.modal-inscriptos-tribunal-docente
+  .tabla-inscriptos-tribunal-docente
+  td:last-child {
   width: 36%;
   text-align: center;
 }
@@ -75,11 +83,19 @@
   color: #3b241f;
 }
 
-.modal-inscriptos-tribunal-docente .tabla-inscriptos-tribunal-docente tbody tr:nth-child(even) td {
+.modal-inscriptos-tribunal-docente
+  .tabla-inscriptos-tribunal-docente
+  tbody
+  tr:nth-child(even)
+  td {
   background: #fffaf0;
 }
 
-.modal-inscriptos-tribunal-docente .tabla-inscriptos-tribunal-docente tbody tr:last-child td {
+.modal-inscriptos-tribunal-docente
+  .tabla-inscriptos-tribunal-docente
+  tbody
+  tr:last-child
+  td {
   border-bottom: 0;
 }
 
@@ -111,7 +127,7 @@
   .modal-inscriptos-tribunal-docente .tabla-inscriptos-tribunal-docente th,
   .modal-inscriptos-tribunal-docente .tabla-inscriptos-tribunal-docente td {
     padding: 12px 10px;
-    font-size: .88rem;
+    font-size: 0.88rem;
   }
 
   .swal2-popup.modal-inscriptos-tribunal-docente .swal2-actions {

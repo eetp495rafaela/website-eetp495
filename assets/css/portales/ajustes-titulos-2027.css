@@ -1,0 +1,22 @@
+/* Website 2027 | Revisión 17: simplificación de títulos en los cuatro portales.
+   Los encabezados h1 dinámicos del menú se conservan; sólo se ocultan los h2
+   duplicados que son hijos inmediatos de una sección principal.
+   No se ocultan encabezados de subsecciones, formularios, modales ni tablas. */
+
+body.portal-soporte-2027 #inicio > section.grupo.seccion-destino > h2:first-child,
+body.portal-gestion-2027 #inicio > section.grupo.seccion-destino > h2:first-child,
+body.portal-docentes-2027 main#inicio > section.grupo.seccion-destino > h2:first-child,
+body.portal-alumnos-2027 #legacy-sections > section.grupo.seccion-destino > h2:first-of-type {
+  display: none;
+}
+/* La explicación genérica deja espacio al contenido cuando se elige una herramienta.
+   En inicio permanece visible. */
+body:has(#home-panel[hidden]) .work-topline > div > #view-description,
+body:has(#home-panel[style*="display: none"]) .work-topline > div > #view-description {
+  display: none;
+}
+/* Icono Volver arriba en los módulos que ya utilizan SVG. */
+body.portal-docentes-2027 .float-top svg,
+body.portal-alumnos-2027 .float-top svg { width: 30px; height: 30px; stroke-width: 3; }
+body.portal-soporte-2027 .btn-arriba i,
+body.portal-gestion-2027 .btn-arriba i { font-size: 25px; }

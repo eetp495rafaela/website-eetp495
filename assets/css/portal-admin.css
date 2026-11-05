@@ -5364,17 +5364,20 @@ body {
   gap: 16px;
   align-items: end;
 }
-#asignaciones-docentes .grid-botones-asignaciones > :nth-child(-n+3),
-#asignaciones-docentes .grid-botones-reemplazos > :nth-child(-n+3) {
+#asignaciones-docentes .grid-botones-asignaciones > :nth-child(-n + 3),
+#asignaciones-docentes .grid-botones-reemplazos > :nth-child(-n + 3) {
   grid-column: span 4;
 }
-#asignaciones-docentes .grid-botones-asignaciones > :nth-child(n+4),
-#asignaciones-docentes .grid-botones-reemplazos > :nth-child(n+4) {
+#asignaciones-docentes .grid-botones-asignaciones > :nth-child(n + 4),
+#asignaciones-docentes .grid-botones-reemplazos > :nth-child(n + 4) {
   grid-column: span 3;
 }
 #referentes-institucionales .grid-ajuste-referentes {
   display: grid;
-  grid-template-columns: minmax(0, .9fr) minmax(0, 1.2fr) minmax(0, .95fr) minmax(0, .7fr);
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.2fr) minmax(
+      0,
+      0.95fr
+    ) minmax(0, 0.7fr);
   align-items: end;
 }
 #referentes-institucionales .grid-ajuste-referentes .campo-formulario,

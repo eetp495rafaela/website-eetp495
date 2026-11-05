@@ -1,0 +1,68 @@
+/* E.E.T.P. N° 495 · Website 2027 — criterio de botones aprobado (Integración 09).
+   Solo la vista pública en desarrollo. No altera portales funcionales, menú, tarjetas,
+   botones flotantes ni selectores de materias. */
+
+/* Botones de acción: texto en una sola línea, altura coherente. */
+.btn {
+  white-space: nowrap;
+  min-height: 50px;
+  box-sizing: border-box;
+  text-align: center;
+}
+
+/* Pares equivalentes: ambas acciones ocupan exactamente la misma superficie. */
+.actions.botones-uniformes,
+.document-toolbar.botones-uniformes {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  width: min(100%, 640px);
+  align-items: stretch;
+}
+.actions.botones-uniformes > .btn,
+.document-toolbar.botones-uniformes > .btn {
+  width: 100%;
+  min-width: 0;
+  height: 52px;
+  padding: 10px 12px;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Calendario: control anterior, Hoy y siguiente con igual ancho y alto. */
+.cal-toolbar .cal-actions > button {
+  width: 42px;
+  height: 40px;
+  min-width: 42px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+}
+
+/* Los controles accesibles y botones de icono mantienen su geometría original. */
+@media (max-width: 760px) {
+  .actions.botones-uniformes,
+  .document-toolbar.botones-uniformes {
+    grid-template-columns: minmax(0, 1fr);
+    width: min(100%, 420px);
+  }
+  .actions.botones-uniformes > .btn,
+  .document-toolbar.botones-uniformes > .btn {
+    height: 50px;
+  }
+  .btn {
+    font-size: clamp(0.7rem, 2.6vw, 0.9rem);
+    padding-inline: clamp(9px, 2.4vw, 18px);
+  }
+}
+@media (max-width: 390px) {
+  .cal-toolbar .cal-actions > button {
+    width: 36px;
+    min-width: 36px;
+    height: 36px;
+  }
+}
