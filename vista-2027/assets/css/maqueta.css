@@ -1690,3 +1690,40 @@ dialog::backdrop {
     bottom: 15px;
   }
 }
+
+/* EETP495 2027 · Integración 25 · enlace Instagram en el footer */
+.footer .footer-instagram {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  max-width: 100%;
+  padding: 10px 12px;
+  margin-top: 4px;
+  border: 1px solid rgba(173, 198, 232, 0.25);
+  border-radius: 10px;
+  background: rgba(151, 186, 228, 0.09);
+  color: #e8f1ff;
+  font-size: 0.86rem;
+  font-weight: 750;
+  line-height: 1.3;
+  text-decoration: none;
+  transition: background-color .18s ease, border-color .18s ease;
+}
+.footer .footer-instagram svg {
+  width: 20px;
+  height: 20px;
+  flex: 0 0 20px;
+}
+.footer .footer-instagram span {
+  overflow-wrap: anywhere;
+}
+.footer .footer-instagram:hover,
+.footer .footer-instagram:focus-visible {
+  color: #fff;
+  background: rgba(151, 186, 228, .19);
+  border-color: rgba(204, 221, 243, .55);
+}
+.footer .footer-instagram:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 3px;
+}

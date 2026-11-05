@@ -64,9 +64,11 @@
     const count = document.createElement("p");
     count.className = "plan-year-count";
     count.textContent =
-      y <= 2
-        ? `${year.items.length} espacios curriculares · Formación general`
-        : `${year.items.length} espacios curriculares`;
+      y <= 2 && year.items.some((item) => item.group === "taller")
+        ? `${year.items.length} espacios curriculares · Taller con 3 áreas`
+        : y <= 2
+          ? `${year.items.length} espacios curriculares · Formación general`
+          : `${year.items.length} espacios curriculares`;
     const ul = document.createElement("ul");
     ul.className = "subjects";
     ul.style.setProperty(
@@ -75,13 +77,28 @@
     );
     year.items.forEach((item) => {
       const li = document.createElement("li");
-      li.className =
-        y <= 2
-          ? "general"
-          : ["general", "tecnica", "taller"].includes(item.group)
-            ? item.group
-            : "general";
-      li.textContent = item.name;
+      li.className = ["general", "tecnica", "taller"].includes(item.group)
+        ? item.group
+        : "general";
+      if (Array.isArray(item.areas) && item.areas.length) {
+        const titulo = document.createElement("strong");
+        titulo.className = "p24-taller-titulo";
+        titulo.textContent = item.name;
+        const subtitulo = document.createElement("span");
+        subtitulo.className = "p24-taller-subtitulo";
+        subtitulo.textContent = "Un espacio curricular · 3 áreas";
+        const areas = document.createElement("span");
+        areas.className = "p24-taller-areas";
+        for (const area of item.areas) {
+          const etiqueta = document.createElement("span");
+          etiqueta.className = "p24-taller-area";
+          etiqueta.textContent = area;
+          areas.append(etiqueta);
+        }
+        li.append(titulo, subtitulo, areas);
+      } else {
+        li.textContent = item.name;
+      }
       ul.append(li);
     });
     popup.append(heading, count, ul);

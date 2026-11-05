@@ -154,3 +154,43 @@
     word-break: normal;
   }
 }
+
+/* Integración 24 corregida · 05/11/2026 · solo presentación */
+/* Plan de Estudios público: Taller es un único espacio con 3 áreas reales. */
+.plan-year-panel .subjects li.taller:has(.p24-taller-titulo) {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  border: 1px solid #81c399;
+  background: linear-gradient(145deg, #edf9ef, #daf2df);
+  color: #215e36;
+  min-width: 0;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  box-shadow: 0 2px 8px rgba(22, 100, 54, .08);
+}
+.plan-year-panel .p24-taller-titulo { color: #17633b; font-weight: 900; font-size: .9rem; }
+.plan-year-panel .p24-taller-subtitulo { color: #436a50; font-size: .72rem; line-height: 1.35; }
+.plan-year-panel .p24-taller-areas { display: flex; flex-wrap: wrap; gap: 5px; }
+.plan-year-panel .p24-taller-area {
+  display: inline-flex;
+  padding: 4px 7px;
+  font-weight: 800;
+  font-size: .7rem;
+  line-height: 1.25;
+  color: #17562b;
+  background: #c4e9ca;
+  border: 1px solid #a5d8b1;
+  border-radius: 999px;
+  white-space: normal;
+}
+@media (min-width: 901px) and (hover: hover) and (pointer: fine) {
+  .plan-year-picker > .plan-year-panel:has(.p24-taller-titulo) {
+    width: max-content;
+    max-width: calc(100vw - 32px);
+  }
+  .plan-year-panel .subjects li.taller:has(.p24-taller-titulo) {
+    white-space: normal;
+    max-width: 290px;
+  }
+}

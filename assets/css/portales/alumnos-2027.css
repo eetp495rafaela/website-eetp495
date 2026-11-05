@@ -301,3 +301,26 @@ body.portal-alumnos-2027 .legacy-workspace .vista-horario-aula-alumno {
     transition: none !important;
   }
 }
+
+/* Integración 24 corregida · 05/11/2026 · solo presentación */
+/* Mis Docentes: sustituye turquesas de la maqueta por azul institucional. */
+body.portal-alumnos-2027 #mis-docentes-alumno .etiqueta-referentes-alumno {
+  border-color: #b9d3ee;
+  background: #e6f1fd;
+  color: #154b86;
+}
+body.portal-alumnos-2027 #mis-docentes-alumno .cabecera-referentes-alumno strong {
+  color: #173e69;
+}
+body.portal-alumnos-2027 #mis-docentes-alumno .tarjeta-referente-alumno {
+  border-top-color: #1860a5;
+}
+body.portal-alumnos-2027 #mis-docentes-alumno .correo-referente-alumno,
+body.portal-alumnos-2027 #mis-docentes-alumno .correo-referente-alumno i {
+  color: #1262a6;
+}
+body.portal-alumnos-2027 #mis-docentes-alumno .encabezado-agenda-docentes-alumno {
+  background: #e9f2fc;
+  color: #163f6e;
+  border: 1px solid #c4daee;
+}

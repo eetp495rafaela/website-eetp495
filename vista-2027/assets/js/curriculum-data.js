@@ -47,16 +47,9 @@ window.EETP_CURRICULUM = [
         group: "general",
       },
       {
-        name: "Electricidad",
-        group: "general",
-      },
-      {
-        name: "Informática",
-        group: "general",
-      },
-      {
-        name: "Organización de la Empresa",
-        group: "general",
+        name: "Taller",
+        group: "taller",
+        areas: ["Electricidad", "Informática", "Organización de la Empresa"],
       },
     ],
   },
@@ -108,16 +101,9 @@ window.EETP_CURRICULUM = [
         group: "general",
       },
       {
-        name: "Electrónica",
-        group: "general",
-      },
-      {
-        name: "Informática",
-        group: "general",
-      },
-      {
-        name: "Documentos Comerciales",
-        group: "general",
+        name: "Taller",
+        group: "taller",
+        areas: ["Electrónica", "Informática", "Documentos Comerciales"],
       },
     ],
   },
