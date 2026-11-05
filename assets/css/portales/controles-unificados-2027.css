@@ -212,3 +212,28 @@ body .floating.float-whatsapp:where(a) {
     grid-template-columns: minmax(0,1fr);
   }
 }
+
+/* Integración 24 corregida · 05/11/2026 · solo presentación */
+/* Documentación Docentes: alinear selector PDF y botón en la misma línea. */
+body.portal-docentes-2027 #panelDocumentacionAcademica .fila-carga-documentacion {
+  align-items: start !important;
+}
+body.portal-docentes-2027 #panelDocumentacionAcademica .acciones-subir-documentacion {
+  align-self: start !important;
+  padding-top: 0 !important;
+  margin-top: 27px !important;
+}
+/* Etiquetas de filtros institucionales: no rojas cuando no hay error. */
+body.portal-docentes-2027 #panelDocumentacionAcademica .filtro-documentos-docente label {
+  color: #164574 !important;
+}
+body.portal-docentes-2027 #panelDocumentacionAcademica .filtro-documentos-docente select {
+  border-color: #cbddea !important;
+  background: #fff !important;
+  color: #234c74 !important;
+}
+@media (max-width: 700px) {
+  body.portal-docentes-2027 #panelDocumentacionAcademica .acciones-subir-documentacion {
+    margin-top: 0 !important;
+  }
+}

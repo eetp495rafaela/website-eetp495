@@ -384,3 +384,55 @@ body.portal-soporte-2027 .p27-dialog-ok {
     scroll-behavior: auto !important;
   }
 }
+
+/* Integración 24 corregida · 05/11/2026 · solo presentación */
+/* Soporte: filtros equivalentes ocupan mitades iguales. */
+body.portal-soporte-2027 #usuarios .filtros-usuarios,
+body.portal-soporte-2027 #asignaciones-docentes .filtros-asignaciones {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+body.portal-soporte-2027 #usuarios .filtros-usuarios > .campo-filtro,
+body.portal-soporte-2027 #asignaciones-docentes .filtros-asignaciones > .campo-filtro {
+  min-width: 0;
+  width: 100%;
+  grid-column: auto;
+}
+body.portal-soporte-2027 #usuarios .filtros-usuarios :is(input, select),
+body.portal-soporte-2027 #asignaciones-docentes .filtros-asignaciones :is(input, select) {
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+/* Mismas funciones y eventos: solo posición y tamaño de botones. */
+body.portal-soporte-2027 #usuarios .acciones-tabla,
+body.portal-soporte-2027 #asignaciones-docentes .acciones-tabla {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 7px;
+  min-width: 184px;
+  max-width: 220px;
+  align-items: stretch;
+}
+body.portal-soporte-2027 :is(#usuarios,#asignaciones-docentes) .acciones-tabla > .btn-tabla {
+  display: inline-flex;
+  width: 100%;
+  min-height: 36px;
+  padding: 7px 8px;
+  justify-content: center;
+  align-items: center;
+  box-sizing: border-box;
+  margin: 0;
+}
+body.portal-soporte-2027 :is(#usuarios,#asignaciones-docentes) .acciones-tabla > .btn-tabla:nth-child(3):last-child {
+  grid-column: 1 / -1;
+}
+body.portal-soporte-2027 #asignaciones-docentes .acciones-tabla > .btn-eliminar-asignacion:nth-child(3):last-child::after {
+  content: 'Eliminar';
+  margin-left: 6px;
+}
+@media (max-width: 700px) {
+  body.portal-soporte-2027 #usuarios .filtros-usuarios,
+  body.portal-soporte-2027 #asignaciones-docentes .filtros-asignaciones {
+    grid-template-columns: minmax(0,1fr);
+  }
+}
