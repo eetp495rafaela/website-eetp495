@@ -1,0 +1,426 @@
+/* EETP 495 · Integración 15 · Portal Gestión · Solo capa visual; lógica vigente intacta. */
+body.portal-gestion-2027 {
+  background: #f5f8fc;
+  color: #18304d;
+  min-width: 0;
+}
+body.portal-gestion-2027 > .p27-original-header {
+  display: none !important;
+}
+body.portal-gestion-2027 > .skip {
+  position: absolute;
+  left: -9999px;
+  top: auto;
+}
+body.portal-gestion-2027 > .skip:focus-visible {
+  left: 12px;
+  top: 44px;
+  z-index: 200;
+  padding: 12px;
+  background: #fff;
+}
+body.portal-gestion-2027 .portal-shell {
+  min-height: calc(100vh - 33px);
+}
+body.portal-gestion-2027 .side-nav .nav-item {
+  gap: 11px;
+  text-decoration: none;
+}
+body.portal-gestion-2027 .side-nav .nav-item > .mini-icon {
+  flex: 0 0 27px;
+  width: 27px;
+  height: 27px;
+}
+body.portal-gestion-2027 .side-nav .nav-item > span:last-child {
+  min-width: 0;
+  flex: 1 1 auto;
+}
+body.portal-gestion-2027 .side-nav .nav-item.is-active {
+  color: #154a87;
+  background: #e9f2fc;
+}
+body.portal-gestion-2027 .side-nav .p27-filtered,
+body.portal-gestion-2027 .side-nav .nav-section.p27-filtered {
+  display: none !important;
+}
+body.portal-gestion-2027 .topbar.p27-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 78px;
+  min-height: 78px;
+  gap: 12px;
+  background: white;
+  padding: 0 clamp(18px, 3.5vw, 48px);
+  position: sticky;
+  top: 0;
+  z-index: 18;
+}
+body.portal-gestion-2027 .topbar.p27-topbar .topbar-spacer {
+  flex: 1 1 auto;
+}
+body.portal-gestion-2027 .topbar.p27-topbar .p27-user {
+  display: flex;
+  align-items: flex-end;
+  flex-direction: column;
+  gap: 0;
+  min-width: 0;
+  max-width: 230px;
+  font-size: 12px;
+  color: #194a7e;
+  font-weight: 800;
+}
+body.portal-gestion-2027 .topbar.p27-topbar .p27-user span {
+  overflow: hidden;
+  max-width: 100%;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+body.portal-gestion-2027 .topbar.p27-topbar .p27-user small {
+  color: #8298ac;
+  font-size: 10px;
+}
+body.portal-gestion-2027 .topbar.p27-topbar .exit-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  white-space: nowrap;
+  border: 0;
+  background: transparent;
+  color: #285c88;
+  font-weight: 750;
+  padding: 8px;
+}
+body.portal-gestion-2027 .portal-content {
+  min-width: 0;
+}
+body.portal-gestion-2027 main#inicio.contenedor {
+  display: block;
+  width: 100%;
+  max-width: 1540px;
+  margin: 0 auto;
+  padding: clamp(25px, 3.5vw, 55px) clamp(20px, 4vw, 64px) 90px;
+  min-height: 0;
+  background: transparent;
+}
+body.portal-gestion-2027 main#inicio > section.p27-legacy-launch {
+  display: none !important;
+}
+body.portal-gestion-2027 main#inicio > section.p27-pane {
+  display: none !important;
+  margin: 0;
+  position: relative;
+}
+body.portal-gestion-2027
+  main#inicio
+  > section.p27-pane.p27-active:not([hidden]) {
+  display: block !important;
+}
+body.portal-gestion-2027 main#inicio > section.p27-pane[hidden] {
+  display: none !important;
+}
+body.portal-gestion-2027 .work-topline {
+  display: flex;
+  justify-content: space-between;
+  align-items: start;
+  gap: 18px;
+  margin-bottom: 23px;
+}
+body.portal-gestion-2027 .work-topline .overline {
+  color: #bb833d;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 11px;
+  margin-bottom: 12px;
+}
+body.portal-gestion-2027 .work-topline h1 {
+  font-size: clamp(23px, 2.5vw, 36px);
+  color: #0b2346;
+  font-weight: 900;
+  letter-spacing: -0.04em;
+  margin: 0 0 10px;
+}
+body.portal-gestion-2027 .work-topline p {
+  color: #657f99;
+  font-size: 14px;
+  margin: 0;
+  line-height: 1.6;
+}
+body.portal-gestion-2027 .work-topline .role-mark {
+  flex: none;
+  white-space: nowrap;
+}
+body.portal-gestion-2027 .p27-home .panel {
+  margin-top: 20px;
+}
+body.portal-gestion-2027 .p27-intro {
+  font-size: 14px;
+  color: #607990;
+  line-height: 1.8;
+}
+body.portal-gestion-2027 .p27-pane > h2 {
+  color: #214c79;
+  font-size: clamp(19px, 2.1vw, 25px);
+  font-weight: 850;
+  letter-spacing: -0.03em;
+  margin: 0 0 23px;
+  padding: 0 0 16px;
+  border: 0;
+  border-bottom: 1px solid #e2eaf2;
+}
+body.portal-gestion-2027 .p27-pane .panel-info {
+  background: #fff;
+  border: 1px solid #dfebf6;
+  border-radius: 13px;
+  padding: clamp(15px, 2.2vw, 28px);
+  max-width: 100%;
+  min-width: 0;
+  box-shadow: 0 10px 34px rgba(15, 43, 78, 0.045);
+}
+body.portal-gestion-2027 .p27-pane .panel-info p {
+  color: #58738e;
+  line-height: 1.65;
+}
+body.portal-gestion-2027 .p27-pane input,
+body.portal-gestion-2027 .p27-pane select,
+body.portal-gestion-2027 .p27-pane textarea {
+  max-width: 100%;
+  background: #fff;
+  color: #244b70;
+  border-color: #cfdfea;
+}
+body.portal-gestion-2027 .p27-pane .btn-accion {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 43px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  background: #18529b;
+  border: 1px solid #18529b;
+  color: #fff;
+  box-shadow: none;
+  white-space: nowrap;
+  vertical-align: middle;
+  font-weight: 800;
+}
+body.portal-gestion-2027 .p27-pane .btn-accion:hover {
+  background: #124581;
+  transform: none;
+}
+body.portal-gestion-2027 .p27-pane .btn-volver {
+  display: none !important;
+}
+body.portal-gestion-2027
+  .p27-pane
+  :is(
+    .tabla-contenedor,
+    .tabla-responsive,
+    .tabla-wrapper,
+    .contenedor-tabla,
+    .tabla-contactos-contenedor
+  ) {
+  max-width: 100%;
+  overflow-x: auto;
+}
+body.portal-gestion-2027 .p27-pane table {
+  max-width: 100%;
+  color: #244b70;
+}
+body.portal-gestion-2027 .p27-pane table th {
+  background: #eaf3fc;
+  color: #205080;
+}
+body.portal-gestion-2027 .p27-pane table td {
+  color: #385d80;
+}
+body.portal-gestion-2027 .p27-pane .acciones {
+  gap: 12px;
+}
+body.portal-gestion-2027 .p27-pane .grid {
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+}
+body.portal-gestion-2027 .p27-pane * {
+  scroll-margin-top: 105px;
+}
+/* Preserve old modal & form components: only the outer visual layer changes. */
+body.portal-gestion-2027 .floating.p27-whatsapp {
+  position: fixed;
+  right: 18px;
+  bottom: 82px;
+  z-index: 55;
+  width: 50px;
+  height: 50px;
+  background: #168c5f;
+  color: #fff;
+  border: 0;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+}
+body.portal-gestion-2027 #btnArriba.btn-arriba {
+  position: fixed !important;
+  bottom: 18px !important;
+  right: 18px !important;
+  z-index: 55 !important;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: #18529b;
+  border: 0;
+  color: white;
+  display: grid;
+  place-items: center;
+  min-height: 0;
+  min-width: 0;
+  padding: 0;
+  font-size: 24px;
+  box-shadow: 0 12px 26px #0b23462b;
+}
+body.portal-gestion-2027 #btnArriba.btn-arriba:not(.mostrar) {
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(10px);
+}
+body.portal-gestion-2027 #btnArriba.btn-arriba.mostrar {
+  opacity: 1;
+  pointer-events: auto;
+  transform: none;
+}
+body.portal-gestion-2027 .p27-contact-dialog {
+  border: 1px solid #dce9f4;
+  border-radius: 16px;
+  width: min(92vw, 460px);
+  padding: 0;
+  box-shadow: 0 28px 75px #0b234655;
+}
+body.portal-gestion-2027 .p27-contact-dialog::backdrop {
+  background: #0b234695;
+}
+body.portal-gestion-2027 .p27-dialog-inner {
+  padding: 28px;
+  position: relative;
+}
+body.portal-gestion-2027 .p27-dialog-inner h2 {
+  color: #0b2346;
+  font-size: 22px;
+  margin: 0 0 12px;
+}
+body.portal-gestion-2027 .p27-dialog-inner p {
+  color: #647d94;
+  line-height: 1.7;
+}
+body.portal-gestion-2027 .p27-dialog-close {
+  position: absolute;
+  right: 15px;
+  top: 10px;
+  background: transparent;
+  border: 0;
+  font-size: 24px;
+  color: #547490;
+}
+body.portal-gestion-2027 .p27-dialog-ok {
+  background: #18529b;
+  color: #fff;
+  border: 0;
+  border-radius: 9px;
+  padding: 11px 20px;
+  font-weight: 800;
+}
+@media (max-width: 770px) {
+  body.portal-gestion-2027 .topbar.p27-topbar {
+    height: 65px;
+    min-height: 65px;
+    padding: 0 12px;
+    gap: 8px;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    align-items: center;
+    justify-content: space-between;
+  }
+  body.portal-gestion-2027 .topbar.p27-topbar .crumb {
+    display: none;
+  }
+  body.portal-gestion-2027 .topbar.p27-topbar .topbar-spacer {
+    flex: 1 1 auto;
+  }
+  body.portal-gestion-2027 .topbar.p27-topbar .p27-user {
+    flex: 0 1 auto;
+    max-width: 35vw;
+    align-items: flex-end;
+  }
+  body.portal-gestion-2027 .topbar.p27-topbar .exit-link {
+    flex: none;
+    padding: 6px;
+  }
+  body.portal-gestion-2027 .topbar.p27-topbar .exit-link span {
+    display: none;
+  }
+  body.portal-gestion-2027 .topbar.p27-topbar #sidebar-toggle {
+    flex: none;
+  }
+  body.portal-gestion-2027 main#inicio.contenedor {
+    padding: 24px 14px 85px;
+  }
+  body.portal-gestion-2027 .p27-pane .panel-info {
+    padding: 18px 12px;
+  }
+  body.portal-gestion-2027 .p27-pane .btn-accion {
+    white-space: normal;
+    min-width: 0;
+    max-width: 100%;
+  }
+  body.portal-gestion-2027 .work-topline {
+    margin-bottom: 20px;
+  }
+  body.portal-gestion-2027 .p27-pane .acciones {
+    align-items: stretch;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  body.portal-gestion-2027 * {
+    transition: none !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Gestión: preserve access-gated sections and the original form states. */
+body.portal-gestion-2027 main#inicio > section.p27-legacy-launch {
+  display: none !important;
+}
+body.portal-gestion-2027 .side-nav .nav-item[hidden] {
+  display: none !important;
+}
+body.portal-gestion-2027 .p27-pane .btn-gestion,
+body.portal-gestion-2027 .p27-pane button.btn-gestion {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  min-height: 43px;
+  max-width: 100%;
+  border-radius: 10px;
+  white-space: nowrap;
+}
+body.portal-gestion-2027
+  .p27-pane
+  :is(.tabla-gestion, .tabla-wrapper, .vista-gestion, .contenedor-tabla) {
+  max-width: 100%;
+}
+body.portal-gestion-2027 .p27-pane .vista-gestion {
+  min-width: 0;
+}
+body.portal-gestion-2027 .p27-pane .panel-info {
+  min-width: 0;
+  align-items: flex-start;
+}
+body.portal-gestion-2027 .p27-pane [hidden] {
+  display: none !important;
+}
+@media (max-width: 770px) {
+  body.portal-gestion-2027 .p27-pane .btn-gestion {
+    white-space: normal;
+    min-width: 0;
+  }
+}

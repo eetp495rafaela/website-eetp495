@@ -168,3 +168,21 @@ secrets/
 *.key
 *.p12
 *.pfx
+
+# =====================================================
+# WEBSITE 2027 — DOCUMENTACIÓN LOCAL / NO PUBLICAR
+# Repositorio GitHub Pages público: no versionar bitácoras
+# internas, auditorías de arquitectura ni registros locales.
+# =====================================================
+/Bitacora_Maestra_Website_EETP495_*.txt
+/BITACORA_MIGRACION_EETP495_2027.md
+/ESTADO_ACTUAL.md
+/MAPA_MODULOS_2027.md
+/REGISTRO_INTEGRACION_*.md
+/REGISTRO_DESARROLLO_2027.md
+/SEGURIDAD_REPOSITORIO_2027.md
+/Respaldos/
+/.backups/
+
+# Documento local de continuidad de la migración
+/CONTINUIDAD_CHAT_WEBSITE_2027.md

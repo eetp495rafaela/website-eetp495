@@ -1,7 +1,13 @@
 /* EETP 495 - Docentes libres de Taller en Portal Admin.
    Estilos aislados: solo afectan #vistaDocentesLibresTallerAdmin. */
-#vistaDocentesLibresTallerAdmin { min-width: 0; margin-top: 18px; }
-#vistaDocentesLibresTallerAdmin, #vistaDocentesLibresTallerAdmin * { box-sizing: border-box; }
+#vistaDocentesLibresTallerAdmin {
+  min-width: 0;
+  margin-top: 18px;
+}
+#vistaDocentesLibresTallerAdmin,
+#vistaDocentesLibresTallerAdmin * {
+  box-sizing: border-box;
+}
 #vistaDocentesLibresTallerAdmin .docentes-libres-introduccion {
   display: flex;
   flex-wrap: wrap;
@@ -63,7 +69,9 @@
   line-height: 1.35;
 }
 
-#vistaDocentesLibresTallerAdmin .docentes-libres-leyenda .docentes-libres-leyenda-aula,
+#vistaDocentesLibresTallerAdmin
+  .docentes-libres-leyenda
+  .docentes-libres-leyenda-aula,
 #vistaDocentesLibresTallerAdmin .docentes-libres-estado-aula {
   border-color: #f4dbb3;
   color: #915406;
@@ -98,7 +106,9 @@
   font-size: 1.15rem;
 }
 
-#vistaDocentesLibresTallerAdmin .docentes-libres-tarde .docentes-libres-turno-icono {
+#vistaDocentesLibresTallerAdmin
+  .docentes-libres-tarde
+  .docentes-libres-turno-icono {
   color: #276289;
   background: #e5f1fb;
 }

@@ -1,0 +1,214 @@
+/* Login institucional 2027: puente visual sin cambios en Firebase Auth. */
+.login-demo [hidden] {
+  display: none !important;
+}
+.login-card .login-acceso {
+  width: 100%;
+}
+.login-card .mensaje-login {
+  font-size: 12px;
+  color: #194b82;
+  line-height: 1.5;
+  min-height: 18px;
+  margin: 8px 0;
+}
+.login-card .role-tiles .role-availability {
+  min-height: 69px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border: 1px solid #dde8f1;
+  border-radius: 11px;
+  padding: 15px 12px;
+  background: #fff;
+  color: #295c8e;
+  font-size: 12px;
+  font-weight: 850;
+}
+.login-card .role-symbol {
+  color: #1e619b;
+  font-size: 19px;
+  line-height: 1;
+  width: 24px;
+  text-align: center;
+  flex: 0 0 24px;
+}
+.login-card .google-button:disabled,
+.login-card button:disabled {
+  opacity: 0.65;
+  cursor: wait;
+}
+.login-card .selector-roles {
+  margin-top: 12px;
+}
+.login-card .selector-roles > p {
+  color: #667d95;
+  font-size: 14px;
+  line-height: 1.7;
+}
+.login-card .selector-roles .btn-ingresar,
+.login-card .selector-roles .btn-solicitar-acceso {
+  background: #174e8c;
+  color: white;
+  width: 100%;
+  padding: 14px 16px;
+  border: 0;
+  border-radius: 11px;
+  font-weight: 800;
+  margin: 10px 0;
+  min-height: 48px;
+  cursor: pointer;
+}
+.login-card .selector-roles .btn-volver-cuenta {
+  display: block;
+  color: #245b94;
+  background: none;
+  border: 0;
+  padding: 15px 0;
+  font-weight: 800;
+  cursor: pointer;
+  text-align: left;
+}
+.login-card .selector-roles .campo {
+  position: relative;
+  margin: 12px 0;
+}
+.login-card .selector-roles .campo i {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #5e7e9e;
+}
+.login-card .selector-roles input {
+  width: 100%;
+  min-height: 50px;
+  padding: 12px 14px 12px 42px;
+  border: 1px solid #ceddeb;
+  border-radius: 10px;
+  background: white;
+  font: inherit;
+}
+.login-card .selector-roles input:focus-visible {
+  outline: 3px solid #72a9e0;
+  outline-offset: 1px;
+}
+.login-card .selector-roles input[readonly] {
+  background: #f1f5f9;
+  color: #4a6179;
+}
+.login-card .opciones-roles {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin: 18px 0;
+}
+.login-card .btn-rol-portal {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 64px;
+  padding: 12px;
+  border: 1px solid #cbdceb;
+  background: white;
+  color: #27588b;
+  border-radius: 11px;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 800;
+  cursor: pointer;
+  text-align: left;
+}
+.login-card .btn-rol-portal:hover {
+  background: #edf5fc;
+  border-color: #80aad2;
+}
+.login-card .btn-rol-portal:focus-visible,
+.login-card button:focus-visible,
+.login-card a:focus-visible {
+  outline: 3px solid #eeaa52;
+  outline-offset: 3px;
+}
+.login-card .mensaje-login:not(:empty) {
+  margin: 12px 0;
+}
+.login-form-side .login-legal {
+  line-height: 1.5;
+}
+#contacto-dialog {
+  max-width: min(92vw, 410px);
+  border: none;
+  border-radius: 16px;
+  padding: 0;
+  box-shadow: 0 24px 90px #0b234661;
+}
+#contacto-dialog::backdrop {
+  background: #05183199;
+}
+#contacto-dialog .modal-content p {
+  line-height: 1.7;
+  color: #4d6480;
+}
+@media (max-width: 570px) {
+  .login-card .role-tiles .role-availability {
+    min-height: 58px;
+    font-size: 11px;
+    padding: 10px;
+  }
+  .login-card .opciones-roles {
+    grid-template-columns: 1fr;
+  }
+}
+/* EETP495 2027 · Integración 11: botón solicitud de acceso */
+/* CTA para solicitud de acceso, sin alterar la autenticación original. */
+.login-card .acceso-cta {
+  margin-top: 28px;
+}
+.login-card .btn-acceso-estudiantes {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  width: 100%;
+  min-height: 60px;
+  padding: 11px 13px;
+  border: 1px solid #b8d4ed;
+  border-radius: 11px;
+  background: #eaf4fd;
+  color: #174e8c;
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1.25;
+  white-space: nowrap;
+  transition:
+    background 0.18s,
+    border-color 0.18s;
+}
+.login-card .btn-acceso-estudiantes svg {
+  flex: 0 0 19px;
+}
+.login-card .btn-acceso-estudiantes:hover {
+  background: #dbeeff;
+  border-color: #8cb9df;
+}
+.login-card .login-tools {
+  justify-content: flex-end;
+  margin-top: 18px;
+}
+@media (max-width: 570px) {
+  .login-card .btn-acceso-estudiantes {
+    font-size: clamp(9px, 2.75vw, 11px);
+    gap: 6px;
+    padding-inline: 7px;
+  }
+  .login-card .login-tools {
+    align-items: flex-end;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .login-card .btn-acceso-estudiantes {
+    transition: none;
+  }
+}
+/* Fin Integración 11 */

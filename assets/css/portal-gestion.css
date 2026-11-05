@@ -3031,7 +3031,9 @@ body {
   line-height: 1.35;
 }
 
-#vistaDocentesLibresTallerGestion .docentes-libres-leyenda .docentes-libres-leyenda-aula,
+#vistaDocentesLibresTallerGestion
+  .docentes-libres-leyenda
+  .docentes-libres-leyenda-aula,
 #vistaDocentesLibresTallerGestion .docentes-libres-estado-aula {
   border-color: #f4dbb3;
   color: #915406;
@@ -3066,7 +3068,9 @@ body {
   font-size: 1.15rem;
 }
 
-#vistaDocentesLibresTallerGestion .docentes-libres-tarde .docentes-libres-turno-icono {
+#vistaDocentesLibresTallerGestion
+  .docentes-libres-tarde
+  .docentes-libres-turno-icono {
   color: #276289;
   background: #e5f1fb;
 }
@@ -3994,7 +3998,8 @@ body {
 #sira-gestion .filtros-sira-gestion .campo-filtro-gestion,
 .filtros-documentacion-gestion.filtros-accion-inline-4 .campo-filtro-gestion,
 #sira-gestion .filtros-sira-gestion .campo-filtro-boton-gestion,
-.filtros-documentacion-gestion.filtros-accion-inline-4 .campo-filtro-boton-gestion {
+.filtros-documentacion-gestion.filtros-accion-inline-4
+  .campo-filtro-boton-gestion {
   width: 100%;
   min-width: 0;
 }
@@ -4043,7 +4048,9 @@ body {
   align-items: end;
 }
 
-#formReemplazoDocenteGestion .campo-filtro-boton-reemplazo-gestion .btn-gestion {
+#formReemplazoDocenteGestion
+  .campo-filtro-boton-reemplazo-gestion
+  .btn-gestion {
   width: 100%;
   min-height: 46px;
   justify-content: center;

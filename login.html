@@ -1,251 +1,317 @@
 <!doctype html>
+<!doctype html>
 <html lang="es">
   <head>
-    <meta charset="UTF-8" />
-
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
-    <meta name="robots" content="noindex, nofollow" />
-
-    <title>Portal Institucional | E.E.T.P. Nº 495</title>
-
-    <!-- CSS -->
-    <link rel="stylesheet" href="assets/css/portal-login.css" />
-
-    <!-- Logo en la pestaña -->
-    <link rel="icon" href="assets/img/logo.png" />
-
-    <!-- Google Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-
+    <meta charset="utf-8" />
+    <meta content="width=device-width,initial-scale=1" name="viewport" />
+    <meta content="noindex,nofollow" name="robots" />
+    <meta content="#0b2346" name="theme-color" />
+    <title>Ingreso al Portal Institucional | E.E.T.P. N° 495</title>
+    <link href="vista-2027/assets/img/logo.webp" rel="icon" />
+    <link href="vista-2027/assets/css/portal-maqueta.css" rel="stylesheet" />
     <link
-      href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;600;700;800&display=swap"
+      href="vista-2027/assets/css/login-integracion-2027.css"
       rel="stylesheet"
     />
-
-    <!-- Font Awesome -->
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
+      rel="stylesheet"
+    />
     <link
       rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
+      href="vista-2027/assets/css/ajustes-revision-2027.css"
     />
   </head>
-
-  <body>
-    <!-- =====================================================
-         FONDOS DEL LOGIN
-    ====================================================== -->
-
-    <div class="login-fondos" aria-hidden="true">
-      <div class="login-fondo login-fondo-1"></div>
-      <div class="login-fondo login-fondo-2"></div>
-      <div class="login-fondo login-fondo-3"></div>
-      <div class="login-fondo login-fondo-4"></div>
+  <body class="login-demo">
+    <a class="skip" href="#login-main">Saltar al ingreso</a>
+    <div class="demo-ribbon">
+      <span>PORTAL INSTITUCIONAL · E.E.T.P. N° 495</span
+      ><a href="index.html"
+        ><svg
+          aria-hidden="true"
+          class="icon"
+          fill="none"
+          height="14"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="1.8"
+          viewbox="0 0 24 24"
+          width="14"
+        >
+          <path d="m3 10 9-7 9 7v11H3z"></path>
+          <path d="M9 21v-7h6v7"></path>
+        </svg>
+        Volver al sitio público</a
+      >
     </div>
-
-    <!-- =====================================================
-         PORTAL
-    ====================================================== -->
-
-    <main class="portal">
-      <div class="circulo">
-        <div class="reloj"></div>
-
-        <div class="login">
-          <!-- LOGO -->
-
-          <div class="logo-contenedor">
-            <img
-              src="assets/img/logo.png"
-              alt="Logo E.E.T.P. Nº 495"
-              class="logo"
-            />
+    <main class="login-wrap" id="login-main">
+      <section aria-labelledby="school-intro" class="login-story">
+        <img
+          alt="Frente del edificio de la E.E.T.P. N° 495"
+          class="login-backdrop"
+          src="vista-2027/assets/img/frente.webp"
+        />
+        <div class="login-story-overlay"></div>
+        <div class="story-content">
+          <div class="story-eyebrow">EDUCACIÓN TÉCNICA Y PÚBLICA · RAFAELA</div>
+          <h1 id="school-intro">
+            El futuro se construye <em>en comunidad.</em>
+          </h1>
+          <p>
+            Un único punto de ingreso para docentes, estudiantes, equipos de
+            Gestión y Administración/Soporte.
+          </p>
+          <div class="story-tech">
+            <svg
+              aria-hidden="true"
+              class="icon"
+              fill="none"
+              height="23"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="1.8"
+              viewbox="0 0 24 24"
+              width="23"
+            >
+              <path d="M3 21V7l9-5 9 5v14M3 10h18M7 14h3v7m4-7h3v7"></path>
+            </svg>
+            <span>E.E.T.P. N° 495 · “Malvinas Argentinas”</span>
           </div>
-
-          <h1>E.E.T.P. Nº 495</h1>
-
-          <h2>Portal Institucional</h2>
-
-          <!-- =================================================
-               VISTA PRINCIPAL DEL LOGIN
-          ================================================== -->
-
+        </div>
+      </section>
+      <section class="login-form-side">
+        <div class="login-card">
+          <div class="login-logo">
+            <img
+              alt="Escudo de la E.E.T.P. N° 495"
+              height="96"
+              src="vista-2027/assets/img/logo.webp"
+              width="73"
+            />
+            <div>
+              <span class="school-id">E.E.T.P. N° 495</span
+              ><span class="school-subid">Malvinas Argentinas · Rafaela</span>
+            </div>
+          </div>
+          <span class="form-eyebrow"
+            >ACCESO A HERRAMIENTAS INSTITUCIONALES</span
+          >
+          <h2>Tu portal, en un solo lugar.</h2>
           <div class="login-acceso" id="vistaLogin">
-            <p class="texto-acceso">
-              Ingresá con tu cuenta institucional o cuenta autorizada.
+            <p class="login-copy">
+              Ingresá con la cuenta de Google autorizada por la escuela. El
+              acceso a cada portal depende de los permisos de tu cuenta.
             </p>
-
-            <button type="button" class="btn-ingresar" id="btnGoogle">
-              <i class="fa-brands fa-google"></i>
-              Ingresar con Google
+            <button class="google-button" id="btnGoogle" type="button">
+              <span aria-hidden="true" class="google-g">G</span
+              ><span>Ingresar con Google</span>
+              <svg
+                aria-hidden="true"
+                class="icon"
+                fill="none"
+                height="19"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="1.8"
+                viewbox="0 0 24 24"
+                width="19"
+              >
+                <path d="m9 5 7 7-7 7"></path>
+              </svg>
             </button>
-
-            <p class="mensaje-login"></p>
-
-            <!-- NUEVO ACCESO PARA ESTUDIANTES -->
-
-            <div class="acceso-nuevo-alumno">
-              <p class="texto-nuevo-alumno">
-                ¿Finalizaste el cursado y no tenés acceso?
-              </p>
-
+            <p aria-live="polite" class="mensaje-login" role="status"></p>
+            <div class="acceso-cta">
               <button
                 type="button"
-                class="btn-solicitar-acceso"
                 id="btnSolicitarAcceso"
+                class="btn-acceso-estudiantes"
+                aria-label="¿Finalizaste el cursado y necesitás solicitar acceso?"
               >
-                <i class="fa-solid fa-user-graduate"></i>
-                Solicitar acceso como estudiante
+                <svg
+                  aria-hidden="true"
+                  viewBox="0 0 24 24"
+                  width="19"
+                  height="19"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.9"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path d="M12 2 2 7l10 5 10-5-10-5Z" />
+                  <path d="M6 10v5c0 2.4 3 4 6 4s6-1.6 6-4v-5" />
+                  <path d="M22 7v7" />
+                </svg>
+                <span
+                  >¿Finalizaste el cursado y necesitás solicitar acceso?</span
+                >
               </button>
             </div>
-
-            <a class="volver-sitio-publico" href="index.html">
-              <i class="fa-solid fa-house"></i>
-              Volver al sitio público
-            </a>
+            <div class="login-tools">
+              <a
+                href="assets/pdfs/Manual_Usuario_Completo_Portal_EETP495_Octubre_2026.pdf"
+                rel="noopener noreferrer"
+                target="_blank"
+                >Manual de Usuario</a
+              >
+            </div>
           </div>
-
-          <!-- =================================================
-               SOLICITUD DE ACCESO COMO ESTUDIANTE
-
-               Por ahora esta vista es solamente visual.
-               No guarda absolutamente ningún dato.
-          ================================================== -->
-
-          <div class="selector-roles" id="vistaSolicitudAlumno" hidden>
+          <div class="selector-roles" hidden="" id="vistaSolicitudAlumno">
             <p class="titulo-solicitud-alumno" id="tituloSolicitudAlumno">
               Solicitud de acceso para estudiantes con cursada completa.
             </p>
-
             <p
               class="descripcion-solicitud-alumno"
               id="descripcionSolicitudAlumno"
             >
               Completá tus datos y verificá tu cuenta de Google.
             </p>
-
             <button
-              type="button"
               class="btn-solicitar-acceso"
               id="btnGoogleSolicitud"
               style="margin-bottom: 18px"
+              type="button"
             >
               <i class="fa-brands fa-google"></i>
               Verificar correo con Google
             </button>
-
-            <form id="formSolicitudAlumno" autocomplete="off">
+            <form autocomplete="off" id="formSolicitudAlumno">
               <!-- APELLIDO Y NOMBRE -->
-
               <div class="campo">
                 <i class="fa-solid fa-user"></i>
-
                 <input
-                  type="text"
+                  autocomplete="name"
                   id="solicitudNombreCompleto"
                   name="nombreCompleto"
                   placeholder="Apellido y nombre completo"
-                  autocomplete="name"
-                  required
+                  required=""
+                  type="text"
                 />
               </div>
-
               <!-- CORREO -->
-
               <div class="campo">
                 <i class="fa-solid fa-envelope"></i>
-
                 <input
-                  type="email"
                   id="solicitudCorreo"
                   name="correo"
                   placeholder="Correo de tu cuenta Google"
-                  readonly
+                  readonly=""
+                  type="email"
                 />
               </div>
-
               <!-- DNI -->
-
               <div class="campo">
                 <i class="fa-solid fa-id-card"></i>
-
                 <input
-                  type="text"
+                  autocomplete="off"
                   id="solicitudDni"
+                  inputmode="numeric"
+                  maxlength="8"
                   name="dni"
                   placeholder="DNI"
-                  inputmode="numeric"
-                  autocomplete="off"
-                  maxlength="8"
-                  required
+                  required=""
+                  type="text"
                 />
               </div>
-
               <button
-                type="submit"
                 class="btn-ingresar"
                 id="btnEnviarSolicitud"
+                type="submit"
               >
                 <i class="fa-solid fa-paper-plane"></i>
                 Enviar solicitud
               </button>
             </form>
-
             <button
-              type="button"
               class="btn-volver-cuenta"
               id="btnVolverLoginSolicitud"
+              type="button"
             >
               <i class="fa-solid fa-arrow-left"></i>
               Volver al inicio de sesión
             </button>
-
             <p class="mensaje-login" id="mensajeSolicitudAlumno"></p>
           </div>
-
-          <!-- =================================================
-               SELECTOR DE ROLES
-          ================================================== -->
-
-          <div class="selector-roles" id="vistaSeleccionRol" hidden>
+          <div class="selector-roles" hidden="" id="vistaSeleccionRol">
             <p class="texto-acceso">
               Tu cuenta tiene más de un rol autorizado. Elegí el portal al que
               querés ingresar.
             </p>
-
             <div class="opciones-roles" id="opcionesRoles"></div>
-
             <button
-              type="button"
               class="btn-volver-cuenta"
               id="btnElegirOtraCuenta"
+              type="button"
             >
               <i class="fa-solid fa-arrow-left"></i>
               Elegir otra cuenta de Google
             </button>
-
             <p class="mensaje-login" id="mensajeSeleccionRol"></p>
           </div>
         </div>
-      </div>
+        <div class="login-legal">
+          © <span id="current-year">2026</span> · E.E.T.P. N° 495 · Portal
+          Institucional.
+        </div>
+      </section>
     </main>
+    <div class="float-stack login-float">
+      <a
+        class="floating float-whatsapp"
+        id="contacto-institucional"
+        href="https://wa.me/5493492712717"
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label="Escribir por WhatsApp a la escuela"
+        title="WhatsApp institucional"
+      >
+        <svg
+          aria-hidden="true"
+          class="icon"
+          fill="none"
+          height="26"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="1.8"
+          viewbox="0 0 24 24"
+          width="26"
+        >
+          <path
+            d="M21 11.5a8.5 8.5 0 0 1-8.5 8.5 9 9 0 0 1-4-.9L3 21l1.9-5.5A8.5 8.5 0 1 1 21 11.5z"
+          ></path>
+          <path d="M8 11h8M8 14h5"></path></svg></a
+      ><button
+        aria-label="Volver arriba"
+        class="floating float-top"
+        id="go-top"
+        title="Volver arriba"
+      >
+        <svg
+          aria-hidden="true"
+          class="icon"
+          fill="none"
+          height="25"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="1.8"
+          viewbox="0 0 24 24"
+          width="25"
+        >
+          <path d="m5 12 7-7 7 7M12 5v14"></path>
+        </svg>
+      </button>
+    </div>
 
-    <!-- =====================================================
-         JAVASCRIPT
-    ====================================================== -->
-
-    <script src="assets/js/login-fondo.js"></script>
-
-    <script type="module" src="assets/js/firebase-auth.js"></script>
-
-    <!-- =====================================================
-         NAVEGACIÓN VISUAL DE LA SOLICITUD
-
-         IMPORTANTE:
-         Por ahora este código solamente muestra y oculta
-         las vistas. No utiliza Firebase ni guarda datos.
-    ====================================================== -->
-
+    <script
+      defer="True"
+      src="vista-2027/assets/js/login-integracion-2027.js"
+    ></script>
+    <script src="assets/js/firebase-auth.js" type="module"></script>
     <script>
       document.addEventListener("DOMContentLoaded", () => {
         const vistaLogin = document.getElementById("vistaLogin");

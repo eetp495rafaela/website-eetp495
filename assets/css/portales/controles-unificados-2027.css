@@ -1,0 +1,214 @@
+/* E.E.T.P. N° 495 · Website 2027 · Integración 18
+   Unifica controles comparables sin alterar sus eventos, identificadores ni permisos.
+   Se aplica solamente en los cuatro portales de 2027. */
+
+body:is(.portal-alumnos-2027,.portal-docentes-2027,.portal-soporte-2027,.portal-gestion-2027) {
+  --p27-control-h: 46px;
+  --p27-control-gap: 12px;
+}
+
+/* Menús: botones de la misma hilera comparten proporciones.
+   Los elementos ocultos por permisos mantienen su estado original. */
+body:is(.portal-soporte-2027,.portal-gestion-2027,.portal-docentes-2027,.portal-alumnos-2027)
+  :is(.p27-pane,.legacy-workspace)
+  :is(.acciones,.acciones-gestion,.acciones-calificaciones-taller-admin,.acciones-estudiantes,.acciones-finalizacion-ciclo-admin,.acciones-sime-listado,.acciones-calendario-admin,.acciones-accesos-recientes,.acciones-modal,.acciones-gestion-superior,.herramientas-cambio-ciclo-admin)
+  :has(> button:nth-of-type(2)) {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 190px),1fr));
+  align-items: stretch;
+  gap: var(--p27-control-gap) !important;
+  width: 100%;
+  min-width: 0;
+}
+
+body:is(.portal-soporte-2027,.portal-gestion-2027,.portal-docentes-2027,.portal-alumnos-2027)
+  :is(.p27-pane,.legacy-workspace)
+  :is(.acciones,.acciones-gestion,.acciones-calificaciones-taller-admin,.acciones-estudiantes,.acciones-finalizacion-ciclo-admin,.acciones-sime-listado,.acciones-calendario-admin,.acciones-accesos-recientes,.acciones-modal,.acciones-gestion-superior,.herramientas-cambio-ciclo-admin)
+  :has(> button:nth-of-type(2)) > button:not([hidden]) {
+  box-sizing: border-box;
+  width: 100% !important;
+  min-width: 0 !important;
+  min-height: var(--p27-control-h) !important;
+  height: var(--p27-control-h) !important;
+  margin: 0 !important;
+  white-space: nowrap;
+  text-align: center;
+  justify-content: center;
+}
+
+/* Alumnos · Documentación: botón + dos filtros, tres columnas iguales. */
+body.portal-alumnos-2027 #documentacion-academica .barra-consulta-documentacion-alumno {
+  display: grid !important;
+  grid-template-columns: repeat(3,minmax(0,1fr)) !important;
+  align-items: end !important;
+  gap: var(--p27-control-gap) !important;
+  min-width: 0;
+}
+body.portal-alumnos-2027 #documentacion-academica :is(.acciones-consulta-documentacion-alumno,.filtros-documentacion-alumno) {
+  display: contents !important;
+}
+body.portal-alumnos-2027 #documentacion-academica .filtro-documentacion-alumno {
+  min-width: 0 !important;
+  width: 100%;
+}
+body.portal-alumnos-2027 #documentacion-academica :is(#btnVerMiDocumentacion,#filtroTipoDocumentacionAlumno,#filtroEspacioDocumentacionAlumno) {
+  box-sizing: border-box;
+  display: block;
+  min-width: 0 !important;
+  width: 100% !important;
+  height: var(--p27-control-h) !important;
+  min-height: var(--p27-control-h) !important;
+  margin: 0 !important;
+  white-space: nowrap;
+}
+
+/* Docentes · PDF: selector de archivo y subir documento, a partes iguales.
+   El campo Título/Tema, cuando existe, queda en una fila completa anterior. */
+body.portal-docentes-2027 #panelDocumentacionAcademica .fila-carga-documentacion {
+  display: grid !important;
+  grid-template-columns: repeat(2,minmax(0,1fr)) !important;
+  align-items: end !important;
+  gap: var(--p27-control-gap) !important;
+  min-width: 0;
+}
+body.portal-docentes-2027 #panelDocumentacionAcademica #campoTituloMaterialEstudio:not([hidden]) {
+  grid-column: 1 / -1 !important;
+}
+body.portal-docentes-2027 #panelDocumentacionAcademica :is(.campo-archivo-documentacion,.acciones-subir-documentacion) {
+  width: 100%;
+  min-width: 0;
+  margin: 0 !important;
+}
+body.portal-docentes-2027 #panelDocumentacionAcademica .acciones-subir-documentacion {
+  display: flex !important;
+  align-self: end !important;
+  padding: 0 !important;
+}
+body.portal-docentes-2027 #panelDocumentacionAcademica :is(#archivoDocumentoAcademico,#btnSubirDocumentoAcademico) {
+  box-sizing: border-box;
+  display: block;
+  min-width: 0 !important;
+  width: 100% !important;
+  height: var(--p27-control-h) !important;
+  min-height: var(--p27-control-h) !important;
+  margin: 0 !important;
+}
+body.portal-docentes-2027 #panelDocumentacionAcademica #archivoDocumentoAcademico::file-selector-button {
+  height: 100%;
+  min-height: 100%;
+  margin-right: 12px;
+  background: #16579c;
+  border: 0;
+  border-radius: 7px;
+  padding: 0 16px;
+  color: white;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+/* Docentes · documentos disponibles: botón + curso + tipo. */
+body.portal-docentes-2027 #panelDocumentacionAcademica .barra-consulta-documentos-docente {
+  display: grid !important;
+  grid-template-columns: repeat(3,minmax(0,1fr)) !important;
+  align-items: end !important;
+  gap: var(--p27-control-gap) !important;
+}
+body.portal-docentes-2027 #panelDocumentacionAcademica :is(.acciones-consulta-documentos-docente,.filtros-documentos-docente) {
+  display: contents !important;
+}
+body.portal-docentes-2027 #panelDocumentacionAcademica .filtro-documentos-docente {
+  min-width: 0 !important;
+  width: 100% !important;
+}
+body.portal-docentes-2027 #panelDocumentacionAcademica :is(#btnVerDocumentosDocente,#filtroCursoDocumentosDocente,#filtroTipoDocumentosDocente) {
+  box-sizing: border-box;
+  min-width: 0 !important;
+  width: 100% !important;
+  height: var(--p27-control-h) !important;
+  min-height: var(--p27-control-h) !important;
+  margin: 0 !important;
+  white-space: nowrap;
+}
+
+/* Alumnos · sin el recuadro explicativo; resultados siguen en contenedores originales. */
+body.portal-alumnos-2027 :is(#mis-docentes-alumno,#mis-companeros-alumno) > .panel-info {
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+/* Documentos institucionales · mismas tarjetas que Enlaces Institucionales. */
+body.portal-docentes-2027 .p27-pdf-grid {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fit,minmax(min(100%,220px),1fr));
+  align-items: stretch;
+  gap: 14px;
+}
+body.portal-docentes-2027 .p27-pdf-grid .p27-pdf-card {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 108px;
+  min-width: 0;
+  display: flex !important;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 11px;
+  text-align: center;
+  padding: 18px 13px;
+  text-decoration: none;
+  overflow-wrap: anywhere;
+  border-radius: 13px;
+  border: 1px solid #d8e5f3;
+  background: #fff;
+  color: #154779;
+  box-shadow: 0 7px 22px rgba(15,43,78,.05);
+}
+body.portal-docentes-2027 .p27-pdf-grid .p27-pdf-card:hover,
+body.portal-docentes-2027 .p27-pdf-grid .p27-pdf-card:focus-visible {
+  border-color: #3975ad;
+  background: #f1f7ff;
+  box-shadow: 0 8px 26px rgba(11,56,105,.13);
+  outline-offset: 3px;
+}
+body.portal-docentes-2027 .p27-pdf-grid .p27-pdf-card i {
+  font-size: 25px;
+  color: #1d5f9f;
+}
+body.portal-docentes-2027 .p27-pdf-grid .p27-pdf-card h3 {
+  font-size: clamp(13px,1.1vw,16px);
+  font-weight: 800;
+  line-height: 1.35;
+  margin: 0;
+  color: #183c66;
+}
+
+/* WhatsApp: la nueva ancla conserva el mismo aspecto circular que el botón. */
+body .floating.float-whatsapp:where(a) {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+}
+
+@media (max-width: 700px) {
+  body:is(.portal-soporte-2027,.portal-gestion-2027,.portal-docentes-2027,.portal-alumnos-2027)
+    :is(.p27-pane,.legacy-workspace)
+    :is(.acciones,.acciones-gestion,.acciones-calificaciones-taller-admin,.acciones-estudiantes,.acciones-finalizacion-ciclo-admin,.acciones-sime-listado,.acciones-calendario-admin,.acciones-accesos-recientes,.acciones-modal,.acciones-gestion-superior,.herramientas-cambio-ciclo-admin)
+    :has(> button:nth-of-type(2)) {
+    grid-template-columns: minmax(0,1fr) !important;
+  }
+  body.portal-alumnos-2027 #documentacion-academica .barra-consulta-documentacion-alumno,
+  body.portal-docentes-2027 #panelDocumentacionAcademica .barra-consulta-documentos-docente,
+  body.portal-docentes-2027 #panelDocumentacionAcademica .fila-carga-documentacion {
+    grid-template-columns: minmax(0,1fr) !important;
+  }
+  body.portal-docentes-2027 #panelDocumentacionAcademica #campoTituloMaterialEstudio:not([hidden]) {
+    grid-column: auto !important;
+  }
+  body.portal-docentes-2027 .p27-pdf-grid {
+    grid-template-columns: minmax(0,1fr);
+  }
+}

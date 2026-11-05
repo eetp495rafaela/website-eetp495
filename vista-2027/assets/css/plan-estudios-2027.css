@@ -1,0 +1,156 @@
+/* Website 2027 - Plan de Estudios: único ajuste visual autorizado del módulo. */
+.plan-year-picker {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 10px;
+  margin: 30px 0 24px;
+  isolation: isolate;
+  z-index: 3;
+}
+.plan-year-picker > .plan-year-button {
+  width: 100%;
+  min-width: 0;
+  min-height: 58px;
+  padding: 11px 8px;
+  border: 1px solid #b5cce4;
+  border-radius: 12px;
+  color: #184e89;
+  background: #f7fbff;
+  font-weight: 800;
+  line-height: 1.25;
+  font-family: inherit;
+  font-size: clamp(0.8rem, 1.35vw, 1rem);
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition:
+    background 0.16s,
+    color 0.16s,
+    box-shadow 0.16s;
+}
+.plan-year-picker > .plan-year-button .year-arrow {
+  font-size: 0.9em;
+  line-height: 1;
+  opacity: 0.8;
+}
+.plan-year-picker > .plan-year-button[aria-expanded="true"],
+.plan-year-picker > .plan-year-button:hover {
+  color: white;
+  background: #1a579c;
+  border-color: #1a579c;
+  box-shadow: 0 8px 20px rgba(18, 75, 136, 0.18);
+}
+.plan-year-picker > .plan-year-button:focus-visible {
+  outline: 3px solid #cb851f;
+  outline-offset: 3px;
+}
+.plan-year-picker > .plan-year-panel {
+  position: absolute;
+  left: var(--year-panel-left, 0px);
+  top: 100%;
+  bottom: auto;
+  width: min(450px, calc(100vw - 32px));
+  max-height: var(--year-panel-height, 510px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 20px 22px;
+  border: 1px solid #bfd3e8;
+  border-radius: 15px;
+  background: #fff;
+  box-shadow: 0 20px 55px rgba(9, 42, 86, 0.2);
+  z-index: 20;
+}
+.plan-year-panel[hidden] {
+  display: none !important;
+}
+.plan-year-picker > .plan-year-panel.is-above {
+  top: auto;
+  bottom: 100%;
+}
+.plan-year-panel .plan-year-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.plan-year-panel .plan-year-heading h3 {
+  font-size: 1.4rem;
+  margin: 0;
+  color: #153e75;
+}
+.plan-year-panel .plan-year-count {
+  font-size: 0.79rem;
+  color: #5b7088;
+  margin: 0 0 15px;
+}
+.plan-year-panel .subjects {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-rows: repeat(var(--plan-subject-rows, 7), max-content);
+  grid-auto-flow: column;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+}
+.plan-year-panel .subjects li {
+  font-size: 0.79rem;
+  line-height: 1.35;
+  padding: 9px 10px;
+  word-wrap: break-word;
+}
+@media (max-width: 900px), (hover: none) {
+  .plan-year-picker {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 9px;
+  }
+  .plan-year-picker > .plan-year-button {
+    font-size: 0.95rem;
+    min-height: 55px;
+  }
+  .plan-year-picker > .plan-year-panel,
+  .plan-year-picker > .plan-year-panel.is-above {
+    position: static;
+    grid-column: 1/-1;
+    width: 100%;
+    max-height: none;
+    overflow: visible;
+    padding: 20px 18px;
+    box-shadow: 0 10px 28px rgba(9, 42, 86, 0.1);
+  }
+}
+@media (max-width: 560px) {
+  .plan-year-picker {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .plan-year-panel .subjects {
+    grid-template-columns: 1fr;
+    grid-template-rows: none;
+    grid-auto-flow: row;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .plan-year-picker > .plan-year-button {
+    transition: none;
+  }
+}
+
+/* Integración 08: recuadros uniformes y textos en una línea SOLO en PC. */
+@media (min-width: 901px) and (hover: hover) and (pointer: fine) {
+  .plan-year-picker > .plan-year-panel {
+    width: max-content;
+    max-width: calc(100vw - 32px);
+  }
+  .plan-year-panel .subjects {
+    grid-template-columns: repeat(2, minmax(max-content, 1fr));
+    width: max-content;
+    max-width: 100%;
+  }
+  .plan-year-panel .subjects li {
+    white-space: nowrap;
+    overflow-wrap: normal;
+    word-break: normal;
+  }
+}
