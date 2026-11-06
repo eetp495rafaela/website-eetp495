@@ -107,6 +107,27 @@
   ]);
   const isHidden = (el) => !el || el.hidden || el.style.display === "none";
   const limited = () => document.body.dataset.docenteAccesoLimitado === "true";
+
+  // Solo texto informativo: refleja la visibilidad ya decidida por los módulos
+  // existentes de Si.R.A. y Registro de Calificaciones de Taller.
+  // No consulta Firestore ni concede accesos o permisos.
+  const homeSummary = $("#resumenInicioDocente");
+  const siraCard = $(
+    '.grid-docente-principal a[data-solo-docente-taller][href="#sira-docente"]',
+  );
+  const gradesCard = $("#tarjetaCalificacionesTallerDocente");
+  function refreshHomeSummary() {
+    if (!homeSummary) return;
+    const canRegisterAttendance = !limited() && !isHidden(siraCard);
+    // El módulo original de calificaciones habilita la tarjeta solo para
+    // asignaciones/reemplazos autorizados de Taller de 1° y 2° año.
+    const canUseGrades = !limited() && !isHidden(gradesCard);
+    const sentence =
+      `Consultá tus horarios${canRegisterAttendance ? ", registrá asistencias" : ""}` +
+      ` y accedé a documentación académica${canUseGrades ? ", calificaciones" : ""},` +
+      " informes y herramientas para tu tarea docente.";
+    if (homeSummary.textContent !== sentence) homeSummary.textContent = sentence;
+  }
   function allow(id) {
     if (id === "inicio") return true;
     const section = document.getElementById(id);
@@ -121,6 +142,7 @@
   }
   const search = $("#module-search");
   function refreshMenu() {
+    refreshHomeSummary();
     const q = (search?.value || "").trim().toLocaleLowerCase("es-AR");
     $$("#side-nav .nav-section").forEach((group) => {
       let count = 0;
@@ -241,6 +263,12 @@
         attributeFilter: ["style", "hidden"],
       });
   }
+  // Observar también la tarjeta original de Si.R.A. ante cambios de permiso.
+  if (siraCard)
+    obs.observe(siraCard, {
+      attributes: true,
+      attributeFilter: ["style", "hidden"],
+    });
   obs.observe(document.body, {
     attributes: true,
     attributeFilter: ["data-docente-acceso-limitado"],
