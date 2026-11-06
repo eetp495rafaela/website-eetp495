@@ -1,0 +1,41 @@
+/* Integración 35 · botones de consulta e impresión en ambos portales.
+   No afecta al diseño del resto de los módulos. */
+#docentes-libres-taller-admin .acciones-docentes-libres-reporte,
+#vistaDocentesLibresTallerGestion .acciones-docentes-libres-reporte {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+#docentes-libres-taller-admin .acciones-docentes-libres-reporte > button,
+#vistaDocentesLibresTallerGestion .acciones-docentes-libres-reporte > button {
+  min-height: 42px;
+  white-space: nowrap;
+}
+#vistaDocentesLibresTallerGestion .acciones-docentes-libres-reporte {
+  margin: 0 0 16px;
+}
+#docentes-libres-taller-admin .acciones-docentes-libres-reporte .btn-generar-pdf-docentes,
+#vistaDocentesLibresTallerGestion .acciones-docentes-libres-reporte .btn-generar-pdf-docentes {
+  background: #146c70;
+  color: #fff;
+  border-color: #146c70;
+}
+#docentes-libres-taller-admin .acciones-docentes-libres-reporte .btn-generar-pdf-docentes:hover,
+#vistaDocentesLibresTallerGestion .acciones-docentes-libres-reporte .btn-generar-pdf-docentes:hover {
+  background: #0d5659;
+  color: #fff;
+}
+@media (max-width: 760px) {
+  #docentes-libres-taller-admin .acciones-docentes-libres-reporte,
+  #vistaDocentesLibresTallerGestion .acciones-docentes-libres-reporte {
+    width: 100%;
+    justify-content: stretch;
+  }
+  #docentes-libres-taller-admin .acciones-docentes-libres-reporte > button,
+  #vistaDocentesLibresTallerGestion .acciones-docentes-libres-reporte > button {
+    flex: 1 1 100%;
+    width: 100%;
+  }
+}

@@ -5365,6 +5365,16 @@ async function cargarDocentesLibresTallerGestion() {
     });
 
     vistaDocentesLibresTallerGestion.innerHTML = `
+      <div class="acciones-docentes-libres-reporte">
+        <button class="btn-gestion" id="btnActualizarDocentesLibresTallerGestion" type="button">
+          <i class="fa-solid fa-rotate" aria-hidden="true"></i>
+          Actualizar consulta
+        </button>
+        <button class="btn-gestion btn-generar-pdf-docentes" id="btnGenerarPdfDocentesLibresTallerGestion" type="button">
+          <i class="fa-solid fa-file-pdf" aria-hidden="true"></i>
+          Generar PDF
+        </button>
+      </div>
       <div class="docentes-libres-introduccion">
         <div>
           <span class="docentes-libres-kicker">
@@ -5387,6 +5397,11 @@ async function cargarDocentesLibresTallerGestion() {
       ${construirPanelDocentesLibresTallerGestion(disponibilidad.MANANA, "MANANA")}
       ${construirPanelDocentesLibresTallerGestion(disponibilidad.TARDE, "TARDE")}
     `;
+    vistaDocentesLibresTallerGestion
+      .querySelector("#btnActualizarDocentesLibresTallerGestion")
+      ?.addEventListener("click", () => {
+        void cargarDocentesLibresTallerGestion();
+      });
     docentesLibresTallerGestionCargados = true;
   } catch (error) {
     console.error(
