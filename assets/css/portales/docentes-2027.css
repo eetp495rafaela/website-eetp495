@@ -546,3 +546,27 @@ body.portal-docentes-2027 #situacion-asistencia-docente .fila-situacion-asistenc
     grid-template-columns: minmax(0, 1fr);
   }
 }
+
+/* Integración 36 - 06/11/2026 - Agenda Institucional: anchos de columnas. */
+/* Solo tabla de contactos del Portal Docentes; no afecta otras tablas. */
+body.portal-docentes-2027 #agenda-institucional-docente .tabla-agenda-docente {
+  width: 100%;
+  min-width: 1080px;
+  table-layout: fixed;
+}
+
+body.portal-docentes-2027 #agenda-institucional-docente .tabla-agenda-docente :is(th, td):nth-child(1) {
+  width: 28%;
+}
+
+body.portal-docentes-2027 #agenda-institucional-docente .tabla-agenda-docente :is(th, td):nth-child(2) {
+  width: 46%;
+}
+
+body.portal-docentes-2027 #agenda-institucional-docente .tabla-agenda-docente :is(th, td):nth-child(3) {
+  width: 26%;
+}
+
+body.portal-docentes-2027 #agenda-institucional-docente .tabla-agenda-docente td:nth-child(-n + 2) {
+  overflow-wrap: anywhere;
+}
