@@ -505,3 +505,44 @@ body.portal-docentes-2027 .p27-pane .vista-calificaciones-taller-docente {
     transition: none !important;
   }
 }
+
+
+/* Website EETP495 2027 - Integracion 32 - Situacion de Asistencia Docente */
+/* Exclusivo del primer formulario: Curso | Periodo | Consultar situacion. */
+body.portal-docentes-2027 #situacion-asistencia-docente .fila-situacion-asistencia-docente {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  align-items: end;
+  width: 100%;
+  max-width: none;
+}
+
+body.portal-docentes-2027 #situacion-asistencia-docente .fila-situacion-asistencia-docente > .campo-documentacion {
+  min-width: 0;
+  width: 100%;
+}
+
+body.portal-docentes-2027 #situacion-asistencia-docente .fila-situacion-asistencia-docente select {
+  width: 100%;
+  min-width: 0;
+  min-height: 48px;
+  box-sizing: border-box;
+}
+
+body.portal-docentes-2027 #situacion-asistencia-docente .fila-situacion-asistencia-docente #btnVerSituacionAsistenciaDocente {
+  width: 100%;
+  min-width: 0;
+  min-height: 48px;
+  height: 48px;
+  box-sizing: border-box;
+  margin: 0;
+  justify-self: stretch;
+  align-self: end;
+}
+
+@media (max-width: 760px) {
+  body.portal-docentes-2027 #situacion-asistencia-docente .fila-situacion-asistencia-docente {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
