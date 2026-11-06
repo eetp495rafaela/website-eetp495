@@ -21,6 +21,7 @@
       href="vista-2027/assets/css/ajustes-revision-2027.css"
     />
     <link rel="stylesheet" href="vista-2027/assets/css/contacto-foto-2027.css?v=28" />
+    <link rel="stylesheet" href="vista-2027/assets/css/contacto-banner-2027.css?v=30" />
   </head>
   <body class="home">
     <a class="skip" href="#contenido">Saltar al contenido</a>
@@ -448,16 +449,10 @@
               Rafaela.
             </p>
           </div>
-          <div class="contact-grid">
-            <div class="contact-card">
+          <div class="contact-grid p30-contact-grid">
+            <div class="contact-card p30-contact-card">
               <h3>Comunicate con nosotros</h3>
-              <div class="contact-row">
-                <span class="symbol">⌖</span>
-                <div>
-                  <b>Domicilio</b
-                  ><span>Mensajero José Donna 342 · Rafaela</span>
-                </div>
-              </div>
+              <div class="p30-contact-details">
               <div class="contact-row">
                 <span class="symbol">☎</span>
                 <div>
@@ -489,8 +484,9 @@
                   ><span>Lunes a viernes · 7:00 a 19:00</span>
                 </div>
               </div>
+              </div>
             </div>
-            <div class="map-panel p28-location">
+            <div class="map-panel p28-location p30-location">
               <div class="p28-location-photo">
                 <img
                   src="vista-2027/assets/img/frente.webp"
@@ -499,17 +495,28 @@
                 />
               </div>
               <div class="p28-location-content">
-                <div class="p28-location-heading">
-                  <span class="map-icon" aria-hidden="true">⌖</span>
-                  <h3>Te esperamos en nuestra escuela</h3>
+                <div class="p30-location-graphic" aria-hidden="true">
+                  <svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg" fill="none">
+                    <path d="m7 79 34-14 36 12 34-14v32l-34 13-36-11-34 12V79Z" fill="#eef8ff" stroke="#9bc7f0" stroke-width="3" stroke-linejoin="round" />
+                    <path d="M41 65v32m36-20v31" stroke="#9bc7f0" stroke-width="3" />
+                    <path d="M82 34c0 20-22 39-22 39S38 54 38 34a22 22 0 1 1 44 0Z" fill="#1762b5" stroke="#0f4b94" stroke-width="2" />
+                    <circle cx="60" cy="34" r="8" fill="#d9efff" />
+                  </svg>
                 </div>
-                <a
-                  class="btn btn-primary"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  href="https://www.google.com/maps/search/?api=1&query=Mensajero+Jos%C3%A9+Donna+342+Rafaela+Santa+Fe"
-                  >Ver ubicación en Google Maps ↗</a
-                >
+                <div class="p30-location-copy">
+                  <h3>Te esperamos en nuestra escuela</h3>
+                  <p class="p30-address">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 10c0 6-8 12-8 12S4 16 4 10a8 8 0 1 1 16 0Z"/><circle cx="12" cy="10" r="2.5"/></svg>
+                    <span>Mensajero José Donna 342<br />Rafaela, Santa Fe</span>
+                  </p>
+                  <a
+                    class="btn btn-primary"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    href="https://www.google.com/maps/search/?api=1&query=Mensajero+Jos%C3%A9+Donna+342+Rafaela+Santa+Fe"
+                    >Ver ubicación en Google Maps ↗</a
+                  >
+                </div>
               </div>
             </div>
           </div>
