@@ -194,3 +194,9 @@
     max-width: 290px;
   }
 }
+
+/* Integración 31 · Plan 2027: evitar que la materia junto a Taller se estire. */
+/* La grilla mantiene su orden y el recuadro de Taller conserva sus tres áreas. */
+.plan-year-panel .subjects:has(> li.taller .p24-taller-areas) > li.general {
+  align-self: start;
+}
