@@ -33,6 +33,7 @@
     />
     <link rel="stylesheet" href="../vista-2027/assets/css/portal-maqueta.css" />
     <link rel="stylesheet" href="../assets/css/portales/soporte-2027.css?v=34" />
+    <link rel="stylesheet" href="../assets/css/docentes-libres-taller-pdf.css?v=35" />
     <link
       rel="stylesheet"
       href="../assets/css/portales/identidad-institucional-2027.css?v=16"
@@ -3139,14 +3140,24 @@
                     clases de aula, se muestran sus horarios.
                   </p>
                 </div>
-                <button
-                  class="btn-accion"
-                  id="btnActualizarDocentesLibresTallerAdmin"
-                  type="button"
-                >
-                  <i class="fa-solid fa-rotate"></i>
-                  Actualizar consulta
-                </button>
+                <div class="acciones-docentes-libres-reporte">
+                  <button
+                    class="btn-accion"
+                    id="btnActualizarDocentesLibresTallerAdmin"
+                    type="button"
+                  >
+                    <i class="fa-solid fa-rotate"></i>
+                    Actualizar consulta
+                  </button>
+                  <button
+                    class="btn-accion btn-generar-pdf-docentes"
+                    id="btnGenerarPdfDocentesLibresTallerAdmin"
+                    type="button"
+                  >
+                    <i class="fa-solid fa-file-pdf"></i>
+                    Generar PDF
+                  </button>
+                </div>
               </div>
               <div
                 aria-live="polite"
@@ -4653,6 +4664,10 @@
     <script
       src="../assets/js/docentes-libres-taller-admin.js?v=20261103-1"
       type="module"
+    ></script>
+    <script
+      src="../assets/js/docentes-libres-taller-pdf.js?v=35"
+      defer
     ></script>
     <script src="../assets/js/pizarra-horarios-admin.js" type="module"></script>
     <script
