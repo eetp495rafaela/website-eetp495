@@ -436,3 +436,83 @@ body.portal-soporte-2027 #asignaciones-docentes .acciones-tabla > .btn-eliminar-
     grid-template-columns: minmax(0,1fr);
   }
 }
+
+/* Integración 33 · 06/11/2026 · Si.R.A. Soporte: parte semanal. */
+/* Solo la primera tarjeta: Tipo, Curso, Fecha y Ver parte semanal. */
+body.portal-soporte-2027 #sira-admin .filtros-documentacion-admin.filtros-sira-admin {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  width: 100%;
+  max-width: 100%;
+  gap: 16px;
+  align-items: end;
+  justify-content: stretch;
+}
+body.portal-soporte-2027 #sira-admin .filtros-sira-admin > .campo-filtro {
+  min-width: 0;
+  width: 100%;
+  grid-column: auto;
+}
+body.portal-soporte-2027 #sira-admin .filtros-sira-admin :is(select, input[type="date"]),
+body.portal-soporte-2027 #sira-admin .filtros-sira-admin #btnVerSiraAdmin {
+  width: 100%;
+  min-width: 0;
+  height: 46px;
+  min-height: 46px;
+  box-sizing: border-box;
+}
+body.portal-soporte-2027 #sira-admin .filtros-sira-admin #btnVerSiraAdmin {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin: 0;
+  white-space: nowrap;
+}
+@media (max-width: 1100px) {
+  body.portal-soporte-2027 #sira-admin .filtros-documentacion-admin.filtros-sira-admin {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 700px) {
+  body.portal-soporte-2027 #sira-admin .filtros-documentacion-admin.filtros-sira-admin {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* Integración 34 · 06/11/2026 · Referentes Institucionales · Portal Soporte. */
+/* Tres selectores en ancho completo; cuatro columnas cuando se habilita Curso. */
+body.portal-soporte-2027 #referentes-institucionales #formReferenteInstitucional .grid-ajuste-referentes {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  width: 100%;
+  max-width: 100%;
+  gap: 16px;
+  align-items: end;
+}
+body.portal-soporte-2027 #referentes-institucionales #formReferenteInstitucional .grid-ajuste-referentes:has(> #campoCursoReferenteInstitucional:not([hidden])) {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+body.portal-soporte-2027 #referentes-institucionales #formReferenteInstitucional .grid-ajuste-referentes > .campo-formulario {
+  grid-column: auto;
+  min-width: 0;
+  width: 100%;
+}
+body.portal-soporte-2027 #referentes-institucionales #formReferenteInstitucional .grid-ajuste-referentes select {
+  display: block;
+  min-width: 0;
+  width: 100%;
+  box-sizing: border-box;
+}
+@media (max-width: 1100px) {
+  body.portal-soporte-2027 #referentes-institucionales #formReferenteInstitucional .grid-ajuste-referentes,
+  body.portal-soporte-2027 #referentes-institucionales #formReferenteInstitucional .grid-ajuste-referentes:has(> #campoCursoReferenteInstitucional:not([hidden])) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 700px) {
+  body.portal-soporte-2027 #referentes-institucionales #formReferenteInstitucional .grid-ajuste-referentes,
+  body.portal-soporte-2027 #referentes-institucionales #formReferenteInstitucional .grid-ajuste-referentes:has(> #campoCursoReferenteInstitucional:not([hidden])) {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
