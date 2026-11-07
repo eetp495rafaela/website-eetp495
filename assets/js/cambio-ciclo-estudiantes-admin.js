@@ -1093,7 +1093,7 @@ async function marcarSeleccionadosComoEgresados() {
   } finally {
     btnMarcarEgresadosAdmin.innerHTML = `
       <i class="fa-solid fa-user-graduate"></i>
-      Marcar seleccionados como EGRESADOS
+      Marcar como Egresados
     `;
   }
 }

@@ -516,3 +516,34 @@ body.portal-soporte-2027 #referentes-institucionales #formReferenteInstitucional
     grid-template-columns: minmax(0, 1fr);
   }
 }
+
+/* =====================================================
+   INTEGRACIÓN 37 · 06/11/2026 · S.I.M.E. EN CELULAR
+   Solo Inscripciones registradas del Portal Soporte.
+   Anula el flex-basis vertical de 320px que generaba
+   un hueco grande entre la descripción y los botones.
+===================================================== */
+@media (max-width: 700px) {
+  body.portal-soporte-2027 #sime .panel-sime-admin > .encabezado-listado {
+    align-items: stretch;
+    gap: 12px;
+  }
+
+  body.portal-soporte-2027 #sime .panel-sime-admin > .encabezado-listado > div:first-child {
+    flex: 0 1 auto;
+    min-width: 0;
+    width: 100%;
+  }
+
+  body.portal-soporte-2027 #sime .panel-sime-admin > .encabezado-listado > div:first-child p {
+    margin: 7px 0 0;
+    text-wrap: pretty;
+  }
+
+  body.portal-soporte-2027 #sime .panel-sime-admin > .encabezado-listado > .acciones-sime-listado {
+    align-self: stretch;
+    grid-template-columns: minmax(0, 1fr) !important;
+    gap: 8px !important;
+    margin: 0;
+  }
+}
