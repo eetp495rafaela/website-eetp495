@@ -1,3 +1,5 @@
+import { getAuth } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-auth.js";
+
 const BACKEND_BACKUP_URL =
   "https://script.google.com/macros/s/AKfycbwgqaaYJLlGZl7CcxcYRwy-qqPrlqKoL2L1qDxk0nqsPCbVZqmmbTS5KaCsdDNxVpq-/exec";
 
@@ -45,10 +47,22 @@ async function generarBackupSistema() {
       "Generando copia de seguridad. Esto puede tardar unos segundos...",
     );
 
+    // El servidor exige una sesión Firebase vigente
+    // con perfil SOPORTE activo.
+    // No basta con que el botón sea visible en el navegador.
+    const usuario = getAuth().currentUser;
+
+    if (!usuario) {
+      throw new Error("Tu sesión ha finalizado. Volvé a ingresar al portal.");
+    }
+
+    const idToken = await usuario.getIdToken(true);
+
     const respuesta = await fetch(BACKEND_BACKUP_URL, {
       method: "POST",
       body: JSON.stringify({
         accion: "generar_backup_firestore",
+        idToken,
       }),
     });
 
@@ -84,6 +98,7 @@ async function generarBackupSistema() {
     });
   } finally {
     btnGenerarBackupSistema.disabled = false;
+
     btnGenerarBackupSistema.innerHTML = `
       <i class="fa-solid fa-cloud-arrow-down"></i>
       Generar backup ahora
