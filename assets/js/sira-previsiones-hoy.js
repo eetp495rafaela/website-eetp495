@@ -33,28 +33,55 @@ if (vista && etiquetaFecha && botonActualizar && seccion) {
   const db = getFirestore(app);
   const auth = getAuth(app);
   let usuarioActual = null;
-  let fechaConsultada = "";
   let consultando = false;
 
   function seccionVisible() {
     return location.hash === `#${seccion.id}` && !seccion.hidden;
   }
 
+  // Esta previsión se consulta a demanda. No realiza lecturas al abrir el portal.
+  const aclaracion = panel.querySelector(".sira-hoy-aclaracion");
+
+  function ocultarPrevision() {
+    vista.hidden = true;
+    if (aclaracion) aclaracion.hidden = true;
+  }
+
+  function mostrarPrevision() {
+    vista.hidden = false;
+    if (aclaracion) aclaracion.hidden = false;
+  }
+
   function dibujarFilas(clases, reemplazos, fecha) {
-    const filas = clases.map((clase) => {
-      const reemplazo = reemplazoDeClase(clase, reemplazos, fecha);
-      const docente = reemplazo
-        ? String(reemplazo.reemplazanteNombre || reemplazo.reemplazanteCorreo || "Docente sin asignar")
-        : String(clase.docenteNombre || "Docente sin asignar");
-      const turno = normalizar(clase.turno) === "MANANA" ? "Mañana" : "Tarde";
+    const grupos = [
+      { tipo: "TALLER", titulo: "Taller" },
+      { tipo: "EDUCACION_FISICA", titulo: "Educación Física" },
+    ];
+
+    const filas = grupos.map(({ tipo, titulo }) => {
+      const clasesDelGrupo = clases.filter((clase) => normalizar(clase.tipoHorario) === tipo);
+      if (!clasesDelGrupo.length) return "";
+
+      const filasClases = clasesDelGrupo.map((clase) => {
+        const reemplazo = reemplazoDeClase(clase, reemplazos, fecha);
+        const docente = reemplazo
+          ? String(reemplazo.reemplazanteNombre || reemplazo.reemplazanteCorreo || "Docente sin asignar")
+          : String(clase.docenteNombre || "Docente sin asignar");
+        const turno = normalizar(clase.turno) === "MANANA" ? "Mañana" : "Tarde";
+        return `
+          <tr>
+            <td data-label="Turno"><span class="sira-hoy-turno">${turno}</span></td>
+            <td data-label="Curso / grupo"><strong>${escaparHtml(obtenerCursoGrupo(clase))}</strong></td>
+            <td data-label="Actividad">${escaparHtml(obtenerActividad(clase))}</td>
+            <td data-label="Docente">${escaparHtml(docente)}${reemplazo ? ' <span class="sira-hoy-reemplazo">Reemplazo vigente</span>' : ""}</td>
+            <td data-label="Horario">${escaparHtml(obtenerHorario(clase))}</td>
+          </tr>`;
+      }).join("");
+
       return `
-        <tr>
-          <td data-label="Turno"><span class="sira-hoy-turno">${turno}</span></td>
-          <td data-label="Curso / grupo"><strong>${escaparHtml(obtenerCursoGrupo(clase))}</strong></td>
-          <td data-label="Actividad">${escaparHtml(obtenerActividad(clase))}</td>
-          <td data-label="Docente">${escaparHtml(docente)}${reemplazo ? ' <span class="sira-hoy-reemplazo">Reemplazo vigente</span>' : ""}</td>
-          <td data-label="Horario">${escaparHtml(obtenerHorario(clase))}</td>
-        </tr>`;
+        <tr class="sira-hoy-fila-grupo">
+          <th scope="rowgroup" colspan="5">${titulo}<span class="sira-hoy-grupo-cantidad">${clasesDelGrupo.length} ${clasesDelGrupo.length === 1 ? "clase" : "clases"}</span></th>
+        </tr>${filasClases}`;
     }).join("");
 
     vista.innerHTML = `
@@ -67,15 +94,14 @@ if (vista && etiquetaFecha && botonActualizar && seccion) {
       </div>`;
   }
 
-  async function consultar(forzar = false) {
+  async function consultar() {
     if (!usuarioActual || !seccionVisible() || consultando) return;
     const fecha = obtenerFechaArgentina();
     etiquetaFecha.textContent = fecha.rotulo;
-    if (!forzar && fechaConsultada === fecha.fechaISO) return;
+    mostrarPrevision();
 
     if (fecha.dia === "SABADO" || fecha.dia === "DOMINGO") {
       vista.innerHTML = '<p class="sira-hoy-mensaje">Hoy no hay clases semanales programadas de Taller ni Educación Física.</p>';
-      fechaConsultada = fecha.fechaISO;
       return;
     }
 
@@ -124,7 +150,6 @@ if (vista && etiquetaFecha && botonActualizar && seccion) {
           vista.insertAdjacentHTML("beforeend", '<p class="sira-hoy-aviso">No fue posible verificar los reemplazos vigentes; los nombres mostrados corresponden a los horarios registrados.</p>');
         }
       }
-      fechaConsultada = fecha.fechaISO;
     } catch (error) {
       console.error("No se pudieron consultar las clases previstas de Si.R.A.:", error);
       vista.innerHTML = '<p class="sira-hoy-mensaje sira-hoy-error">No se pudieron consultar los horarios previstos. Volvé a intentar con «Actualizar».</p>';
@@ -134,17 +159,28 @@ if (vista && etiquetaFecha && botonActualizar && seccion) {
     }
   }
 
-  botonActualizar.addEventListener("click", () => consultar(true));
-  window.addEventListener("hashchange", () => consultar());
+  // Al abrir Si.R.A. o volver desde otra sección, la previsión sigue plegada.
+  ocultarPrevision();
+  let fechaMostrada = "";
+
+  function actualizarFecha() {
+    const fecha = obtenerFechaArgentina();
+    if (fechaMostrada && fechaMostrada !== fecha.fechaISO) ocultarPrevision();
+    fechaMostrada = fecha.fechaISO;
+    etiquetaFecha.textContent = fecha.rotulo;
+  }
+
+  actualizarFecha();
+  botonActualizar.addEventListener("click", () => consultar());
+  window.addEventListener("hashchange", () => {
+    ocultarPrevision();
+    actualizarFecha();
+  });
   document.addEventListener("visibilitychange", () => {
-    if (!document.hidden) consultar();
+    if (!document.hidden) actualizarFecha();
   });
   onAuthStateChanged(auth, (usuario) => {
     usuarioActual = usuario;
-    if (!usuario) {
-      fechaConsultada = "";
-      return;
-    }
-    consultar();
+    if (!usuario) ocultarPrevision();
   });
 }
