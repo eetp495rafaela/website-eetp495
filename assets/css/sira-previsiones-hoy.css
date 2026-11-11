@@ -150,3 +150,29 @@
     color: #1d507f;
   }
 }
+
+/* Integración 40: separación de Taller y Educación Física dentro de la misma tabla. */
+.sira-hoy .sira-hoy-tabla .sira-hoy-fila-grupo th {
+  background: #dae9f9;
+  color: #173d73;
+  border-top: 1px solid #bed6ec;
+  border-bottom: 1px solid #bed6ec;
+  padding: 11px 14px;
+  font-weight: 800;
+}
+.sira-hoy .sira-hoy-tabla .sira-hoy-grupo-cantidad {
+  margin-left: 12px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #456d95;
+}
+@media (max-width: 780px) {
+  .sira-hoy .sira-hoy-tabla tbody tr.sira-hoy-fila-grupo {
+    padding: 0;
+  }
+  .sira-hoy .sira-hoy-tabla .sira-hoy-fila-grupo th {
+    display: block;
+    width: 100%;
+    box-sizing: border-box;
+  }
+}
