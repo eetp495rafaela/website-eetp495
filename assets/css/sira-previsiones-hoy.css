@@ -1,0 +1,152 @@
+/* E.E.T.P. N° 495 · Integración 39 · Estilos aislados de la nueva tabla Si.R.A. */
+#sira-admin .sira-hoy,
+#sira-gestion .sira-hoy {
+  display: block;
+  margin-bottom: 20px;
+}
+.sira-hoy .sira-hoy-cabecera {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 14px;
+  margin-bottom: 18px;
+}
+.sira-hoy .sira-hoy-cabecera h3 {
+  margin: 0 0 5px;
+  color: #173d73;
+  font-size: 19px;
+  font-weight: 800;
+}
+.sira-hoy .sira-hoy-cabecera p {
+  margin: 0;
+  max-width: 680px;
+  color: #58738e;
+}
+.sira-hoy .sira-hoy-herramientas {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.sira-hoy .sira-hoy-fecha {
+  display: inline-flex;
+  align-items: center;
+  padding: 9px 12px;
+  border-radius: 10px;
+  color: #1b4e87;
+  background: #eaf3fc;
+  border: 1px solid #d0e3f5;
+  font-weight: 800;
+  font-size: 13px;
+}
+.sira-hoy .sira-hoy-actualizar {
+  border: 1px solid #1a50a0;
+  border-radius: 10px;
+  padding: 9px 15px;
+  min-height: 40px;
+  color: #fff;
+  background: #174a98;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 800;
+  cursor: pointer;
+}
+.sira-hoy .sira-hoy-actualizar:hover { background: #103a80; }
+.sira-hoy .sira-hoy-actualizar:disabled { opacity: .6; cursor: progress; }
+.sira-hoy .sira-hoy-actualizar:focus-visible { outline: 3px solid #e9a443; outline-offset: 2px; }
+.sira-hoy .sira-hoy-resumen {
+  color: #1d558f;
+  font-weight: 800;
+  margin: 0 0 10px;
+}
+.sira-hoy .sira-hoy-tabla-contenedor {
+  overflow-x: auto;
+  max-width: 100%;
+  border: 1px solid #d9e7f5;
+  border-radius: 12px;
+}
+.sira-hoy table.sira-hoy-tabla {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+  min-width: 660px;
+  margin: 0;
+}
+.sira-hoy .sira-hoy-tabla th,
+.sira-hoy .sira-hoy-tabla td {
+  padding: 12px 14px;
+  text-align: left;
+  vertical-align: middle;
+  border-bottom: 1px solid #e3edf7;
+}
+.sira-hoy .sira-hoy-tabla th {
+  background: #eaf3fc;
+  color: #174a7d;
+  font-weight: 800;
+  white-space: nowrap;
+}
+.sira-hoy .sira-hoy-tabla tbody tr:nth-child(even) { background: #f8fbfe; }
+.sira-hoy .sira-hoy-tabla tbody tr:last-child td { border-bottom: 0; }
+.sira-hoy .sira-hoy-tabla strong { color: #173f75; font-weight: 800; }
+.sira-hoy .sira-hoy-turno {
+  display: inline-flex;
+  padding: 4px 9px;
+  border-radius: 99px;
+  background: #edf3fa;
+  color: #255c94;
+  font-weight: 800;
+  white-space: nowrap;
+}
+.sira-hoy .sira-hoy-reemplazo {
+  display: inline-block;
+  padding: 2px 7px;
+  margin-left: 4px;
+  border-radius: 6px;
+  background: #fff3dc;
+  color: #82540b;
+  font-size: 11px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+.sira-hoy .sira-hoy-mensaje {
+  padding: 14px 16px;
+  background: #f4f8fc;
+  border-radius: 10px;
+  color: #496989;
+  margin: 0;
+}
+.sira-hoy .sira-hoy-error { background: #fff3f3; color: #9b2435; }
+.sira-hoy .sira-hoy-aviso,
+.sira-hoy .sira-hoy-aclaracion {
+  color: #607a94;
+  font-size: 12px;
+  margin: 13px 0 0;
+}
+@media (max-width: 780px) {
+  .sira-hoy .sira-hoy-herramientas { width: 100%; justify-content: space-between; }
+  .sira-hoy table.sira-hoy-tabla { min-width: 0; font-size: 13px; }
+  .sira-hoy .sira-hoy-tabla thead { display: none; }
+  .sira-hoy .sira-hoy-tabla tbody { display: block; }
+  .sira-hoy .sira-hoy-tabla tbody tr {
+    display: block;
+    padding: 10px 12px;
+    border-bottom: 1px solid #dbe9f7;
+  }
+  .sira-hoy .sira-hoy-tabla tbody tr:last-child { border-bottom: 0; }
+  .sira-hoy .sira-hoy-tabla td {
+    display: grid;
+    grid-template-columns: minmax(93px, 34%) minmax(0, 1fr);
+    align-items: start;
+    padding: 6px 0;
+    gap: 10px;
+    border: 0;
+    overflow-wrap: anywhere;
+  }
+  .sira-hoy .sira-hoy-tabla td::before {
+    content: attr(data-label);
+    font-weight: 800;
+    color: #1d507f;
+  }
+}

@@ -46,6 +46,7 @@
       rel="stylesheet"
       href="../assets/css/portales/controles-unificados-2027.css?v=18"
     />
+      <link rel="stylesheet" href="../assets/css/sira-previsiones-hoy.css?v=39" />
   </head>
   <body class="portal-soporte-2027" data-rol-permitido="SOPORTE">
     <header class="topbar p27-original-header">
@@ -2669,7 +2670,25 @@
           </section>
           <section class="grupo seccion-destino p27-pane" id="sira-admin">
             <h2>Si.R.A. - Sistema de Registro de Asistencia</h2>
-            <div class="panel-info">
+                        <div class="panel-info sira-hoy" id="panelSiraPrevistasHoy">
+              <div class="sira-hoy-cabecera">
+                <div>
+                  <h3>Asistencias previstas para hoy</h3>
+                  <p>Clases de Taller y Educación Física que corresponde registrar hoy, según los horarios activos.</p>
+                </div>
+                <div class="sira-hoy-herramientas">
+                  <span class="sira-hoy-fecha" id="fechaSiraPrevistasHoy">Consultando fecha...</span>
+                  <button class="sira-hoy-actualizar" id="btnActualizarSiraPrevistasHoy" type="button">
+                    <i class="fa-solid fa-arrows-rotate" aria-hidden="true"></i> Actualizar
+                  </button>
+                </div>
+              </div>
+              <div id="vistaSiraPrevistasHoy" aria-live="polite">
+                <p class="sira-hoy-mensaje">Abrí Si.R.A. para consultar las asistencias previstas de hoy.</p>
+              </div>
+              <p class="sira-hoy-aclaracion">Previsión basada en horarios semanales activos; no indica si el parte fue cargado. Feriados y suspensiones excepcionales no se contemplan.</p>
+            </div>
+<div class="panel-info">
               <div class="encabezado-listado">
                 <div>
                   <h3>Consulta y administración de asistencias</h3>
@@ -4653,6 +4672,7 @@
       type="module"
     ></script>
     <script src="../assets/js/sira-admin.js" type="module"></script>
+    <script src="../assets/js/sira-previsiones-hoy.js?v=39" type="module"></script>
     <script
       src="../assets/js/horarios-admin.js?v=20260923-2"
       type="module"

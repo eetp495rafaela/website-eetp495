@@ -46,6 +46,7 @@
       href="../assets/css/portales/ajustes-documentos-2027.css?v=19"
     />
     <link rel="stylesheet" href="../assets/css/docentes-libres-taller-pdf.css?v=35" />
+      <link rel="stylesheet" href="../assets/css/sira-previsiones-hoy.css?v=39" />
   </head>
   <body
     class="portal-gestion-2027"
@@ -1372,7 +1373,25 @@
           </section>
           <section class="grupo seccion-destino p27-pane" id="sira-gestion">
             <h2>Si.R.A. - Sistema de Registro de Asistencia</h2>
-            <div class="panel-info panel-gestion-listado">
+                        <div class="panel-info sira-hoy" id="panelSiraPrevistasHoy">
+              <div class="sira-hoy-cabecera">
+                <div>
+                  <h3>Asistencias previstas para hoy</h3>
+                  <p>Clases de Taller y Educación Física que corresponde registrar hoy, según los horarios activos.</p>
+                </div>
+                <div class="sira-hoy-herramientas">
+                  <span class="sira-hoy-fecha" id="fechaSiraPrevistasHoy">Consultando fecha...</span>
+                  <button class="sira-hoy-actualizar" id="btnActualizarSiraPrevistasHoy" type="button">
+                    <i class="fa-solid fa-arrows-rotate" aria-hidden="true"></i> Actualizar
+                  </button>
+                </div>
+              </div>
+              <div id="vistaSiraPrevistasHoy" aria-live="polite">
+                <p class="sira-hoy-mensaje">Abrí Si.R.A. para consultar las asistencias previstas de hoy.</p>
+              </div>
+              <p class="sira-hoy-aclaracion">Previsión basada en horarios semanales activos; no indica si el parte fue cargado. Feriados y suspensiones excepcionales no se contemplan.</p>
+            </div>
+<div class="panel-info panel-gestion-listado">
               <i class="fa-solid fa-user-check"> </i>
               <div class="contenido-panel-gestion">
                 <h3>Consulta de asistencias</h3>
@@ -2103,6 +2122,7 @@
       type="module"
     ></script>
     <script src="../assets/js/sira-gestion.js" type="module"></script>
+    <script src="../assets/js/sira-previsiones-hoy.js?v=39" type="module"></script>
     <script
       src="../assets/js/reemplazos-docentes-gestion.js"
       type="module"
