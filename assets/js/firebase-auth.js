@@ -66,6 +66,12 @@ const PORTALES_POR_ROL = {
     url: "docentes/index.html",
   },
 
+  DOCENTE_APOYO: {
+    etiqueta: "Docente de Apoyo",
+    icono: "fa-hands-holding-child",
+    url: "docentes-apoyo/index.html",
+  },
+
   SOPORTE: {
     etiqueta: "Soporte Institucional",
     icono: "fa-user-gear",

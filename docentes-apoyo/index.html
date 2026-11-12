@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="es-AR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <title>Docente de Apoyo | E.E.T.P. N° 495</title>
+  <link rel="icon" href="../vista-2027/assets/img/logo.webp" type="image/webp">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+  <style>
+    :root { color-scheme: light; --azul:#11345a; --fondo:#f3f7fc; --borde:#dbe4ee; --verde:#147a6a; }
+    * { box-sizing:border-box; }
+    body { margin:0; background:var(--fondo); color:#1b3047; font:16px/1.55 system-ui,-apple-system,Segoe UI,sans-serif; }
+    header { background:var(--azul); color:white; padding:18px max(18px,calc((100vw - 1100px)/2)); display:flex; align-items:center; gap:15px; }
+    header img { width:42px; height:53px; object-fit:contain; }
+    header h1 { margin:0; font-size:1.2rem; line-height:1.25; }
+    header small { display:block; opacity:.85; }
+    header .salir { margin-left:auto; border:1px solid #a2bcd7; color:white; background:transparent; padding:9px 13px; border-radius:9px; cursor:pointer; }
+    main { max-width:1100px; margin:auto; padding:26px 18px 60px; }
+    h2 { margin:0 0 8px; color:var(--azul); font-size:1.65rem; }
+    .intro { color:#52718c; margin:0 0 18px; }
+    .tarjetas { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px; }
+    .tarjeta { display:block; text-align:left; width:100%; border:1px solid var(--borde); border-radius:14px; padding:20px; background:white; color:var(--azul); box-shadow:0 5px 17px #153b6010; cursor:pointer; }
+    .tarjeta i { font-size:23px; color:var(--verde); margin-right:10px; }
+    .tarjeta strong { font-size:1.06rem; }
+    .tarjeta span { display:block; font-size:.9rem; color:#5a7288; margin-top:8px; }
+    .tarjeta:hover,.tarjeta:focus-visible { outline:2px solid #4aa294; outline-offset:1px; }
+    section.detalle { background:white; margin-top:20px; padding:22px; border:1px solid var(--borde); border-radius:14px; }
+    section.detalle[hidden] { display:none; }
+    .barra { display:flex; gap:12px; align-items:center; justify-content:space-between; flex-wrap:wrap; }
+    .barra h3 { margin:0; font-size:1.25rem; color:var(--azul); }
+    button.accion { border:0; border-radius:9px; color:white; background:var(--azul); padding:9px 15px; cursor:pointer; }
+    button.accion:disabled { opacity:.6; cursor:not-allowed; }
+    .mensaje { color:#56718a; font-size:.95rem; }
+    .error { color:#a51d31; }
+    .tabla { overflow-x:auto; }
+    table { border-collapse:collapse; min-width:580px; width:100%; }
+    th,td { padding:10px; border-bottom:1px solid var(--borde); text-align:left; vertical-align:top; }
+    th { background:#edf3f9; }
+    a { color:#125d90; }
+    .oculto { display:none!important; }
+    @media(max-width:640px) { .tarjetas { grid-template-columns:1fr; } header { padding:12px 16px; } header h1 { font-size:1rem; } main { padding:18px 12px 40px; } section.detalle { padding:14px; } }
+  </style>
+</head>
+<body data-rol-permitido="DOCENTE_APOYO">
+  <header>
+    <img src="../vista-2027/assets/img/logo.webp" alt="Escudo E.E.T.P. N° 495">
+    <div><h1>E.E.T.P. N° 495</h1><small>Portal Docente de Apoyo</small></div>
+    <button id="btnCerrarSesionPortal" class="salir" type="button"><i class="fa-solid fa-right-from-bracket"></i> Salir</button>
+  </header>
+  <main>
+    <h2>Herramientas de consulta</h2>
+    <p class="intro" id="bienvenidaApoyo">Verificando tu cuenta...</p>
+    <div class="tarjetas">
+      <button class="tarjeta" type="button" data-abrir="panelInformesApoyo">
+        <i class="fa-solid fa-file-lines"></i><strong>Informes Pedagógico-Didácticos</strong>
+        <span>Informes de los estudiantes que acompañás, en modo lectura.</span>
+      </button>
+      <button class="tarjeta" id="btnGenerarPizarraHorarios" type="button">
+        <i class="fa-solid fa-table-cells-large"></i><strong>Ver Horario Completo</strong>
+        <span>Pizarra completa de la escuela: Aula, Taller y Educación Física.</span>
+      </button>
+      <button class="tarjeta" type="button" data-abrir="panelAgendaApoyo">
+        <i class="fa-solid fa-address-book"></i><strong>Agenda Institucional</strong>
+        <span>Contactos institucionales y estudiantes a tu cargo.</span>
+      </button>
+      <button class="tarjeta" type="button" data-abrir="panelAsistenciaApoyo">
+        <i class="fa-solid fa-chart-line"></i><strong>Situación de Asistencia · Si.R.A.</strong>
+        <span>Consulta individual de asistencia de los estudiantes que acompañás.</span>
+      </button>
+    </div>
+    <section class="detalle" id="panelInformesApoyo" hidden>
+      <div class="barra"><h3>Informes Pedagógico-Didácticos</h3><button class="accion" type="button" id="btnCargarInformesApoyo">Consultar informes</button></div>
+      <p class="mensaje">Solo documentos compartidos con vos por la institución.</p>
+      <div id="resultadoInformesApoyo" aria-live="polite"></div>
+    </section>
+    <section class="detalle" id="panelAgendaApoyo" hidden>
+      <div class="barra"><h3>Agenda Institucional</h3><button class="accion" type="button" id="btnCargarAgendaApoyo">Consultar contactos</button></div>
+      <div id="resultadoAgendaApoyo" aria-live="polite"></div>
+    </section>
+    <section class="detalle" id="panelAsistenciaApoyo" hidden>
+      <div class="barra"><h3>Situación de Asistencia · Si.R.A.</h3><button class="accion" type="button" id="btnCargarAsistenciaApoyo">Consultar asistencia</button></div>
+      <p class="mensaje">Solo estudiantes a tu cargo, sin permisos para modificar registros.</p>
+      <div id="resultadoAsistenciaApoyo" aria-live="polite"></div>
+    </section>
+  </main>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script type="module" src="../assets/js/proteger-portal.js"></script>
+  <script type="module" src="../assets/js/pizarra-horarios-admin.js"></script>
+  <script type="module" src="../assets/js/docentes-apoyo.js"></script>
+</body>
+</html>

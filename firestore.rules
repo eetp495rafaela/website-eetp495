@@ -185,6 +185,11 @@ function esDocentePorPerfil() {
   ]);
 }
 
+// El rol de apoyo NO hereda los permisos de DOCENTE.
+function esDocenteApoyoPorPerfil() {
+  return usuarioActivoTieneRoles(["DOCENTE_APOYO"]);
+}
+
 function esGestionInstitucional() {
   return usuarioActivoTieneRoles([
     "DIRECCION",
@@ -2493,6 +2498,26 @@ allow update: if esSoporte()
   );
     }
 
+/*
+ * Vinculaciones de Docentes de Apoyo.
+ * El vínculo identifica al ESTUDIANTE por correo, no por curso.
+ * Los cambios de curso no alteran las autorizaciones.
+ */
+match /apoyos_estudiantes/{vinculoId} {
+  allow get, list: if esSoporte()
+    || (
+      esDocenteApoyoPorPerfil()
+      && resource.data.get("estado", "") == "ACTIVO"
+      && resource.data.get("docenteCorreo", "") == request.auth.token.email
+    );
+
+  // Los vínculos se administran a través del backend, que sincroniza
+  // en la misma operación las autorizaciones de Google Drive.
+  // Una escritura directa de cliente podría dejar permisos desfasados.
+  allow create, update, delete: if false;
+
+}
+
 match /asignaciones_docentes/{asignacionId} {
   /*
    * Soporte y Gestión pueden consultar todas las asignaciones.
@@ -2659,6 +2684,7 @@ match /horarios/{horarioId} {
         esGestionInstitucional()
         || esAlumnoPorPerfil()
         || esDocentePorPerfil()
+        || esDocenteApoyoPorPerfil()
       )
       && resource.data.estado == "ACTIVO"
     );
@@ -2801,6 +2827,7 @@ match /horarios/{horarioId} {
             esGestionInstitucional()
             || esAlumnoPorPerfil()
             || esDocentePorPerfil()
+            || esDocenteApoyoPorPerfil()
           )
           && resource.data.estado == "ACTIVO"
         );

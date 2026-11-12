@@ -70,6 +70,7 @@ const CLAVE_ROL_ACTIVO = "rolActivoPortal";
 const ROLES_VALIDOS = new Set([
   "ALUMNO",
   "DOCENTE",
+  "DOCENTE_APOYO",
   "SOPORTE",
   "PRECEPTORIA",
   "SECRETARIA",
@@ -466,6 +467,7 @@ function mostrarDatosUsuario(perfil, user, correo, rolUsuario) {
   const rolesLegibles = {
     ALUMNO: "Estudiante",
     DOCENTE: "Docente",
+    DOCENTE_APOYO: "Docente de Apoyo",
     SOPORTE: "Soporte Institucional",
     PRECEPTORIA: "Preceptoría",
     SECRETARIA: "Secretaría",
