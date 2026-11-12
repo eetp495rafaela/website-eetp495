@@ -98,8 +98,9 @@ boton?.addEventListener("click",async()=>{
   const actuales=new Set(vinculos.filter(v=>v.estado==="ACTIVO").map(v=>correo(v.alumnoCorreo)));
   const agregar=visibles.filter(a=>seleccionadas.has(correo(a.correo))&&!actuales.has(correo(a.correo))).map(a=>({alumnoCorreo:correo(a.correo),alumnoNombre:a.nombreCompleto||""}));
   const quitar=visibles.filter(a=>!seleccionadas.has(correo(a.correo))&&actuales.has(correo(a.correo))).map(a=>correo(a.correo));
-  if(!agregar.length&&!quitar.length){informar("No hay cambios para guardar.");return;}
-  if(!confirm("¿Confirmás "+agregar.length+" incorporación(es) y "+quitar.length+" desvinculación(es)? Se actualizarán los permisos de Google Drive."))return;
+  if(!agregar.length&&!quitar.length){
+    if(!confirm("No hay cambios en los estudiantes. ¿Querés comprobar y sincronizar de nuevo los permisos de Google Drive?"))return;
+  } else if(!confirm("¿Confirmás "+agregar.length+" incorporación(es) y "+quitar.length+" desvinculación(es)? Se actualizarán los permisos de Google Drive."))return;
   ocupado=true;pintar();informar("Actualizando vinculaciones y permisos de informes...");
   try{
     // La operación del servidor debe verificar SOPORTE, validar todos los
@@ -108,7 +109,12 @@ boton?.addEventListener("click",async()=>{
     const respuesta=await consultarBackend("actualizar_vinculos_docente_apoyo",{docenteCorreo,agregar,quitar});
     await cargarVinculos();
     informar(respuesta.mensaje||"Vínculos y permisos actualizados correctamente.");
-  }catch(e){informar(e.message||"No se guardaron los cambios. Revisá el backend.",true);}
+  }catch(e){
+    // El servidor puede haber guardado un vínculo y fallado al sincronizar
+    // Drive. Recargar la situación real antes de ofrecer otro intento.
+    try{await cargarVinculos();}catch(error){console.error("No se pudieron recargar los vínculos:",error);}
+    informar(e.message||"La operación quedó incompleta. Revisá la sincronización.",true);
+  }
   finally{ocupado=false;pintar();}
 });
 window.addEventListener("portalUsuarioListo",iniciar);

@@ -88,6 +88,17 @@ function usuarioActivoTieneRoles(rolesBuscados) {
     && perfilActivoTieneRoles(
       perfilUsuario(),
       rolesBuscados
+    )
+    // DOCENTE_APOYO no se puede combinar con roles institucionales.
+    // Esto evita heredar permisos de DOCENTE, DIRECCION o SOPORTE.
+    && (
+      !perfilTieneAlgunoDeLosRoles(perfilUsuario(), ["DOCENTE_APOYO"])
+      || (
+        rolesBuscados.hasAny(["DOCENTE_APOYO"])
+        && perfilUsuario().get("rol", "") == "DOCENTE_APOYO"
+        && perfilUsuario().get("roles", ["DOCENTE_APOYO"]) is list
+        && perfilUsuario().get("roles", ["DOCENTE_APOYO"]).hasOnly(["DOCENTE_APOYO"])
+      )
     );
 }
 

@@ -718,7 +718,10 @@ onAuthStateChanged(auth, async (user) => {
      * El rol ALUMNO es exclusivo y no puede combinarse
      * con ningún otro rol institucional.
      */
-    if (rolesUsuario.includes("ALUMNO") && rolesUsuario.length > 1) {
+    if (
+      rolesUsuario.some((rol) => ["ALUMNO", "DOCENTE_APOYO"].includes(rol)) &&
+      rolesUsuario.length > 1
+    ) {
       await signOut(auth);
 
       volverAlLogin("La configuración de roles de esta cuenta no es válida.");

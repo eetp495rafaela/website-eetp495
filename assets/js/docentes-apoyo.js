@@ -90,9 +90,10 @@ async function cargarAsistencia(){
 
 async function cargarAgenda(){
   mensaje("resultadoAgendaApoyo","Cargando contactos...");
-  const [vinculos,referentes]=await Promise.all([
+  const [vinculos,referentes,agenda]=await Promise.all([
     vinculosActivos(),
-    getDocs(query(collection(db,"referentes_institucionales"),where("estado","==","ACTIVO")))
+    getDocs(query(collection(db,"referentes_institucionales"),where("estado","==","ACTIVO"))),
+    consultarBackend("listar_agenda_docente_apoyo")
   ]);
   const personas=referentes.docs.map(d=>d.data()).sort((a,b)=>String(a.nombreCompleto||a.nombre||"").localeCompare(String(b.nombreCompleto||b.nombre||""),"es"));
   const filas=personas.map(r=>{
@@ -101,7 +102,13 @@ async function cargarAgenda(){
     return "<tr><td>"+textoSeguro(r.nombreCompleto||r.nombre||"-")+"</td><td>"+textoSeguro(r.cargo||"-")+"</td><td>"+email+"</td></tr>";
   }).join("");
   const asignados=vinculos.length?vinculos.map(v=>"<li>"+textoSeguro(v.alumnoNombre||"Estudiante")+"</li>").join(""):"<li>No tenés estudiantes vinculados.</li>";
-  mostrar("resultadoAgendaApoyo",'<h4>Estudiantes a tu cargo</h4><ul>'+asignados+'</ul><h4>Administración institucional</h4>'+(filas?'<div class="tabla"><table><thead><tr><th>Nombre</th><th>Cargo</th><th>Contacto</th></tr></thead><tbody>'+filas+"</tbody></table></div>":"<p class='mensaje'>Sin contactos disponibles.</p>"));
+  const colegas=Array.isArray(agenda.colegas)?agenda.colegas:[];
+  const filasColegas=colegas.map(c=>{
+    const email=correoNormalizado(c.correo),enlace=email?'<a href="mailto:'+textoSeguro(email)+'">'+textoSeguro(email)+'</a>':"-";
+    return "<tr><td>"+textoSeguro(c.nombre||"-")+"</td><td>"+textoSeguro(c.cursoNombre||"-")+"</td><td>"+enlace+"</td></tr>";
+  }).join("");
+  const tablaColegas=filasColegas?'<div class="tabla"><table><thead><tr><th>Docente</th><th>Curso</th><th>Correo</th></tr></thead><tbody>'+filasColegas+"</tbody></table></div>":"<p class='mensaje'>No hay docentes vinculados a los cursos de tus estudiantes.</p>";
+  mostrar("resultadoAgendaApoyo",'<h4>Estudiantes a tu cargo</h4><ul>'+asignados+'</ul><h4>Mis colegas docentes</h4>'+tablaColegas+'<h4>Administración institucional</h4>'+(filas?'<div class="tabla"><table><thead><tr><th>Nombre</th><th>Cargo</th><th>Contacto</th></tr></thead><tbody>'+filas+"</tbody></table></div>":"<p class='mensaje'>Sin contactos disponibles.</p>"));
 }
 
 document.querySelectorAll("[data-abrir]").forEach(btn=>btn.addEventListener("click",()=>{

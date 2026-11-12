@@ -4535,6 +4535,10 @@ async function registrarUsuario(event) {
     );
     return;
   }
+  if ((rol === "DOCENTE_APOYO") !== (tipoVinculo === "APOYO_EXTERNO")) {
+    mostrarMensajeRegistro("La situación Docente de Apoyo corresponde únicamente al rol DOCENTE DE APOYO.", "error");
+    return;
+  }
   if (
     ![
       "ALUMNO",
@@ -4815,6 +4819,10 @@ async function guardarEdicionUsuario(event) {
       "Seleccioná una Situación de Revista válida.",
       "error",
     );
+    return;
+  }
+  if ((rol === "DOCENTE_APOYO") !== (tipoVinculo === "APOYO_EXTERNO")) {
+    mostrarMensajeEdicion("La situación Docente de Apoyo corresponde únicamente al rol DOCENTE DE APOYO.", "error");
     return;
   }
 
@@ -5760,6 +5768,9 @@ function validarFilasImportacionUsuarios(filas) {
 
     if (!situacionesValidas.includes(situacionRevista)) {
       erroresFila.push("la situación de revista no es válida");
+    }
+    if ((rol === "DOCENTE_APOYO") !== (situacionRevista === "APOYO_EXTERNO")) {
+      erroresFila.push("el rol Docente de Apoyo requiere la situación APOYO_EXTERNO");
     }
 
     if (fechaFinalizacion && !/^\d{4}-\d{2}-\d{2}$/.test(fechaFinalizacion)) {
