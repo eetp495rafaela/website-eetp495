@@ -122,10 +122,19 @@ function agruparContactosAgendaApoyo(registros, categoria) {
     const clave=(correo||normalizarBusquedaAgendaApoyo(nombre))+"|"+(categoria==="ADMINISTRACION"?cargo:"");
     const cursos=listaCursosContactoApoyo(item);
     const espacios=Array.isArray(item.espacios)?item.espacios.map(x=>String(x||"").trim()).filter(Boolean):[];
-    if(!agrupados.has(clave)) agrupados.set(clave,{nombre,correo,cargo,cursos:[],espacios:[]});
+    if(!agrupados.has(clave)) agrupados.set(clave,{nombre,correo,cargo,cursos:[],espacios:[],espaciosPorCurso:Object.create(null)});
     const actual=agrupados.get(clave);
     cursos.forEach(c=>{if(!actual.cursos.includes(c))actual.cursos.push(c)});
     espacios.forEach(e=>{if(!actual.espacios.includes(e))actual.espacios.push(e)});
+    const porCurso=item.espaciosPorCurso&&typeof item.espaciosPorCurso==="object"&&!Array.isArray(item.espaciosPorCurso)?item.espaciosPorCurso:{};
+    Object.entries(porCurso).forEach(([curso,espaciosCurso])=>{
+      if(!Array.isArray(espaciosCurso))return;
+      if(!actual.espaciosPorCurso[curso])actual.espaciosPorCurso[curso]=[];
+      espaciosCurso.forEach(e=>{
+        const nombreEspacio=String(e||"").trim();
+        if(nombreEspacio&&!actual.espaciosPorCurso[curso].includes(nombreEspacio))actual.espaciosPorCurso[curso].push(nombreEspacio);
+      });
+    });
   });
   return [...agrupados.values()].sort((a,b)=>ordenarAgendaApoyo(a.nombre,b.nombre));
 }
@@ -148,6 +157,7 @@ async function obtenerDatosAgendaApoyo() {
     const resultado={
       ALUMNOS:agruparContactosAgendaApoyo(estudiantes,"ALUMNOS"),
       COLEGAS:agruparContactosAgendaApoyo(Array.isArray(agenda.colegas)?agenda.colegas:[],"COLEGAS"),
+      CURSOS_DOCENTES:Array.isArray(agenda.cursosDisponibles)?agenda.cursosDisponibles.map(c=>String(c||"").trim()).filter(Boolean):null,
       ADMINISTRACION:agruparContactosAgendaApoyo(referentes.docs.map(d=>d.data()),"ADMINISTRACION")
     };
     cacheDatosAgendaApoyo=resultado;
@@ -165,7 +175,14 @@ function detalleContactoAgendaApoyo(contacto,categoria) {
       contacto.cargo||"Administración institucional";
     return cargo+((["PRECEPTOR","PRECEPTORA"].includes(contacto.cargo)&&cursos.length)?" · "+cursos.join(", "):"");
   }
-  if(categoria==="COLEGAS") return contacto.espacios.length?contacto.espacios.sort(ordenarAgendaApoyo).join(" · "):cursos.join(" · ")||"Sin espacio asignado";
+  if(categoria==="COLEGAS") {
+    const seleccionado=cursoAgendaApoyo?.value||"";
+    if(seleccionado){
+      const espacios=(contacto.espaciosPorCurso?.[seleccionado]||[]).slice().sort(ordenarAgendaApoyo);
+      return espacios.join(" · ")||"Sin espacio asignado";
+    }
+    return contacto.espacios.length?contacto.espacios.slice().sort(ordenarAgendaApoyo).join(" · "):"Sin espacio asignado";
+  }
   return cursos.join(" · ")||"Curso sin informar";
 }
 function actualizarFiltroCursoAgendaApoyo() {
@@ -173,7 +190,9 @@ function actualizarFiltroCursoAgendaApoyo() {
   const conCurso=["COLEGAS","ALUMNOS"].includes(categoria);
   const anterior=cursoAgendaApoyo?.value||"";
   const cursos=conCurso&&cacheDatosAgendaApoyo?
-    [...new Set((cacheDatosAgendaApoyo[categoria]||[]).flatMap(c=>c.cursos))].sort(ordenarAgendaApoyo):[];
+    [...new Set((categoria==="COLEGAS"&&cacheDatosAgendaApoyo.CURSOS_DOCENTES
+      ? cacheDatosAgendaApoyo.CURSOS_DOCENTES
+      : (cacheDatosAgendaApoyo[categoria]||[]).flatMap(c=>c.cursos)))].sort(ordenarAgendaApoyo):[];
   if(!cursoAgendaApoyo)return;
   cursoAgendaApoyo.replaceChildren(new Option("Todos los cursos",""),
     ...cursos.map(c=>new Option(c,c)));
