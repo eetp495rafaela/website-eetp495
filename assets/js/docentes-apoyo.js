@@ -88,33 +88,144 @@ async function cargarAsistencia(){
   mostrar("resultadoAsistenciaApoyo",'<div class="tabla"><table><thead><tr><th>Estudiante</th><th>Curso</th><th>P</th><th>A</th><th>T</th><th>% asistencia</th></tr></thead><tbody>'+filas+'</tbody></table></div><p class="mensaje">4 tardanzas equivalen a 1 falta. Los datos son de consulta y no pueden editarse.</p>');
 }
 
-async function cargarAgenda(){
-  mensaje("resultadoAgendaApoyo","Cargando contactos...");
-  const [vinculos,referentes,agenda]=await Promise.all([
-    vinculosActivos(),
-    getDocs(query(collection(db,"referentes_institucionales"),where("estado","==","ACTIVO"))),
-    consultarBackend("listar_agenda_docente_apoyo")
-  ]);
-  const personas=referentes.docs.map(d=>d.data()).sort((a,b)=>String(a.nombreCompleto||a.nombre||"").localeCompare(String(b.nombreCompleto||b.nombre||""),"es"));
-  const filas=personas.map(r=>{
-    const correo=correoNormalizado(r.correo||r.email);
-    const email=correo&&/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(correo)?'<a href="mailto:'+textoSeguro(correo)+'">'+textoSeguro(correo)+"</a>":"-";
-    return "<tr><td>"+textoSeguro(r.nombreCompleto||r.nombre||"-")+"</td><td>"+textoSeguro(r.cargo||"-")+"</td><td>"+email+"</td></tr>";
-  }).join("");
-  const asignados=vinculos.length?vinculos.map(v=>"<li>"+textoSeguro(v.alumnoNombre||"Estudiante")+"</li>").join(""):"<li>No tenés estudiantes vinculados.</li>";
-  const colegas=Array.isArray(agenda.colegas)?agenda.colegas:[];
-  const filasColegas=colegas.map(c=>{
-    const email=correoNormalizado(c.correo),enlace=email?'<a href="mailto:'+textoSeguro(email)+'">'+textoSeguro(email)+'</a>':"-";
-    return "<tr><td>"+textoSeguro(c.nombre||"-")+"</td><td>"+textoSeguro(c.cursoNombre||"-")+"</td><td>"+enlace+"</td></tr>";
-  }).join("");
-  const tablaColegas=filasColegas?'<div class="tabla"><table><thead><tr><th>Docente</th><th>Curso</th><th>Correo</th></tr></thead><tbody>'+filasColegas+"</tbody></table></div>":"<p class='mensaje'>No hay docentes vinculados a los cursos de tus estudiantes.</p>";
-  mostrar("resultadoAgendaApoyo",'<h4>Estudiantes a tu cargo</h4><ul>'+asignados+'</ul><h4>Mis colegas docentes</h4>'+tablaColegas+'<h4>Administración institucional</h4>'+(filas?'<div class="tabla"><table><thead><tr><th>Nombre</th><th>Cargo</th><th>Contacto</th></tr></thead><tbody>'+filas+"</tbody></table></div>":"<p class='mensaje'>Sin contactos disponibles.</p>"));
-}
+/* Misma presentación de Agenda que el Portal Docentes.
+ * Los filtros son locales sobre datos YA autorizados por Firestore y Apps Script.
+ * Nunca se consulta /usuarios desde el navegador.
+ */
+let cacheDatosAgendaApoyo = null;
+let promesaAgendaApoyo = null;
+const categoriaAgendaApoyo = document.getElementById("categoriaAgendaApoyo");
+const cursoAgendaApoyo = document.getElementById("cursoAgendaApoyo");
+const buscarAgendaApoyo = document.getElementById("buscarAgendaApoyo");
 
-// La navegación y el menú lateral se gestionan en docentes-apoyo-navegacion.js.
+const ordenarAgendaApoyo = (a,b) => String(a||"").localeCompare(String(b||""),"es",{numeric:true,sensitivity:"base"});
+const normalizarBusquedaAgendaApoyo = v => String(v||"").trim().normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLocaleLowerCase("es");
+
+function cursoDeReferenciaApoyo(datos) {
+  const nombre=String(datos.cursoNombre||datos.nombreCurso||"").trim();
+  if(nombre) return nombre;
+  const anio=Number(datos.cursoAnio||datos.anio||0);
+  const division=String(datos.cursoDivision||datos.division||"").trim();
+  return anio&&division ? anio+"° "+division : "";
+}
+function listaCursosContactoApoyo(datos) {
+  const cursos=Array.isArray(datos.cursos) ? datos.cursos : [];
+  const nom=cursoDeReferenciaApoyo(datos);
+  return [...new Set([...cursos.map(x=>String(x||"").trim()),nom].filter(Boolean))];
+}
+function agruparContactosAgendaApoyo(registros, categoria) {
+  const agrupados=new Map();
+  registros.forEach(item=>{
+    const correo=correoNormalizado(item.correo||item.email||item.alumnoCorreo);
+    const nombre=String(item.nombre||item.nombreCompleto||item.alumnoNombre||"").trim()||"Sin nombre";
+    const cargo=String(item.cargo||"").trim().toUpperCase();
+    const clave=(correo||normalizarBusquedaAgendaApoyo(nombre))+"|"+(categoria==="ADMINISTRACION"?cargo:"");
+    const cursos=listaCursosContactoApoyo(item);
+    const espacios=Array.isArray(item.espacios)?item.espacios.map(x=>String(x||"").trim()).filter(Boolean):[];
+    if(!agrupados.has(clave)) agrupados.set(clave,{nombre,correo,cargo,cursos:[],espacios:[]});
+    const actual=agrupados.get(clave);
+    cursos.forEach(c=>{if(!actual.cursos.includes(c))actual.cursos.push(c)});
+    espacios.forEach(e=>{if(!actual.espacios.includes(e))actual.espacios.push(e)});
+  });
+  return [...agrupados.values()].sort((a,b)=>ordenarAgendaApoyo(a.nombre,b.nombre));
+}
+async function obtenerDatosAgendaApoyo() {
+  if(cacheDatosAgendaApoyo) return cacheDatosAgendaApoyo;
+  if(promesaAgendaApoyo) return promesaAgendaApoyo;
+  promesaAgendaApoyo=(async()=>{
+    asegurarSesion();
+    const [vinculos,referentes,agenda]=await Promise.all([
+      vinculosActivos(),
+      getDocs(query(collection(db,"referentes_institucionales"),where("estado","==","ACTIVO"))),
+      consultarBackend("listar_agenda_docente_apoyo")
+    ]);
+    const estudiantesServidor=Array.isArray(agenda.estudiantes)?agenda.estudiantes:null;
+    // Compatibilidad con una versión anterior del GAS: vínculos propios (sin consulta global).
+    const estudiantes=estudiantesServidor||vinculos.map(v=>({
+      nombre:String(v.alumnoNombre||"").trim(),correo:correoNormalizado(v.alumnoCorreo),
+      cursoNombre:cursoDeReferenciaApoyo(v)
+    }));
+    const resultado={
+      ALUMNOS:agruparContactosAgendaApoyo(estudiantes,"ALUMNOS"),
+      COLEGAS:agruparContactosAgendaApoyo(Array.isArray(agenda.colegas)?agenda.colegas:[],"COLEGAS"),
+      ADMINISTRACION:agruparContactosAgendaApoyo(referentes.docs.map(d=>d.data()),"ADMINISTRACION")
+    };
+    cacheDatosAgendaApoyo=resultado;
+    return resultado;
+  })();
+  try {return await promesaAgendaApoyo}
+  finally {promesaAgendaApoyo=null}
+}
+function detalleContactoAgendaApoyo(contacto,categoria) {
+  const cursos=[...contacto.cursos].sort(ordenarAgendaApoyo);
+  if(categoria==="ADMINISTRACION"){
+    const cargo=({"DIRECTORA":"Director/a","DIRECTOR":"Director/a","VICE_DIRECTORA":"Vice Director/a",
+      "SECRETARIO":"Secretario/a","SECRETARIA":"Secretario/a","PRO_SECRETARIO":"Pro Secretario/a",
+      "PRECEPTOR":"Preceptor/a","PRECEPTORA":"Preceptor/a","ASISTENTE_ADMINISTRATIVO":"Asistente Administrativo"})[contacto.cargo]||
+      contacto.cargo||"Administración institucional";
+    return cargo+((["PRECEPTOR","PRECEPTORA"].includes(contacto.cargo)&&cursos.length)?" · "+cursos.join(", "):"");
+  }
+  if(categoria==="COLEGAS") return contacto.espacios.length?contacto.espacios.sort(ordenarAgendaApoyo).join(" · "):cursos.join(" · ")||"Sin espacio asignado";
+  return cursos.join(" · ")||"Curso sin informar";
+}
+function actualizarFiltroCursoAgendaApoyo() {
+  const categoria=categoriaAgendaApoyo?.value||"";
+  const conCurso=["COLEGAS","ALUMNOS"].includes(categoria);
+  const anterior=cursoAgendaApoyo?.value||"";
+  const cursos=conCurso&&cacheDatosAgendaApoyo?
+    [...new Set((cacheDatosAgendaApoyo[categoria]||[]).flatMap(c=>c.cursos))].sort(ordenarAgendaApoyo):[];
+  if(!cursoAgendaApoyo)return;
+  cursoAgendaApoyo.replaceChildren(new Option("Todos los cursos",""),
+    ...cursos.map(c=>new Option(c,c)));
+  cursoAgendaApoyo.disabled=!conCurso||!cursos.length;
+  if(cursos.includes(anterior))cursoAgendaApoyo.value=anterior;
+}
+function renderizarAgendaApoyo() {
+  const categoria=categoriaAgendaApoyo?.value||"";
+  if(!categoria){mensaje("resultadoAgendaApoyo","Seleccioná una categoría para consultar la agenda.");return}
+  if(!cacheDatosAgendaApoyo){mensaje("resultadoAgendaApoyo","Cargando contactos...");return}
+  const curso=["COLEGAS","ALUMNOS"].includes(categoria)?cursoAgendaApoyo?.value||"":"";
+  const buscar=normalizarBusquedaAgendaApoyo(buscarAgendaApoyo?.value);
+  const visibles=(cacheDatosAgendaApoyo[categoria]||[]).filter(c=>
+    (!curso||c.cursos.includes(curso)) &&
+    (!buscar||normalizarBusquedaAgendaApoyo(c.nombre).includes(buscar))
+  );
+  const titulos={COLEGAS:"Mis colegas docentes",ADMINISTRACION:"Administración institucional",ALUMNOS:"Mis alumnos"};
+  const titulosDetalle={COLEGAS:"Espacio curricular",ADMINISTRACION:"Cargo",ALUMNOS:"Curso"};
+  if(!visibles.length){
+    mostrar("resultadoAgendaApoyo",'<div class="apoyo-agenda-resumen"><strong>'+textoSeguro(titulos[categoria])+'</strong></div><p class="mensaje">No se encontraron contactos disponibles para esta categoría.</p>');
+    return;
+  }
+  const filas=visibles.map(c=>{
+    const correo=/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(c.correo)?c.correo:"";
+    const enlace=correo?'<a href="mailto:'+textoSeguro(correo)+'">'+textoSeguro(correo)+'</a>':"Correo no cargado";
+    return '<tr><td><strong>'+textoSeguro(c.nombre)+'</strong></td><td>'+textoSeguro(detalleContactoAgendaApoyo(c,categoria))+'</td><td>'+enlace+'</td></tr>';
+  }).join("");
+  mostrar("resultadoAgendaApoyo",'<div class="apoyo-agenda-resumen"><strong>'+textoSeguro(titulos[categoria])+' :</strong><span>'+visibles.length+' '+(visibles.length===1?"contacto":"contactos")+'</span></div>'+
+    '<div class="tabla"><table><thead><tr><th>Apellido y nombre</th><th>'+textoSeguro(titulosDetalle[categoria])+'</th><th>Correo electrónico</th></tr></thead><tbody>'+filas+"</tbody></table></div>");
+}
+async function cargarCategoriaAgendaApoyo() {
+  if(!categoriaAgendaApoyo?.value){renderizarAgendaApoyo();return}
+  mensaje("resultadoAgendaApoyo","Cargando contactos...");
+  try {
+    await obtenerDatosAgendaApoyo();
+    actualizarFiltroCursoAgendaApoyo();
+    renderizarAgendaApoyo();
+  }catch(error){
+    mensaje("resultadoAgendaApoyo",error.message||"No se pudieron cargar los contactos.",true);
+  }
+}
+categoriaAgendaApoyo?.addEventListener("change",()=>{
+  if(buscarAgendaApoyo) buscarAgendaApoyo.value="";
+  if(cursoAgendaApoyo) cursoAgendaApoyo.value="";
+  cargarCategoriaAgendaApoyo();
+});
+cursoAgendaApoyo?.addEventListener("change",renderizarAgendaApoyo);
+buscarAgendaApoyo?.addEventListener("input",renderizarAgendaApoyo);
+
 document.getElementById("btnCargarInformesApoyo")?.addEventListener("click",()=>ejecutarConBoton("btnCargarInformesApoyo",cargarInformes));
 document.getElementById("btnCargarAsistenciaApoyo")?.addEventListener("click",()=>ejecutarConBoton("btnCargarAsistenciaApoyo",cargarAsistencia));
-document.getElementById("btnCargarAgendaApoyo")?.addEventListener("click",()=>ejecutarConBoton("btnCargarAgendaApoyo",cargarAgenda));
+
 
 function sesionLista(event){
   const datos=event?.detail||window.portalUsuario;

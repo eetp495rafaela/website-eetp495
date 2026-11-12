@@ -115,11 +115,34 @@
           </section>
 
           <section class="apoyo-panel detalle" id="panelAgendaApoyo" hidden aria-labelledby="tituloAgendaApoyo">
-            <div class="apoyo-panel-header">
-              <div><h2 id="tituloAgendaApoyo">Agenda Institucional</h2><p>Estudiantes a tu cargo, colegas relacionados y referentes institucionales.</p></div>
-              <button class="apoyo-action" type="button" id="btnCargarAgendaApoyo"><i class="fa-solid fa-rotate-right" aria-hidden="true"></i> Consultar contactos</button>
+            <div class="apoyo-agenda-intro">
+              <h2 id="tituloAgendaApoyo">Contactos de la comunidad educativa</h2>
+              <p>Seleccioná una categoría para consultar nombres y correos electrónicos institucionales.</p>
             </div>
-            <div id="resultadoAgendaApoyo" aria-live="polite"></div>
+            <div class="apoyo-agenda-filtros">
+              <div class="apoyo-agenda-campo">
+                <label for="categoriaAgendaApoyo">Contactos que querés consultar</label>
+                <select id="categoriaAgendaApoyo">
+                  <option value="">Seleccionar categoría</option>
+                  <option value="COLEGAS">Mis colegas docentes</option>
+                  <option value="ADMINISTRACION">Administración institucional</option>
+                  <option value="ALUMNOS">Mis alumnos</option>
+                </select>
+              </div>
+              <div class="apoyo-agenda-campo">
+                <label for="cursoAgendaApoyo">Curso</label>
+                <select id="cursoAgendaApoyo" disabled>
+                  <option value="">Todos los cursos</option>
+                </select>
+              </div>
+              <div class="apoyo-agenda-campo">
+                <label for="buscarAgendaApoyo">Buscar por nombre</label>
+                <input id="buscarAgendaApoyo" type="text" placeholder="Ej.: Pérez, María..." autocomplete="off" />
+              </div>
+            </div>
+            <div id="resultadoAgendaApoyo" aria-live="polite">
+              <p class="mensaje">Seleccioná una categoría para consultar la agenda.</p>
+            </div>
           </section>
 
           <section class="apoyo-panel detalle" id="panelAsistenciaApoyo" hidden aria-labelledby="tituloAsistenciaApoyo">
