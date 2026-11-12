@@ -53,81 +53,6 @@ body.portal-docentes-apoyo-2027 .apoyo-banner-icon {
   opacity: .7;
   flex: 0 0 auto;
 }
-body.portal-docentes-apoyo-2027 .apoyo-home-title {
-  font-size: clamp(17px, 2vw, 23px);
-  color: #173e6d;
-  margin: 29px 0 17px;
-}
-body.portal-docentes-apoyo-2027 .apoyo-quick-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 16px;
-}
-body.portal-docentes-apoyo-2027 .apoyo-quick-card {
-  width: 100%;
-  display: flex;
-  align-items: center;
-  gap: 15px;
-  min-height: 120px;
-  padding: 20px;
-  border: 1px solid #dde8f3;
-  background: #fff;
-  border-radius: 14px;
-  box-shadow: 0 8px 24px rgba(11, 35, 70, .045);
-  color: #193f6b;
-  text-align: left;
-  cursor: pointer;
-  font: inherit;
-  transition: border-color .16s, box-shadow .16s, transform .16s;
-}
-body.portal-docentes-apoyo-2027 .apoyo-quick-card:hover,
-body.portal-docentes-apoyo-2027 .apoyo-quick-card:focus-visible {
-  border-color: #87b2dc;
-  box-shadow: 0 12px 28px rgba(11, 35, 70, .10);
-  transform: translateY(-1px);
-}
-body.portal-docentes-apoyo-2027 .apoyo-quick-card:focus-visible,
-body.portal-docentes-apoyo-2027 .nav-item:focus-visible {
-  outline: 3px solid #86bae9;
-  outline-offset: 2px;
-}
-body.portal-docentes-apoyo-2027 .apoyo-quick-card:disabled {
-  opacity: .6;
-  cursor: wait;
-}
-body.portal-docentes-apoyo-2027 .apoyo-card-icon {
-  display: grid;
-  place-items: center;
-  width: 49px;
-  height: 49px;
-  flex: 0 0 49px;
-  background: #ebf4fd;
-  color: #1f659d;
-  border-radius: 12px;
-  font-size: 19px;
-}
-body.portal-docentes-apoyo-2027 .apoyo-quick-card > span:nth-child(2) {
-  flex: 1 1 auto;
-  min-width: 0;
-}
-body.portal-docentes-apoyo-2027 .apoyo-quick-card strong {
-  display: block;
-  color: #123a68;
-  font-size: 15px;
-  line-height: 1.4;
-}
-body.portal-docentes-apoyo-2027 .apoyo-quick-card small {
-  display: block;
-  color: #617f9c;
-  font-size: 12px;
-  line-height: 1.55;
-  margin-top: 7px;
-}
-body.portal-docentes-apoyo-2027 .apoyo-card-arrow {
-  flex: 0 0 auto;
-  color: #97adc1;
-  font-size: 12px;
-}
 body.portal-docentes-apoyo-2027 .apoyo-notice {
   display: flex;
   align-items: start;
@@ -239,11 +164,6 @@ body.portal-docentes-apoyo-2027 .apoyo-panel a {
 body.portal-docentes-apoyo-2027 .portal-footer {
   flex-wrap: wrap;
 }
-@media (max-width: 950px) {
-  body.portal-docentes-apoyo-2027 .apoyo-quick-grid {
-    grid-template-columns: 1fr;
-  }
-}
 @media (max-width: 770px) {
   body.portal-docentes-apoyo-2027 .topbar .crumb {
     display: none;
@@ -256,15 +176,6 @@ body.portal-docentes-apoyo-2027 .portal-footer {
   }
   body.portal-docentes-apoyo-2027 .dash-banner {
     padding: 26px 20px;
-  }
-  body.portal-docentes-apoyo-2027 .apoyo-quick-card {
-    min-height: 101px;
-    padding: 15px;
-  }
-  body.portal-docentes-apoyo-2027 .apoyo-card-icon {
-    width: 44px;
-    height: 44px;
-    flex-basis: 44px;
   }
   body.portal-docentes-apoyo-2027 .apoyo-panel-header {
     align-items: stretch;

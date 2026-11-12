@@ -100,31 +100,11 @@
               </div>
               <div class="apoyo-banner-icon" aria-hidden="true"><i class="fa-solid fa-hands-holding-circle"></i></div>
             </div>
-            <h2 class="apoyo-home-title">Herramientas disponibles</h2>
-            <div class="apoyo-quick-grid">
-              <button class="apoyo-quick-card" type="button" data-abrir="panelInformesApoyo">
-                <span class="apoyo-card-icon"><i class="fa-solid fa-file-lines" aria-hidden="true"></i></span>
-                <span><strong>Informes Pedagógico-Didácticos</strong><small>Informes de los estudiantes que acompañás, en modo lectura.</small></span>
-                <i class="fa-solid fa-chevron-right apoyo-card-arrow" aria-hidden="true"></i>
-              </button>
-              <button class="apoyo-quick-card" type="button" id="btnGenerarPizarraHorarios">
-                <span class="apoyo-card-icon"><i class="fa-solid fa-table-cells-large" aria-hidden="true"></i></span>
-                <span><strong>Ver Horario Completo</strong><small>Pizarra de Aula, Taller y Educación Física.</small></span>
-                <i class="fa-solid fa-chevron-right apoyo-card-arrow" aria-hidden="true"></i>
-              </button>
-              <button class="apoyo-quick-card" type="button" data-abrir="panelAgendaApoyo">
-                <span class="apoyo-card-icon"><i class="fa-solid fa-address-book" aria-hidden="true"></i></span>
-                <span><strong>Agenda Institucional</strong><small>Contactos de la escuela y estudiantes a tu cargo.</small></span>
-                <i class="fa-solid fa-chevron-right apoyo-card-arrow" aria-hidden="true"></i>
-              </button>
-              <button class="apoyo-quick-card" type="button" data-abrir="panelAsistenciaApoyo">
-                <span class="apoyo-card-icon"><i class="fa-solid fa-chart-line" aria-hidden="true"></i></span>
-                <span><strong>Situación de Asistencia · Si.R.A.</strong><small>Información individual de asistencia, solo lectura.</small></span>
-                <i class="fa-solid fa-chevron-right apoyo-card-arrow" aria-hidden="true"></i>
-              </button>
-            </div>
             <div class="apoyo-notice"><i class="fa-solid fa-circle-info" aria-hidden="true"></i> Solo vas a poder consultar información de estudiantes vinculados a tu cuenta. Los horarios de la escuela pueden consultarse completos.</div>
           </div>
+
+          <!-- Activador para la pizarra desde el menú lateral; no visible en Inicio. -->
+          <button type="button" id="btnGenerarPizarraHorarios" hidden tabindex="-1" aria-hidden="true">Ver Horario Completo</button>
 
           <section class="apoyo-panel detalle" id="panelInformesApoyo" hidden aria-labelledby="tituloInformesApoyo">
             <div class="apoyo-panel-header">

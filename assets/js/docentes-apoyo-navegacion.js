@@ -67,14 +67,6 @@ enlaces.forEach(enlace => enlace.addEventListener("click", event => {
   event.preventDefault();
   navegar(enlace.dataset.vista);
 }));
-document.querySelectorAll("[data-abrir]").forEach(boton => boton.addEventListener("click", () => {
-  const destinos = {
-    panelInformesApoyo: "informes", panelAgendaApoyo: "agenda",
-    panelAsistenciaApoyo: "asistencia",
-  };
-  const destino = destinos[boton.dataset.abrir];
-  if (destino) navegar(destino);
-}));
 window.addEventListener("hashchange", () => {
   const nombre = location.hash.slice(1);
   mostrarVista(nombre === "pizarra" ? "inicio" : nombre);
