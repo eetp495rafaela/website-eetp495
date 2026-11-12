@@ -33,6 +33,7 @@
     />
     <link rel="stylesheet" href="../vista-2027/assets/css/portal-maqueta.css" />
     <link rel="stylesheet" href="../assets/css/portales/soporte-2027.css?v=37" />
+    <link rel="stylesheet" href="../assets/css/portales/docentes-apoyo-admin.css?v=1" />
     <link rel="stylesheet" href="../assets/css/docentes-libres-taller-pdf.css?v=35" />
     <link
       rel="stylesheet"
@@ -903,6 +904,27 @@
           </div>
           <section class="grupo seccion-destino p27-pane" id="usuarios">
             <h2>Usuarios</h2>
+            <details id="gestionDocentesApoyo" class="panel-info" style="margin:16px 0">
+              <summary style="cursor:pointer;font-weight:800;color:#123a61">Asignaciones de Docentes de Apoyo</summary>
+              <p>Vinculá cada docente de apoyo con sus estudiantes. Los cambios de curso del estudiante no eliminan el vínculo. Los permisos de informes y Si.R.A. deben sincronizarse en el servidor.</p>
+              <div class="form-grid">
+                <div class="campo-formulario">
+                  <label for="docenteApoyoAdmin">Docente de Apoyo</label>
+                  <select id="docenteApoyoAdmin"><option value="">Seleccionar docente</option></select>
+                </div>
+                <div class="campo-formulario">
+                  <label for="cursoApoyoAdmin">Filtrar estudiantes por curso</label>
+                  <select id="cursoApoyoAdmin" disabled><option value="">Todos los cursos</option></select>
+                </div>
+              </div>
+              <div id="estudiantesApoyoAdmin" aria-live="polite" style="max-height:330px;overflow:auto;padding:12px;border:1px solid #dbe4ee;border-radius:10px;margin:12px 0">
+                <p>Seleccioná un docente para comenzar.</p>
+              </div>
+              <button class="btn-accion" id="btnGuardarApoyoAdmin" type="button" disabled>
+                <i class="fa-solid fa-floppy-disk"></i> Guardar vínculos
+              </button>
+              <p id="mensajeApoyoAdmin" class="mensaje-formulario" role="status" aria-live="polite"></p>
+            </details>
             <div class="panel-info">
               <p>
                 Registrá aquí las cuentas autorizadas para ingresar al Portal
@@ -951,6 +973,7 @@
                       <option value="">Seleccionar rol principal</option>
                       <option value="ALUMNO">ALUMNO</option>
                       <option value="DOCENTE">DOCENTE</option>
+                      <option value="DOCENTE_APOYO">DOCENTE DE APOYO</option>
                       <option value="SOPORTE">SOPORTE</option>
                       <option value="PRECEPTORIA">PRECEPTORÍA</option>
                       <option value="SECRETARIA">SECRETARÍA</option>
@@ -973,6 +996,7 @@
                       <option value="REEMPLAZANTE">Reemplazante</option>
                       <option value="CURSANDO">Cursando</option>
                       <option value="CURSADA_COMPLETA">Cursada Completa</option>
+                      <option value="APOYO_EXTERNO">Docente de Apoyo</option>
                     </select>
                   </div>
                   <div class="campo-formulario">
@@ -1101,6 +1125,7 @@
                     <option value="">Todos los roles</option>
                     <option value="ALUMNO">ALUMNO</option>
                     <option value="DOCENTE">DOCENTE</option>
+                      <option value="DOCENTE_APOYO">DOCENTE DE APOYO</option>
                     <option value="SOPORTE">SOPORTE</option>
                     <option value="PRECEPTORIA">PRECEPTORÍA</option>
                     <option value="SECRETARIA">SECRETARÍA</option>
@@ -4300,6 +4325,7 @@
               <select id="editarRol" required="">
                 <option value="ALUMNO">ALUMNO</option>
                 <option value="DOCENTE">DOCENTE</option>
+                      <option value="DOCENTE_APOYO">DOCENTE DE APOYO</option>
                 <option value="SOPORTE">SOPORTE</option>
                 <option value="PRECEPTORIA">PRECEPTORÍA</option>
                 <option value="SECRETARIA">SECRETARÍA</option>
@@ -4380,6 +4406,7 @@
                 <option value="REEMPLAZANTE">Reemplazante</option>
                 <option value="CURSANDO">Cursando</option>
                 <option value="CURSADA_COMPLETA">Cursada Completa</option>
+                      <option value="APOYO_EXTERNO">Docente de Apoyo</option>
                 <option value="EGRESADO">Egresado</option>
               </select>
             </div>
@@ -4631,6 +4658,7 @@
       </svg>
     </a>
 
+    <script src="../assets/js/docentes-apoyo-admin.js" type="module"></script>
     <script src="../assets/js/portales/soporte-2027.js" defer></script>
     <script
       src="../assets/js/proteger-portal.js?v=20260831-appcheck1"

@@ -712,7 +712,7 @@ function actualizarSelectorRolesAdicionales() {
     .trim()
     .toUpperCase();
 
-  const esAlumno = rolPrincipal === "ALUMNO";
+  const esAlumno = ["ALUMNO", "DOCENTE_APOYO"].includes(rolPrincipal);
 
   checksRolesAdicionalesUsuario.forEach((checkbox) => {
     const rolCheckbox = String(checkbox.value || "")
@@ -758,7 +758,7 @@ function actualizarSelectorRolesEdicion() {
 
   const esMiCuenta = Boolean(correoEditado) && correoEditado === correoActual;
 
-  const esAlumno = rolPrincipal === "ALUMNO";
+  const esAlumno = ["ALUMNO", "DOCENTE_APOYO"].includes(rolPrincipal);
 
   checksEditarRolesAdicionales.forEach((checkbox) => {
     const rolCheckbox = String(checkbox.value || "")
@@ -4525,6 +4525,7 @@ async function registrarUsuario(event) {
     "REEMPLAZANTE",
     "CURSANDO",
     "CURSADA_COMPLETA",
+    "APOYO_EXTERNO",
   ];
 
   if (!situacionesRevistaValidas.includes(tipoVinculo)) {
@@ -4534,10 +4535,15 @@ async function registrarUsuario(event) {
     );
     return;
   }
+  if ((rol === "DOCENTE_APOYO") !== (tipoVinculo === "APOYO_EXTERNO")) {
+    mostrarMensajeRegistro("La situación Docente de Apoyo corresponde únicamente al rol DOCENTE DE APOYO.", "error");
+    return;
+  }
   if (
     ![
       "ALUMNO",
       "DOCENTE",
+      "DOCENTE_APOYO",
       "SOPORTE",
       "PRECEPTORIA",
       "SECRETARIA",
@@ -4784,8 +4790,8 @@ async function guardarEdicionUsuario(event) {
     );
 
   const rolesSeleccionados =
-    rol === "ALUMNO"
-      ? ["ALUMNO"]
+    ["ALUMNO", "DOCENTE_APOYO"].includes(rol)
+      ? [rol]
       : Array.from(new Set([rol, ...rolesAdicionales]));
 
   const rolesActuales = obtenerRolesUsuarioAdmin(usuarioEnEdicion);
@@ -4805,6 +4811,7 @@ async function guardarEdicionUsuario(event) {
     "CURSANDO",
     "CURSADA_COMPLETA",
     "EGRESADO",
+    "APOYO_EXTERNO",
   ];
 
   if (!situacionesRevistaValidas.includes(tipoVinculo)) {
@@ -4812,6 +4819,10 @@ async function guardarEdicionUsuario(event) {
       "Seleccioná una Situación de Revista válida.",
       "error",
     );
+    return;
+  }
+  if ((rol === "DOCENTE_APOYO") !== (tipoVinculo === "APOYO_EXTERNO")) {
+    mostrarMensajeEdicion("La situación Docente de Apoyo corresponde únicamente al rol DOCENTE DE APOYO.", "error");
     return;
   }
 
@@ -4837,6 +4848,7 @@ async function guardarEdicionUsuario(event) {
     ![
       "ALUMNO",
       "DOCENTE",
+      "DOCENTE_APOYO",
       "SOPORTE",
       "PRECEPTORIA",
       "SECRETARIA",
@@ -4851,6 +4863,7 @@ async function guardarEdicionUsuario(event) {
   const rolesValidos = [
     "ALUMNO",
     "DOCENTE",
+    "DOCENTE_APOYO",
     "SOPORTE",
     "PRECEPTORIA",
     "SECRETARIA",
@@ -4870,7 +4883,7 @@ async function guardarEdicionUsuario(event) {
     return;
   }
 
-  if (rolesSeleccionados.includes("ALUMNO") && rolesSeleccionados.length > 1) {
+  if (rolesSeleccionados.some(r => ["ALUMNO", "DOCENTE_APOYO"].includes(r)) && rolesSeleccionados.length > 1) {
     mostrarMensajeEdicion(
       "El rol ALUMNO no puede combinarse con otros roles.",
       "error",
@@ -5650,6 +5663,7 @@ function validarFilasImportacionUsuarios(filas) {
   const rolesValidos = [
     "ALUMNO",
     "DOCENTE",
+    "DOCENTE_APOYO",
     "SOPORTE",
     "PRECEPTORIA",
     "ASISTENTE_ADMINISTRATIVO",
@@ -5663,6 +5677,7 @@ function validarFilasImportacionUsuarios(filas) {
     "REEMPLAZANTE",
     "CURSANDO",
     "CURSADA_COMPLETA",
+    "APOYO_EXTERNO",
   ];
 
   const encabezadosArchivo = Object.keys(filas[0] || {});
@@ -5753,6 +5768,9 @@ function validarFilasImportacionUsuarios(filas) {
 
     if (!situacionesValidas.includes(situacionRevista)) {
       erroresFila.push("la situación de revista no es válida");
+    }
+    if ((rol === "DOCENTE_APOYO") !== (situacionRevista === "APOYO_EXTERNO")) {
+      erroresFila.push("el rol Docente de Apoyo requiere la situación APOYO_EXTERNO");
     }
 
     if (fechaFinalizacion && !/^\d{4}-\d{2}-\d{2}$/.test(fechaFinalizacion)) {

@@ -1,0 +1,12 @@
+{
+  "private": true,
+  "name": "eetp495-pruebas-reglas-apoyo",
+  "version": "1.0.0",
+  "scripts": {
+    "test": "node docentes-apoyo.rules.test.cjs"
+  },
+  "dependencies": {
+    "@firebase/rules-unit-testing": "6.0.0",
+    "firebase": "13.2.0"
+  }
+}

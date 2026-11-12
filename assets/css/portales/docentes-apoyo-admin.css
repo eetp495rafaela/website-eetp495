@@ -1,0 +1,167 @@
+/* Confirmación de asignaciones de Docentes de Apoyo · Portal Soporte */
+.swal2-popup.apoyo-confirmacion-modal {
+  font-family:"Nunito Sans",system-ui,sans-serif;
+  border:1px solid #e0e9f4;
+  border-radius:20px;
+  padding:28px 25px 24px;
+  box-shadow:0 24px 75px rgba(10,31,67,.22);
+  color:#183d67;
+}
+.apoyo-confirmacion-modal .swal2-title {
+  color:#123a68;
+  font-size:clamp(20px,2vw,25px);
+  font-weight:850;
+  letter-spacing:-.025em;
+  margin:12px 5px 0;
+}
+.apoyo-confirmacion-modal .swal2-icon.swal2-question {
+  border-color:#bcd7ee;
+  color:#1b5a99;
+}
+.apoyo-confirmacion-modal .swal2-icon.swal2-info {
+  border-color:#bcd7ee;
+  color:#1b5a99;
+}
+.apoyo-confirmacion-modal .swal2-html-container {
+  margin:18px 0 0;
+  font-size:13px;
+  color:#4c6785;
+}
+.apoyo-conf-contenido {
+  text-align:left;
+}
+.apoyo-conf-docente {
+  margin:0 0 13px;
+  display:flex;
+  flex-wrap:wrap;
+  gap:5px 9px;
+  font-size:12px;
+  color:#54718f;
+}
+.apoyo-conf-docente strong {
+  color:#183d68;
+  font-size:13px;
+}
+.apoyo-conf-descripcion {
+  line-height:1.65;
+  margin:0 0 17px;
+}
+.apoyo-conf-grupo {
+  border:1px solid #dbe8f3;
+  border-radius:12px;
+  margin:11px 0;
+  background:#f8fbff;
+  overflow:hidden;
+}
+.apoyo-conf-bajas {
+  border-color:#efcfd2;
+  background:#fff9f9;
+}
+.apoyo-conf-grupo-titulo {
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:10px;
+  padding:12px 14px;
+  border-bottom:1px solid #e2eaf5;
+  font-size:12px;
+  color:#194a7c;
+}
+.apoyo-conf-bajas .apoyo-conf-grupo-titulo {
+  border-bottom-color:#f1dfe1;
+  color:#9e3340;
+}
+.apoyo-conf-grupo-titulo span {
+  background:#e0ecf8;
+  border-radius:20px;
+  padding:2px 10px;
+  font-variant-numeric:tabular-nums;
+  font-weight:800;
+}
+.apoyo-conf-bajas .apoyo-conf-grupo-titulo span {
+  background:#fae7e8;
+}
+.apoyo-conf-grupo ul {
+  padding:10px 20px 12px 35px;
+  margin:0;
+  max-height:160px;
+  overflow-y:auto;
+  font-size:12px;
+  line-height:1.9;
+}
+.apoyo-conf-restantes {
+  color:#7790a8;
+  font-style:italic;
+}
+.apoyo-conf-sin-cambios {
+  background:#f0f6fc;
+  border:1px solid #dbe7f3;
+  border-radius:12px;
+  padding:16px;
+  line-height:1.5;
+  color:#255887;
+}
+.apoyo-conf-sin-cambios i {
+  margin-right:8px;
+}
+.apoyo-conf-aviso {
+  display:flex;
+  align-items:baseline;
+  gap:8px;
+  background:#eff6fc;
+  border-radius:10px;
+  padding:11px 12px;
+  font-size:11px;
+  line-height:1.6;
+  margin:17px 0 0;
+  color:#477197;
+}
+.apoyo-conf-aviso i {
+  flex:none;
+}
+.apoyo-conf-acciones {
+  display:flex !important;
+  align-items:center;
+  justify-content:flex-end;
+  gap:10px;
+  margin:22px 0 0 !important;
+}
+.apoyo-conf-aceptar,
+.apoyo-conf-cancelar {
+  border:0;
+  border-radius:11px;
+  padding:12px 19px;
+  min-height:43px;
+  font-family:inherit;
+  font-size:12px;
+  font-weight:800;
+  cursor:pointer;
+  transition:background .15s,transform .15s;
+}
+.apoyo-conf-aceptar {
+  color:#fff;
+  background:#0e447f;
+}
+.apoyo-conf-aceptar:hover { background:#0a335f; }
+.apoyo-conf-cancelar {
+  color:#4f6781;
+  background:#eaf0f6;
+}
+.apoyo-conf-cancelar:hover { background:#dce6f0; }
+.apoyo-conf-aceptar:focus-visible,
+.apoyo-conf-cancelar:focus-visible {
+  outline:3px solid #83b4e0;
+  outline-offset:3px;
+}
+@media (max-width:600px) {
+  .swal2-popup.apoyo-confirmacion-modal {
+    padding:18px 15px 18px;
+  }
+  .apoyo-conf-acciones {
+    width:100%;
+    flex-direction:column-reverse;
+    align-items:stretch;
+  }
+  .apoyo-conf-aceptar,
+  .apoyo-conf-cancelar {width:100%;margin:0 !important;}
+}

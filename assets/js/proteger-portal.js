@@ -70,6 +70,7 @@ const CLAVE_ROL_ACTIVO = "rolActivoPortal";
 const ROLES_VALIDOS = new Set([
   "ALUMNO",
   "DOCENTE",
+  "DOCENTE_APOYO",
   "SOPORTE",
   "PRECEPTORIA",
   "SECRETARIA",
@@ -466,6 +467,7 @@ function mostrarDatosUsuario(perfil, user, correo, rolUsuario) {
   const rolesLegibles = {
     ALUMNO: "Estudiante",
     DOCENTE: "Docente",
+    DOCENTE_APOYO: "Docente de Apoyo",
     SOPORTE: "Soporte Institucional",
     PRECEPTORIA: "Preceptoría",
     SECRETARIA: "Secretaría",
@@ -716,7 +718,10 @@ onAuthStateChanged(auth, async (user) => {
      * El rol ALUMNO es exclusivo y no puede combinarse
      * con ningún otro rol institucional.
      */
-    if (rolesUsuario.includes("ALUMNO") && rolesUsuario.length > 1) {
+    if (
+      rolesUsuario.some((rol) => ["ALUMNO", "DOCENTE_APOYO"].includes(rol)) &&
+      rolesUsuario.length > 1
+    ) {
       await signOut(auth);
 
       volverAlLogin("La configuración de roles de esta cuenta no es válida.");
