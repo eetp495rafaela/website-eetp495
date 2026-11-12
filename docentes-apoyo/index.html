@@ -1,92 +1,162 @@
 <!doctype html>
 <html lang="es-AR">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="robots" content="noindex,nofollow">
-  <title>Docente de Apoyo | E.E.T.P. N° 495</title>
-  <link rel="icon" href="../vista-2027/assets/img/logo.webp" type="image/webp">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
-  <style>
-    :root { color-scheme: light; --azul:#11345a; --fondo:#f3f7fc; --borde:#dbe4ee; --verde:#147a6a; }
-    * { box-sizing:border-box; }
-    body { margin:0; background:var(--fondo); color:#1b3047; font:16px/1.55 system-ui,-apple-system,Segoe UI,sans-serif; }
-    header { background:var(--azul); color:white; padding:18px max(18px,calc((100vw - 1100px)/2)); display:flex; align-items:center; gap:15px; }
-    header img { width:42px; height:53px; object-fit:contain; }
-    header h1 { margin:0; font-size:1.2rem; line-height:1.25; }
-    header small { display:block; opacity:.85; }
-    header .salir { margin-left:auto; border:1px solid #a2bcd7; color:white; background:transparent; padding:9px 13px; border-radius:9px; cursor:pointer; }
-    main { max-width:1100px; margin:auto; padding:26px 18px 60px; }
-    h2 { margin:0 0 8px; color:var(--azul); font-size:1.65rem; }
-    .intro { color:#52718c; margin:0 0 18px; }
-    .tarjetas { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px; }
-    .tarjeta { display:block; text-align:left; width:100%; border:1px solid var(--borde); border-radius:14px; padding:20px; background:white; color:var(--azul); box-shadow:0 5px 17px #153b6010; cursor:pointer; }
-    .tarjeta i { font-size:23px; color:var(--verde); margin-right:10px; }
-    .tarjeta strong { font-size:1.06rem; }
-    .tarjeta span { display:block; font-size:.9rem; color:#5a7288; margin-top:8px; }
-    .tarjeta:hover,.tarjeta:focus-visible { outline:2px solid #4aa294; outline-offset:1px; }
-    section.detalle { background:white; margin-top:20px; padding:22px; border:1px solid var(--borde); border-radius:14px; }
-    section.detalle[hidden] { display:none; }
-    .barra { display:flex; gap:12px; align-items:center; justify-content:space-between; flex-wrap:wrap; }
-    .barra h3 { margin:0; font-size:1.25rem; color:var(--azul); }
-    button.accion { border:0; border-radius:9px; color:white; background:var(--azul); padding:9px 15px; cursor:pointer; }
-    button.accion:disabled { opacity:.6; cursor:not-allowed; }
-    .mensaje { color:#56718a; font-size:.95rem; }
-    .error { color:#a51d31; }
-    .tabla { overflow-x:auto; }
-    table { border-collapse:collapse; min-width:580px; width:100%; }
-    th,td { padding:10px; border-bottom:1px solid var(--borde); text-align:left; vertical-align:top; }
-    th { background:#edf3f9; }
-    a { color:#125d90; }
-    .oculto { display:none!important; }
-    @media(max-width:640px) { .tarjetas { grid-template-columns:1fr; } header { padding:12px 16px; } header h1 { font-size:1rem; } main { padding:18px 12px 40px; } section.detalle { padding:14px; } }
-  </style>
-</head>
-<body data-rol-permitido="DOCENTE_APOYO">
-  <header>
-    <img src="../vista-2027/assets/img/logo.webp" alt="Escudo E.E.T.P. N° 495">
-    <div><h1>E.E.T.P. N° 495</h1><small>Portal Docente de Apoyo</small></div>
-    <button id="btnCerrarSesionPortal" class="salir" type="button"><i class="fa-solid fa-right-from-bracket"></i> Salir</button>
-  </header>
-  <main>
-    <h2>Herramientas de consulta</h2>
-    <p class="intro" id="bienvenidaApoyo">Verificando tu cuenta...</p>
-    <div class="tarjetas">
-      <button class="tarjeta" type="button" data-abrir="panelInformesApoyo">
-        <i class="fa-solid fa-file-lines"></i><strong>Informes Pedagógico-Didácticos</strong>
-        <span>Informes de los estudiantes que acompañás, en modo lectura.</span>
-      </button>
-      <button class="tarjeta" id="btnGenerarPizarraHorarios" type="button">
-        <i class="fa-solid fa-table-cells-large"></i><strong>Ver Horario Completo</strong>
-        <span>Pizarra completa de la escuela: Aula, Taller y Educación Física.</span>
-      </button>
-      <button class="tarjeta" type="button" data-abrir="panelAgendaApoyo">
-        <i class="fa-solid fa-address-book"></i><strong>Agenda Institucional</strong>
-        <span>Contactos institucionales y estudiantes a tu cargo.</span>
-      </button>
-      <button class="tarjeta" type="button" data-abrir="panelAsistenciaApoyo">
-        <i class="fa-solid fa-chart-line"></i><strong>Situación de Asistencia · Si.R.A.</strong>
-        <span>Consulta individual de asistencia de los estudiantes que acompañás.</span>
-      </button>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="theme-color" content="#0b2346" />
+    <meta name="robots" content="noindex,nofollow" />
+    <title>Portal Docentes de Apoyo | E.E.T.P. N° 495</title>
+    <link rel="icon" href="../vista-2027/assets/img/logo.webp" type="image/webp" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;600;700;800&amp;display=swap" />
+    <link rel="stylesheet" href="../vista-2027/assets/css/portal-maqueta.css" />
+    <link rel="stylesheet" href="../assets/css/portales/docentes-2027.css?v=36" />
+    <link rel="stylesheet" href="../assets/css/portales/identidad-institucional-2027.css?v=16" />
+    <link rel="stylesheet" href="../assets/css/portales/docentes-apoyo-2027.css?v=1" />
+  </head>
+  <body class="portal-docentes-2027 portal-docentes-apoyo-2027" data-rol-permitido="DOCENTE_APOYO">
+    <a class="skip" href="#inicio">Saltar al contenido</a>
+    <div class="demo-ribbon">
+      <span>PORTAL INSTITUCIONAL · E.E.T.P. N° 495</span>
+      <a href="../index.html"><i class="fa-solid fa-arrow-up-right-from-square" aria-hidden="true"></i> Volver al sitio público</a>
     </div>
-    <section class="detalle" id="panelInformesApoyo" hidden>
-      <div class="barra"><h3>Informes Pedagógico-Didácticos</h3><button class="accion" type="button" id="btnCargarInformesApoyo">Consultar informes</button></div>
-      <p class="mensaje">Solo documentos compartidos con vos por la institución.</p>
-      <div id="resultadoInformesApoyo" aria-live="polite"></div>
-    </section>
-    <section class="detalle" id="panelAgendaApoyo" hidden>
-      <div class="barra"><h3>Agenda Institucional</h3><button class="accion" type="button" id="btnCargarAgendaApoyo">Consultar contactos</button></div>
-      <div id="resultadoAgendaApoyo" aria-live="polite"></div>
-    </section>
-    <section class="detalle" id="panelAsistenciaApoyo" hidden>
-      <div class="barra"><h3>Situación de Asistencia · Si.R.A.</h3><button class="accion" type="button" id="btnCargarAsistenciaApoyo">Consultar asistencia</button></div>
-      <p class="mensaje">Solo estudiantes a tu cargo, sin permisos para modificar registros.</p>
-      <div id="resultadoAsistenciaApoyo" aria-live="polite"></div>
-    </section>
-  </main>
-  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-  <script type="module" src="../assets/js/proteger-portal.js"></script>
-  <script type="module" src="../assets/js/pizarra-horarios-admin.js"></script>
-  <script type="module" src="../assets/js/docentes-apoyo.js"></script>
-</body>
+    <div class="portal-shell">
+      <aside class="sidebar" id="sidebar" aria-label="Menú Docentes de Apoyo">
+        <div class="side-brand">
+          <img src="../vista-2027/assets/img/logo.webp" alt="Escudo de la escuela" width="42" height="53" />
+          <div><strong>E.E.T.P. N° 495</strong><small>Malvinas Argentinas</small></div>
+        </div>
+        <div class="side-intro">
+          <span class="side-kicker">Acompañamiento pedagógico</span>
+          <h2>Portal Docentes de Apoyo</h2>
+          <span class="mini-chip">Herramientas de consulta</span>
+        </div>
+        <label class="sidebar-search">
+          <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+          <input id="module-search" type="search" placeholder="Buscar herramienta…" autocomplete="off" aria-label="Buscar herramienta" />
+        </label>
+        <nav class="side-nav" id="side-nav" aria-label="Herramientas del portal">
+          <a href="#inicio" class="nav-item is-active" data-vista="inicio" aria-current="page">
+            <span class="mini-icon"><i class="fa-solid fa-house" aria-hidden="true"></i></span><span>Inicio</span>
+          </a>
+          <div class="nav-section">
+            <div class="nav-group"><span>Consultas autorizadas</span></div>
+            <div class="nav-items">
+              <a href="#informes" class="nav-item" data-vista="informes">
+                <span class="mini-icon"><i class="fa-solid fa-file-lines" aria-hidden="true"></i></span><span>Informes Pedagógico-Didácticos</span>
+              </a>
+              <a href="#pizarra" class="nav-item" data-vista="pizarra">
+                <span class="mini-icon"><i class="fa-solid fa-table-cells-large" aria-hidden="true"></i></span><span>Ver Horario Completo</span>
+              </a>
+              <a href="#agenda" class="nav-item" data-vista="agenda">
+                <span class="mini-icon"><i class="fa-solid fa-address-book" aria-hidden="true"></i></span><span>Agenda Institucional</span>
+              </a>
+              <a href="#asistencia" class="nav-item" data-vista="asistencia">
+                <span class="mini-icon"><i class="fa-solid fa-chart-line" aria-hidden="true"></i></span><span>Situación de Asistencia · Si.R.A.</span>
+              </a>
+            </div>
+          </div>
+        </nav>
+        <div class="side-footer">
+          <a href="../index.html"><i class="fa-solid fa-arrow-up-right-from-square" aria-hidden="true"></i> Sitio público</a>
+        </div>
+      </aside>
+
+      <div class="sidebar-overlay" id="sidebar-overlay" aria-hidden="true"></div>
+
+      <div class="portal-content">
+        <header class="topbar">
+          <button type="button" class="circle-btn mobile-menu" id="sidebar-toggle" aria-label="Abrir menú" aria-controls="sidebar" aria-expanded="false">
+            <i class="fa-solid fa-bars" aria-hidden="true"></i>
+          </button>
+          <div class="crumb"><span>Portal Institucional</span><i class="fa-solid fa-chevron-right" aria-hidden="true"></i><strong id="breadcrumb-role">Docentes de Apoyo</strong></div>
+          <div class="topbar-spacer"></div>
+          <div class="user-identity">
+            <span data-nombre-usuario>Cargando usuario…</span>
+            <small data-rol-usuario>Docente de Apoyo</small>
+          </div>
+          <button type="button" class="exit-link" id="btnCerrarSesionPortal" title="Cerrar sesión">
+            <i class="fa-solid fa-right-from-bracket" aria-hidden="true"></i><span>Cerrar sesión</span>
+          </button>
+        </header>
+
+        <main class="contenedor" id="inicio" tabindex="-1">
+          <div class="work-topline">
+            <div>
+              <div class="overline">Acompañamiento pedagógico</div>
+              <h1 id="view-title">Bienvenido a tu espacio institucional</h1>
+              <p id="view-description">Elegí una opción del menú lateral para consultar la información que tenés autorizada.</p>
+            </div>
+            <div class="role-mark"><i class="fa-solid fa-shield-halved" aria-hidden="true"></i> Portal Docentes de Apoyo</div>
+          </div>
+
+          <div id="home-panel" class="p27-home">
+            <div class="dash-banner">
+              <div>
+                <div class="banner-kicker">TU ESPACIO INSTITUCIONAL</div>
+                <h2>Acompañar, consultar y estar al día.</h2>
+                <p id="bienvenidaApoyo">Verificando tu cuenta…</p>
+              </div>
+              <div class="apoyo-banner-icon" aria-hidden="true"><i class="fa-solid fa-hands-holding-circle"></i></div>
+            </div>
+            <h2 class="apoyo-home-title">Herramientas disponibles</h2>
+            <div class="apoyo-quick-grid">
+              <button class="apoyo-quick-card" type="button" data-abrir="panelInformesApoyo">
+                <span class="apoyo-card-icon"><i class="fa-solid fa-file-lines" aria-hidden="true"></i></span>
+                <span><strong>Informes Pedagógico-Didácticos</strong><small>Informes de los estudiantes que acompañás, en modo lectura.</small></span>
+                <i class="fa-solid fa-chevron-right apoyo-card-arrow" aria-hidden="true"></i>
+              </button>
+              <button class="apoyo-quick-card" type="button" id="btnGenerarPizarraHorarios">
+                <span class="apoyo-card-icon"><i class="fa-solid fa-table-cells-large" aria-hidden="true"></i></span>
+                <span><strong>Ver Horario Completo</strong><small>Pizarra de Aula, Taller y Educación Física.</small></span>
+                <i class="fa-solid fa-chevron-right apoyo-card-arrow" aria-hidden="true"></i>
+              </button>
+              <button class="apoyo-quick-card" type="button" data-abrir="panelAgendaApoyo">
+                <span class="apoyo-card-icon"><i class="fa-solid fa-address-book" aria-hidden="true"></i></span>
+                <span><strong>Agenda Institucional</strong><small>Contactos de la escuela y estudiantes a tu cargo.</small></span>
+                <i class="fa-solid fa-chevron-right apoyo-card-arrow" aria-hidden="true"></i>
+              </button>
+              <button class="apoyo-quick-card" type="button" data-abrir="panelAsistenciaApoyo">
+                <span class="apoyo-card-icon"><i class="fa-solid fa-chart-line" aria-hidden="true"></i></span>
+                <span><strong>Situación de Asistencia · Si.R.A.</strong><small>Información individual de asistencia, solo lectura.</small></span>
+                <i class="fa-solid fa-chevron-right apoyo-card-arrow" aria-hidden="true"></i>
+              </button>
+            </div>
+            <div class="apoyo-notice"><i class="fa-solid fa-circle-info" aria-hidden="true"></i> Solo vas a poder consultar información de estudiantes vinculados a tu cuenta. Los horarios de la escuela pueden consultarse completos.</div>
+          </div>
+
+          <section class="apoyo-panel detalle" id="panelInformesApoyo" hidden aria-labelledby="tituloInformesApoyo">
+            <div class="apoyo-panel-header">
+              <div><h2 id="tituloInformesApoyo">Informes Pedagógico-Didácticos</h2><p>Informes de tus estudiantes vinculados, en modo lectura.</p></div>
+              <button class="apoyo-action" type="button" id="btnCargarInformesApoyo"><i class="fa-solid fa-rotate-right" aria-hidden="true"></i> Consultar informes</button>
+            </div>
+            <div id="resultadoInformesApoyo" aria-live="polite"></div>
+          </section>
+
+          <section class="apoyo-panel detalle" id="panelAgendaApoyo" hidden aria-labelledby="tituloAgendaApoyo">
+            <div class="apoyo-panel-header">
+              <div><h2 id="tituloAgendaApoyo">Agenda Institucional</h2><p>Estudiantes a tu cargo, colegas relacionados y referentes institucionales.</p></div>
+              <button class="apoyo-action" type="button" id="btnCargarAgendaApoyo"><i class="fa-solid fa-rotate-right" aria-hidden="true"></i> Consultar contactos</button>
+            </div>
+            <div id="resultadoAgendaApoyo" aria-live="polite"></div>
+          </section>
+
+          <section class="apoyo-panel detalle" id="panelAsistenciaApoyo" hidden aria-labelledby="tituloAsistenciaApoyo">
+            <div class="apoyo-panel-header">
+              <div><h2 id="tituloAsistenciaApoyo">Situación de Asistencia · Si.R.A.</h2><p>Datos exclusivamente de estudiantes a tu cargo, sin acceso a registros completos del curso.</p></div>
+              <button class="apoyo-action" type="button" id="btnCargarAsistenciaApoyo"><i class="fa-solid fa-rotate-right" aria-hidden="true"></i> Consultar asistencia</button>
+            </div>
+            <div id="resultadoAsistenciaApoyo" aria-live="polite"></div>
+          </section>
+        </main>
+        <footer class="portal-footer"><span>E.E.T.P. N° 495 · Malvinas Argentinas</span><span>Portal Institucional · Consulta autorizada</span></footer>
+      </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script type="module" src="../assets/js/proteger-portal.js"></script>
+    <script type="module" src="../assets/js/pizarra-horarios-admin.js"></script>
+    <script type="module" src="../assets/js/docentes-apoyo-navegacion.js"></script>
+    <script type="module" src="../assets/js/docentes-apoyo.js"></script>
+  </body>
 </html>

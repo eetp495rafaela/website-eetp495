@@ -111,11 +111,7 @@ async function cargarAgenda(){
   mostrar("resultadoAgendaApoyo",'<h4>Estudiantes a tu cargo</h4><ul>'+asignados+'</ul><h4>Mis colegas docentes</h4>'+tablaColegas+'<h4>Administración institucional</h4>'+(filas?'<div class="tabla"><table><thead><tr><th>Nombre</th><th>Cargo</th><th>Contacto</th></tr></thead><tbody>'+filas+"</tbody></table></div>":"<p class='mensaje'>Sin contactos disponibles.</p>"));
 }
 
-document.querySelectorAll("[data-abrir]").forEach(btn=>btn.addEventListener("click",()=>{
-  const objetivo=btn.dataset.abrir;
-  document.querySelectorAll("section.detalle").forEach(panel=>panel.hidden=panel.id!==objetivo);
-  document.getElementById(objetivo)?.scrollIntoView({behavior:"smooth",block:"start"});
-}));
+// La navegación y el menú lateral se gestionan en docentes-apoyo-navegacion.js.
 document.getElementById("btnCargarInformesApoyo")?.addEventListener("click",()=>ejecutarConBoton("btnCargarInformesApoyo",cargarInformes));
 document.getElementById("btnCargarAsistenciaApoyo")?.addEventListener("click",()=>ejecutarConBoton("btnCargarAsistenciaApoyo",cargarAsistencia));
 document.getElementById("btnCargarAgendaApoyo")?.addEventListener("click",()=>ejecutarConBoton("btnCargarAgendaApoyo",cargarAgenda));
