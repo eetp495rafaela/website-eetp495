@@ -58,6 +58,17 @@ async function main() {
       }
       await setDoc(doc(db,'horarios','activo'),{estado:'ACTIVO'});
       await setDoc(doc(db,'horarios','inactivo'),{estado:'INACTIVO'});
+      // Registro Si.R.A. válido para comprobar que DOCENTE y SOPORTE siguen operando.
+      const horarioDocente = {
+        estado:'ACTIVO',docenteCorreo:e.doc,tipoHorario:'TALLER',
+        cursoId:'1A',cursoAnio:1,cursoDivision:'A',cursoNombre:'1° A',
+        espacioId:'taller1',dia:'LUNES',horaInicio:'08:00',horaFin:'09:00',grupoTaller:'A'
+      };
+      await setDoc(doc(db,'horarios','horario_docente'),horarioDocente);
+      await setDoc(doc(db,'asistencias_clases','clase_docente'),{
+        ...horarioDocente,horarioId:'horario_docente',fecha:'2026-11-12',
+        estado:'ACTIVA',alumnos:[{correo:e.s1,estado:'PRESENTE'}]
+      });
       await setDoc(doc(db,'referentes_institucionales','activo'),{estado:'ACTIVO'});
       await setDoc(doc(db,'referentes_institucionales','inactivo'),{estado:'INACTIVO'});
       await setDoc(doc(db,'asistencias_clases','clase'),{
@@ -106,6 +117,12 @@ async function main() {
     await deny('Apoyo no lee asistencia de curso completa',getDoc(d(a,'asistencias_clases','clase')));
     await deny('Apoyo no edita asistencia de curso',updateDoc(d(a,'asistencias_clases','clase'),
       {estado:'INACTIVA'}));
+    await allow('Docente tradicional conserva lectura Si.R.A.',getDoc(d(teacher,'asistencias_clases','clase_docente')));
+    await allow('Docente tradicional conserva edición Si.R.A.',updateDoc(d(teacher,'asistencias_clases','clase_docente'),
+      {alumnos:[{correo:e.s1,estado:'AUSENTE'}]}));
+    await allow('Soporte conserva edición Si.R.A.',updateDoc(d(sop,'asistencias_clases','clase_docente'),
+      {marcaPrueba:'regresion'}));
+    await deny('Apoyo no accede al registro válido de Si.R.A.',getDoc(d(a,'asistencias_clases','clase_docente')));
     console.log('\nPRUEBAS SUPERADAS: '+count+' verificaciones.');
   } finally {
     await env.cleanup();
