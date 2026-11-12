@@ -1,43 +1,42 @@
-# Docentes de Apoyo — integración pendiente (2026-11-12)
+# Docentes de Apoyo — Integración 41
 
-**Estado: rama de desarrollo / no desplegar ni combinar con main.**
+**Fecha:** 12/11/2026  
+**Estado:** interfaz y backend preparados para producción; comprobaciones de seguridad pendientes registradas.  
+**Ámbito:** E.E.T.P. N° 495 · Portal Institucional 2027.
 
-## Funcionalidad acordada
-- Rol independiente `DOCENTE_APOYO`, sin heredar permisos de `DOCENTE` y sin asignaciones curriculares.
-- Vinculación `apoyos_estudiantes` por `docenteCorreo` + `alumnoCorreo`, independiente de curso; múltiples docentes y estudiantes.
-- Soporte asigna o desvincula; al desactivar usuario deben revocarse las autorizaciones de Drive.
-- Puede consultar: **informes de sus estudiantes**, **pizarra completa**, **agenda institucional** y **situación Si.R.A. solamente de sus estudiantes**. Ningún permiso de edición de asistencia.
-- Al cambiar de curso un estudiante conserva el vínculo y la visibilidad de sus informes mientras sigue vinculado.
+## Alcance implementado
 
-## Contrato obligatorio del backend de informes (Apps Script, código aún no incorporado)
-Ya se recibió el código real de la implementación que ofrece `listar_informes_docente`, `crear_informe_pedagogico`, `sincronizar_permisos_usuario` y `actualizar_docentes_informes_estudiante`.
+- Rol institucional exclusivo `DOCENTE_APOYO`. No hereda las funciones del rol `DOCENTE`.
+- Soporte registra cuentas y vincula estudiantes individualmente a docentes de apoyo, sin depender de su curso. El vínculo no se borra al cambiar de curso.
+- Portal propio `docentes-apoyo/index.html` con navegación lateral y cuatro consultas:
+  1. Informes Pedagógico-Didácticos de estudiantes vinculados (Google Docs con permiso `reader`).
+  2. Horario completo (pizarra institucional).
+  3. Agenda Institucional: **todos los docentes activos**, sus espacios curriculares y filtro por curso; referentes institucionales activos; estudiantes exclusivamente vinculados.
+  4. Situación de Asistencia (Si.R.A.) únicamente para los estudiantes vinculados, sin leer registros completos de los cursos.
+- Confirmación de vinculaciones en Soporte con modal institucional y resumen de incorporaciones/desvinculaciones.
+- Actualización de asignaciones y sincronización de permisos Drive a través del backend de Google Apps Script existente; nunca escribir `apoyos_estudiantes` directamente desde el navegador.
+- Reglas Firestore: lectura limitada de `apoyos_estudiantes` para su propietario o Soporte, denegación de escrituras del navegador; lectura de horarios y referentes activos; sin acceso amplio a `usuarios` ni `asistencias_clases`.
 
-Se preparó una versión ampliada del archivo `.gs` en el entorno de trabajo (NO incorporarla en este repositorio público ni desplegarla todavía). Debe superar validaciones reales antes de activar el rol. Implementación requerida:
+## Validaciones efectuadas
 
-1. `actualizar_vinculos_docente_apoyo`: validar ID token Firebase, `estado=ACTIVO`, rol principal `SOPORTE` y vigencia. Validar docente destino `DOCENTE_APOYO`, alumnos activos y pares ya vinculados; aceptar `agregar:[{alumnoCorreo,alumnoNombre}]` y `quitar:[alumnoCorreo]`. Crear/activar/desactivar documentos `apoyos_estudiantes`, revocar/compartir **todos** los Google Docs pertinentes y devolver `ok:true` solo cuando la sincronización sea consistente. **No confiar en los nombres ni cursos enviados por el navegador**; recuperar de Firestore.
-2. `listar_informes_docente_apoyo`: validar ID token y rol `DOCENTE_APOYO` activo; consultar desde el servidor exclusivamente sus vínculos `ACTIVO` y devolver solo informes de esos estudiantes, con `alumnoNombre`, `cursoNombre`, `fechaCreacion`, `driveUrl`. Nunca aceptar una lista de alumnos aportada por el cliente como fuente de autorización.
-3. `listar_agenda_docente_apoyo`: devolver únicamente colegas activos con asignaciones vigentes en los cursos de estudiantes vinculados (sin exponer la base de perfiles completa).
-4. `listar_situacion_asistencia_apoyo`: validar token y rol; resolver los estudiantes a cargo; leer registros de `asistencias_clases` en el servidor, calcular `presentes,ausentes,tardanzas,porcentaje` por estudiante y devolver **solo** filas autorizadas. Los documentos Si.R.A. incluyen registros de varios estudiantes: **no** habilitar lectura directa de `asistencias_clases` para el rol.
-5. Modificar la creación de informes de Dirección para agregar al compartir los Docentes de Apoyo vinculados. Modificar la sincronización de permisos por estudiante y por usuario para añadir/quitar correctamente docentes de apoyo, incluidos informes históricos.
-6. Al desactivar un `DOCENTE_APOYO` en Soporte, revocar de Drive las autorizaciones previas; reactivar no debe otorgar acceso salvo vínculos activos y cuenta vigente. Si cambia el responsable del estudiante, sincronizar inmediatamente.
-7. Si el estudiante cambia de curso, no alterar vínculos. Usar un identificador estable del alumno y de los registros Si.R.A., evitando identificar menores solo por nombres coincidentes.
-8. Asegurar que el backend rechace `idToken` omitido, inválido, expirado, de usuario desactivado o rol incorrecto en **todas** las operaciones.
+- 29 pruebas de reglas de Firestore con el emulador: permisos de lectura/escritura, roles, cuentas inactivas y aislamiento de Si.R.A.
+- El usuario verificó en el entorno local con una cuenta `DOCENTE_APOYO`: inicio de sesión, diseño y navegación, Agenda general con filtro por curso, lista de vínculos y apertura de un informe de estudiante en modo lectura.
+- El usuario verificó el funcionamiento habitual de Soporte, Gestión y Docentes después de desplegar las reglas.
+- Implementación de Google Apps Script actualizada **sobre la versión existente**, manteniendo URL. El código privado del backend NO está en este repositorio público.
 
-**Agenda:** el frontend consulta la lista depurada de colegas relacionados con los cursos a través del backend, además de referentes institucionales activos y estudiantes vinculados.
+## Observaciones pendientes — no marcar como superadas
 
-## Firestore
-Se añadió `match /apoyos_estudiantes/{vinculoId}`: lectura permitida solo a Soporte o al docente de apoyo activo propietario del vínculo (filtrado por correo + estado). La escritura desde clientes queda denegada; el Apps Script usa credenciales de servicio tras comprobar autorización.
-Se amplió lectura de `horarios` activos y `referentes_institucionales` activos para el nuevo rol, y **no** se amplió lectura de usuarios alumnos ni asistencia por curso.
+1. **HTTP 429:** una operación de resincronización respondió «No se pudo consultar el perfil institucional del usuario. Código 429». No se conoce todavía qué consulta agotó la cuota. La permanencia de los vínculos no prueba que todos los permisos Drive hayan quedado sincronizados. No reintentar repetidamente si reaparece.
+2. **Revocación efectiva:** realizar una prueba controlada de desvinculación y de desactivación de cuenta, verificando en Google Drive y con la cuenta afectada que el documento deja de abrirse, y que los permisos heredados o de grupo no mantienen acceso.
+3. **Acceso negativo real:** verificar que el docente no puede abrir informes de otro estudiante ni leer registros Si.R.A. de compañeros.
+4. **Cargas y cuota:** reducir consultas redundantes del Apps Script si el 429 se repite. No publicar claves privadas ni datos reales de estudiantes en bitácoras públicas.
 
-## Validaciones previas a fusionar
-- Comprobar reglas contra emulador de Firestore: rol activo, inactivo, no vinculado; denegaciones de lectura de otros estudiantes y Si.R.A., prohibición de escrituras.
-- Ensayar docente con 3 estudiantes de distintos cursos, dos docentes apoyando a alumnos del mismo curso y cambios de curso.
-- Comprobar con cuenta de prueba que informes/Drive solo se comparten con titulares de vínculo activo y se revocan al quitar o dar de baja.
-- Comprobar Si.R.A. a través del backend sin permitir leer registros de compañeros.
-- Probar alta, edición, desactivación, reactivación y flujos sin cambios.
-- Confirmar que docentes habituales, Dirección, Soporte, estudiantes, SIRA y Galería no sufren regresiones.
-- Crear versión nueva del Web App existente, mantener URL y acceso requeridos; publicar reglas solo al confirmar pruebas.
-- **No fusionar esta rama ni desplegar reglas antes de completar el backend y las pruebas de seguridad.**
+## Recuperación
 
-## Estado del código
-La rama incluye formularios, navegación, rol y reglas propuestas. El backend `.gs` ampliado ya fue generado y superó pruebas de sintaxis y simulaciones de tokens, roles exclusivos, filtrado Si.R.A. y permisos de Drive. **No fue desplegado ni probado con cuentas reales**, y no se ha fusionado esta rama. El frontend no debe publicarse antes de su implantación y las pruebas de reglas.
+- Las reglas previas están respaldadas localmente en `.backups/firestore-produccion-20261112.rules` (SHA-256 verificado por el responsable).
+- Volver a un commit anterior en GitHub Pages no revierte automáticamente permisos de Drive ni reglas de Firestore.
+- La bitácora histórica `BITACORA_MIGRACION_EETP495_2027.md` y `ESTADO_ACTUAL.md` permanecen **locales y excluidas de Git** de manera intencional.
+
+## Criterio de seguridad
+
+El permiso de escritura excepcional concedido directamente en Google Drive puede perdurar hasta revocación o resincronización; la sincronización institucional tiende a volverlo a `reader`. El sistema no concede permisos de escritura por defecto ni debe afirmar revocación completa sin una prueba real.
