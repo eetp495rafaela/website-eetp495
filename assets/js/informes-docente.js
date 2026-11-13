@@ -69,6 +69,20 @@ function formatearFechaInformeDocente(fechaTexto) {
   return soloFecha;
 }
 
+function renderizarDocentesApoyoEnInforme(informe) {
+  const docentes = Array.isArray(informe?.docentesApoyo) ? informe.docentesApoyo : [];
+  const vistos = new Set();
+  const filas = docentes.map((docente) => {
+    const correo = String(docente?.correo || "").trim().toLowerCase();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(correo) || vistos.has(correo)) return "";
+    vistos.add(correo);
+    const nombre = String(docente?.nombre || "").trim() || correo;
+    return '<span class="informe-dai-linea"><b>DAI:</b> ' + escaparHtmlDocente(nombre) + ' - <a href="mailto:' + escaparHtmlDocente(correo) + '">' + escaparHtmlDocente(correo) + '</a></span>';
+  }).filter(Boolean);
+  if (!filas.length) return "";
+  return '<div class="informe-dai-contactos" aria-label="Docentes de Apoyo vinculados">' + filas.join("") + '</div>';
+}
+
 async function enviarAlBackendInformesDocente(payload) {
   const respuesta = await fetch(INFORMES_BACKEND_URL, {
     method: "POST",
@@ -131,6 +145,7 @@ function renderizarInformesDocente(informes) {
                     <small>
                       DNI: ${escaparHtmlDocente(informe.alumnoDni || "-")}
                     </small>
+                    ${renderizarDocentesApoyoEnInforme(informe)}
                   </td>
 
                   <td>

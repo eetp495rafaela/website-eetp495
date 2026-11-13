@@ -1,0 +1,19 @@
+/* Integración 44 · DAI visibles solo en informes autorizados. */
+body.portal-docentes-2027 .tabla-informes-docente .informe-dai-contactos {
+  margin-top: 9px; padding-top: 8px;
+  border-top: 1px dashed #d9e6f3;
+  display: flex; flex-direction: column; gap: 4px;
+}
+body.portal-docentes-2027 .tabla-informes-docente .informe-dai-linea {
+  display: block; line-height: 1.55; font-size: 0.83rem;
+  font-weight: 700; color: #41617f; overflow-wrap: anywhere;
+}
+body.portal-docentes-2027 .tabla-informes-docente .informe-dai-linea b {
+  color: #164c82; font-weight: 900;
+}
+body.portal-docentes-2027 .tabla-informes-docente .informe-dai-linea a {
+  color: #15589c; text-decoration: underline; text-underline-offset: 2px;
+}
+body.portal-docentes-2027 .tabla-informes-docente .informe-dai-linea a:focus-visible {
+  outline: 2px solid #23649d; outline-offset: 2px;
+}
