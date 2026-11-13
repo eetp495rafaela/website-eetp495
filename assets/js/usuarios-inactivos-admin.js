@@ -32,6 +32,7 @@ const mensajeUsuariosInactivos = document.getElementById(
 const rolesLegibles = {
   ALUMNO: "Estudiante",
   DOCENTE: "Docente",
+  DOCENTE_APOYO: "Docente de Apoyo",
   SOPORTE: "Soporte Institucional",
   PRECEPTORIA: "Preceptoría",
   SECRETARIA: "Secretaría",
@@ -436,6 +437,7 @@ function crearResumenPlanBajaGlobal(plan) {
   const cuenta = acciones.cuenta || {};
   const alumno = acciones.alumno || null;
   const docente = acciones.docente || null;
+  const docenteApoyo = acciones.docenteApoyo || null;
   const institucional = acciones.institucional || null;
 
   const roles = Array.isArray(plan?.roles)
@@ -570,6 +572,41 @@ function crearResumenPlanBajaGlobal(plan) {
       informes.archivosDriveRelacionados,
     );
 
+    if (archivos) {
+      lineasConserva.push(archivos);
+    }
+  }
+
+  if (docenteApoyo) {
+    const vinculos = crearLineaResumenBaja(
+      "Vínculos con estudiantes a eliminar",
+      docenteApoyo.vinculosEstudiantesAEliminar,
+    );
+    if (vinculos) {
+      lineasElimina.push(vinculos);
+    }
+
+    const informes = docenteApoyo.informesPedagogicos || {};
+    const autorizaciones = crearLineaResumenBaja(
+      "Autorizaciones en informes a retirar",
+      informes.referenciasAutorizacionAEliminar,
+    );
+    if (autorizaciones) {
+      lineasElimina.push(autorizaciones);
+    }
+
+    const permisos = crearLineaResumenBaja(
+      "Permisos personales de Google Drive a retirar",
+      informes.permisosDirectosDriveAEliminar,
+    );
+    if (permisos) {
+      lineasElimina.push(permisos);
+    }
+
+    const archivos = crearLineaResumenBaja(
+      "Archivos de informes a conservar",
+      informes.archivosDriveAConservar,
+    );
     if (archivos) {
       lineasConserva.push(archivos);
     }
