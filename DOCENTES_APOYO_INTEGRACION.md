@@ -40,3 +40,16 @@
 ## Criterio de seguridad
 
 El permiso de escritura excepcional concedido directamente en Google Drive puede perdurar hasta revocación o resincronización; la sincronización institucional tiende a volverlo a `reader`. El sistema no concede permisos de escritura por defecto ni debe afirmar revocación completa sin una prueba real.
+
+## Integración 42 — Legibilidad y períodos Si.R.A. (13/11/2026)
+
+**Motivo:** el responsable solicitó tipografía equivalente a Portal Docentes y consultas de Si.R.A. por trimestre o anual.
+
+**Cambios web:** tamaños de texto aumentados en tablas, rótulos, enlaces y botones de Informes Pedagógico-Didácticos, Agenda Institucional y Si.R.A.; CSS responsivo para pantallas reducidas. Selector de período `ANUAL`, `TRIMESTRE_1`, `TRIMESTRE_2`, `TRIMESTRE_3`, y respuesta con el período solicitado.
+
+**Backend privado:** el usuario actualizó la implementación vigente de Google Apps Script, con la misma URL. El cálculo por período se realiza en el servidor usando el calendario configurado para el año lectivo. Las autorizaciones siguen basadas en vínculos activos y no se exponen registros de otros estudiantes en el navegador.
+
+**Comprobado:** el usuario verificó visualmente el diseño y la presencia del selector desde la rama de desarrollo en la laptop. Se realizaron validaciones de sintaxis del JavaScript, y se mantuvo el consumo de datos de Si.R.A. exclusivamente a través del servidor.
+
+**Aún pendiente:** verificación real de resultados numéricos de los cuatro períodos si hay registros, revocación de Google Drive al quitar vínculos y seguimiento del HTTP 429. No inferir que estas pruebas ocurrieron solamente por comprobar el diseño.
+
