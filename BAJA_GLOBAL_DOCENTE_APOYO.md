@@ -1,7 +1,7 @@
 # Baja Global — Docentes de Apoyo
 
 **Fecha:** 13/11/2026  
-**Estado:** preparado en desarrollo; pruebas reales y despliegue pendiente.
+**Estado:** Apps Script actualizado por el responsable y baja completa de cuenta de ensayo confirmada; frontend listo para integrar en `main`.
 
 ## Causa del bloqueo
 El Apps Script de Baja Global, versión `2026-09-15-PRODUCCION-6`, no contempla el rol institucional exclusivo `DOCENTE_APOYO` en el enrutador de bajas. Esto produce «La combinación de roles del usuario no está habilitada para baja global automática».
@@ -18,10 +18,12 @@ El Apps Script de Baja Global, versión `2026-09-15-PRODUCCION-6`, no contempla 
 ## Ajuste del frontend
 `assets/js/usuarios-inactivos-admin.js` muestra `DOCENTE_APOYO` como «Docente de Apoyo» y presenta en el resumen previo las desvinculaciones de estudiantes, autorizaciones y permisos Drive que se retirarán. No ejecuta cambios por sí mismo: todas las acciones sensibles deben ser validadas por el servidor.
 
-## Validaciones
+## Validaciones y cierre operativo
 - Sintaxis JavaScript del backend verificada.
 - Pruebas simuladas: plan de baja, permisos y orden de operaciones; rechazo de cuenta ACTIVA o multirrol; protección de propiedad Drive; fallo de revocación mantiene perfil/vínculos y deja Auth deshabilitada.
-- **Pendientes:** hacer copia del Apps Script de Baja Global vigente, actualizar esa implementación sin cambiar URL, comprobar prevalidación real con cuenta de prueba, baja real y revocación de acceso a Google Docs. Verificar que una cuota HTTP 429 no provoque una baja incompleta.
+- **13/11/2026:** el responsable confirmó que actualizó el Apps Script de Baja Global en su implementación vigente y que pudo eliminar por completo la cuenta de prueba `DOCENTE_APOYO` desde el portal.
+- La confirmación del usuario valida el recorrido funcional de la baja, pero **no sustituye** una auditoría independiente de todos los permisos efectivos de Google Drive, especialmente permisos heredados/de grupos.
+- **Pendientes históricos:** verificar revocación efectiva de Drive y vigilar posibles fallos HTTP 429. No afirmar que se ejecutaron pruebas adicionales ni que ya no existen errores de cuota.
 
 ## Advertencias operativas
 - La eliminación afecta la cuenta del **proyecto Firebase Authentication**, no elimina una cuenta personal de Google.
