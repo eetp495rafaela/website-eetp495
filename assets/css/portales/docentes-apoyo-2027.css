@@ -274,3 +274,97 @@ body.portal-docentes-apoyo-2027 .apoyo-agenda-resumen span {
     grid-column: auto;
   }
 }
+
+
+/* Integración 42: misma jerarquía tipográfica que Portal Docentes. */
+body.portal-docentes-apoyo-2027 .work-topline #view-description {
+  font-size: 15px;
+  line-height: 1.6;
+}
+body.portal-docentes-apoyo-2027 .apoyo-panel-header p,
+body.portal-docentes-apoyo-2027 .apoyo-agenda-intro p {
+  font-size: 15px;
+  line-height: 1.6;
+}
+body.portal-docentes-apoyo-2027 .apoyo-panel .mensaje,
+body.portal-docentes-apoyo-2027 .apoyo-panel .apoyo-periodo-consultado {
+  font-size: 14px;
+  line-height: 1.65;
+}
+body.portal-docentes-apoyo-2027 .apoyo-panel table {
+  font-size: 14.5px;
+  line-height: 1.48;
+}
+body.portal-docentes-apoyo-2027 .apoyo-panel th,
+body.portal-docentes-apoyo-2027 .apoyo-panel td {
+  padding: 15px 16px;
+}
+body.portal-docentes-apoyo-2027 .apoyo-panel th {
+  font-size: 13px;
+}
+body.portal-docentes-apoyo-2027 .apoyo-panel td {
+  color: #274e73;
+}
+body.portal-docentes-apoyo-2027 .apoyo-panel td strong {
+  font-weight: 800;
+}
+body.portal-docentes-apoyo-2027 .apoyo-panel .tabla a {
+  font-weight: 700;
+}
+body.portal-docentes-apoyo-2027 .apoyo-action {
+  font-size: 14px;
+  min-height: 46px;
+  padding: 12px 18px;
+}
+body.portal-docentes-apoyo-2027 .apoyo-agenda-campo label {
+  font-size: 14px;
+}
+body.portal-docentes-apoyo-2027 .apoyo-agenda-campo select,
+body.portal-docentes-apoyo-2027 .apoyo-agenda-campo input {
+  font-size: 14px;
+}
+body.portal-docentes-apoyo-2027 .apoyo-agenda-resumen {
+  font-size: 15px;
+}
+body.portal-docentes-apoyo-2027 .apoyo-agenda-resumen span {
+  font-size: 13px;
+}
+body.portal-docentes-apoyo-2027 .apoyo-asistencia-filtros {
+  display: flex;
+  align-items: flex-end;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin: 4px 0 23px;
+}
+body.portal-docentes-apoyo-2027 .apoyo-asistencia-filtros .apoyo-agenda-campo {
+  flex: 0 1 275px;
+  min-width: 210px;
+}
+body.portal-docentes-apoyo-2027 .apoyo-asistencia-filtros .apoyo-action {
+  flex: 0 0 auto;
+}
+body.portal-docentes-apoyo-2027 .apoyo-periodo-consultado {
+  padding: 11px 15px;
+  margin: 0 0 14px;
+  border: 1px solid #dce8f5;
+  border-radius: 10px;
+  background: #f0f6fc;
+  color: #365e85;
+}
+body.portal-docentes-apoyo-2027 .apoyo-periodo-consultado i {
+  margin-right: 9px;
+}
+@media (max-width: 650px) {
+  body.portal-docentes-apoyo-2027 .apoyo-asistencia-filtros {
+    align-items: stretch;
+  }
+  body.portal-docentes-apoyo-2027 .apoyo-asistencia-filtros .apoyo-agenda-campo,
+  body.portal-docentes-apoyo-2027 .apoyo-asistencia-filtros .apoyo-action {
+    flex: 1 1 100%;
+    min-width: 0;
+    width: 100%;
+  }
+  body.portal-docentes-apoyo-2027 .apoyo-panel table {
+    font-size: 14px;
+  }
+}

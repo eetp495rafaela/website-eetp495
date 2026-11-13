@@ -37,12 +37,12 @@ async function vinculosActivos(){
   const snap=await getDocs(q);
   return snap.docs.map(d=>d.data()).sort((a,b)=>String(a.alumnoNombre||"").localeCompare(String(b.alumnoNombre||""),"es"));
 }
-async function consultarBackend(accion){
+async function consultarBackend(accion,opciones={}){
   const idToken=await asegurarSesion().getIdToken(true);
   const respuesta=await fetch(URL_BACKEND_INFORMES,{
     method:"POST",
     headers:{"Content-Type":"text/plain;charset=utf-8"},
-    body:JSON.stringify({accion,idToken})
+    body:JSON.stringify({accion,idToken,...opciones})
   });
   if(!respuesta.ok)throw new Error("No se pudo conectar con el sistema institucional.");
   const resultado=await respuesta.json();
@@ -78,14 +78,21 @@ async function cargarInformes(){
 }
 
 async function cargarAsistencia(){
+  const selector=document.getElementById("periodoAsistenciaApoyo");
+  const periodo=selector?.value||"ANUAL";
+  const etiqueta=selector?.selectedOptions?.[0]?.textContent?.trim()||"Anual";
   mensaje("resultadoAsistenciaApoyo","Consultando Si.R.A. de tus estudiantes...");
-  // Nunca leer asistencias_clases desde el cliente: cada documento contiene
-  // registros de todo un curso. El servidor debe devolver solo filas autorizadas.
-  const resultado=await consultarBackend("listar_situacion_asistencia_apoyo");
+  // La autorización, las fechas del trimestre y el cálculo se realizan
+  // en Apps Script. Nunca acceder a asistencias_clases en el navegador:
+  // cada registro puede contener a varios estudiantes de un curso.
+  const resultado=await consultarBackend("listar_situacion_asistencia_apoyo",{periodo});
+  if(resultado.periodo!==periodo){
+    throw new Error("El servidor de Si.R.A. todavía no reconoce el filtro por período. Actualizá la implementación vigente de Apps Script.");
+  }
   const registros=Array.isArray(resultado.estudiantes)?resultado.estudiantes:[];
-  if(!registros.length){mensaje("resultadoAsistenciaApoyo","No hay registros de asistencia disponibles para tus estudiantes.");return;}
-  const filas=registros.map(r=>"<tr><td>"+textoSeguro(r.nombre||r.alumnoNombre||"-")+"</td><td>"+textoSeguro(r.cursoNombre||"-")+"</td><td>"+textoSeguro(r.presentes??0)+"</td><td>"+textoSeguro(r.ausentes??0)+"</td><td>"+textoSeguro(r.tardanzas??0)+"</td><td>"+textoSeguro(r.porcentaje??"-")+" %</td></tr>").join("");
-  mostrar("resultadoAsistenciaApoyo",'<div class="tabla"><table><thead><tr><th>Estudiante</th><th>Curso</th><th>P</th><th>A</th><th>T</th><th>% asistencia</th></tr></thead><tbody>'+filas+'</tbody></table></div><p class="mensaje">4 tardanzas equivalen a 1 falta. Los datos son de consulta y no pueden editarse.</p>');
+  if(!registros.length){mensaje("resultadoAsistenciaApoyo","No hay estudiantes vinculados con información disponible para "+etiqueta+".");return;}
+  const filas=registros.map(r=>"<tr><td>"+textoSeguro(r.nombre||r.alumnoNombre||"-")+"</td><td>"+textoSeguro(r.cursoNombre||"-")+"</td><td>"+textoSeguro(r.presentes??0)+"</td><td>"+textoSeguro(r.ausentes??0)+"</td><td>"+textoSeguro(r.tardanzas??0)+"</td><td>"+textoSeguro(r.porcentaje??0)+" %</td></tr>").join("");
+  mostrar("resultadoAsistenciaApoyo",'<p class="apoyo-periodo-consultado"><i class="fa-solid fa-calendar-days" aria-hidden="true"></i> Período consultado: <strong>'+textoSeguro(resultado.etiqueta||etiqueta)+'</strong>'+(resultado.cicloLectivo?' · '+textoSeguro(resultado.cicloLectivo):'')+'</p><div class="tabla"><table><thead><tr><th>Estudiante</th><th>Curso</th><th>Presentes</th><th>Ausentes</th><th>Tardanzas</th><th>% asistencia</th></tr></thead><tbody>'+filas+'</tbody></table></div><p class="mensaje">4 tardanzas equivalen a 1 falta. Los datos son de consulta y no pueden editarse.</p>');
 }
 
 /* Misma presentación de Agenda que el Portal Docentes.
