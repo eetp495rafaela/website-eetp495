@@ -30,3 +30,14 @@ La versión completa `Informes_Pedagogicos_DAI_Integracion_44_20261113.gs` se pr
 
 ## Publicación
 No fusionar a `main` ni eliminar esta rama hasta comprobar el entorno local y la actualización de Apps Script; después registrar el cierre en la bitácora privada y actualizar la laptop.
+
+## Ampliación aprobada — Portal Gestión (13/11/2026)
+
+- Se incorpora **una tarjeta independiente debajo de los Informes Pedagógico-Didácticos** en `gestion/index.html`.
+- La tabla agrupa por Docente de Apoyo (nombre y correo), con estudiantes asociados y **curso actual**. Un estudiante con dos DAI aparece en las dos filas. Los DAI vigentes sin alumnos se muestran con la leyenda «Sin estudiantes vinculados».
+- **Consulta exclusivamente a demanda:** al abrir el Portal Gestión, suscribir eventos o navegar a Informes, la nueva tarjeta **no consulta Firestore ni Apps Script**. La acción `listar_docentes_apoyo_gestion` se llama solo al pulsar «Ver docentes de apoyo», sin escrituras ni actualización automática.
+- Roles permitidos: `DIRECCION`, `SECRETARIA`, `ASISTENTE_ADMINISTRATIVO` y `PRECEPTORIA`, comprobados en el **servidor**, y con perfil activo. Los docentes tradicionales, los DAI y los usuarios sin sesión no pueden usar la acción.
+- El backend de Informes Pedagógico-Didácticos contiene esta nueva acción en el archivo privado completo `Informes_Pedagogicos_DAI_Gestion_Integracion_44_20261113.gs`. Actualizar **la implementación vigente de Informes** conservando URL; no modificar el Apps Script de Baja Global.
+- No se modifican reglas Firestore. No se conceden permisos de lectura directa desde navegador a `usuarios` ni `apoyos_estudiantes`.
+- Se realizaron pruebas simuladas del backend para autenticación/roles, vínculos activos, duplicados, ausencia de DAI, orden, cambios de curso y conteos de consultas; no se ejecutaron lecturas reales.
+- **Pendiente:** prueba real desde Gestión, comprobación visual PC/móvil, y contraste del directorio con asignaciones efectivas. No publicar en `main` hasta validación.

@@ -29,6 +29,7 @@
     />
     <link rel="stylesheet" href="../vista-2027/assets/css/portal-maqueta.css" />
     <link rel="stylesheet" href="../assets/css/portales/gestion-2027.css" />
+    <link rel="stylesheet" href="../assets/css/portales/docentes-apoyo-gestion.css?v=1" />
     <link
       rel="stylesheet"
       href="../assets/css/portales/identidad-institucional-2027.css?v=16"
@@ -1860,6 +1861,26 @@
                 <p class="mensaje-gestion" id="mensajeInformesGestion"></p>
               </div>
             </div>
+            <div class="panel-info panel-gestion-listado panel-dai-gestion">
+              <i class="fa-solid fa-people-group" aria-hidden="true"></i>
+              <div class="contenido-panel-gestion">
+                <div class="encabezado-panel-gestion encabezado-panel-gestion--acciones">
+                  <div>
+                    <h3>Docentes de Apoyo y estudiantes vinculados</h3>
+                    <p>Consultá los acompañamientos pedagógicos vigentes, sin modificar las asignaciones.</p>
+                  </div>
+                  <div class="acciones-gestion acciones-gestion-superior">
+                    <button class="btn-gestion" id="btnVerDAIGestion" type="button">
+                      <i class="fa-solid fa-users" aria-hidden="true"></i>
+                      Ver docentes de apoyo
+                    </button>
+                  </div>
+                </div>
+                <div class="vista-gestion vista-dai-gestion" id="vistaDAIGestion" aria-live="polite">
+                  <p class="mensaje-gestion">Presioná “Ver docentes de apoyo” para consultar las vinculaciones. No se realizan consultas automáticas.</p>
+                </div>
+              </div>
+            </div>
             <a class="btn-volver" href="#inicio">
               <i class="fa-solid fa-arrow-up"> </i>
               Volver al inicio
@@ -2095,6 +2116,7 @@
     </a>
 
     <script src="../assets/js/portales/gestion-2027.js" defer></script>
+    <script src="../assets/js/docentes-apoyo-gestion.js?v=1" type="module"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
     <script

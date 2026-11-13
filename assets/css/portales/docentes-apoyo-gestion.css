@@ -1,0 +1,85 @@
+/* Integración 44 · Gestión: directorio DAI, solo lectura a demanda. */
+body.portal-gestion-2027 .panel-dai-gestion {
+  margin-top: 22px;
+}
+body.portal-gestion-2027 .panel-dai-gestion .encabezado-panel-gestion p {
+  line-height: 1.65;
+}
+body.portal-gestion-2027 .vista-dai-gestion {
+  margin-top: 16px;
+}
+body.portal-gestion-2027 .dai-gestion-tabla-scroll {
+  width: 100%;
+  overflow-x: auto;
+  border: 1px solid #dae6f2;
+  border-radius: 12px;
+  background: #fff;
+}
+body.portal-gestion-2027 .dai-gestion-tabla {
+  width: 100%;
+  min-width: 600px;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 14px;
+}
+body.portal-gestion-2027 .dai-gestion-tabla th {
+  padding: 15px 18px;
+  background: #eaf3fb;
+  color: #133b66;
+  font-weight: 900;
+  border-bottom: 1px solid #d9e6f2;
+}
+body.portal-gestion-2027 .dai-gestion-tabla th:first-child {
+  width: 38%;
+}
+body.portal-gestion-2027 .dai-gestion-tabla td {
+  vertical-align: top;
+  padding: 17px 18px;
+  color: #25466b;
+  border-top: 1px solid #e5edf6;
+  line-height: 1.55;
+}
+body.portal-gestion-2027 .dai-gestion-tabla tbody tr:hover {
+  background: #f7faff;
+}
+body.portal-gestion-2027 .dai-gestion-nombre {
+  display: block;
+  font-weight: 850;
+  color: #173b67;
+}
+body.portal-gestion-2027 .dai-gestion-correo,
+body.portal-gestion-2027 .dai-gestion-curso {
+  display: block;
+  font-size: 12.5px;
+  color: #607d98;
+  overflow-wrap: anywhere;
+}
+body.portal-gestion-2027 .dai-gestion-estudiantes {
+  margin: 0;
+  padding-left: 19px;
+  display: grid;
+  gap: 9px;
+}
+body.portal-gestion-2027 .dai-gestion-estudiantes li {
+  padding-left: 2px;
+}
+body.portal-gestion-2027 .dai-gestion-sin-estudiantes {
+  font-size: 13px;
+  color: #6b839b;
+  font-style: italic;
+}
+body.portal-gestion-2027 .dai-gestion-contador {
+  margin: 12px 0 0;
+  font-size: 13px;
+  color: #547392;
+}
+@media (max-width: 650px) {
+  body.portal-gestion-2027 .dai-gestion-tabla td,
+  body.portal-gestion-2027 .dai-gestion-tabla th {
+    padding: 13px 12px;
+  }
+  body.portal-gestion-2027 .panel-dai-gestion .acciones-gestion-superior,
+  body.portal-gestion-2027 .panel-dai-gestion .btn-gestion {
+    width: 100%;
+  }
+}
