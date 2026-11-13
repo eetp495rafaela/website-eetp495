@@ -13,7 +13,7 @@
     <link rel="stylesheet" href="../vista-2027/assets/css/portal-maqueta.css" />
     <link rel="stylesheet" href="../assets/css/portales/docentes-2027.css?v=36" />
     <link rel="stylesheet" href="../assets/css/portales/identidad-institucional-2027.css?v=16" />
-    <link rel="stylesheet" href="../assets/css/portales/docentes-apoyo-2027.css?v=1" />
+    <link rel="stylesheet" href="../assets/css/portales/docentes-apoyo-2027.css?v=2" />
   </head>
   <body class="portal-docentes-2027 portal-docentes-apoyo-2027" data-rol-permitido="DOCENTE_APOYO">
     <a class="skip" href="#inicio">Saltar al contenido</a>
@@ -147,10 +147,21 @@
 
           <section class="apoyo-panel detalle" id="panelAsistenciaApoyo" hidden aria-labelledby="tituloAsistenciaApoyo">
             <div class="apoyo-panel-header">
-              <div><h2 id="tituloAsistenciaApoyo">Situación de Asistencia · Si.R.A.</h2><p>Datos exclusivamente de estudiantes a tu cargo, sin acceso a registros completos del curso.</p></div>
-              <button class="apoyo-action" type="button" id="btnCargarAsistenciaApoyo"><i class="fa-solid fa-rotate-right" aria-hidden="true"></i> Consultar asistencia</button>
+              <div><h2 id="tituloAsistenciaApoyo">Situación de Asistencia · Si.R.A.</h2><p>Consultá la asistencia de los estudiantes que acompañás, por trimestre o anual.</p></div>
             </div>
-            <div id="resultadoAsistenciaApoyo" aria-live="polite"></div>
+            <div class="apoyo-asistencia-filtros">
+              <div class="apoyo-agenda-campo">
+                <label for="periodoAsistenciaApoyo">Período</label>
+                <select id="periodoAsistenciaApoyo">
+                  <option value="ANUAL">Anual</option>
+                  <option value="TRIMESTRE_1">1° Trimestre</option>
+                  <option value="TRIMESTRE_2">2° Trimestre</option>
+                  <option value="TRIMESTRE_3">3° Trimestre</option>
+                </select>
+              </div>
+              <button class="apoyo-action" type="button" id="btnCargarAsistenciaApoyo"><i class="fa-solid fa-magnifying-glass-chart" aria-hidden="true"></i> Consultar situación</button>
+            </div>
+            <div id="resultadoAsistenciaApoyo" aria-live="polite"><p class="mensaje">Seleccioná un período y presioná Consultar situación.</p></div>
           </section>
         </main>
         <footer class="portal-footer"><span>E.E.T.P. N° 495 · Malvinas Argentinas</span><span>Portal Institucional · Consulta autorizada</span></footer>
@@ -160,6 +171,6 @@
     <script type="module" src="../assets/js/proteger-portal.js"></script>
     <script type="module" src="../assets/js/pizarra-horarios-admin.js"></script>
     <script type="module" src="../assets/js/docentes-apoyo-navegacion.js"></script>
-    <script type="module" src="../assets/js/docentes-apoyo.js"></script>
+    <script type="module" src="../assets/js/docentes-apoyo.js?v=20261113-periodos1"></script>
   </body>
 </html>
