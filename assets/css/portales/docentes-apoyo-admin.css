@@ -165,3 +165,8 @@
   .apoyo-conf-aceptar,
   .apoyo-conf-cancelar {width:100%;margin:0 !important;}
 }
+
+/* Integración 44 · Espacio entre título, descripción y filtros de apoyo. */
+body.portal-soporte-2027 #gestionDocentesApoyo > p {
+  margin: 16px 0 24px; line-height: 1.7; color: #506e8e;
+}
