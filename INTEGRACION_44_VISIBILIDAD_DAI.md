@@ -1,7 +1,7 @@
 # Integración 44 — DAI en Informes Docentes y espaciado en Soporte
 
 **Fecha:** 13/11/2026  
-**Estado:** preparado en rama de desarrollo, aún no publicado.
+**Estado:** validación visual local aprobada por el responsable; preparado para integrar en `main`.
 
 ## Motivo
 - Soporte: separar visualmente el texto descriptivo de «Asignaciones de Docentes de Apoyo» respecto del título y los selectores.
@@ -41,3 +41,12 @@ No fusionar a `main` ni eliminar esta rama hasta comprobar el entorno local y la
 - No se modifican reglas Firestore. No se conceden permisos de lectura directa desde navegador a `usuarios` ni `apoyos_estudiantes`.
 - Se realizaron pruebas simuladas del backend para autenticación/roles, vínculos activos, duplicados, ausencia de DAI, orden, cambios de curso y conteos de consultas; no se ejecutaron lecturas reales.
 - **Pendiente:** prueba real desde Gestión, comprobación visual PC/móvil, y contraste del directorio con asignaciones efectivas. No publicar en `main` hasta validación.
+
+## Cierre de alcance — 13/11/2026
+
+- El responsable aprobó la visualización de las tres mejoras y solicitó publicar y cerrar esta integración.
+- La tabla de Gestión permanece **a demanda** (solo consulta al hacer clic; sin lecturas automáticas ni escrituras).
+- El responsable recibió y utilizó una versión del Apps Script de Informes para la consulta de Gestión. Se preparó además una variante privada optimizada por lotes; **no consta confirmación expresa de que esa última variante haya sido instalada**. No se requiere cambiar el backend para fusionar la presentación web que el responsable ya verificó.
+- Se registraron 10 pruebas web exitosas: 5 del renderizado DAI en Informes y 5 del directorio de Gestión, con datos ficticios.
+- No se modifican reglas ni datos de Firestore en esta integración. Los antecedentes pendientes de Drive, HTTP 429 y Si.R.A. se conservan en bitácora, sin declararlos resueltos.
+- La posible migración parcial desde Apps Script hacia Firebase/Cloud Functions **queda sujeta a decisión de Dirección en 2027**, sin cambio aprobado ni programado.
