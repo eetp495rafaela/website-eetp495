@@ -1,0 +1,79 @@
+/* Integración 45B · Tema opcional en login; autenticación sin cambios. */
+body.login-demo .login-form-side { position: relative; }
+body.login-demo .login-theme-container {
+  position: absolute; top: 17px; right: clamp(18px,3vw,40px); z-index: 3;
+}
+body.login-demo .login-theme-toggle {
+  display: inline-flex; width: 79px; height: 42px;
+  align-items: center; justify-content: space-between; padding: 4px;
+  border: 1px solid #bfd1e4; border-radius: 12px;
+  background: #edf4fc; cursor: pointer;
+}
+body.login-demo .login-theme-icon {
+  display: grid; place-items: center; flex: 0 0 32px;
+  width: 32px; height: 32px; border-radius: 8px;
+  font-size: 18px; opacity: .55; filter: grayscale(.7);
+}
+html:not([data-public-theme="dark"]) body.login-demo .login-theme-sun,
+html[data-public-theme="dark"] body.login-demo .login-theme-moon {
+  background: #fff; opacity: 1; filter: none;
+  box-shadow: 0 2px 8px rgba(0,28,60,.17);
+}
+body.login-demo .login-theme-toggle:focus-visible {
+  outline: 3px solid #e3b367; outline-offset: 3px;
+}
+html[data-public-theme="dark"] body.login-demo {
+  color-scheme: dark; background: #0c1727; color: #e6f0ff;
+}
+html[data-public-theme="dark"] body.login-demo .login-form-side {
+  background: linear-gradient(150deg,#101d30,#152841); color: #e6f0ff;
+}
+html[data-public-theme="dark"] body.login-demo .login-theme-toggle {
+  background: #142940; border-color: #536c86;
+}
+html[data-public-theme="dark"] body.login-demo .login-theme-moon {
+  background: #2b5077;
+}
+html[data-public-theme="dark"] body.login-demo
+:is(.login-card h2,.school-id,.login-card .login-logo .school-id) {
+  color: #edf5ff;
+}
+html[data-public-theme="dark"] body.login-demo
+:is(.login-copy,.school-subid,.login-legal,.login-card .selector-roles > p,
+    .login-card .mensaje-login:not(.error):not(.ok)) {
+  color: #bdd3e9;
+}
+html[data-public-theme="dark"] body.login-demo .form-eyebrow { color: #ffd39b; }
+html[data-public-theme="dark"] body.login-demo .google-button {
+  background: #203951; color: #eff7ff; border-color: #526e89;
+}
+html[data-public-theme="dark"] body.login-demo .google-button:hover { background: #294967; }
+html[data-public-theme="dark"] body.login-demo .google-g { color: #b8d6ff; }
+html[data-public-theme="dark"] body.login-demo
+:is(.btn-acceso-estudiantes,.login-note,.role-tiles .role-availability) {
+  background: #1d3956; color: #e1f0ff; border-color: #4b6a89;
+}
+html[data-public-theme="dark"] body.login-demo
+:is(.login-tools a,.selector-roles .btn-volver-cuenta) { color: #afdaff; }
+html[data-public-theme="dark"] body.login-demo
+:is(.selector-roles input,.selector-roles select) {
+  background: #142942; color: #eaf4ff;
+  border-color: #4e6b86; color-scheme: dark;
+}
+html[data-public-theme="dark"] body.login-demo
+:is(.selector-roles input,.selector-roles select)::placeholder {
+  color: #a8c0db; opacity: 1;
+}
+html[data-public-theme="dark"] body.login-demo
+:is(.selector-roles .campo i,.selector-roles .texto-acceso) { color: #c8def4; }
+html[data-public-theme="dark"] body.login-demo .login-divider { color: #a9c3de; }
+html[data-public-theme="dark"] body.login-demo .login-divider::before,
+html[data-public-theme="dark"] body.login-demo .login-divider::after { background: #385572; }
+/* Las fotos y el escudo no llevan filtros; las alertas mantienen sus colores. */
+@media (max-width: 770px) {
+  body.login-demo .login-form-side { padding-top: max(78px,7vw); }
+  body.login-demo .login-theme-container { top: 14px; right: 18px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  body.login-demo .login-theme-icon { transition: none; }
+}

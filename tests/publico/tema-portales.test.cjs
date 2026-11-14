@@ -48,8 +48,13 @@ test("el título Nuestra historia usa el color adaptable", () => {
   const css = load("vista-2027/assets/css/tema-publico-2027.css");
   assert.match(css, /--navy:\s*#eaf2ff/i);
 });
-test("login institucional permanece sin control de tema ni cambios visuales", () => {
+test("login permite seleccionar tema sin modificar el acceso institucional", () => {
   const html = load("login.html");
-  assert(!html.includes("data-public-theme-toggle"));
+  assert.equal((html.match(/data-public-theme-toggle/g) || []).length, 1);
+  assert.match(html, /tema-login-2027\.css\?v=45b/);
+  assert.match(html, /tema-publico-2027\.js\?v=45/);
+  assert.match(html, /localStorage\.getItem\("eetp495-public-theme"\)/);
+  assert(html.includes('id="btnGoogle"'));
+  assert(html.includes('id="formSolicitudAlumno"'));
   assert(!html.includes("tema-portales-2027.css"));
 });
