@@ -1163,3 +1163,11 @@ html[data-public-theme="dark"] body:is(.portal-alumnos-2027,.portal-docentes-202
   color: #9ce9bd !important;
 }
 /* No transformar ni esconder botones: la prioridad sigue en la función. */
+
+/* Estado de edición: distinguir habilitado del modo «Sólo lectura» ámbar. */
+html[data-public-theme="dark"] body.portal-docentes-2027
+#calificaciones-taller-docente .estado-calificaciones-solo-lectura.edicion-habilitada {
+  color: #adf0d4 !important;
+  border-color: #5ab995 !important;
+  background: #1b453b !important;
+}

@@ -12,6 +12,26 @@
 - Funciona sin cuenta, sin Firebase, sin Apps Script y sin llamadas de red adicionales salvo los recursos estáticos.
 - Sin modificar datos institucionales ni la lógica de las aplicaciones.
 
+
+## Auditoría visual integral por capturas — Integración 45B (14/11/2026)
+
+**Autorización:** el responsable finalizó la revisión de capturas y pidió corregir los portales de manera integral.
+
+- **Docentes:** Mis Horarios (degradado amarillo), Si.R.A. Registro (tarjetas, nombres y controles), Parte (encabezado y resultados), Situación (mensajes sin datos), Calificaciones (filtros y estados lectura/edición), Documentación Académica (tabla), Mesas de Examen (panel y filtros), Agenda (desplegables), Gestiones Docentes y Normativa (tarjetas PDF).
+- **Soporte:** Usuarios y DAI, Contactos, Referentes, Estudiantes y cambio de ciclo, Cursos, Asignaciones/Reemplazos, Horarios, Docentes libres (se conservan colores semánticos), Calificaciones, Si.R.A., modales.
+- **Gestión:** formularios, tablas, S.I.M.E., Si.R.A., horarios, directorio DAI, mensajes.
+- **Alumnos:** horarios, documentos, S.I.M.E., listados y referentes.
+- **Docentes de Apoyo:** filtros, tablas de informes, agendas y asistencia.
+- **Login:** se añadió el mismo selector, con CSS específico de contraste. No cambia el login con Google, solicitudes ni fotografías.
+
+**Criterio:** `tema-portales-2027.css` contiene overrides exclusivamente visuales bajo el atributo de tema. El CSS para el login es separado. Se conservan estados de asistencia, éxito/error, libre/ocupado y lectura/edición, y ningún usuario obtiene permisos nuevos.
+
+**Pruebas:** validación estática de sintaxis agrupada, estructura, alternancia y contrastes AA de combinaciones centrales; tests locales en `tests/publico/tema-contrastes.test.cjs`. Son pruebas estáticas: no reemplazan una validación visual real en cada módulo y navegador.
+
+**Incidencias funcionales observadas, fuera de alcance:** App Check/reCAPTCHA en Documentación Académica y un posible registro de Calificaciones sin inicializar. El CSS no resuelve esos errores ni modifica autenticación.
+
+**Estado:** cambios preparados en la rama de desarrollo y **aún no publicados**. Se requiere prueba local antes de fusionar.
+
 ## Pruebas previstas
 - Alternar tres veces en la portada y verificar alternancia completa, accesibilidad y la preferencia guardada.
 - Navegar a La Escuela, Plan, Proyectos, Novedades, Calendario e Inscripciones con cada tema.
