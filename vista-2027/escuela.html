@@ -3,6 +3,13 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <script>
+      try {
+        if (localStorage.getItem("eetp495-public-theme") === "dark") {
+          document.documentElement.setAttribute("data-public-theme", "dark");
+        }
+      } catch (_) { /* La preferencia es opcional. */ }
+    </script>
     <meta name="theme-color" content="#0b2346" />
     <meta
       name="description"
@@ -14,6 +21,7 @@
     <link rel="stylesheet" href="assets/css/maqueta.css" />
     <link rel="stylesheet" href="assets/css/botones-uniformes-2027.css" />
     <link rel="stylesheet" href="assets/css/ajustes-revision-2027.css" />
+    <link rel="stylesheet" href="assets/css/tema-publico-2027.css?v=45" />
   </head>
   <body class="">
     <a class="skip" href="#contenido">Saltar al contenido</a>
@@ -57,7 +65,16 @@
           title="Abrir Portal Institucional"
           ><span class="portal-icon">↗</span>
           <span>Portal Institucional</span></a
-        ><button
+        >
+        <button
+          type="button"
+          class="public-theme-toggle"
+          data-public-theme-toggle
+          aria-pressed="false"
+          aria-label="Activar modo oscuro"
+          title="Activar modo oscuro"
+        ><span class="public-theme-icon public-theme-sun" aria-hidden="true">☀️</span><span class="public-theme-icon public-theme-moon" aria-hidden="true">🌙</span></button>
+        <button
           id="mobile-menu"
           class="mobile-trigger"
           aria-expanded="false"
@@ -398,5 +415,6 @@
       </div>
     </dialog>
     <script src="assets/js/maqueta.js" defer></script>
+    <script src="assets/js/tema-publico-2027.js?v=45" defer></script>
   </body>
 </html>
