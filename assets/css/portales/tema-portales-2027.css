@@ -219,7 +219,7 @@ html[data-public-theme="dark"] body:is(.portal-alumnos-2027,.portal-docentes-202
 html[data-public-theme="dark"] body:is(.portal-alumnos-2027,.portal-docentes-2027,.portal-gestion-2027,.portal-soporte-2027)
 :is(.work-topline h1,.p27-pane > h2,.legacy-workspace > .grupo > h2,.p27-intro h2,.panel-header h2) { color: #eaf3ff; }
 html[data-public-theme="dark"] body:is(.portal-alumnos-2027,.portal-docentes-2027,.portal-gestion-2027,.portal-soporte-2027)
-:is(.work-topline p,.panel-header p,.p27-pane p,.legacy-workspace p,.p27-home p,.muted,.micro) {
+:is(.work-topline > div > p,.panel-header p,.p27-pane > p,.p27-home .panel p,.muted,.micro) {
   color: #b6cce5;
 }
 html[data-public-theme="dark"] body:is(.portal-alumnos-2027,.portal-docentes-2027,.portal-gestion-2027,.portal-soporte-2027)
@@ -244,10 +244,6 @@ html[data-public-theme="dark"] body:is(.portal-alumnos-2027,.portal-docentes-202
 html[data-public-theme="dark"] body:is(.portal-alumnos-2027,.portal-docentes-2027,.portal-gestion-2027,.portal-soporte-2027)
 :is(.panel-header,.encabezado-listado,.encabezado-panel-gestion,.encabezado-docente-mesas,.encabezado-documentos-cargados) {
   border-color: #3a506a;
-}
-html[data-public-theme="dark"] body:is(.portal-alumnos-2027,.portal-docentes-2027,.portal-gestion-2027,.portal-soporte-2027)
-:is(.panel-info,.panel-gestion-listado,.p27-pane,.legacy-workspace) :is(strong,b,small):not(.estado-error):not(.estado-ok) {
-  color: inherit;
 }
 /* Mantener textos secundarios legibles y acentos azules claros sobre fondo oscuro. */
 html[data-public-theme="dark"] body:is(.portal-alumnos-2027,.portal-docentes-2027,.portal-gestion-2027,.portal-soporte-2027)
