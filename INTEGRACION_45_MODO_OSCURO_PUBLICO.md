@@ -1,7 +1,7 @@
 # Integración 45 — Modo claro/oscuro en el sitio público
 
 **Fecha:** 14/11/2026  
-**Estado:** rama de desarrollo. No fusionar con `main` antes de probar.
+**Estado:** sitio público validado visualmente por el responsable; ampliación a portales preparada en desarrollo, pendiente de prueba local. No fusionar con `main` antes de probar.
 
 ## Alcance
 - Solo el **sitio público 2027**, portada y las seis secciones de `vista-2027/`.
@@ -18,3 +18,12 @@
 - Probar PC y celular, menú desplegable, contraste y fotografías.
 - Inspeccionar que, al volver, persista el último modo elegido.
 - Comprobar que ningún portal institucional heredó este cambio.
+
+## Ajuste y ampliación aprobados (14/11/2026)
+
+- El responsable confirmó que el selector público es cómodo y funciona visualmente. Detectó un caso de contraste: **«Nuestra historia»** en La Escuela tenía color azul fijado en línea; se sustituyó por `var(--navy)`, que es oscuro en claro y blanco azulado en oscuro.
+- Se incorporó el mismo selector ☀️ / 🌙 en las barras superiores **visibles** de los cuatro portales: Alumnos, Docentes (incluye usuarios DAI), Gestión y Soporte. Se evita el encabezado antiguo oculto de Gestión y Soporte.
+- Se reutiliza `vista-2027/assets/js/tema-publico-2027.js` y la clave de almacenamiento `eetp495-public-theme`. Al navegar entre público y portales se conserva la preferencia. `login.html` permanece sin cambios.
+- La nueva hoja `assets/css/portales/tema-portales-2027.css` contiene únicamente presentación (paneles, tablas, formularios, barra lateral, calendario/Si.R.A. y directorios). Se cargó **al final** de los estilos originales para tener prioridad de tema, sin modificar permisos, acciones, identificadores, semántica de alertas o datos.
+- En pantallas pequeñas se prioriza menú, selector y salida. Solo a menos de 500 px se oculta el nombre en el encabezado, no el usuario ni sus permisos.
+- Pruebas de referencia: `node --test tests/publico/*.test.cjs`. Se requiere revisión manual en PC y móvil de todos los módulos y, en particular, formularios, tablas, menús y contraste. **Producción y `main` intactos.**
