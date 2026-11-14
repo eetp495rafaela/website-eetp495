@@ -1,28 +1,28 @@
-# Integración 45 — Modo claro/oscuro en el sitio público
+# Integración 45 — Modo claro/oscuro del sitio público y los portales
 
 **Fecha:** 14/11/2026  
 **Estado:** sitio público validado visualmente por el responsable; ampliación a los cinco portales preparada en desarrollo, pendiente de prueba local. No fusionar con `main` antes de probar.
 
-## Alcance
-- Solo el **sitio público 2027**, portada y las seis secciones de `vista-2027/`.
+## Alcance inicial (sitio público)
+- El **sitio público 2027**, portada y las seis secciones de `vista-2027/`.
 - Botón rectangular redondeado en el encabezado con ☀️ y 🌙. Se destaca el icono del modo activo. Cada clic alterna entre claro y oscuro, actualiza su accesibilidad (`aria-label`, `aria-pressed`) y guarda la elección en `localStorage`.
 - Modo claro inicial; se restaura la elección en toda la navegación pública sin destellos claros cuando existe modo oscuro guardado.
 - Hoja independiente de estilos oscuros con paleta azul institucional; se adaptan encabezado, tarjetas, calendarios, Plan de Estudios, transporte y contacto. No se invierten fotografías, escudos, ni íconos.
 - Comportamiento en celular: selector junto al acceso al Portal Institucional y el menú. No modifica navegación ni lógica de la galería.
 - Funciona sin cuenta, sin Firebase, sin Apps Script y sin llamadas de red adicionales salvo los recursos estáticos.
-- No cambia login, Docentes, Gestión, Soporte o Alumnos. Sin modificar datos institucionales.
+- Sin modificar datos institucionales ni la lógica de las aplicaciones.
 
 ## Pruebas previstas
 - Alternar tres veces en la portada y verificar alternancia completa, accesibilidad y la preferencia guardada.
 - Navegar a La Escuela, Plan, Proyectos, Novedades, Calendario e Inscripciones con cada tema.
 - Probar PC y celular, menú desplegable, contraste y fotografías.
 - Inspeccionar que, al volver, persista el último modo elegido.
-- Comprobar que ningún portal institucional heredó este cambio.
+- Comprobar que ninguna función institucional ni permiso depende de la elección del tema.
 
 ## Ajuste y ampliación aprobados (14/11/2026)
 
 - El responsable confirmó que el selector público es cómodo y funciona visualmente. Detectó un caso de contraste: **«Nuestra historia»** en La Escuela tenía color azul fijado en línea; se sustituyó por `var(--navy)`, que es oscuro en claro y blanco azulado en oscuro.
-- Se incorporó el mismo selector ☀️ / 🌙 en las barras superiores **visibles** de los cinco portales: Alumnos, Docentes (incluye usuarios DAI), Gestión y Soporte. Se evita el encabezado antiguo oculto de Gestión y Soporte.
+- Se incorporó el mismo selector ☀️ / 🌙 en las barras superiores **visibles** de los cinco portales: Alumnos, Docentes, Docentes de Apoyo, Gestión y Soporte. Se evita el encabezado antiguo oculto de Gestión y Soporte.
 - Se reutiliza `vista-2027/assets/js/tema-publico-2027.js` y la clave de almacenamiento `eetp495-public-theme`. Al navegar entre público y portales se conserva la preferencia. `login.html` permanece sin cambios.
 - La nueva hoja `assets/css/portales/tema-portales-2027.css` contiene únicamente presentación (paneles, tablas, formularios, barra lateral, calendario/Si.R.A. y directorios). Se cargó **al final** de los estilos originales para tener prioridad de tema, sin modificar permisos, acciones, identificadores, semántica de alertas o datos.
 - En pantallas pequeñas se prioriza menú, selector y salida. Solo a menos de 500 px se oculta el nombre en el encabezado, no el usuario ni sus permisos.
