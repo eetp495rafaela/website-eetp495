@@ -3,6 +3,13 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <script>
+      try {
+        if (localStorage.getItem("eetp495-public-theme") === "dark") {
+          document.documentElement.setAttribute("data-public-theme", "dark");
+        }
+      } catch (_) { /* La preferencia es opcional. */ }
+    </script>
     <meta name="theme-color" content="#0b2346" />
     <meta name="robots" content="noindex,nofollow" />
     <title>Portal Docentes | E.E.T.P. N° 495</title>
@@ -48,6 +55,7 @@
     <link rel="stylesheet" href="../assets/css/portales/gestiones-elegantes-2027.css?v=28" />
     <link rel="stylesheet" href="../assets/css/portales/normativa-elegante-2027.css?v=30" />
     <link rel="stylesheet" href="../assets/css/portales/informes-docente-dai.css?v=1" />
+    <link rel="stylesheet" href="../assets/css/portales/tema-portales-2027.css?v=45" />
   </head>
   <body data-rol-permitido="DOCENTE" class="portal-docentes-2027">
     <a class="skip" href="#inicio">Saltar al contenido</a>
@@ -614,6 +622,14 @@
             <span data-nombre-usuario>Cargando usuario…</span
             ><small data-rol-usuario>Docente</small>
           </div>
+          <button
+            type="button"
+            class="portal-theme-toggle"
+            data-public-theme-toggle
+            aria-pressed="false"
+            aria-label="Activar modo oscuro"
+            title="Activar modo oscuro"
+          ><span class="portal-theme-icon portal-theme-sun" aria-hidden="true">☀️</span><span class="portal-theme-icon portal-theme-moon" aria-hidden="true">🌙</span></button>
           <button
             type="button"
             class="exit-link"
@@ -2136,5 +2152,6 @@
       src="../assets/js/calificaciones-taller-docente.js?v=20261009-1"
       type="module"
     ></script>
+    <script src="../vista-2027/assets/js/tema-publico-2027.js?v=45" defer></script>
   </body>
 </html>
