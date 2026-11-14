@@ -3,11 +3,11 @@ const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const path = require("node:path");
 const root = path.resolve(__dirname, "../..");
-const fourPortals = ["alumnos/index.html","docentes/index.html","gestion/index.html","admin/index.html"];
+const fivePortals = ["alumnos/index.html","docentes/index.html","docentes-apoyo/index.html","gestion/index.html","admin/index.html"];
 const load = p => fs.readFileSync(path.join(root, p), "utf8");
 
 test("cada portal tiene un solo botón de tema en su encabezado visible", () => {
-  for (const p of fourPortals) {
+  for (const p of fivePortals) {
     const html = load(p);
     assert.equal((html.match(/data-public-theme-toggle/g) || []).length, 1, p);
     const active = html.slice(html.indexOf('class="portal-content"'));
@@ -19,7 +19,7 @@ test("cada portal tiene un solo botón de tema en su encabezado visible", () => 
   }
 });
 test("preferencia local se aplica antes de que cargue el CSS del portal", () => {
-  for (const p of fourPortals) {
+  for (const p of fivePortals) {
     const html = load(p);
     const boot = html.indexOf('localStorage.getItem("eetp495-public-theme")');
     const css = html.indexOf("tema-portales-2027.css?v=45");
@@ -33,10 +33,10 @@ test("el código compartido permite volver al modo claro", () => {
   assert.match(js, /localStorage\.setItem\(clave, nuevo\)/);
   assert.match(js, /aria-pressed/);
 });
-test("paleta oscura aplicada únicamente a los cuatro portales", () => {
+test("paleta oscura aplicada únicamente a los cinco portales", () => {
   const css = load("assets/css/portales/tema-portales-2027.css");
   assert.match(css, /html\[data-public-theme="dark"\]/);
-  for (const cls of ["portal-alumnos-2027","portal-docentes-2027","portal-gestion-2027","portal-soporte-2027"]) {
+  for (const cls of ["portal-alumnos-2027","portal-docentes-2027","portal-docentes-apoyo-2027","portal-gestion-2027","portal-soporte-2027"]) {
     assert(css.includes(cls),cls);
   }
   assert(!/filter:\s*invert\(/i.test(css));

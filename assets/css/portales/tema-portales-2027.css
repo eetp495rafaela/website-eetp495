@@ -341,3 +341,44 @@ html[data-public-theme="dark"] body:is(.portal-alumnos-2027,.portal-docentes-202
 :is(dialog,.modal-content,.p27-dialog-inner,.p27-contact-dialog) :is(h2,h3,h4) {
   color: #eaf3ff;
 }
+
+/* Portal de Docentes de Apoyo: módulos exclusivos del acompañamiento. */
+html[data-public-theme="dark"] body.portal-docentes-apoyo-2027
+:is(.apoyo-panel,.apoyo-notice,.apoyo-agenda-resumen,.apoyo-periodo-consultado,.apoyo-panel .tabla) {
+  background: #192d46;
+  border-color: #3c5570;
+  color: #daebff;
+}
+html[data-public-theme="dark"] body.portal-docentes-apoyo-2027
+:is(.apoyo-panel h2,.apoyo-panel h4,.apoyo-agenda-intro h2) { color: #eaf4ff; }
+html[data-public-theme="dark"] body.portal-docentes-apoyo-2027
+:is(.apoyo-panel-header p,.apoyo-agenda-intro p,.apoyo-panel .mensaje:not(.error),.apoyo-agenda-resumen span) {
+  color: #bacfe6;
+}
+html[data-public-theme="dark"] body.portal-docentes-apoyo-2027
+.apoyo-panel-header { border-bottom-color: #3b536c; }
+html[data-public-theme="dark"] body.portal-docentes-apoyo-2027
+.apoyo-agenda-campo label { color: #e2efff; }
+html[data-public-theme="dark"] body.portal-docentes-apoyo-2027
+.apoyo-agenda-campo :is(select,input) {
+  background: #11263e;
+  color: #eaf4ff;
+  border-color: #48627f;
+}
+html[data-public-theme="dark"] body.portal-docentes-apoyo-2027
+.apoyo-agenda-campo select:disabled { background: #1b3047; color: #adbed1; }
+html[data-public-theme="dark"] body.portal-docentes-apoyo-2027
+.apoyo-panel th {
+  background: #233f5d;
+  color: #e9f3ff;
+  border-color: #3b526c;
+}
+html[data-public-theme="dark"] body.portal-docentes-apoyo-2027
+.apoyo-panel td {
+  color: #dcecff;
+  border-color: #354d68;
+}
+html[data-public-theme="dark"] body.portal-docentes-apoyo-2027
+.apoyo-panel a { color: #abd5ff; }
+html[data-public-theme="dark"] body.portal-docentes-apoyo-2027
+.apoyo-panel .mensaje.error { color: #ff9ca5; }
