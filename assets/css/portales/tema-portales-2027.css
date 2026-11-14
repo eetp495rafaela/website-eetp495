@@ -767,3 +767,278 @@ html[data-public-theme="dark"] body.portal-docentes-2027 #agenda-institucional-d
   color: #eaf4ff !important;
   border-color: #52708c !important;
 }
+
+
+/* ============================================================
+   Integración 45C · Soporte, Gestión, Alumnos y Docentes de Apoyo
+   ============================================================ */
+
+/* SOPORTE · Alta de usuarios y vinculación DAI. El <summary> original
+   tenía azul fijo inline, casi invisible sobre fondo nocturno. */
+html[data-public-theme="dark"] body.portal-soporte-2027 #gestionDocentesApoyo > summary {
+  color: #eaf4ff !important;
+  background: transparent;
+  line-height: 1.5;
+}
+html[data-public-theme="dark"] body.portal-soporte-2027 #gestionDocentesApoyo > p {
+  color: #bdd4ea !important;
+}
+html[data-public-theme="dark"] body.portal-soporte-2027 #estudiantesApoyoAdmin {
+  background: #1b304b;
+  color: #e1efff;
+  border-color: #45617e !important;
+}
+html[data-public-theme="dark"] body.portal-soporte-2027 #estudiantesApoyoAdmin :is(label,span,strong,p) {
+  color: #e3f1ff;
+}
+html[data-public-theme="dark"] body.portal-soporte-2027 #usuarios
+:is(.selector-roles-admin label,.rol-adicional,.campo-roles-adicionales label) {
+  color: #d5e7fa !important;
+}
+html[data-public-theme="dark"] body.portal-soporte-2027 #usuarios :is(.selector-roles-admin label,.filtros-usuarios,.filtros-contactos-institucionales) {
+  background: #1e344f;
+  border-color: #48627e;
+}
+
+/* SOPORTE · Directorios de personas, estudiantes, cursos y vínculos.
+   Mantener verdes/rojos en badges y botones de baja. */
+html[data-public-theme="dark"] body.portal-soporte-2027 :is(#usuarios,#contactos-institucionales,#referentes-institucionales,
+         #estudiantes,#cursos,#asignaciones-docentes,#espacios-curriculares)
+:is(.filtros-usuarios,.filtros-asignaciones,.filtros-contactos-institucionales,
+    .filtros-estudiantes,.filtros-referentes,.filtros-cambio-ciclo-admin,
+    .herramientas-cambio-ciclo-admin,.campo-filtro,
+    .panel-usuarios-inactivos,.panel-solicitudes-alta) {
+  border-color: #425d7a;
+}
+html[data-public-theme="dark"] body.portal-soporte-2027 #estudiantes
+:is(.herramientas-cambio-ciclo-admin,.filtros-cambio-ciclo-admin,.panel-cambio-ciclo-admin) {
+  background: #192f4a !important;
+  border-color: #425d7a !important;
+}
+html[data-public-theme="dark"] body.portal-soporte-2027 #estudiantes
+:is(.herramientas-cambio-ciclo-admin,.filtros-cambio-ciclo-admin)
+:is(label,p,small) {
+  color: #d1e4f8 !important;
+}
+html[data-public-theme="dark"] body.portal-soporte-2027 #estudiantes :is(.tabla-estudiantes,.tabla-usuarios)
+:is(td,th) {
+  border-color: #405974;
+}
+html[data-public-theme="dark"] body.portal-soporte-2027 :is(#usuarios,#referentes-institucionales,#contactos-institucionales,
+         #estudiantes,#cursos,#asignaciones-docentes)
+:is(.encabezado-listado p,.panel-info > p,.campo-filtro small,
+    .campo-formulario small) {
+  color: #b9cfe6 !important;
+}
+
+/* SOPORTE · Horario de Aula/Taller/Educación Física: las cinco columnas
+   permanecen legibles en vez de tarjetas blancas sobre una página oscura. */
+html[data-public-theme="dark"] body.portal-soporte-2027 :is(#horario-aula,#horario-taller,#horario-educacion-fisica)
+:is(.dia-horario-admin,.recreo-horario-admin,.tarjeta-bloque-horario-admin) {
+  background: #1c324e !important;
+  border-color: #45617d !important;
+  color: #e3effd !important;
+}
+html[data-public-theme="dark"] body.portal-soporte-2027 :is(#horario-aula,#horario-taller,#horario-educacion-fisica)
+:is(.dia-horario-admin h4,.bloque-horario-materia,.bloque-horario-hora,
+    .bloque-horario-docente,.bloque-horario-ubicacion) {
+  color: #deebff !important;
+}
+html[data-public-theme="dark"] body.portal-soporte-2027 :is(#horario-aula,#horario-taller,#horario-educacion-fisica)
+.etiqueta-turno-horario-admin {
+  background: #254665 !important;
+  color: #d6eaff !important;
+}
+html[data-public-theme="dark"] body.portal-soporte-2027 :is(#horario-aula,#horario-taller,#horario-educacion-fisica)
+:is(.bloque-horario-opcion,.campo-formulario .mensaje-formulario:not(.error)) {
+  color: #c8ddf4 !important;
+}
+
+/* SOPORTE · Docentes libres de Taller: verde = libre, naranja = aula.
+   Se conservan estados pero se oscurecen las superficies blancas. */
+html[data-public-theme="dark"] body.portal-soporte-2027 #vistaDocentesLibresTallerAdmin
+:is(.docentes-libres-introduccion,.docentes-libres-turno,
+    .docentes-libres-dia,.docentes-libres-dia-encabezado,
+    .docentes-libres-docente,.docentes-libres-vacio) {
+  background: #1c324c !important;
+  border-color: #405d79 !important;
+  color: #dceafa !important;
+}
+html[data-public-theme="dark"] body.portal-soporte-2027 #vistaDocentesLibresTallerAdmin
+:is(.docentes-libres-introduccion h3,.docentes-libres-turno h4,
+    .docentes-libres-dia h5,.docentes-libres-identidad strong) {
+  color: #edf6ff !important;
+}
+html[data-public-theme="dark"] body.portal-soporte-2027 #vistaDocentesLibresTallerAdmin
+:is(.docentes-libres-introduccion p,.docentes-libres-turno-encabezado p,
+    .docentes-libres-cantidad,.docentes-libres-kicker,
+    .docentes-libres-detalles-aula li span,
+    .docentes-libres-detalles-aula li small,.docentes-libres-vacio) {
+  color: #bad0e6 !important;
+}
+html[data-public-theme="dark"] body.portal-soporte-2027 #vistaDocentesLibresTallerAdmin
+:is(.docentes-libres-detalles-aula,.docentes-libres-detalles-aula li) {
+  border-color: #46607a !important;
+}
+html[data-public-theme="dark"] body.portal-soporte-2027 #vistaDocentesLibresTallerAdmin
+:is(.docentes-libres-leyenda span:not(.docentes-libres-leyenda-aula),
+    .docentes-libres-estado:not(.docentes-libres-estado-aula)) {
+  color: #a7f4d0 !important;
+  background: #174339 !important;
+  border-color: #377c61 !important;
+}
+html[data-public-theme="dark"] body.portal-soporte-2027 #vistaDocentesLibresTallerAdmin
+:is(.docentes-libres-leyenda-aula,.docentes-libres-estado-aula) {
+  color: #ffe0ab !important;
+  background: #4a341e !important;
+  border-color: #937042 !important;
+}
+
+/* SOPORTE · Calificaciones, tablones, configuración. No transformar
+   resultados de acciones ni botones destructivos. */
+html[data-public-theme="dark"] body.portal-soporte-2027 :is(#calificaciones-taller-admin,#calificaciones-taller,
+         #configuracion,#asignaciones-docentes)
+:is(.panel-info,.tabla-contenedor,.filtros-calificaciones-admin) {
+  background: #192e47;
+  border-color: #45617c;
+}
+html[data-public-theme="dark"] body.portal-soporte-2027 :is(#calificaciones-taller-admin,#calificaciones-taller)
+:is(.mensaje-formulario:not(.error):not(.ok),.encabezado-listado p) {
+  color: #b9d1eb !important;
+}
+
+/* GESTIÓN · S.I.M.E., Si.R.A., horarios y directorio DAI.
+   Los semáforos de asistencia siguen siendo verde/rojo/ámbar. */
+html[data-public-theme="dark"] body.portal-gestion-2027 :is(.grupo-horario-gestion,.dia-horario-gestion,
+         .tarjeta-bloque-horario-gestion,.tarjeta-sime-gestion,
+         .materias-contenedor-sime-gestion,.tabla-sime-gestion-contenedor,
+         .sira-gestion-encabezado,.sira-gestion-dia,.sira-gestion-bloque) {
+  background: #1b304a !important;
+  border-color: #45607c !important;
+  color: #dfedfc !important;
+}
+html[data-public-theme="dark"] body.portal-gestion-2027 :is(.titulo-grupo-horario-gestion h4,.encabezado-sime-gestion h4,
+         .materias-contenedor-sime-gestion h5,.sira-gestion-encabezado h3,
+         .sira-gestion-bloque header h4,.bloque-horario-materia-gestion) {
+  color: #edf6ff !important;
+}
+html[data-public-theme="dark"] body.portal-gestion-2027 :is(.titulo-grupo-horario-gestion span,.bloque-horario-hora-gestion,
+         .bloque-horario-docente-gestion,.bloque-horario-extra-gestion,
+         .encabezado-sime-gestion p,.detalle-sime-gestion p,
+         .sira-gestion-encabezado p,.sira-gestion-bloque header p) {
+  color: #bfd4e9 !important;
+}
+html[data-public-theme="dark"] body.portal-gestion-2027 :is(.sira-gestion-dia > h4,.dia-horario-gestion h5,
+         .sira-gestion-bloque header,.materias-contenedor-sime-gestion) {
+  background: #263f5b !important;
+  color: #eaf4ff !important;
+  border-color: #4a6681;
+}
+html[data-public-theme="dark"] body.portal-gestion-2027 :is(.sira-gestion-estado,.sira-gestion-estado li,
+         .sira-gestion-dia-vacio,.sira-gestion-sin-datos,
+         .materias-sime-gestion span,.materia-sime-vacia) {
+  background: #20344d !important;
+  border-color: #45607d !important;
+  color: #dceafa !important;
+}
+html[data-public-theme="dark"] body.portal-gestion-2027 .sira-gestion-estado li :is(strong,small) {
+  color: #d6e8fb !important;
+}
+html[data-public-theme="dark"] body.portal-gestion-2027 .panel-dai-gestion :is(.dai-gestion-tabla-scroll,.dai-gestion-tabla) {
+  background: #1b3049 !important;
+  border-color: #45617d !important;
+}
+html[data-public-theme="dark"] body.portal-gestion-2027 .panel-dai-gestion .dai-gestion-tabla th {
+  background: #254361 !important;
+  color: #f0f7ff !important;
+  border-color: #4a6682 !important;
+}
+html[data-public-theme="dark"] body.portal-gestion-2027 .panel-dai-gestion .dai-gestion-tabla td {
+  background: #1b3049 !important;
+  color: #d9e9fb !important;
+  border-color: #405c79 !important;
+}
+html[data-public-theme="dark"] body.portal-gestion-2027 .panel-dai-gestion
+:is(.dai-gestion-nombre,.dai-gestion-correo,.dai-gestion-curso,
+    .dai-gestion-sin-estudiantes,.dai-gestion-contador) {
+  color: #c7dbf1 !important;
+}
+
+/* ALUMNOS · Horarios, documentos, S.I.M.E. y referentes.
+   Mantener las categorías y calificaciones de los listados. */
+html[data-public-theme="dark"] body.portal-alumnos-2027 :is(.dia-horario-alumno,.tarjeta-bloque-horario-alumno,
+         .tarjeta-referente-alumno,.tarjeta-companero-alumno,
+         .sime-bloque,.lista-materias-sime,.tabla-contenedor) {
+  background: #1b304a !important;
+  color: #e0eefb !important;
+  border-color: #46617c !important;
+}
+html[data-public-theme="dark"] body.portal-alumnos-2027 :is(.dia-horario-alumno h4,.tarjeta-bloque-horario-alumno
+         .bloque-horario-materia-alumno,.tarjeta-referente-alumno strong,
+         .tarjeta-companero-alumno strong) {
+  color: #edf5ff !important;
+}
+html[data-public-theme="dark"] body.portal-alumnos-2027 :is(.tarjeta-bloque-horario-alumno .bloque-horario-hora-alumno,
+         .tarjeta-bloque-horario-alumno .bloque-horario-docente-alumno,
+         .tarjeta-bloque-horario-alumno .bloque-horario-ubicacion-alumno,
+         .tarjeta-referente-alumno p,.tarjeta-companero-alumno p) {
+  color: #c3d7ee !important;
+}
+html[data-public-theme="dark"] body.portal-alumnos-2027 :is(.tabla-documentacion-alumno,.tabla-docentes-alumno,
+         .tabla-sime-alumno,.tabla-contenedor) {
+  background: #192d46 !important;
+  border-color: #405b77 !important;
+}
+html[data-public-theme="dark"] body.portal-alumnos-2027 :is(.tabla-documentacion-alumno,.tabla-docentes-alumno,
+         .tabla-sime-alumno) :is(th,td,td strong) {
+  color: #dbeafb !important;
+  border-color: #415e7a !important;
+}
+html[data-public-theme="dark"] body.portal-alumnos-2027 :is(.tabla-documentacion-alumno,.tabla-docentes-alumno,
+         .tabla-sime-alumno) thead th {
+  background: #263e5a !important;
+}
+
+/* DAI · Sus filtros, informes, horarios y las tarjetas de asistencia
+   deben conservar el mismo contraste que Docentes. */
+html[data-public-theme="dark"] body.portal-docentes-2027 .apoyo-panel :is(.apoyo-agenda-resumen,.apoyo-periodo-consultado) {
+  background: #1d3550 !important;
+  border-color: #46627f !important;
+  color: #e3effd !important;
+}
+html[data-public-theme="dark"] body.portal-docentes-2027 .apoyo-panel :is(.apoyo-agenda-resumen span,.apoyo-periodo-consultado,
+                      .apoyo-panel-header p,.apoyo-agenda-intro p) {
+  color: #bdd4ea !important;
+}
+html[data-public-theme="dark"] body.portal-docentes-2027 .apoyo-panel .apoyo-agenda-campo :is(input,select,option) {
+  background: #142a43 !important;
+  border-color: #4a6681 !important;
+  color: #ecf5ff !important;
+}
+
+/* Diálogos de configuración y edición: fuera de .p27-pane.
+   Mantener siempre visibles los botones de confirmar/cancelar. */
+html[data-public-theme="dark"] body:is(.portal-alumnos-2027,.portal-docentes-2027,.portal-gestion-2027,.portal-soporte-2027) :is(.modal-edicion-contenido,.modal-confirmacion-contenido,
+         .modal-contenido,.p27-contact-dialog,.modal-content) {
+  background: #192d47 !important;
+  color: #dceafb !important;
+  border-color: #47617c !important;
+}
+html[data-public-theme="dark"] body:is(.portal-alumnos-2027,.portal-docentes-2027,.portal-gestion-2027,.portal-soporte-2027) :is(.modal-edicion-contenido,.modal-confirmacion-contenido,
+         .modal-contenido,.p27-contact-dialog,.modal-content)
+:is(h2,h3,h4,p):not(.error):not(.ok):not(.mensaje-error) {
+  color: #d7e8f9 !important;
+}
+html[data-public-theme="dark"] body:is(.portal-alumnos-2027,.portal-docentes-2027,.portal-gestion-2027,.portal-soporte-2027) :is(.modal-edicion-contenido,.modal-confirmacion-contenido,
+         .modal-contenido,.p27-contact-dialog,.modal-content)
+:is(input:not([type="checkbox"]):not([type="radio"]),select,textarea) {
+  background: #152b43 !important;
+  color: #eaf5ff !important;
+  border-color: #4d6885 !important;
+}
+html[data-public-theme="dark"] body:is(.portal-alumnos-2027,.portal-docentes-2027,.portal-gestion-2027,.portal-soporte-2027) :is(.modal-edicion-contenido,.modal-confirmacion-contenido,
+         .modal-contenido,.p27-contact-dialog,.modal-content)
+:is(option,optgroup) {
+  background: #152b43 !important;
+  color: #eaf5ff !important;
+}
