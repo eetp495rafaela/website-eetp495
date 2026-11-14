@@ -1,0 +1,347 @@
+/* Integración 45 · Tema oscuro de los cuatro portales 2027.
+   Solo presentación: NO altera permisos, visibilidad, estados, eventos ni datos.
+   Comparte con el sitio público la clave local "eetp495-public-theme".
+   No invertir fotografías ni escudos; mantener mensajes semánticos de estado. */
+
+/* Botón rectangular con sol y luna: se ve en la barra superior activa. */
+body:is(.portal-alumnos-2027,.portal-docentes-2027,.portal-gestion-2027,.portal-soporte-2027)
+.portal-content .topbar .portal-theme-toggle {
+  display: inline-flex;
+  flex: 0 0 79px;
+  width: 79px;
+  height: 42px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 4px;
+  margin: 0;
+  border: 1px solid #c1d3e4;
+  border-radius: 12px;
+  background: #eef4fb;
+  color: #183959;
+  cursor: pointer;
+  line-height: 1;
+  font-family: inherit;
+  -webkit-tap-highlight-color: transparent;
+}
+body:is(.portal-alumnos-2027,.portal-docentes-2027,.portal-gestion-2027,.portal-soporte-2027)
+.portal-content .topbar .portal-theme-icon {
+  flex: 0 0 32px;
+  width: 32px;
+  height: 32px;
+  display: grid;
+  place-items: center;
+  border-radius: 8px;
+  font-size: 18px;
+  opacity: .55;
+  filter: grayscale(.75);
+  transition: opacity .16s, background-color .16s, filter .16s;
+}
+html:not([data-public-theme="dark"])
+body:is(.portal-alumnos-2027,.portal-docentes-2027,.portal-gestion-2027,.portal-soporte-2027)
+.portal-content .topbar .portal-theme-sun,
+html[data-public-theme="dark"]
+body:is(.portal-alumnos-2027,.portal-docentes-2027,.portal-gestion-2027,.portal-soporte-2027)
+.portal-content .topbar .portal-theme-moon {
+  background: #fff;
+  opacity: 1;
+  filter: none;
+  box-shadow: 0 2px 8px rgba(0, 28, 60, .20);
+}
+html[data-public-theme="dark"]
+body:is(.portal-alumnos-2027,.portal-docentes-2027,.portal-gestion-2027,.portal-soporte-2027)
+.portal-content .topbar .portal-theme-toggle {
+  background: #15263e;
+  border-color: #58738f;
+  color: #eaf4ff;
+}
+html[data-public-theme="dark"]
+body:is(.portal-alumnos-2027,.portal-docentes-2027,.portal-gestion-2027,.portal-soporte-2027)
+.portal-content .topbar .portal-theme-moon {
+  background: #31547a;
+}
+body:is(.portal-alumnos-2027,.portal-docentes-2027,.portal-gestion-2027,.portal-soporte-2027)
+.portal-content .topbar .portal-theme-toggle:focus-visible {
+  outline: 3px solid #e8b567 !important;
+  outline-offset: 2px;
+}
+/* Mantener visible el interruptor sin desbordar el encabezado móvil. */
+@media (max-width: 770px) {
+  body:is(.portal-alumnos-2027,.portal-docentes-2027,.portal-gestion-2027,.portal-soporte-2027)
+  .portal-content .topbar .portal-theme-toggle {
+    flex-basis: 71px;
+    width: 71px;
+    height: 40px;
+    padding: 3px;
+    border-radius: 10px;
+  }
+  body:is(.portal-alumnos-2027,.portal-docentes-2027,.portal-gestion-2027,.portal-soporte-2027)
+  .portal-content .topbar .portal-theme-icon {
+    flex-basis: 30px;
+    width: 30px;
+    height: 32px;
+    font-size: 17px;
+  }
+}
+@media (max-width: 500px) {
+  body:is(.portal-alumnos-2027,.portal-docentes-2027)
+  .portal-content .topbar .user-identity,
+  body:is(.portal-gestion-2027,.portal-soporte-2027)
+  .portal-content .topbar .p27-user { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .portal-theme-toggle .portal-theme-icon { transition: none !important; }
+}
+
+/* Variables institucionales: diferenciar enlaces claros de botones con
+   fondo azul. Las alertas de éxito/error/advertencia conservan sus colores. */
+html[data-public-theme="dark"]
+body:is(.portal-alumnos-2027,.portal-docentes-2027,.portal-gestion-2027,.portal-soporte-2027) {
+  color-scheme: dark;
+  --navy: #eaf3ff;
+  --deep: #dcecff;
+  --blue: #a3d0ff;
+  --ink: #e3edfa;
+  --muted: #adc2da;
+  --line: #344962;
+  --off: #0c1829;
+  --white: #192d47;
+  --sky: #183550;
+  --shadow: 0 15px 42px rgba(0,0,0,.25);
+  --eetp-marino: #eaf3ff;
+  --eetp-azul: #2b6db8;
+  --eetp-azul-fuerte: #347fcb;
+  --eetp-azul-medio: #9cc5f3;
+  --eetp-celeste: #223c58;
+  --eetp-celeste-suave: #1a314a;
+  --eetp-blanco: #192c45;
+  --eetp-borde: #3c526b;
+  --eetp-texto: #dceaf9;
+  --eetp-texto-suave: #b5c9df;
+  --clay: #87bfff;
+  --clay-medium: #9bcaff;
+  --clay-dark: #dcecff;
+  --clay-deep: #e8f3ff;
+  --clay-soft: #203d5c;
+  --cream: #152942;
+  --warm-white: #182d47;
+  --butter: #223c58;
+  --butter-strong: #345877;
+  --butter-soft: #172b43;
+  --bordo-acento: #8abfff;
+  --bordo-borde: #3c526b;
+  --bordo-crema: #172b43;
+  --bordo-crema-2: #192d47;
+  --bordo-texto: #dceaf9;
+  --bordo-texto-suave: #b5c9df;
+  --docente-fondo: #0c1829;
+  --docente-panel: #192c45;
+  --docente-panel-2: #203550;
+  --docente-texto: #dceaf9;
+  --docente-texto-suave: #b5c9df;
+  --docente-tabla: #192c45;
+  --docente-tabla-head: #243e5a;
+  --docente-tabla-texto: #dceaf9;
+  --docente-borde: #3c526b;
+  --alumno-fondo: #0c1829;
+  --alumno-blanco: #192c45;
+  --alumno-celeste: #223c58;
+  --alumno-celeste-suave: #172b43;
+  --alumno-borde: #3c526b;
+  --alumno-texto: #dceaf9;
+  --alumno-texto-suave: #b5c9df;
+  --gestion-fondo: #0c1829;
+  --gestion-celeste: #223c58;
+  --gestion-borde: #3c526b;
+  --gestion-texto: #dceaf9;
+  --gestion-texto-suave: #b5c9df;
+  --fondo: #0c1829;
+  --azul-claro: #223c58;
+  --borde: #3c526b;
+  --texto: #dceaf9;
+  --texto-suave: #b5c9df;
+  background: #0c1829;
+  color: #e3edfa;
+}
+html[data-public-theme="dark"] body:is(.portal-alumnos-2027,.portal-docentes-2027,.portal-gestion-2027,.portal-soporte-2027)
+:is(.portal-shell,.portal-content, main#inicio, .contenedor, .p27-pane, .legacy-workspace) {
+  background-color: transparent;
+  color: #dceafa;
+}
+
+/* Navegación y barra superior. */
+html[data-public-theme="dark"] body:is(.portal-alumnos-2027,.portal-docentes-2027,.portal-gestion-2027,.portal-soporte-2027) .sidebar {
+  background: #101f34;
+  border-right-color: #30455f;
+  box-shadow: 5px 0 26px rgba(0,0,0,.18);
+}
+html[data-public-theme="dark"] body:is(.portal-alumnos-2027,.portal-docentes-2027,.portal-gestion-2027,.portal-soporte-2027)
+:is(.side-brand,.side-footer) { border-color: #344862; }
+html[data-public-theme="dark"] body:is(.portal-alumnos-2027,.portal-docentes-2027,.portal-gestion-2027,.portal-soporte-2027)
+:is(.side-brand strong,.side-intro h2) { color: #e7f1ff; }
+html[data-public-theme="dark"] body:is(.portal-alumnos-2027,.portal-docentes-2027,.portal-gestion-2027,.portal-soporte-2027)
+:is(.side-brand small,.nav-group,.side-footer a) { color: #aec5dd; }
+html[data-public-theme="dark"] body:is(.portal-alumnos-2027,.portal-docentes-2027,.portal-gestion-2027,.portal-soporte-2027)
+:is(.sidebar-search,.mini-chip) {
+  background: #203854;
+  border-color: #3c5671;
+  color: #d3e5f8;
+}
+html[data-public-theme="dark"] body:is(.portal-alumnos-2027,.portal-docentes-2027,.portal-gestion-2027,.portal-soporte-2027)
+.sidebar-search input { color: #edf5ff; }
+html[data-public-theme="dark"] body:is(.portal-alumnos-2027,.portal-docentes-2027,.portal-gestion-2027,.portal-soporte-2027)
+.sidebar-search input::placeholder { color: #c0d0e0; opacity: 1; }
+html[data-public-theme="dark"] body:is(.portal-alumnos-2027,.portal-docentes-2027,.portal-gestion-2027,.portal-soporte-2027)
+.nav-item { color: #c1d4e9; }
+html[data-public-theme="dark"] body:is(.portal-alumnos-2027,.portal-docentes-2027,.portal-gestion-2027,.portal-soporte-2027)
+.nav-item:hover { color: #fff; background: #264261; }
+html[data-public-theme="dark"] body:is(.portal-alumnos-2027,.portal-docentes-2027,.portal-gestion-2027,.portal-soporte-2027)
+.side-nav .nav-item.is-active {
+  color: #ebf5ff;
+  background: #29476b;
+}
+html[data-public-theme="dark"] body:is(.portal-alumnos-2027,.portal-docentes-2027,.portal-gestion-2027,.portal-soporte-2027)
+:is(.mini-icon,.circle-btn) { background: #294966; color: #e3f2ff; border-color: #4c6987; }
+html[data-public-theme="dark"] body:is(.portal-alumnos-2027,.portal-docentes-2027,.portal-gestion-2027,.portal-soporte-2027)
+.portal-content .topbar {
+  background: rgba(17,34,55,.97);
+  border-bottom: 1px solid #344963;
+  color: #dcecff;
+  box-shadow: 0 4px 16px rgba(0,0,0,.12);
+}
+html[data-public-theme="dark"] body:is(.portal-alumnos-2027,.portal-docentes-2027,.portal-gestion-2027,.portal-soporte-2027)
+:is(.crumb,.crumb strong,.user-identity,.user-identity small,.p27-user,.p27-user small,.exit-link) { color: #c8def5; }
+html[data-public-theme="dark"] body:is(.portal-alumnos-2027,.portal-docentes-2027,.portal-gestion-2027,.portal-soporte-2027)
+.exit-link:hover { color: #fff; }
+html[data-public-theme="dark"] body:is(.portal-alumnos-2027,.portal-docentes-2027,.portal-gestion-2027,.portal-soporte-2027)
+:is(.role-mark,.mini-chip,.badge-institucional) { background: #284662; border-color: #466485; color: #d7eaff; }
+
+/* Titulares, textos auxiliares y paneles de módulos. */
+html[data-public-theme="dark"] body:is(.portal-alumnos-2027,.portal-docentes-2027,.portal-gestion-2027,.portal-soporte-2027)
+:is(.work-topline h1,.p27-pane > h2,.legacy-workspace > .grupo > h2,.p27-intro h2,.panel-header h2) { color: #eaf3ff; }
+html[data-public-theme="dark"] body:is(.portal-alumnos-2027,.portal-docentes-2027,.portal-gestion-2027,.portal-soporte-2027)
+:is(.work-topline p,.panel-header p,.p27-pane p,.legacy-workspace p,.p27-home p,.muted,.micro) {
+  color: #b6cce5;
+}
+html[data-public-theme="dark"] body:is(.portal-alumnos-2027,.portal-docentes-2027,.portal-gestion-2027,.portal-soporte-2027)
+:is(.p27-pane,.legacy-workspace) :is(h2,h3,h4):not(.estado-error):not(.mensaje-error) {
+  color: #e8f2ff;
+}
+html[data-public-theme="dark"] body:is(.portal-alumnos-2027,.portal-docentes-2027,.portal-gestion-2027,.portal-soporte-2027)
+:is(.p27-pane,.legacy-workspace) :is(label,legend) { color: #d6e7f9; }
+html[data-public-theme="dark"] body:is(.portal-alumnos-2027,.portal-docentes-2027,.portal-gestion-2027,.portal-soporte-2027)
+:is(.panel,.panel-info,.panel-gestion-listado,.p27-home .panel,.tarjeta,.tarjeta-gestion,.tarjeta-acceso,.tarjeta-documentacion,.tarjeta-referente-alumno,.tarjeta-lista-estudiantes-docente,.calendar-board,.tabla-informes-docente-contenedor) {
+  background-color: #192c46;
+  border-color: #3a5069;
+  color: #dceafa;
+  box-shadow: 0 9px 24px rgba(0,0,0,.12);
+}
+html[data-public-theme="dark"] body:is(.portal-alumnos-2027,.portal-docentes-2027,.portal-gestion-2027,.portal-soporte-2027)
+:is(.p27-pane,.legacy-workspace) :is(.panel-info,.documentos-cargados-docente,.tarjeta-bloque-horario-docente,.tarjeta-bloque-horario-gestion,.sira-bloque,.sira-clase-seleccionada,.sira-gestion-bloque,.dia-horario-docente,.dia-horario-aula-docente,.dia-horario-gestion,.sime-bloque) {
+  background: #192c46 !important;
+  border-color: #3b526e !important;
+  color: #dceafa !important;
+}
+html[data-public-theme="dark"] body:is(.portal-alumnos-2027,.portal-docentes-2027,.portal-gestion-2027,.portal-soporte-2027)
+:is(.panel-header,.encabezado-listado,.encabezado-panel-gestion,.encabezado-docente-mesas,.encabezado-documentos-cargados) {
+  border-color: #3a506a;
+}
+html[data-public-theme="dark"] body:is(.portal-alumnos-2027,.portal-docentes-2027,.portal-gestion-2027,.portal-soporte-2027)
+:is(.panel-info,.panel-gestion-listado,.p27-pane,.legacy-workspace) :is(strong,b,small):not(.estado-error):not(.estado-ok) {
+  color: inherit;
+}
+/* Mantener textos secundarios legibles y acentos azules claros sobre fondo oscuro. */
+html[data-public-theme="dark"] body:is(.portal-alumnos-2027,.portal-docentes-2027,.portal-gestion-2027,.portal-soporte-2027)
+:is(.eyebrow,.overline,.side-kicker,.form-eyebrow,.enlace-correo-agenda-docente,.small-link) { color: #a6d1ff; }
+
+/* Entradas y tablas de datos (sin cambiar eventos, enabled, disabled, hidden). */
+html[data-public-theme="dark"] body:is(.portal-alumnos-2027,.portal-docentes-2027,.portal-gestion-2027,.portal-soporte-2027)
+:is(.p27-pane,.legacy-workspace) :is(input:not([type="checkbox"]):not([type="radio"]),select,textarea) {
+  background: #11243b;
+  color: #e8f2ff;
+  border-color: #4b6481;
+}
+html[data-public-theme="dark"] body:is(.portal-alumnos-2027,.portal-docentes-2027,.portal-gestion-2027,.portal-soporte-2027)
+:is(.p27-pane,.legacy-workspace) :is(input,textarea)::placeholder { color: #a7bed6; opacity: 1; }
+html[data-public-theme="dark"] body:is(.portal-alumnos-2027,.portal-docentes-2027,.portal-gestion-2027,.portal-soporte-2027)
+:is(.p27-pane,.legacy-workspace) :is(input:disabled,select:disabled,textarea:disabled) {
+  background-color: #1e3148;
+  color: #97abc2;
+}
+html[data-public-theme="dark"] body:is(.portal-alumnos-2027,.portal-docentes-2027,.portal-gestion-2027,.portal-soporte-2027)
+:is(.p27-pane,.legacy-workspace) table { background-color: #192c46; }
+html[data-public-theme="dark"] body:is(.portal-alumnos-2027,.portal-docentes-2027,.portal-gestion-2027,.portal-soporte-2027)
+:is(.p27-pane,.legacy-workspace) table thead :is(th,tr) {
+  background: #223c59;
+  color: #e9f3ff;
+  border-color: #3a526f;
+}
+html[data-public-theme="dark"] body:is(.portal-alumnos-2027,.portal-docentes-2027,.portal-gestion-2027,.portal-soporte-2027)
+:is(.p27-pane,.legacy-workspace) table tbody td { color: #dae9f9; border-color: #344e68; }
+html[data-public-theme="dark"] body:is(.portal-alumnos-2027,.portal-docentes-2027,.portal-gestion-2027,.portal-soporte-2027)
+:is(.p27-pane,.legacy-workspace) table tbody tr:hover { background: #263e5a; }
+
+/* Área docente: reglas antiguas usan !important: prevalecer sin retocar la lógica. */
+html[data-public-theme="dark"] body.portal-docentes-2027
+:is(.p27-pane,.legacy-workspace) :is(.panel-info,.documentos-cargados-docente,.barra-consulta-documentos-docente),
+html[data-public-theme="dark"] body.portal-docentes-2027
+:is(#panelDocumentacionAcademica,#sira-docente,#parte-sira-docente,#situacion-asistencia-docente,#mis-horarios-docente)
+:is(.documentos-cargados-docente,.dia-horario-docente,.dia-horario-aula-docente,.sira-gestion-dia,.sira-gestion-bloque,.sira-clase-seleccionada) {
+  background: #192c46 !important;
+  color: #daeafb !important;
+  border-color: #3b526e !important;
+}
+html[data-public-theme="dark"] body.portal-docentes-2027
+#panelDocumentacionAcademica :is(input:not([type="checkbox"]):not([type="radio"]),select,textarea),
+html[data-public-theme="dark"] body.portal-docentes-2027
+#panelDocumentacionAcademica :is(input:disabled,select:disabled) {
+  background: #13283e !important;
+  color: #e9f3ff !important;
+  border-color: #4b6481 !important;
+}
+html[data-public-theme="dark"] body.portal-docentes-2027
+:is(#panelDocumentacionAcademica,#mesas-examen-docente,#situacion-asistencia-docente)
+table thead th {
+  background: #223c59 !important;
+  color: #eaf4ff !important;
+  border-color: #3b526e !important;
+}
+html[data-public-theme="dark"] body.portal-docentes-2027
+#panelDocumentacionAcademica .tabla-documentos td,
+html[data-public-theme="dark"] body.portal-docentes-2027
+#panelDocumentacionAcademica .tabla-documentos td strong {
+  color: #e0efff !important;
+}
+html[data-public-theme="dark"] body.portal-docentes-2027
+:is(#sira-docente,#parte-sira-docente,#situacion-asistencia-docente,#mis-horarios-docente)
+:is(.sira-gestion-dia > h4,.sira-gestion-bloque > header,.dia-horario-docente > h4,.dia-horario-aula-docente > h4) {
+  background: #223c59 !important;
+  color: #eaf4ff !important;
+}
+html[data-public-theme="dark"] body.portal-docentes-2027
+:is(.p27-pane,.legacy-workspace)
+:is(.campo-documentacion,.campo-docente-mesas,.encabezado-listado,.encabezado-documentos-cargados,.encabezado-docente-mesas)
+:is(label,h3,p) { color: #dceafa !important; }
+
+/* Directorios DAI, informes, contactos: no modificar su contenido. */
+html[data-public-theme="dark"] body.portal-docentes-2027
+.tabla-informes-docente :is(td,strong,small,.informe-dai-linea) { color: #e1eeff; }
+html[data-public-theme="dark"] body.portal-docentes-2027
+.tabla-informes-docente .informe-dai-linea a { color: #a9d0ff; }
+html[data-public-theme="dark"] body.portal-gestion-2027
+.dai-gestion-tabla :is(th,td,small,strong) { color: #e2f0ff; }
+html[data-public-theme="dark"] body:is(.portal-gestion-2027,.portal-soporte-2027)
+:is(.p27-pane,.legacy-workspace) :is(.vista-gestion,.panel-configuracion,.filtros-gestion,.filtros-documentacion-admin) {
+  color: #dceafa;
+}
+
+/* Diálogos HTML, sin afectar decisiones ni estados. */
+html[data-public-theme="dark"] body:is(.portal-alumnos-2027,.portal-docentes-2027,.portal-gestion-2027,.portal-soporte-2027)
+:is(dialog,.modal-content,.p27-dialog-inner,.p27-contact-dialog) {
+  background: #192c46;
+  color: #dceafa;
+  border-color: #3b526e;
+}
+html[data-public-theme="dark"] body:is(.portal-alumnos-2027,.portal-docentes-2027,.portal-gestion-2027,.portal-soporte-2027)
+:is(dialog,.modal-content,.p27-dialog-inner,.p27-contact-dialog) :is(h2,h3,h4) {
+  color: #eaf3ff;
+}
