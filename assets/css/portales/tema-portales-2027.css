@@ -1042,3 +1042,124 @@ html[data-public-theme="dark"] body:is(.portal-alumnos-2027,.portal-docentes-202
   background: #152b43 !important;
   color: #eaf5ff !important;
 }
+
+
+/* ============================================================
+   Integración 45D · Documentos institucionales, Si.R.A. de Soporte,
+   diálogos de confirmación y ajustes transversales de contraste.
+   ============================================================ */
+
+/* Docentes: las fichas de gestiones y normativa tienen background e
+   iconos marcados !important en archivos independientes. */
+html[data-public-theme="dark"] body.portal-docentes-2027 :is(#gestiones-docentes-2027,#normativa-vigente-2027)
+.p27-pdf-grid .p27-pdf-card {
+  background: linear-gradient(135deg,#203750,#192d46) !important;
+  color: #eaf4ff !important;
+  border-color: #476686 !important;
+  box-shadow: 0 8px 25px rgba(0,0,0,.14);
+}
+html[data-public-theme="dark"] body.portal-docentes-2027 :is(#gestiones-docentes-2027,#normativa-vigente-2027)
+.p27-pdf-grid .p27-pdf-card:is(:hover,:focus-visible) {
+  background: linear-gradient(135deg,#294663,#203753) !important;
+  border-color: #83b7e8 !important;
+}
+html[data-public-theme="dark"] body.portal-docentes-2027 :is(#gestiones-docentes-2027,#normativa-vigente-2027)
+.p27-pdf-grid .p27-pdf-card :is(h3,i) {
+  color: #e9f4ff !important;
+}
+html[data-public-theme="dark"] body.portal-docentes-2027 :is(#gestiones-docentes-2027,#normativa-vigente-2027)
+.p27-pdf-grid .p28-doc-subtitle {
+  color: #c7ddf5 !important;
+}
+html[data-public-theme="dark"] body.portal-docentes-2027 .p27-pdf-grid .p27-pdf-card {
+  background-color: #1e3551;
+  border-color: #486480;
+  color: #eaf5ff;
+}
+html[data-public-theme="dark"] body.portal-docentes-2027 .p27-pdf-grid .p27-pdf-card :is(h3,i) { color: #e7f3ff; }
+
+/* Soporte · Si.R.A.: las tarjetas se presentan a demanda y los
+   estados de asistencia conservan los colores de cabecera. */
+html[data-public-theme="dark"] body.portal-soporte-2027 #sira-admin :is(.sira-admin-encabezado,.sira-admin-semana,
+    .sira-admin-dia,.sira-admin-bloque,.sira-admin-estado) {
+  background: #1b304a !important;
+  border-color: #46617c !important;
+  color: #dfecfa;
+}
+html[data-public-theme="dark"] body.portal-soporte-2027 #sira-admin :is(.sira-admin-encabezado h3,.sira-admin-dia > h4,
+    .sira-admin-bloque header h4) {
+  color: #eaf4ff !important;
+}
+html[data-public-theme="dark"] body.portal-soporte-2027 #sira-admin :is(.sira-admin-encabezado p,
+    .sira-admin-bloque header p,.sira-admin-dia > h4 span) {
+  color: #c7dcf1 !important;
+}
+html[data-public-theme="dark"] body.portal-soporte-2027 #sira-admin :is(.sira-admin-bloque header,
+    .sira-admin-estado li,.sira-admin-sin-datos,.sira-admin-dia-vacio) {
+  background: #233b58 !important;
+  color: #dceafa !important;
+  border-color: #486480 !important;
+}
+html[data-public-theme="dark"] body.portal-soporte-2027 #sira-admin .sira-admin-estado li :is(strong,small) {
+  color: #daeafb !important;
+}
+/* No se alteran .sira-admin-estado.presentes / .ausentes / .tarde
+   para que los indicadores sigan expresando cada resultado. */
+
+/* Modales SweetAlert2 de los portales, también los DAI.
+   Se conserva el color de iconos, botones de confirmación y alertas. */
+html[data-public-theme="dark"] body:is(.portal-alumnos-2027,.portal-docentes-2027,.portal-gestion-2027,.portal-soporte-2027) .swal2-popup:not(.swal2-toast) {
+  background: #1d334e;
+  color: #e7f1ff;
+  border: 1px solid #476480;
+}
+html[data-public-theme="dark"] body:is(.portal-alumnos-2027,.portal-docentes-2027,.portal-gestion-2027,.portal-soporte-2027) .swal2-popup:not(.swal2-toast)
+:is(.swal2-title,.swal2-html-container) {
+  color: #e0edfc;
+}
+html[data-public-theme="dark"] body:is(.portal-alumnos-2027,.portal-docentes-2027,.portal-gestion-2027,.portal-soporte-2027) .swal2-popup.apoyo-confirmacion-modal
+:is(.apoyo-conf-grupo,.apoyo-conf-aviso,.apoyo-conf-sin-cambios) {
+  background: #263b56;
+  color: #dceafa;
+  border-color: #47647f;
+}
+html[data-public-theme="dark"] body:is(.portal-alumnos-2027,.portal-docentes-2027,.portal-gestion-2027,.portal-soporte-2027) .swal2-popup.apoyo-confirmacion-modal
+:is(.apoyo-conf-grupo-titulo,.apoyo-conf-docente,
+    .apoyo-conf-docente strong,.apoyo-conf-descripcion) {
+  color: #e2efff;
+}
+/* La agrupación de bajas sigue destacándose en rojo. */
+html[data-public-theme="dark"] body:is(.portal-alumnos-2027,.portal-docentes-2027,.portal-gestion-2027,.portal-soporte-2027) .swal2-popup.apoyo-confirmacion-modal .apoyo-conf-bajas {
+  border-color: #9c5862;
+}
+html[data-public-theme="dark"] body:is(.portal-alumnos-2027,.portal-docentes-2027,.portal-gestion-2027,.portal-soporte-2027) .swal2-popup.apoyo-confirmacion-modal .apoyo-conf-bajas .apoyo-conf-grupo-titulo {
+  color: #ffb1b8;
+}
+html[data-public-theme="dark"] body:is(.portal-alumnos-2027,.portal-docentes-2027,.portal-gestion-2027,.portal-soporte-2027) .swal2-popup.apoyo-confirmacion-modal .apoyo-conf-grupo-titulo span {
+  background: #375374;
+  color: #eaf4ff;
+}
+html[data-public-theme="dark"] body:is(.portal-alumnos-2027,.portal-docentes-2027,.portal-gestion-2027,.portal-soporte-2027) .swal2-popup.apoyo-confirmacion-modal
+:is(.apoyo-conf-restantes,.apoyo-conf-aviso) {
+  color: #bfd5eb;
+}
+
+/* Cabecera: el nombre de usuario no debe perderse en el azul oscuro. */
+html[data-public-theme="dark"] body:is(.portal-alumnos-2027,.portal-docentes-2027,.portal-gestion-2027,.portal-soporte-2027) .portal-content .topbar
+:is(.user-identity,.user-identity span,.user-identity small,
+    .p27-user,.p27-user span,.p27-user small,.exit-link) {
+  color: #daeafd !important;
+}
+/* Mensajes de éxito, error y advertencia necesitan distinguirse con
+   independencia del fondo. Solo colores de texto, sin modificar estados. */
+html[data-public-theme="dark"] body:is(.portal-alumnos-2027,.portal-docentes-2027,.portal-gestion-2027,.portal-soporte-2027) :is(.p27-pane,.legacy-workspace,.apoyo-panel)
+:is(.mensaje-formulario.error,.mensaje-gestion.error,.mensaje-formulario.mensaje-error,
+    .mensaje-gestion.mensaje-error) {
+  color: #ffa9af !important;
+}
+html[data-public-theme="dark"] body:is(.portal-alumnos-2027,.portal-docentes-2027,.portal-gestion-2027,.portal-soporte-2027) :is(.p27-pane,.legacy-workspace,.apoyo-panel)
+:is(.mensaje-formulario.ok,.mensaje-gestion.ok,.mensaje-formulario.mensaje-ok,
+    .mensaje-gestion.mensaje-ok) {
+  color: #9ce9bd !important;
+}
+/* No transformar ni esconder botones: la prioridad sigue en la función. */
