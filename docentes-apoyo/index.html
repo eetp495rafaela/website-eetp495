@@ -3,6 +3,13 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <script>
+      try {
+        if (localStorage.getItem("eetp495-public-theme") === "dark") {
+          document.documentElement.setAttribute("data-public-theme", "dark");
+        }
+      } catch (_) { /* La preferencia es opcional. */ }
+    </script>
     <meta name="theme-color" content="#0b2346" />
     <meta name="robots" content="noindex,nofollow" />
     <title>Portal Docentes de Apoyo | E.E.T.P. N° 495</title>
@@ -14,6 +21,7 @@
     <link rel="stylesheet" href="../assets/css/portales/docentes-2027.css?v=36" />
     <link rel="stylesheet" href="../assets/css/portales/identidad-institucional-2027.css?v=16" />
     <link rel="stylesheet" href="../assets/css/portales/docentes-apoyo-2027.css?v=2" />
+    <link rel="stylesheet" href="../assets/css/portales/tema-portales-2027.css?v=45" />
   </head>
   <body class="portal-docentes-2027 portal-docentes-apoyo-2027" data-rol-permitido="DOCENTE_APOYO">
     <a class="skip" href="#inicio">Saltar al contenido</a>
@@ -76,6 +84,14 @@
             <span data-nombre-usuario>Cargando usuario…</span>
             <small data-rol-usuario>Docente de Apoyo</small>
           </div>
+          <button
+            type="button"
+            class="portal-theme-toggle"
+            data-public-theme-toggle
+            aria-pressed="false"
+            aria-label="Activar modo oscuro"
+            title="Activar modo oscuro"
+          ><span class="portal-theme-icon portal-theme-sun" aria-hidden="true">☀️</span><span class="portal-theme-icon portal-theme-moon" aria-hidden="true">🌙</span></button>
           <button type="button" class="exit-link" id="btnCerrarSesionPortal" title="Cerrar sesión">
             <i class="fa-solid fa-right-from-bracket" aria-hidden="true"></i><span>Cerrar sesión</span>
           </button>
@@ -172,5 +188,6 @@
     <script type="module" src="../assets/js/pizarra-horarios-admin.js"></script>
     <script type="module" src="../assets/js/docentes-apoyo-navegacion.js"></script>
     <script type="module" src="../assets/js/docentes-apoyo.js?v=20261113-periodos1"></script>
+    <script src="../vista-2027/assets/js/tema-publico-2027.js?v=45" defer></script>
   </body>
 </html>
