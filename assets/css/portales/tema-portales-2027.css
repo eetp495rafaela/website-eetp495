@@ -382,3 +382,388 @@ html[data-public-theme="dark"] body.portal-docentes-apoyo-2027
 .apoyo-panel a { color: #abd5ff; }
 html[data-public-theme="dark"] body.portal-docentes-apoyo-2027
 .apoyo-panel .mensaje.error { color: #ff9ca5; }
+
+
+/* ============================================================
+   Integración 45B · Auditoría visual por módulo (14/11/2026)
+   Formularios, tablas, estados informativos y pantallas heredadas.
+   Restricción: solo CSS; sin tocar el estado de ningún componente.
+   ============================================================ */
+
+/* Campos, listas nativas y opciones: el error principal era texto
+   celeste claro dentro de controles blancos, especialmente al desplegar. */
+html[data-public-theme="dark"] body:is(.portal-alumnos-2027,.portal-docentes-2027,.portal-gestion-2027,.portal-soporte-2027) :is(.p27-pane,.legacy-workspace,.apoyo-panel,.panel-info)
+:is(input:not([type="checkbox"]):not([type="radio"]):not([type="button"]):not([type="submit"]):not([type="hidden"]),
+      select, textarea) {
+  background: #13273f !important;
+  color: #edf5ff !important;
+  border-color: #536a84 !important;
+  color-scheme: dark;
+  caret-color: #f0f7ff;
+}
+html[data-public-theme="dark"] body:is(.portal-alumnos-2027,.portal-docentes-2027,.portal-gestion-2027,.portal-soporte-2027) :is(.p27-pane,.legacy-workspace,.apoyo-panel,.panel-info)
+:is(input,textarea)::placeholder {
+  color: #adc4dd !important;
+  opacity: 1;
+}
+html[data-public-theme="dark"] body:is(.portal-alumnos-2027,.portal-docentes-2027,.portal-gestion-2027,.portal-soporte-2027) :is(.p27-pane,.legacy-workspace,.apoyo-panel,.panel-info)
+:is(input:disabled,select:disabled,textarea:disabled) {
+  background: #243449 !important;
+  color: #c0cede !important;
+  border-color: #46576a !important;
+  opacity: 1;
+  cursor: not-allowed;
+}
+html[data-public-theme="dark"] body:is(.portal-alumnos-2027,.portal-docentes-2027,.portal-gestion-2027,.portal-soporte-2027) :is(.p27-pane,.legacy-workspace,.apoyo-panel,.panel-info)
+:is(select,option,optgroup) {
+  color-scheme: dark;
+}
+html[data-public-theme="dark"] body:is(.portal-alumnos-2027,.portal-docentes-2027,.portal-gestion-2027,.portal-soporte-2027) :is(.p27-pane,.legacy-workspace,.apoyo-panel,.panel-info)
+:is(select option,select optgroup) {
+  background-color: #13273f !important;
+  color: #eef6ff !important;
+}
+html[data-public-theme="dark"] body:is(.portal-alumnos-2027,.portal-docentes-2027,.portal-gestion-2027,.portal-soporte-2027) :is(.p27-pane,.legacy-workspace,.apoyo-panel,.panel-info)
+select option:disabled {
+  color: #a5b9cc !important;
+}
+html[data-public-theme="dark"] body:is(.portal-alumnos-2027,.portal-docentes-2027,.portal-gestion-2027,.portal-soporte-2027) :is(.p27-pane,.legacy-workspace,.apoyo-panel,.panel-info)
+input[type="file"]::file-selector-button {
+  background: #294b71 !important;
+  color: #e8f3ff !important;
+  border-color: #5c7592 !important;
+}
+html[data-public-theme="dark"] body:is(.portal-alumnos-2027,.portal-docentes-2027,.portal-gestion-2027,.portal-soporte-2027) :is(.p27-pane,.legacy-workspace,.apoyo-panel,.panel-info)
+:is(input,select,textarea):focus-visible {
+  outline: 2px solid #96c8ff !important;
+  outline-offset: 2px;
+}
+html[data-public-theme="dark"] body:is(.portal-alumnos-2027,.portal-docentes-2027,.portal-gestion-2027,.portal-soporte-2027) :is(.p27-pane,.legacy-workspace,.apoyo-panel,.panel-info)
+input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: brightness(0) invert(1);
+  opacity: .84;
+}
+/* El filtro anterior afecta solo al pequeño ícono del calendario,
+   jamás a fotografías, documentos, escudos ni otros elementos. */
+html[data-public-theme="dark"] body:is(.portal-alumnos-2027,.portal-docentes-2027,.portal-gestion-2027,.portal-soporte-2027) :is(.p27-pane,.legacy-workspace,.apoyo-panel,.panel-info)
+:is(.filtros-usuarios,.filtros-asignaciones,.filtros-gestion,
+    .filtros-contactos-institucionales,.filtros-documentos-docente,
+    .barra-consulta-documentos-docente,.filtros-informes-gestion,
+    .filtros-documentacion-gestion,.filtros-sime-gestion,
+    .filtros-horarios-gestion,.filtros-documentacion-alumno,
+    .filtros-mesas-gestion,.filtros-docentes-gestion,
+    .filtros-calificaciones-taller-docente,.acciones-calificaciones-taller-docente) {
+  background: #1b304b !important;
+  border-color: #3f5876 !important;
+  color: #daeafc;
+}
+html[data-public-theme="dark"] body:is(.portal-alumnos-2027,.portal-docentes-2027,.portal-gestion-2027,.portal-soporte-2027) :is(.p27-pane,.legacy-workspace) :is(
+  .panel-info p:not(.error):not(.ok),
+  .encabezado-listado p,.encabezado-panel-gestion p,
+  .encabezado-documentos-cargados p,.panel-header p,
+  .texto-ayuda,.texto-ayuda-sime,.texto-informativo,
+  .ayuda-edicion-calificaciones-taller,
+  .mensaje-formulario:not(.error):not(.ok):not(.mensaje-error):not(.mensaje-ok),
+  .mensaje-gestion:not(.error):not(.ok):not(.mensaje-error):not(.mensaje-ok)
+) {
+  color: #bfd3e9 !important;
+}
+html[data-public-theme="dark"] body:is(.portal-alumnos-2027,.portal-docentes-2027,.portal-gestion-2027,.portal-soporte-2027) :is(.p27-pane,.legacy-workspace)
+:is(.tabla-contenedor,.tabla-usuarios,.tabla-gestion,.tabla-documentos,
+    .tabla-informes-docente,.tabla-documentos-contenedor,
+    .tabla-informes-gestion-contenedor,.tabla-sime-gestion-contenedor,
+    .tabla-informes-docente-contenedor,.tabla-documentos-alumno,
+    .tabla-documentacion-alumno,.tabla-sime-alumno,.tabla-docente-mesas-contenedor) {
+  background: #192e48 !important;
+  border-color: #405975 !important;
+}
+html[data-public-theme="dark"] body:is(.portal-alumnos-2027,.portal-docentes-2027,.portal-gestion-2027,.portal-soporte-2027) :is(.p27-pane,.legacy-workspace)
+:is(.tabla-usuarios,.tabla-gestion,.tabla-documentos,.tabla-documentacion-alumno,
+    .tabla-informes-docente,.tabla-informes-gestion,.tabla-sime-gestion,
+    .tabla-sime-alumno,.tabla-docente-mesas,.tabla-documentos-alumno)
+tbody :is(td,td strong,td small) {
+  color: #dceafa !important;
+}
+html[data-public-theme="dark"] body:is(.portal-alumnos-2027,.portal-docentes-2027,.portal-gestion-2027,.portal-soporte-2027) :is(.p27-pane,.legacy-workspace)
+:is(.tabla-usuarios,.tabla-gestion,.tabla-documentos,.tabla-documentacion-alumno,
+    .tabla-informes-docente,.tabla-informes-gestion,.tabla-sime-gestion,
+    .tabla-sime-alumno,.tabla-docente-mesas,.tabla-documentos-alumno)
+thead th {
+  background: #274365 !important;
+  color: #eff6ff !important;
+  border-color: #4c637d !important;
+}
+html[data-public-theme="dark"] body:is(.portal-alumnos-2027,.portal-docentes-2027,.portal-gestion-2027,.portal-soporte-2027) :is(.p27-pane,.legacy-workspace) :is(
+  .tabla-vacia,.tabla-documentos-vacia,.mensaje-sin-registros,
+  .tabla-informes-vacia,.tabla-docentes-vacia
+):not(.error):not(.mensaje-error) {
+  color: #c5d9ef !important;
+  background: #182b43 !important;
+}
+html[data-public-theme="dark"] body:is(.portal-alumnos-2027,.portal-docentes-2027,.portal-gestion-2027,.portal-soporte-2027) :is(.p27-pane,.legacy-workspace)
+:is(.panel-info,.panel-gestion,.tarjeta,.grupo-horario-gestion,.tarjeta-sime-gestion)
+:is(p,small):not(.error):not(.ok):not(.mensaje-error):not(.mensaje-ok) {
+  color: #b9cee6;
+}
+
+/* ============================================================
+   DOCENTES · Mis Horarios: quitar el degradado amarillo heredado.
+   ============================================================ */
+html[data-public-theme="dark"] body.portal-docentes-2027 #mis-horarios-docente
+:is(.bloque-horario-docente,.vista-horario-aula-docente,
+    .vista-horario-taller-docente,.vista-horario-ef-docente) {
+  background: #1a2e49 !important;
+  color: #dfecfb;
+  border-color: #3d5876 !important;
+}
+html[data-public-theme="dark"] body.portal-docentes-2027 #mis-horarios-docente
+:is(.dia-horario-docente,.dia-horario-aula-docente) {
+  background: #142840 !important;
+  color: #deebfb !important;
+  border-color: #486281 !important;
+}
+html[data-public-theme="dark"] body.portal-docentes-2027 #mis-horarios-docente
+:is(.dia-horario-docente,.dia-horario-aula-docente) h4 {
+  color: #f0f6ff !important;
+  border-color: #45627f;
+}
+html[data-public-theme="dark"] body.portal-docentes-2027 #mis-horarios-docente
+.tarjeta-bloque-horario-docente {
+  background: #213855 !important;
+  color: #e6f2ff !important;
+  border-color: #4a6686 !important;
+  box-shadow: none;
+}
+html[data-public-theme="dark"] body.portal-docentes-2027 #mis-horarios-docente
+:is(.bloque-horario-hora-docente,.bloque-horario-curso-docente,
+    .bloque-horario-materia-docente,.bloque-horario-turno-docente,
+    .bloque-horario-ubicacion-docente) {
+  color: #d0e5ff !important;
+}
+html[data-public-theme="dark"] body.portal-docentes-2027 #mis-horarios-docente
+:is(.bloque-horario-materia-docente,.bloque-horario-curso-docente) {
+  color: #f0f6ff !important;
+}
+html[data-public-theme="dark"] body.portal-docentes-2027 #mis-horarios-docente
+:is(.mensaje-formulario,.sin-bloques-horario-docente):not(.error) {
+  color: #c1d5eb !important;
+}
+
+/* DOCENTES · Si.R.A.: tarjetas individuales y selector de asistencia. */
+html[data-public-theme="dark"] body.portal-docentes-2027 #sira-docente
+:is(.sira-estudiante,.sira-clase-seleccionada) {
+  background: #203854 !important;
+  color: #e9f3ff !important;
+  border-color: #45627f !important;
+}
+html[data-public-theme="dark"] body.portal-docentes-2027 #sira-docente .sira-estudiante-nombre strong {
+  color: #f0f6ff !important;
+}
+html[data-public-theme="dark"] body.portal-docentes-2027 #sira-docente .sira-estudiante-nombre small {
+  background: #284e69 !important;
+  color: #d8f5ff !important;
+}
+html[data-public-theme="dark"] body.portal-docentes-2027 #sira-docente .sira-estudiante-controles :is(select,input) {
+  background: #13283f !important;
+  color: #e8f5ff !important;
+  border-color: #58718a !important;
+}
+html[data-public-theme="dark"] body.portal-docentes-2027 #sira-docente .sira-estudiante-controles select option {
+  background: #13283f !important;
+  color: #edf6ff !important;
+}
+html[data-public-theme="dark"] body.portal-docentes-2027 #sira-docente .sira-clase-seleccionada :is(p,small,strong) {
+  color: #d8e9fa !important;
+}
+html[data-public-theme="dark"] body.portal-docentes-2027 #sira-docente :is(.sira-modo-lluvia,.sira-gestion-bloque) {
+  background: #18344f !important;
+  color: #e2f1ff !important;
+}
+
+/* DOCENTES · Parte semanal: conservar semántica de presentes/ausentes,
+   pero sustituir el amarillo del título por azul oscuro. */
+html[data-public-theme="dark"] body.portal-docentes-2027 #parte-sira-docente .sira-gestion-encabezado {
+  background: #213b59 !important;
+  border-color: #526d88 !important;
+}
+html[data-public-theme="dark"] body.portal-docentes-2027 #parte-sira-docente .sira-gestion-encabezado h3 {
+  color: #f2f7ff !important;
+}
+html[data-public-theme="dark"] body.portal-docentes-2027 #parte-sira-docente .sira-gestion-encabezado p {
+  color: #c6def5 !important;
+}
+html[data-public-theme="dark"] body.portal-docentes-2027 #parte-sira-docente
+:is(.sira-gestion-dia,.sira-gestion-bloque,.sira-gestion-estado) {
+  background: #172d47 !important;
+  border-color: #42617f !important;
+  color: #e2effc !important;
+}
+html[data-public-theme="dark"] body.portal-docentes-2027 #parte-sira-docente .sira-gestion-dia > h4,
+html[data-public-theme="dark"] body.portal-docentes-2027 #parte-sira-docente .sira-gestion-bloque header {
+  background: #243e5b !important;
+  color: #e7f1ff !important;
+  border-color: #446380 !important;
+}
+html[data-public-theme="dark"] body.portal-docentes-2027 #parte-sira-docente .sira-gestion-bloque header
+:is(h4,strong,p) {
+  color: #e7f1ff !important;
+}
+html[data-public-theme="dark"] body.portal-docentes-2027 #parte-sira-docente .sira-gestion-estado :is(li,.sira-gestion-sin-datos) {
+  background: #1e344f !important;
+  color: #dbeafc !important;
+  border-color: #3c5672 !important;
+}
+html[data-public-theme="dark"] body.portal-docentes-2027 #parte-sira-docente .sira-gestion-estado li :is(strong,small) {
+  color: #d3e4f8 !important;
+}
+html[data-public-theme="dark"] body.portal-docentes-2027 #parte-sira-docente .sira-gestion-dia-vacio {
+  background: #20344c !important;
+  color: #d5e4f6 !important;
+  border-color: #456482 !important;
+}
+/* Las cabeceras .presentes/.ausentes/.tarde conservan el verde, rojo,
+   ámbar originales y sus valores: no redefinir .estado ni .h5. */
+
+/* DOCENTES · Situación de asistencia, filtros y resultados neutrales. */
+html[data-public-theme="dark"] body.portal-docentes-2027 #situacion-asistencia-docente
+:is(.sira-gestion-encabezado,.detalle-asistencia-docente,.tarjeta-detalle-asistencia) {
+  background: #192f49 !important;
+  color: #dceafa;
+  border-color: #425e7a !important;
+}
+html[data-public-theme="dark"] body.portal-docentes-2027 #situacion-asistencia-docente
+:is(.mensaje-gestion,.mensaje-formulario):not(.error):not(.ok):not(.mensaje-error) {
+  background: #20354f !important;
+  color: #bcd3eb !important;
+  border-color: #49617d !important;
+}
+html[data-public-theme="dark"] body.portal-docentes-2027 #situacion-asistencia-docente
+:is(.btn-filtro-detalle-asistencia-docente,.btn-filtro-situacion-docente):not(.activo) {
+  background: #233a55 !important;
+  color: #dceaff !important;
+  border-color: #54718e !important;
+}
+html[data-public-theme="dark"] body.portal-docentes-2027 #situacion-asistencia-docente
+:is(.btn-filtro-detalle-asistencia-docente,.btn-filtro-situacion-docente).activo {
+  color: #ffffff !important;
+}
+
+/* DOCENTES · Calificaciones: lectura, edición y listados. */
+html[data-public-theme="dark"] body.portal-docentes-2027 #calificaciones-taller-docente
+:is(.campo-calificaciones-taller-docente label,.encabezado-listado p) {
+  color: #d5e6fa !important;
+}
+html[data-public-theme="dark"] body.portal-docentes-2027 #calificaciones-taller-docente
+:is(.campo-calificaciones-taller-docente select,.select-nota-taller-docente) {
+  color: #eef6ff !important;
+  background: #152b43 !important;
+  border-color: #4c6a87 !important;
+}
+html[data-public-theme="dark"] body.portal-docentes-2027 #calificaciones-taller-docente
+:is(.chip-calificaciones-taller-docente,.acciones-calificaciones-taller-docente,
+    .tabla-calificaciones-taller-contenedor,.tabla-calificaciones-taller-docente) {
+  background: #1c324e !important;
+  color: #e1edfc !important;
+  border-color: #445f7c !important;
+}
+html[data-public-theme="dark"] body.portal-docentes-2027 #calificaciones-taller-docente .chip-calificaciones-taller-docente strong {
+  color: #f1f7ff !important;
+}
+html[data-public-theme="dark"] body.portal-docentes-2027 #calificaciones-taller-docente .tabla-calificaciones-taller-docente
+thead tr :is(th,.encabezado-taller-editable) {
+  background: #274565 !important;
+  color: #f1f6ff !important;
+  border-color: #4b627b !important;
+}
+html[data-public-theme="dark"] body.portal-docentes-2027 #calificaciones-taller-docente .tabla-calificaciones-taller-docente
+tbody td {
+  background: #1a304a;
+  color: #e0edfa !important;
+  border-color: #435c78 !important;
+}
+html[data-public-theme="dark"] body.portal-docentes-2027 #calificaciones-taller-docente
+:is(.tabla-calificaciones-taller-docente .nota-trim,
+    .tabla-calificaciones-taller-docente .nota-anual) {
+  color: #ffe1a0 !important;
+}
+html[data-public-theme="dark"] body.portal-docentes-2027 #calificaciones-taller-docente
+:is(.estado-calificaciones-solo-lectura,.estado-calificaciones-solo-lectura.edicion-habilitada) {
+  color: #ffe2a4 !important;
+  border-color: #a17c4f !important;
+}
+html[data-public-theme="dark"] body.portal-docentes-2027 #calificaciones-taller-docente
+:is(#mensajeCalificacionesTallerDocente:not(.error):not(.ok),.nota-sin-cargar) {
+  color: #c5d7eb !important;
+}
+/* Semántica de errores y aprobaciones: conservar texto rojo/verde, aclarado. */
+html[data-public-theme="dark"] body.portal-docentes-2027 #calificaciones-taller-docente #mensajeCalificacionesTallerDocente.error {
+  color: #ffa8aa !important;
+}
+html[data-public-theme="dark"] body.portal-docentes-2027 #calificaciones-taller-docente #mensajeCalificacionesTallerDocente.ok {
+  color: #90e1bb !important;
+}
+
+/* DOCENTES · Documentación académica: la tabla blanca tenía texto claro. */
+html[data-public-theme="dark"] body.portal-docentes-2027 #panelDocumentacionAcademica
+:is(.documentos-cargados-docente,.tabla-documentos-contenedor,
+    .barra-consulta-documentos-docente,.tabla-documentos,
+    .tabla-documentos-vacia) {
+  background: #1b314c !important;
+  border-color: #425d7a !important;
+  color: #dceaff !important;
+}
+html[data-public-theme="dark"] body.portal-docentes-2027 #panelDocumentacionAcademica
+:is(.tabla-documentos th,.tabla-documentos thead th) {
+  background: #274363 !important;
+  color: #ecf5ff !important;
+}
+html[data-public-theme="dark"] body.portal-docentes-2027 #panelDocumentacionAcademica
+:is(.tabla-documentos td,.tabla-documentos-vacia) {
+  background: #1a304b !important;
+  color: #d5e6f9 !important;
+}
+html[data-public-theme="dark"] body.portal-docentes-2027 #panelDocumentacionAcademica
+:is(.filtro-documentos-docente label,.encabezado-listado p,
+    .encabezado-documentos-cargados p) {
+  color: #d0e3f7 !important;
+}
+
+/* DOCENTES · Mesas de examen: antigua tarjeta blanca en fondo azul. */
+html[data-public-theme="dark"] body.portal-docentes-2027 #mesas-examen-docente
+:is(.panel-docente-mesas,.tabla-docente-mesas-contenedor,.tabla-docente-mesas) {
+  background: #1b304b !important;
+  color: #e6f1ff !important;
+  border-color: #466080 !important;
+}
+html[data-public-theme="dark"] body.portal-docentes-2027 #mesas-examen-docente
+:is(.encabezado-docente-mesas h3,.encabezado-docente-mesas p,
+    .campo-docente-mesas label,.mensaje-docente-mesas:not(.ok):not(.error)) {
+  color: #d7e8fb !important;
+}
+html[data-public-theme="dark"] body.portal-docentes-2027 #mesas-examen-docente .tabla-docente-mesas
+:is(th,td,td strong,.tabla-vacia) {
+  background: #213b59 !important;
+  color: #e2effc !important;
+  border-color: #496682 !important;
+}
+html[data-public-theme="dark"] body.portal-docentes-2027 #mesas-examen-docente .tabla-docente-mesas tbody :is(td,td strong) {
+  background: #1b304b !important;
+}
+html[data-public-theme="dark"] body.portal-docentes-2027 #mesas-examen-docente :is(.mensaje-docente-mesas.error,.mensaje-formulario.error) {
+  color: #ffaaaa !important;
+}
+html[data-public-theme="dark"] body.portal-docentes-2027 #mesas-examen-docente :is(.mensaje-docente-mesas.ok,.mensaje-formulario.ok) {
+  color: #97e6b9 !important;
+}
+
+/* DOCENTES · Agenda institucional: opciones nativas claras con letras claras. */
+html[data-public-theme="dark"] body.portal-docentes-2027 #agenda-institucional-docente
+:is(.campo-agenda-docente,.filtros-agenda-docente,.barra-agenda-docente) {
+  color: #d8e9f9;
+}
+html[data-public-theme="dark"] body.portal-docentes-2027 #agenda-institucional-docente
+:is(select,select option,input[type="search"],input[type="text"]) {
+  background: #152a44 !important;
+  color: #eaf4ff !important;
+  border-color: #52708c !important;
+}
