@@ -8,7 +8,9 @@
         if (localStorage.getItem("eetp495-public-theme") === "dark") {
           document.documentElement.setAttribute("data-public-theme", "dark");
         }
-      } catch (_) { /* La preferencia es opcional. */ }
+      } catch (_) {
+        /* La preferencia es opcional. */
+      }
     </script>
     <meta name="robots" content="noindex,nofollow" />
     <meta name="theme-color" content="#0b2346" />
@@ -36,7 +38,10 @@
     />
     <link rel="stylesheet" href="../vista-2027/assets/css/portal-maqueta.css" />
     <link rel="stylesheet" href="../assets/css/portales/gestion-2027.css" />
-    <link rel="stylesheet" href="../assets/css/portales/docentes-apoyo-gestion.css?v=1" />
+    <link
+      rel="stylesheet"
+      href="../assets/css/portales/docentes-apoyo-gestion.css?v=1"
+    />
     <link
       rel="stylesheet"
       href="../assets/css/portales/identidad-institucional-2027.css?v=16"
@@ -53,9 +58,15 @@
       rel="stylesheet"
       href="../assets/css/portales/ajustes-documentos-2027.css?v=19"
     />
-    <link rel="stylesheet" href="../assets/css/docentes-libres-taller-pdf.css?v=35" />
-      <link rel="stylesheet" href="../assets/css/sira-previsiones-hoy.css?v=40" />
-    <link rel="stylesheet" href="../assets/css/portales/tema-portales-2027.css?v=46" />
+    <link
+      rel="stylesheet"
+      href="../assets/css/docentes-libres-taller-pdf.css?v=35"
+    />
+    <link rel="stylesheet" href="../assets/css/sira-previsiones-hoy.css?v=40" />
+    <link
+      rel="stylesheet"
+      href="../assets/css/portales/tema-portales-2027.css?v=46"
+    />
   </head>
   <body
     class="portal-gestion-2027"
@@ -438,7 +449,7 @@
                   >
                     <rect x="5" y="5" width="14" height="17" rx="2" />
                     <path d="M9 5V3h6v2M8 11h8M8 15h8" /></svg></span
-                ><span>S.I.M.E.</span></a
+                ><span>S.I.M.E. - Exámenes</span></a
               ><a class="nav-item" href="#informes-pedagogicos"
                 ><span class="mini-icon"
                   ><svg
@@ -551,7 +562,15 @@
             aria-pressed="false"
             aria-label="Activar modo oscuro"
             title="Activar modo oscuro"
-          ><span class="portal-theme-icon portal-theme-sun" aria-hidden="true">☀️</span><span class="portal-theme-icon portal-theme-moon" aria-hidden="true">🌙</span></button>
+          >
+            <span class="portal-theme-icon portal-theme-sun" aria-hidden="true"
+              >☀️</span
+            ><span
+              class="portal-theme-icon portal-theme-moon"
+              aria-hidden="true"
+              >🌙</span
+            >
+          </button>
           <button
             class="exit-link"
             type="button"
@@ -1390,25 +1409,41 @@
           </section>
           <section class="grupo seccion-destino p27-pane" id="sira-gestion">
             <h2>Si.R.A. - Sistema de Registro de Asistencia</h2>
-                        <div class="panel-info sira-hoy" id="panelSiraPrevistasHoy">
+            <div class="panel-info sira-hoy" id="panelSiraPrevistasHoy">
               <div class="sira-hoy-cabecera">
                 <div>
                   <h3>Asistencias previstas para hoy</h3>
-                  <p>Clases de Taller y Educación Física que corresponde registrar hoy, según los horarios activos.</p>
+                  <p>
+                    Clases de Taller y Educación Física que corresponde
+                    registrar hoy, según los horarios activos.
+                  </p>
                 </div>
                 <div class="sira-hoy-herramientas">
-                  <span class="sira-hoy-fecha" id="fechaSiraPrevistasHoy">Consultando fecha...</span>
-                  <button class="sira-hoy-actualizar" id="btnActualizarSiraPrevistasHoy" type="button">
-                    <i class="fa-solid fa-arrows-rotate" aria-hidden="true"></i> Actualizar
+                  <span class="sira-hoy-fecha" id="fechaSiraPrevistasHoy"
+                    >Consultando fecha...</span
+                  >
+                  <button
+                    class="sira-hoy-actualizar"
+                    id="btnActualizarSiraPrevistasHoy"
+                    type="button"
+                  >
+                    <i class="fa-solid fa-arrows-rotate" aria-hidden="true"></i>
+                    Actualizar
                   </button>
                 </div>
               </div>
               <div id="vistaSiraPrevistasHoy" aria-live="polite" hidden>
-                <p class="sira-hoy-mensaje">Abrí Si.R.A. para consultar las asistencias previstas de hoy.</p>
+                <p class="sira-hoy-mensaje">
+                  Abrí Si.R.A. para consultar las asistencias previstas de hoy.
+                </p>
               </div>
-              <p class="sira-hoy-aclaracion" hidden>Previsión basada en horarios semanales activos; no indica si el parte fue cargado. Feriados y suspensiones excepcionales no se contemplan.</p>
+              <p class="sira-hoy-aclaracion" hidden>
+                Previsión basada en horarios semanales activos; no indica si el
+                parte fue cargado. Feriados y suspensiones excepcionales no se
+                contemplan.
+              </p>
             </div>
-<div class="panel-info panel-gestion-listado">
+            <div class="panel-info panel-gestion-listado">
               <i class="fa-solid fa-user-check"> </i>
               <div class="contenido-panel-gestion">
                 <h3>Consulta de asistencias</h3>
@@ -1880,20 +1915,36 @@
             <div class="panel-info panel-gestion-listado panel-dai-gestion">
               <i class="fa-solid fa-people-group" aria-hidden="true"></i>
               <div class="contenido-panel-gestion">
-                <div class="encabezado-panel-gestion encabezado-panel-gestion--acciones">
+                <div
+                  class="encabezado-panel-gestion encabezado-panel-gestion--acciones"
+                >
                   <div>
                     <h3>Docentes de Apoyo y estudiantes vinculados</h3>
-                    <p>Consultá los acompañamientos pedagógicos vigentes, sin modificar las asignaciones.</p>
+                    <p>
+                      Consultá los acompañamientos pedagógicos vigentes, sin
+                      modificar las asignaciones.
+                    </p>
                   </div>
                   <div class="acciones-gestion acciones-gestion-superior">
-                    <button class="btn-gestion" id="btnVerDAIGestion" type="button">
+                    <button
+                      class="btn-gestion"
+                      id="btnVerDAIGestion"
+                      type="button"
+                    >
                       <i class="fa-solid fa-users" aria-hidden="true"></i>
                       Ver docentes de apoyo
                     </button>
                   </div>
                 </div>
-                <div class="vista-gestion vista-dai-gestion" id="vistaDAIGestion" aria-live="polite">
-                  <p class="mensaje-gestion">Presioná “Ver docentes de apoyo” para consultar las vinculaciones. No se realizan consultas automáticas.</p>
+                <div
+                  class="vista-gestion vista-dai-gestion"
+                  id="vistaDAIGestion"
+                  aria-live="polite"
+                >
+                  <p class="mensaje-gestion">
+                    Presioná “Ver docentes de apoyo” para consultar las
+                    vinculaciones. No se realizan consultas automáticas.
+                  </p>
                 </div>
               </div>
             </div>
@@ -2132,7 +2183,10 @@
     </a>
 
     <script src="../assets/js/portales/gestion-2027.js" defer></script>
-    <script src="../assets/js/docentes-apoyo-gestion.js?v=1" type="module"></script>
+    <script
+      src="../assets/js/docentes-apoyo-gestion.js?v=1"
+      type="module"
+    ></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
     <script
@@ -2160,7 +2214,10 @@
       type="module"
     ></script>
     <script src="../assets/js/sira-gestion.js" type="module"></script>
-    <script src="../assets/js/sira-previsiones-hoy.js?v=40" type="module"></script>
+    <script
+      src="../assets/js/sira-previsiones-hoy.js?v=40"
+      type="module"
+    ></script>
     <script
       src="../assets/js/reemplazos-docentes-gestion.js"
       type="module"
@@ -2184,6 +2241,9 @@
         });
       });
     </script>
-    <script src="../vista-2027/assets/js/tema-publico-2027.js?v=45" defer></script>
+    <script
+      src="../vista-2027/assets/js/tema-publico-2027.js?v=45"
+      defer
+    ></script>
   </body>
 </html>
