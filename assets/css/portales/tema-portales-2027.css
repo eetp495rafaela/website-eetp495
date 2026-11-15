@@ -1494,3 +1494,10 @@ html[data-public-theme="dark"] body.portal-gestion-2027 #mesas-examen-gestion
   color: #e1eeff !important;
 }
 
+
+
+/* Ajuste puntual: título del panel Docentes libres sobre superficie nocturna. */
+html[data-public-theme="dark"] body.portal-gestion-2027 #vistaDocentesLibresTallerGestion
+.docentes-libres-introduccion h3 {
+  color: #edf6ff !important;
+}
