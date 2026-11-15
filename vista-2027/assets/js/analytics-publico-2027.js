@@ -23,6 +23,7 @@
   const iniciarMedicion = () => {
     if (iniciado) return;
     iniciado = true;
+    window["ga-disable-" + MEDICION] = false;
     window.dataLayer = window.dataLayer || [];
     window.gtag = window.gtag || function () { window.dataLayer.push(arguments); };
     window.gtag("consent", "default", {
@@ -79,7 +80,19 @@
     const elegir = (acepta) => {
       guardarPreferencia(acepta ? "si" : "no");
       caja.remove();
-      if (acepta) iniciarMedicion();
+      if (acepta) {
+        if (iniciado) {
+          window["ga-disable-" + MEDICION] = false;
+          window.gtag("consent", "update", { analytics_storage: "granted" });
+          const ruta = window.location.pathname;
+          window.gtag("event", "page_view", {
+            send_to: MEDICION,
+            page_location: window.location.origin + ruta,
+            page_path: ruta,
+            page_title: document.title,
+          });
+        } else iniciarMedicion();
+      }
       else {
         window["ga-disable-" + MEDICION] = true;
         if (typeof window.gtag === "function") {
