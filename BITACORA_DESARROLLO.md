@@ -164,3 +164,26 @@ Rama de trabajo: `main`
 - Google Cloud/Firebase: proyecto `portal-institucional-eet-fa5c7`, usado para servicios del portal. No confundir el proyecto Cloud con la propiedad GA4 de igual nombre.
 - Esta entrada **solo documenta** el estado conocido y el testimonio del responsable. No se cambian DNS, redirecciones, Cloudflare, NIC.ar, CNAME, Analytics, Firebase ni código del sitio.
 
+## 2026-11-15 — PENDIENTE: completar auditoría de seguridad del repositorio público
+
+**Estado:** auditoría preliminar realizada; continuar en un nuevo chat. **No modificar producción sin revisar y acordar cada intervención.**
+
+### Lo revisado hasta ahora
+- Revisión parcial de archivos actuales en `main`, `.gitignore`, `firestore.rules`, módulos de autenticación, administración, documentación, backup y otros JS/HTML de portales.
+- No se detectaron claves privadas, contraseñas reales ni tokens privados evidentes en los archivos examinados. La `apiKey` de configuración web de Firebase es pública por diseño, pero debe tener restricciones y reglas adecuadas.
+- En `firestore.rules` (3.178 líneas) no se detectaron reglas globales del tipo `allow read, write: if true`; existen controles por autenticación, perfil y roles. **No se ha comprobado que la versión del repositorio coincida con las reglas desplegadas en Firebase.**
+- Varios módulos invocan URLs de Google Apps Script visibles en código público. **Es imprescindible comprobar que cada endpoint verifica en el servidor la identidad, el token Firebase y el rol**, especialmente backups, usuarios y documentación. La validación del navegador no es suficiente.
+- Se detectó uso de `innerHTML` en diversos módulos; se observaron funciones de escape en muestras revisadas, pero resta una comprobación sistemática de inyección de HTML/XSS.
+- `.gitignore` excluye `.env`, archivos habituales de cuentas de servicio y credenciales, backups y algunos informes internos. Esto no borra información previamente publicada en el historial.
+- El repositorio público incluye `BITACORA_DESARROLLO.md` y documentación de arquitectura. Evaluar su exposición y la del historial Git. El ZIP histórico de trabajo incluye `.git`: no distribuirlo públicamente sin revisar.
+- **Importante:** esta revisión fue parcial; no se completó un escaneo exhaustivo de todos los blobs y commits históricos ni una prueba dinámica contra producción. No afirmar seguridad absoluta ni ausencia total de secretos.
+
+### Próximos pasos, en orden recomendado
+1. **Firebase Console:** contrastar reglas de Firestore publicadas con `firestore.rules`; comprobar Auth, roles, App Check y acceso a datos de estudiantes y docentes, sin cambiar nada inicialmente.
+2. **Google Cloud:** revisar restricciones de las API keys web y los servicios habilitados.
+3. **Apps Script / Google Drive:** revisar permisos de implementación, validación de Firebase ID tokens y roles en el servidor, especialmente backup, documentación y gestión de usuarios; comprobar permisos de los archivos Drive.
+4. **Repositorio GitHub público:** completar inventario de archivos, búsqueda de secretos y datos personales en `main` e historial; revisar bitácoras/manuales/ZIP; evaluar riesgos `innerHTML`/XSS, dependencias y exposición de endpoints, y evitar publicar documentación sensible.
+5. **Informe final:** separar hallazgos confirmados, riesgos potenciales y verificaciones pendientes; proponer correcciones mínimas y seguras. No tocar reglas, secretos, datos ni módulos aprobados sin autorización explícita.
+
+**Acuerdo:** dejar estos trabajos pendientes para retomarlos mañana en un nuevo chat. Esta entrada es solo documentación.
+
