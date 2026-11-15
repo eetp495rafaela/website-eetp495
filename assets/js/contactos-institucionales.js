@@ -629,7 +629,7 @@ function construirHtmlAgenda_(contactos, datosReunion = { esReunion: false }) {
     ".datos-reunion span{min-width:0;overflow-wrap:anywhere}",
     ".tabla-scroll{overflow-x:auto}",
     ".planilla{width:100%;min-width:840px;border-collapse:collapse;table-layout:fixed}",
-    ".planilla col.nombre{width:23%}.planilla col.dni{width:11%}.planilla col.correo{width:27%}.planilla col.firma{width:17%}.planilla col.constancia{width:11%}.planilla col.escuela{width:11%}",
+    ".planilla col.nombre{width:23%}.planilla col.dni{width:11%}.planilla col.correo{width:33%}.planilla col.firma{width:17%}.planilla col.constancia{width:8%}.planilla col.escuela{width:8%}",
     ".planilla thead th{border:1px solid #8ea9be;background:#dfeefa;color:#073683;padding:9px 7px;font-size:12px;text-align:left;text-transform:uppercase}",
     ".planilla tbody .fila-letra th{border:1px solid #8ea9be;background:#eef5fb;color:#105c9d;font-size:14px;text-align:left;padding:7px 9px}",
     ".planilla tbody td{border:1px solid #aebdca;height:15mm;min-height:15mm;padding:7px 8px;vertical-align:middle;font-size:14.5px;line-height:1.35}",
