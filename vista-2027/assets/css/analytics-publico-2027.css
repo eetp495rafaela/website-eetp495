@@ -1,0 +1,35 @@
+/* Consentimiento de estadísticas: visible solo en páginas públicas. */
+.eetp-consentimiento {
+  position: fixed;
+  z-index: 10020;
+  left: max(14px, env(safe-area-inset-left));
+  right: max(14px, env(safe-area-inset-right));
+  bottom: max(14px, env(safe-area-inset-bottom));
+  width: min(640px, calc(100vw - 28px));
+  box-sizing: border-box;
+  padding: 16px 18px;
+  border: 1px solid #9bb4cb;
+  border-radius: 14px;
+  background: #fff;
+  color: #193954;
+  box-shadow: 0 10px 35px rgba(10, 30, 60, .25);
+  font: 14px/1.5 Arial, sans-serif;
+}
+.eetp-consentimiento strong { font-size: 16px; color: inherit; }
+.eetp-consentimiento p { margin: 6px 0 0; color: inherit; }
+.eetp-consentimiento-acciones { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 13px; }
+.eetp-consentimiento-acciones button {
+  font: inherit; font-weight: 700; padding: 9px 13px;
+  border-radius: 8px; cursor: pointer;
+}
+.eetp-consentimiento-rechazar { border: 1px solid #7f96ab; background: #fff; color: #193954; }
+.eetp-consentimiento-aceptar { border: 1px solid #0b4c95; background: #0b4c95; color: #fff; }
+.eetp-enlace-privacidad { display: block; margin: 8px auto; padding: 8px 12px; border: 0; background: transparent; color: inherit; font: inherit; text-decoration: underline; cursor: pointer; }
+.eetp-consentimiento button:focus-visible, .eetp-enlace-privacidad:focus-visible { outline: 3px solid #e6ad44; outline-offset: 2px; }
+html[data-public-theme="dark"] .eetp-consentimiento { background: #182d47; color: #eaf3ff; border-color: #6886a4; box-shadow: 0 12px 36px #0009; }
+html[data-public-theme="dark"] .eetp-consentimiento-rechazar { background: #203c5b; color: #eaf3ff; border-color: #6886a4; }
+html[data-public-theme="dark"] .eetp-consentimiento-aceptar { background: #347fcb; border-color: #347fcb; }
+@media (max-width: 500px) {
+ .eetp-consentimiento { width: auto; font-size: 13px; padding: 13px; }
+ .eetp-consentimiento-acciones button { flex: 1 1 auto; }
+}
