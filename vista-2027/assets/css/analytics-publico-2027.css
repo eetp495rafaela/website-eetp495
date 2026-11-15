@@ -19,8 +19,12 @@
 .eetp-consentimiento p { margin: 6px 0 0; color: inherit; }
 .eetp-consentimiento-acciones { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 13px; }
 .eetp-consentimiento-acciones button {
+  flex: 1 1 0;
+  min-width: 0;
+  box-sizing: border-box;
   font: inherit; font-weight: 700; padding: 9px 13px;
   border-radius: 8px; cursor: pointer;
+  text-align: center;
 }
 .eetp-consentimiento-rechazar { border: 1px solid #7f96ab; background: #fff; color: #193954; }
 .eetp-consentimiento-aceptar { border: 1px solid #0b4c95; background: #0b4c95; color: #fff; }
@@ -31,5 +35,5 @@ html[data-public-theme="dark"] .eetp-consentimiento-rechazar { background: #203c
 html[data-public-theme="dark"] .eetp-consentimiento-aceptar { background: #347fcb; border-color: #347fcb; }
 @media (max-width: 500px) {
  .eetp-consentimiento { width: auto; font-size: 13px; padding: 13px; }
- .eetp-consentimiento-acciones button { flex: 1 1 auto; }
+ .eetp-consentimiento-acciones button { flex: 1 1 0; }
 }
