@@ -144,3 +144,11 @@ Rama de trabajo: `main`
 - Sin modificaciones a Firebase, permisos, datos académicos, portales internos ni al código de medición.
 - Pendiente comprobación visual final de botones en pantallas grandes y móviles.
 
+## 2026-11-15 — Aviso de estadísticas más amigable y transparente
+
+- Se conservó el consentimiento previo: el sitio público solamente carga la etiqueta de GA4 cuando la persona acepta; si no acepta, puede usar el sitio igualmente, pero esa visita no se envía a Analytics por este mecanismo.
+- Se reemplazó el título del aviso por **«¡Ayudanos a mejorar la web de nuestra escuela!»** y se explicó en lenguaje sencillo la finalidad de las estadísticas, el posible uso de cookies y datos técnicos por Google, la exclusión de los portales internos y la libertad de cambiar la decisión.
+- Permanecen las dos opciones de igual tamaño: **No aceptar** y **Aceptar estadísticas**.
+- Se actualizó la versión del script a `?v=2` en las siete páginas públicas para evitar que el navegador conserve el texto anterior.
+- Se verificó la sintaxis JavaScript. No hubo cambios en la identificación de GA4, eventos, permisos, Firebase ni datos institucionales. Pendiente comprobación visual de la redacción en PC y celular.
+
