@@ -456,11 +456,37 @@ function obtenerDniAgenda_(contacto) {
 }
 
 
-function solicitarDatosReunionAgenda_() {
+// Etiquetas disponibles solo entre los contactos autorizados para esta planilla.
+const CORREOS_TECNICOS_AGENDA_ = new Set([
+  "soportetecnico.tec495@gmail.com",
+  "enviotrabajos495@gmail.com",
+]);
+
+function contactosImprimiblesAgenda_(contactos) {
+  return contactos.filter((contacto) =>
+    !CORREOS_TECNICOS_AGENDA_.has(normalizarCorreo(contacto.correo))
+  );
+}
+
+function etiquetasImprimiblesAgenda_(contactos) {
+  const etiquetas = new Map();
+  contactosImprimiblesAgenda_(contactos).forEach((contacto) => {
+    contacto.etiquetasContacto.forEach((etiqueta) => {
+      const nombre = String(etiqueta).trim();
+      const clave = nombre.toLocaleLowerCase("es");
+      if (nombre && !etiquetas.has(clave)) etiquetas.set(clave, nombre);
+    });
+  });
+  return [...etiquetas.values()].sort((a, b) =>
+    a.localeCompare(b, "es", { sensitivity: "base" })
+  );
+}
+
+function solicitarDatosReunionAgenda_(etiquetasDisponibles) {
   return new Promise((resolver) => {
     const dialogo = document.createElement("dialog");
     const estilo = document.createElement("style");
-    estilo.textContent = ".agenda-modal{position:fixed!important;top:50%!important;left:50%!important;right:auto!important;bottom:auto!important;inset-block-start:50%!important;inset-inline-start:50%!important;transform:translate(-50%,-50%)!important;margin:0!important;box-sizing:border-box;border:0!important;border-radius:14px;max-width:min(95vw,520px);width:100%;max-height:calc(100dvh - 32px);overflow-y:auto;padding:24px;color:#193954!important;background:#fff!important;box-shadow:0 12px 40px #0004}.agenda-modal::backdrop{background:rgba(10,28,48,.65)}.agenda-modal label{display:block;margin:12px 0 5px;font-weight:650}.agenda-modal input:not([type=radio]){box-sizing:border-box;width:100%;padding:10px;border:1px solid #9aaebe;border-radius:7px;font:inherit;color:#193954;background:white}.agenda-modal .agenda-opciones{display:flex;gap:20px;align-items:center;margin:14px 0}.agenda-modal .agenda-opciones label{margin:0;display:flex;gap:7px;align-items:center}.agenda-modal .agenda-botones{display:flex;justify-content:flex-end;gap:10px;margin-top:20px}.agenda-modal button{padding:10px 15px;border-radius:7px;border:1px solid #a8b8c9;cursor:pointer;font-weight:700}.agenda-modal button[type=submit]{color:white;background:#073683;border-color:#073683}.agenda-modal [hidden]{display:none!important}";
+    estilo.textContent = ".agenda-modal{position:fixed!important;top:50%!important;left:50%!important;right:auto!important;bottom:auto!important;inset-block-start:50%!important;inset-inline-start:50%!important;transform:translate(-50%,-50%)!important;margin:0!important;box-sizing:border-box;border:0!important;border-radius:14px;max-width:min(95vw,520px);width:100%;max-height:calc(100dvh - 32px);overflow-y:auto;padding:24px;color:#193954!important;background:#fff!important;box-shadow:0 12px 40px #0004}.agenda-modal::backdrop{background:rgba(10,28,48,.65)}.agenda-modal label{display:block;margin:12px 0 5px;font-weight:650}.agenda-modal input:not([type=radio]){box-sizing:border-box;width:100%;padding:10px;border:1px solid #9aaebe;border-radius:7px;font:inherit;color:#193954;background:white}.agenda-modal .agenda-opciones{display:flex;gap:20px;align-items:center;margin:14px 0}.agenda-modal .agenda-opciones label{margin:0;display:flex;gap:7px;align-items:center}.agenda-modal .agenda-botones{display:flex;justify-content:flex-end;gap:10px;margin-top:20px}.agenda-modal button{padding:10px 15px;border-radius:7px;border:1px solid #a8b8c9;cursor:pointer;font-weight:700}.agenda-modal button[type=submit]{color:white;background:#073683;border-color:#073683}.agenda-modal select{box-sizing:border-box;width:100%;padding:10px;border:1px solid #9aaebe;border-radius:7px;font:inherit;color:#193954;background:white}.agenda-modal [hidden]{display:none!important}";
     dialogo.className = "agenda-modal";
     dialogo.setAttribute("aria-label", "Opciones de la planilla de asistencia");
     dialogo.innerHTML = '<form><h2 style="margin:0;font-size:21px">Generar planilla de asistencia</h2>' +
@@ -472,13 +498,33 @@ function solicitarDatosReunionAgenda_() {
       '<label for="agenda-hora">Horario (24 horas, HH:mm)</label><input id="agenda-hora" name="hora" type="text" inputmode="numeric" placeholder="14:30" pattern="(?:[01][0-9]|2[0-3]):[0-5][0-9]" maxlength="5" title="Ingresá la hora en formato de 24 horas, por ejemplo 14:30">' +
       '<label for="agenda-lugar">Lugar</label><input id="agenda-lugar" name="lugar" type="text" maxlength="120">' +
       '<label for="agenda-motivo">Motivo</label><input id="agenda-motivo" name="motivo" type="text" maxlength="180">' +
-      '</div><div class="agenda-botones"><button type="button" class="agenda-cancelar">Cancelar</button>' +
+      '</div><div class="agenda-alcance"><label for="agenda-alcance">Contactos que se incluirán</label>' +
+      '<select id="agenda-alcance" name="alcance"><option value="">Todos los contactos activos</option>' +
+      '<option value="etiqueta">Elegir Departamento/Curso</option></select>' +
+      '<div class="agenda-elegir-etiqueta" hidden><label for="agenda-etiqueta">Departamento/Curso</label>' +
+      '<select id="agenda-etiqueta" name="etiqueta"><option value="">Seleccionar Departamento/Curso</option></select></div></div>' +
+      '<div class="agenda-botones"><button type="button" class="agenda-cancelar">Cancelar</button>' +
       '<button type="submit">Generar planilla</button></div></form>';
     document.head.appendChild(estilo);
     document.body.appendChild(dialogo);
     const formulario = dialogo.querySelector("form");
     const campos = dialogo.querySelector(".agenda-campos");
     const entradas = [...campos.querySelectorAll("input")];
+    const alcance = formulario.elements.alcance;
+    const selectorEtiqueta = formulario.elements.etiqueta;
+    const cajaEtiqueta = dialogo.querySelector(".agenda-elegir-etiqueta");
+    etiquetasDisponibles.forEach((etiqueta) => {
+      const opcion = document.createElement("option");
+      opcion.value = etiqueta;
+      opcion.textContent = etiqueta;
+      selectorEtiqueta.appendChild(opcion);
+    });
+    alcance.addEventListener("change", () => {
+      const elegir = alcance.value === "etiqueta";
+      cajaEtiqueta.hidden = !elegir;
+      selectorEtiqueta.required = elegir;
+      if (elegir) selectorEtiqueta.focus();
+    });
     let terminado = false;
     const finalizar = (resultado) => {
       if (terminado) return;
@@ -500,8 +546,13 @@ function solicitarDatosReunionAgenda_() {
     dialogo.addEventListener("cancel", (evento) => { evento.preventDefault(); finalizar(null); });
     formulario.addEventListener("submit", (evento) => {
       evento.preventDefault();
+      const etiquetaSeleccionada = alcance.value === "etiqueta" ? selectorEtiqueta.value : "";
+      if (alcance.value === "etiqueta" && !etiquetaSeleccionada) {
+        selectorEtiqueta.reportValidity();
+        return;
+      }
       if (formulario.elements.reunion.value === "no") {
-        finalizar({ esReunion: false });
+        finalizar({ esReunion: false, etiqueta: etiquetaSeleccionada });
         return;
       }
       const hora = formulario.elements.hora.value.trim();
@@ -512,6 +563,7 @@ function solicitarDatosReunionAgenda_() {
       }
       finalizar({
         esReunion: true,
+        etiqueta: etiquetaSeleccionada,
         fecha: formulario.elements.fecha.value,
         horario: hora,
         lugar: formulario.elements.lugar.value.trim(),
@@ -527,13 +579,7 @@ function construirHtmlAgenda_(contactos, datosReunion = { esReunion: false }) {
   const comparar = new Intl.Collator("es", { sensitivity: "base", numeric: true });
   // Excluir exclusivamente las dos cuentas técnicas de esta planilla.
   // Los docentes con rol Soporte deben seguir apareciendo.
-  const correosExcluidos = new Set([
-    "soportetecnico.tec495@gmail.com",
-    "enviotrabajos495@gmail.com",
-  ]);
-  const ordenados = contactos.filter((contacto) =>
-    !correosExcluidos.has(String(contacto.correo || "").trim().toLowerCase())
-  ).sort((a, b) =>
+  const ordenados = contactosImprimiblesAgenda_(contactos).sort((a, b) =>
     comparar.compare(a.nombreCompleto, b.nombreCompleto) ||
     comparar.compare(a.correo, b.correo),
   );
@@ -608,9 +654,11 @@ function construirHtmlAgenda_(contactos, datosReunion = { esReunion: false }) {
     '<button type="button" onclick="window.print()">Imprimir / Guardar PDF</button></div>',
     '<main><header><img src="' + escaparHtmlAgenda_(logo) + '" alt="Escudo E.E.T.P. N.º 495">',
     '<div><h1>E.E.T.P. N.º 495 “Malvinas Argentinas”</h1>',
-    '<p class="subtitulo">Planilla de asistencia · Reunión plenaria · ' +
-      ordenados.length + ' usuarios activos (sin alumnado)<br>Generada el ' +
-      escaparHtmlAgenda_(fechaGeneracion) + '</p></div></header>',
+    '<p class="subtitulo">Planilla de asistencia · ' +
+      (datosReunion.esReunion ? 'Reunión' : 'Listado institucional') + ' · ' +
+      ordenados.length + ' usuarios activos (sin alumnado)' +
+      (datosReunion.etiqueta ? ' · Departamento/Curso: ' + escaparHtmlAgenda_(datosReunion.etiqueta) : '') +
+      '<br>Generada el ' + escaparHtmlAgenda_(fechaGeneracion) + '</p></div></header>',
     datosReunion.esReunion
       ? '<div class="datos-reunion"><span><strong>Fecha de reunión:</strong> ' +
         escaparHtmlAgenda_(datosReunion.fecha.split("-").reverse().join("/")) + '</span>' +
@@ -638,44 +686,48 @@ async function generarAgendaContactosImprimible_() {
   if (!btnGenerarAgendaContactos || !accesoContactosHabilitado || !auth.currentUser) {
     return;
   }
-  const datosReunion = await solicitarDatosReunionAgenda_();
-  if (!datosReunion) return;
-  // La ventana se abre en el envío del modal, no después de consultar Firestore.
-  const ventana = window.open("", "_blank");
-  if (!ventana) {
-    mostrarMensaje("Permití las ventanas emergentes para generar la agenda.", "error");
-    return;
-  }
-  ventana.document.write('<!doctype html><html lang="es"><meta charset="utf-8"><title>Agenda institucional</title><body style="font-family:Arial;padding:24px">Preparando la agenda institucional...</body></html>');
-  ventana.document.close();
   const original = btnGenerarAgendaContactos.innerHTML;
   btnGenerarAgendaContactos.disabled = true;
-  btnGenerarAgendaContactos.textContent = "Generando agenda...";
+  btnGenerarAgendaContactos.textContent = "Preparando opciones...";
   try {
-    // El documento utiliza la fuente del portal, no Google Sheets ni los contactos del dispositivo.
+    // Siempre se consulta al servidor: las opciones son etiquetas vigentes, no filtros de pantalla.
     const resultado = await getDocsFromServer(query(
       collection(db, "usuarios"),
       where("rol", "!=", "ALUMNO"),
     ));
-    const contactos = resultado.docs.map(prepararContacto).filter(
+    const contactos = contactosImprimiblesAgenda_(resultado.docs.map(prepararContacto).filter(
       (contacto) => contacto.estado === "ACTIVO" && contacto.nombreCompleto && contacto.correo,
-    );
+    ));
     if (!contactos.length) throw new Error("No hay contactos institucionales activos.");
-    if (!ventana.closed) {
-      ventana.document.open();
-      ventana.document.write(construirHtmlAgenda_(contactos, datosReunion));
-      ventana.document.close();
-      ventana.focus();
+    btnGenerarAgendaContactos.disabled = false;
+    btnGenerarAgendaContactos.innerHTML = original;
+    const datosReunion = await solicitarDatosReunionAgenda_(etiquetasImprimiblesAgenda_(contactos));
+    if (!datosReunion) return;
+
+    const etiqueta = String(datosReunion.etiqueta || "").trim().toLocaleLowerCase("es");
+    const seleccionados = etiqueta
+      ? contactos.filter((contacto) => contacto.etiquetasContacto.some(
+          (valor) => String(valor).trim().toLocaleLowerCase("es") === etiqueta
+        ))
+      : contactos;
+    if (!seleccionados.length) {
+      mostrarMensaje("No hay contactos activos para el Departamento/Curso elegido.", "error");
+      return;
     }
-    mostrarMensaje("Agenda preparada con " + contactos.filter((contacto) => !["soportetecnico.tec495@gmail.com", "enviotrabajos495@gmail.com"].includes(normalizarCorreo(contacto.correo))).length + " contactos.", "ok");
+    // Se abre inmediatamente después de confirmar el modal, antes de operaciones adicionales.
+    const ventana = window.open("", "_blank");
+    if (!ventana) {
+      mostrarMensaje("Permití las ventanas emergentes para generar la agenda.", "error");
+      return;
+    }
+    ventana.document.open();
+    ventana.document.write(construirHtmlAgenda_(seleccionados, datosReunion));
+    ventana.document.close();
+    ventana.focus();
+    mostrarMensaje("Agenda preparada con " + seleccionados.length + " contactos.", "ok");
   } catch (error) {
     console.error("Error al generar la agenda institucional:", error);
     mostrarMensaje(error?.message || "No se pudo generar la agenda.", "error");
-    if (!ventana.closed) {
-      ventana.document.open();
-      ventana.document.write('<!doctype html><html lang="es"><meta charset="utf-8"><title>Error</title><body style="font-family:Arial;padding:24px">No se pudo generar la agenda. Revisá el mensaje en el portal.</body></html>');
-      ventana.document.close();
-    }
   } finally {
     btnGenerarAgendaContactos.disabled = false;
     btnGenerarAgendaContactos.innerHTML = original;
