@@ -63,3 +63,17 @@ test("el ingreso mantiene Google y la solicitud de acceso",()=>{
  assert(html.includes('id="formSolicitudAlumno"'));
  assert(!/filter:\s*invert\(/.test(login));
 });
+
+
+test("los últimos ajustes de Alumnos y Soporte mantienen AA en modo oscuro",()=>{
+ const patch=css.slice(css.indexOf("Integración 47"));
+ assert(patch.startsWith("Integración 47"),"Se requiere integración 47");
+ assert(patch.includes('body.portal-alumnos-2027 #mis-docentes-alumno'));
+ assert(patch.includes(".correo-referente-alumno:not(.sin-correo)"));
+ assert(patch.includes(".cargo-referente-alumno"));
+ assert(patch.includes('body.portal-soporte-2027 #sira-admin'));
+ assert(patch.includes(".sira-hoy .sira-hoy-mensaje:not(.sira-hoy-error)"));
+ assert(!patch.includes("html:not([data-public-theme"),"No modificar modo claro");
+ for(const [bg,fg] of [["#1b304a","#a8dcff"],["#1b304a","#9ed0f7"],["#233b56","#dceaff"]])
+  assert(contrast(bg,fg)>=4.5,bg+" / "+fg);
+});
