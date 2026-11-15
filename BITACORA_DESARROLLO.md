@@ -99,3 +99,13 @@ Rama de trabajo: `main`
 - Se conservaron los porcentajes de ancho, casillas, altura de filas, contenido y el resto de funcionalidades.
 - Se comprobó sintaxis JavaScript; pendiente verificación visual en navegador e impresión.
 
+## 2026-11-15 — Controles Sí/No más grandes en modal
+
+**Archivo:** `assets/js/contactos-institucionales.js`  
+**Commit:** `1c744dd1d6601842f129cc2c03e66edbe6e23bc5`
+
+- Se aumentó a 21 × 21 px el tamaño de las dos opciones de selección (Sí y No) para identificar si la planilla corresponde a una reunión.
+- Se conserva el comportamiento nativo, la selección exclusiva y la adaptación al modo oscuro.
+- No se cambiaron el filtro Departamento/Curso, la impresión ni los datos institucionales.
+- Se comprobó sintaxis JavaScript; pendiente comprobación visual en Soporte y Gestión.
+
