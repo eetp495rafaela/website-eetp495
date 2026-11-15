@@ -1,7 +1,7 @@
 # Integración 45 — Modo claro/oscuro del sitio público y los portales
 
 **Fecha:** 14/11/2026  
-**Estado final:** tema claro/oscuro revisado visualmente por el responsable en entorno local y aprobado para integración en `main`. Las verificaciones de despliegue público se realizan por separado.
+**Estado final:** tema claro/oscuro revisado visualmente por el responsable en entorno local e integrado en `main` mediante el PR #6 (merge `8e7a16e6df811c7df066ac8bdb1d22107bba26b5`). La propagación pública y las pruebas autenticadas se verifican por separado.
 
 ## Alcance inicial (sitio público)
 - El **sitio público 2027**, portada y las seis secciones de `vista-2027/`.
@@ -67,6 +67,6 @@
 
 **Sin cambios en:** Firestore, reglas y datos reales, permisos, App Check, Apps Script, autenticación, registro de asistencias, operaciones de alta/baja, ni lógica de inscripciones/mesas. Las tareas pendientes de seguridad de las integraciones 41 a 44 no se marcan como resueltas.
 
-**Publicación acordada:** integrar la rama `desarrollo/modo-oscuro-publico-20261114` en `main`, origen del sitio publicado. La presencia del commit en `main` confirma la integración del código, pero no por sí sola la propagación completa de GitHub Pages ni el comportamiento bajo una sesión autenticada.
+**Integración completada:** el PR #6 fusionó la rama `desarrollo/modo-oscuro-publico-20261114` con `main` (merge `8e7a16e6df811c7df066ac8bdb1d22107bba26b5`), origen del sitio publicado. La presencia del commit en `main` confirma la integración del código, pero no por sí sola la propagación completa de GitHub Pages ni el comportamiento bajo una sesión autenticada. La eliminación de la rama temporal se realiza tras sincronizar y ejecutar pruebas en la laptop.
 
 **Continuidad local:** actualizar las bitácoras privadas `BITACORA_MIGRACION_EETP495_2027.md` y `ESTADO_ACTUAL.md` en la laptop; ambos archivos se mantienen excluidos de Git.
