@@ -378,12 +378,13 @@ h3 {
   display: flex;
   align-items: center;
   gap: 12px;
-  max-width: 270px;
+  max-width: 370px;
 }
 .photo-tag b {
   font-size: 0.81rem;
   display: block;
   color: #173a6b;
+  white-space: nowrap;
 }
 .photo-tag span {
   font-size: 0.69rem;
@@ -1729,4 +1730,14 @@ dialog::backdrop {
 .footer .footer-instagram:focus-visible {
   outline: 2px solid #fff;
   outline-offset: 3px;
+}
+
+@media (max-width: 600px) {
+  .photo-tag {
+    max-width: calc(100% - 16px);
+  }
+
+  .photo-tag b {
+    white-space: normal;
+  }
 }
