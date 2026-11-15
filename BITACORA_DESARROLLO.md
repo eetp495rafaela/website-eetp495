@@ -56,3 +56,14 @@ Rama de trabajo: `main`
 - Las dos cuentas técnicas continúan excluidas por correo exacto; la autorización de Soporte de cualquier otro docente no lo excluye.
 - Se identifican el Departamento/Curso elegido y la cantidad de personas en el encabezado del documento. No hay cambios en Firestore ni datos institucionales.
 - **Pendiente:** validar visualmente el modal en Soporte y Gestión y comprobar la salida impresa en ambos modos, incluyendo usuarios con varias etiquetas.
+
+## 2026-11-15 — Compatibilidad del modal con modo oscuro
+
+**Archivo:** `assets/js/contactos-institucionales.js`  
+**Commit:** `363cffd76fead34114d1ab7877dc3f8961f47d65`
+
+- Se detecta el modo oscuro ya utilizado en los portales mediante el selector CSS `html[data-public-theme="dark"]`.
+- El modal de generación de planilla adapta fondo, título, etiquetas, controles, selectores, botones y contraste al modo activo sin perder el estilo claro ni su centrado.
+- Sin cambios en permisos, usuarios, datos, consultas, filtrado por Departamento/Curso o generación del PDF.
+- Se constató que el commit local del usuario `f7686d4` modificó los nombres visibles Si.R.A. y S.I.M.E. e incluyó reformateo HTML; ese archivo no se alteró en este ajuste.
+- Pendiente: verificar el resultado en modo claro y oscuro desde Soporte y Gestión.
