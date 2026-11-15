@@ -89,3 +89,13 @@ Rama de trabajo: `main`
 - No se modificaron las consultas, las funciones de los botones, los datos institucionales ni los permisos.
 - **Pendiente:** comprobación manual de los tres botones y del modal en modo claro/oscuro desde los portales Soporte y Gestión.
 
+## 2026-11-15 — Legibilidad de encabezados Constancia y Escuela
+
+**Archivo:** `assets/js/contactos-institucionales.js`  
+**Commit:** `e2dc44efdb75a566d20aa622623912f80cf7ff81`
+
+- Se redujo exclusivamente la fuente de los encabezados **CONSTANCIA** y **ESCUELA** de 12 px a 10 px y su padding horizontal de 7 px a 3 px.
+- Se aplicó `white-space: nowrap` a esos encabezados para evitar solapamientos visuales.
+- Se conservaron los porcentajes de ancho, casillas, altura de filas, contenido y el resto de funcionalidades.
+- Se comprobó sintaxis JavaScript; pendiente verificación visual en navegador e impresión.
+
