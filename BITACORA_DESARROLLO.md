@@ -35,3 +35,11 @@ Rama de trabajo: `main`
 - Los campos se utilizan solamente para el documento generado; no se persisten en Firestore.
 - Se preservan las seis columnas, la casilla de constancia, las dos exclusiones por correo y la impresión A4 horizontal.
 - **Pendiente de prueba manual en navegador:** flujo Sí/No/Cancelar, validación HH:mm, saltos de página y visualización del motivo largo.
+
+## 2026-11-15 — Corrección visual del modal de planilla
+
+- **Commit:** `05d5aa8acc68adf499241dd4e7a50365196508b9`.
+- Se fuerza la ubicación centrada del diálogo en la ventana para evitar interferencias de estilos globales del portal.
+- Se restablece el fondo blanco y el texto oscuro del modal; se limita su alto al espacio visible con desplazamiento interno en pantallas pequeñas.
+- No se modificaron formularios, contactos, filtros ni la generación de PDFs.
+- Pendiente: confirmar visualmente el resultado en Soporte y Gestión.
