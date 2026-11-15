@@ -78,3 +78,14 @@ Rama de trabajo: `main`
 - No se modificaron los filtros, las casillas, los datos de reunión, las cuentas excluidas ni los datos institucionales.
 - **Pendiente:** verificar visualmente la impresión y revisar los correos excepcionalmente largos.
 
+## 2026-11-15 — Corrección urgente: restaurar botones de Contactos Institucionales
+
+**Archivo:** `assets/js/contactos-institucionales.js`  
+**Commit:** `f56f7195d1b9c6f4c888c2ff952a95e04e85d133`
+
+- Se corrigió un error de sintaxis introducido en la cadena JavaScript que define el CSS del modo oscuro del modal: las comillas dobles sin escapar en `data-public-theme="dark"` impedían que el navegador interpretara el módulo.
+- El fallo afectaba a los tres botones de Contactos Institucionales, pues no se registraban sus manejadores de eventos.
+- Los selectores CSS usan ahora comillas simples dentro de la cadena JavaScript; se verificó que el archivo completo supera el análisis sintáctico de JavaScript (sin las declaraciones `import`).
+- No se modificaron las consultas, las funciones de los botones, los datos institucionales ni los permisos.
+- **Pendiente:** comprobación manual de los tres botones y del modal en modo claro/oscuro desde los portales Soporte y Gestión.
+
