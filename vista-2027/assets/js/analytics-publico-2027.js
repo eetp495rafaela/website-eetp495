@@ -71,7 +71,7 @@
     const titulo = document.createElement("strong");
     titulo.textContent = "Privacidad y estadísticas";
     const parrafo = document.createElement("p");
-    parrafo.textContent = "¿Nos permitís medir visitas anónimas al sitio público con Google Analytics? Es opcional y no afecta tu acceso. No medimos los portales internos.";
+    parrafo.textContent = "¿Aceptás el uso de cookies de Google Analytics para conocer las visitas y el uso general del sitio público? Google puede procesar datos técnicos de navegación. Es opcional; no medimos los portales internos.";
     texto.append(titulo, parrafo);
     const acciones = document.createElement("div");
     acciones.className = "eetp-consentimiento-acciones";
@@ -80,12 +80,20 @@
       guardarPreferencia(acepta ? "si" : "no");
       caja.remove();
       if (acepta) iniciarMedicion();
-      else if (iniciado) {
-        // Cortar de inmediato el envío de eventos y evitar tráfico al volver a cargar.
+      else {
         window["ga-disable-" + MEDICION] = true;
         if (typeof window.gtag === "function") {
           window.gtag("consent", "update", { analytics_storage: "denied" });
         }
+        // Quitar cookies propias de GA al revocar, cuando el navegador lo permite.
+        document.cookie.split(";").forEach((parte) => {
+          const nombre = parte.split("=")[0].trim();
+          if (!/^_ga(?:_|$)/.test(nombre)) return;
+          const vencimiento = "expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/;SameSite=Lax";
+          document.cookie = nombre + "=;" + vencimiento;
+          document.cookie = nombre + "=;" + vencimiento + ";domain=" + window.location.hostname;
+          document.cookie = nombre + "=;" + vencimiento + ";domain=." + window.location.hostname;
+        });
       }
     };
     acciones.append(
@@ -94,7 +102,6 @@
     );
     caja.append(texto, acciones);
     document.body.appendChild(caja);
-    acciones.querySelector("button").focus({ preventScroll: true });
   }
 
   const pie = document.querySelector("footer");
