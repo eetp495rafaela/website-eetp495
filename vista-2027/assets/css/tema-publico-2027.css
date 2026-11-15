@@ -1,0 +1,387 @@
+/* Integración 45 · Modo claro/oscuro SOLO para las siete páginas públicas.
+   Se conserva la identidad azul institucional; las fotografías y los logos
+   NO se invierten ni se filtran. Los portales y login permanecen intactos. */
+
+/* Botón compacto rectangular, accesible desde el encabezado PC y celular. */
+.public-theme-toggle {
+  display: inline-flex;
+  flex: 0 0 79px;
+  align-items: center;
+  justify-content: space-between;
+  width: 79px;
+  height: 43px;
+  padding: 4px;
+  margin: 0;
+  border: 1px solid #bbcde0;
+  border-radius: 12px;
+  background: #edf3fa;
+  color: #183959;
+  box-shadow: 0 3px 10px rgba(16, 49, 87, .07);
+  cursor: pointer;
+  font-family: inherit;
+  line-height: 1;
+  -webkit-tap-highlight-color: transparent;
+}
+.public-theme-toggle .public-theme-icon {
+  display: grid;
+  flex: 0 0 33px;
+  width: 33px;
+  height: 33px;
+  place-items: center;
+  border-radius: 8px;
+  font-size: 19px;
+  line-height: 1;
+  opacity: .53;
+  filter: grayscale(.65);
+  transition: background-color .18s ease, opacity .18s ease, filter .18s ease;
+}
+html:not([data-public-theme="dark"]) .public-theme-toggle .public-theme-sun,
+html[data-public-theme="dark"] .public-theme-toggle .public-theme-moon {
+  background: #fff;
+  opacity: 1;
+  filter: none;
+  box-shadow: 0 2px 8px rgba(0, 27, 61, .18);
+}
+.public-theme-toggle:hover { border-color: #5787bc; }
+.public-theme-toggle:focus-visible {
+  outline: 3px solid #e1a949;
+  outline-offset: 3px;
+}
+@media (max-width: 1340px) and (min-width: 1151px) {
+  /* Un icono nuevo ocupa espacio: en pantallas intermedias aparece el menú
+     colapsado, sin superponer Portal Institucional ni el selector. */
+  .header-inner { height: 78px; }
+  .header-inner .mobile-trigger { display: flex; margin-left: 0; }
+  .header-inner .nav {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: white;
+    border-bottom: 1px solid #dae4ef;
+    box-shadow: 0 20px 32px #0824431b;
+    padding: 15px 24px;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0;
+    margin: 0;
+  }
+  .header-inner .nav.open { display: flex; }
+  .header-inner .nav a { padding: 11px 10px; font-size: .96rem; }
+  .header-inner .portal { margin-left: auto; }
+}
+@media (max-width: 1150px) {
+  .header-inner .portal { margin-left: auto; }
+  .header-inner .mobile-trigger { margin-left: 0; }
+}
+@media (max-width: 560px) {
+  .header-inner .public-theme-toggle { flex-basis: 70px; width: 70px; height: 41px; padding: 3px; border-radius: 10px; }
+  .header-inner .public-theme-icon { flex-basis: 30px; width: 30px; height: 33px; font-size: 18px; }
+}
+@media (max-width: 365px) {
+  .header-inner { gap: 5px; }
+  .header-inner .brand { gap: 6px; }
+  .header-inner .brand-name { font-size: 11.5px; }
+  .header-inner .public-theme-toggle { flex-basis: 65px; width: 65px; }
+  .header-inner .public-theme-icon { flex-basis: 28px; width: 28px; }
+}
+
+/* Paleta oscura: contrastes legibles, sin alterar los datos del sitio. */
+html[data-public-theme="dark"] {
+  color-scheme: dark;
+  --navy: #eaf2ff;
+  --blue: #9ac5ff;
+  --bright: #a8caff;
+  --ink: #e3ecfa;
+  --muted: #aec0d8;
+  --orange: #ffca81;
+  --gold: #f0ba63;
+  --line: #32445f;
+  --pale: #14253c;
+  --card: #182b45;
+  --mint: #79dfb3;
+  --shadow: 0 20px 60px rgba(0, 0, 0, .24);
+  background: #0b1526;
+}
+html[data-public-theme="dark"] body {
+  background: #0b1526;
+  color: #e3ecfa;
+}
+html[data-public-theme="dark"] .site-header {
+  background: rgba(16, 29, 48, .96);
+  border-bottom-color: #31465f;
+  box-shadow: 0 4px 23px rgba(0, 0, 0, .24);
+}
+html[data-public-theme="dark"] .brand-name,
+html[data-public-theme="dark"] .nav a,
+html[data-public-theme="dark"] .nav a[aria-current="page"] {
+  color: #e8f1ff;
+}
+html[data-public-theme="dark"] .nav a:hover,
+html[data-public-theme="dark"] .nav a[aria-current="location"] {
+  color: #a7ceff;
+}
+html[data-public-theme="dark"] .brand-town { color: #a9bcd3; }
+html[data-public-theme="dark"] .nav.open { background: #12253e; border-bottom-color: #31465f; }
+html[data-public-theme="dark"] .portal { background: #286bb5; color: #fff; }
+html[data-public-theme="dark"] .portal:hover { background: #347dcb; }
+html[data-public-theme="dark"] .mobile-trigger {
+  background: #172c48;
+  border-color: #3e5470;
+  color: #e7f1ff;
+}
+html[data-public-theme="dark"] .public-theme-toggle {
+  background: #111f35;
+  border-color: #506580;
+}
+html[data-public-theme="dark"] .public-theme-toggle .public-theme-moon {
+  background: #2c4a71;
+}
+html[data-public-theme="dark"] .skip {
+  background: #142942;
+  color: #fff;
+}
+
+/* Hero, títulos, botones y fondos de sección. */
+html[data-public-theme="dark"] .hero {
+  background: linear-gradient(115deg, #0f2036, #142b49 75%, #0e1c33);
+}
+html[data-public-theme="dark"] .hero::before { border-color: #31516e; }
+html[data-public-theme="dark"] .hero h1 em,
+html[data-public-theme="dark"] .eyebrow,
+html[data-public-theme="dark"] .text-link,
+html[data-public-theme="dark"] .quick-card .go,
+html[data-public-theme="dark"] .meta,
+html[data-public-theme="dark"] .timeline-year {
+  color: #a9d2ff;
+}
+html[data-public-theme="dark"] .lead,
+html[data-public-theme="dark"] .hero .lead,
+html[data-public-theme="dark"] .section-heading p,
+html[data-public-theme="dark"] .copy p,
+html[data-public-theme="dark"] .text-body,
+html[data-public-theme="dark"] .text-body p,
+html[data-public-theme="dark"] .muted {
+  color: #b1c5dc;
+}
+html[data-public-theme="dark"] .section-alt { background: #112039; }
+html[data-public-theme="dark"] .section-cream { background: #182536; }
+html[data-public-theme="dark"] .btn-outline {
+  background: #152d4b;
+  color: #d8eaff;
+  border-color: #527195;
+}
+html[data-public-theme="dark"] .btn-outline:hover { background: #214468; }
+html[data-public-theme="dark"] .btn-primary {
+  color: #fff;
+  background: #2469b8;
+}
+html[data-public-theme="dark"] .btn-primary:hover { background: #347dcc; }
+html[data-public-theme="dark"] .btn-light {
+  background: #f0f5ff;
+  color: #164478;
+}
+html[data-public-theme="dark"] .stat b,
+html[data-public-theme="dark"] .quick-card h3,
+html[data-public-theme="dark"] .news-copy h3,
+html[data-public-theme="dark"] .project-copy h3,
+html[data-public-theme="dark"] .place-copy h3,
+html[data-public-theme="dark"] .copy h2,
+html[data-public-theme="dark"] .contact-card h3,
+html[data-public-theme="dark"] .timeline-text h3,
+html[data-public-theme="dark"] .step h3,
+html[data-public-theme="dark"] .transporte-card-2027 h3,
+html[data-public-theme="dark"] .cal-toolbar h2,
+html[data-public-theme="dark"] .calendar-side h3,
+html[data-public-theme="dark"] .faq summary {
+  color: #e6f0ff;
+}
+html[data-public-theme="dark"] .stat small,
+html[data-public-theme="dark"] .quick-card p,
+html[data-public-theme="dark"] .news-copy p,
+html[data-public-theme="dark"] .project-copy p,
+html[data-public-theme="dark"] .place-copy p,
+html[data-public-theme="dark"] .photo-tag span,
+html[data-public-theme="dark"] .transporte-card-2027 p,
+html[data-public-theme="dark"] .step p,
+html[data-public-theme="dark"] .gallery-wide figcaption,
+html[data-public-theme="dark"] .faq details p {
+  color: #aec2db;
+}
+
+/* Tarjetas institucionales, foto de portada, listados y transporte. */
+html[data-public-theme="dark"] :is(
+  .quick-card, .news-card, .project-card, .place-card,
+  .contact-card, .transporte-card-2027, .study-card,
+  .timeline-text, .step, .faq details, .calendar-board,
+  .photo-tag, .year-tabs button, .plan-year-picker > .plan-year-button
+) {
+  background: #182a43;
+  color: #dceafa;
+  border-color: #324962;
+  box-shadow: 0 9px 30px rgba(0, 0, 0, .12);
+}
+html[data-public-theme="dark"] .quick-card:hover,
+html[data-public-theme="dark"] .plan-year-picker > .plan-year-button:hover {
+  border-color: #7595bd;
+}
+html[data-public-theme="dark"] .card-icon,
+html[data-public-theme="dark"] .photo-tag .tag-icon,
+html[data-public-theme="dark"] .transporte-icono-2027,
+html[data-public-theme="dark"] .step-num,
+html[data-public-theme="dark"] .year-number {
+  background: #284765;
+  color: #d1e8ff;
+}
+html[data-public-theme="dark"] .photo-tag b,
+html[data-public-theme="dark"] .contact-row b,
+html[data-public-theme="dark"] .plan-year-panel .plan-year-heading h3,
+html[data-public-theme="dark"] .plan-year-panel .plan-year-count {
+  color: #e1edff;
+}
+html[data-public-theme="dark"] .detail,
+html[data-public-theme="dark"] .notice-blue {
+  background: #1b334b;
+  color: #c9ddf1;
+  border-color: #45607a;
+}
+html[data-public-theme="dark"] .notice {
+  background: #332919;
+  color: #ffe1af;
+  border-color: #80643a;
+}
+html[data-public-theme="dark"] .pill {
+  background: #1d3c54;
+  color: #cce7ff;
+  border-color: #48688a;
+}
+html[data-public-theme="dark"] .contact-row { border-bottom-color: #32455d; }
+html[data-public-theme="dark"] .contact-row a,
+html[data-public-theme="dark"] .contact-row span { color: #b9cfe8; }
+html[data-public-theme="dark"] .contact-row a:hover { color: #fff; }
+html[data-public-theme="dark"] .timeline-text { color: #b8cbe2; }
+html[data-public-theme="dark"] .timeline-item:not(:last-child)::before { background: #395472; }
+html[data-public-theme="dark"] .tag-demostracion { background: #48351e; color: #ffce94; }
+
+/* Plan de Estudios: tabs, panel desplegable y Taller con sus tres áreas. */
+html[data-public-theme="dark"] .year-tabs button { color: #dceaff; }
+html[data-public-theme="dark"] .year-tabs button[aria-pressed="true"],
+html[data-public-theme="dark"] .plan-year-picker > .plan-year-button[aria-expanded="true"] {
+  background: #265f9e;
+  color: #fff;
+  border-color: #6796c6;
+}
+html[data-public-theme="dark"] .plan-year-picker > .plan-year-button { color: #d7eaff; }
+html[data-public-theme="dark"] .plan-year-picker > .plan-year-panel {
+  background: #172941;
+  color: #e6f0ff;
+  border-color: #48627f;
+}
+html[data-public-theme="dark"] .legend span { color: #cadced; }
+html[data-public-theme="dark"] .subjects li,
+html[data-public-theme="dark"] .plan-year-panel .subjects li {
+  color: #e2efff;
+  background: #1c354f;
+  border-color: #3a5775;
+  border-left-color: #6ba7ec;
+}
+html[data-public-theme="dark"] .subjects li.tecnica {
+  background: #392c21;
+  border-left-color: #edae60;
+}
+html[data-public-theme="dark"] .subjects li.taller {
+  background: #193d35;
+  border-left-color: #61c49c;
+}
+html[data-public-theme="dark"] .plan-year-panel .subjects li.taller:has(.p24-taller-titulo) {
+  background: linear-gradient(145deg, #183f30, #235340);
+  border-color: #4eaa77;
+  color: #e6fff0;
+}
+html[data-public-theme="dark"] .plan-year-panel .p24-taller-titulo { color: #d5ffdf; }
+html[data-public-theme="dark"] .plan-year-panel .p24-taller-subtitulo { color: #b7e4c4; }
+html[data-public-theme="dark"] .plan-year-panel .p24-taller-area {
+  background: #315d46;
+  color: #e4ffed;
+  border-color: #6bae82;
+}
+
+/* Calendario: conservar el contraste de fechas y actividades. */
+html[data-public-theme="dark"] .cal-toolbar,
+html[data-public-theme="dark"] .weekdays div,
+html[data-public-theme="dark"] .calendar-side {
+  background: #172c46;
+  color: #dae9fb;
+  border-color: #344c65;
+}
+html[data-public-theme="dark"] .cal-toolbar button {
+  background: #213a58;
+  color: #e1efff;
+  border-color: #456380;
+}
+html[data-public-theme="dark"] .day-cell {
+  background: #15273e;
+  color: #e3efff;
+  border-color: #2f435d;
+}
+html[data-public-theme="dark"] .day-cell.blank { background: #101d2f; }
+html[data-public-theme="dark"] .day-cell:not(.blank):hover { background: #25425f; }
+html[data-public-theme="dark"] .day-cell.selected {
+  background: #234668;
+  box-shadow: inset 0 0 0 2px #85c1ff;
+}
+html[data-public-theme="dark"] .day-cell.today .day-n {
+  color: #fff;
+  background: #2d70bd;
+}
+html[data-public-theme="dark"] .day-cell.has-event .day-event {
+  background: #42331d;
+  color: #ffe0a7;
+  border-left-color: #d89f53;
+}
+html[data-public-theme="dark"] .cal-list li { border-bottom-color: #365271; }
+html[data-public-theme="dark"] .cal-list b { color: #e8f1ff; }
+html[data-public-theme="dark"] .cal-list span { color: #bbcee4; }
+
+/* Contacto: tarjetas y banner con fotografía intacta. */
+html[data-public-theme="dark"] #contacto .p30-contact-card h3,
+html[data-public-theme="dark"] #contacto .p30-location .p30-location-copy h3 {
+  color: #e8f2ff;
+}
+html[data-public-theme="dark"] #contacto .contact-card.p30-contact-card {
+  background: #172a44;
+  border-color: #374e69;
+}
+html[data-public-theme="dark"] #contacto .map-panel.p28-location.p30-location {
+  background: linear-gradient(125deg, #152a43, #1e3b59);
+  border-color: #3b5878;
+}
+html[data-public-theme="dark"] #contacto .p30-location .p28-location-content {
+  background: linear-gradient(130deg, #1c3550, #213d5b);
+}
+html[data-public-theme="dark"] #contacto .p30-location .p28-location-photo::after {
+  background: linear-gradient(90deg, transparent, #1c3550 94%);
+}
+html[data-public-theme="dark"] #contacto .p30-address { color: #c4daef; }
+html[data-public-theme="dark"] #contacto .p30-address svg { stroke: #9fcbff; }
+html[data-public-theme="dark"] #contacto .p30-location-graphic { color: #bad9fb; }
+@media (max-width: 800px) {
+  html[data-public-theme="dark"] #contacto .p30-location .p28-location-photo::after {
+    background: linear-gradient(0deg, #1c3550, transparent);
+  }
+}
+
+/* Elementos ya oscuros de origen conservan sus textos blancos. */
+html[data-public-theme="dark"] .dark-panel,
+html[data-public-theme="dark"] .cta,
+html[data-public-theme="dark"] .page-hero,
+html[data-public-theme="dark"] .footer {
+  color: #fff;
+}
+html[data-public-theme="dark"] .dark-panel h2,
+html[data-public-theme="dark"] .cta h2,
+html[data-public-theme="dark"] .page-hero h1,
+html[data-public-theme="dark"] .footer h3 {
+  color: #fff;
+}

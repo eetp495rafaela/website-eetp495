@@ -4,6 +4,13 @@
   <head>
     <meta charset="utf-8" />
     <meta content="width=device-width,initial-scale=1" name="viewport" />
+    <script>
+      try {
+        if (localStorage.getItem("eetp495-public-theme") === "dark") {
+          document.documentElement.setAttribute("data-public-theme", "dark");
+        }
+      } catch (_) { /* La preferencia es opcional. */ }
+    </script>
     <meta content="noindex,nofollow" name="robots" />
     <meta content="#0b2346" name="theme-color" />
     <title>Ingreso al Portal Institucional | E.E.T.P. N° 495</title>
@@ -21,6 +28,7 @@
       rel="stylesheet"
       href="vista-2027/assets/css/ajustes-revision-2027.css"
     />
+    <link href="vista-2027/assets/css/tema-login-2027.css?v=45b" rel="stylesheet" />
   </head>
   <body class="login-demo">
     <a class="skip" href="#login-main">Saltar al ingreso</a>
@@ -82,6 +90,11 @@
         </div>
       </section>
       <section class="login-form-side">
+        <div class="login-theme-container">
+          <button type="button" class="login-theme-toggle" data-public-theme-toggle
+            aria-pressed="false" aria-label="Activar modo oscuro" title="Activar modo oscuro"
+          ><span class="login-theme-icon login-theme-sun" aria-hidden="true">☀️</span><span class="login-theme-icon login-theme-moon" aria-hidden="true">🌙</span></button>
+        </div>
         <div class="login-card">
           <div class="login-logo">
             <img
@@ -400,5 +413,6 @@
         }
       });
     </script>
+    <script src="vista-2027/assets/js/tema-publico-2027.js?v=45" defer></script>
   </body>
 </html>

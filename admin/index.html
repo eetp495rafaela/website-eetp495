@@ -3,6 +3,13 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <script>
+      try {
+        if (localStorage.getItem("eetp495-public-theme") === "dark") {
+          document.documentElement.setAttribute("data-public-theme", "dark");
+        }
+      } catch (_) { /* La preferencia es opcional. */ }
+    </script>
     <meta name="robots" content="noindex,nofollow" />
     <meta name="theme-color" content="#0b2346" />
     <title>Portal Soporte | E.E.T.P. N° 495</title>
@@ -48,6 +55,7 @@
       href="../assets/css/portales/controles-unificados-2027.css?v=18"
     />
       <link rel="stylesheet" href="../assets/css/sira-previsiones-hoy.css?v=40" />
+    <link rel="stylesheet" href="../assets/css/portales/tema-portales-2027.css?v=47" />
   </head>
   <body class="portal-soporte-2027" data-rol-permitido="SOPORTE">
     <header class="topbar p27-original-header">
@@ -664,6 +672,14 @@
             <span id="p27-username">Cargando usuario…</span
             ><small>Soporte</small>
           </div>
+          <button
+            type="button"
+            class="portal-theme-toggle"
+            data-public-theme-toggle
+            aria-pressed="false"
+            aria-label="Activar modo oscuro"
+            title="Activar modo oscuro"
+          ><span class="portal-theme-icon portal-theme-sun" aria-hidden="true">☀️</span><span class="portal-theme-icon portal-theme-moon" aria-hidden="true">🌙</span></button>
           <button
             class="exit-link"
             type="button"
@@ -4785,5 +4801,6 @@
         copiarMensajeEstudiantes();
       }
     </script>
+    <script src="../vista-2027/assets/js/tema-publico-2027.js?v=45" defer></script>
   </body>
 </html>
