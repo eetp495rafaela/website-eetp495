@@ -152,3 +152,15 @@ Rama de trabajo: `main`
 - Se actualizó la versión del script a `?v=2` en las siete páginas públicas para evitar que el navegador conserve el texto anterior.
 - Se verificó la sintaxis JavaScript. No hubo cambios en la identificación de GA4, eventos, permisos, Firebase ni datos institucionales. Pendiente comprobación visual de la redacción en PC y celular.
 
+## 2026-11-15 — Infraestructura del dominio (referencia; sin cambios técnicos)
+
+- Dominio oficial: `eetp495rafaela.edu.ar`, registrado y gestionado ante **NIC Argentina (NIC.ar)**, según confirma el responsable del proyecto.
+- **Cloudflare**: servicio donde se administran los DNS del dominio, según confirma el responsable. No se verificaron aquí los registros DNS ni eventuales reglas de proxy/HTTPS.
+- **GitHub Pages**: publicación del repositorio `eetp495rafaela/website-eetp495` desde `main`, según `README.md`. El archivo `CNAME` contiene `eetp495rafaela.edu.ar`.
+- URL predeterminada de GitHub Pages: `https://eetp495rafaela.github.io/website-eetp495/`. El responsable recuerda que se configuró su redirección al dominio institucional, pero **la redirección actual sigue pendiente de verificación**. No se modificó.
+- Dominio canónico preferido para el SEO: `https://eetp495rafaela.edu.ar/`; sitemap en `/sitemap.xml`; propiedad de dominio en Google Search Console. En noviembre de 2026 se verificó que las cuatro páginas públicas podían indexarse y se solicitaron sus indexaciones. Login y los portales internos permanecen con `noindex,nofollow`.
+- **Google Analytics 4** activo para el sitio público: propiedad **Sitio Web EETP 495** (ID `550788569`), flujo **Web Principal** (medición `G-57ZS2C1RQM`); hay eventos confirmados en Tiempo real y medición condicionada a consentimiento del visitante.
+- Segunda propiedad GA4 `portal-institucional-eet-fa5c7` (ID `562634371`, medición `G-CCLJGLRT3V`): se decidió **conservarla**. No se constató actividad reciente ni se investigaron exhaustivamente sus posibles vinculaciones con Firebase; no eliminar sin revisión.
+- Google Cloud/Firebase: proyecto `portal-institucional-eet-fa5c7`, usado para servicios del portal. No confundir el proyecto Cloud con la propiedad GA4 de igual nombre.
+- Esta entrada **solo documenta** el estado conocido y el testimonio del responsable. No se cambian DNS, redirecciones, Cloudflare, NIC.ar, CNAME, Analytics, Firebase ni código del sitio.
+
