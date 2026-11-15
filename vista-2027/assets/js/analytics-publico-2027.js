@@ -70,9 +70,9 @@
     caja.setAttribute("aria-label", "Privacidad y estadísticas");
     const texto = document.createElement("div");
     const titulo = document.createElement("strong");
-    titulo.textContent = "Privacidad y estadísticas";
+    titulo.textContent = "¡Ayudanos a mejorar la web de nuestra escuela!";
     const parrafo = document.createElement("p");
-    parrafo.textContent = "¿Aceptás el uso de cookies de Google Analytics para conocer las visitas y el uso general del sitio público? Google puede procesar datos técnicos de navegación. Es opcional; no medimos los portales internos.";
+    parrafo.textContent = "Nos gustaría saber cuántas personas nos visitan y qué secciones consultan para seguir mejorando este sitio. Si aceptás, usaremos Google Analytics, que puede utilizar cookies y procesar datos técnicos de navegación. No enviamos nombres, DNI ni información académica desde esta medición, y no analizamos los portales internos. Es tu elección: podés usar la web igual y cambiarla cuando quieras.";
     texto.append(titulo, parrafo);
     const acciones = document.createElement("div");
     acciones.className = "eetp-consentimiento-acciones";
