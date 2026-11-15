@@ -1171,3 +1171,326 @@ html[data-public-theme="dark"] body.portal-docentes-2027
   border-color: #5ab995 !important;
   background: #1b453b !important;
 }
+
+
+
+/* Integración 46 · Contrastes relevados en cuatro portales · 14/11/2026 */
+/* Solo tema oscuro, salvo el distintivo puntual de Mis compañeros.
+   No tocar JS, estados, operaciones de datos ni estilos de Taller/Educación Física. */
+
+/* DOCENTES · Si.R.A. y Parte: controles nativos blancos con texto pálido. */
+html[data-public-theme="dark"] body.portal-docentes-2027
+:is(#sira-docente,#parte-sira-docente) :is(.campo-documentacion input,.campo-documentacion select) {
+  color: #eef6ff !important;
+  background: #10253f !important;
+  border: 1px solid #536f8e !important;
+  color-scheme: dark;
+}
+html[data-public-theme="dark"] body.portal-docentes-2027
+:is(#sira-docente,#parte-sira-docente) .campo-documentacion select:disabled {
+  color: #c2d5ea !important;
+  background: #203650 !important;
+  opacity: 1 !important;
+}
+html[data-public-theme="dark"] body.portal-docentes-2027
+:is(#sira-docente,#parte-sira-docente) .campo-documentacion :is(select option,select optgroup) {
+  color: #eef6ff !important;
+  background: #10253f !important;
+}
+html[data-public-theme="dark"] body.portal-docentes-2027
+:is(#sira-docente,#parte-sira-docente) input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: brightness(0) invert(1);
+  opacity: .9;
+}
+
+/* MODALES SOPORTE · El formulario principal y los diálogos externos a .p27-pane
+   comparten etiquetas con los formularios claros, pero fondo oscuro. */
+html[data-public-theme="dark"] body.portal-soporte-2027
+:is(.modal-edicion-contenido,.modal-contenido,.modal-confirmacion-contenido,.modal-content)
+:is(.campo-formulario > label,.campo-formulario label,.formulario-edicion label,.formulario-usuario label,
+    .selector-roles-admin label,.opcion-rol-admin span) {
+  color: #e3f0ff !important;
+}
+html[data-public-theme="dark"] body.portal-soporte-2027
+:is(.modal-edicion-contenido,.modal-contenido,.modal-confirmacion-contenido,.modal-content)
+:is(.btn-cerrar-modal,.modal-cerrar,.btn-cerrar,.cerrar-modal,.modal-edicion-cabecera button) {
+  color: #edf5ff !important;
+}
+html[data-public-theme="dark"] body.portal-soporte-2027
+:is(.modal-edicion-contenido,.modal-contenido,.modal-confirmacion-contenido,.modal-content)
+:is(.opcion-rol-admin,.selector-roles-admin) {
+  border-color: #48627e !important;
+  color: #e0efff !important;
+}
+html[data-public-theme="dark"] body.portal-soporte-2027
+:is(.modal-edicion-contenido,.modal-contenido,.modal-confirmacion-contenido,.modal-content)
+.opcion-rol-admin:has(input:disabled) {
+  opacity: .65;
+}
+html[data-public-theme="dark"] body.portal-soporte-2027
+:is(.modal-edicion-contenido,.modal-contenido,.modal-confirmacion-contenido,.modal-content)
+.opcion-rol-admin:has(input:checked) {
+  background: #234f67 !important;
+  border-color: #7eb5e6 !important;
+}
+html[data-public-theme="dark"] body.portal-soporte-2027
+:is(.modal-edicion-contenido,.modal-contenido,.modal-confirmacion-contenido,.modal-content)
+:is(input,select,textarea):not([type="checkbox"]):not([type="radio"]) {
+  color-scheme: dark;
+}
+html[data-public-theme="dark"] body.portal-soporte-2027
+:is(.modal-edicion-contenido,.modal-contenido,.modal-confirmacion-contenido,.modal-content)
+:is(input,textarea)::placeholder {
+  color: #b7cce2 !important;
+}
+
+/* SweetAlert2 · títulos, áreas editables y selectores de todos los portales. */
+html[data-public-theme="dark"] body:is(.portal-soporte-2027,.portal-gestion-2027,.portal-docentes-2027,.portal-alumnos-2027)
+.swal2-popup :is(.swal2-title,.swal2-html-container,.swal2-html-container > strong,.swal2-close) {
+  color: #eaf4ff !important;
+}
+html[data-public-theme="dark"] body:is(.portal-soporte-2027,.portal-gestion-2027,.portal-docentes-2027,.portal-alumnos-2027)
+.swal2-popup :is(.swal2-input,.swal2-textarea,.swal2-select) {
+  color: #edf6ff !important;
+  background: #162e49 !important;
+  border-color: #6482a0 !important;
+  color-scheme: dark;
+}
+html[data-public-theme="dark"] body:is(.portal-soporte-2027,.portal-gestion-2027,.portal-docentes-2027,.portal-alumnos-2027)
+.swal2-popup :is(.swal2-input,.swal2-textarea)::placeholder {
+  color: #b4cbe3 !important;
+}
+html[data-public-theme="dark"] body:is(.portal-soporte-2027,.portal-gestion-2027,.portal-docentes-2027,.portal-alumnos-2027)
+.swal2-popup :is(.swal2-html-container p,.swal2-html-container span,.swal2-html-container small) {
+  color: #c5d9ee;
+}
+
+/* SOPORTE · Solo selector de bloques del formulario Horario de Aula. */
+html[data-public-theme="dark"] body.portal-soporte-2027 #horario-aula
+:is(#bloquesHorarioAula,.columna-bloques-horarios-admin) {
+  background: #1a324e !important;
+  border-color: #4c6884 !important;
+}
+html[data-public-theme="dark"] body.portal-soporte-2027 #horario-aula
+.titulo-columna-bloques-admin {
+  background: #284765 !important;
+  color: #edf6ff !important;
+}
+html[data-public-theme="dark"] body.portal-soporte-2027 #horario-aula
+.columna-bloques-horarios-admin .bloque-horario-opcion {
+  background: #233b56 !important;
+  color: #e3f0ff !important;
+  border-color: #526d89 !important;
+}
+html[data-public-theme="dark"] body.portal-soporte-2027 #horario-aula
+.columna-bloques-horarios-admin .bloque-horario-opcion:has(input:checked) {
+  background: #244e75 !important;
+  border-color: #91c5f4 !important;
+}
+html[data-public-theme="dark"] body.portal-soporte-2027 #horario-aula
+.columna-bloques-horarios-admin .recreo-horario-admin {
+  background: #142a45 !important;
+  color: #e5f2ff !important;
+}
+
+/* SOPORTE · Registro de mesas: tarjetas de año/división y subtítulo. */
+html[data-public-theme="dark"] body.portal-soporte-2027 #mesas-examen-admin
+.titulo-tribunal-mesa-admin h4 {
+  color: #edf5ff !important;
+}
+html[data-public-theme="dark"] body.portal-soporte-2027 #mesas-examen-admin
+:is(.opciones-mesas-admin,.columna-cursos-mesa-admin) {
+  background: #1b314d !important;
+  border-color: #4a6785 !important;
+}
+html[data-public-theme="dark"] body.portal-soporte-2027 #mesas-examen-admin
+.titulo-anio-mesa-admin {
+  color: #eaf4ff !important;
+  border-color: #4a6785 !important;
+}
+html[data-public-theme="dark"] body.portal-soporte-2027 #mesas-examen-admin
+.item-curso-mesa-admin {
+  background: #253e5b !important;
+  color: #e9f3ff !important;
+  border-color: #587591 !important;
+}
+html[data-public-theme="dark"] body.portal-soporte-2027 #mesas-examen-admin
+.item-curso-mesa-admin :is(span,label) {
+  color: #edf5ff !important;
+}
+html[data-public-theme="dark"] body.portal-soporte-2027 #mesas-examen-admin
+.item-curso-mesa-admin:has(input:checked) {
+  background: #255b7d !important;
+  border-color: #a0d4fb !important;
+}
+
+/* ALUMNOS · Mis docentes: filas y celdas coherentes con la tabla nocturna. */
+html[data-public-theme="dark"] body.portal-alumnos-2027 #mis-docentes-alumno
+:is(.tabla-docentes-alumno,.tabla-docentes-alumno tbody,.tabla-docentes-alumno tbody tr,
+    .tabla-docentes-alumno tbody td) {
+  background: #1a304b !important;
+  color: #e2f0ff !important;
+  border-color: #48637f !important;
+}
+html[data-public-theme="dark"] body.portal-alumnos-2027 #mis-docentes-alumno
+.tabla-docentes-alumno tbody tr:hover td {
+  background: #25425f !important;
+}
+html[data-public-theme="dark"] body.portal-alumnos-2027 #mis-docentes-alumno
+.tabla-docentes-alumno tbody td::before {
+  color: #bcd5ef !important;
+}
+html[data-public-theme="dark"] body.portal-alumnos-2027 #mis-docentes-alumno
+.tabla-docentes-alumno tbody td .enlace-correo-docente-alumno {
+  color: #8ed8ff !important;
+}
+
+/* ALUMNOS · Mesas: fondo claro heredado de .panel-alumno-mesas. */
+html[data-public-theme="dark"] body.portal-alumnos-2027 #mesas-examen-alumno
+:is(.panel-alumno-mesas,.tabla-alumno-mesas-contenedor,.tabla-alumno-mesas) {
+  background: #1a304a !important;
+  color: #e0eeff !important;
+  border-color: #486681 !important;
+}
+html[data-public-theme="dark"] body.portal-alumnos-2027 #mesas-examen-alumno
+:is(.encabezado-alumno-mesas h3,.encabezado-alumno-mesas p,
+    .campo-alumno-mesas label,.mensaje-alumno-mesas) {
+  color: #dfedfc !important;
+}
+html[data-public-theme="dark"] body.portal-alumnos-2027 #mesas-examen-alumno
+.tabla-alumno-mesas tbody td {
+  background: #1a304a !important;
+  color: #e3efff !important;
+}
+
+/* ALUMNOS · Mis compañeros: único ajuste de contraste en modo claro. */
+html:not([data-public-theme="dark"]) body.portal-alumnos-2027
+#mis-companeros-alumno .encabezado-agenda-docentes-alumno,
+html:not([data-public-theme="dark"]) body.portal-alumnos-2027
+#mis-companeros-alumno .encabezado-agenda-docentes-alumno :is(strong,span) {
+  color: #174674 !important;
+}
+
+/* GESTIÓN · Horarios: distintivo de turno, curso e icono de calendario. */
+html[data-public-theme="dark"] body.portal-gestion-2027 #horarios
+.titulo-grupo-horario-gestion > span {
+  background: #2b4a67 !important;
+  color: #edf6ff !important;
+  border-color: #577794 !important;
+}
+html[data-public-theme="dark"] body.portal-gestion-2027 #horarios
+.bloque-horario-curso-gestion {
+  background: #254260 !important;
+  color: #ebf4ff !important;
+}
+html[data-public-theme="dark"] body.portal-gestion-2027 #horarios
+:is(.panel-gestion-listado > i,.panel-gestion-listado > .fa-calendar,
+    .panel-info > .fa-calendar-days) {
+  color: #a8d5ff !important;
+}
+
+/* GESTIÓN · Docentes libres: cambiar solo las cabeceras/paneles,
+   conservando tarjetas de docentes, alertas y semántica verde/ámbar. */
+html[data-public-theme="dark"] body.portal-gestion-2027 #vistaDocentesLibresTallerGestion
+.docentes-libres-introduccion {
+  background: #1c3650 !important;
+  border-color: #4a6681 !important;
+}
+html[data-public-theme="dark"] body.portal-gestion-2027 #vistaDocentesLibresTallerGestion
+:is(.docentes-libres-introduccion p,.docentes-libres-turno-encabezado p) {
+  color: #c3d9ee !important;
+}
+html[data-public-theme="dark"] body.portal-gestion-2027 #vistaDocentesLibresTallerGestion
+.docentes-libres-turno {
+  background: #1a304a !important;
+  border-color: #4a6681 !important;
+}
+html[data-public-theme="dark"] body.portal-gestion-2027 #vistaDocentesLibresTallerGestion
+.docentes-libres-turno-encabezado :is(h4,p) {
+  color: #e5f2ff !important;
+}
+
+/* GESTIÓN · Si.R.A.: aviso de ausencia de clases previstas. */
+html[data-public-theme="dark"] body.portal-gestion-2027 #sira-gestion
+.sira-hoy .sira-hoy-mensaje:not(.sira-hoy-error) {
+  color: #dceaff !important;
+  background: #233b56 !important;
+  border: 1px solid #4b6784 !important;
+}
+
+/* GESTIÓN · Situación de asistencia: períodos y botones de filtros. */
+html[data-public-theme="dark"] body.portal-gestion-2027 #situacion-asistencia-estudiantes
+.resumen-periodos-gestion {
+  background: #1c344f !important;
+  color: #e3f0ff !important;
+  border-color: #4b6987 !important;
+}
+html[data-public-theme="dark"] body.portal-gestion-2027 #situacion-asistencia-estudiantes
+.resumen-periodos-gestion :is(h4,p,strong,span) {
+  color: #e5f2ff !important;
+}
+html[data-public-theme="dark"] body.portal-gestion-2027 #situacion-asistencia-estudiantes
+.trimestre-consulta-gestion {
+  background: #263f59 !important;
+  color: #e7f3ff !important;
+  border-color: #53708d !important;
+}
+html[data-public-theme="dark"] body.portal-gestion-2027 #situacion-asistencia-estudiantes
+.btn-filtro-detalle-asistencia:not(.activo) {
+  background: #263e59 !important;
+  color: #e4f1ff !important;
+  border-color: #56738f !important;
+}
+html[data-public-theme="dark"] body.portal-gestion-2027 #situacion-asistencia-estudiantes
+.btn-filtro-detalle-asistencia.activo {
+  color: #ffffff !important;
+}
+
+/* GESTIÓN · Mesas de examen: los dos paneles principales y los cursos. */
+html[data-public-theme="dark"] body.portal-gestion-2027 #mesas-examen-gestion
+:is(.panel-gestion-listado,#panelMesaDireccionGestion) {
+  background: #192e49 !important;
+  color: #e6f1ff !important;
+  border-color: #486681 !important;
+}
+html[data-public-theme="dark"] body.portal-gestion-2027 #mesas-examen-gestion
+:is(.encabezado-listado h3,.encabezado-listado p,.campo-filtro-gestion label,
+    .titulo-tribunal-mesa-gestion h4) {
+  color: #e5f2ff !important;
+}
+html[data-public-theme="dark"] body.portal-gestion-2027 #mesas-examen-gestion
+:is(.opciones-mesas-gestion,.columna-cursos-mesa-gestion) {
+  background: #203753 !important;
+  border-color: #54708b !important;
+}
+html[data-public-theme="dark"] body.portal-gestion-2027 #mesas-examen-gestion
+.titulo-anio-mesa-gestion {
+  color: #eef6ff !important;
+  border-color: #597895 !important;
+}
+html[data-public-theme="dark"] body.portal-gestion-2027 #mesas-examen-gestion
+.item-curso-mesa-gestion {
+  background: #29435f !important;
+  color: #edf6ff !important;
+  border-color: #627f99 !important;
+}
+html[data-public-theme="dark"] body.portal-gestion-2027 #mesas-examen-gestion
+.item-curso-mesa-gestion :is(span,label) {
+  color: #edf6ff !important;
+}
+html[data-public-theme="dark"] body.portal-gestion-2027 #mesas-examen-gestion
+.item-curso-mesa-gestion:has(input:checked) {
+  background: #255c7e !important;
+  border-color: #97cfff !important;
+}
+html[data-public-theme="dark"] body.portal-gestion-2027 #mesas-examen-gestion
+:is(.filtros-mesas-gestion,.tabla-mesas-gestion,.tabla-contenedor) {
+  background: #172d46 !important;
+  border-color: #466380 !important;
+}
+html[data-public-theme="dark"] body.portal-gestion-2027 #mesas-examen-gestion
+.tabla-mesas-gestion tbody td {
+  background: #1a3049 !important;
+  color: #e1eeff !important;
+}
+
