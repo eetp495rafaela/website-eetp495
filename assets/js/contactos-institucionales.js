@@ -457,7 +457,15 @@ function obtenerDniAgenda_(contacto) {
 
 function construirHtmlAgenda_(contactos) {
   const comparar = new Intl.Collator("es", { sensitivity: "base", numeric: true });
-  const ordenados = [...contactos].sort((a, b) =>
+  // Excluir exclusivamente las dos cuentas técnicas de esta planilla.
+  // Los docentes con rol Soporte deben seguir apareciendo.
+  const correosExcluidos = new Set([
+    "soportetecnico.tec495@gmail.com",
+    "enviotrabajos495@gmail.com",
+  ]);
+  const ordenados = contactos.filter((contacto) =>
+    !correosExcluidos.has(String(contacto.correo || "").trim().toLowerCase())
+  ).sort((a, b) =>
     comparar.compare(a.nombreCompleto, b.nombreCompleto) ||
     comparar.compare(a.correo, b.correo),
   );
@@ -472,7 +480,7 @@ function construirHtmlAgenda_(contactos) {
     .sort(([a], [b]) => comparar.compare(a, b))
     .map(([letra, items]) =>
       '<tbody class="grupo">' +
-      '<tr class="fila-letra"><th scope="rowgroup" colspan="4">' +
+      '<tr class="fila-letra"><th scope="rowgroup" colspan="6">' +
       escaparHtmlAgenda_(letra) + '</th></tr>' +
       items.map((contacto) =>
         '<tr class="fila-persona">' +
@@ -480,6 +488,8 @@ function construirHtmlAgenda_(contactos) {
         '<td class="col-dni">' + escaparHtmlAgenda_(obtenerDniAgenda_(contacto)) + '</td>' +
         '<td class="col-correo">' + escaparHtmlAgenda_(contacto.correo) + '</td>' +
         '<td class="col-firma"></td>' +
+        '<td class="col-constancia"><span class="casilla-constancia"></span></td>' +
+        '<td class="col-escuela"></td>' +
         '</tr>'
       ).join("") + '</tbody>'
     ).join("");
@@ -505,7 +515,7 @@ function construirHtmlAgenda_(contactos) {
     ".datos-reunion span{white-space:nowrap}",
     ".tabla-scroll{overflow-x:auto}",
     ".planilla{width:100%;min-width:840px;border-collapse:collapse;table-layout:fixed}",
-    ".planilla col.nombre{width:32%}.planilla col.dni{width:12%}.planilla col.correo{width:34%}.planilla col.firma{width:22%}",
+    ".planilla col.nombre{width:23%}.planilla col.dni{width:11%}.planilla col.correo{width:27%}.planilla col.firma{width:17%}.planilla col.constancia{width:11%}.planilla col.escuela{width:11%}",
     ".planilla thead th{border:1px solid #8ea9be;background:#dfeefa;color:#073683;padding:9px 7px;font-size:12px;text-align:left;text-transform:uppercase}",
     ".planilla tbody .fila-letra th{border:1px solid #8ea9be;background:#eef5fb;color:#105c9d;font-size:14px;text-align:left;padding:7px 9px}",
     ".planilla tbody td{border:1px solid #aebdca;height:15mm;min-height:15mm;padding:7px 8px;vertical-align:middle;font-size:14.5px;line-height:1.35}",
@@ -513,6 +523,8 @@ function construirHtmlAgenda_(contactos) {
     ".planilla .col-dni{font-variant-numeric:tabular-nums;white-space:nowrap}",
     ".planilla .col-correo{font-size:14px;overflow-wrap:anywhere}",
     ".planilla .col-firma{background:#fff}",
+    ".planilla .col-constancia{text-align:center}.casilla-constancia{display:inline-block;width:6mm;height:6mm;border:1.5px solid #193954;vertical-align:middle;background:#fff}",
+    ".planilla .col-escuela{background:#fff}",
     ".observacion{font-size:10px;color:#4c6275;margin:10px 0 0}",
     "footer{margin-top:12px;color:#657d91;font-size:9px;line-height:1.4}",
     "@page{size:A4 landscape;margin:11mm 10mm}",
@@ -535,9 +547,10 @@ function construirHtmlAgenda_(contactos) {
     '<span><strong>Horario:</strong> _______________</span>',
     '<span><strong>Lugar:</strong> ___________________________</span></div>',
     '<div class="tabla-scroll"><table class="planilla">',
-    '<colgroup><col class="nombre"><col class="dni"><col class="correo"><col class="firma"></colgroup>',
+    '<colgroup><col class="nombre"><col class="dni"><col class="correo"><col class="firma"><col class="constancia"><col class="escuela"></colgroup>',
     '<thead><tr><th scope="col">APELLIDO Y NOMBRE</th><th scope="col">DNI</th>',
-    '<th scope="col">CORREO</th><th scope="col">FIRMA</th></tr></thead>',
+    '<th scope="col">CORREO</th><th scope="col">FIRMA</th>',
+    '<th scope="col">CONSTANCIA</th><th scope="col">ESCUELA</th></tr></thead>',
     filas, '</table></div>',
     faltantesDni
       ? '<p class="observacion">DNI pendientes de completar: ' + faltantesDni +
