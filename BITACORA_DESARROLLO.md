@@ -67,3 +67,14 @@ Rama de trabajo: `main`
 - Sin cambios en permisos, usuarios, datos, consultas, filtrado por Departamento/Curso o generación del PDF.
 - Se constató que el commit local del usuario `f7686d4` modificó los nombres visibles Si.R.A. y S.I.M.E. e incluyó reformateo HTML; ese archivo no se alteró en este ajuste.
 - Pendiente: verificar el resultado en modo claro y oscuro desde Soporte y Gestión.
+
+## 2026-11-15 — Mejora del ancho de CORREO en planilla
+
+**Archivo:** `assets/js/contactos-institucionales.js`  
+**Commit:** `226ef5e04240ed394f92ff241f43e3148327c5db`
+
+- Se redistribuyeron los anchos de las seis columnas de la planilla A4 horizontal: Apellido y nombre 23 %, DNI 11 %, Correo 33 %, Firma 17 %, Constancia 8 % y Escuela 8 %.
+- Correo gana 6 puntos porcentuales para reducir cortes de direcciones largas en la vista imprimible; Constancia y Escuela ceden 3 puntos porcentuales cada una.
+- No se modificaron los filtros, las casillas, los datos de reunión, las cuentas excluidas ni los datos institucionales.
+- **Pendiente:** verificar visualmente la impresión y revisar los correos excepcionalmente largos.
+
