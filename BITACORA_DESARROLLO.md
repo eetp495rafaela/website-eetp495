@@ -43,3 +43,16 @@ Rama de trabajo: `main`
 - Se restablece el fondo blanco y el texto oscuro del modal; se limita su alto al espacio visible con desplazamiento interno en pantallas pequeñas.
 - No se modificaron formularios, contactos, filtros ni la generación de PDFs.
 - Pendiente: confirmar visualmente el resultado en Soporte y Gestión.
+
+## 2026-11-15 — Selección de Departamento/Curso al generar planilla
+
+**Archivo:** `assets/js/contactos-institucionales.js`  
+**Commit:** `25f890fc83cc7fc293cdac4476183300a5f465bb`
+
+- Se suma al modal la opción predeterminada **Todos los contactos activos** y la alternativa **Elegir Departamento/Curso**, basada en las etiquetas institucionales existentes.
+- El listado de etiquetas se construye a partir de una consulta actual al servidor, considerando solo contactos activos elegibles para impresión; no depende de los filtros de la tabla en pantalla.
+- Una etiqueta puede corresponder a varios docentes y un docente puede tener varias etiquetas; se imprime una sola fila por contacto incluido.
+- La selección por Departamento/Curso se combina con la elección Sí/No de reunión, manteniendo fecha, horario de 24 horas, lugar y motivo cuando corresponda.
+- Las dos cuentas técnicas continúan excluidas por correo exacto; la autorización de Soporte de cualquier otro docente no lo excluye.
+- Se identifican el Departamento/Curso elegido y la cantidad de personas en el encabezado del documento. No hay cambios en Firestore ni datos institucionales.
+- **Pendiente:** validar visualmente el modal en Soporte y Gestión y comprobar la salida impresa en ambos modos, incluyendo usuarios con varias etiquetas.
