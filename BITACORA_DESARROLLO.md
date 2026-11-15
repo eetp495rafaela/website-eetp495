@@ -136,3 +136,11 @@ Rama de trabajo: `main`
 - **Pendiente:** comprobar visualmente el aviso en móvil y escritorio, modos claro y oscuro; probar consentimiento/rechazo; verificar evento `page_view` en **Tiempo real** de GA4 después de la publicación. No se comprobó aún la recepción real de eventos.
 - No se alteraron autenticación, permisos, Firebase, bases de datos ni funcionamiento de módulos institucionales.
 
+## 2026-11-15 — Validación GA4 y botones simétricos de consentimiento
+
+- Captura de **Google Analytics 4 > Tiempo real** aportada por la institución: se observaron **1 usuario activo**, **2 vistas de Inicio** y eventos `page_view`, `first_visit`, `scroll`, `session_start` y `user_engagement`. Confirma recepción de eventos del sitio público.
+- Se ajustó solamente el CSS `vista-2027/assets/css/analytics-publico-2027.css` para que **No aceptar** y **Aceptar estadísticas** tengan el mismo ancho (`flex: 1 1 0`), manteniendo sus acciones y colores.
+- Se cambió la versión de la referencia CSS a `?v=2` en las siete páginas públicas para evitar reutilizar la versión anterior de la hoja de estilos.
+- Sin modificaciones a Firebase, permisos, datos académicos, portales internos ni al código de medición.
+- Pendiente comprobación visual final de botones en pantallas grandes y móviles.
+
