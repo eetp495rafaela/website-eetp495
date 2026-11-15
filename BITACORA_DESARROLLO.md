@@ -22,3 +22,16 @@ Rama de trabajo: `main`
 
 - GitHub remoto: verificada **una sola rama**, `main`.
 - La actualización de la laptop debe realizarse localmente con `git fetch` y `git pull --ff-only`, después de comprobar que no haya cambios sin guardar.
+
+## 2026-11-15 — Modal de reunión para planilla imprimible
+
+**Archivo:** `assets/js/contactos-institucionales.js`  
+**Commit:** `aa16f0c67054fde0f838eb49745531ee2525272d`
+
+- Al generar la planilla desde Contactos Institucionales (Soporte o Gestión) se abre un modal que pregunta si corresponde a una reunión.
+- Si se elige **Sí**, exige Fecha de reunión, Horario (formato 24 horas HH:mm), Lugar y Motivo; los muestra en una fila sobre la tabla imprimible.
+- Si se elige **No**, genera la misma planilla sin la fila de datos de reunión.
+- **Cancelar** o cerrar el modal no genera documentos ni modifica contactos.
+- Los campos se utilizan solamente para el documento generado; no se persisten en Firestore.
+- Se preservan las seis columnas, la casilla de constancia, las dos exclusiones por correo y la impresión A4 horizontal.
+- **Pendiente de prueba manual en navegador:** flujo Sí/No/Cancelar, validación HH:mm, saltos de página y visualización del motivo largo.
