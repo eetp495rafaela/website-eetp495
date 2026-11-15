@@ -455,7 +455,75 @@ function obtenerDniAgenda_(contacto) {
   return /^[0-9]{7,8}$/.test(dni) ? dni : "";
 }
 
-function construirHtmlAgenda_(contactos) {
+
+function solicitarDatosReunionAgenda_() {
+  return new Promise((resolver) => {
+    const dialogo = document.createElement("dialog");
+    const estilo = document.createElement("style");
+    estilo.textContent = ".agenda-modal{border:0;border-radius:14px;max-width:min(95vw,520px);width:100%;padding:24px;color:#193954;background:#fff;box-shadow:0 12px 40px #0004}.agenda-modal::backdrop{background:rgba(10,28,48,.65)}.agenda-modal label{display:block;margin:12px 0 5px;font-weight:650}.agenda-modal input:not([type=radio]){box-sizing:border-box;width:100%;padding:10px;border:1px solid #9aaebe;border-radius:7px;font:inherit;color:#193954;background:white}.agenda-modal .agenda-opciones{display:flex;gap:20px;align-items:center;margin:14px 0}.agenda-modal .agenda-opciones label{margin:0;display:flex;gap:7px;align-items:center}.agenda-modal .agenda-botones{display:flex;justify-content:flex-end;gap:10px;margin-top:20px}.agenda-modal button{padding:10px 15px;border-radius:7px;border:1px solid #a8b8c9;cursor:pointer;font-weight:700}.agenda-modal button[type=submit]{color:white;background:#073683;border-color:#073683}.agenda-modal [hidden]{display:none!important}";
+    dialogo.className = "agenda-modal";
+    dialogo.setAttribute("aria-label", "Opciones de la planilla de asistencia");
+    dialogo.innerHTML = '<form><h2 style="margin:0;font-size:21px">Generar planilla de asistencia</h2>' +
+      '<p>¿La planilla corresponde a una reunión?</p>' +
+      '<div class="agenda-opciones"><label><input type="radio" name="reunion" value="si" required> Sí</label>' +
+      '<label><input type="radio" name="reunion" value="no"> No</label></div>' +
+      '<div class="agenda-campos" hidden>' +
+      '<label for="agenda-fecha">Fecha de reunión</label><input id="agenda-fecha" name="fecha" type="date">' +
+      '<label for="agenda-hora">Horario (24 horas, HH:mm)</label><input id="agenda-hora" name="hora" type="text" inputmode="numeric" placeholder="14:30" pattern="(?:[01][0-9]|2[0-3]):[0-5][0-9]" maxlength="5" title="Ingresá la hora en formato de 24 horas, por ejemplo 14:30">' +
+      '<label for="agenda-lugar">Lugar</label><input id="agenda-lugar" name="lugar" type="text" maxlength="120">' +
+      '<label for="agenda-motivo">Motivo</label><input id="agenda-motivo" name="motivo" type="text" maxlength="180">' +
+      '</div><div class="agenda-botones"><button type="button" class="agenda-cancelar">Cancelar</button>' +
+      '<button type="submit">Generar planilla</button></div></form>';
+    document.head.appendChild(estilo);
+    document.body.appendChild(dialogo);
+    const formulario = dialogo.querySelector("form");
+    const campos = dialogo.querySelector(".agenda-campos");
+    const entradas = [...campos.querySelectorAll("input")];
+    let terminado = false;
+    const finalizar = (resultado) => {
+      if (terminado) return;
+      terminado = true;
+      dialogo.close();
+      dialogo.remove();
+      estilo.remove();
+      resolver(resultado);
+    };
+    formulario.querySelectorAll('[name="reunion"]').forEach((radio) => {
+      radio.addEventListener("change", () => {
+        const esReunion = formulario.elements.reunion.value === "si";
+        campos.hidden = !esReunion;
+        entradas.forEach((entrada) => { entrada.required = esReunion; });
+        if (esReunion) entradas[0].focus();
+      });
+    });
+    formulario.querySelector(".agenda-cancelar").addEventListener("click", () => finalizar(null));
+    dialogo.addEventListener("cancel", (evento) => { evento.preventDefault(); finalizar(null); });
+    formulario.addEventListener("submit", (evento) => {
+      evento.preventDefault();
+      if (formulario.elements.reunion.value === "no") {
+        finalizar({ esReunion: false });
+        return;
+      }
+      const hora = formulario.elements.hora.value.trim();
+      if (!/^(?:[01][0-9]|2[0-3]):[0-5][0-9]$/.test(hora)) {
+        formulario.elements.hora.setCustomValidity("Usá HH:mm en formato de 24 horas (por ejemplo, 14:30).");
+        formulario.elements.hora.reportValidity();
+        return;
+      }
+      finalizar({
+        esReunion: true,
+        fecha: formulario.elements.fecha.value,
+        horario: hora,
+        lugar: formulario.elements.lugar.value.trim(),
+        motivo: formulario.elements.motivo.value.trim(),
+      });
+    });
+    formulario.elements.hora.addEventListener("input", () => formulario.elements.hora.setCustomValidity(""));
+    dialogo.showModal();
+  });
+}
+
+function construirHtmlAgenda_(contactos, datosReunion = { esReunion: false }) {
   const comparar = new Intl.Collator("es", { sensitivity: "base", numeric: true });
   // Excluir exclusivamente las dos cuentas técnicas de esta planilla.
   // Los docentes con rol Soporte deben seguir apareciendo.
@@ -511,8 +579,8 @@ function construirHtmlAgenda_(contactos) {
     "header img{width:47px;height:47px;object-fit:contain}",
     "h1{font-size:17px;color:#073683;margin:0 0 4px}",
     ".subtitulo{font-size:10px;color:#506779;line-height:1.5;margin:0}",
-    ".datos-reunion{display:flex;flex-wrap:wrap;gap:10px 28px;margin:13px 0 12px;font-size:11px;color:#193954}",
-    ".datos-reunion span{white-space:nowrap}",
+    ".datos-reunion{display:grid;grid-template-columns:1.1fr .65fr 1.2fr 1.65fr;gap:8px 13px;margin:13px 0 12px;font-size:11px;color:#193954}",
+    ".datos-reunion span{min-width:0;overflow-wrap:anywhere}",
     ".tabla-scroll{overflow-x:auto}",
     ".planilla{width:100%;min-width:840px;border-collapse:collapse;table-layout:fixed}",
     ".planilla col.nombre{width:23%}.planilla col.dni{width:11%}.planilla col.correo{width:27%}.planilla col.firma{width:17%}.planilla col.constancia{width:11%}.planilla col.escuela{width:11%}",
@@ -543,9 +611,13 @@ function construirHtmlAgenda_(contactos) {
     '<p class="subtitulo">Planilla de asistencia · Reunión plenaria · ' +
       ordenados.length + ' usuarios activos (sin alumnado)<br>Generada el ' +
       escaparHtmlAgenda_(fechaGeneracion) + '</p></div></header>',
-    '<div class="datos-reunion"><span><strong>Fecha de reunión:</strong> ___________________</span>',
-    '<span><strong>Horario:</strong> _______________</span>',
-    '<span><strong>Lugar:</strong> ___________________________</span></div>',
+    datosReunion.esReunion
+      ? '<div class="datos-reunion"><span><strong>Fecha de reunión:</strong> ' +
+        escaparHtmlAgenda_(datosReunion.fecha.split("-").reverse().join("/")) + '</span>' +
+        '<span><strong>Horario:</strong> ' + escaparHtmlAgenda_(datosReunion.horario) + '</span>' +
+        '<span><strong>Lugar:</strong> ' + escaparHtmlAgenda_(datosReunion.lugar) + '</span>' +
+        '<span><strong>Motivo:</strong> ' + escaparHtmlAgenda_(datosReunion.motivo) + '</span></div>'
+      : '',
     '<div class="tabla-scroll"><table class="planilla">',
     '<colgroup><col class="nombre"><col class="dni"><col class="correo"><col class="firma"><col class="constancia"><col class="escuela"></colgroup>',
     '<thead><tr><th scope="col">APELLIDO Y NOMBRE</th><th scope="col">DNI</th>',
@@ -566,7 +638,9 @@ async function generarAgendaContactosImprimible_() {
   if (!btnGenerarAgendaContactos || !accesoContactosHabilitado || !auth.currentUser) {
     return;
   }
-  // La ventana debe abrirse directamente desde el clic para evitar bloqueos.
+  const datosReunion = await solicitarDatosReunionAgenda_();
+  if (!datosReunion) return;
+  // La ventana se abre en el envío del modal, no después de consultar Firestore.
   const ventana = window.open("", "_blank");
   if (!ventana) {
     mostrarMensaje("Permití las ventanas emergentes para generar la agenda.", "error");
@@ -589,11 +663,11 @@ async function generarAgendaContactosImprimible_() {
     if (!contactos.length) throw new Error("No hay contactos institucionales activos.");
     if (!ventana.closed) {
       ventana.document.open();
-      ventana.document.write(construirHtmlAgenda_(contactos));
+      ventana.document.write(construirHtmlAgenda_(contactos, datosReunion));
       ventana.document.close();
       ventana.focus();
     }
-    mostrarMensaje("Agenda preparada con " + contactos.length + " contactos.", "ok");
+    mostrarMensaje("Agenda preparada con " + contactos.filter((contacto) => !["soportetecnico.tec495@gmail.com", "enviotrabajos495@gmail.com"].includes(normalizarCorreo(contacto.correo))).length + " contactos.", "ok");
   } catch (error) {
     console.error("Error al generar la agenda institucional:", error);
     mostrarMensaje(error?.message || "No se pudo generar la agenda.", "error");
