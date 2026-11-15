@@ -1,7 +1,7 @@
 # Integración 45 — Modo claro/oscuro del sitio público y los portales
 
 **Fecha:** 14/11/2026  
-**Estado:** sitio público validado visualmente por el responsable; ampliación a los cinco portales preparada en desarrollo, pendiente de prueba local. No fusionar con `main` antes de probar.
+**Estado final:** tema claro/oscuro revisado visualmente por el responsable en entorno local y aprobado para integración en `main`. Las verificaciones de despliegue público se realizan por separado.
 
 ## Alcance inicial (sitio público)
 - El **sitio público 2027**, portada y las seis secciones de `vista-2027/`.
@@ -30,7 +30,7 @@
 
 **Incidencias funcionales observadas, fuera de alcance:** App Check/reCAPTCHA en Documentación Académica y un posible registro de Calificaciones sin inicializar. El CSS no resuelve esos errores ni modifica autenticación.
 
-**Estado:** cambios preparados en la rama de desarrollo y **aún no publicados**. Se requiere prueba local antes de fusionar.
+**Estado de la etapa 45B:** estas correcciones se prepararon inicialmente en desarrollo. La aprobación visual posterior y los ajustes finales se consignan en el cierre siguiente.
 
 ## Pruebas previstas
 - Alternar tres veces en la portada y verificar alternancia completa, accesibilidad y la preferencia guardada.
@@ -43,12 +43,30 @@
 
 - El responsable confirmó que el selector público es cómodo y funciona visualmente. Detectó un caso de contraste: **«Nuestra historia»** en La Escuela tenía color azul fijado en línea; se sustituyó por `var(--navy)`, que es oscuro en claro y blanco azulado en oscuro.
 - Se incorporó el mismo selector ☀️ / 🌙 en las barras superiores **visibles** de los cinco portales: Alumnos, Docentes, Docentes de Apoyo, Gestión y Soporte. Se evita el encabezado antiguo oculto de Gestión y Soporte.
-- Se reutiliza `vista-2027/assets/js/tema-publico-2027.js` y la clave de almacenamiento `eetp495-public-theme`. Al navegar entre público y portales se conserva la preferencia. `login.html` permanece sin cambios.
+- Se reutiliza `vista-2027/assets/js/tema-publico-2027.js` y la clave de almacenamiento `eetp495-public-theme`. Al navegar entre público y portales se conserva la preferencia. La operación de acceso de `login.html` permanece intacta; su adaptación visual se documenta en 45B.
 - La nueva hoja `assets/css/portales/tema-portales-2027.css` contiene únicamente presentación (paneles, tablas, formularios, barra lateral, calendario/Si.R.A. y directorios). Se cargó **al final** de los estilos originales para tener prioridad de tema, sin modificar permisos, acciones, identificadores, semántica de alertas o datos.
 - En pantallas pequeñas se prioriza menú, selector y salida. Solo a menos de 500 px se oculta el nombre en el encabezado, no el usuario ni sus permisos.
-- Pruebas de referencia: `node --test tests/publico/*.test.cjs`. Se requiere revisión manual en PC y móvil de todos los módulos y, en particular, formularios, tablas, menús y contraste. **Producción y `main` intactos.**
+- Pruebas de referencia: `node --test tests/publico/*.test.cjs`. Se requiere revisión manual en PC y móvil de todos los módulos y, en particular, formularios, tablas, menús y contraste. **En esa etapa**, producción y `main` permanecían intactos. El cierre y la integración se documentan a continuación.
 
 ### Precisión de alcance (14/11/2026)
 
 - También se incorporó el interruptor en `docentes-apoyo/index.html`, página separada de `docentes/index.html`.
 - Su CSS exclusivo adapta filtros, tablas y avisos del DAI con colores legibles, sin cambiar la lógica de autorización de vínculos.
+
+## Cierre del desarrollo — revisión final de los portales (14/11/2026)
+
+**Aprobación visual:** el responsable revisó pantallas de los portales Docentes, Soporte, Alumnos y Gestión en el entorno local, comunicó incidencias de contraste y finalmente confirmó que el resto se veía correctamente. La confirmación es una revisión visual del usuario, no una auditoría automatizada completa de funciones, permisos o responsive.
+
+**Últimos ajustes de la capa `assets/css/portales/tema-portales-2027.css`:**
+
+- **Integración 46:** selectores nativos de Si.R.A. y Parte del Portal Docentes; etiquetas y títulos de modales de Soporte y SweetAlert2; tarjetas de bloques de **Horario de Aula únicamente**; cursos de mesas de examen en Soporte y Gestión; tabla de Mis docentes y panel de Mesas de Examen de Alumnos; distintivos de Horarios, panel de Docentes libres de Taller, mensaje informativo de Si.R.A., períodos y filtros de asistencia de Gestión.
+- **Navegación:** se retiró exclusivamente el enlace «Volver al inicio» de las pantallas **Mesas de Examen de Docentes y Alumnos**, manteniendo la navegación superior y lateral.
+- **Integración 47:** se aclararon el cargo, el correo y su ícono en las tarjetas de referentes de «Mis docentes» (Alumnos); se ajustó el mensaje de «Asistencias previstas para hoy» de Si.R.A. (Soporte), equivalente al ajuste de Gestión.
+- **Caché:** las páginas afectadas referencian `tema-portales-2027.css?v=46` o `v=47` según el cierre de cada revisión; el archivo CSS es compartido. El modo claro conserva sus reglas base, salvo el ajuste localizado del rótulo «Mis compañeros».
+- **Pruebas estáticas:** se actualizaron las verificaciones para aceptar versiones CSS vigentes y se agregó un control AA de los últimos colores. La ejecución propuesta es `node --test tests/publico/*.test.cjs`. La comprobación visual de los módulos fue realizada por el responsable; las pruebas automatizadas no sustituyen una revisión de flujos de datos.
+
+**Sin cambios en:** Firestore, reglas y datos reales, permisos, App Check, Apps Script, autenticación, registro de asistencias, operaciones de alta/baja, ni lógica de inscripciones/mesas. Las tareas pendientes de seguridad de las integraciones 41 a 44 no se marcan como resueltas.
+
+**Publicación acordada:** integrar la rama `desarrollo/modo-oscuro-publico-20261114` en `main`, origen del sitio publicado. La presencia del commit en `main` confirma la integración del código, pero no por sí sola la propagación completa de GitHub Pages ni el comportamiento bajo una sesión autenticada.
+
+**Continuidad local:** actualizar las bitácoras privadas `BITACORA_MIGRACION_EETP495_2027.md` y `ESTADO_ACTUAL.md` en la laptop; ambos archivos se mantienen excluidos de Git.
