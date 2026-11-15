@@ -109,3 +109,18 @@ Rama de trabajo: `main`
 - No se cambiaron el filtro Departamento/Curso, la impresión ni los datos institucionales.
 - Se comprobó sintaxis JavaScript; pendiente comprobación visual en Soporte y Gestión.
 
+## 2026-11-15 — Auditoría SEO y habilitación controlada de indexación pública
+
+**Repositorio:** `eetp495rafaela/website-eetp495` · rama `main`  
+**Implementación:** commits `ee455d0`, `3d07991`, `daa5152`, `47a0f18` y `ef64d88`.
+
+- Google Search Console (capturas proporcionadas): la propiedad de dominio existe; el sitemap previo se procesaba correctamente pero declaraba solo una URL. Informe al 08/11/2026: una URL indexada (`https://eetp495rafaela.edu.ar/`) y dos excluidas por `noindex` (raíz HTTP y `/login.html`). Los datos de Search Console pueden tener retraso y no prueban el estado actual.
+- Se habilitó `index,follow` solamente en: `index.html`, `vista-2027/escuela.html`, `vista-2027/plan-estudios.html` y `vista-2027/calendario.html`.
+- A cada una se incorporó una URL canónica absoluta HTTPS y una descripción específica de su contenido institucional.
+- `sitemap.xml` ahora declara esas cuatro URLs públicas definitivas.
+- Se preservaron `noindex,nofollow` en `login.html`, los cinco portales internos (Soporte, Gestión, Docentes, Estudiantes y Docentes de Apoyo) y las páginas públicas con contenido demostrativo (`proyectos.html`, `novedades.html` e `inscripciones.html`).
+- `robots.txt` se conserva intacto para que los buscadores puedan leer las etiquetas `noindex` de las páginas que deben excluirse.
+- Se comprobaron de nuevo los indicadores de indexación en los 13 HTML pertinentes y las cuatro entradas del sitemap; no se alteraron JavaScript, estilos, autenticación, permisos, Firebase ni datos institucionales.
+- **Pendiente:** verificar el despliegue público; actualizar/enviar sitemap en Search Console, inspeccionar las cuatro URLs HTTPS y seguir los informes de indexación. No hay garantía de indexación ni de posiciones por el solo hecho de habilitarla.
+- **Google Analytics 4:** no se detectó instalación en el código revisado; pendiente verificar si existe propiedad y flujo de datos en la cuenta institucional antes de incorporarlo.
+
