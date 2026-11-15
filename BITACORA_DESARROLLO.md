@@ -124,3 +124,15 @@ Rama de trabajo: `main`
 - **Pendiente:** verificar el despliegue público; actualizar/enviar sitemap en Search Console, inspeccionar las cuatro URLs HTTPS y seguir los informes de indexación. No hay garantía de indexación ni de posiciones por el solo hecho de habilitarla.
 - **Google Analytics 4:** no se detectó instalación en el código revisado; pendiente verificar si existe propiedad y flujo de datos en la cuenta institucional antes de incorporarlo.
 
+## 2026-11-15 — Google Analytics 4 para Website 2027 (solo sitio público)
+
+- Se verificó desde la cuenta institucional la propiedad GA4 **Sitio Web EETP 495**, flujo **Web Principal**, URL `https://eetp495rafaela.edu.ar` e ID de medición `G-57ZS2C1RQM`. La captura de Analytics indicaba ausencia de datos durante las últimas 48 horas.
+- Se crearon `vista-2027/assets/js/analytics-publico-2027.js` y `vista-2027/assets/css/analytics-publico-2027.css`; se incorporaron a **siete páginas públicas**: Inicio, La Escuela, Plan de Estudios, Calendario Escolar, Proyectos, Novedades e Inscripciones.
+- No se añadió la etiqueta a `login.html` ni a los cinco portales autenticados. Las tres páginas públicas aún demostrativas continúan con `noindex,nofollow`.
+- Se implementó aviso de consentimiento no obligatorio, con opciones **No aceptar** y **Aceptar estadísticas**, persistencia local de la elección y acceso permanente a **Privacidad y estadísticas** en el pie de las páginas públicas.
+- **Sin consentimiento afirmativo no se descarga `gtag.js` ni se envían eventos GA4.** Con consentimiento, se mantiene almacenamiento publicitario denegado, se inhabilitan señales de publicidad y se emiten vistas de páginas con ruta sin query string ni fragmentos.
+- La persona puede cambiar su preferencia posteriormente. Al rechazar/revocar, se deshabilita el envío y se intenta retirar las cookies propias de GA que sean accesibles al navegador.
+- Se comprobó mediante lectura de la rama `main` que las siete páginas públicas contienen una sola referencia al módulo y su CSS, que los seis documentos privados revisados no contienen dichas referencias, y que el JavaScript supera la comprobación de sintaxis.
+- **Pendiente:** comprobar visualmente el aviso en móvil y escritorio, modos claro y oscuro; probar consentimiento/rechazo; verificar evento `page_view` en **Tiempo real** de GA4 después de la publicación. No se comprobó aún la recepción real de eventos.
+- No se alteraron autenticación, permisos, Firebase, bases de datos ni funcionamiento de módulos institucionales.
+
