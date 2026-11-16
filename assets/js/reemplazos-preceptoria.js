@@ -1,6 +1,6 @@
 import { getApps, getApp, initializeApp } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-app.js";
 import { getAuth } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-auth.js";
-import { getFirestore, collection, getDocs, getDoc, doc, writeBatch, query, where, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
+import { getFirestore, collection, getDocs, getDoc, doc, writeBatch, setDoc, query, where, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
 
 const config = { apiKey:"AIzaSyAARktrOpu-Rz683q4RxTK2h1nmkUaUbuA", authDomain:"portal-institucional-eet-fa5c7.firebaseapp.com", projectId:"portal-institucional-eet-fa5c7", storageBucket:"portal-institucional-eet-fa5c7.firebasestorage.app", messagingSenderId:"658183549494", appId:"1:658183549494:web:84fe7da91b1ea8990f1e97" };
 const db = getFirestore(getApps().length ? getApp() : initializeApp(config));
@@ -79,3 +79,46 @@ form?.addEventListener("submit",async e=>{
   finally{boton.disabled=false;}
 });
 cargar();
+
+
+/* Vinculación retroactiva: no modifica ni duplica reemplazos reales. */
+if (form) {
+  const botonVincular = document.createElement("button");
+  botonVincular.type = "button";
+  botonVincular.className = form.querySelector('button[type="submit"]')?.className || "";
+  botonVincular.textContent = "Vincular reemplazos existentes";
+  botonVincular.style.marginTop = "12px";
+  form.insertAdjacentElement("afterend", botonVincular);
+  botonVincular.addEventListener("click", async () => {
+    botonVincular.disabled = true;
+    try {
+      const hoy = new Intl.DateTimeFormat("en-CA", {timeZone:"America/Argentina/Buenos_Aires",year:"numeric",month:"2-digit",day:"2-digit"}).format(new Date());
+      const docs = await getDocs(collection(db,"reemplazos_docentes"));
+      const vigentes = docs.docs.filter(d => {
+        const r=d.data();
+        return r.tipoHorario==="PRECEPTORIA" && r.estado==="ACTIVO"
+          && r.fechaDesde<=hoy && hoy<=r.fechaHasta && correo(r.reemplazanteCorreo);
+      });
+      const porCorreo = new Map();
+      for (const d of vigentes) {
+        const email=correo(d.data().reemplazanteCorreo);
+        if (porCorreo.has(email)) throw Error("Hay más de un reemplazo vigente para "+email+". Revisalos antes de vincular.");
+        porCorreo.set(email,d);
+      }
+      let creados=0,existentes=0;
+      for (const [email,reemplazo] of porCorreo) {
+        const ref=doc(db,"accesos_preceptoria_temporales",email);
+        const actual=await getDoc(ref);
+        if (actual.exists()) {
+          if (actual.data().reemplazoId!==reemplazo.id) throw Error("El acceso de "+email+" apunta a otro reemplazo. No se sobrescribió.");
+          existentes++;
+          continue;
+        }
+        await setDoc(ref,{reemplazoId:reemplazo.id,reemplazanteCorreo:email,actualizadoEn:serverTimestamp(),actualizadoPor:correo(auth.currentUser?.email)});
+        creados++;
+      }
+      mensaje("Vinculación completada: "+creados+" nuevo(s), "+existentes+" ya vinculado(s). No se modificaron reemplazos.");
+    } catch (e) { console.error(e); mensaje(e.message||"No se pudo completar la vinculación.",true); }
+    finally {botonVincular.disabled=false;}
+  });
+}
