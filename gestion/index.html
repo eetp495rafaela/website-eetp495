@@ -1093,6 +1093,20 @@
                 </form>
               </div>
             </div>
+            <div class="panel-info panel-gestion-listado" id="panelRegistroPreceptoriaGestion">
+  <i class="fa-solid fa-user-clock"></i><div class="contenido-panel-gestion">
+  <h3>Reemplazos de Preceptoría</h3>
+  <p>Asigná temporalmente un curso de la preceptora titular a una reemplazante con rol PRECEPTORIA.</p>
+  <form id="formReemplazoPreceptoria" autocomplete="off">
+  <div class="filtros-gestion">
+    <div class="campo-filtro-gestion"><label>Preceptora titular *</label><select name="titular" required><option value="">Cargando...</option></select></div>
+    <div class="campo-filtro-gestion"><label>Curso de la titular *</label><select name="asignacion" required><option value="">Seleccioná una titular</option></select></div>
+    <div class="campo-filtro-gestion"><label>Preceptora reemplazante *</label><select name="reemplazante" required><option value="">Cargando...</option></select></div>
+    <div class="campo-filtro-gestion"><label>Desde *</label><input type="date" name="desde" required></div>
+    <div class="campo-filtro-gestion"><label>Hasta *</label><input type="date" name="hasta" required></div>
+    <div class="campo-filtro-gestion"><button class="btn-gestion" type="submit">Registrar reemplazo de Preceptoría</button></div>
+  </div><p class="mensaje-gestion" id="mensajeReemplazoPreceptoria" role="status"></p>
+  </form></div></div>
             <div class="panel-info panel-gestion-listado">
               <i class="fa-solid fa-list"> </i>
               <div class="contenido-panel-gestion">
@@ -2245,5 +2259,6 @@
       src="../vista-2027/assets/js/tema-publico-2027.js?v=45"
       defer
     ></script>
+  <script src="../assets/js/reemplazos-preceptoria.js?v=1" type="module"></script>
   </body>
 </html>
