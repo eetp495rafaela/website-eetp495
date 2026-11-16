@@ -2387,6 +2387,18 @@ allow list: if alumnoPuedeListarCompaneros();
       /*
        * Consulta de listados de usuarios.
        */
+/* Lecturas docentes de estudiantes: ruta directa para Si.R.A., Agenda y listados.
+ * Se evalúa sin consultar el índice de Preceptoría temporal. La consulta
+ * cliente debe restringir rol, estado y condición CURSANDO. */
+allow list: if usuarioAutenticado()
+  && perfilActivoTieneRoles(perfilUsuario(), ["DOCENTE"])
+  && resource.data.get("rol", "") == "ALUMNO"
+  && resource.data.get("estado", "") == "ACTIVO"
+  && (
+    resource.data.get("tipoVinculo", "") == "CURSANDO"
+    || resource.data.get("situacionRevista", "") == "CURSANDO"
+  );
+
 allow list: if esSoporte()
 
    /*
