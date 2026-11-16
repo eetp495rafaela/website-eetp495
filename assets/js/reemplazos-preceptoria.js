@@ -1,6 +1,6 @@
 import { getApps, getApp, initializeApp } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-app.js";
 import { getAuth } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-auth.js";
-import { getFirestore, collection, getDocs, getDoc, doc, addDoc, query, where, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
+import { getFirestore, collection, getDocs, getDoc, doc, writeBatch, query, where, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
 
 const config = { apiKey:"AIzaSyAARktrOpu-Rz683q4RxTK2h1nmkUaUbuA", authDomain:"portal-institucional-eet-fa5c7.firebaseapp.com", projectId:"portal-institucional-eet-fa5c7", storageBucket:"portal-institucional-eet-fa5c7.firebasestorage.app", messagingSenderId:"658183549494", appId:"1:658183549494:web:84fe7da91b1ea8990f1e97" };
 const db = getFirestore(getApps().length ? getApp() : initializeApp(config));
@@ -59,8 +59,11 @@ form?.addEventListener("submit",async e=>{
     if(!usr.exists()||correo(usr.data().correo||usr.id)!==reemplazanteCorreo||!activo(usr.data())||!roles(usr.data()).some(r=>r==="DOCENTE"||r==="PRECEPTORIA"))throw Error("La reemplazante debe tener un perfil DOCENTE o PRECEPTORIA activo.");
     if(existentes.docs.some(d=>{const x=d.data();return x.estado==="ACTIVO"&&x.tipoHorario==="PRECEPTORIA"&&correo(x.titularCorreo)===titularCorreo&&fechaDesde<=x.fechaHasta&&fechaHasta>=x.fechaDesde;}))throw Error("Ya hay un reemplazo activo superpuesto para esta preceptora.");
     const a=asignaciones[0].data();
+    if(existentes.docs.some(d=>{const v=d.data();return v.estado==="ACTIVO"&&v.tipoHorario==="PRECEPTORIA"&&correo(v.reemplazanteCorreo)===reemplazanteCorreo&&fechaDesde<=v.fechaHasta&&fechaHasta>=v.fechaDesde;}))throw Error("La reemplazante ya tiene un reemplazo de Preceptoría superpuesto.");
     const cursos=[...new Map(asignaciones.map(d=>[String(d.data().cursoId),{id:String(d.data().cursoId),nombre:d.data().cursoNombre||String(d.data().cursoId)}])).values()];
-    await addDoc(collection(db,"reemplazos_docentes"),{
+    const referencia=doc(collection(db,"reemplazos_docentes"));
+    const lote=writeBatch(db);
+    lote.set(referencia,{
       asignacionTitularId:asignaciones[0].id,asignacionesTitularIds:asignaciones.map(d=>d.id),titularCorreo,titularNombre:a.nombreCompleto||titularCorreo,
       reemplazanteCorreo,reemplazanteNombre:usr.data().nombreCompleto||reemplazanteCorreo,
       cursoId:a.cursoId,cursoIds:cursos.map(c=>c.id),cursoNombre:cursos.map(c=>c.nombre).join(", "),cursoAnio:Number(a.cursoAnio||0),cursoDivision:a.cursoDivision||"",
@@ -68,6 +71,8 @@ form?.addEventListener("submit",async e=>{
       fechaDesde,fechaHasta,estado:"ACTIVO",creadoEn:serverTimestamp(),creadoPor:correo(auth.currentUser?.email),
       actualizadoEn:serverTimestamp(),actualizadoPor:correo(auth.currentUser?.email)
     });
+    lote.set(doc(db,"accesos_preceptoria_temporales",reemplazanteCorreo),{reemplazoId:referencia.id,reemplazanteCorreo,actualizadoEn:serverTimestamp(),actualizadoPor:correo(auth.currentUser?.email)});
+    await lote.commit();
     campo("reemplazante").value="";campo("desde").value="";campo("hasta").value="";
     mensaje("Reemplazo registrado para "+cursos.length+" curso(s). Podés verlo y finalizarlo desde el listado.");
   }catch(err){console.error(err);mensaje(err.message||"No se pudo registrar el reemplazo.",true);}
