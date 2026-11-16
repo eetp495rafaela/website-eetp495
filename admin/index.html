@@ -1716,14 +1716,15 @@
               </form>
               <div class="separador-usuarios"></div>
 <h3>Reemplazos de Preceptoría</h3>
-<p>Seleccioná la preceptora titular y la reemplazante. El reemplazo comprenderá todos los cursos asignados a la titular, únicamente durante las fechas indicadas.</p>
+<p>Seleccioná el/la preceptor/a titular y su reemplazante. El reemplazo comprenderá todos los cursos asignados a la titular, únicamente durante las fechas indicadas.</p>
 <form id="formReemplazoPreceptoria" autocomplete="off">
   <div class="form-grid">
-    <div class="campo-formulario"><label>Preceptora titular *</label><select name="titular" required><option value="">Cargando...</option></select></div>
-        <div class="campo-formulario"><label>Preceptora reemplazante *</label><select name="reemplazante" required><option value="">Cargando...</option></select></div>
+    <div class="campo-formulario"><label>Preceptor/a titular *</label><select name="titular" required><option value="">Cargando...</option></select></div>
+        <div class="campo-formulario"><label>Preceptor/a reemplazante *</label><select name="reemplazante" required><option value="">Cargando...</option></select></div>
     <div class="campo-formulario"><label>Desde *</label><input type="date" name="desde" required></div>
     <div class="campo-formulario"><label>Hasta *</label><input type="date" name="hasta" required></div>
     <div style="display:flex;align-items:flex-end;" class="campo-formulario"><button style="width:100%;height:41px;min-height:41px;margin:0;" type="submit" class="btn-accion">Registrar reemplazo de Preceptoría</button></div>
+    <div class="campo-formulario campo-vincular-preceptoria"><button type="button" id="btnVincularReemplazosPreceptoria" class="btn-accion">Vincular reemplazos existentes</button></div>
   </div>
   <p id="mensajeReemplazoPreceptoria" role="status"></p>
 </form>
