@@ -35,7 +35,7 @@ async function cargar() {
     opcion(titular,"","Seleccionar preceptora titular");
     opcion(reemplazante,"","Seleccionar preceptora reemplazante");
     const correosTitulares=new Set([...referentes.values()].map(x=>correo(x.correo)));
-    [...usuarios].filter(([email,u])=>activo(u)&&roles(u).includes("PRECEPTORIA")).sort((a,b)=>String(a[1].nombreCompleto||a[0]).localeCompare(String(b[1].nombreCompleto||b[0]),"es")).forEach(([email,u])=>{
+    [...usuarios].filter(([email,u])=>activo(u)&&(roles(u).includes("DOCENTE")||roles(u).includes("PRECEPTORIA"))).sort((a,b)=>String(a[1].nombreCompleto||a[0]).localeCompare(String(b[1].nombreCompleto||b[0]),"es")).forEach(([email,u])=>{
       const etiqueta=(u.nombreCompleto||email)+" — "+email;
       if(correosTitulares.has(email)) opcion(titular,email,etiqueta);
       opcion(reemplazante,email,etiqueta);
@@ -56,7 +56,7 @@ form?.addEventListener("submit",async e=>{
     const asignaciones=refsActuales.docs.filter(d=>d.data().cargo==="PRECEPTOR"&&correo(d.data().correo)===titularCorreo&&d.data().cursoId);
     if(!asignaciones.length)throw Error("La titular no tiene cursos activos asignados.");
     if(!usuarios.has(titularCorreo)||!activo(usuarios.get(titularCorreo))||!roles(usuarios.get(titularCorreo)).includes("PRECEPTORIA"))throw Error("La titular ya no tiene un perfil activo de Preceptoría.");
-    if(!usr.exists()||correo(usr.data().correo||usr.id)!==reemplazanteCorreo||!activo(usr.data())||!roles(usr.data()).includes("PRECEPTORIA"))throw Error("La reemplazante debe tener el rol PRECEPTORIA activo.");
+    if(!usr.exists()||correo(usr.data().correo||usr.id)!==reemplazanteCorreo||!activo(usr.data())||!roles(usr.data()).some(r=>r==="DOCENTE"||r==="PRECEPTORIA"))throw Error("La reemplazante debe tener un perfil DOCENTE o PRECEPTORIA activo.");
     if(existentes.docs.some(d=>{const x=d.data();return x.estado==="ACTIVO"&&x.tipoHorario==="PRECEPTORIA"&&correo(x.titularCorreo)===titularCorreo&&fechaDesde<=x.fechaHasta&&fechaHasta>=x.fechaDesde;}))throw Error("Ya hay un reemplazo activo superpuesto para esta preceptora.");
     const a=asignaciones[0].data();
     const cursos=[...new Map(asignaciones.map(d=>[String(d.data().cursoId),{id:String(d.data().cursoId),nombre:d.data().cursoNombre||String(d.data().cursoId)}])).values()];
