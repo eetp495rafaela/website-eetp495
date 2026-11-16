@@ -1559,21 +1559,28 @@ html[data-public-theme="dark"] body:is(.portal-gestion-2027,.portal-soporte-2027
 }
 
 
-/* Reemplazos de Preceptoría: dos filas definidas, botón a la altura de fechas. */
+/* Preceptoría: titular / reemplazante / registrar; desde / hasta / vincular. */
 #formReemplazoPreceptoria :is(.form-grid,.filtros-gestion) {
-  display: grid;
-  grid-template-columns: repeat(3,minmax(0,1fr));
-  gap: 14px;
-  align-items: end;
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:14px;
+  align-items:end;
 }
 #formReemplazoPreceptoria :is(.campo-formulario,.campo-filtro-gestion) {min-width:0;width:100%;}
 #formReemplazoPreceptoria :is(.campo-formulario,.campo-filtro-gestion):nth-child(1) {grid-column:1;grid-row:1;}
 #formReemplazoPreceptoria :is(.campo-formulario,.campo-filtro-gestion):nth-child(2) {grid-column:2;grid-row:1;}
 #formReemplazoPreceptoria :is(.campo-formulario,.campo-filtro-gestion):nth-child(3) {grid-column:1;grid-row:2;}
 #formReemplazoPreceptoria :is(.campo-formulario,.campo-filtro-gestion):nth-child(4) {grid-column:2;grid-row:2;}
-#formReemplazoPreceptoria :is(.campo-formulario,.campo-filtro-gestion):nth-child(5) {grid-column:3;grid-row:2;align-self:end;display:flex;align-items:flex-end;padding:0;}
-#formReemplazoPreceptoria button[type="submit"] {height:42px!important;min-height:42px!important;margin:0!important;width:100%;}
+#formReemplazoPreceptoria :is(.campo-formulario,.campo-filtro-gestion):nth-child(5) {grid-column:3;grid-row:1;display:flex;align-items:flex-end;padding:0;}
+#formReemplazoPreceptoria :is(.campo-formulario,.campo-filtro-gestion):nth-child(6) {grid-column:3;grid-row:2;display:flex;align-items:flex-end;padding:0;}
+#formReemplazoPreceptoria :is(button[type="submit"],#btnVincularReemplazosPreceptoria) {
+  display:flex;align-items:center;justify-content:center;
+  width:100%;height:42px!important;min-height:42px!important;
+  margin:0!important;padding:6px 10px;
+  font-size:.88rem;white-space:nowrap;
+}
 @media (max-width:850px) {
   #formReemplazoPreceptoria :is(.form-grid,.filtros-gestion) {grid-template-columns:minmax(0,1fr);}
   #formReemplazoPreceptoria :is(.campo-formulario,.campo-filtro-gestion):nth-child(n) {grid-column:1;grid-row:auto;}
+  #formReemplazoPreceptoria :is(button[type="submit"],#btnVincularReemplazosPreceptoria) {white-space:normal;}
 }
