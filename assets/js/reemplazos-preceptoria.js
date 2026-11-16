@@ -59,7 +59,7 @@ form?.addEventListener("submit",async e=>{
     if(!usr.exists()||correo(usr.data().correo||usr.id)!==reemplazanteCorreo||!activo(usr.data())||!roles(usr.data()).some(r=>r==="DOCENTE"||r==="PRECEPTORIA"))throw Error("La reemplazante debe tener un perfil DOCENTE o PRECEPTORIA activo.");
     if(existentes.docs.some(d=>{const x=d.data();return x.estado==="ACTIVO"&&x.tipoHorario==="PRECEPTORIA"&&correo(x.titularCorreo)===titularCorreo&&fechaDesde<=x.fechaHasta&&fechaHasta>=x.fechaDesde;}))throw Error("Ya hay un reemplazo activo superpuesto para esta preceptora.");
     const a=asignaciones[0].data();
-    if(existentes.docs.some(d=>{const v=d.data();return v.estado==="ACTIVO"&&v.tipoHorario==="PRECEPTORIA"&&correo(v.reemplazanteCorreo)===reemplazanteCorreo&&fechaDesde<=v.fechaHasta&&fechaHasta>=v.fechaDesde;}))throw Error("La reemplazante ya tiene un reemplazo de Preceptoría superpuesto.");
+    if(existentes.docs.some(d=>{const v=d.data();return v.estado==="ACTIVO"&&v.tipoHorario==="PRECEPTORIA"&&correo(v.reemplazanteCorreo)===reemplazanteCorreo;}))throw Error("La reemplazante ya tiene un reemplazo activo de Preceptoría. Finalizalo antes de registrar otro para no invalidar su acceso temporal.");
     const cursos=[...new Map(asignaciones.map(d=>[String(d.data().cursoId),{id:String(d.data().cursoId),nombre:d.data().cursoNombre||String(d.data().cursoId)}])).values()];
     const referencia=doc(collection(db,"reemplazos_docentes"));
     const lote=writeBatch(db);
