@@ -32,8 +32,8 @@ async function cargar() {
     referentes=new Map(refs.docs.filter(d=>d.data().cargo==="PRECEPTOR"&&d.data().estado==="ACTIVO"&&d.data().cursoId).map(d=>[d.id,d.data()]));
     const titular=campo("titular"),reemplazante=campo("reemplazante");
     titular.replaceChildren();reemplazante.replaceChildren();
-    opcion(titular,"","Seleccionar preceptora titular");
-    opcion(reemplazante,"","Seleccionar preceptora reemplazante");
+    opcion(titular,"","Seleccionar preceptor/a titular");
+    opcion(reemplazante,"","Seleccionar preceptor/a reemplazante");
     const correosTitulares=new Set([...referentes.values()].map(x=>correo(x.correo)));
     [...usuarios].filter(([email,u])=>activo(u)&&(roles(u).includes("DOCENTE")||roles(u).includes("PRECEPTORIA"))).sort((a,b)=>String(a[1].nombreCompleto||a[0]).localeCompare(String(b[1].nombreCompleto||b[0]),"es")).forEach(([email,u])=>{
       const etiqueta=(u.nombreCompleto||email)+" — "+email;
@@ -54,9 +54,9 @@ form?.addEventListener("submit",async e=>{
   try {
     const [usr,existentes,refsActuales]=await Promise.all([getDoc(doc(db,"usuarios",usuarios.get(reemplazanteCorreo)?.documentoId || reemplazanteCorreo)),getDocs(collection(db,"reemplazos_docentes")),getDocs(query(collection(db,"referentes_institucionales"),where("estado","==","ACTIVO")))]);
     const asignaciones=refsActuales.docs.filter(d=>d.data().cargo==="PRECEPTOR"&&correo(d.data().correo)===titularCorreo&&d.data().cursoId);
-    if(!asignaciones.length)throw Error("La titular no tiene cursos activos asignados.");
-    if(!usuarios.has(titularCorreo)||!activo(usuarios.get(titularCorreo))||!roles(usuarios.get(titularCorreo)).includes("PRECEPTORIA"))throw Error("La titular ya no tiene un perfil activo de Preceptoría.");
-    if(!usr.exists()||correo(usr.data().correo||usr.id)!==reemplazanteCorreo||!activo(usr.data())||!roles(usr.data()).some(r=>r==="DOCENTE"||r==="PRECEPTORIA"))throw Error("La reemplazante debe tener un perfil DOCENTE o PRECEPTORIA activo.");
+    if(!asignaciones.length)throw Error("El/la titular no tiene cursos activos asignados.");
+    if(!usuarios.has(titularCorreo)||!activo(usuarios.get(titularCorreo))||!roles(usuarios.get(titularCorreo)).includes("PRECEPTORIA"))throw Error("El/la titular ya no tiene un perfil activo de Preceptoría.");
+    if(!usr.exists()||correo(usr.data().correo||usr.id)!==reemplazanteCorreo||!activo(usr.data())||!roles(usr.data()).some(r=>r==="DOCENTE"||r==="PRECEPTORIA"))throw Error("El/la reemplazante debe tener un perfil DOCENTE o PRECEPTORIA activo.");
     if(existentes.docs.some(d=>{const x=d.data();return x.estado==="ACTIVO"&&x.tipoHorario==="PRECEPTORIA"&&correo(x.titularCorreo)===titularCorreo&&fechaDesde<=x.fechaHasta&&fechaHasta>=x.fechaDesde;}))throw Error("Ya hay un reemplazo activo superpuesto para esta preceptora.");
     const a=asignaciones[0].data();
     if(existentes.docs.some(d=>{const v=d.data();return v.estado==="ACTIVO"&&v.tipoHorario==="PRECEPTORIA"&&correo(v.reemplazanteCorreo)===reemplazanteCorreo;}))throw Error("La reemplazante ya tiene un reemplazo activo de Preceptoría. Finalizalo antes de registrar otro para no invalidar su acceso temporal.");
@@ -83,12 +83,8 @@ cargar();
 
 /* Vinculación retroactiva: no modifica ni duplica reemplazos reales. */
 if (form) {
-  const botonVincular = document.createElement("button");
-  botonVincular.type = "button";
-  botonVincular.className = form.querySelector('button[type="submit"]')?.className || "";
-  botonVincular.textContent = "Vincular reemplazos existentes";
-  botonVincular.style.marginTop = "12px";
-  form.insertAdjacentElement("afterend", botonVincular);
+  const botonVincular = document.getElementById("btnVincularReemplazosPreceptoria");
+  if (botonVincular) {
   botonVincular.addEventListener("click", async () => {
     botonVincular.disabled = true;
     try {
@@ -121,4 +117,5 @@ if (form) {
     } catch (e) { console.error(e); mensaje(e.message||"No se pudo completar la vinculación.",true); }
     finally {botonVincular.disabled=false;}
   });
+  }
 }
