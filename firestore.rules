@@ -2399,6 +2399,13 @@ allow list: if usuarioAutenticado()
     || resource.data.get("situacionRevista", "") == "CURSANDO"
   );
 
+/* Preceptoría: acceso de lectura a la nómina de estudiantes.
+ * Aplica tanto a un perfil permanente como a un reemplazo temporal vigente.
+ * No habilita la modificación de fichas ni la lectura de otros roles. */
+allow list: if usuarioAutenticado()
+  && resource.data.get("rol", "") == "ALUMNO"
+  && usuarioActivoTieneRoles(["PRECEPTORIA"]);
+
 allow list: if esSoporte()
 
    /*
