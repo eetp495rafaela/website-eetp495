@@ -1,3 +1,13 @@
+## 2026-11-16 — Reemplazos de Preceptoría (primera integración)
+
+- Se agregó `assets/js/reemplazos-preceptoria.js` y un formulario independiente en Soporte y Gestión. Selecciona una titular con referente `PRECEPTOR` activo, su curso y una reemplazante activa con rol `PRECEPTORIA` (principal o adicional).
+- Se registra en `reemplazos_docentes` con `tipoHorario: PRECEPTORIA`, `asignacionTitularId` apuntando a `referentes_institucionales`, fechas, estado y auditoría. Se impide duplicación superpuesta en el cliente; los formularios de Taller y EF no se alteraron.
+- Se amplió la validación de creación desde Gestión en `firestore.rules` para `PRECEPTORIA`, verificando referente y reemplazante. Se conservan permisos de Gestión (Dirección/Secretaría/Asistente Administrativo registran; Preceptoría consulta).
+- El listado y finalización existentes utilizan la colección común y permiten consultar/finalizar estos registros.
+- **Importante:** el rol PRECEPTORIA ya habilita las funciones generales de Gestión. Esta integración **no agrega aún una capa de autorización por curso** a cada módulo ni proyecta las asignaciones temporales en todas las vistas de referentes. No considerar probado el acceso integral a los cursos hasta completar esa integración y pruebas con cuentas reales.
+- **Pendiente:** prueba funcional en navegador con usuario de rol doble, registro desde ambos portales, cierre anticipado y vencimiento; revisión de reglas desplegadas en Firebase. Cambios en GitHub no equivalen a desplegar `firestore.rules`.
+- **Sin modificar:** datos existentes, roles permanentes, asignaciones originales, Taller y EF. Auditoría de seguridad desde `1a3fe88` sigue pendiente.
+
 # Bitácora de desarrollo — Website 2027
 
 Repositorio: `eetp495rafaela/website-eetp495`  
