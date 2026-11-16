@@ -142,7 +142,20 @@ async function autorizado() {
   if(!activo && roles.length===1)activo=roles[0];
   const gestion=window.location.pathname.startsWith("/gestion/");
   const permitidos=gestion?["DIRECCION","SECRETARIA","ASISTENTE_ADMINISTRATIVO","PRECEPTORIA"]:["SOPORTE"];
-  return mayus(p.estado)==="ACTIVO" && roles.includes(activo) && permitidos.includes(activo);
+  // El protector del portal ya verificó contra Firestore la vigencia del
+  // reemplazo temporal de Preceptoría y la elección del rol activo.
+  // El perfil permanente puede ser DOCENTE aunque el rol activo sea PRECEPTORIA.
+  const rolPortal=mayus(window.portalUsuario?.rol);
+  const correoPortal=String(window.portalUsuario?.correo||"").trim().toLowerCase();
+  const preceptoriaTemporalValidada=gestion
+    && activo==="PRECEPTORIA"
+    && rolPortal==="PRECEPTORIA"
+    && correoPortal===user.email.toLowerCase()
+    && Array.isArray(window.portalUsuario?.roles)
+    && window.portalUsuario.roles.includes("PRECEPTORIA");
+  return mayus(p.estado)==="ACTIVO"
+    && permitidos.includes(activo)
+    && (roles.includes(activo) || preceptoriaTemporalValidada);
 }
 async function alHacerClic() {
   if(!boton||!window.Swal)return;
