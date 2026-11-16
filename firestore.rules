@@ -2632,6 +2632,14 @@ match /reemplazos_docentes/{reemplazoId} {
           get(/databases/$(database)/documents/usuarios/$(request.resource.data.reemplazanteCorreo)).data.get("rol", "") == "PRECEPTORIA"
           || "PRECEPTORIA" in get(/databases/$(database)/documents/usuarios/$(request.resource.data.reemplazanteCorreo)).data.get("roles", [])
         )
+        && request.resource.data.asignacionesTitularIds is list
+        && request.resource.data.asignacionesTitularIds.size() > 0
+        && request.resource.data.asignacionesTitularIds.size() <= 30
+        && request.resource.data.asignacionTitularId in request.resource.data.asignacionesTitularIds
+        && request.resource.data.cursoIds is list
+        && request.resource.data.cursoIds.size() > 0
+        && request.resource.data.cursoIds.size() <= 30
+        && request.resource.data.cursoId in request.resource.data.cursoIds
         && request.resource.data.fechaDesde is string
         && request.resource.data.fechaHasta is string
         && request.resource.data.fechaDesde.matches("^[0-9]{4}-[0-9]{2}-[0-9]{2}$")
