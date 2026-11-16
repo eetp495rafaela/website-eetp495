@@ -398,7 +398,9 @@ function construirSelectorRoles(perfil) {
 
 /* El permiso temporal se comprueba contra el registro original; no se añade al perfil. */
 async function tienePreceptoriaTemporal(correo) {
-  const vinculo = await getDoc(doc(db, "accesos_preceptoria_temporales", correo));
+  let vinculo;
+  try { vinculo = await getDoc(doc(db, "accesos_preceptoria_temporales", correo)); }
+  catch (error) { console.warn("Permiso temporal no disponible:", error.code || error); return false; }
   if (!vinculo.exists() || !vinculo.data().reemplazoId) return false;
   const reemplazo = await getDoc(doc(db, "reemplazos_docentes", vinculo.data().reemplazoId));
   if (!reemplazo.exists()) return false;
