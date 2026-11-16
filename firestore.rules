@@ -2613,8 +2613,32 @@ match /reemplazos_docentes/{reemplazoId} {
 
     && request.resource.data.tipoHorario in [
       "TALLER",
-      "EDUCACION_FISICA"
+      "EDUCACION_FISICA",
+      "PRECEPTORIA"
     ]
+
+    && (
+      request.resource.data.tipoHorario != "PRECEPTORIA"
+      || (
+        request.resource.data.asignacionTitularId is string
+        && exists(/databases/$(database)/documents/referentes_institucionales/$(request.resource.data.asignacionTitularId))
+        && get(/databases/$(database)/documents/referentes_institucionales/$(request.resource.data.asignacionTitularId)).data.cargo == "PRECEPTOR"
+        && get(/databases/$(database)/documents/referentes_institucionales/$(request.resource.data.asignacionTitularId)).data.estado == "ACTIVO"
+        && get(/databases/$(database)/documents/referentes_institucionales/$(request.resource.data.asignacionTitularId)).data.correo == request.resource.data.titularCorreo
+        && get(/databases/$(database)/documents/referentes_institucionales/$(request.resource.data.asignacionTitularId)).data.cursoId == request.resource.data.cursoId
+        && exists(/databases/$(database)/documents/usuarios/$(request.resource.data.reemplazanteCorreo))
+        && get(/databases/$(database)/documents/usuarios/$(request.resource.data.reemplazanteCorreo)).data.estado == "ACTIVO"
+        && (
+          get(/databases/$(database)/documents/usuarios/$(request.resource.data.reemplazanteCorreo)).data.get("rol", "") == "PRECEPTORIA"
+          || "PRECEPTORIA" in get(/databases/$(database)/documents/usuarios/$(request.resource.data.reemplazanteCorreo)).data.get("roles", [])
+        )
+        && request.resource.data.fechaDesde is string
+        && request.resource.data.fechaHasta is string
+        && request.resource.data.fechaDesde.matches("^[0-9]{4}-[0-9]{2}-[0-9]{2}$")
+        && request.resource.data.fechaHasta.matches("^[0-9]{4}-[0-9]{2}-[0-9]{2}$")
+        && request.resource.data.fechaDesde <= request.resource.data.fechaHasta
+      )
+    )
 
     && request.resource.data.creadoPor
       == request.auth.token.email
