@@ -98,6 +98,20 @@ function obtenerRolesPerfil(perfil) {
   );
 }
 
+async function tienePreceptoriaTemporal(correo) {
+  try {
+    const vinculo = await getDoc(doc(db, "accesos_preceptoria_temporales", correo));
+    if (!vinculo.exists() || !vinculo.data().reemplazoId) return false;
+    const reemplazo = await getDoc(doc(db, "reemplazos_docentes", vinculo.data().reemplazoId));
+    if (!reemplazo.exists()) return false;
+    const r = reemplazo.data();
+    const hoy = fechaActualLocalIso();
+    return r.tipoHorario === "PRECEPTORIA" && r.estado === "ACTIVO"
+      && normalizarCorreo(r.reemplazanteCorreo) === correo
+      && r.fechaDesde <= hoy && hoy <= r.fechaHasta;
+  } catch (error) { console.warn("No se pudo validar Preceptoría temporal:", error.code || error); return false; }
+}
+
 function obtenerRolActivoSesion() {
   try {
     return normalizarRol(sessionStorage.getItem(CLAVE_ROL_ACTIVO));
@@ -701,6 +715,7 @@ onAuthStateChanged(auth, async (user) => {
       .toUpperCase();
 
     const rolesUsuario = obtenerRolesPerfil(perfil);
+    if (rolesUsuario.includes("DOCENTE") && !rolesUsuario.includes("PRECEPTORIA") && await tienePreceptoriaTemporal(correo)) rolesUsuario.push("PRECEPTORIA");
 
     if (estado !== "ACTIVO") {
       await signOut(auth);
