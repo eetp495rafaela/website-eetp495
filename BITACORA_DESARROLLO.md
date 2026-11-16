@@ -197,3 +197,10 @@ Rama de trabajo: `main`
 
 **Acuerdo:** dejar estos trabajos pendientes para retomarlos mañana en un nuevo chat. Esta entrada es solo documentación.
 
+
+
+### 2026-11-16 — Reemplazos de Preceptoría: registro por titular
+- Formularios de Soporte y Gestión: se elimina selección de curso, se corrige alineación del botón y se invalida caché del módulo.
+- Un registro de reemplazo de Preceptoría abarca todos los cursos activos de la titular, conservando `asignacionesTitularIds` y `cursoIds` y los campos heredados para compatibilidad del listado.
+- Reglas de Firestore: validación básica de listas de cursos/asignaciones en creación desde Gestión. **Pendiente de despliegue y pruebas con emulador o cuentas de prueba**.
+- **No habilitar uso productivo todavía**: pendiente integrar y verificar permisos temporales efectivos por curso, validar que se extingan por fecha y finalizar pruebas de seguridad. No se alteran referentes ni roles permanentes.
