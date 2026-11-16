@@ -1715,6 +1715,20 @@
                 <p class="mensaje-formulario" id="mensajeReemplazoDocente"></p>
               </form>
               <div class="separador-usuarios"></div>
+<h3>Reemplazos de Preceptoría</h3>
+<p>Seleccioná una preceptora titular, el curso asignado y una reemplazante con rol PRECEPTORIA. El reemplazo tendrá vigencia únicamente entre las fechas indicadas.</p>
+<form id="formReemplazoPreceptoria" autocomplete="off">
+  <div class="form-grid">
+    <div class="campo-formulario"><label>Preceptora titular *</label><select name="titular" required><option value="">Cargando...</option></select></div>
+    <div class="campo-formulario"><label>Curso de la titular *</label><select name="asignacion" required><option value="">Seleccioná una titular</option></select></div>
+    <div class="campo-formulario"><label>Preceptora reemplazante *</label><select name="reemplazante" required><option value="">Cargando...</option></select></div>
+    <div class="campo-formulario"><label>Desde *</label><input type="date" name="desde" required></div>
+    <div class="campo-formulario"><label>Hasta *</label><input type="date" name="hasta" required></div>
+    <div class="campo-formulario"><button type="submit" class="btn-accion">Registrar reemplazo de Preceptoría</button></div>
+  </div>
+  <p id="mensajeReemplazoPreceptoria" role="status"></p>
+</form>
+              <div class="separador-usuarios"></div>
               <div class="encabezado-listado">
                 <div>
                   <h3>Reemplazos registrados</h3>
@@ -4886,5 +4900,6 @@
       src="../vista-2027/assets/js/tema-publico-2027.js?v=45"
       defer
     ></script>
+  <script src="../assets/js/reemplazos-preceptoria.js?v=1" type="module"></script>
   </body>
 </html>
