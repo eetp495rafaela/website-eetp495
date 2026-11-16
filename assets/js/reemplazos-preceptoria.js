@@ -1,6 +1,6 @@
 import { getApps, getApp, initializeApp } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-app.js";
 import { getAuth } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-auth.js";
-import { getFirestore, collection, getDocs, getDoc, doc, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
+import { getFirestore, collection, getDocs, getDoc, doc, addDoc, query, where, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
 
 const config = { apiKey:"AIzaSyAARktrOpu-Rz683q4RxTK2h1nmkUaUbuA", authDomain:"portal-institucional-eet-fa5c7.firebaseapp.com", projectId:"portal-institucional-eet-fa5c7", storageBucket:"portal-institucional-eet-fa5c7.firebasestorage.app", messagingSenderId:"658183549494", appId:"1:658183549494:web:84fe7da91b1ea8990f1e97" };
 const db = getFirestore(getApps().length ? getApp() : initializeApp(config));
@@ -20,13 +20,13 @@ async function cargar() {
     const rol = String(window.portalUsuario?.rol || sessionStorage.getItem("rolActivoPortal") || "").toUpperCase();
     if (!["DIRECCION","SECRETARIA","ASISTENTE_ADMINISTRATIVO"].includes(rol)) {
       const panel = document.getElementById("panelRegistroPreceptoriaGestion");
-      if (panel) panel.hidden = true;
+      if (panel) { panel.hidden = true; panel.style.display = "none"; }
       form.hidden = true;
       return;
     }
   }
   try {
-    const [us,refs] = await Promise.all([getDocs(collection(db,"usuarios")),getDocs(collection(db,"referentes_institucionales"))]);
+    const [us,refs] = await Promise.all([getDocs(query(collection(db,"usuarios"),where("rol","!=","ALUMNO"))),getDocs(collection(db,"referentes_institucionales"))]);
     usuarios=new Map(us.docs.map(d=>[correo(d.data().correo||d.id),d.data()]));
     referentes=new Map(refs.docs.filter(d=>d.data().cargo==="PRECEPTOR"&&d.data().estado==="ACTIVO"&&d.data().cursoId).map(d=>[d.id,d.data()]));
     const titular=campo("titular"),reemplazante=campo("reemplazante");
