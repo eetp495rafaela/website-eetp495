@@ -2326,8 +2326,8 @@ allow list: if alumnoPuedeListarCompaneros();
   puedeAdministrarReemplazos()
   && resource.data.get("estado", "") == "ACTIVO"
   && (
-    resource.data.get("rol", "") == "DOCENTE"
-    || resource.data.get("roles", []).hasAny(["DOCENTE"])
+    resource.data.get("rol", "") in ["DOCENTE", "PRECEPTORIA"]
+    || resource.data.get("roles", []).hasAny(["DOCENTE", "PRECEPTORIA"])
   )
 )
       || (
@@ -2372,8 +2372,8 @@ allow list: if esSoporte()
   puedeAdministrarReemplazos()
   && resource.data.get("estado", "") == "ACTIVO"
   && (
-    resource.data.get("rol", "") == "DOCENTE"
-    || resource.data.get("roles", []).hasAny(["DOCENTE"])
+    resource.data.get("rol", "") in ["DOCENTE", "PRECEPTORIA"]
+    || resource.data.get("roles", []).hasAny(["DOCENTE", "PRECEPTORIA"])
   )
 )
 
