@@ -1608,3 +1608,13 @@ html[data-public-theme="dark"] body.portal-docentes-2027
   .tarjeta-enlace-institucional-docente:focus-visible p {
   color: #dceafe;
 }
+
+
+/* Si.R.A. — contraste de la cantidad de clases en encabezados de grupo
+   cuando está activado el modo oscuro. */
+html[data-public-theme="dark"] body:is(.portal-gestion-2027,.portal-soporte-2027)
+  :is(#sira-gestion,#sira-admin) .sira-hoy .sira-hoy-tabla
+  .sira-hoy-fila-grupo .sira-hoy-grupo-cantidad {
+  color: #e4f0ff;
+  font-weight: 800;
+}
