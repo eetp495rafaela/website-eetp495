@@ -83,11 +83,37 @@ function perfilTieneRol(rolBuscado) {
     );
 }
 
+/* Acceso temporal de Preceptoría: se verifica en servidor y vence por fecha.
+ * El vínculo sólo indica el ID; la fuente de verdad es el reemplazo. */
+function preceptoriaTemporalVigente() {
+  let correo = request.auth.token.email;
+  let rutaVinculo = /databases/$(database)/documents/accesos_preceptoria_temporales/$(correo);
+  let vinculo = get(rutaVinculo).data;
+  let rutaReemplazo = /databases/$(database)/documents/reemplazos_docentes/$(vinculo.reemplazoId);
+  let reemplazo = get(rutaReemplazo).data;
+  return usuarioAutenticado()
+    && perfilActivo(perfilUsuario())
+    && perfilTieneAlgunoDeLosRoles(perfilUsuario(), ["DOCENTE"])
+    && exists(rutaVinculo)
+    && vinculo.get("reemplazanteCorreo", "") == correo
+    && vinculo.get("reemplazoId", "") is string
+    && exists(rutaReemplazo)
+    && reemplazo.get("tipoHorario", "") == "PRECEPTORIA"
+    && reemplazo.get("estado", "") == "ACTIVO"
+    && reemplazo.get("reemplazanteCorreo", "") == correo
+    && reemplazo.get("fechaDesde", "") is string
+    && reemplazo.get("fechaHasta", "") is string
+    && request.time >= inicioDiaArgentina(reemplazo.fechaDesde)
+    && request.time < finDiaArgentinaExclusivo(reemplazo.fechaHasta);
+}
+
 function usuarioActivoTieneRoles(rolesBuscados) {
   return usuarioAutenticado()
-    && perfilActivoTieneRoles(
-      perfilUsuario(),
-      rolesBuscados
+    && (
+      perfilActivoTieneRoles(
+        perfilUsuario(),
+        rolesBuscados
+      ) || (rolesBuscados.hasAny(["PRECEPTORIA"]) && preceptoriaTemporalVigente())
     )
     // DOCENTE_APOYO no se puede combinar con roles institucionales.
     // Esto evita heredar permisos de DOCENTE, DIRECCION o SOPORTE.
@@ -2559,6 +2585,24 @@ match /asignaciones_docentes/{asignacionId} {
   allow create, update, delete: if esSoporte();
 }
 
+/* Índice de acceso temporal: sólo Gestión autorizada/Soporte escribe.
+ * El reemplazo referenciado se valida al consultar permisos. */
+match /accesos_preceptoria_temporales/{correo} {
+  allow get: if esSoporte() || puedeAdministrarReemplazos()
+    || (usuarioAutenticado() && request.auth.token.email == correo
+      && perfilActivo(perfilUsuario())
+      && perfilTieneAlgunoDeLosRoles(perfilUsuario(), ["DOCENTE"]));
+  allow list: if esSoporte() || puedeAdministrarReemplazos();
+  allow create, update: if (esSoporte() || puedeAdministrarReemplazos())
+    && request.resource.data.reemplazanteCorreo == correo
+    && request.resource.data.reemplazoId is string
+    && request.resource.data.actualizadoPor == request.auth.token.email
+    && request.resource.data.actualizadoEn == request.time
+    && getAfter(/databases/$(database)/documents/reemplazos_docentes/$(request.resource.data.reemplazoId)).data.get("tipoHorario", "") == "PRECEPTORIA"
+    && getAfter(/databases/$(database)/documents/reemplazos_docentes/$(request.resource.data.reemplazoId)).data.get("reemplazanteCorreo", "") == correo;
+  allow delete: if esSoporte() || puedeAdministrarReemplazos();
+}
+
 match /reemplazos_docentes/{reemplazoId} {
 
   /*
@@ -2629,8 +2673,8 @@ match /reemplazos_docentes/{reemplazoId} {
         && exists(/databases/$(database)/documents/usuarios/$(request.resource.data.reemplazanteCorreo))
         && get(/databases/$(database)/documents/usuarios/$(request.resource.data.reemplazanteCorreo)).data.estado == "ACTIVO"
         && (
-          get(/databases/$(database)/documents/usuarios/$(request.resource.data.reemplazanteCorreo)).data.get("rol", "") == "PRECEPTORIA"
-          || "PRECEPTORIA" in get(/databases/$(database)/documents/usuarios/$(request.resource.data.reemplazanteCorreo)).data.get("roles", [])
+          get(/databases/$(database)/documents/usuarios/$(request.resource.data.reemplazanteCorreo)).data.get("rol", "") in ["DOCENTE", "PRECEPTORIA"]
+          || get(/databases/$(database)/documents/usuarios/$(request.resource.data.reemplazanteCorreo)).data.get("roles", []).hasAny(["DOCENTE", "PRECEPTORIA"])
         )
         && request.resource.data.asignacionesTitularIds is list
         && request.resource.data.asignacionesTitularIds.size() > 0
