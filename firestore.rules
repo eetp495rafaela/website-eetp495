@@ -2609,7 +2609,9 @@ match /accesos_preceptoria_temporales/{correo} {
     && request.resource.data.reemplazoId is string
     && request.resource.data.actualizadoPor == request.auth.token.email
     && request.resource.data.actualizadoEn == request.time
+    && request.resource.data.keys().hasOnly(["reemplazoId", "reemplazanteCorreo", "actualizadoEn", "actualizadoPor"])
     && getAfter(/databases/$(database)/documents/reemplazos_docentes/$(request.resource.data.reemplazoId)).data.get("tipoHorario", "") == "PRECEPTORIA"
+    && getAfter(/databases/$(database)/documents/reemplazos_docentes/$(request.resource.data.reemplazoId)).data.get("estado", "") == "ACTIVO"
     && getAfter(/databases/$(database)/documents/reemplazos_docentes/$(request.resource.data.reemplazoId)).data.get("reemplazanteCorreo", "") == correo;
   allow delete: if esSoporte() || puedeAdministrarReemplazos();
 }
