@@ -13,11 +13,12 @@ const activo = u => String(u.estado || "").toUpperCase() === "ACTIVO";
 const mensaje = (s, error=false) => { const el = document.getElementById("mensajeReemplazoPreceptoria"); if(el){el.textContent=s;el.style.color=error?"#c93a3a":"";} };
 const opcion = (sel, valor, texto) => { const el=document.createElement("option"); el.value=valor;el.textContent=texto;sel.appendChild(el); };
 let usuarios = new Map(), referentes = new Map();
+const estadoGestion = () => String(window.portalUsuario?.rol || sessionStorage.getItem("rolActivoPortal") || "").trim().toUpperCase();
 
 async function cargar() {
   if (!form) return;
   if (location.pathname.startsWith("/gestion/")) {
-    const rol = String(window.portalUsuario?.rol || sessionStorage.getItem("rolActivoPortal") || "").toUpperCase();
+    const rol = estadoGestion();
     if (!["DIRECCION","SECRETARIA","ASISTENTE_ADMINISTRATIVO"].includes(rol)) {
       const panel = document.getElementById("panelRegistroPreceptoriaGestion");
       if (panel) { panel.hidden = true; panel.style.display = "none"; }
@@ -27,7 +28,7 @@ async function cargar() {
   }
   try {
     const [us,refs] = await Promise.all([getDocs(query(collection(db,"usuarios"),where("rol","!=","ALUMNO"))),getDocs(collection(db,"referentes_institucionales"))]);
-    usuarios=new Map(us.docs.map(d=>[correo(d.data().correo||d.id),d.data()]));
+    usuarios=new Map(us.docs.map(d=>[correo(d.data().correo||d.id),{...d.data(),documentoId:d.id}]));
     referentes=new Map(refs.docs.filter(d=>d.data().cargo==="PRECEPTOR"&&d.data().estado==="ACTIVO"&&d.data().cursoId).map(d=>[d.id,d.data()]));
     const titular=campo("titular"),reemplazante=campo("reemplazante");
     titular.replaceChildren();reemplazante.replaceChildren();
@@ -56,9 +57,9 @@ form?.addEventListener("submit",async e=>{
   if(titularCorreo===reemplazanteCorreo||fechaHasta<fechaDesde){mensaje("Revisá las personas y las fechas del reemplazo.",true);return;}
   boton.disabled=true;
   try {
-    const [ref,usr,existentes]=await Promise.all([getDoc(doc(db,"referentes_institucionales",asignacionTitularId)),getDoc(doc(db,"usuarios",reemplazanteCorreo)),getDocs(collection(db,"reemplazos_docentes"))]);
-    if(!ref.exists()||ref.data().estado!=="ACTIVO"||ref.data().cargo!=="PRECEPTOR"||correo(ref.data().correo)!==titularCorreo)throw Error("La asignación de Preceptoría ya no está vigente.");
-    if(!usr.exists()||!activo(usr.data())||!roles(usr.data()).includes("PRECEPTORIA"))throw Error("La reemplazante debe tener el rol PRECEPTORIA activo.");
+    const [ref,usr,existentes]=await Promise.all([getDoc(doc(db,"referentes_institucionales",asignacionTitularId)),getDoc(doc(db,"usuarios",usuarios.get(reemplazanteCorreo)?.documentoId || reemplazanteCorreo)),getDocs(collection(db,"reemplazos_docentes"))]);
+    if(!ref.exists()||ref.data().estado!=="ACTIVO"||ref.data().cargo!=="PRECEPTOR"||correo(ref.data().correo)!==titularCorreo||!usuarios.has(titularCorreo)||!activo(usuarios.get(titularCorreo))||!roles(usuarios.get(titularCorreo)).includes("PRECEPTORIA"))throw Error("La asignación de Preceptoría ya no está vigente.");
+    if(!usr.exists()||correo(usr.data().correo||usr.id)!==reemplazanteCorreo||!activo(usr.data())||!roles(usr.data()).includes("PRECEPTORIA"))throw Error("La reemplazante debe tener el rol PRECEPTORIA activo.");
     if(existentes.docs.some(d=>{const x=d.data();return x.estado==="ACTIVO"&&x.asignacionTitularId===asignacionTitularId&&fechaDesde<=x.fechaHasta&&fechaHasta>=x.fechaDesde;}))throw Error("Ya hay un reemplazo activo superpuesto para este curso.");
     const a=ref.data();
     await addDoc(collection(db,"reemplazos_docentes"),{
