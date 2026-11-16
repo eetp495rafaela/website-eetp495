@@ -209,3 +209,10 @@ Rama de trabajo: `main`
 - Confirmado: PRECEPTORIA tiene acceso institucional general por rol; las asignaciones en Referentes Institucionales se usan para mostrar referentes en Portal Alumnos, no para limitar el acceso a Gestión.
 - El reemplazo debe habilitar temporalmente la elección de PRECEPTORIA en el login a un DOCENTE sin asignarle el rol permanente; debe revocarse por fecha o finalización manual y comprobarse también en reglas Firestore.
 - Se actualizó el selector de reemplazantes para admitir docentes activos y se ajustó el botón. **Pendiente:** autorización temporal segura en login, proteger-portal y Firestore. No usar en producción como habilitación de acceso hasta completar despliegue y pruebas.
+
+### 2026-11-16 — Implementación de autorización temporal de Preceptoría (pendiente despliegue/prueba real)
+- El reemplazante puede ser DOCENTE activo sin rol PRECEPTORIA permanente. El formulario crea atómicamente el reemplazo y `accesos_preceptoria_temporales/{correo}`, que referencia el ID de reemplazo; se evita reemplazar el vínculo mientras exista otro reemplazo activo para esa persona.
+- El login y proteger-portal validan el vínculo, el documento de reemplazo, su estado y fechas antes de ofrecer/permitir PRECEPTORIA. No se modifican `usuarios.rol` ni `usuarios.roles`.
+- Reglas Firestore: validación del permiso temporal en servidor con horario Argentina, validación de escritura de vínculo por administradores y admisión de reemplazantes DOCENTE. La finalización manual o vencimiento impide nuevas lecturas/escrituras autorizadas por el reemplazo.
+- CSS: grilla explícita para alinear el botón con fechas en Soporte y Gestión; versiones de caché actualizadas.
+- Comprobación de sintaxis JS realizada para tres módulos. **Falta desplegar reglas y ejecutar pruebas integrales con usuario docente sin PRECEPTORIA permanente**, así como verificar reglas con herramientas Firebase. Hasta entonces no se considera validado en producción.
