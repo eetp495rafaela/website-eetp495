@@ -13,9 +13,18 @@ const activo = u => String(u.estado || "").toUpperCase() === "ACTIVO";
 const mensaje = (s, error=false) => { const el = document.getElementById("mensajeReemplazoPreceptoria"); if(el){el.textContent=s;el.style.color=error?"#c93a3a":"";} };
 const opcion = (sel, valor, texto) => { const el=document.createElement("option"); el.value=valor;el.textContent=texto;sel.appendChild(el); };
 let usuarios = new Map(), referentes = new Map();
-const fechaHoy = () => { const p = new Intl.DateTimeFormat("en-CA",{timeZone:"America/Argentina/Buenos_Aires",year:"numeric",month:"2-digit",day:"2-digit"}).format(new Date()); return p; };
+
 async function cargar() {
   if (!form) return;
+  if (location.pathname.startsWith("/gestion/")) {
+    const rol = String(window.portalUsuario?.rol || sessionStorage.getItem("rolActivoPortal") || "").toUpperCase();
+    if (!["DIRECCION","SECRETARIA","ASISTENTE_ADMINISTRATIVO"].includes(rol)) {
+      const panel = document.getElementById("panelRegistroPreceptoriaGestion");
+      if (panel) panel.hidden = true;
+      form.hidden = true;
+      return;
+    }
+  }
   try {
     const [us,refs] = await Promise.all([getDocs(collection(db,"usuarios")),getDocs(collection(db,"referentes_institucionales"))]);
     usuarios=new Map(us.docs.map(d=>[correo(d.data().correo||d.id),d.data()]));
