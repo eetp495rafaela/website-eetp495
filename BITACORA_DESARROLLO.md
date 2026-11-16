@@ -204,3 +204,8 @@ Rama de trabajo: `main`
 - Un registro de reemplazo de Preceptoría abarca todos los cursos activos de la titular, conservando `asignacionesTitularIds` y `cursoIds` y los campos heredados para compatibilidad del listado.
 - Reglas de Firestore: validación básica de listas de cursos/asignaciones en creación desde Gestión. **Pendiente de despliegue y pruebas con emulador o cuentas de prueba**.
 - **No habilitar uso productivo todavía**: pendiente integrar y verificar permisos temporales efectivos por curso, validar que se extingan por fecha y finalizar pruebas de seguridad. No se alteran referentes ni roles permanentes.
+
+### 2026-11-16 — Aclaración funcional: acceso temporal de Preceptoría
+- Confirmado: PRECEPTORIA tiene acceso institucional general por rol; las asignaciones en Referentes Institucionales se usan para mostrar referentes en Portal Alumnos, no para limitar el acceso a Gestión.
+- El reemplazo debe habilitar temporalmente la elección de PRECEPTORIA en el login a un DOCENTE sin asignarle el rol permanente; debe revocarse por fecha o finalización manual y comprobarse también en reglas Firestore.
+- Se actualizó el selector de reemplazantes para admitir docentes activos y se ajustó el botón. **Pendiente:** autorización temporal segura en login, proteger-portal y Firestore. No usar en producción como habilitación de acceso hasta completar despliegue y pruebas.
