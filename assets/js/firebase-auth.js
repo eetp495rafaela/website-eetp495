@@ -396,6 +396,20 @@ function construirSelectorRoles(perfil) {
    VALIDAR USUARIO YA REGISTRADO
 ===================================================== */
 
+/* El permiso temporal se comprueba contra el registro original; no se añade al perfil. */
+async function tienePreceptoriaTemporal(correo) {
+  const vinculo = await getDoc(doc(db, "accesos_preceptoria_temporales", correo));
+  if (!vinculo.exists() || !vinculo.data().reemplazoId) return false;
+  const reemplazo = await getDoc(doc(db, "reemplazos_docentes", vinculo.data().reemplazoId));
+  if (!reemplazo.exists()) return false;
+  const r = reemplazo.data();
+  const hoy = new Date();
+  const fecha = [hoy.getFullYear(), String(hoy.getMonth()+1).padStart(2,"0"), String(hoy.getDate()).padStart(2,"0")].join("-");
+  return r.tipoHorario === "PRECEPTORIA" && r.estado === "ACTIVO"
+    && normalizarCorreo(r.reemplazanteCorreo) === correo
+    && r.fechaDesde <= fecha && fecha <= r.fechaHasta;
+}
+
 async function validarPerfilUsuario(user) {
   const correo = normalizarCorreo(user.email);
 
@@ -422,6 +436,7 @@ async function validarPerfilUsuario(user) {
     .toUpperCase();
 
   const roles = obtenerRolesPerfil(perfil);
+  if (roles.includes("DOCENTE") && !roles.includes("PRECEPTORIA") && await tienePreceptoriaTemporal(correo)) roles.push("PRECEPTORIA");
 
   if (estado !== "ACTIVO") {
     await signOut(auth);
