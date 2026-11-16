@@ -87,24 +87,35 @@ function perfilTieneRol(rolBuscado) {
  * El vínculo sólo indica el ID; la fuente de verdad es el reemplazo. */
 function preceptoriaTemporalVigente() {
   let correo = request.auth.token.email;
-  let rutaVinculo = /databases/$(database)/documents/accesos_preceptoria_temporales/$(correo);
-  let vinculo = get(rutaVinculo).data;
-  let rutaReemplazo = /databases/$(database)/documents/reemplazos_docentes/$(vinculo.reemplazoId);
-  let reemplazo = get(rutaReemplazo).data;
+  let ruta = /databases/$(database)/documents/accesos_preceptoria_temporales/$(correo);
   return usuarioAutenticado()
     && perfilActivo(perfilUsuario())
     && perfilTieneAlgunoDeLosRoles(perfilUsuario(), ["DOCENTE"])
-    && exists(rutaVinculo)
-    && vinculo.get("reemplazanteCorreo", "") == correo
-    && vinculo.get("reemplazoId", "") is string
-    && exists(rutaReemplazo)
-    && reemplazo.get("tipoHorario", "") == "PRECEPTORIA"
+    && exists(ruta)
+    && preceptoriaTemporalConVinculo(correo);
+}
+
+function preceptoriaTemporalConVinculo(correo) {
+  let vinculo = get(/databases/$(database)/documents/accesos_preceptoria_temporales/$(correo)).data;
+  let id = vinculo.get("reemplazoId", "");
+  return vinculo.get("reemplazanteCorreo", "") == correo
+    && id is string
+    && id.size() > 0
+    && exists(/databases/$(database)/documents/reemplazos_docentes/$(id))
+    && preceptoriaTemporalConReemplazo(correo, id);
+}
+
+function preceptoriaTemporalConReemplazo(correo, id) {
+  let reemplazo = get(/databases/$(database)/documents/reemplazos_docentes/$(id)).data;
+  let desde = reemplazo.get("fechaDesde", "");
+  let hasta = reemplazo.get("fechaHasta", "");
+  return reemplazo.get("tipoHorario", "") == "PRECEPTORIA"
     && reemplazo.get("estado", "") == "ACTIVO"
     && reemplazo.get("reemplazanteCorreo", "") == correo
-    && reemplazo.get("fechaDesde", "") is string
-    && reemplazo.get("fechaHasta", "") is string
-    && request.time >= inicioDiaArgentina(reemplazo.fechaDesde)
-    && request.time < finDiaArgentinaExclusivo(reemplazo.fechaHasta);
+    && fechaISOCalificacionesValida(desde)
+    && fechaISOCalificacionesValida(hasta)
+    && request.time >= inicioDiaArgentina(desde)
+    && request.time < finDiaArgentinaExclusivo(hasta);
 }
 
 function usuarioActivoTieneRoles(rolesBuscados) {
