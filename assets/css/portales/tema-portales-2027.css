@@ -1584,3 +1584,27 @@ html[data-public-theme="dark"] body:is(.portal-gestion-2027,.portal-soporte-2027
   #formReemplazoPreceptoria :is(.campo-formulario,.campo-filtro-gestion):nth-child(n) {grid-column:1;grid-row:auto;}
   #formReemplazoPreceptoria :is(button[type="submit"],#btnVincularReemplazosPreceptoria) {white-space:normal;}
 }
+
+
+/* Enlaces Institucionales / Docentes: el hover claro heredado del tema
+   bordó no debe producir texto claro sobre amarillo en modo oscuro. */
+html[data-public-theme="dark"] body.portal-docentes-2027
+  .tarjeta-enlace-institucional-docente:hover,
+html[data-public-theme="dark"] body.portal-docentes-2027
+  .tarjeta-enlace-institucional-docente:focus-visible {
+  background: linear-gradient(180deg, #213c60 0%, #284b73 100%);
+  border-color: #83b6ed;
+  color: #f2f7ff;
+}
+html[data-public-theme="dark"] body.portal-docentes-2027
+  .tarjeta-enlace-institucional-docente:hover h3,
+html[data-public-theme="dark"] body.portal-docentes-2027
+  .tarjeta-enlace-institucional-docente:focus-visible h3 {
+  color: #ffffff;
+}
+html[data-public-theme="dark"] body.portal-docentes-2027
+  .tarjeta-enlace-institucional-docente:hover p,
+html[data-public-theme="dark"] body.portal-docentes-2027
+  .tarjeta-enlace-institucional-docente:focus-visible p {
+  color: #dceafe;
+}
