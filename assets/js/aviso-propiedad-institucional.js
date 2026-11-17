@@ -4,7 +4,7 @@
     if (document.getElementById("aviso-propiedad-institucional")) return;
     const style = document.createElement("style");
     style.textContent = `
-      #aviso-propiedad-institucional { text-align:center; padding:12px 16px; font-size:12px; line-height:1.5; color:inherit; }
+      #aviso-propiedad-institucional { display:inline-flex; align-items:center; justify-content:center; text-align:center; margin:0; padding:0; font-size:inherit; line-height:inherit; color:inherit; vertical-align:baseline; }\n      #aviso-propiedad-institucional.aviso-separado::before { content:"·"; margin:0 12px; opacity:.65; }
       #aviso-propiedad-institucional button { color:inherit; font:inherit; text-decoration:underline; text-underline-offset:3px; border:0; background:transparent; cursor:pointer; }
       #aviso-propiedad-institucional dialog { position:fixed; inset:0; margin:auto; width:min(92vw,510px); max-height:85vh; padding:26px; border-radius:14px; border:1px solid #6583a5; background:#fff; color:#142b46; box-shadow:0 16px 48px #0005; text-align:left; }
       #aviso-propiedad-institucional dialog::backdrop { background:rgba(2,12,29,.75); }
@@ -18,7 +18,7 @@
     wrapper.id = "aviso-propiedad-institucional";
     const open = document.createElement("button");
     open.type = "button";
-    open.textContent = "Acerca de...";
+    open.textContent = "Acerca de";
     open.setAttribute("aria-label", "Acerca del portal y su propiedad intelectual");
     const dialog = document.createElement("dialog");
     dialog.setAttribute("aria-label", "Acerca del Portal Institucional");
