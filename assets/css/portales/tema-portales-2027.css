@@ -1362,6 +1362,10 @@ html[data-public-theme="dark"] body.portal-alumnos-2027 #mesas-examen-alumno
   background: #1a304a !important;
   color: #e3efff !important;
 }
+html[data-public-theme="dark"] body.portal-alumnos-2027 #mesas-examen-alumno
+.tabla-alumno-mesas tbody td strong {
+  color: #f3f8ff !important;
+}
 
 /* ALUMNOS · Mis compañeros: único ajuste de contraste en modo claro. */
 html:not([data-public-theme="dark"]) body.portal-alumnos-2027
