@@ -402,7 +402,15 @@ async function tienePreceptoriaTemporal(correo) {
   try { vinculo = await getDoc(doc(db, "accesos_preceptoria_temporales", correo)); }
   catch (error) { console.warn("Permiso temporal no disponible:", error.code || error); return false; }
   if (!vinculo.exists() || !vinculo.data().reemplazoId) return false;
-  const reemplazo = await getDoc(doc(db, "reemplazos_docentes", vinculo.data().reemplazoId));
+  // Un reemplazo vencido o un documento temporal sin permisos de lectura
+  // nunca debe impedir el ingreso con el rol permanente DOCENTE.
+  let reemplazo;
+  try {
+    reemplazo = await getDoc(doc(db, "reemplazos_docentes", vinculo.data().reemplazoId));
+  } catch (error) {
+    console.warn("No se pudo validar el reemplazo temporal; se conservan los roles permanentes:", error.code || error);
+    return false;
+  }
   if (!reemplazo.exists()) return false;
   const r = reemplazo.data();
   const hoy = new Date();
