@@ -1618,3 +1618,25 @@ html[data-public-theme="dark"] body:is(.portal-gestion-2027,.portal-soporte-2027
   color: #e4f0ff;
   font-weight: 800;
 }
+
+
+/* S.I.M.E. / Alumnos: evitar las celdas blancas heredadas del tema claro
+   que vuelven ilegibles las fechas y el turno en modo oscuro. */
+html[data-public-theme="dark"] body.portal-alumnos-2027
+  #examenes .tabla-sime-alumno tbody tr td {
+  background-color: #1b304a !important;
+  color: #e3f0ff !important;
+  border-bottom-color: #405b77 !important;
+}
+html[data-public-theme="dark"] body.portal-alumnos-2027
+  #examenes .tabla-sime-alumno tbody tr:nth-child(even) td {
+  background-color: #223a57 !important;
+}
+html[data-public-theme="dark"] body.portal-alumnos-2027
+  #examenes .tabla-sime-alumno tbody tr:hover td {
+  background-color: #2b496c !important;
+}
+html[data-public-theme="dark"] body.portal-alumnos-2027
+  #examenes .tabla-sime-alumno tbody td :is(span,strong,time) {
+  color: inherit;
+}
