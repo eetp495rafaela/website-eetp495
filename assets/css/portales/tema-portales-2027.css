@@ -1673,3 +1673,36 @@ html:not([data-public-theme="dark"]) body.portal-alumnos-2027
   color: #ffffff !important;
   opacity: 1 !important;
 }
+
+
+/* Documentación Académica / Alumnos: contraste completo de la barra
+   de filtros y de las filas de documentos en modo oscuro. */
+html[data-public-theme="dark"] body.portal-alumnos-2027
+  #documentacion-academica .barra-consulta-documentacion-alumno {
+  background: #1b304a !important;
+  border-color: #46617c !important;
+}
+html[data-public-theme="dark"] body.portal-alumnos-2027
+  #documentacion-academica .filtros-documentacion-alumno label,
+html[data-public-theme="dark"] body.portal-alumnos-2027
+  #documentacion-academica .filtro-documentacion-alumno label {
+  color: #e3efff !important;
+}
+html[data-public-theme="dark"] body.portal-alumnos-2027
+  #documentacion-academica .tabla-documentacion-alumno tbody td {
+  background: #1b304a !important;
+  color: #e3efff !important;
+  border-bottom-color: #46617c !important;
+}
+html[data-public-theme="dark"] body.portal-alumnos-2027
+  #documentacion-academica .tabla-documentacion-alumno tbody tr:nth-child(even) td {
+  background: #223a57 !important;
+}
+html[data-public-theme="dark"] body.portal-alumnos-2027
+  #documentacion-academica .tabla-documentacion-alumno tbody tr:hover td {
+  background: #2b496c !important;
+}
+html[data-public-theme="dark"] body.portal-alumnos-2027
+  #documentacion-academica .tabla-documentacion-alumno tbody td :is(strong,span,a:not(.btn-accion)) {
+  color: #e3efff !important;
+}
