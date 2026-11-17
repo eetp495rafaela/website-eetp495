@@ -1658,3 +1658,18 @@ html[data-public-theme="dark"] body.portal-alumnos-2027
   #examenes .tabla-sime-alumno tbody td .etiqueta-estado-sime :is(span,strong) {
   color: #075c3a !important;
 }
+
+
+/* S.I.M.E. / Alumnos: el aviso de inscripciones abiertas mantiene fondo
+   verde oscuro; en tema claro el texto debe ser blanco y contrastado. */
+html:not([data-public-theme="dark"]) body.portal-alumnos-2027
+  #examenes #estadoSimeAlumno.abierto {
+  background: #07514b;
+  border-color: #27cbb0;
+  color: #ffffff;
+}
+html:not([data-public-theme="dark"]) body.portal-alumnos-2027
+  #examenes #estadoSimeAlumno.abierto :is(p,strong,span,a) {
+  color: #ffffff !important;
+  opacity: 1 !important;
+}
