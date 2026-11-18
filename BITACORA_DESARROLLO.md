@@ -216,3 +216,13 @@ Rama de trabajo: `main`
 - Reglas Firestore: validación del permiso temporal en servidor con horario Argentina, validación de escritura de vínculo por administradores y admisión de reemplazantes DOCENTE. La finalización manual o vencimiento impide nuevas lecturas/escrituras autorizadas por el reemplazo.
 - CSS: grilla explícita para alinear el botón con fechas en Soporte y Gestión; versiones de caché actualizadas.
 - Comprobación de sintaxis JS realizada para tres módulos. **Falta desplegar reglas y ejecutar pruebas integrales con usuario docente sin PRECEPTORIA permanente**, así como verificar reglas con herramientas Firebase. Hasta entonces no se considera validado en producción.
+
+## 2026-11-18 — Uniformidad visual del aviso «Acerca de»
+
+- Commits: `e5680a339a46c9ce022d35b052a8c3a266419e34` y `623a3d30290092c0c579fa3b2e8d2268998ee117`.
+- Se centraliza el estilo en `assets/js/aviso-propiedad-institucional.js` (versión de caché 4 en las 13 páginas HTML).
+- Sitio público: «Privacidad y estadísticas» y «Acerca de» centrados en una fila, con separador vertical, tipografía y color uniformes. La visual de Inicio fue aprobada por el responsable mediante captura del sitio.
+- Se extiende el aviso a las seis páginas públicas internas y al Portal de Docentes de Apoyo que aún no lo cargaban; se centra también en Login, Administración/Soporte, Gestión, Docentes y Estudiantes. En los portales sin enlace de privacidad, se muestra solo «Acerca de», centrado.
+- Se contemplan modo claro/oscuro, ancho móvil y foco visible por teclado. Se conserva el texto del aviso y sus acciones; sin cambios en autenticación, permisos, reglas, datos ni servicios externos.
+- **Validación:** sintaxis JavaScript comprobada antes del commit; pendiente confirmar despliegue y visualización real de las demás páginas y portales en ambos temas y tamaños de pantalla.
+- **Sincronización local:** pendiente de ejecutar `git pull --ff-only` en la laptop tras comprobar el estado del árbol de trabajo.
