@@ -11,6 +11,13 @@
       .footer .eetp-footer-legal #aviso-propiedad-institucional { border-left:1px solid #8fa8c880; }
       .footer .eetp-footer-legal > .eetp-enlace-privacidad:hover, .footer .eetp-footer-legal #aviso-propiedad-institucional > button:hover { text-decoration:underline; color:#fff; }
       .footer .eetp-footer-legal button:focus-visible { outline:2px solid currentColor; outline-offset:2px; }
+      .portal-footer.eetp-footer-con-aviso { flex-wrap:wrap; }
+      .portal-footer .eetp-footer-legal, .eetp-footer-legal-individual { display:flex; flex:0 0 100%; width:100%; align-items:center; justify-content:center; text-align:center; color:#536b86; font-size:.78rem; line-height:1.5; }
+      .login-legal .eetp-footer-legal { margin-top:8px; }
+      html[data-public-theme="dark"] :is(.portal-footer .eetp-footer-legal, .eetp-footer-legal-individual) { color:#8fa8c8; }
+      :is(.portal-footer .eetp-footer-legal, .eetp-footer-legal-individual) #aviso-propiedad-institucional > button { display:inline-block; margin:0; padding:4px 12px; color:inherit; font:inherit; text-decoration:none; }
+      :is(.portal-footer .eetp-footer-legal, .eetp-footer-legal-individual) #aviso-propiedad-institucional > button:hover { text-decoration:underline; }
+      #aviso-propiedad-institucional button:focus-visible { outline:2px solid currentColor; outline-offset:2px; }
       #aviso-propiedad-institucional dialog { position:fixed; inset:0; margin:auto; width:min(92vw,510px); max-height:85vh; padding:26px; border-radius:14px; border:1px solid #6583a5; background:#fff; color:#142b46; box-shadow:0 16px 48px #0005; text-align:left; }
       #aviso-propiedad-institucional dialog::backdrop { background:rgba(2,12,29,.75); }
       #aviso-propiedad-institucional dialog h2 { font-size:1.3rem; margin:0 0 14px; color:inherit; }
@@ -47,8 +54,21 @@
       links.className = "eetp-footer-legal";
       footerEnd.after(links);
       links.append(privacy, wrapper);
-    } else if (footer) footer.appendChild(wrapper);
-    else document.body.appendChild(wrapper);
+    } else if (footer?.classList.contains("portal-footer")) {
+      footer.classList.add("eetp-footer-con-aviso");
+      const links = document.createElement("div");
+      links.className = "eetp-footer-legal";
+      links.appendChild(wrapper);
+      footer.appendChild(links);
+    } else {
+      const links = document.createElement("div");
+      links.className = "eetp-footer-legal eetp-footer-legal-individual";
+      links.appendChild(wrapper);
+      const loginLegal = document.querySelector(".login-legal");
+      if (loginLegal) loginLegal.appendChild(links);
+      else if (footer) footer.appendChild(links);
+      else document.body.appendChild(links);
+    }
   };
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init, { once:true });
   else init();
