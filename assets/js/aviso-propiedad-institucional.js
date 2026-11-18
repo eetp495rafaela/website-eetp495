@@ -6,6 +6,11 @@
     style.textContent = `
       #aviso-propiedad-institucional { display:inline-flex; align-items:center; justify-content:center; text-align:center; margin:0; padding:0; font-size:inherit; line-height:inherit; color:inherit; vertical-align:baseline; }\n      #aviso-propiedad-institucional.aviso-separado::before { content:"·"; margin:0 12px; opacity:.65; }
       #aviso-propiedad-institucional button { color:inherit; font:inherit; text-decoration:underline; text-underline-offset:3px; border:0; background:transparent; cursor:pointer; }
+      .footer .eetp-footer-legal { display:flex; align-items:center; justify-content:center; flex-wrap:wrap; gap:0; margin:12px 0 0; color:#8fa8c8; font-size:.78rem; line-height:1.5; }
+      .footer .eetp-footer-legal > .eetp-enlace-privacidad, .footer .eetp-footer-legal #aviso-propiedad-institucional > button { display:inline-block; margin:0; padding:4px 12px; color:inherit; font:inherit; text-decoration:none; }
+      .footer .eetp-footer-legal #aviso-propiedad-institucional { border-left:1px solid #8fa8c880; }
+      .footer .eetp-footer-legal > .eetp-enlace-privacidad:hover, .footer .eetp-footer-legal #aviso-propiedad-institucional > button:hover { text-decoration:underline; color:#fff; }
+      .footer .eetp-footer-legal button:focus-visible { outline:2px solid currentColor; outline-offset:2px; }
       #aviso-propiedad-institucional dialog { position:fixed; inset:0; margin:auto; width:min(92vw,510px); max-height:85vh; padding:26px; border-radius:14px; border:1px solid #6583a5; background:#fff; color:#142b46; box-shadow:0 16px 48px #0005; text-align:left; }
       #aviso-propiedad-institucional dialog::backdrop { background:rgba(2,12,29,.75); }
       #aviso-propiedad-institucional dialog h2 { font-size:1.3rem; margin:0 0 14px; color:inherit; }
@@ -35,7 +40,14 @@
     dialog.append(title, text, close);
     wrapper.append(open, dialog);
     const footer = document.querySelector("footer");
-    if (footer) footer.appendChild(wrapper);
+    const privacy = footer?.querySelector(".eetp-enlace-privacidad");
+    const footerEnd = footer?.querySelector(".footer-end");
+    if (privacy && footerEnd) {
+      const links = document.createElement("div");
+      links.className = "eetp-footer-legal";
+      footerEnd.after(links);
+      links.append(privacy, wrapper);
+    } else if (footer) footer.appendChild(wrapper);
     else document.body.appendChild(wrapper);
   };
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init, { once:true });
