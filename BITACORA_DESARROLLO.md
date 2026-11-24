@@ -239,3 +239,12 @@ Rama de trabajo: `main`
 - No se modifican esquema de Firestore, reglas, permisos, consultas de asistencia ni cálculos de inasistencias.
 - **Validación:** nueve casos de la función de normalización comprobados correctamente. Pendiente prueba integral en navegador con registros de Taller y EF, incluyendo reapertura, edición, desactivación y guardado real en Firebase; pendiente confirmar despliegue.
 - **Sincronización local:** el responsable confirmó fast-forward a `120bcce` en `~/EETP495_2027/Website`, con HEAD y origin/main coincidentes. Pendiente descargar este commit documental.
+
+## 2026-11-24 — Si.R.A.: contraste en modo oscuro y ratificación del cálculo de asistencia
+
+- Contraste del texto explicativo de Modo Lluvia: se establece el color `#B8D8EA` y opacidad 1 en el selector específico del tema oscuro del Portal Docente, en `assets/css/portales/tema-portales-2027.css`. Commit: `919fd33351565790ad20b438cb9593e87ca7bd80`.
+- Se actualiza la versión de caché de dicha hoja de estilos de 47 a 48 en `docentes/index.html`. Commit: `a18a492c18d0524041ceaffc98f57fe156a70ee0`.
+- No se modifican el modo claro, la lógica de asistencia, los permisos ni Firebase. Pendiente confirmación visual del nuevo contraste tras el despliegue.
+- Se verifica en `assets/js/situacion-asistencia-docente.js` el criterio de faltas fraccionarias: faltas equivalentes = ausentes + tardanzas / 4; porcentaje = (total de clases - faltas equivalentes) / total de clases × 100. Cada tardanza equivale a 0,25 faltas desde la primera; no se espera a acumular cuatro tardanzas.
+- Caso comprobado por el responsable: una única clase registrada con estado Tarde arroja 75 % de asistencia. El resultado es correcto según el criterio vigente, ratificado por el responsable. No se modifica el código de cálculo.
+- Sincronización anterior confirmada por el responsable: laptop y remoto coincidían en `ffcc90e`, con árbol limpio. Pendiente descargar los ajustes de contraste y esta entrada documental. La validación funcional integral de Modo Lluvia sigue pendiente de confirmación.
