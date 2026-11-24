@@ -226,3 +226,16 @@ Rama de trabajo: `main`
 - Se contemplan modo claro/oscuro, ancho móvil y foco visible por teclado. Se conserva el texto del aviso y sus acciones; sin cambios en autenticación, permisos, reglas, datos ni servicios externos.
 - **Validación:** sintaxis JavaScript comprobada antes del commit; pendiente confirmar despliegue y visualización real de las demás páginas y portales en ambos temas y tamaños de pantalla.
 - **Sincronización local:** pendiente de ejecutar `git pull --ff-only` en la laptop tras comprobar el estado del árbol de trabajo.
+
+## 2026-11-24 — Si.R.A.: Modo Lluvia en Taller y Educación Física
+
+**Archivo modificado:** `assets/js/sira-docente.js`  
+**Commit de implementación:** `120bccee4759dcc92735873d7ae1abd9d8febcae`
+
+- Se habilita el mismo Modo Lluvia para Taller y Educación Física mediante lógica compartida.
+- Al activar el modo, cambiar el estado de un estudiante o guardar, se normaliza la observación: los ausentes reciben la leyenda «Día de lluvia», seguida de la observación previa si existe. Se evitan duplicados de la leyenda aislada y se conserva el texto del docente.
+- Al desactivar el modo o corregir un ausente a presente/tarde, se retira la leyenda aislada sin eliminar el resto de la observación.
+- Al reabrir una asistencia se recupera el valor booleano `modoLluvia` guardado y se normalizan las observaciones cuando está activo. Se escapan caracteres HTML en las observaciones recuperadas.
+- No se modifican esquema de Firestore, reglas, permisos, consultas de asistencia ni cálculos de inasistencias.
+- **Validación:** nueve casos de la función de normalización comprobados correctamente. Pendiente prueba integral en navegador con registros de Taller y EF, incluyendo reapertura, edición, desactivación y guardado real en Firebase; pendiente confirmar despliegue.
+- **Sincronización local:** el responsable confirmó fast-forward a `120bcce` en `~/EETP495_2027/Website`, con HEAD y origin/main coincidentes. Pendiente descargar este commit documental.
