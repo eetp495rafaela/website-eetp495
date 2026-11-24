@@ -592,6 +592,18 @@ function renderizarEncabezadoClaseSira(clase) {
   `;
 }
 
+function normalizarObservacionLluviaSira(observacion, estado, modoLluvia) {
+  const texto = String(observacion || "").trim();
+  const partes = texto.split(/\s+[-–—]\s+/).filter(parte => !/^d[ií]a de lluvia$/i.test(parte.trim()));
+  let resto = partes.join(" - ").trim();
+  // Reconoce también la leyenda histórica aislada o pegada a un separador.
+  resto = resto.replace(/^(?:d[ií]a de lluvia\s*[-–—:;]\s*)+/i, "").replace(/(?:\s*[-–—:;]\s*d[ií]a de lluvia)+$/i, "").trim();
+  if (/^d[ií]a de lluvia$/i.test(resto)) resto = "";
+  return modoLluvia && estado === "AUSENTE"
+    ? "Día de lluvia" + (resto ? " - " + resto : "")
+    : resto;
+}
+
 function renderizarListaEstudiantesSira(clase, estudiantes) {
   if (!vistaAsistenciaSiraDocente) return;
 
@@ -616,14 +628,14 @@ function renderizarListaEstudiantesSira(clase, estudiantes) {
   }
 
   const htmlModoLluvia =
-    tipo === "EDUCACION_FISICA"
+    (tipo === "EDUCACION_FISICA" || tipo === "TALLER")
       ? `
         <div class="sira-modo-lluvia">
           <label>
-            <input type="checkbox" id="modoLluviaSiraDocente" />
+            <input type="checkbox" id="modoLluviaSiraDocente" ${asistenciaSiraActual?.modoLluvia === true ? "checked" : ""} />
             🌧️ <strong>Activar Modo Lluvia</strong>
             <span>
-              Autocompleta “Día de lluvia” en estudiantes ausentes sin observación.
+              Agrega “Día de lluvia” a estudiantes ausentes y conserva las demás observaciones.
             </span>
           </label>
         </div>
@@ -638,7 +650,8 @@ function renderizarListaEstudiantesSira(clase, estudiantes) {
       );
 
       const estadoGuardado = registroGuardado?.estado || "PRESENTE";
-      const observacionGuardada = registroGuardado?.observacion || "";
+      const observacionGuardada = String(registroGuardado?.observacion || "")
+        .replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
       return `
       <div class="sira-estudiante" data-indice="${index}">
@@ -697,6 +710,24 @@ function renderizarListaEstudiantesSira(clase, estudiantes) {
     ${htmlEstudiantes}
   </div>
 `;
+
+  const controlLluvia = document.getElementById("modoLluviaSiraDocente");
+  if (controlLluvia) {
+    const actualizarObservacion = (index) => {
+      const estado = document.getElementById(`estadoSira-${index}`);
+      const observacion = document.getElementById(`observacionSira-${index}`);
+      if (estado && observacion) {
+        observacion.value = normalizarObservacionLluviaSira(
+          observacion.value, estado.value, controlLluvia.checked,
+        );
+      }
+    };
+    controlLluvia.addEventListener("change", () => estudiantes.forEach((_, index) => actualizarObservacion(index)));
+    estudiantes.forEach((_, index) => {
+      document.getElementById(`estadoSira-${index}`)?.addEventListener("change", () => actualizarObservacion(index));
+      if (controlLluvia.checked) actualizarObservacion(index);
+    });
+  }
 
   if (btnRegistrarAsistenciaSira) {
     btnRegistrarAsistenciaSira.hidden = false;
@@ -963,7 +994,7 @@ async function guardarAsistenciaSira() {
     .toUpperCase();
 
   const modoLluvia =
-    tipo === "EDUCACION_FISICA" &&
+    (tipo === "EDUCACION_FISICA" || tipo === "TALLER") &&
     document.getElementById("modoLluviaSiraDocente")?.checked === true;
 
   const registros = estudiantesSiraActuales.map((estudiante, index) => {
@@ -973,11 +1004,7 @@ async function guardarAsistenciaSira() {
     let observacion =
       document.getElementById(`observacionSira-${index}`)?.value || "";
 
-    observacion = observacion.trim();
-
-    if (modoLluvia && estado === "AUSENTE" && !observacion) {
-      observacion = "Día de lluvia";
-    }
+    observacion = normalizarObservacionLluviaSira(observacion, estado, modoLluvia);
 
     return {
       alumnoCorreo: estudiante.correo || "",
