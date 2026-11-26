@@ -388,3 +388,17 @@ Próxima tarea: VP-01, validación visual y funcional.
 
 La publicación del sistema y la activación del ciclo 2027
 son operaciones independientes.
+
+
+## 2026-11-26 — Períodos de asistencia y consolidación
+
+- Corregido el contraste del modo oscuro en los períodos
+  de asistencia del Portal Soporte.
+- Fondos, bordes, títulos, etiquetas y resumen de trimestres.
+- Modo claro conservado sin modificaciones.
+- Actualizada la versión de caché de la hoja de estilos.
+- Sin cambios en Firestore, reglas ni lógica funcional.
+- Preparado el manual operativo de cambio de ciclo 2027.
+- Ambas ramas verificadas como idénticas antes de consolidar.
+- Se establece main como única rama de trabajo.
+- Pendiente confirmar visualmente el ajuste en producción.

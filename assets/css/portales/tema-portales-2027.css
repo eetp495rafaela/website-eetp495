@@ -1710,3 +1710,29 @@ html[data-public-theme="dark"] body.portal-alumnos-2027
   #documentacion-academica .tabla-documentacion-alumno tbody td :is(strong,span,a:not(.btn-accion)) {
   color: #e3efff !important;
 }
+
+/* Soporte: contraste de periodos de asistencia. */
+
+html[data-public-theme="dark"] body.portal-soporte-2027
+#panelPeriodosAsistencia .bloque-trimestre-asistencia,
+html[data-public-theme="dark"] body.portal-soporte-2027
+#panelPeriodosAsistencia .tarjeta-periodo-registrado {
+  background: #1b304a !important;
+  border-color: #45617e !important;
+  color: #eaf4ff !important;
+}
+
+html[data-public-theme="dark"] body.portal-soporte-2027
+#panelPeriodosAsistencia .resumen-periodos-registrados {
+  background: #172b44 !important;
+  border-color: #45617e !important;
+  color: #eaf4ff !important;
+}
+
+html[data-public-theme="dark"] body.portal-soporte-2027
+#panelPeriodosAsistencia :is(
+  .bloque-trimestre-asistencia,
+  .resumen-periodos-registrados
+) :is(h4, label, strong, span, p) {
+  color: #eaf4ff !important;
+}
