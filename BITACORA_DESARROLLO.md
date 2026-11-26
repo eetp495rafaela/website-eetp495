@@ -304,3 +304,35 @@ asistencias, calificaciones y mesas de examen.
   aplicación; Soporte conserva sus permisos individuales.
 - La implementación definitiva se realizará cuando la
   institución disponga el inicio del ciclo lectivo 2027.
+
+## Validación preproducción — 26/11/2026
+
+- VP-02: aprobada, 7/7 comprobaciones adicionales.
+- Limpieza interrumpida después de 100 de 102 registros.
+- Conservación de los dos registros pendientes.
+- Rechazo de la confirmación anterior.
+- Reintento exitoso mediante una nueva revisión.
+- Conservación de ciclos vigentes y futuros.
+- Conservación de registros académicos.
+- VP-03: textos HTML de limpieza anual actualizados.
+- VP-01: validación visual todavía pendiente.
+- Total acumulado: 144/144 comprobaciones específicas.
+- Prueba de regresión:
+  tests/seguridad-firestore/limpieza-interrumpida.test.mjs
+
+### Entorno de pruebas
+
+El emulador presentó fallos internos SIGSEGV/SIGABRT
+con OpenJDK 21.0.13.1.
+
+Configuración que permitió completar VP-02:
+
+    export JAVA_TOOL_OPTIONS="-Xms128m -Xmx1536m -XX:+UseSerialGC -XX:ActiveProcessorCount=2 -Xint -Xshare:off"
+
+Proyecto ficticio: demo-eetp495-ciclo.
+Puerto del emulador: 8085.
+Sin modificaciones en Firestore de producción.
+Sin activación del ciclo 2027 en producción.
+Sin fusión con main.
+
+Próximas tareas: VP-01 y VP-04.

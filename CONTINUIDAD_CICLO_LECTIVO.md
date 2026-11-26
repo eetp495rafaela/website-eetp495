@@ -22,7 +22,9 @@ CL-01 a CL-10 completados.
 - Funcionales especificas: 54/54.
 - Seguridad Firestore: 66/66.
 - Integracion Firestore: 17/17.
-- Total: 137/137.
+- Total inicial: 137/137.
+- Validacion adicional VP-02: 7/7.
+- Total acumulado: 144/144.
 - Pruebas generales aprobadas.
 - Sintaxis validada.
 - Git diff check correcto.
@@ -53,8 +55,8 @@ CL-01 a CL-10 completados.
 ## Pendientes antes de publicar
 
 1. Validar visualmente las interfaces y confirmaciones.
-2. Probar interrupcion de limpieza entre lotes y reintento.
-3. Revisar textos HTML de la limpieza anual.
+2. Interrupcion de limpieza y reintento: APROBADO 7/7.
+3. Textos HTML corregidos. Validacion visual pendiente.
 4. Revisar valores predeterminados de ciclo en otros modulos.
 5. Verificar configuracion institucional de produccion.
 6. Realizar respaldo previo.
@@ -97,3 +99,35 @@ del ciclo lectivo 2027.
 No repetir las etapas CL-01 a CL-10.
 No reconstruir funcionalidades ya desarrolladas.
 Priorizar sencillez, seguridad y reutilizacion.
+
+## Validación preproducción — 26/11/2026
+
+- VP-02: aprobada, 7/7 comprobaciones adicionales.
+- Limpieza interrumpida después de 100 de 102 registros.
+- Conservación de los dos registros pendientes.
+- Rechazo de la confirmación anterior.
+- Reintento exitoso mediante una nueva revisión.
+- Conservación de ciclos vigentes y futuros.
+- Conservación de registros académicos.
+- VP-03: textos HTML de limpieza anual actualizados.
+- VP-01: validación visual todavía pendiente.
+- Total acumulado: 144/144 comprobaciones específicas.
+- Prueba de regresión:
+  tests/seguridad-firestore/limpieza-interrumpida.test.mjs
+
+### Entorno de pruebas
+
+El emulador presentó fallos internos SIGSEGV/SIGABRT
+con OpenJDK 21.0.13.1.
+
+Configuración que permitió completar VP-02:
+
+    export JAVA_TOOL_OPTIONS="-Xms128m -Xmx1536m -XX:+UseSerialGC -XX:ActiveProcessorCount=2 -Xint -Xshare:off"
+
+Proyecto ficticio: demo-eetp495-ciclo.
+Puerto del emulador: 8085.
+Sin modificaciones en Firestore de producción.
+Sin activación del ciclo 2027 en producción.
+Sin fusión con main.
+
+Próximas tareas: VP-01 y VP-04.
