@@ -19,7 +19,7 @@ import {
   serverTimestamp,
 } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
 
-import { getAuth } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-auth.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-auth.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyAARktrOpu-Rz683q4RxTK2h1nmkUaUbuA",
@@ -92,6 +92,20 @@ function mostrarPeriodosGestion(ciclo, datos) {
   }
   resumenPeriodosGestion.appendChild(grilla);
 }
+
+onAuthStateChanged(auth, async (usuario) => {
+  if (!usuario || !cicloPeriodosGestion) return;
+  try {
+    const ciclo = await obtenerCicloVigente(db);
+    if (!cicloPeriodosGestion.value) {
+      cicloPeriodosGestion.value = String(ciclo);
+    }
+  } catch (error) {
+    if (resumenPeriodosGestion) {
+      resumenPeriodosGestion.textContent = error.message;
+    }
+  }
+});
 
 if (btnConsultarPeriodosGestion) {
   btnConsultarPeriodosGestion.addEventListener("click", async () => {

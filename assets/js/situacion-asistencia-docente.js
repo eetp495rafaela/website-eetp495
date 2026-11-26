@@ -1,3 +1,5 @@
+import { obtenerCicloVigente } from "./ciclo-lectivo.js";
+
 import {
   initializeApp,
   getApp,
@@ -306,7 +308,7 @@ function prepararCursos(asignaciones) {
   });
 }
 
-function renderizarCursos(cursos) {
+function renderizarCursos(cursos, cicloLectivo) {
   renderizarCursosDetalleAsistenciaDocente(cursos);
 
   if (!cursoSituacionAsistenciaDocente) return;
@@ -319,7 +321,7 @@ function renderizarCursos(cursos) {
     cursoSituacionAsistenciaDocente.disabled = true;
 
     mostrarMensaje(
-      `No se encontraron cursos activos de Taller o Educación Física para el ciclo lectivo ${new Date().getFullYear()}.`,
+      `No se encontraron cursos activos de Taller o Educación Física para el ciclo lectivo ${cicloLectivo}.`,
       "error",
     );
 
@@ -356,7 +358,7 @@ async function cargarCursosAsignados(usuario) {
 
   try {
     const correoDocente = normalizarCorreo(usuario.email);
-    const cicloLectivo = new Date().getFullYear();
+    const cicloLectivo = await obtenerCicloVigente(db);
 
     const asignaciones = await obtenerAsignacionesDocente(
       correoDocente,
@@ -365,7 +367,7 @@ async function cargarCursosAsignados(usuario) {
 
     cursosSituacionAsistenciaDocente = prepararCursos(asignaciones);
 
-    renderizarCursos(cursosSituacionAsistenciaDocente);
+    renderizarCursos(cursosSituacionAsistenciaDocente, cicloLectivo);
   } catch (error) {
     console.error("Error al cargar cursos de Situación de Asistencia:", error);
 
@@ -862,7 +864,7 @@ async function consultarDetalleAsistenciaDocente() {
   }
 
   try {
-    const cicloLectivo = new Date().getFullYear();
+    const cicloLectivo = await obtenerCicloVigente(db);
     const periodos = await obtenerPeriodosAsistencia(cicloLectivo);
 
     if (!periodos) {
@@ -1291,8 +1293,6 @@ async function consultarSituacionAsistencia() {
   const periodoSeleccionado =
     periodoSituacionAsistenciaDocente?.value || "ANUAL";
 
-  const cicloLectivo = new Date().getFullYear();
-
   if (!tipo || !cursoId) {
     mostrarMensajeSituacionAsistencia(
       "Seleccioná el tipo de asistencia y el curso.",
@@ -1322,6 +1322,7 @@ async function consultarSituacionAsistencia() {
   }
 
   try {
+    const cicloLectivo = await obtenerCicloVigente(db);
     const periodos = await obtenerPeriodosAsistencia(cicloLectivo);
 
     if (!periodos) {

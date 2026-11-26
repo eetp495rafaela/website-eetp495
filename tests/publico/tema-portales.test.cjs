@@ -22,7 +22,7 @@ test("preferencia local se aplica antes de que cargue el CSS del portal", () => 
   for (const p of fivePortals) {
     const html = load(p);
     const boot = html.indexOf('localStorage.getItem("eetp495-public-theme")');
-    const css = html.search(/tema-portales-2027\.css\?v=\d+/);
+    const css = html.search(/tema-portales-2027\.css\?v=[A-Za-z0-9._-]+/);
     assert(boot > 0 && css > boot, p);
     assert.match(html, /tema-publico-2027\.js\?v=45/, p);
   }

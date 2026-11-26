@@ -1,3 +1,5 @@
+import { obtenerCicloVigente } from "./ciclo-lectivo.js";
+
 import {
   getApps,
   getApp,
@@ -595,7 +597,7 @@ async function sincronizarAlumnosRegistroCalificacionesCursoActual(cursoId) {
     return { actualizado: false, motivo: "SIN_CURSO" };
   }
 
-  const cicloLectivo = new Date().getFullYear();
+  const cicloLectivo = await obtenerCicloVigente(db);
   const referenciaRegistro = doc(
     db,
     "calificaciones_taller",
@@ -6458,7 +6460,13 @@ if (btnConfigurarPeriodosAsistencia && panelPeriodosAsistencia) {
       panelPeriodosAsistencia.removeAttribute("hidden");
 
       if (cicloLectivoPeriodos && !cicloLectivoPeriodos.value) {
-        cicloLectivoPeriodos.value = new Date().getFullYear();
+        try {
+          cicloLectivoPeriodos.value = await obtenerCicloVigente(db);
+        } catch (error) {
+          mensajePeriodosAsistencia.textContent = error.message;
+          mensajePeriodosAsistencia.className = "mensaje-formulario error";
+          return;
+        }
       }
 
       await cargarPeriodosAsistencia(cicloLectivoPeriodos.value);
@@ -6519,8 +6527,20 @@ if (btnCerrarSesion) {
   });
 }
 
-onAuthStateChanged(auth, (user) => {
+onAuthStateChanged(auth, async (user) => {
   if (!user) return;
 
   usuarioSoporte = user;
+
+  try {
+    const ciclo = await obtenerCicloVigente(db);
+    if (asignacionCicloLectivo) {
+      asignacionCicloLectivo.defaultValue = String(ciclo);
+      if (!asignacionCicloLectivo.value) {
+        asignacionCicloLectivo.value = String(ciclo);
+      }
+    }
+  } catch (error) {
+    console.error("Ciclo institucional no disponible:", error);
+  }
 });

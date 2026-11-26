@@ -1,3 +1,5 @@
+import { obtenerCicloVigente } from "./ciclo-lectivo.js";
+
 import {
   initializeApp,
   getApp,
@@ -126,11 +128,7 @@ function mostrarVistaInformativa(texto) {
   `;
 }
 
-function obtenerCicloLectivoActual() {
-  return new Date().getFullYear();
-}
-
-function esAsignacionTallerPrimerCiclo(asignacion) {
+function esAsignacionTallerPrimerCiclo(asignacion, cicloInstitucional) {
   const tipo = normalizarTexto(
     asignacion.espacioTipo ||
       asignacion.tipoEspacio ||
@@ -144,11 +142,11 @@ function esAsignacionTallerPrimerCiclo(asignacion) {
   return (
     tipo === "TALLER" &&
     (anio === 1 || anio === 2) &&
-    cicloLectivo === obtenerCicloLectivoActual()
+    cicloLectivo === cicloInstitucional
   );
 }
 
-function estaReemplazoVigente(reemplazo) {
+function estaReemplazoVigente(reemplazo, cicloInstitucional) {
   const estado = normalizarTexto(reemplazo.estado);
   const tipo = normalizarTexto(reemplazo.tipoHorario || reemplazo.espacioTipo);
   const fechaDesde = String(reemplazo.fechaDesde || "").trim();
@@ -166,7 +164,7 @@ function estaReemplazoVigente(reemplazo) {
   return (
     estado === "ACTIVO" &&
     tipo === "TALLER" &&
-    cicloLectivo === obtenerCicloLectivoActual() &&
+    cicloLectivo === cicloInstitucional &&
     fechaDesde &&
     fechaHasta &&
     fechaHoy >= fechaDesde &&
@@ -195,7 +193,7 @@ function crearAccesoDesdeAsignacion(asignacion, origen = "TITULAR") {
   };
 }
 
-async function obtenerAccesosTitular(correoDocente) {
+async function obtenerAccesosTitular(correoDocente, cicloInstitucional) {
   const porId = new Map();
 
   const consultas = [
@@ -220,7 +218,7 @@ async function obtenerAccesosTitular(correoDocente) {
         ...documento.data(),
       };
 
-      if (!esAsignacionTallerPrimerCiclo(datos)) return;
+      if (!esAsignacionTallerPrimerCiclo(datos, cicloInstitucional)) return;
 
       porId.set(documento.id, crearAccesoDesdeAsignacion(datos, "TITULAR"));
     });
@@ -229,7 +227,7 @@ async function obtenerAccesosTitular(correoDocente) {
   return Array.from(porId.values());
 }
 
-async function obtenerAccesosReemplazo(correoDocente) {
+async function obtenerAccesosReemplazo(correoDocente, cicloInstitucional) {
   const consultaReemplazos = query(
     collection(db, "reemplazos_docentes"),
     where("reemplazanteCorreo", "==", correoDocente),
@@ -244,7 +242,7 @@ async function obtenerAccesosReemplazo(correoDocente) {
       ...documento.data(),
     };
 
-    if (!estaReemplazoVigente(reemplazo)) return;
+    if (!estaReemplazoVigente(reemplazo, cicloInstitucional)) return;
 
     const anio = Number(reemplazo.cursoAnio || 0);
 
@@ -2677,9 +2675,10 @@ function controlarAccesoModuloCalificaciones(puedeVer) {
 
 async function prepararModulo(correoDocente) {
   try {
+    const cicloInstitucional = await obtenerCicloVigente(db);
     const [titulares, reemplazos] = await Promise.all([
-      obtenerAccesosTitular(correoDocente),
-      obtenerAccesosReemplazo(correoDocente),
+      obtenerAccesosTitular(correoDocente, cicloInstitucional),
+      obtenerAccesosReemplazo(correoDocente, cicloInstitucional),
     ]);
 
     accesosCalificacionesTallerDocente = deduplicarAccesos([

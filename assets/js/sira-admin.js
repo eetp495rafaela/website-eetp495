@@ -1,3 +1,5 @@
+import { obtenerCicloVigente } from "./ciclo-lectivo.js";
+
 import {
   initializeApp,
   getApp,
@@ -900,7 +902,7 @@ async function consultarSituacionAsistenciaAdmin() {
   }
 
   try {
-    const cicloLectivo = new Date().getFullYear();
+    const cicloLectivo = await obtenerCicloVigente(db);
     const periodos = await obtenerPeriodosDetalleAsistenciaAdmin(cicloLectivo);
 
     if (!periodos) {
@@ -1375,7 +1377,7 @@ async function consultarDetalleAsistenciaAdmin() {
   }
 
   try {
-    const cicloLectivo = new Date().getFullYear();
+    const cicloLectivo = await obtenerCicloVigente(db);
     const periodos = await obtenerPeriodosDetalleAsistenciaAdmin(cicloLectivo);
 
     if (!periodos) {

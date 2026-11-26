@@ -1,3 +1,5 @@
+import { obtenerCicloVigente } from "./ciclo-lectivo.js";
+
 import {
   initializeApp,
   getApp,
@@ -501,8 +503,6 @@ async function consultarSituacionAsistencia() {
   const periodoSeleccionado =
     periodoSituacionAsistenciaGestion?.value || "ANUAL";
 
-  const cicloLectivo = new Date().getFullYear();
-
   if (!tipo || !cursoId) {
     mostrarMensajeSituacionAsistencia(
       "Seleccioná el tipo de asistencia y el curso.",
@@ -543,6 +543,7 @@ async function consultarSituacionAsistencia() {
   }
 
   try {
+    const cicloLectivo = await obtenerCicloVigente(db);
     const periodos = await obtenerPeriodosAsistenciaGestion(cicloLectivo);
 
     if (!periodos) {
@@ -999,7 +1000,7 @@ async function consultarDetalleAsistenciaGestion() {
   }
 
   try {
-    const cicloLectivo = new Date().getFullYear();
+    const cicloLectivo = await obtenerCicloVigente(db);
     const periodos = await obtenerPeriodosAsistenciaGestion(cicloLectivo);
 
     if (!periodos) {

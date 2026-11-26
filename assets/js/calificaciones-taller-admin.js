@@ -1,3 +1,5 @@
+import { obtenerCicloVigente } from "./ciclo-lectivo.js";
+
 import {
   getApps,
   getApp,
@@ -1333,7 +1335,12 @@ onAuthStateChanged(auth, async (usuario) => {
   usuarioSoporteCalificaciones = usuario;
 
   if (cicloCalificaciones && !cicloCalificaciones.value) {
-    cicloCalificaciones.value = String(new Date().getFullYear());
+    try {
+      cicloCalificaciones.value = String(await obtenerCicloVigente(db));
+    } catch (error) {
+      mostrarMensaje(error.message, "error");
+      return;
+    }
   }
 
   await cargarCursosCalificaciones();

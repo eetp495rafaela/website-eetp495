@@ -1,3 +1,5 @@
+import { obtenerCicloVigente } from "./ciclo-lectivo.js";
+
 import {
   initializeApp,
   getApp,
@@ -3315,6 +3317,25 @@ if (horarioEfCicloLectivo) {
 
 onAuthStateChanged(auth, async (usuario) => {
   if (!usuario) return;
+
+  try {
+    const ciclo = String(await obtenerCicloVigente(db));
+
+    for (const campo of [
+      horarioAulaCicloLectivo,
+      horarioTallerCicloLectivo,
+      horarioEfCicloLectivo
+    ]) {
+      if (!campo) continue;
+      campo.defaultValue = ciclo;
+      if (!campo.value) campo.value = ciclo;
+    }
+  } catch (error) {
+    mostrarMensajeHorarioAula(error.message, "error");
+    mostrarMensajeHorarioTaller(error.message, "error");
+    mostrarMensajeHorarioEf(error.message, "error");
+    return;
+  }
 
   if (horarioAulaCurso) {
     horarioAulaCurso.innerHTML = `

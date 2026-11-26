@@ -455,7 +455,13 @@ async function cargarOpcionesDocumentacion() {
     );
   }
 
-  cicloLectivoDocumento.value = resultado.cicloLectivoActual || "2026";
+  const ciclo = Number(resultado.cicloLectivoActual);
+
+  if (!Number.isInteger(ciclo) || ciclo < 2020 || ciclo > 2100) {
+    throw new Error("El servicio no informó un ciclo lectivo válido.");
+  }
+
+  cicloLectivoDocumento.value = String(ciclo);
 
   cargarCursosDisponibles();
 

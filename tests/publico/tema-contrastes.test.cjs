@@ -66,7 +66,10 @@ test("el ingreso mantiene Google y la solicitud de acceso",()=>{
 
 
 test("los últimos ajustes de Alumnos y Soporte mantienen AA en modo oscuro",()=>{
- const patch=css.slice(css.indexOf("Integración 47"));
+ const inicio=css.indexOf("Integración 47");
+ const fin=css.indexOf("/* Si.R.A. · previsiones:",inicio);
+ assert(inicio>=0 && fin>inicio);
+ const patch=css.slice(inicio,fin);
  assert(patch.startsWith("Integración 47"),"Se requiere integración 47");
  assert(patch.includes('body.portal-alumnos-2027 #mis-docentes-alumno'));
  assert(patch.includes(".correo-referente-alumno:not(.sin-correo)"));

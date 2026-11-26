@@ -87,3 +87,25 @@ Sin activación del ciclo 2027 en producción.
 Sin fusión con main.
 
 Próximas tareas: VP-01 y VP-04.
+
+## VP-04 — Ciclos lectivos predeterminados
+
+Fecha: 26/11/2026.
+
+- Ciclo institucional integrado en asignaciones docentes,
+  horarios, calificaciones y consultas de asistencia.
+- Valores fijos de 2026 retirados de los formularios.
+- Selección manual de otros ciclos conservada.
+- Fechas reales y períodos de mesas de examen conservados.
+- Documentación Académica: eliminado el valor fijo de respaldo.
+- Pendiente verificar el ciclo informado por Apps Script.
+- Corregidas dos pruebas preexistentes del tema visual:
+  alcance del bloque CSS y versiones de caché alfanuméricas.
+- 90 pruebas generales aprobadas.
+- Sintaxis JavaScript y git diff check correctos.
+- Se conservan las 144 comprobaciones específicas previas.
+- Pendiente validación funcional y visual en navegador.
+- Sin cambios en Firestore de producción.
+- Sin despliegue de reglas ni fusión con main.
+
+Próxima tarea: VP-01, validación visual y funcional.
