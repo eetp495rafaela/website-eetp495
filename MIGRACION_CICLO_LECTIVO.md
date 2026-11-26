@@ -109,3 +109,33 @@ Fecha: 26/11/2026.
 - Sin despliegue de reglas ni fusión con main.
 
 Próxima tarea: VP-01, validación visual y funcional.
+
+## Cierre de desarrollo y preparación de producción — 26/11/2026
+
+- Etapas CL-01 a CL-10 finalizadas.
+- 144 comprobaciones específicas aprobadas.
+- 90/90 pruebas generales aprobadas.
+- Sintaxis JavaScript correcta.
+- VP-02 aprobada.
+- VP-03 corregida.
+- VP-04 implementada.
+- Commit de código consolidado: d51e78b.
+- Comparación preliminar con main: 4 commits por delante,
+  ninguno por detrás y 46 archivos diferentes.
+- Repositorio local y remoto sincronizados.
+- Desarrollo de código cerrado para esta etapa.
+
+### Próxima etapa: portal institucional real
+
+- Verificar configuración institucional de producción.
+- Realizar respaldo previo.
+- Revisar diferencias funcionales con main.
+- Coordinar publicación de reglas y sitio.
+- Validar las interfaces en el portal institucional.
+- Verificar Documentación Académica y Apps Script.
+- Mantener 2026 como ciclo vigente durante las pruebas.
+- No ejecutar migraciones, promociones, activaciones
+  ni limpiezas sobre datos reales durante la validación.
+
+La publicación del sistema y la activación del ciclo 2027
+son operaciones independientes.
