@@ -6,14 +6,14 @@ Fecha: 26/11/2026
 
 - GitHub: eetp495rafaela/website-eetp495
 - Ruta local: ~/EETP495_2027/Website
-- Rama: desarrollo/ciclo-lectivo-2027
-- Commit funcional de referencia: 5a1d286
-- Rama main sin fusionar con este desarrollo.
+- Rama única: main
+- Commit funcional de referencia: 091cbf9
+- Rama de desarrollo integrada y eliminada.
 
 ## Estado
 
-ETAPA DE DESARROLLO COMPLETADA.
-IMPLEMENTACION EN PRODUCCION PENDIENTE.
+PREPARACIÓN REAL DE 2027 COMPLETADA Y APROBADA.
+CICLO VIGENTE: 2026. ACTIVACIÓN DE 2027 PENDIENTE.
 
 CL-01 a CL-10 completados.
 
@@ -52,29 +52,18 @@ CL-01 a CL-10 completados.
 - Configuracion de periodos.
 - Indices de acceso temporal de preceptoria.
 
-## Pendientes antes de publicar
+## Pendientes al inicio de 2027
 
-1. Validar visualmente las interfaces y confirmaciones.
-2. Interrupcion de limpieza y reintento: APROBADO 7/7.
-3. Textos HTML corregidos. Validacion visual pendiente.
-4. Revisar valores predeterminados de ciclo en otros modulos.
-5. Verificar configuracion institucional de produccion.
-6. Realizar respaldo previo.
-7. Revisar diferencias con main antes de fusionar.
-8. Coordinar publicacion de reglas y sitio web.
+Consultar la última entrada de este documento. No repetir la migración.
 
 ## Precauciones
 
-- No se modificaron datos reales de Firestore.
-- No se activo el ciclo lectivo 2027.
-- No se fusiono la rama de desarrollo con main.
-- La promocion de estudiantes se realiza de 6° a 1° año.
-- No repetir promociones y revisar grupos de Taller.
-- No editar registros durante migracion o limpieza.
-- La limpieza es transaccional por lote.
-- Soporte conserva permisos individuales de eliminacion.
-- La validacion de activacion no bloquea todas las
-  posibles modificaciones concurrentes.
+- No activar 2027 hasta completar la organización institucional.
+- Promover estudiantes de 6° a 1° año, sin repetir movimientos.
+- No editar registros durante migración, activación o limpieza.
+- La limpieza es transaccional por lote; Soporte conserva permisos individuales de eliminación.
+- La validación de activación no bloquea todas las posibles modificaciones concurrentes.
+- No limpiar ciclos anteriores sin respaldo e informes históricos.
 
 ## Emulador Firestore
 
@@ -93,8 +82,8 @@ Puerto local: 8085
 
 ## Proxima etapa
 
-Validacion preproduccion e implementacion institucional
-del ciclo lectivo 2027.
+Organización académica y activación institucional en 2027.
+Consultar el procedimiento actualizado al final de este documento.
 
 No repetir las etapas CL-01 a CL-10.
 No reconstruir funcionalidades ya desarrolladas.
@@ -183,3 +172,29 @@ Próxima tarea: VP-01, validación visual y funcional.
 
 La publicación del sistema y la activación del ciclo 2027
 son operaciones independientes.
+
+## 2026-11-26 — Preparación real del ciclo 2027 aprobada
+
+- Publicación del sistema en producción y consolidación en la única rama main.
+- Configuración institucional inicial: cicloVigente = 2026.
+- Respaldo lógico previo de Firestore: 1.794 documentos y reglas; el responsable confirmó además el backup del portal antes de preparar el ciclo.
+- Corrección visual de períodos de asistencia y selector/columna de ciclo en Asignaciones Docentes aprobados por el responsable en ambos temas.
+- Migración real desde Soporte: 267 asignaciones, 704 horarios de Aula, 88 de Taller y 36 de Educación Física (828 horarios; 1.095 registros en total).
+- El portal informó «Migración completada» y «El ciclo 2026 continúa vigente». El responsable confirmó la revisión de las asignaciones y los horarios copiados de 2027, sin diferencias observadas respecto de 2026.
+- Estado actual: 2027 PREPARADO, NO ACTIVADO. No repetir la migración.
+- Sin promoción ni repitencia de estudiantes, sin activación de 2027 ni limpieza de 2026 en esta etapa.
+- Commit de código de referencia: 091cbf9. Se cierra la etapa de preparación; no se da por probada la activación ni la limpieza en producción.
+
+### Continuidad al inicio del ciclo 2027
+
+1. Realizar y verificar un nuevo respaldo.
+2. Revisar y ajustar las asignaciones docentes de 2027 y sus horarios vinculados.
+3. Revisar y ajustar los horarios de Aula, Taller y Educación Física de 2027. Los cambios posteriores de 2026 no se copian automáticamente.
+4. Una vez cerradas las actividades que dependen de la matrícula 2026, realizar promociones y repitencias de 6° a 1° año, sin procesar dos veces a un estudiante.
+5. Incorporar ingresantes y revisar divisiones y grupos de Taller.
+6. Configurar los períodos de asistencia 2027.
+7. Activar desde Gestionar ciclo lectivo, escribiendo ACTIVAR 2027 únicamente cuando todo esté listo.
+8. Verificar todos los portales, inicializar calificaciones de Taller y revisar S.I.M.E., Documentación Académica y Apps Script.
+9. Conservar informes históricos, verificar su accesibilidad y realizar respaldo antes de decidir si limpiar los registros operativos de 2026.
+
+Pendiente verificar cobertura del backup de Apps Script y ciclo de Documentación Académica; revisar vínculos horarios al editar asignaciones y consultas históricas antes de limpiar. No ejecutar limpieza de asistencias como parte del cambio anual. No hay reversión de activación desde la interfaz.

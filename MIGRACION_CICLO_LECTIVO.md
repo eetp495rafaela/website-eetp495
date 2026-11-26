@@ -139,3 +139,29 @@ Próxima tarea: VP-01, validación visual y funcional.
 
 La publicación del sistema y la activación del ciclo 2027
 son operaciones independientes.
+
+## 2026-11-26 — Preparación real del ciclo 2027 aprobada
+
+- Publicación del sistema en producción y consolidación en la única rama main.
+- Configuración institucional inicial: cicloVigente = 2026.
+- Respaldo lógico previo de Firestore: 1.794 documentos y reglas; el responsable confirmó además el backup del portal antes de preparar el ciclo.
+- Corrección visual de períodos de asistencia y selector/columna de ciclo en Asignaciones Docentes aprobados por el responsable en ambos temas.
+- Migración real desde Soporte: 267 asignaciones, 704 horarios de Aula, 88 de Taller y 36 de Educación Física (828 horarios; 1.095 registros en total).
+- El portal informó «Migración completada» y «El ciclo 2026 continúa vigente». El responsable confirmó la revisión de las asignaciones y los horarios copiados de 2027, sin diferencias observadas respecto de 2026.
+- Estado actual: 2027 PREPARADO, NO ACTIVADO. No repetir la migración.
+- Sin promoción ni repitencia de estudiantes, sin activación de 2027 ni limpieza de 2026 en esta etapa.
+- Commit de código de referencia: 091cbf9. Se cierra la etapa de preparación; no se da por probada la activación ni la limpieza en producción.
+
+### Continuidad al inicio del ciclo 2027
+
+1. Realizar y verificar un nuevo respaldo.
+2. Revisar y ajustar las asignaciones docentes de 2027 y sus horarios vinculados.
+3. Revisar y ajustar los horarios de Aula, Taller y Educación Física de 2027. Los cambios posteriores de 2026 no se copian automáticamente.
+4. Una vez cerradas las actividades que dependen de la matrícula 2026, realizar promociones y repitencias de 6° a 1° año, sin procesar dos veces a un estudiante.
+5. Incorporar ingresantes y revisar divisiones y grupos de Taller.
+6. Configurar los períodos de asistencia 2027.
+7. Activar desde Gestionar ciclo lectivo, escribiendo ACTIVAR 2027 únicamente cuando todo esté listo.
+8. Verificar todos los portales, inicializar calificaciones de Taller y revisar S.I.M.E., Documentación Académica y Apps Script.
+9. Conservar informes históricos, verificar su accesibilidad y realizar respaldo antes de decidir si limpiar los registros operativos de 2026.
+
+Pendiente verificar cobertura del backup de Apps Script y ciclo de Documentación Académica; revisar vínculos horarios al editar asignaciones y consultas históricas antes de limpiar. No ejecutar limpieza de asistencias como parte del cambio anual. No hay reversión de activación desde la interfaz.
