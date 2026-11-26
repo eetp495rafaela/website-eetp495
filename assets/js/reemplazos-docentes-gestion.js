@@ -1,3 +1,5 @@
+import { obtenerCicloVigente } from "./ciclo-lectivo.js";
+
 import {
   getApps,
   getApp,
@@ -153,6 +155,8 @@ async function cargarDocentesReemplazosGestion() {
   }
 
   try {
+    const cicloInstitucional = await obtenerCicloVigente(db);
+
     const consultaRolDocente = query(
       collection(db, "usuarios"),
       where("estado", "==", "ACTIVO"),
@@ -172,7 +176,12 @@ async function cargarDocentesReemplazosGestion() {
     ] = await Promise.all([
       getDocs(consultaRolDocente),
       getDocs(consultaRolAdicionalDocente),
-      getDocs(collection(db, "asignaciones_docentes")),
+      getDocs(
+        query(
+          collection(db, "asignaciones_docentes"),
+          where("cicloLectivo", "==", cicloInstitucional),
+        ),
+      ),
     ]);
 
     /*
@@ -319,7 +328,14 @@ async function cargarAsignacionesTitularGestion() {
   limpiarSelectGestion(reemplazoAsignacionGestion, "Buscando asignaciones...");
 
   try {
-    const consulta = await getDocs(collection(db, "asignaciones_docentes"));
+    const cicloInstitucional = await obtenerCicloVigente(db);
+
+    const consulta = await getDocs(
+        query(
+          collection(db, "asignaciones_docentes"),
+          where("cicloLectivo", "==", cicloInstitucional),
+        ),
+      );
 
     const asignaciones = consulta.docs
       .map((documento) => ({

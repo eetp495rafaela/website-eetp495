@@ -3230,6 +3230,98 @@ match /calificaciones_taller/{registroId} {
    CONFIGURACIÓN DE PERÍODOS DE ASISTENCIA
 ===================================================== */
 
+/* Ciclo lectivo institucional vigente. */
+match /migraciones_ciclo/{documentoId} {
+
+      function estadoMigracionValido() {
+        let d = request.resource.data;
+
+        return d.keys().hasAll([
+          "migracionId",
+          "origen",
+          "destino",
+          "huella",
+          "total",
+          "estado"
+        ])
+        && d.keys().hasOnly([
+          "migracionId",
+          "origen",
+          "destino",
+          "huella",
+          "total",
+          "estado"
+        ])
+        && d.origen is int
+        && d.destino is int
+        && d.origen >= 2020
+        && d.destino <= 2100
+        && d.destino == d.origen + 1
+        && documentoId == string(d.destino)
+        && d.huella is string
+        && d.huella.matches("^[a-f0-9]{64}$")
+        && d.migracionId ==
+          string(d.origen) + "_" +
+          string(d.destino) + "_" + d.huella
+        && d.total is int
+        && d.total > 0
+        && d.estado in ["EN_PROCESO", "PREPARADO"];
+      }
+
+      allow get: if esSoporte();
+
+      allow create: if esSoporte()
+        && estadoMigracionValido()
+        && request.resource.data.estado == "EN_PROCESO"
+        && request.resource.data.origen ==
+          get(/databases/$(database)/documents/configuracion_institucional/ciclo_lectivo).data.cicloVigente;
+
+      allow update: if esSoporte()
+        && estadoMigracionValido()
+        && resource.data.estado == "EN_PROCESO"
+        && request.resource.data.estado == "PREPARADO"
+        && request.resource.data.diff(resource.data)
+          .affectedKeys().hasOnly(["estado"])
+        && request.resource.data.origen ==
+          get(/databases/$(database)/documents/configuracion_institucional/ciclo_lectivo).data.cicloVigente;
+
+      allow list, delete: if false;
+    }
+
+    match /configuracion_institucional/{documentoId} {
+  allow get: if documentoId == "ciclo_lectivo"
+    && (
+      esSoporte()
+      || esGestionInstitucional()
+      || esDocentePorPerfil()
+      || esDocenteApoyoPorPerfil()
+      || esAlumnoPorPerfil()
+    );
+
+  allow create: if esSoporte()
+    && documentoId == "ciclo_lectivo"
+    && request.resource.data.keys().hasOnly([
+      "cicloVigente"
+    ])
+    && request.resource.data.cicloVigente is int
+    && request.resource.data.cicloVigente >= 2020
+    && request.resource.data.cicloVigente <= 2100;
+
+  allow update: if esSoporte()
+    && documentoId == "ciclo_lectivo"
+    && request.resource.data.keys().hasOnly(["cicloVigente"])
+    && request.resource.data.cicloVigente is int
+    && request.resource.data.cicloVigente <= 2100
+    && request.resource.data.cicloVigente ==
+      resource.data.cicloVigente + 1
+    && get(/databases/$(database)/documents/migraciones_ciclo/$(string(request.resource.data.cicloVigente))).data.estado
+      == "PREPARADO"
+    && get(/databases/$(database)/documents/migraciones_ciclo/$(string(request.resource.data.cicloVigente))).data.origen
+      == resource.data.cicloVigente;
+
+  allow list, delete: if false;
+}
+
 match /configuracion_periodos/{cicloLectivo} {
 
   /*

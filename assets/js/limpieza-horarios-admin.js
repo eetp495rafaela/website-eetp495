@@ -1,10 +1,7 @@
 import {
-  collection,
-  getDocs,
-  query,
-  where,
-  writeBatch,
-} from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
+  consultarLimpiezaCiclo,
+  eliminarCicloAnterior
+} from "./limpieza-ciclo-firestore.js";
 
 document.addEventListener("DOMContentLoaded", () => {
   const btnAbrir = document.getElementById("btnAbrirLimpiezaHorarios");
@@ -34,6 +31,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   let cicloPendiente = 0;
   let resumenPendiente = null;
+  let huellaPendiente = "";
   let etapaConfirmacion = 1;
   let eliminandoHorarios = false;
 
@@ -76,53 +74,13 @@ document.addEventListener("DOMContentLoaded", () => {
     return ciclo;
   }
 
-  function obtenerConsultaHorarios(db, ciclo) {
-    return query(
-      collection(db, "horarios"),
-      where("cicloLectivo", "==", ciclo),
-    );
-  }
-
-  function resumirHorarios(documentos) {
-    const resumen = {
-      total: documentos.length,
-      aula: 0,
-      taller: 0,
-      educacionFisica: 0,
-      otros: 0,
-    };
-
-    documentos.forEach((documento) => {
-      const tipo = String(documento.data()?.tipoHorario || "")
-        .trim()
-        .toUpperCase();
-
-      if (tipo === "AULA") {
-        resumen.aula++;
-        return;
-      }
-
-      if (tipo === "TALLER") {
-        resumen.taller++;
-        return;
-      }
-
-      if (tipo === "EDUCACION_FISICA") {
-        resumen.educacionFisica++;
-        return;
-      }
-
-      resumen.otros++;
-    });
-
-    return resumen;
-  }
-
   function construirDetalleResumen(resumen) {
     const partes = [
       `${resumen.aula} de Aula`,
       `${resumen.taller} de Taller`,
       `${resumen.educacionFisica} de Educación Física`,
+      `${resumen.asignaciones || 0} asignaciones docentes`,
+      `${resumen.reemplazos || 0} reemplazos docentes`,
     ];
 
     if (resumen.otros) {
@@ -172,7 +130,7 @@ document.addEventListener("DOMContentLoaded", () => {
     etapaConfirmacion = 1;
 
     if (tituloConfirmacion) {
-      tituloConfirmacion.textContent = "Confirmar limpieza de horarios";
+      tituloConfirmacion.textContent = "Confirmar limpieza del ciclo anterior";
     }
 
     if (textoConfirmacion) {
@@ -200,9 +158,9 @@ document.addEventListener("DOMContentLoaded", () => {
     restaurarPrimeraConfirmacion();
 
     textoConfirmacion.textContent =
-      `Se encontraron ${resumen.total} bloques del ciclo lectivo ${ciclo}: ` +
+      `Se encontraron ${resumen.total} registros del ciclo lectivo ${ciclo}: ` +
       `${construirDetalleResumen(resumen)}. ` +
-      "Se eliminarán únicamente esos bloques horarios.";
+      "Se eliminarán esos horarios, asignaciones y reemplazos docentes.";
 
     modalConfirmacion.removeAttribute("hidden");
     modalConfirmacion.style.display = "flex";
@@ -263,12 +221,13 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     try {
-      const resultado = await getDocs(obtenerConsultaHorarios(db, ciclo));
-      const resumen = resumirHorarios(resultado.docs);
+      const resultado = await consultarLimpiezaCiclo(db, ciclo);
+      huellaPendiente = resultado.huella;
+      const resumen = resultado.resumen;
 
       if (!resumen.total) {
         mostrarMensajeModal(
-          `No hay bloques horarios cargados para el ciclo lectivo ${ciclo}.`,
+          `No hay horarios, asignaciones ni reemplazos cargados para el ciclo lectivo ${ciclo}.`,
           "mensaje-error",
         );
         return;
@@ -287,7 +246,7 @@ document.addEventListener("DOMContentLoaded", () => {
         btnContinuar.disabled = false;
         btnContinuar.innerHTML = `
           <i class="fa-solid fa-magnifying-glass"></i>
-          Revisar bloques
+          Revisar registros
         `;
       }
     }
@@ -308,8 +267,8 @@ document.addEventListener("DOMContentLoaded", () => {
     tituloConfirmacion.textContent = "Segunda confirmación";
     textoConfirmacion.textContent =
       `Confirmá nuevamente que querés eliminar los ${resumenPendiente.total} ` +
-      `bloques horarios del ciclo lectivo ${cicloPendiente}. ` +
-      "Las asignaciones docentes y los registros históricos de asistencia no serán eliminados.";
+      `registros de horarios, asignaciones y reemplazos del ciclo lectivo ${cicloPendiente}. ` +
+      "Se eliminarán horarios, asignaciones y reemplazos. Las asistencias no serán eliminadas.";
 
     btnAceptarConfirmacion.innerHTML = `
       <i class="fa-solid fa-triangle-exclamation"></i>
@@ -332,33 +291,12 @@ document.addEventListener("DOMContentLoaded", () => {
     tituloConfirmacion.textContent = "Confirmación definitiva";
     textoConfirmacion.textContent =
       `Esta es la última confirmación. Se eliminarán definitivamente todos los ` +
-      `bloques horarios del ciclo lectivo ${cicloPendiente}. Esta acción no se puede deshacer.`;
+      `registros de horarios, asignaciones y reemplazos del ciclo lectivo ${cicloPendiente}. Esta acción no se puede deshacer.`;
 
     btnAceptarConfirmacion.innerHTML = `
       <i class="fa-solid fa-trash-can"></i>
       Eliminar definitivamente
     `;
-  }
-
-  async function eliminarDocumentosEnLotes(documentos) {
-    const db = window.portalDb;
-
-    if (!db) {
-      throw new Error("No se encontró la conexión con Firestore.");
-    }
-
-    const TAMANO_LOTE = 450;
-
-    for (let inicio = 0; inicio < documentos.length; inicio += TAMANO_LOTE) {
-      const lote = writeBatch(db);
-      const bloque = documentos.slice(inicio, inicio + TAMANO_LOTE);
-
-      bloque.forEach((documento) => {
-        lote.delete(documento.ref);
-      });
-
-      await lote.commit();
-    }
   }
 
   function actualizarVistasHorariosEliminados(ciclo) {
@@ -419,25 +357,16 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     mostrarMensajePanel(
-      `Eliminando los bloques horarios del ciclo ${cicloAEliminar}. No cierres esta ventana...`,
+      `Eliminando los registros del ciclo ${cicloAEliminar}. No cierres esta ventana...`,
     );
 
     try {
-      // Se consulta nuevamente para asegurar que se eliminen todos los bloques
-      // que existan para ese ciclo en el momento exacto de confirmar.
-      const resultado = await getDocs(
-        obtenerConsultaHorarios(db, cicloAEliminar),
+      const totalEliminar = await eliminarCicloAnterior(
+        db, cicloAEliminar, huellaPendiente,
+        (cantidad, total) => mostrarMensajePanel(
+          `Limpieza: ${cantidad} de ${total} registros.`
+        )
       );
-
-      const totalEliminar = resultado.docs.length;
-
-      if (!totalEliminar) {
-        throw new Error(
-          `Ya no hay bloques horarios cargados para el ciclo ${cicloAEliminar}.`,
-        );
-      }
-
-      await eliminarDocumentosEnLotes(resultado.docs);
 
       modalConfirmacion?.setAttribute("hidden", "");
       if (modalConfirmacion) modalConfirmacion.style.display = "none";
@@ -448,15 +377,15 @@ document.addEventListener("DOMContentLoaded", () => {
       actualizarVistasHorariosEliminados(cicloAEliminar);
 
       mostrarMensajePanel(
-        `Se eliminaron correctamente ${totalEliminar} bloques horarios del ciclo lectivo ${cicloAEliminar}.`,
+        `Se eliminaron correctamente ${totalEliminar} registros de horarios, asignaciones y reemplazos del ciclo lectivo ${cicloAEliminar}.`,
         "mensaje-exito",
       );
 
       if (typeof Swal !== "undefined") {
         await Swal.fire({
           icon: "success",
-          title: "Bloques horarios eliminados",
-          text: `Se eliminaron ${totalEliminar} bloques del ciclo lectivo ${cicloAEliminar}.`,
+          title: "Horarios y asignaciones eliminados",
+          text: `Se eliminaron ${totalEliminar} registros del ciclo lectivo ${cicloAEliminar}.`,
           confirmButtonText: "Aceptar",
           confirmButtonColor: "#0b4edb",
         });
@@ -466,7 +395,9 @@ document.addEventListener("DOMContentLoaded", () => {
         cicloInput.value = "";
       }
     } catch (error) {
-      console.error("Error al eliminar bloques horarios:", error);
+      console.error("Error al limpiar el ciclo:", error);
+      modalConfirmacion?.setAttribute("hidden", "");
+      if (modalConfirmacion) modalConfirmacion.style.display = "none";
 
       mostrarMensajePanel(
         error.message || "No se pudieron eliminar los bloques horarios.",
@@ -492,7 +423,7 @@ document.addEventListener("DOMContentLoaded", () => {
         btnContinuar.disabled = false;
         btnContinuar.innerHTML = `
           <i class="fa-solid fa-magnifying-glass"></i>
-          Revisar bloques
+          Revisar registros
         `;
       }
     }

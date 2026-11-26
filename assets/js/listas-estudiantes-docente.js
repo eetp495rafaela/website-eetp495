@@ -1,3 +1,5 @@
+import { obtenerCicloVigente } from "./ciclo-lectivo.js";
+
 import {
   initializeApp,
   getApp,
@@ -118,16 +120,20 @@ function mostrarMensajeListasEstudiantes(texto, tipo = "") {
 }
 
 async function obtenerCursosAsignadosDocente(correoDocente) {
+  const cicloInstitucional = await obtenerCicloVigente(db);
+
   const cursosPorClave = new Map();
 
   const consultasAsignaciones = [
     query(
       collection(db, "asignaciones_docentes"),
+      where("cicloLectivo", "==", cicloInstitucional),
       where("docenteCorreo", "==", correoDocente),
       where("estado", "==", "ACTIVA"),
     ),
     query(
       collection(db, "asignaciones_docentes"),
+      where("cicloLectivo", "==", cicloInstitucional),
       where("docenteCorreo", "==", correoDocente),
       where("estado", "==", "ACTIVO"),
     ),

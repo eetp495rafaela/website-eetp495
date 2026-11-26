@@ -1,3 +1,5 @@
+import { obtenerCicloVigente } from "./ciclo-lectivo.js";
+
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-app.js";
 
 import {
@@ -261,16 +263,20 @@ function reemplazoDocenteVigente(reemplazo, fechaActual) {
 }
 
 async function obtenerVinculosDocenteReemplazante(correo) {
+  const cicloInstitucional = await obtenerCicloVigente(db);
+
   const asignacionesPorId = new Map();
 
   const consultasAsignaciones = [
     query(
       collection(db, "asignaciones_docentes"),
+      where("cicloLectivo", "==", cicloInstitucional),
       where("docenteCorreo", "==", correo),
       where("estado", "==", "ACTIVA"),
     ),
     query(
       collection(db, "asignaciones_docentes"),
+      where("cicloLectivo", "==", cicloInstitucional),
       where("docenteCorreo", "==", correo),
       where("estado", "==", "ACTIVO"),
     ),

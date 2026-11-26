@@ -5491,3 +5491,60 @@ body {
     grid-template-columns: minmax(0, 1fr);
   }
 }
+
+
+/* CL-03: Distribución de configuración */
+#configuracion .grid-configuracion-portal {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  align-items: stretch;
+}
+
+#configuracion .grid-configuracion-portal > .panel-info {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+#configuracion .grid-configuracion-portal > .panel-info > .acciones {
+  margin-top: auto;
+}
+
+@media (max-width: 1000px) {
+  #configuracion .grid-configuracion-portal {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 600px) {
+  #configuracion .grid-configuracion-portal {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+
+/* CL-03: Uniformidad de tarjetas */
+#configuracion .grid-configuracion-portal > .panel-info {
+  overflow-wrap: anywhere;
+}
+
+#configuracion .grid-configuracion-portal > .panel-info > .acciones {
+  display: flex;
+  width: 100%;
+  margin-top: auto;
+  padding-top: 12px;
+}
+
+#configuracion .grid-configuracion-portal > .panel-info > .acciones > .btn-accion {
+  width: 100%;
+  max-width: none;
+  flex: 1 1 100%;
+  min-height: 44px;
+  box-sizing: border-box;
+  justify-content: center;
+  text-align: center;
+}
+
+#configuracion .grid-configuracion-portal > .panel-info > .mensaje-formulario {
+  min-height: 44px;
+  margin-top: 12px;
+}

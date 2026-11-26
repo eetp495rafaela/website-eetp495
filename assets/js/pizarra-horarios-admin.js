@@ -1,3 +1,5 @@
+import { obtenerCicloVigente } from "./ciclo-lectivo.js";
+
 import {
   initializeApp,
   getApp,
@@ -1203,39 +1205,6 @@ function obtenerFechaGeneracion() {
   });
 }
 
-function obtenerCicloLectivoPizarra(bloques) {
-  const ciclos = Array.from(
-    new Set(
-      bloques
-        .map((bloque) => Number(bloque.cicloLectivo))
-        .filter(
-          (ciclo) => Number.isInteger(ciclo) && ciclo >= 2020 && ciclo <= 2100,
-        ),
-    ),
-  ).sort((a, b) => a - b);
-
-  if (!ciclos.length) {
-    throw new Error(
-      "Los horarios activos no tienen un ciclo lectivo válido. Revisá los bloques cargados.",
-    );
-  }
-
-  const anioActual = new Date().getFullYear();
-
-  if (ciclos.includes(anioActual)) {
-    return anioActual;
-  }
-
-  if (ciclos.length === 1) {
-    return ciclos[0];
-  }
-
-  throw new Error(
-    `Hay horarios activos de más de un ciclo lectivo (${ciclos.join(
-      ", ",
-    )}) y ninguno corresponde al año actual. Revisá los bloques antes de generar la pizarra.`,
-  );
-}
 
 function obtenerRutaCssPizarra() {
   const baseUrl = new URL(
@@ -1347,9 +1316,12 @@ async function generarPizarraHorarios() {
       "Consultando horarios activos y preparando vista imprimible...",
     );
 
+    const cicloLectivo = await obtenerCicloVigente(db);
+
     const consultaHorarios = query(
       collection(db, "horarios"),
       where("estado", "==", "ACTIVO"),
+      where("cicloLectivo", "==", cicloLectivo),
     );
 
     const resultado = await getDocs(consultaHorarios);
@@ -1379,8 +1351,6 @@ async function generarPizarraHorarios() {
         "No hay horarios activos cargados para generar la pizarra.",
       );
     }
-
-    const cicloLectivo = obtenerCicloLectivoPizarra(bloquesActivos);
 
     const bloques = bloquesActivos.filter(
       (bloque) => Number(bloque.cicloLectivo) === cicloLectivo,

@@ -1,3 +1,5 @@
+import { obtenerCicloVigente } from "./ciclo-lectivo.js";
+
 import {
   initializeApp,
   getApp,
@@ -88,16 +90,20 @@ function controlarAccesoPorHash(puedeVer) {
 }
 
 async function obtenerAsignacionesActivasDocente(correoDocente) {
+  const cicloInstitucional = await obtenerCicloVigente(db);
+
   const asignacionesPorId = new Map();
 
   const consultas = [
     query(
       collection(db, "asignaciones_docentes"),
+      where("cicloLectivo", "==", cicloInstitucional),
       where("docenteCorreo", "==", correoDocente),
       where("estado", "==", "ACTIVA"),
     ),
     query(
       collection(db, "asignaciones_docentes"),
+      where("cicloLectivo", "==", cicloInstitucional),
       where("docenteCorreo", "==", correoDocente),
       where("estado", "==", "ACTIVO"),
     ),

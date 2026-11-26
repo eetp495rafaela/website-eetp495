@@ -1,3 +1,5 @@
+import { obtenerCicloVigente } from "./ciclo-lectivo.js";
+
 import {
   initializeApp,
   getApp,
@@ -264,6 +266,8 @@ function renderizarAgendaDocente(contactos, categoria) {
 ===================================================== */
 
 async function obtenerColegasAgendaDocente(cursoSeleccionado = "") {
+  const cicloInstitucional = await obtenerCicloVigente(db);
+
   const consultaUsuarios = query(
     collection(db, "usuarios"),
     where("rol", "==", "DOCENTE"),
@@ -283,6 +287,7 @@ async function obtenerColegasAgendaDocente(cursoSeleccionado = "") {
       return getDocs(
         query(
           collection(db, "asignaciones_docentes"),
+          where("cicloLectivo", "==", cicloInstitucional),
           where("cursoNombre", "==", cursoSeleccionado),
           where("estado", "==", estado),
         ),
@@ -292,6 +297,7 @@ async function obtenerColegasAgendaDocente(cursoSeleccionado = "") {
     return getDocs(
       query(
         collection(db, "asignaciones_docentes"),
+        where("cicloLectivo", "==", cicloInstitucional),
         where("estado", "==", estado),
       ),
     );
@@ -493,6 +499,8 @@ async function obtenerAdministracionAgendaDocente() {
 ===================================================== */
 
 async function obtenerCursosAsignadosAgendaDocente() {
+  const cicloInstitucional = await obtenerCicloVigente(db);
+
   const correoDocente = normalizarCorreoAgendaDocente(
     usuarioAgendaDocenteActual?.email,
   );
@@ -503,6 +511,7 @@ async function obtenerCursosAsignadosAgendaDocente() {
     getDocs(
       query(
         collection(db, "asignaciones_docentes"),
+        where("cicloLectivo", "==", cicloInstitucional),
         where("docenteCorreo", "==", correoDocente),
         where("estado", "==", estado),
       ),

@@ -3644,12 +3644,34 @@
                   Uso exclusivo del Administrador.
                 </p>
               </div>
+              <!-- Migración de ciclo lectivo -->
+              <div class="panel-info">
+                <div class="encabezado-listado">
+                  <div>
+                    <h3>Migración de ciclo lectivo</h3>
+                    <p>Prepará y activá el próximo ciclo lectivo.</p>
+                  </div>
+                </div>
+                <div class="acciones">
+                  <button
+                    class="btn-accion"
+                    id="btnPrepararMigracionCiclo"
+                    type="button"
+                  >
+                    <i class="fa-solid fa-calendar-plus"></i>
+                    Gestionar ciclo lectivo
+                  </button>
+                </div>
+                <p class="mensaje-formulario" id="mensajeMigracionCiclo">
+                  Uso exclusivo de Soporte.
+                </p>
+              </div>
               <!-- Limpiar bloques horarios -->
               <div class="panel-info">
                 <div class="encabezado-listado">
                   <div>
-                    <h3>Limpiar horarios</h3>
-                    <p>Eliminá los bloques horarios de un ciclo lectivo.</p>
+                    <h3>Limpiar ciclo anterior</h3>
+                    <p>Eliminá horarios y asignaciones de ciclos anteriores.</p>
                   </div>
                 </div>
                 <div class="acciones">
@@ -3659,11 +3681,11 @@
                     type="button"
                   >
                     <i class="fa-solid fa-calendar-xmark"></i>
-                    Limpiar horarios
+                    Limpiar ciclo anterior
                   </button>
                 </div>
                 <p class="mensaje-formulario" id="mensajeLimpiezaHorarios">
-                  No afecta asignaciones ni asistencias.
+                  No afecta usuarios, cursos ni asistencias.
                 </p>
               </div>
               <!-- Períodos de asistencia -->
@@ -4821,6 +4843,7 @@
       type="module"
     ></script>
     <script src="../assets/js/backup-admin.js" type="module"></script>
+    <script src="../assets/js/migracion-ciclo-admin.js" type="module"></script>
     <script src="../assets/js/galeria-admin.js" type="module"></script>
     <script
       src="../assets/js/docentes-libres-taller-admin.js?v=20261103-1"

@@ -1,3 +1,5 @@
+import { obtenerCicloVigente } from "./ciclo-lectivo.js";
+
 import {
   initializeApp,
   getApp,
@@ -4179,6 +4181,8 @@ async function cargarDocentesGestion() {
   if (!vistaDocentesGestion) return;
 
   try {
+    const cicloInstitucional = await obtenerCicloVigente(db);
+
     if (btnVerDocentesGestion) {
       btnVerDocentesGestion.disabled = true;
       btnVerDocentesGestion.innerHTML = `
@@ -4195,12 +4199,10 @@ async function cargarDocentesGestion() {
       </p>
     `;
 
-    const consultaAsignaciones = getDocs(
-      collection(db, "asignaciones_docentes"),
-    );
+    const consultaAsignaciones = getDocs(query(collection(db, "asignaciones_docentes"), where("cicloLectivo", "==", cicloInstitucional)));
 
     const consultaHorarios = getDocs(
-      query(collection(db, "horarios"), where("estado", "==", "ACTIVO")),
+      query(collection(db, "horarios"), where("estado", "==", "ACTIVO"), where("cicloLectivo", "==", cicloInstitucional)),
     );
 
     const [resultadoAsignaciones, resultadoHorarios] = await Promise.all([
@@ -4891,6 +4893,8 @@ async function cargarHorariosGestion() {
     mensajeHorariosGestion.hidden = false;
   }
   try {
+    const cicloInstitucional = await obtenerCicloVigente(db);
+
     if (btnVerHorariosGestion) {
       btnVerHorariosGestion.disabled = true;
       btnVerHorariosGestion.innerHTML = `
@@ -4910,6 +4914,7 @@ async function cargarHorariosGestion() {
     const consultaHorariosActivos = query(
       collection(db, "horarios"),
       where("estado", "==", "ACTIVO"),
+      where("cicloLectivo", "==", cicloInstitucional),
     );
 
     const consultaReemplazosActivos = query(
@@ -5127,6 +5132,8 @@ async function cargarDocentesLibresTallerGestion() {
   const textoOriginal = btnDocentesLibresTallerGestion?.innerHTML || "";
 
   try {
+    const cicloInstitucional = await obtenerCicloVigente(db);
+
     if (btnDocentesLibresTallerGestion) {
       btnDocentesLibresTallerGestion.disabled = true;
 
@@ -5145,10 +5152,10 @@ async function cargarDocentesLibresTallerGestion() {
     `;
 
     const [resultadoAsignaciones, resultadoHorarios] = await Promise.all([
-      getDocs(collection(db, "asignaciones_docentes")),
+      getDocs(query(collection(db, "asignaciones_docentes"), where("cicloLectivo", "==", cicloInstitucional))),
 
       getDocs(
-        query(collection(db, "horarios"), where("estado", "==", "ACTIVO")),
+        query(collection(db, "horarios"), where("estado", "==", "ACTIVO"), where("cicloLectivo", "==", cicloInstitucional)),
       ),
     ]);
 

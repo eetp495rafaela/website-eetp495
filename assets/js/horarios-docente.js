@@ -1,3 +1,5 @@
+import { obtenerCicloVigente } from "./ciclo-lectivo.js";
+
 import {
   initializeApp,
   getApp,
@@ -455,11 +457,14 @@ async function cargarHorarioAulaDocente(usuario) {
   mostrarMensajeHorarioDocente("Cargando horario de aula...");
 
   try {
+    const cicloInstitucional = await obtenerCicloVigente(db);
+
     const correoDocente = normalizarCorreoDocente(usuario.email);
 
     const consultaHorarios = query(
       collection(db, "horarios"),
       where("estado", "==", "ACTIVO"),
+      where("cicloLectivo", "==", cicloInstitucional),
       where("tipoHorario", "==", "AULA"),
       where("docenteCorreo", "==", correoDocente),
     );
@@ -614,11 +619,14 @@ async function cargarHorarioTallerDocente(usuario) {
   mostrarMensajeHorarioTallerDocente("Cargando horario de taller...");
 
   try {
+    const cicloInstitucional = await obtenerCicloVigente(db);
+
     const correoDocente = normalizarCorreoDocente(usuario.email);
 
     const consultaHorariosPropios = query(
       collection(db, "horarios"),
       where("estado", "==", "ACTIVO"),
+      where("cicloLectivo", "==", cicloInstitucional),
       where("tipoHorario", "==", "TALLER"),
       where("docenteCorreo", "==", correoDocente),
     );
@@ -651,6 +659,7 @@ async function cargarHorarioTallerDocente(usuario) {
       const consultaHorariosTitular = query(
         collection(db, "horarios"),
         where("estado", "==", "ACTIVO"),
+        where("cicloLectivo", "==", cicloInstitucional),
         where("tipoHorario", "==", "TALLER"),
         where("docenteCorreo", "==", titularCorreo),
       );
@@ -791,11 +800,14 @@ async function cargarHorarioEducacionFisicaDocente(usuario) {
   );
 
   try {
+    const cicloInstitucional = await obtenerCicloVigente(db);
+
     const correoDocente = normalizarCorreoDocente(usuario.email);
 
     const consultaHorariosPropios = query(
       collection(db, "horarios"),
       where("estado", "==", "ACTIVO"),
+      where("cicloLectivo", "==", cicloInstitucional),
       where("tipoHorario", "==", "EDUCACION_FISICA"),
       where("docenteCorreo", "==", correoDocente),
     );
@@ -827,6 +839,7 @@ async function cargarHorarioEducacionFisicaDocente(usuario) {
       const consultaHorariosTitular = query(
         collection(db, "horarios"),
         where("estado", "==", "ACTIVO"),
+        where("cicloLectivo", "==", cicloInstitucional),
         where("tipoHorario", "==", "EDUCACION_FISICA"),
         where("docenteCorreo", "==", titularCorreo),
       );

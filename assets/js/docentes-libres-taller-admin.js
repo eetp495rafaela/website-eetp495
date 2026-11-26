@@ -1,3 +1,5 @@
+import { obtenerCicloVigente } from "./ciclo-lectivo.js";
+
 // Consulta de solo lectura de docentes libres de Taller para el Portal Admin.
 // La lógica de disponibilidad es equivalente a la del Portal Gestión.
 // No escribe en Firestore ni altera horarios/asignaciones.
@@ -221,11 +223,13 @@ async function cargarDocentesLibresTallerAdmin() {
       );
     }
 
+    const cicloInstitucional = await obtenerCicloVigente(db);
+
     const [resultadoAsignaciones, resultadoHorarios] = await Promise.all([
-      getDocs(collection(db, "asignaciones_docentes")),
+      getDocs(query(collection(db, "asignaciones_docentes"), where("cicloLectivo", "==", cicloInstitucional))),
 
       getDocs(
-        query(collection(db, "horarios"), where("estado", "==", "ACTIVO")),
+        query(collection(db, "horarios"), where("estado", "==", "ACTIVO"), where("cicloLectivo", "==", cicloInstitucional)),
       ),
     ]);
 

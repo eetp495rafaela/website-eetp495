@@ -15,7 +15,7 @@ if (!host || !Number.isInteger(port) || port < 1) process.exit(2);
 async function main() {
   const rules = fs.readFileSync(path.resolve(__dirname, '../../firestore.rules'), 'utf8');
   const env = await initializeTestEnvironment({
-    projectId: 'portal-institucional-eet-fa5c7', firestore: { host, port, rules }
+    projectId: 'demo-eetp495-ciclo', firestore: { host, port, rules }
   });
   const e = {
     a:'apoyo1@pruebas.invalid', b:'apoyo2@pruebas.invalid',
@@ -123,7 +123,200 @@ async function main() {
     await allow('Soporte conserva edición Si.R.A.',updateDoc(d(sop,'asistencias_clases','clase_docente'),
       {marcaPrueba:'regresion'}));
     await deny('Apoyo no accede al registro válido de Si.R.A.',getDoc(d(a,'asistencias_clases','clase_docente')));
-    console.log('\nPRUEBAS SUPERADAS: '+count+' verificaciones.');
+
+    console.log('Probando reglas del ciclo institucional:');
+
+    const ciclo = db =>
+      doc(db, 'configuracion_institucional', 'ciclo_lectivo');
+
+    await allow('Soporte crea ciclo 2026',
+      setDoc(ciclo(sop), {cicloVigente:2026}));
+
+    await allow('Soporte lee ciclo vigente',
+      getDoc(ciclo(sop)));
+
+    await allow('Docente lee ciclo vigente',
+      getDoc(ciclo(teacher)));
+
+    await allow('Docente de apoyo lee ciclo vigente',
+      getDoc(ciclo(a)));
+
+    await allow('Estudiante lee ciclo vigente',
+      getDoc(ciclo(as(e.s1))));
+
+    await deny('Cuenta inactiva no lee ciclo',
+      getDoc(ciclo(off)));
+
+    await deny('Anonimo no lee ciclo',
+      getDoc(ciclo(anon)));
+
+    await deny('Docente no cambia ciclo',
+      updateDoc(ciclo(teacher), {cicloVigente:2027}));
+
+    await deny('Estudiante no cambia ciclo',
+      updateDoc(ciclo(as(e.s1)), {cicloVigente:2027}));
+
+    await deny('Soporte no guarda ciclo como texto',
+      updateDoc(ciclo(sop), {cicloVigente:'2027'}));
+
+    await deny('Soporte no guarda ciclo fuera de rango',
+      updateDoc(ciclo(sop), {cicloVigente:2101}));
+
+    await deny('Soporte no agrega campos inesperados',
+      updateDoc(ciclo(sop), {campoExtra:true}));
+
+    await deny('Soporte no activa ciclo sin preparar',
+      updateDoc(ciclo(sop), {cicloVigente:2027}));
+
+    await deny('Soporte no salta ciclos',
+      updateDoc(ciclo(sop), {cicloVigente:2028}));
+
+    await deny('Soporte no retrocede ciclos',
+      updateDoc(ciclo(sop), {cicloVigente:2025}));
+
+    await deny('Soporte no elimina configuracion',
+      deleteDoc(ciclo(sop)));
+
+    await deny('Soporte no lista configuraciones',
+      getDocs(collection(sop,'configuracion_institucional')));
+
+
+  console.log('Probando reglas de migracion institucional:');
+
+  const migracion = db =>
+    doc(db, 'migraciones_ciclo', '2027');
+
+  const huella = 'a'.repeat(64);
+
+  const datosMigracion = {
+    migracionId: '2026_2027_' + huella,
+    origen: 2026,
+    destino: 2027,
+    huella,
+    total: 1095,
+    estado: 'EN_PROCESO'
+  };
+
+  await deny(
+    'Docente no inicia migracion',
+    setDoc(migracion(teacher), datosMigracion)
+  );
+
+  await deny(
+    'Estudiante no inicia migracion',
+    setDoc(migracion(as(e.s1)), datosMigracion)
+  );
+
+  await deny(
+    'Soporte no inicia migracion ya preparada',
+    setDoc(migracion(sop), {
+      ...datosMigracion,
+      estado: 'PREPARADO'
+    })
+  );
+
+  await deny(
+    'Soporte no inicia migracion con huella invalida',
+    setDoc(migracion(sop), {
+      ...datosMigracion,
+      huella: 'incorrecta'
+    })
+  );
+
+  await deny(
+    'Soporte no inicia migracion vacia',
+    setDoc(migracion(sop), {
+      ...datosMigracion,
+      total: 0
+    })
+  );
+
+  await allow(
+    'Soporte inicia migracion valida',
+    setDoc(migracion(sop), datosMigracion)
+  );
+
+  await deny(
+    'Soporte no activa migracion incompleta',
+    updateDoc(ciclo(sop), {cicloVigente:2027})
+  );
+
+  await allow(
+    'Soporte consulta migracion',
+    getDoc(migracion(sop))
+  );
+
+  await deny(
+    'Docente no consulta migracion',
+    getDoc(migracion(teacher))
+  );
+
+  await deny(
+    'Anonimo no consulta migracion',
+    getDoc(migracion(anon))
+  );
+
+  await deny(
+    'Soporte no modifica huella',
+    updateDoc(migracion(sop), {
+      huella: 'b'.repeat(64)
+    })
+  );
+
+  await deny(
+    'Soporte no modifica total',
+    updateDoc(migracion(sop), {
+      total: 100
+    })
+  );
+
+  await deny(
+    'Docente no completa migracion',
+    updateDoc(migracion(teacher), {
+      estado: 'PREPARADO'
+    })
+  );
+
+  await allow(
+    'Soporte marca migracion preparada',
+    updateDoc(migracion(sop), {
+      estado: 'PREPARADO'
+    })
+  );
+
+  await deny(
+    'Soporte no reinicia migracion preparada',
+    updateDoc(migracion(sop), {
+      estado: 'EN_PROCESO'
+    })
+  );
+
+  await deny(
+    'Soporte no elimina registro de migracion',
+    deleteDoc(migracion(sop))
+  );
+
+  await deny(
+    'Docente no activa migracion preparada',
+    updateDoc(ciclo(teacher), {cicloVigente:2027})
+  );
+
+  await allow(
+    'Soporte activa migracion preparada',
+    updateDoc(ciclo(sop), {cicloVigente:2027})
+  );
+
+  await deny(
+    'Soporte no vuelve al ciclo anterior',
+    updateDoc(ciclo(sop), {cicloVigente:2026})
+  );
+
+  await deny(
+    'Soporte no activa dos veces el mismo ciclo',
+    updateDoc(ciclo(sop), {cicloVigente:2027})
+  );
+
+  console.log('\nPRUEBAS SUPERADAS: '+count+' verificaciones.');
   } finally {
     await env.cleanup();
   }

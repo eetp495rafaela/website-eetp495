@@ -1,3 +1,5 @@
+import { obtenerCicloVigente } from "./ciclo-lectivo.js";
+
 import {
   initializeApp,
   getApp,
@@ -538,6 +540,8 @@ async function cargarHorarioAulaAlumno(usuario) {
   mostrarMensajeHorarioAlumno("Cargando horario de aula...");
 
   try {
+    const cicloInstitucional = await obtenerCicloVigente(db);
+
     const correo = normalizarCorreoHorarioAlumno(usuario.email);
     const referenciaUsuario = doc(db, "usuarios", correo);
     const documentoUsuario = await getDoc(referenciaUsuario);
@@ -562,6 +566,7 @@ async function cargarHorarioAulaAlumno(usuario) {
     const consultaHorarios = query(
       collection(db, "horarios"),
       where("estado", "==", "ACTIVO"),
+      where("cicloLectivo", "==", cicloInstitucional),
       where("cursoAnio", "==", cursoAnio),
       where("cursoDivision", "==", cursoDivision),
     );

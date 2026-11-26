@@ -1,3 +1,5 @@
+import { obtenerCicloVigente } from "./ciclo-lectivo.js";
+
 import {
   initializeApp,
   getApp,
@@ -422,6 +424,8 @@ async function cargarMisDocentesAlumno() {
   mostrarMensajeDocentesAlumno("Cargando agenda de docentes...");
 
   try {
+    const cicloInstitucional = await obtenerCicloVigente(db);
+
     const perfilAlumno = await obtenerPerfilAlumno(usuarioDocentesAlumnoActual);
 
     try {
@@ -439,6 +443,7 @@ async function cargarMisDocentesAlumno() {
 
     const consultaAsignaciones = query(
       collection(db, "asignaciones_docentes"),
+      where("cicloLectivo", "==", cicloInstitucional),
       where("cursoAnio", "==", perfilAlumno.cursoAnio),
       where("cursoDivision", "==", perfilAlumno.cursoDivision),
       where("estado", "==", "ACTIVA"),

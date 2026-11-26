@@ -1,3 +1,5 @@
+import { obtenerCicloVigente } from "./ciclo-lectivo.js";
+
 import {
   getApps,
   getApp,
@@ -341,9 +343,16 @@ async function cargarDocentesReemplazos() {
   limpiarSelect(reemplazoDocente, "Cargando docentes...");
 
   try {
+    const cicloInstitucional = await obtenerCicloVigente(db);
+
     const [consultaUsuarios, consultaAsignaciones] = await Promise.all([
       getDocs(collection(db, "usuarios")),
-      getDocs(collection(db, "asignaciones_docentes")),
+      getDocs(
+        query(
+          collection(db, "asignaciones_docentes"),
+          where("cicloLectivo", "==", cicloInstitucional),
+        ),
+      ),
     ]);
 
     const correosTitularesPermitidos = new Set();
@@ -451,7 +460,14 @@ async function cargarAsignacionesTitular() {
   limpiarSelect(reemplazoAsignacion, "Buscando asignaciones...");
 
   try {
-    const consulta = await getDocs(collection(db, "asignaciones_docentes"));
+    const cicloInstitucional = await obtenerCicloVigente(db);
+
+    const consulta = await getDocs(
+        query(
+          collection(db, "asignaciones_docentes"),
+          where("cicloLectivo", "==", cicloInstitucional),
+        ),
+      );
 
     const asignaciones = consulta.docs
       .map((documento) => ({
