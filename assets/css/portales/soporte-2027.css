@@ -547,3 +547,10 @@ body.portal-soporte-2027 #referentes-institucionales #formReferenteInstitucional
     margin: 0;
   }
 }
+
+/* Asignaciones docentes: filtros por ciclo, curso y docente. */
+@media (min-width: 701px) {
+  body.portal-soporte-2027 #asignaciones-docentes .filtros-asignaciones {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}

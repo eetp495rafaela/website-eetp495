@@ -18,6 +18,7 @@ import {
   doc,
   getDoc,
   getDocs,
+  getDocsFromServer,
   query,
   where,
   setDoc,
@@ -464,6 +465,8 @@ const mensajeListadoMesasExamenAdmin = document.getElementById(
 let mesasExamenAdminCargadas = [];
 let cursosMesasExamenAdmin = [];
 let espaciosMesasExamenAdmin = [];
+
+const filtroCicloAsignacion = document.getElementById("filtroCicloAsignacion");
 
 const filtroCursoAsignacion = document.getElementById("filtroCursoAsignacion");
 
@@ -1316,6 +1319,31 @@ function normalizarTextoFiltro(texto) {
     .replace(/[\u0300-\u036f]/g, "");
 }
 
+function cargarCiclosFiltroAsignaciones(vigente) {
+  const anterior = Number(filtroCicloAsignacion.value);
+  const ciclos = [...new Set([
+    vigente,
+    ...asignacionesCargadas.map(a => Number(a.cicloLectivo)),
+  ])].filter(c => Number.isInteger(c) && c >= 2020 && c <= 2100)
+    .sort((a, b) => b - a);
+
+  filtroCicloAsignacion.replaceChildren(
+    ...ciclos.map(c => new Option(String(c), String(c)))
+  );
+
+  filtroCicloAsignacion.value = String(
+    ciclos.includes(anterior) ? anterior : vigente
+  );
+  filtroCicloAsignacion.disabled = false;
+}
+
+function asignacionesDelCiclo() {
+  const ciclo = Number(filtroCicloAsignacion.value);
+  return asignacionesCargadas.filter(
+    a => Number(a.cicloLectivo) === ciclo
+  );
+}
+
 function cargarCursosFiltroAsignaciones(asignaciones) {
   if (!filtroCursoAsignacion) return;
 
@@ -1359,7 +1387,7 @@ function renderizarAsignaciones(asignaciones) {
     const fila = document.createElement("tr");
     const celda = document.createElement("td");
 
-    celda.colSpan = 7;
+    celda.colSpan = 8;
     celda.className = "tabla-vacia";
     celda.textContent = "No se encontraron asignaciones con esos filtros.";
 
@@ -1379,6 +1407,7 @@ function renderizarAsignaciones(asignaciones) {
     fila.appendChild(crearCelda(asignacion.docenteNombre));
     fila.appendChild(crearCelda(asignacion.cursoNombre));
     fila.appendChild(crearCelda(asignacion.espacioNombre));
+    fila.appendChild(crearCelda(asignacion.cicloLectivo));
     fila.appendChild(crearCelda(textoTipoEspacio(asignacion.espacioTipo)));
     fila.appendChild(crearCelda(asignacion.docenteCorreo));
     fila.appendChild(crearCeldaEstado(asignacion.estado));
@@ -1398,7 +1427,7 @@ function aplicarFiltrosAsignaciones() {
 
   const textoDocente = normalizarTextoFiltro(buscarDocenteAsignacion?.value);
 
-  const asignacionesFiltradas = asignacionesCargadas.filter((asignacion) => {
+  const asignacionesFiltradas = asignacionesDelCiclo().filter((asignacion) => {
     const cursoNombre = String(asignacion.cursoNombre || "").trim();
 
     const docenteNombre = normalizarTextoFiltro(asignacion.docenteNombre);
@@ -4297,7 +4326,10 @@ async function cargarAsignaciones() {
   cuerpoTablaAsignaciones.innerHTML = "";
 
   try {
-    const consulta = await getDocs(collection(db, "asignaciones_docentes"));
+    const vigente = await obtenerCicloVigente(db);
+    const consulta = await getDocsFromServer(
+      collection(db, "asignaciones_docentes")
+    );
 
     asignacionesCargadas = consulta.docs
       .map((documento) => ({
@@ -4332,7 +4364,7 @@ async function cargarAsignaciones() {
       const fila = document.createElement("tr");
       const celda = document.createElement("td");
 
-      celda.colSpan = 7;
+      celda.colSpan = 8;
       celda.className = "tabla-vacia";
       celda.textContent = "Todavía no hay asignaciones registradas.";
 
@@ -4343,7 +4375,8 @@ async function cargarAsignaciones() {
       return;
     }
 
-    cargarCursosFiltroAsignaciones(asignacionesCargadas);
+    cargarCiclosFiltroAsignaciones(vigente);
+    cargarCursosFiltroAsignaciones(asignacionesDelCiclo());
     aplicarFiltrosAsignaciones();
   } catch (error) {
     console.error("Error al cargar asignaciones:", error);
@@ -5040,6 +5073,13 @@ if (btnVerAsignaciones) {
   btnVerAsignaciones.addEventListener("click", async () => {
     await prepararFormularioAsignaciones();
     await cargarAsignaciones();
+  });
+}
+
+if (filtroCicloAsignacion) {
+  filtroCicloAsignacion.addEventListener("change", () => {
+    cargarCursosFiltroAsignaciones(asignacionesDelCiclo());
+    aplicarFiltrosAsignaciones();
   });
 }
 

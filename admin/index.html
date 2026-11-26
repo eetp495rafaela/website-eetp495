@@ -43,7 +43,7 @@
     <link rel="stylesheet" href="../vista-2027/assets/css/portal-maqueta.css" />
     <link
       rel="stylesheet"
-      href="../assets/css/portales/soporte-2027.css?v=37"
+      href="../assets/css/portales/soporte-2027.css?v=filtro-ciclo-1"
     />
     <link
       rel="stylesheet"
@@ -1613,6 +1613,12 @@
               </div>
               <div class="filtros-usuarios filtros-asignaciones">
                 <div class="campo-filtro">
+                  <label for="filtroCicloAsignacion">Ciclo lectivo</label>
+                  <select id="filtroCicloAsignacion" disabled>
+                    <option value="">Cargá las asignaciones</option>
+                  </select>
+                </div>
+                <div class="campo-filtro">
                   <label for="filtroCursoAsignacion">Curso</label>
                   <select id="filtroCursoAsignacion">
                     <option value="">Todos los cursos</option>
@@ -1638,6 +1644,7 @@
                       <th>Docente</th>
                       <th>Curso</th>
                       <th>Espacio curricular</th>
+                      <th>Ciclo lectivo</th>
                       <th>Tipo</th>
                       <th>Contacto</th>
                       <th>Estado</th>
@@ -4797,7 +4804,7 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
     <script
-      src="../assets/js/admin.js?v=20261102-compartido1"
+      src="../assets/js/admin.js?v=filtro-ciclo-1"
       type="module"
     ></script>
     <script

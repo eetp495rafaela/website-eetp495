@@ -402,3 +402,15 @@ son operaciones independientes.
 - Ambas ramas verificadas como idénticas antes de consolidar.
 - Se establece main como única rama de trabajo.
 - Pendiente confirmar visualmente el ajuste en producción.
+
+## 2026-11-26 — Filtro de ciclo en asignaciones docentes
+
+- Selector de ciclos lectivos disponibles.
+- Ciclo institucional vigente seleccionado inicialmente.
+- Columna de ciclo lectivo incorporada.
+- Filtros combinados por ciclo, curso y docente.
+- Consulta actualizada desde Firestore al cargar el listado.
+- Diseño responsive y compatible con ambos temas.
+- Permite revisar el ciclo preparado antes de activarlo.
+- Sin cambios en las reglas ni en los datos de Firestore.
+- Pendiente comprobación funcional en producción.
